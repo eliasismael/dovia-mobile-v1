@@ -1,0 +1,64 @@
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
+import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import 'dart:ui';
+import '/custom_code/widgets/index.dart' as custom_widgets;
+import 'd_h_a_s_s_o_c_i_a_t_e_tu_trabajo_widget.dart'
+    show DHASSOCIATETuTrabajoWidget;
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+class DHASSOCIATETuTrabajoModel
+    extends FlutterFlowModel<DHASSOCIATETuTrabajoWidget> {
+  ///  State fields for stateful widgets in this page.
+
+  // Model for CornerGradientBackground component.
+  late CornerGradientBackgroundModel cornerGradientBackgroundModel;
+  // State field(s) for TextField widget.
+  FocusNode? textFieldFocusNode1;
+  TextEditingController? textController1;
+  String? Function(BuildContext, String?)? textController1Validator;
+  // State field(s) for TextField widget.
+  FocusNode? textFieldFocusNode2;
+  TextEditingController? textController2;
+  String? Function(BuildContext, String?)? textController2Validator;
+  // State field(s) for TextField widget.
+  FocusNode? textFieldFocusNode3;
+  TextEditingController? textController3;
+  String? Function(BuildContext, String?)? textController3Validator;
+  // Model for FIXED_DOVIA_ICON component.
+  late FixedDoviaIconModel fixedDoviaIconModel;
+  // Model for DH_ASSOCIATE_Navbar component.
+  late DHASSOCIATENavbarModel dHASSOCIATENavbarModel;
+
+  @override
+  void initState(BuildContext context) {
+    cornerGradientBackgroundModel =
+        createModel(context, () => CornerGradientBackgroundModel());
+    fixedDoviaIconModel = createModel(context, () => FixedDoviaIconModel());
+    dHASSOCIATENavbarModel =
+        createModel(context, () => DHASSOCIATENavbarModel());
+  }
+
+  @override
+  void dispose() {
+    cornerGradientBackgroundModel.dispose();
+    textFieldFocusNode1?.dispose();
+    textController1?.dispose();
+
+    textFieldFocusNode2?.dispose();
+    textController2?.dispose();
+
+    textFieldFocusNode3?.dispose();
+    textController3?.dispose();
+
+    fixedDoviaIconModel.dispose();
+    dHASSOCIATENavbarModel.dispose();
+  }
+}
