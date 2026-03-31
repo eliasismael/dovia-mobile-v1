@@ -281,29 +281,38 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    displayedMonth = DateTime(
-                      displayedMonth.year,
-                      displayedMonth.month - 1,
-                    );
-                  });
-                },
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: lightGrey,
-                    borderRadius: BorderRadius.circular(8),
+              Builder(builder: (context) {
+                final now = DateTime.now();
+                final isCurrentMonth = displayedMonth.year == now.year &&
+                    displayedMonth.month == now.month;
+                return GestureDetector(
+                  onTap: isCurrentMonth
+                      ? null
+                      : () {
+                          setState(() {
+                            displayedMonth = DateTime(
+                              displayedMonth.year,
+                              displayedMonth.month - 1,
+                            );
+                          });
+                        },
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: lightGrey,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.chevron_left,
+                      size: 20,
+                      color: isCurrentMonth
+                          ? mediumGrey.withValues(alpha: 0.3)
+                          : darkTextColor,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.chevron_left,
-                    size: 20,
-                    color: darkTextColor,
-                  ),
-                ),
-              ),
+                );
+              }),
               Text(
                 _getMonthYearString(displayedMonth),
                 style: const TextStyle(
@@ -386,9 +395,13 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
       currentRow.add(const SizedBox(width: 32, height: 32));
     }
 
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+
     // Days of month
     for (int day = 1; day <= daysInMonth; day++) {
       final date = DateTime(displayedMonth.year, displayedMonth.month, day);
+      final isPast = date.isBefore(todayOnly);
       final isSelected = selectedDates[slotIndex] != null &&
           selectedDates[slotIndex]!.year == date.year &&
           selectedDates[slotIndex]!.month == date.month &&
@@ -396,12 +409,14 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
 
       currentRow.add(
         GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedDates[slotIndex] = date;
-              dateExpanded[slotIndex] = false;
-            });
-          },
+          onTap: isPast
+              ? null
+              : () {
+                  setState(() {
+                    selectedDates[slotIndex] = date;
+                    dateExpanded[slotIndex] = false;
+                  });
+                },
           child: Container(
             width: 32,
             height: 32,
@@ -416,7 +431,11 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
                   fontFamily: 'Public Sans',
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? Colors.white : darkTextColor,
+                  color: isPast
+                      ? mediumGrey.withValues(alpha: 0.4)
+                      : isSelected
+                          ? Colors.white
+                          : darkTextColor,
                 ),
               ),
             ),
