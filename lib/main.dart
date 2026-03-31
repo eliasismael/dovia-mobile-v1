@@ -12,6 +12,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'flutter_flow/nav/nav.dart';
 import 'index.dart';
+import 'repositories/index.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,8 +24,14 @@ void main() async {
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
 
-  runApp(ChangeNotifierProvider(
-    create: (context) => appState,
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => appState),
+      ChangeNotifierProvider(create: (_) => FavoritesRepository()),
+      ChangeNotifierProvider(create: (_) => PropertiesRepository()),
+      ChangeNotifierProvider(create: (_) => UserRepository()),
+      ChangeNotifierProvider(create: (_) => VisitsRepository()),
+    ],
     child: MyApp(),
   ));
 }
