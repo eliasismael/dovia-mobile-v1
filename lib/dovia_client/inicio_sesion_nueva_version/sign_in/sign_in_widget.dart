@@ -562,13 +562,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                             );
 
                             if ((_model.apiResultbr7?.succeeded ?? true)) {
+                              final idToken = DOVIAAPIAuthContextGroup
+                                  .signInNEWCall
+                                  .idToken(
+                                (_model.apiResultbr7?.jsonBody ?? ''),
+                              );
                               GoRouter.of(context).prepareAuthEvent();
                               await authManager.signIn(
-                                authenticationToken: DOVIAAPIAuthContextGroup
-                                    .signInNEWCall
-                                    .idToken(
-                                  (_model.apiResultbr7?.jsonBody ?? ''),
-                                ),
+                                authenticationToken: idToken,
                                 refreshToken: DOVIAAPIAuthContextGroup
                                     .signInNEWCall
                                     .refreshToken(
@@ -576,9 +577,170 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 ),
                               );
 
-                              context.pushNamedAuth(
-                                  DOVIACLIENTHomePageWidget.routeName,
-                                  context.mounted);
+                              _model.apiResultProfile =
+                                  await DOVIAAPIUserContextGroup
+                                      .getAuthenticatedUserProfileCall
+                                      .call(
+                                authToken: idToken,
+                              );
+
+                              final userRole =
+                                  DOVIAAPIUserContextGroup
+                                      .getAuthenticatedUserProfileCall
+                                      .userRole(
+                                (_model.apiResultProfile?.jsonBody ?? ''),
+                              );
+                              final isActive =
+                                  DOVIAAPIUserContextGroup
+                                      .getAuthenticatedUserProfileCall
+                                      .isUserActive(
+                                (_model.apiResultProfile?.jsonBody ?? ''),
+                              );
+
+                              final associateRoles = [
+                                'SHOWING',
+                                'OPERATIVE_LISTER',
+                                'LISTER_HQ',
+                                'ASSOCIATE',
+                                'LEGAL_ASSOCIATE',
+                              ];
+
+                              if (!context.mounted) return;
+
+                              if (associateRoles.contains(userRole)) {
+                                if (isActive != true) {
+                                  // Account pending approval — show modal then go to welcome
+                                  await showDialog(
+                                    context: context,
+                                    barrierColor: Colors.black54,
+                                    builder: (dialogContext) {
+                                      return Dialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(24.0),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(0.0),
+                                                child: SvgPicture.asset(
+                                                  'assets/images/D-verde.svg',
+                                                  width: 48.0,
+                                                  height: 62.0,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 16.0),
+                                              Text(
+                                                'Tu cuenta se creó con éxito.',
+                                                textAlign: TextAlign.center,
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .publicSans(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                          fontSize: 18.0,
+                                                          color: const Color(
+                                                              0xFF00444B),
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                              ),
+                                              const SizedBox(height: 12.0),
+                                              Text(
+                                                'El equipo de DOVIA se comunicará contigo a la brevedad para continuar con el proceso de incorporación.',
+                                                textAlign: TextAlign.center,
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .publicSans(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .normal,
+                                                          ),
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.0,
+                                                          lineHeight: 1.4,
+                                                        ),
+                                              ),
+                                              const SizedBox(height: 24.0),
+                                              FFButtonWidget(
+                                                onPressed: () =>
+                                                    Navigator.pop(dialogContext),
+                                                text: 'Entendido',
+                                                options: FFButtonOptions(
+                                                  width:
+                                                      double.infinity,
+                                                  height: 42.0,
+                                                  color: const Color(0xFF007376),
+                                                  textStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleSmall
+                                                          .override(
+                                                            font: GoogleFonts
+                                                                .publicSans(),
+                                                            color: Colors.white,
+                                                            fontSize: 15.0,
+                                                            letterSpacing: 0.0,
+                                                          ),
+                                                  elevation: 0.0,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          25.0),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                  await authManager.signOut();
+                                  context.pushNamedAuth(
+                                      BienvenidaWidget.routeName,
+                                      context.mounted);
+                                } else {
+                                  // Approved — route to role-specific home
+                                  FFAppState().UserRole = userRole ?? 'ASSOCIATE';
+                                  if (userRole == 'SHOWING') {
+                                    context.pushNamedAuth(
+                                        SHOWINGHomeWidget.routeName,
+                                        context.mounted);
+                                  } else if (userRole == 'OPERATIVE_LISTER') {
+                                    context.pushNamedAuth(
+                                        OPERATIVELISTINGHomeWidget.routeName,
+                                        context.mounted);
+                                  } else if (userRole == 'LISTER_HQ') {
+                                    context.pushNamedAuth(
+                                        LISTINGHQHomeWidget.routeName,
+                                        context.mounted);
+                                  } else if (userRole == 'LEGAL_ASSOCIATE') {
+                                    context.pushNamedAuth(
+                                        LegalAssociateHomeWidget.routeName,
+                                        context.mounted);
+                                  } else {
+                                    // ASSOCIATE (Home associate)
+                                    context.pushNamedAuth(
+                                        DHASSOCIATEHomePageWidget.routeName,
+                                        context.mounted);
+                                  }
+                                }
+                              } else {
+                                FFAppState().UserRole = 'CLIENT';
+                                context.pushNamedAuth(
+                                    DOVIACLIENTHomePageWidget.routeName,
+                                    context.mounted);
+                              }
                             } else {
                               await showDialog(
                                 context: context,

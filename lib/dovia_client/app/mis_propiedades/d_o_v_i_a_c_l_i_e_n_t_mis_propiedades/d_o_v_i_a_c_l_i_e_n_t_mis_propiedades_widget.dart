@@ -43,6 +43,21 @@ class _DOVIACLIENTMisPropiedadesWidgetState
     _model = createModel(context, () => DOVIACLIENTMisPropiedadesModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+
+    // Empty state check: if user has no properties at all, redirect to ComoFunciona
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final result = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+          .call(authToken: currentAuthenticationToken);
+      if (!mounted) return;
+      final properties =
+          DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(
+        result.jsonBody,
+      );
+      if ((properties == null || properties.isEmpty) &&
+          result.succeeded) {
+        context.goNamed(DOVIACLIENTComoFuncionaWidget.routeName);
+      }
+    });
   }
 
   @override

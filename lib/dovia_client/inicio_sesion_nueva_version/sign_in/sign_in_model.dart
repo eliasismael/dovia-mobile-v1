@@ -56,6 +56,8 @@ class SignInModel extends FlutterFlowModel<SignInWidget> {
   bool? resultForm;
   // Stores action output result for [Backend Call - API (Sign In NEW)] action in Button widget.
   ApiCallResponse? apiResultbr7;
+  // Stores action output result for [Backend Call - API (Get Authenticated User Profile)] action in Button widget.
+  ApiCallResponse? apiResultProfile;
 
   @override
   void initState(BuildContext context) {

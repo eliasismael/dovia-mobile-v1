@@ -73,7 +73,7 @@ class HowItWorksWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '¿Cómo funciona comercializar tu propiedad con DOVIA?',
+            '¿Por qué comercializar tu propiedad con DOVIA?',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 16,
@@ -82,9 +82,20 @@ class HowItWorksWidget extends StatelessWidget {
               height: 1.25,
             ),
           ),
+          SizedBox(height: 8),
+          Text(
+            'Un proceso seguro, con interesados verificados, ofertas directas y acompañamiento profesional de principio a fin.',
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+              height: 1.4,
+            ),
+          ),
           SizedBox(height: 16),
           Text(
-            'DOVIA es tu aliado para vender o rentar tu propiedad de forma segura, rápida y completamente transparente, respaldado por procesos modernos y tecnología de última generación.\n\nEn venta, nuestra comisión es del 3.5% + impuestos.\n\nEn renta, nuestra comisión es equivalente a un mes de renta.\n\nNuestro objetivo es que todo el proceso sea sin estrés, sin pérdida de tiempo y sin dolores de cabeza.\n\nSolo personas verificadas e interesadas visitan tu propiedad, y cada etapa es supervisada por profesionales Dovia.',
+            'DOVIA comercializa tu propiedad con un proceso estructurado, transparente y respaldado por tecnología y profesionales en cada etapa.\n\nEn venta, nuestra comisión es de 3.5% [impuestos incluidos].\n\nEn renta, nuestra comisión es equivalente a medio mes de renta.\n\nSolo personas verificadas visitan tu propiedad, recibes ofertas directas y te acompañamos hasta el cierre.',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 14,
@@ -106,26 +117,27 @@ class HowItWorksWidget extends StatelessWidget {
           id: 1,
           badgeText: 'Paso 1',
           badgeColor: stepBadgeColor,
-          title: 'Información básica',
+          title: 'Información inicial',
           description:
-              'Completa la información básica, nos ayuda a validar y preparar tu publicación.',
+              'Completa los datos de tu propiedad. En DOVIA validamos y estructuramos la información para una comercialización profesional.',
           icon: _buildTimelineIcon(Icons.auto_awesome_outlined),
         ),
         _buildStep(
           id: 2,
           badgeText: 'Paso 2',
           badgeColor: paso2BadgeColor,
-          title: 'Sesión profesional',
+          title: 'Producción profesional',
           description:
-              'Toma de material comercial, un especialista realizará fotos, recorrido 360°, planos, etc.',
+              'Un especialista DOVIA realiza el material comercial: fotografías, recorrido 360°, planos y todo lo necesario para destacar tu propiedad.',
           icon: _buildTimelineIcon(Icons.flash_on_outlined),
         ),
         _buildStep(
           id: 3,
           badgeText: 'Paso 3',
           badgeColor: paso2BadgeColor,
-          title: 'Ofertas en tiempo real',
-          description: 'Recibe ofertas directas desde tu app.',
+          title: 'Ofertas directas',
+          description:
+              'Recibe ofertas reales directamente desde la plataforma, sin intermediación innecesaria.',
           icon: _buildTimelineIcon(Icons.camera_alt_outlined),
           useAltIcon: true,
         ),
@@ -133,9 +145,9 @@ class HowItWorksWidget extends StatelessWidget {
           id: 4,
           badgeText: 'Paso 4',
           badgeColor: stepBadgeColor,
-          title: 'Acompañamiento total',
+          title: 'Acompañamiento integral',
           description:
-              'Dovia verifica y te acompaña en todo el proceso desde la gestión e visitas hasta el cierre legal.',
+              'Te acompañamos en todo el proceso: desde las visitas hasta la gestión y cierre legal.',
           icon: _buildTimelineIcon(Icons.check_circle_outline),
           isLast: true,
         ),
@@ -281,7 +293,7 @@ class HowItWorksWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         ),
         child: const Text(
-          'Aceptar',
+          'Crea tu propiedad',
           style: TextStyle(
             fontFamily: 'Public Sans',
             fontSize: 14,

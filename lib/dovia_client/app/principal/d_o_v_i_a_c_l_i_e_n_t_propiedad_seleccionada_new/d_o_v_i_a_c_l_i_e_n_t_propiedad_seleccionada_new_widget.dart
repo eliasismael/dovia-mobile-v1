@@ -1,5 +1,8 @@
+import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/principal/todas_las_fotos/todas_las_fotos_widget.dart';
+import '/dovia_client/app/principal/agendar_cita/agendar_cita_widget.dart';
 import '/components/porpiedades_amenidades_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '/components/propiedad_caracteristicas_widget.dart';
 import '/components/propiedades_sobre_el_sector_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
@@ -43,12 +46,15 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  ApiCallResponse? _propertyData;
+
   @override
   void initState() {
     super.initState();
     _model =
         createModel(context, () => DOVIACLIENTPropiedadSeleccionadaNewModel());
 
+    _loadPropertyData();
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -59,13 +65,74 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     super.dispose();
   }
 
+  Future<void> _loadPropertyData() async {
+    if (widget.propertyId == null || widget.propertyId!.isEmpty) return;
+    final response =
+        await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
+      propertyId: widget.propertyId,
+    );
+    if (mounted) {
+      safeSetState(() {
+        _propertyData = response;
+      });
+    }
+  }
+
   void _showGallery() async {
+    final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
+    final body = _propertyData?.jsonBody;
+
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TodasLasFotosWidget(),
+        builder: (context) => TodasLasFotosWidget(
+          habitacionImages: body != null ? api.imgHabitacion(body) : null,
+          cocinaImages: body != null ? api.imgCocina(body) : null,
+          terrazaImages: body != null ? api.imgTerraza(body) : null,
+        ),
       ),
     );
+  }
+
+  void _showPlanos() async {
+    final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
+    final body = _propertyData?.jsonBody;
+    final planos = body != null ? api.imgPlanos(body) : null;
+
+    if (planos == null || planos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay planos disponibles para esta propiedad.')),
+      );
+      return;
+    }
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TodasLasFotosWidget(
+          extraCategories: {'Planos': planos},
+        ),
+      ),
+    );
+  }
+
+  void _show360() async {
+    final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
+    final body = _propertyData?.jsonBody;
+    final url = body != null ? api.video360Url(body) : null;
+
+    if (url != null && url.isNotEmpty) {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El recorrido 360° no está disponible para esta propiedad.')),
+      );
+    }
   }
 
   @override
@@ -431,31 +498,38 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
-                                        Container(
-                                          width: 40.0,
-                                          height: 40.0,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFF7F7F7),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 10.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(
-                                                  0.0,
-                                                  2.0,
-                                                ),
-                                              )
-                                            ],
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/360-view.svg',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.none,
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: _show360,
+                                          child: Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFF7F7F7),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  blurRadius: 10.0,
+                                                  color: Color(0x33000000),
+                                                  offset: Offset(
+                                                    0.0,
+                                                    2.0,
+                                                  ),
+                                                )
+                                              ],
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/360-view.svg',
+                                                width: 200.0,
+                                                height: 200.0,
+                                                fit: BoxFit.none,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -496,31 +570,38 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             ),
                                           ),
                                         ),
-                                        Container(
-                                          width: 40.0,
-                                          height: 40.0,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFF7F7F7),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 10.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(
-                                                  0.0,
-                                                  2.0,
-                                                ),
-                                              )
-                                            ],
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/ruler_combine.svg',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.none,
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: _showPlanos,
+                                          child: Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFF7F7F7),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  blurRadius: 10.0,
+                                                  color: Color(0x33000000),
+                                                  offset: Offset(
+                                                    0.0,
+                                                    2.0,
+                                                  ),
+                                                )
+                                              ],
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/ruler_combine.svg',
+                                                width: 200.0,
+                                                height: 200.0,
+                                                fit: BoxFit.none,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -820,6 +901,37 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                         },
                                                         child:
                                                             VisitorRestrictionPopupWidget(),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              } else {
+                                                await showDialog(
+                                                  context: context,
+                                                  builder: (dialogContext) {
+                                                    return Dialog(
+                                                      elevation: 0,
+                                                      insetPadding:
+                                                          EdgeInsets.zero,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      alignment:
+                                                          AlignmentDirectional(
+                                                                  0.0, 0.0)
+                                                              .resolve(
+                                                                  Directionality.of(
+                                                                      context)),
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          FocusScope.of(
+                                                                  dialogContext)
+                                                              .unfocus();
+                                                          FocusManager.instance
+                                                              .primaryFocus
+                                                              ?.unfocus();
+                                                        },
+                                                        child:
+                                                            AgendarCitaWidget(),
                                                       ),
                                                     );
                                                   },
