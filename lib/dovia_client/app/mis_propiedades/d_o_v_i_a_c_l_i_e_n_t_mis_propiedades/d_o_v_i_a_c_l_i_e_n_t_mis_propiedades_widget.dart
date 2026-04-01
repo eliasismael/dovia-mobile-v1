@@ -186,7 +186,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                               future: DOVIAAPIPropertyContextGroup
                                   .getMyPropertiesCall
                                   .call(
-                                status: 'DRAFT',
+                                status: 'PUBLISHED',
                                 authToken: currentAuthenticationToken,
                               ),
                               builder: (context, snapshot) {
@@ -392,8 +392,11 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                 ),
                               ),
                               FFButtonWidget(
-                                onPressed: () {
-                                  print('Button pressed ...');
+                                onPressed: () async {
+                                  context.pushNamed(
+                                    DOVIACLIENTMisPropiedadesAccionesARealizarWidget
+                                        .routeName,
+                                  );
                                 },
                                 text: 'Ver estatus',
                                 options: FFButtonOptions(
@@ -475,7 +478,9 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: DOVIACLIENTNavbarWidget(
+                        activeTab: DOVIACLIENTMisPropiedadesWidget.routeName,
+                      ),
                     ),
                   ],
                 ),

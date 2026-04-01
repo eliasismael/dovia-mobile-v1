@@ -12,7 +12,14 @@ import 'd_o_v_i_a_c_l_i_e_n_t_navbar_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_navbar_model.dart';
 
 class DOVIACLIENTNavbarWidget extends StatefulWidget {
-  const DOVIACLIENTNavbarWidget({super.key});
+  const DOVIACLIENTNavbarWidget({
+    super.key,
+    this.activeTab,
+  });
+
+  /// Pass the route name of the current page so the matching icon is highlighted.
+  /// E.g. DOVIACLIENTMisVisitasWidget.routeName
+  final String? activeTab;
 
   @override
   State<DOVIACLIENTNavbarWidget> createState() =>
@@ -42,6 +49,13 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
 
     super.dispose();
   }
+
+  ColorFilter? _activeFilter(BuildContext context) => ColorFilter.mode(
+        FlutterFlowTheme.of(context).primary,
+        BlendMode.srcIn,
+      );
+
+  bool _isActive(String routeName) => widget.activeTab == routeName;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +89,9 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                   width: 36.0,
                   height: 24.0,
                   fit: BoxFit.none,
+                  colorFilter: _isActive(DHCLIENTHomepageWidget.routeName)
+                      ? _activeFilter(context)
+                      : null,
                 ),
               ),
             ),
@@ -93,6 +110,10 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                   width: 24.0,
                   height: 24.0,
                   fit: BoxFit.none,
+                  colorFilter:
+                      _isActive(DOVIACLIENTMisFavoritosWidget.routeName)
+                          ? _activeFilter(context)
+                          : null,
                 ),
               ),
             ),
@@ -129,6 +150,10 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     width: 24.0,
                     height: 24.0,
                     fit: BoxFit.none,
+                    colorFilter:
+                        _isActive(DOVIACLIENTMisPropiedadesWidget.routeName)
+                            ? _activeFilter(context)
+                            : null,
                   ),
                 ),
               ),
@@ -148,6 +173,9 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                   width: 24.0,
                   height: 24.0,
                   fit: BoxFit.none,
+                  colorFilter: _isActive(DOVIACLIENTMisVisitasWidget.routeName)
+                      ? _activeFilter(context)
+                      : null,
                 ),
               ),
             ),
@@ -183,6 +211,9 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     width: 24.0,
                     height: 24.0,
                     fit: BoxFit.none,
+                    colorFilter: _isActive(DOVIACLIENTAjustesWidget.routeName)
+                        ? _activeFilter(context)
+                        : null,
                   ),
                 ),
               ),

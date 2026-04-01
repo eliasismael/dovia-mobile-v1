@@ -14,7 +14,14 @@ import 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_tu_propuesta_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_tu_propuesta_model.dart';
 
 class DOVIACLIENTMisVisitasTuPropuestaWidget extends StatefulWidget {
-  const DOVIACLIENTMisVisitasTuPropuestaWidget({super.key});
+  const DOVIACLIENTMisVisitasTuPropuestaWidget({
+    super.key,
+    this.propuestaState,
+    this.paymentMethod,
+  });
+
+  final String? propuestaState;
+  final String? paymentMethod;
 
   static String routeName = 'DOVIA_CLIENT_MisVisitas_TuPropuesta';
   static String routePath = '/dOVIACLIENTMisVisitasTuPropuesta';
@@ -88,8 +95,8 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
                             child: custom_widgets.ProposalScreen(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: MediaQuery.sizeOf(context).height * 1.0,
-                              state: 'completed',
-                              paymentMethod: 'promesa',
+                              state: widget.propuestaState ?? 'pending',
+                              paymentMethod: widget.paymentMethod ?? '',
                             ),
                           ),
                         ],

@@ -72,21 +72,11 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        context.pushNamed(
-                            DOVIACLIENTHomePage2MapaWidget.routeName);
-                      },
-                      child: wrapWithModel(
-                        model: _model.dOVIASHAREDHeaderModel,
-                        updateCallback: () => safeSetState(() {}),
-                        child: DOVIASHAREDHeaderWidget(
-                          title: 'Ajustes',
-                        ),
+                    wrapWithModel(
+                      model: _model.dOVIASHAREDHeaderModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: DOVIASHAREDHeaderWidget(
+                        title: 'Ajustes',
                       ),
                     ),
                     Padding(
@@ -392,7 +382,9 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: DOVIACLIENTNavbarWidget(
+                        activeTab: DOVIACLIENTAjustesWidget.routeName,
+                      ),
                     ),
                   ],
                 ),

@@ -11,6 +11,7 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/backend/api_requests/api_properties.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita_model.dart';
 
@@ -35,11 +36,26 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
   late DOVIACLIENTSobreMiVisitaModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  String _propertyName = '';
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DOVIACLIENTSobreMiVisitaModel());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.propertyId != null && widget.propertyId!.isNotEmpty) {
+        final response = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall
+            .call(propertyId: widget.propertyId);
+        if (response.succeeded && mounted) {
+          final name = getJsonField(response.jsonBody, r'''$.data.name''')
+              ?.toString();
+          if (name != null && name.isNotEmpty) {
+            safeSetState(() => _propertyName = name);
+          }
+        }
+      }
+    });
 
     _model.textController1 ??= TextEditingController();
     _model.textFieldFocusNode1 ??= FocusNode();
@@ -98,7 +114,9 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
-                        title: 'Mi visita en [lugar]',
+                        title: _propertyName.isNotEmpty
+                            ? 'Mi visita en $_propertyName'
+                            : 'Mi visita',
                       ),
                     ),
                     Padding(
