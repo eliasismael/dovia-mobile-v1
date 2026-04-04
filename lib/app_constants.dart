@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'flutter_flow/flutter_flow_util.dart';
-
 abstract class FFAppConstants {
   static const String MapboxAccessToken =
       'pk.eyJ1IjoiZG92aWFob21lIiwiYSI6ImNtam4wMGgwejF4cXAzZnB1NGJva2VyYnQifQ.rdECR3ieHwvnJWden3QBeA';

@@ -1,16 +1,17 @@
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
+
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
+
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 import 'd_o_v_i_a_c_l_i_e_n_t_como_funciona_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_como_funciona_model.dart';
 
@@ -63,29 +64,95 @@ class _DOVIACLIENTComoFuncionaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    wrapWithModel(
-                      model: _model.dOVIASHAREDHeaderModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
-                        title: '¿Cómo funciona\nDovia?',
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              context.safePop();
+                            },
+                            child: Container(
+                              width: 35.0,
+                              height: 35.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).alternate,
+                                shape: BoxShape.circle,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: SvgPicture.asset(
+                                  'assets/images/IconoVolverAtras.svg',
+                                  width: 200.0,
+                                  height: 200.0,
+                                  fit: BoxFit.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '¿Cómo funciona\nDovia?',
+                            textAlign: TextAlign.center,
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.publicSans(
+                                    fontWeight: FontWeight.w600,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  fontSize: 18.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                  lineHeight: 1.4,
+                                ),
+                          ),
+                          Container(
+                            width: 40.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              shape: BoxShape.circle,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: SvgPicture.asset(
+                                'assets/images/IconoDoviaHomeClienteMensajes.svg',
+                                width: 8.0,
+                                height: 8.0,
+                                fit: BoxFit.none,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: MediaQuery.sizeOf(context).height * 1.0,
                               child: custom_widgets.HowItWorksWidget(
@@ -106,27 +173,27 @@ class _DOVIACLIENTComoFuncionaWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 15.0, 100.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

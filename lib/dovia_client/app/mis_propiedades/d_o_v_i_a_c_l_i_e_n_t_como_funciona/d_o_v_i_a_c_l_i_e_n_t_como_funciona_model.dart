@@ -1,18 +1,11 @@
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
-import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_como_funciona_widget.dart'
     show DOVIACLIENTComoFuncionaWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class DOVIACLIENTComoFuncionaModel
     extends FlutterFlowModel<DOVIACLIENTComoFuncionaWidget> {
@@ -20,8 +13,6 @@ class DOVIACLIENTComoFuncionaModel
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
-  // Model for DOVIA_SHARED_Header component.
-  late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DOVIA_CLIENT_Navbar component.
@@ -31,8 +22,6 @@ class DOVIACLIENTComoFuncionaModel
   void initState(BuildContext context) {
     cornerGradientBackgroundModel =
         createModel(context, () => CornerGradientBackgroundModel());
-    dOVIASHAREDHeaderModel =
-        createModel(context, () => DOVIASHAREDHeaderModel());
     fixedDoviaIconModel = createModel(context, () => FixedDoviaIconModel());
     dOVIACLIENTNavbarModel =
         createModel(context, () => DOVIACLIENTNavbarModel());
@@ -41,7 +30,6 @@ class DOVIACLIENTComoFuncionaModel
   @override
   void dispose() {
     cornerGradientBackgroundModel.dispose();
-    dOVIASHAREDHeaderModel.dispose();
     fixedDoviaIconModel.dispose();
     dOVIACLIENTNavbarModel.dispose();
   }

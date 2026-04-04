@@ -52,7 +52,7 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
             decoration: BoxDecoration(
@@ -60,17 +60,18 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
               borderRadius: BorderRadius.circular(10.4),
             ),
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(42.0, 0.0, 42.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        42.0, 0.0, 42.0, 0.0),
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.title,
+                        widget.title,
                         'title',
                       ),
                       textAlign: TextAlign.center,
@@ -91,11 +92,11 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 34.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 34.0, 0.0, 0.0),
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.text,
+                        widget.text,
                         'text',
                       ),
                       textAlign: TextAlign.center,
@@ -125,7 +126,7 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
           ),
         ),
         Align(
-          alignment: AlignmentDirectional(0.0, -1.0),
+          alignment: const AlignmentDirectional(0.0, -1.0),
           child: Container(
             width: 104.0,
             height: 104.0,

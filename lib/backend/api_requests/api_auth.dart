@@ -39,7 +39,7 @@ class SignUpStepNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Sign Up Step  NEW',
-      apiUrl: '${baseUrl}/auth/sign-up',
+      apiUrl: '$baseUrl/auth/sign-up',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -71,7 +71,7 @@ class VerifyCodeStepNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Verify Code Step  NEW',
-      apiUrl: '${baseUrl}/auth/verify',
+      apiUrl: '$baseUrl/auth/verify',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -101,7 +101,7 @@ class ResendCodeNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Resend Code NEW',
-      apiUrl: '${baseUrl}/auth/resend-code',
+      apiUrl: '$baseUrl/auth/resend-code',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -153,7 +153,7 @@ class CompleteRegistrationStepNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Complete Registration Step  NEW',
-      apiUrl: '${baseUrl}/auth/complete-registration',
+      apiUrl: '$baseUrl/auth/complete-registration',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -172,7 +172,7 @@ class CompleteRegistrationStepNEWCall {
         response,
         r'''$.message''',
       ));
-  dynamic? idToken(dynamic response) => getJsonField(
+  dynamic idToken(dynamic response) => getJsonField(
         response,
         r'''$.data.tokens.idToken''',
       );
@@ -208,11 +208,11 @@ class CompleteRegistrationStepNEWCall {
         response,
         r'''$.data.user.roles[0]''',
       );
-  dynamic? isUserVerified(dynamic response) => getJsonField(
+  dynamic isUserVerified(dynamic response) => getJsonField(
         response,
         r'''$.data.user.verified''',
       );
-  dynamic? isUserActive(dynamic response) => getJsonField(
+  dynamic isUserActive(dynamic response) => getJsonField(
         response,
         r'''$.data.user.active''',
       );
@@ -234,7 +234,7 @@ class SignInNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Sign In NEW',
-      apiUrl: '${baseUrl}/auth/sign-in',
+      apiUrl: '$baseUrl/auth/sign-in',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -277,7 +277,7 @@ class ForgotPasswordNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Forgot Password NEW',
-      apiUrl: '${baseUrl}/auth/forgot-password',
+      apiUrl: '$baseUrl/auth/forgot-password',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -313,7 +313,7 @@ class ConfirmForgotPasswordNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Confirm Forgot Password NEW',
-      apiUrl: '${baseUrl}/auth/forgot-password/confirm',
+      apiUrl: '$baseUrl/auth/forgot-password/confirm',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -341,7 +341,7 @@ class RefreshTokenNEWCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Refresh Token NEW',
-      apiUrl: '${baseUrl}/auth/refresh-token',
+      apiUrl: '$baseUrl/auth/refresh-token',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -373,10 +373,10 @@ class SelectRoleCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Select Role',
-      apiUrl: '${baseUrl}/auth/select-role',
+      apiUrl: '$baseUrl/auth/select-role',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,

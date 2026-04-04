@@ -5,13 +5,17 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'index.dart'; // Imports other custom widgets
 import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '/shared_components/popup_exito/popup_exito_widget.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 class ScheduleAppointmentWidget extends StatefulWidget {
   final VoidCallback? onAccept;
   final VoidCallback? onClose;
+  final VoidCallback? onNavigateToVisits;
+  final bool hasPendingVisit;
   final double? width;
   final double? height;
 
@@ -21,6 +25,8 @@ class ScheduleAppointmentWidget extends StatefulWidget {
     this.height,
     this.onAccept,
     this.onClose,
+    this.onNavigateToVisits,
+    this.hasPendingVisit = false,
   });
 
   @override
@@ -38,133 +44,330 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
   List<DateTime?> selectedDates = [null, null, null];
   List<TimeOfDay?> selectedTimes = [null, null, null];
 
-  List<bool> dateExpanded = [false, false, false];
-  List<bool> timeExpanded = [false, false, false];
+  bool _showPendingModal = false;
 
-  // Currently displayed month for calendar
-  DateTime displayedMonth = DateTime.now();
+  bool get _canSubmit =>
+      selectedDates[0] != null &&
+      selectedTimes[0] != null &&
+      selectedDates[1] != null &&
+      selectedTimes[1] != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.hasPendingVisit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() => _showPendingModal = true);
+      });
+    }
+  }
+
+  Future<void> _pickDate(int index) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDates[index] ?? today,
+      firstDate: today,
+      lastDate: DateTime(today.year + 2),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: primaryColor,
+            onPrimary: Colors.white,
+            onSurface: darkTextColor,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() => selectedDates[index] = picked);
+    }
+  }
+
+  Future<void> _pickTime(int index) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTimes[index] ?? const TimeOfDay(hour: 9, minute: 0),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: primaryColor,
+            onPrimary: Colors.white,
+            onSurface: darkTextColor,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() => selectedTimes[index] = picked);
+    }
+  }
+
+  void _handleAccept() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.55),
+      builder: (dialogContext) {
+        Future.delayed(const Duration(seconds: 3), () {
+          if (dialogContext.mounted) {
+            Navigator.of(dialogContext).pop(true);
+          }
+        });
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Navigator.of(dialogContext).pop(true),
+            child: SizedBox.expand(
+              child: Center(
+                child: SizedBox(
+                  height: 340,
+                  child: const PopupExitoWidget(
+                    title: '¡Solicitud enviada!',
+                    text:
+                        'Se envió con éxito tu solicitud. Recibirás confirmación de tu próxima visita. Podrás gestionar tu visita en \'Mis visitas\'.',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) {
+      if (mounted) Navigator.of(context).pop();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: lightGrey,
-      child: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Close button
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
-                        onTap: widget.onClose,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
+    return Stack(
+      children: [
+        // Main content
+        Container(
+          color: lightGrey,
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Close button
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            onTap: () => Navigator.of(context).pop(),
+                            child: const SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: Icon(
+                                Icons.close,
+                                size: 24,
+                                color: darkTextColor,
+                              ),
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.close,
-                            size: 24,
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Screen title
+                        const Text(
+                          'Agendar cita',
+                          style: TextStyle(
+                            fontFamily: 'Public Sans',
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
                             color: darkTextColor,
                           ),
                         ),
-                      ),
+
+                        const SizedBox(height: 12),
+
+                        // Instructive text
+                        const Text(
+                          'Para garantizar la mejor experiencia, selecciona 3 potenciales fechas y horas en orden prioritario:',
+                          style: TextStyle(
+                            fontFamily: 'Public Sans',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: darkTextColor,
+                            height: 1.36,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        RichText(
+                          text: const TextSpan(
+                            style: TextStyle(
+                              fontFamily: 'Public Sans',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: darkTextColor,
+                            ),
+                            children: [
+                              TextSpan(text: 'Selecciona '),
+                              TextSpan(
+                                text: '2 fechas obligatorias',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(text: ' y una opcional'),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        _buildDateTimeSlot(0, isRequired: true),
+                        const SizedBox(height: 16),
+                        _buildDateTimeSlot(1, isRequired: true),
+                        const SizedBox(height: 16),
+                        _buildDateTimeSlot(2, isRequired: false),
+                        const SizedBox(height: 24),
+                      ],
                     ),
+                  ),
+                ),
 
-                    const SizedBox(height: 8),
-
-                    // Title
-                    const Text(
-                      'Para garantizar la mejor experiencia, selecciona 3 potenciales fechas y horas en orden prioritario:',
-                      style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: darkTextColor,
-                        height: 1.36,
+                // Accept button
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _canSubmit ? _handleAccept : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        disabledBackgroundColor:
+                            primaryColor.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
                       ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Subtitle
-                    RichText(
-                      text: const TextSpan(
+                      child: const Text(
+                        'Aceptar',
                         style: TextStyle(
                           fontFamily: 'Public Sans',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: darkTextColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
-                        children: [
-                          TextSpan(text: 'Selecciona '),
-                          TextSpan(
-                            text: '2 fechas obligatorias',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          TextSpan(text: ' y una opcional'),
-                        ],
                       ),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    // First date/time slot (mandatory)
-                    _buildDateTimeSlot(0, isRequired: true),
-
-                    const SizedBox(height: 16),
-
-                    // Second date/time slot (mandatory)
-                    _buildDateTimeSlot(1, isRequired: true),
-
-                    const SizedBox(height: 16),
-
-                    // Third date/time slot (optional)
-                    _buildDateTimeSlot(2, isRequired: false),
-
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-            ),
-
-            // Accept button
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: widget.onAccept,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Aceptar',
-                    style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+
+        // Pending visit modal
+        if (_showPendingModal)
+          ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.35),
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 28),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 48,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Ya tienes una visita pendiente o aprobada para este inmueble.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Public Sans',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: darkTextColor,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Visualiza y gestiona tu visita en "Mis visitas".',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Public Sans',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: mediumGrey,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() => _showPendingModal = false);
+                              widget.onNavigateToVisits?.call();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Ver mis visitas',
+                              style: TextStyle(
+                                fontFamily: 'Public Sans',
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text(
+                            'Volver al perfil del inmueble',
+                            style: TextStyle(
+                              fontFamily: 'Public Sans',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: mediumGrey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -183,70 +386,54 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
       ),
       child: Column(
         children: [
-          // Date selector
-          _buildDropdownItem(
+          _buildPickerRow(
             label: selectedDates[index] != null
                 ? _formatDate(selectedDates[index]!)
                 : 'Selecciona la fecha',
-            isExpanded: dateExpanded[index],
-            isRequired: isRequired && index < 2,
-            onTap: () {
-              setState(() {
-                dateExpanded[index] = !dateExpanded[index];
-                if (dateExpanded[index]) {
-                  timeExpanded[index] = false;
-                }
-              });
-            },
+            isRequired: isRequired,
+            hasValue: selectedDates[index] != null,
+            icon: Icons.calendar_today_outlined,
+            onTap: () => _pickDate(index),
           ),
-
-          // Calendar dropdown
-          if (dateExpanded[index]) _buildCalendar(index),
-
-          // Time selector
-          _buildDropdownItem(
+          Divider(height: 1, color: borderColor),
+          _buildPickerRow(
             label: selectedTimes[index] != null
                 ? _formatTime(selectedTimes[index]!)
                 : 'Selecciona la hora',
-            isExpanded: timeExpanded[index],
-            isRequired: false,
-            onTap: () {
-              setState(() {
-                timeExpanded[index] = !timeExpanded[index];
-                if (timeExpanded[index]) {
-                  dateExpanded[index] = false;
-                }
-              });
-            },
+            isRequired: isRequired,
+            hasValue: selectedTimes[index] != null,
+            icon: Icons.access_time_outlined,
+            onTap: () => _pickTime(index),
           ),
-
-          // Time picker dropdown
-          if (timeExpanded[index]) _buildTimePicker(index),
         ],
       ),
     );
   }
 
-  Widget _buildDropdownItem({
+  Widget _buildPickerRow({
     required String label,
-    required bool isExpanded,
     required bool isRequired,
+    required bool hasValue,
+    required IconData icon,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      child: Container(
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         child: Row(
           children: [
+            Icon(icon, size: 20, color: primaryColor),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Public Sans',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: darkTextColor,
+                  color: hasValue ? darkTextColor : mediumGrey,
                 ),
               ),
             ),
@@ -255,418 +442,20 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
                 '*',
                 style: TextStyle(
                   fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                   color: Colors.red,
                 ),
               ),
-            const SizedBox(width: 8),
-            Icon(
-              isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_right,
-              size: 24,
-              color: darkTextColor,
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.chevron_right,
+              size: 22,
+              color: mediumGrey,
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildCalendar(int slotIndex) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Column(
-        children: [
-          // Month navigation
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Builder(builder: (context) {
-                final now = DateTime.now();
-                final isCurrentMonth = displayedMonth.year == now.year &&
-                    displayedMonth.month == now.month;
-                return GestureDetector(
-                  onTap: isCurrentMonth
-                      ? null
-                      : () {
-                          setState(() {
-                            displayedMonth = DateTime(
-                              displayedMonth.year,
-                              displayedMonth.month - 1,
-                            );
-                          });
-                        },
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: lightGrey,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.chevron_left,
-                      size: 20,
-                      color: isCurrentMonth
-                          ? mediumGrey.withValues(alpha: 0.3)
-                          : darkTextColor,
-                    ),
-                  ),
-                );
-              }),
-              Text(
-                _getMonthYearString(displayedMonth),
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: darkTextColor,
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    displayedMonth = DateTime(
-                      displayedMonth.year,
-                      displayedMonth.month + 1,
-                    );
-                  });
-                },
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: lightGrey,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.chevron_right,
-                    size: 20,
-                    color: darkTextColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Weekday headers
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
-                .map((day) => SizedBox(
-                      width: 32,
-                      child: Text(
-                        day,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: 'Public Sans',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: primaryColor,
-                        ),
-                      ),
-                    ))
-                .toList(),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Calendar days
-          _buildCalendarDays(slotIndex),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarDays(int slotIndex) {
-    final firstDayOfMonth =
-        DateTime(displayedMonth.year, displayedMonth.month, 1);
-    final lastDayOfMonth =
-        DateTime(displayedMonth.year, displayedMonth.month + 1, 0);
-    final daysInMonth = lastDayOfMonth.day;
-    final startWeekday = firstDayOfMonth.weekday % 7; // Sunday = 0
-
-    List<Widget> rows = [];
-    List<Widget> currentRow = [];
-
-    // Empty cells before first day
-    for (int i = 0; i < startWeekday; i++) {
-      currentRow.add(const SizedBox(width: 32, height: 32));
-    }
-
-    final today = DateTime.now();
-    final todayOnly = DateTime(today.year, today.month, today.day);
-
-    // Days of month
-    for (int day = 1; day <= daysInMonth; day++) {
-      final date = DateTime(displayedMonth.year, displayedMonth.month, day);
-      final isPast = date.isBefore(todayOnly);
-      final isSelected = selectedDates[slotIndex] != null &&
-          selectedDates[slotIndex]!.year == date.year &&
-          selectedDates[slotIndex]!.month == date.month &&
-          selectedDates[slotIndex]!.day == date.day;
-
-      currentRow.add(
-        GestureDetector(
-          onTap: isPast
-              ? null
-              : () {
-                  setState(() {
-                    selectedDates[slotIndex] = date;
-                    dateExpanded[slotIndex] = false;
-                  });
-                },
-          child: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: isSelected ? primaryColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Center(
-              child: Text(
-                '$day',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isPast
-                      ? mediumGrey.withValues(alpha: 0.4)
-                      : isSelected
-                          ? Colors.white
-                          : darkTextColor,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      if (currentRow.length == 7) {
-        rows.add(
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: currentRow,
-            ),
-          ),
-        );
-        currentRow = [];
-      }
-    }
-
-    // Add remaining days
-    if (currentRow.isNotEmpty) {
-      while (currentRow.length < 7) {
-        currentRow.add(const SizedBox(width: 32, height: 32));
-      }
-      rows.add(
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: currentRow,
-        ),
-      );
-    }
-
-    return Column(children: rows);
-  }
-
-  Widget _buildTimePicker(int slotIndex) {
-    final currentTime =
-        selectedTimes[slotIndex] ?? const TimeOfDay(hour: 6, minute: 30);
-    final hour12 =
-        currentTime.hourOfPeriod == 0 ? 12 : currentTime.hourOfPeriod;
-    final isAM = currentTime.period == DayPeriod.am;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Column(
-        children: [
-          // Time picker wheel-like display
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Hour column
-                _buildTimeColumn(
-                  values: List.generate(
-                      12, (i) => '${(i + 1).toString().padLeft(2, '0')}'),
-                  selectedValue: hour12.toString().padLeft(2, '0'),
-                  onSelect: (value) {
-                    final newHour = int.parse(value);
-                    final adjustedHour = isAM
-                        ? (newHour == 12 ? 0 : newHour)
-                        : (newHour == 12 ? 12 : newHour + 12);
-                    setState(() {
-                      selectedTimes[slotIndex] = TimeOfDay(
-                        hour: adjustedHour,
-                        minute: currentTime.minute,
-                      );
-                    });
-                  },
-                ),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    ':',
-                    style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: darkTextColor,
-                    ),
-                  ),
-                ),
-
-                // Minute column
-                _buildTimeColumn(
-                  values: List.generate(
-                      12, (i) => '${(i * 5).toString().padLeft(2, '0')}'),
-                  selectedValue: currentTime.minute.toString().padLeft(2, '0'),
-                  onSelect: (value) {
-                    setState(() {
-                      selectedTimes[slotIndex] = TimeOfDay(
-                        hour: currentTime.hour,
-                        minute: int.parse(value),
-                      );
-                    });
-                  },
-                ),
-
-                const SizedBox(width: 24),
-
-                // AM/PM toggle
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        if (!isAM) {
-                          setState(() {
-                            selectedTimes[slotIndex] = TimeOfDay(
-                              hour: currentTime.hour - 12,
-                              minute: currentTime.minute,
-                            );
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isAM ? primaryColor : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'AM',
-                          style: TextStyle(
-                            fontFamily: 'Public Sans',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: isAM ? Colors.white : mediumGrey,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () {
-                        if (isAM) {
-                          setState(() {
-                            selectedTimes[slotIndex] = TimeOfDay(
-                              hour: currentTime.hour + 12,
-                              minute: currentTime.minute,
-                            );
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: !isAM ? primaryColor : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'PM',
-                          style: TextStyle(
-                            fontFamily: 'Public Sans',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: !isAM ? Colors.white : mediumGrey,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTimeColumn({
-    required List<String> values,
-    required String selectedValue,
-    required Function(String) onSelect,
-  }) {
-    int selectedIndex = values.indexOf(selectedValue);
-    if (selectedIndex == -1) selectedIndex = 0;
-
-    final prevIndex = (selectedIndex - 1 + values.length) % values.length;
-    final nextIndex = (selectedIndex + 1) % values.length;
-
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () => onSelect(values[prevIndex]),
-          child: Text(
-            values[prevIndex],
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: mediumGrey,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: borderColor),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            selectedValue,
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: darkTextColor,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => onSelect(values[nextIndex]),
-          child: Text(
-            values[nextIndex],
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: mediumGrey,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -692,23 +481,5 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
     final hour12 = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
     final period = time.period == DayPeriod.am ? 'AM' : 'PM';
     return '${hour12.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} $period';
-  }
-
-  String _getMonthYearString(DateTime date) {
-    const months = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre'
-    ];
-    return '${months[date.month - 1]} ${date.year}';
   }
 }
