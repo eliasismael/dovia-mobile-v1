@@ -1,3 +1,5 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -94,16 +96,44 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: MediaQuery.sizeOf(context).height * 1.0,
                           onShowingAssociateTap: () async {
-                            context.pushNamed(FormAssociateWidget.routeName);
+                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                              role: 'SHOWING_AGENT',
+                              authToken: currentAuthenticationToken,
+                            );
+                            if (result.succeeded) {
+                              FFAppState().UserRole = 'SHOWING_AGENT';
+                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                            }
                           },
-                          onListenAssociateTap: () async {
-                            context.pushNamed(FormAssociateWidget.routeName);
+                          onListerAssociateTap: () async {
+                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                              role: 'OPERATIVE_LISTER',
+                              authToken: currentAuthenticationToken,
+                            );
+                            if (result.succeeded) {
+                              FFAppState().UserRole = 'OPERATIVE_LISTER';
+                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                            }
                           },
                           onHomeAssociateTap: () async {
-                            context.pushNamed(FormAssociateWidget.routeName);
+                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                              role: 'HOME_ASSOCIATE',
+                              authToken: currentAuthenticationToken,
+                            );
+                            if (result.succeeded) {
+                              FFAppState().UserRole = 'HOME_ASSOCIATE';
+                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                            }
                           },
                           onLegalAssociateTap: () async {
-                            context.pushNamed(FormAssociateWidget.routeName);
+                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                              role: 'LEGAL_ASSOCIATE',
+                              authToken: currentAuthenticationToken,
+                            );
+                            if (result.succeeded) {
+                              FFAppState().UserRole = 'LEGAL_ASSOCIATE';
+                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                            }
                           },
                         ),
                       ),
