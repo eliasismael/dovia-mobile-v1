@@ -1977,7 +1977,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: DOVIACLIENTNavbarWidget(
+                        activeTab: DOVIACLIENTHomePageWidget.routeName,
+                      ),
                     ),
                   ],
                 ),

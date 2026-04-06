@@ -14,7 +14,7 @@ class DoviaAssociateDropdownWidget extends StatefulWidget {
   final double? height;
 
   final VoidCallback? onShowingAssociateTap;
-  final VoidCallback? onListenAssociateTap;
+  final VoidCallback? onListerAssociateTap;
   final VoidCallback? onHomeAssociateTap;
   final VoidCallback? onLegalAssociateTap;
 
@@ -23,7 +23,7 @@ class DoviaAssociateDropdownWidget extends StatefulWidget {
     this.width,
     this.height,
     this.onShowingAssociateTap,
-    this.onListenAssociateTap,
+    this.onListerAssociateTap,
     this.onHomeAssociateTap,
     this.onLegalAssociateTap,
   });
@@ -46,7 +46,7 @@ class _DoviaAssociateDropdownWidgetState
   // Hardcoded items
   static const List<String> _titles = [
     'DOVIA SHOWING ASSOCIATE',
-    'DOVIA LISTEN ASSOCIATE',
+    'DOVIA LISTER ASSOCIATE',
     'DOVIA HOME ASSOCIATE',
     'DOVIA LEGAL ASSOCIATE',
   ];
@@ -58,7 +58,7 @@ class _DoviaAssociateDropdownWidgetState
       'Forma parte de una red profesional respaldada por DOVIA',
     ],
     [
-      'Listen Associate acompaña al propietario en el proceso de publicación para atraer interesados.',
+      'Lister Associate acompaña al propietario en el proceso de publicación para atraer interesados.',
       'Realiza visitas y registra información de la propiedad.',
       'Valida y gestiona información de propiedades.',
     ],
@@ -79,7 +79,7 @@ class _DoviaAssociateDropdownWidgetState
       case 0:
         return widget.onShowingAssociateTap;
       case 1:
-        return widget.onListenAssociateTap;
+        return widget.onListerAssociateTap;
       case 2:
         return widget.onHomeAssociateTap;
       case 3:

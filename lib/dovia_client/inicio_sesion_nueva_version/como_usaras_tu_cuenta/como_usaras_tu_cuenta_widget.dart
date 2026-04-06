@@ -74,7 +74,7 @@ class _ComoUsarasTuCuentaWidgetState extends State<ComoUsarasTuCuentaWidget> {
                     Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
                       child: Text(
-                        '¿Cómo usarás tu cuenta?',
+                        '¿Qué quieres hacer en DOVIA?',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.publicSans(
                                 fontWeight: FontWeight.w600,

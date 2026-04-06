@@ -286,8 +286,9 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                                     ) ?? false;
                                         
                                         if (confirmDelete) {
-                                          await DOVIAAPIFavoriteContextGroup.removePropertyFromFavoritesCall.call(
-                                            propertyId: getJsonField(eachFavoriteInFolderItem, r'''$.id''').toString(),
+                                          await DOVIAAPIFavoriteContextGroup.removeFavoriteFromFolderCall.call(
+                                            folderId: widget!.folderId,
+                                            propertyId: getJsonField(eachFavoriteInFolderItem, r'''$.propertyId''').toString(),
                                             authToken: currentAuthenticationToken,
                                           );
                                           safeSetState((){});

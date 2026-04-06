@@ -53,7 +53,7 @@ class GetAuthenticatedUserProfileCall {
       ));
   bool? isUserActive(dynamic response) => castToType<bool>(getJsonField(
         response,
-        r'''$.data.active''',
+        r'''$.data.verified''',
       ));
 }
 

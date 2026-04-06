@@ -598,11 +598,13 @@ class _SignInWidgetState extends State<SignInWidget> {
                               );
 
                               final associateRoles = [
-                                'SHOWING',
+                                'SHOWING_AGENT',
                                 'OPERATIVE_LISTER',
                                 'LISTER_HQ',
-                                'ASSOCIATE',
+                                'HOME_ASSOCIATE',
                                 'LEGAL_ASSOCIATE',
+                                'LEGAL_OFFICER',
+                                'HQ_ADMIN',
                               ];
 
                               if (!context.mounted) return;
@@ -711,8 +713,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                                       context.mounted);
                                 } else {
                                   // Approved — route to role-specific home
-                                  FFAppState().UserRole = userRole ?? 'ASSOCIATE';
-                                  if (userRole == 'SHOWING') {
+                                  FFAppState().UserRole = userRole ?? 'HOME_ASSOCIATE';
+                                  if (userRole == 'SHOWING_AGENT') {
                                     context.pushNamedAuth(
                                         SHOWINGHomeWidget.routeName,
                                         context.mounted);
@@ -724,12 +726,12 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     context.pushNamedAuth(
                                         LISTINGHQHomeWidget.routeName,
                                         context.mounted);
-                                  } else if (userRole == 'LEGAL_ASSOCIATE') {
+                                  } else if (userRole == 'LEGAL_ASSOCIATE' || userRole == 'LEGAL_OFFICER') {
                                     context.pushNamedAuth(
                                         LegalAssociateHomeWidget.routeName,
                                         context.mounted);
                                   } else {
-                                    // ASSOCIATE (Home associate)
+                                    // HOME_ASSOCIATE / HQ_ADMIN
                                     context.pushNamedAuth(
                                         DHASSOCIATEHomePageWidget.routeName,
                                         context.mounted);

@@ -99,7 +99,7 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                         children: [
                           Flexible(
                             child: Text(
-                              'Asociado',
+                              'DOVIA ASSOCIATE',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -121,7 +121,29 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                           ),
                           Flexible(
                             child: Text(
-                              'Un DOVIA Associate elige sus asignaciones y gana por cada trabajo. Foma parte de una red profesional respaldada por DOVIA.',
+                              'Gana dinero con DOVIA',
+                              textAlign: TextAlign.center,
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                      fontWeight: FontWeight.w500,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w500,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              'Recibe asignaciones y ofrece servicios dentro del ecosistema.',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -185,7 +207,7 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                         children: [
                           Flexible(
                             child: Text(
-                              'Usuario',
+                              'USUARIO',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -207,7 +229,29 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                           ),
                           Flexible(
                             child: Text(
-                              'Un DOVIA Usuario elige elige sus propiedades para la venta/renta y puede comprar propiedades. Encontrarás Asociados que te brindrán sus servicios aprobados por nosotros.',
+                              'Compra, renta o vende tu propiedad',
+                              textAlign: TextAlign.center,
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                      fontWeight: FontWeight.w500,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w500,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              'Encuentra, vende y gestiona tu hogar con el respaldo de DOVIA.',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium

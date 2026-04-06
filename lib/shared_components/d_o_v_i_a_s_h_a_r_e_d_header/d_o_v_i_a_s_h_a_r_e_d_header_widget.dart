@@ -17,7 +17,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   const DOVIASHAREDHeaderWidget({
     super.key,
     String? title,
-  }) : this.title = title ?? '[title]';
+  }) : title = title ?? '[title]';
 
   final String title;
 
@@ -53,14 +53,14 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            decoration: BoxDecoration(),
+            decoration: const BoxDecoration(),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -109,7 +109,7 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                     ),
                   ),
                 ),
-              ].divide(SizedBox(width: 8.0)),
+              ].divide(const SizedBox(width: 8.0)),
             ),
           ),
           RichText(
@@ -117,7 +117,7 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: widget!.title,
+                  text: widget.title,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: GoogleFonts.publicSans(
                           fontWeight: FontWeight.w600,
@@ -192,14 +192,15 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                       ),
                     ),
                   ),
-                ].divide(SizedBox(width: 8.0)),
+                ].divide(const SizedBox(width: 8.0)),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                 child: FlutterFlowDropDown<String>(
                   controller: _model.dropDownValueController ??=
                       FormFieldController<String>(null),
-                  options: ['USD', 'GTQ'],
+                  options: const ['USD', 'GTQ'],
                   onChanged: (val) =>
                       safeSetState(() => _model.dropDownValue = val),
                   width: 90.0,
@@ -229,7 +230,8 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                   borderColor: Colors.transparent,
                   borderWidth: 0.0,
                   borderRadius: 67.0,
-                  margin: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                  margin: const EdgeInsetsDirectional.fromSTEB(
+                      12.0, 0.0, 12.0, 0.0),
                   hidesUnderline: true,
                   isOverButton: false,
                   isSearchable: false,

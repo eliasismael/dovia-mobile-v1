@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/dovia_client/app/principal/filtro_busqueda_i_a/filtro_busqueda_i_a_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_homepage_busqueda_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_homepage_busqueda_model.dart';
 
@@ -249,6 +250,41 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                         ),
                                     cursorColor: FlutterFlowTheme.of(context)
                                         .primaryText,
+                                    textInputAction: TextInputAction.search,
+                                    onFieldSubmitted: (_) async {
+                                      final query =
+                                          _model.textController.text.trim();
+                                      if (query.isEmpty) return;
+                                      await showModalBottomSheet(
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        enableDrag: true,
+                                        context: context,
+                                        builder: (context) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              FocusScope.of(context).unfocus();
+                                              FocusManager
+                                                  .instance.primaryFocus
+                                                  ?.unfocus();
+                                            },
+                                            child: Padding(
+                                              padding:
+                                                  MediaQuery.viewInsetsOf(
+                                                      context),
+                                              child: Container(
+                                                height:
+                                                    MediaQuery.sizeOf(context)
+                                                            .height *
+                                                        0.5,
+                                                child:
+                                                    FiltroBusquedaIAWidget(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ).then((value) => safeSetState(() {}));
+                                    },
                                     enableInteractiveSelection: true,
                                     validator: _model.textControllerValidator
                                         .asValidator(context),

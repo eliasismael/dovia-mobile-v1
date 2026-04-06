@@ -184,7 +184,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                       child: FlutterFlowDropDown<String>(
                         controller: _model.dropDownValueController1 ??=
                             FormFieldController<String>(null),
-                        options: ['1', '2', '3'],
+                        options: ['1', '2', '3', '4+'],
                         onChanged: (val) =>
                             safeSetState(() => _model.dropDownValue1 = val),
                         width: MediaQuery.sizeOf(context).width * 1.0,
@@ -207,7 +207,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                                       .bodyMedium
                                       .fontStyle,
                                 ),
-                        hintText: 'Select...',
+                        hintText: 'Seleccionar',
                         icon: Icon(
                           Icons.keyboard_arrow_down_rounded,
                           color: FlutterFlowTheme.of(context).secondaryText,
@@ -271,7 +271,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                       child: FlutterFlowDropDown<String>(
                         controller: _model.dropDownValueController2 ??=
                             FormFieldController<String>(null),
-                        options: ['1', '2', '3'],
+                        options: ['1', '2', '3', '4+'],
                         onChanged: (val) =>
                             safeSetState(() => _model.dropDownValue2 = val),
                         width: MediaQuery.sizeOf(context).width * 1.0,
@@ -294,7 +294,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                                       .bodyMedium
                                       .fontStyle,
                                 ),
-                        hintText: 'Select...',
+                        hintText: 'Seleccionar',
                         icon: Icon(
                           Icons.keyboard_arrow_down_rounded,
                           color: FlutterFlowTheme.of(context).secondaryText,
@@ -358,7 +358,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                       child: FlutterFlowDropDown<String>(
                         controller: _model.dropDownValueController3 ??=
                             FormFieldController<String>(null),
-                        options: ['1', '2', '3'],
+                        options: ['1', '2', '3', '4+'],
                         onChanged: (val) =>
                             safeSetState(() => _model.dropDownValue3 = val),
                         width: MediaQuery.sizeOf(context).width * 1.0,
@@ -381,7 +381,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                                       .bodyMedium
                                       .fontStyle,
                                 ),
-                        hintText: 'Select...',
+                        hintText: 'Seleccionar',
                         icon: Icon(
                           Icons.keyboard_arrow_down_rounded,
                           color: FlutterFlowTheme.of(context).secondaryText,

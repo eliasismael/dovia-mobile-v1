@@ -589,7 +589,9 @@ class _DOVIACLIENTMisFavoritosWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: DOVIACLIENTNavbarWidget(
+                        activeTab: DOVIACLIENTMisFavoritosWidget.routeName,
+                      ),
                     ),
                   ],
                 ),

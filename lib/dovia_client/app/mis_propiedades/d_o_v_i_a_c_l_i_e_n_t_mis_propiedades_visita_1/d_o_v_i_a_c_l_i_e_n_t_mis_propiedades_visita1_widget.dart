@@ -71,7 +71,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -80,20 +80,20 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
+                      child: const DOVIASHAREDHeaderWidget(
                         title: 'Visita',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 20.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 250.0,
                               child: custom_widgets.ProcessState(
@@ -108,23 +108,23 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                 .dOVIACLIENTMisPropiedadesCardOperativeListerModel,
                             updateCallback: () => safeSetState(() {}),
                             child:
-                                DOVIACLIENTMisPropiedadesCardOperativeListerWidget(),
+                                const DOVIACLIENTMisPropiedadesCardOperativeListerWidget(),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model
                                   .dOVIACLIENTMisPropiedadesVisitaListerHQModel,
                               updateCallback: () => safeSetState(() {}),
                               child:
-                                  DOVIACLIENTMisPropiedadesVisitaListerHQWidget(),
+                                  const DOVIACLIENTMisPropiedadesVisitaListerHQWidget(),
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Instrucciones para asociados',
@@ -151,9 +151,9 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller: _model.textController,
@@ -207,14 +207,14 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -267,7 +267,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -282,8 +282,9 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            10.0, 0.0, 0.0, 0.0),
                                     child: Text(
                                       'Convenio Dovia VS Propietario',
                                       style: FlutterFlowTheme.of(context)
@@ -312,15 +313,14 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                     ),
                                   ),
                                   Container(
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Builder(
                                           builder: (context) => Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 0.0, 10.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 0.0, 10.0, 0.0),
                                             child: InkWell(
                                               splashColor: Colors.transparent,
                                               focusColor: Colors.transparent,
@@ -338,7 +338,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                                       backgroundColor:
                                                           Colors.transparent,
                                                       alignment:
-                                                          AlignmentDirectional(
+                                                          const AlignmentDirectional(
                                                                   0.0, 0.0)
                                                               .resolve(
                                                                   Directionality.of(
@@ -352,7 +352,8 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                                               .primaryFocus
                                                               ?.unfocus();
                                                         },
-                                                        child: PopupExitoWidget(
+                                                        child:
+                                                            const PopupExitoWidget(
                                                           title:
                                                               'Se descargó con éxito',
                                                           text:
@@ -393,7 +394,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                                     backgroundColor:
                                                         Colors.transparent,
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                                 0.0, 0.0)
                                                             .resolve(
                                                                 Directionality.of(
@@ -408,7 +409,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                                             ?.unfocus();
                                                       },
                                                       child:
-                                                          SubirArchivoWidget(),
+                                                          const SubirArchivoWidget(),
                                                     ),
                                                   );
                                                 },
@@ -434,7 +435,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -443,7 +444,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                 borderRadius: BorderRadius.circular(16.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 40.0, 20.0, 40.0),
                                 child: Text(
                                   'Revisa y firma electrónicamente el acuerdo de autorización para que podamos comercializar tu propiedad. DOVIA validará tu información y dejará el documento disponible en tu app.',
@@ -479,27 +480,27 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 15.0, 100.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

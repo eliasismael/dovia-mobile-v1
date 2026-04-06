@@ -4999,8 +4999,19 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 );
 
                                                 context.pushNamed(
-                                                    DOVIACLIENTMisVisitasTuPropuestaWidget
-                                                        .routeName);
+                                                  DOVIACLIENTMisVisitasTuPropuestaWidget
+                                                      .routeName,
+                                                  queryParameters: {
+                                                    'propuestaState': serializeParam(
+                                                      'pending',
+                                                      ParamType.String,
+                                                    ),
+                                                    'paymentMethod': serializeParam(
+                                                      _model.paymentMethod,
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
 
                                                 if (_shouldSetState)
                                                   safeSetState(() {});

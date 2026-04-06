@@ -354,7 +354,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: DOVIACLIENTMisVisitasTuPropuestaWidget.routeName,
           path: DOVIACLIENTMisVisitasTuPropuestaWidget.routePath,
           builder: (context, params) =>
-              DOVIACLIENTMisVisitasTuPropuestaWidget(),
+              DOVIACLIENTMisVisitasTuPropuestaWidget(
+                propuestaState: params.getParam('propuestaState', ParamType.String),
+                paymentMethod: params.getParam('paymentMethod', ParamType.String),
+              ),
         ),
         FFRoute(
           name: DCFormaPagoSuscripcion2Widget.routeName,

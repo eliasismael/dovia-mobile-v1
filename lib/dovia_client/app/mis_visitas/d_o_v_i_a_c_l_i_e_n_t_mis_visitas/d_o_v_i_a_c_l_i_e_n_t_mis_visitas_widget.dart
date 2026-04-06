@@ -110,12 +110,23 @@ class _DOVIACLIENTMisVisitasWidgetState
                           Padding(
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 0.0, 15.0, 0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.dOVIACLIENTVisitaCardModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: DOVIACLIENTVisitaCardWidget(
-                                propertyId: 'xxx',
-                              ),
+                            child: Text(
+                              'No tienes visitas próximas.',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
                             ),
                           ),
                           Align(
@@ -145,6 +156,28 @@ class _DOVIACLIENTMisVisitasWidgetState
                               ),
                             ),
                           ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 12.0, 0.0, 0.0),
+                            child: Text(
+                              'No tienes visitas anteriores.',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
+                            ),
+                          ),
                           Align(
                             alignment: AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
@@ -172,6 +205,28 @@ class _DOVIACLIENTMisVisitasWidgetState
                               ),
                             ),
                           ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 12.0, 0.0, 0.0),
+                            child: Text(
+                              'No tienes ofertas activas.',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -187,7 +242,9 @@ class _DOVIACLIENTMisVisitasWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: DOVIACLIENTNavbarWidget(
+                        activeTab: DOVIACLIENTMisVisitasWidget.routeName,
+                      ),
                     ),
                   ],
                 ),

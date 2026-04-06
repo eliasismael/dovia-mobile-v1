@@ -12,6 +12,7 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/backend/api_requests/api_properties.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_model.dart';
 
@@ -36,6 +37,7 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
   late DOVIACLIENTPropiedadSeleccionadaModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  String _propertyName = '';
 
   @override
   void initState() {
@@ -43,7 +45,20 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
     _model =
         createModel(context, () => DOVIACLIENTPropiedadSeleccionadaModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      safeSetState(() {});
+      if (widget.propertyId != null && widget.propertyId!.isNotEmpty) {
+        final response = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall
+            .call(propertyId: widget.propertyId);
+        if (response.succeeded && mounted) {
+          final name = getJsonField(response.jsonBody, r'''$.data.name''')
+              ?.toString();
+          if (name != null && name.isNotEmpty) {
+            safeSetState(() => _propertyName = name);
+          }
+        }
+      }
+    });
   }
 
   @override
@@ -80,7 +95,9 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
-                        title: 'Orchand House',
+                        title: _propertyName.isNotEmpty
+                            ? _propertyName
+                            : 'Propiedad',
                       ),
                     ),
                     Padding(

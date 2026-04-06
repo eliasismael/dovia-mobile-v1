@@ -1,3 +1,4 @@
+import '/auth/custom_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -7,6 +8,7 @@ import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'form_associate_model.dart';
@@ -40,6 +42,24 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  String _roleBadgeText(String role) {
+    switch (role) {
+      case 'SHOWING_AGENT':
+        return 'Dovia Showing Associate';
+      case 'OPERATIVE_LISTER':
+        return 'Dovia Lister Associate';
+      case 'LISTER_HQ':
+        return 'Dovia Lister HQ';
+      case 'HOME_ASSOCIATE':
+        return 'Dovia Home Associate';
+      case 'LEGAL_ASSOCIATE':
+      case 'LEGAL_OFFICER':
+        return 'Dovia Legal Associate';
+      default:
+        return 'Dovia Associate';
+    }
   }
 
   @override
@@ -76,10 +96,80 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                         child: custom_widgets.DoviaAssociateFormWidget(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: MediaQuery.sizeOf(context).height * 0.8,
-                          roleBadgeText: 'Dovia Showing Associate',
+                          roleBadgeText: _roleBadgeText(FFAppState().UserRole),
                           onEnviar: () async {
-                            context
-                                .pushNamed(DOVIACLIENTHomePageWidget.routeName);
+                            await showDialog(
+                              context: context,
+                              barrierColor: Colors.black54,
+                              builder: (dialogContext) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(0.0),
+                                          child: SvgPicture.asset(
+                                            'assets/images/D-verde.svg',
+                                            width: 48.0,
+                                            height: 62.0,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16.0),
+                                        Text(
+                                          'Tu cuenta se creó con éxito.',
+                                          textAlign: TextAlign.center,
+                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                            font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                                            fontSize: 18.0,
+                                            color: const Color(0xFF00444B),
+                                            letterSpacing: 0.0,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12.0),
+                                        Text(
+                                          'El equipo de DOVIA se comunicará contigo a la brevedad para continuar con el proceso de incorporación.',
+                                          textAlign: TextAlign.center,
+                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                            font: GoogleFonts.publicSans(fontWeight: FontWeight.normal),
+                                            fontSize: 14.0,
+                                            letterSpacing: 0.0,
+                                            lineHeight: 1.4,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24.0),
+                                        FFButtonWidget(
+                                          onPressed: () => Navigator.pop(dialogContext),
+                                          text: 'Entendido',
+                                          options: FFButtonOptions(
+                                            width: double.infinity,
+                                            height: 42.0,
+                                            color: const Color(0xFF007376),
+                                            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                              font: GoogleFonts.publicSans(),
+                                              color: Colors.white,
+                                              fontSize: 15.0,
+                                              letterSpacing: 0.0,
+                                            ),
+                                            elevation: 0.0,
+                                            borderRadius: BorderRadius.circular(25.0),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                            await authManager.signOut();
+                            if (context.mounted) {
+                              context.pushNamedAuth(BienvenidaWidget.routeName, context.mounted);
+                            }
                           },
                           onMapPointSelected: (latitude, longitude) async {},
                           mapWidget: () => DrawMapComponentWidget(
