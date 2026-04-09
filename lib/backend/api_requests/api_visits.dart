@@ -130,17 +130,23 @@ class CreateVisitRequestCall {
 class CreateOperativeListingVisitCall {
   Future<ApiCallResponse> call({
     String? propertyId = '',
+    String? authToken = '',
+    dynamic ranges,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{}''';
+    String ffApiRequestBody = '''
+{
+  "proposedAvailabilityRanges": ${serializeJson(ranges, true)}
+}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Operative Listing Visit',
       apiUrl:
           '${baseUrl}/visits/properties/${propertyId}/operative-listing-visits',
       callType: ApiCallType.POST,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,

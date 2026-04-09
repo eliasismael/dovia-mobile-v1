@@ -160,11 +160,13 @@ class CreatePropertyBasicSALEAndRENTCall {
       "others": "${escapeStringForJson(othersRent)}"
     }
   },
-  "ownership": {
-    "isCompanyOwned": $isCompanyOwned,
+  "ownership": ${isCompanyOwned == true ? '''{
+    "isCompanyOwned": true,
     "companyName": "${escapeStringForJson(companyName)}",
     "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
-  }
+  }''' : '''{
+    "isCompanyOwned": false
+  }'''}
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic SALE and RENT',
@@ -301,11 +303,13 @@ class CreatePropertyBasicSALECall {
     "maintenanceFee": $maintenanceFee,
     "singlePropertyTax": $singlePropertyTax
   },
-  "ownership": {
-    "isCompanyOwned": $isCompanyOwned,
+  "ownership": ${isCompanyOwned == true ? '''{
+    "isCompanyOwned": true,
     "companyName": "${escapeStringForJson(companyName)}",
     "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
-  }
+  }''' : '''{
+    "isCompanyOwned": false
+  }'''}
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic SALE',

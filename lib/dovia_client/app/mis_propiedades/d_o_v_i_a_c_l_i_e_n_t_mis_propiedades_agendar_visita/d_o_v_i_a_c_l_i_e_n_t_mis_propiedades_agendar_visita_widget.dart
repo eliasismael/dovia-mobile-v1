@@ -61,17 +61,6 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
     super.dispose();
   }
 
-  // Returns the next calendar date for the given weekday index (0=Mon..6=Sun).
-  String _nextDateForWeekday(int dayIndex) {
-    // DateTime.weekday: 1=Mon, ..., 7=Sun; dayIndex: 0=Mon..6=Sun
-    final targetWeekday = dayIndex + 1;
-    final today = DateTime.now();
-    int daysAhead = targetWeekday - today.weekday;
-    if (daysAhead <= 0) daysAhead += 7;
-    final date = today.add(Duration(days: daysAhead));
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
   String _formatTime(TimeOfDay? t) {
     if (t == null) return '--:--';
     final h = t.hour.toString().padLeft(2, '0');
@@ -95,6 +84,7 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
     final picked = await showTimePicker(
       context: context,
       initialTime: initial,
+      initialEntryMode: TimePickerEntryMode.input,
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
         child: child!,
@@ -132,33 +122,31 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
   Future<void> _onContinuar() async {
     if (!_model.canContinue) return;
 
-    // Sort selected days and build proposed slots
-    final sortedDays = _model.selectedDays.toList()..sort();
-    final slots = sortedDays
-        .take(3)
-        .map((day) => {
-              'date': _nextDateForWeekday(day),
-              'time': _timeToApi(_model.timeFrom!),
-            })
-        .toList();
+    final List<String> dayNames = [
+      'MONDAY',
+      'TUESDAY',
+      'WEDNESDAY',
+      'THURSDAY',
+      'FRIDAY',
+      'SATURDAY',
+      'SUNDAY',
+    ];
 
-    final dateOne = slots.isNotEmpty ? slots[0]['date']! : '';
-    final hourOne = slots.isNotEmpty ? slots[0]['time']! : '';
-    final dateTwo = slots.length > 1 ? slots[1]['date']! : '';
-    final hourTwo = slots.length > 1 ? slots[1]['time']! : '';
-    final dateThree = slots.length > 2 ? slots[2]['date']! : '0000-00-00';
-    final hourThree = slots.length > 2 ? slots[2]['time']! : '00:00';
+    final sortedDays = _model.selectedDays.toList()..sort();
+    final startTimeStr = _timeToApi(_model.timeFrom!);
+    final endTimeStr = _timeToApi(_model.timeTo!);
+
+    final ranges = sortedDays.map((dayIndex) => {
+          'dayOfWeek': dayNames[dayIndex],
+          'startTime': startTimeStr,
+          'endTime': endTimeStr,
+        }).toList();
 
     _model.apiResCreateVisitRequest =
-        await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
+        await DOVIAAPIVisitContextGroup.createOperativeListingVisitCall.call(
       propertyId: widget.propertyId,
       authToken: currentAuthenticationToken,
-      dateOne: dateOne,
-      hourOne: hourOne,
-      dateTwo: dateTwo,
-      hourTwo: hourTwo,
-      dateThree: dateThree,
-      hourThree: hourThree,
+      ranges: ranges,
     );
 
     if (!mounted) return;
@@ -210,6 +198,8 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Agenda tu visita',
+                        showMap: false,
+                        showCurrency: false,
                       ),
                     ),
                     Padding(
