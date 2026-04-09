@@ -163,19 +163,22 @@ class CreateOperativeListingVisitCall {
 class UploadSignedContractCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
+    String? authToken = '',
+    FFUploadedFile? file,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Signed Contract',
       apiUrl: '${baseUrl}/visits/${visitId}/documents/signed-contract',
       callType: ApiCallType.POST,
-      headers: {},
-      params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.JSON,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
@@ -189,16 +192,22 @@ class UploadSignedContractCall {
 class UpdateVisitInstructionsCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
+    String? authToken = '',
+    String? instructions = '',
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
     final ffApiRequestBody = '''
-{}''';
+{
+  "instructions": "${escapeStringForJson(instructions)}"
+}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update Visit Instructions',
       apiUrl: '${baseUrl}/visits/${visitId}/instructions',
       callType: ApiCallType.PUT,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -607,7 +616,7 @@ class ReviewChecklistDocumentsCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
     String? authToken = '',
-    dynamic? items,
+    dynamic items,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 

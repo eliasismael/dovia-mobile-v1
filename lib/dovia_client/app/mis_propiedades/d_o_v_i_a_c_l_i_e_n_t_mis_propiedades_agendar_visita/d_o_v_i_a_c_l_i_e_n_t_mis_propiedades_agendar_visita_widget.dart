@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
+import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_agendar_visita_model.dart';
@@ -63,7 +64,6 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
 
   String _formatTime(TimeOfDay? t) {
     if (t == null) return '--:--';
-    final h = t.hour.toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
     final period = t.hour < 12 ? 'AM' : 'PM';
     final h12 = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
@@ -152,8 +152,31 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
     if (!mounted) return;
 
     if (_model.apiResCreateVisitRequest?.succeeded ?? false) {
-      context.pushNamed(
-          DOVIACLIENTMisPropiedadesVisita1Widget.routeName);
+      final visitId = getJsonField(
+        _model.apiResCreateVisitRequest!.jsonBody,
+        r'$.id',
+      )?.toString();
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: PopupExitoWidget(
+            title: '¡Listo!',
+            text: 'Tu visita ha sido agendada con éxito.',
+            continueText: 'Ir a seguimiento',
+            onContinue: () {
+              Navigator.pop(context);
+              context.pushNamed(
+                DOVIACLIENTMisPropiedadesVisita1Widget.routeName,
+                queryParameters: {
+                  if (visitId != null && visitId.isNotEmpty) 'visitId': visitId,
+                },
+              );
+            },
+          ),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -330,7 +353,7 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                                                   .withOpacity(0.3)
                                               : FlutterFlowTheme.of(context)
                                                   .secondaryText
-                                                  .withOpacity(0.5),
+                                                  .withAlpha(128),
                                       width: isSelected ? 2.0 : 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(20.0),

@@ -464,19 +464,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: DOVIACLIENTMisPropiedadesVisita1Widget.routeName,
           path: DOVIACLIENTMisPropiedadesVisita1Widget.routePath,
           builder: (context, params) =>
-              const DOVIACLIENTMisPropiedadesVisita1Widget(),
-        ),
-        FFRoute(
-          name: DOVIACLIENTMisPropiedadesVisita2Widget.routeName,
-          path: DOVIACLIENTMisPropiedadesVisita2Widget.routePath,
-          builder: (context, params) =>
-              const DOVIACLIENTMisPropiedadesVisita2Widget(),
-        ),
-        FFRoute(
-          name: DOVIACLIENTMisPropiedadesVisita3Widget.routeName,
-          path: DOVIACLIENTMisPropiedadesVisita3Widget.routePath,
-          builder: (context, params) =>
-              const DOVIACLIENTMisPropiedadesVisita3Widget(),
+              DOVIACLIENTMisPropiedadesVisita1Widget(
+            visitId: params.getParam(
+              'visitId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routeName,
