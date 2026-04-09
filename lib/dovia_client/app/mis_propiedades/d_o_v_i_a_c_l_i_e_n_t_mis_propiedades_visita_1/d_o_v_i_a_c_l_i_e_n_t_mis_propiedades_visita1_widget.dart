@@ -233,14 +233,9 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
-                              child: SizedBox(
+                              child: custom_widgets.ProcessState(
                                 width: MediaQuery.sizeOf(context).width,
-                                height: 150.0,
-                                child: custom_widgets.ProcessState(
-                                  width: MediaQuery.sizeOf(context).width,
-                                  height: 150.0,
-                                  currentStep: step,
-                                ),
+                                currentStep: step,
                               ),
                             ),
 

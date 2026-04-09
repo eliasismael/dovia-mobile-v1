@@ -15,7 +15,6 @@ class ProcessState extends StatelessWidget {
   final double? height;
 
   /// Optional: Custom names for the steps.
-  /// If not provided or empty, defaults will be used.
   final List<String>? stepNames;
 
   const ProcessState({
@@ -26,59 +25,36 @@ class ProcessState extends StatelessWidget {
     this.stepNames,
   }) : assert(currentStep >= 1, 'currentStep must be at least 1');
 
-  static const Color primaryColor = Color(0xFF007376);
-  static const Color primaryLightBg = Color(
-    0xFFD2EAEB,
-  );
-  static const Color primaryLightCircle = Color(
-    0xFF70ACAD,
-  );
-  static const Color completedBadgeBg = Color(
-    0x1A007376,
-  );
-  static const Color textColor = Color(0xFF00444B);
-  static const Color grayColor = Color(0xFFA8AABC);
+  // ── Colors ────────────────────────────────────────────────────────────────
+  static const Color _textDark = Color(0xFF00444B);
+  static const Color _gray = Color(0xFFA8AABC);
 
-  // Default Step Titles (Fallback)
-  static const List<String> _defaultStepTitles = [
+  static const List<String> _defaultTitles = [
     'Completar\ninformación',
     'Enlistamiento',
     'Preparar\nmaterial',
     'Publicación\nde propiedad',
   ];
 
-  // Helper to get the actual list to use
-  List<String> get _effectiveStepTitles {
-    if (stepNames != null && stepNames!.isNotEmpty) {
-      return stepNames!;
-    }
-    return _defaultStepTitles;
-  }
+  List<String> get _titles =>
+      (stepNames != null && stepNames!.isNotEmpty) ? stepNames! : _defaultTitles;
 
   @override
   Widget build(BuildContext context) {
-    // We determine the number of steps based on the list being used
-    final stepsCount = _effectiveStepTitles.length;
+    final titles = _titles;
+    final count = titles.length;
 
     return Container(
       width: width ?? double.infinity,
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.centerRight,
-          end: Alignment.centerLeft,
-          colors: [
-            Color(0xFFE9EFFF),
-            Colors.white,
-          ],
-          stops: [1.0, 0.25],
-        ),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(51),
-            blurRadius: 19,
-            offset: const Offset(4.5, 5.2),
+            color: Colors.black.withValues(alpha: 0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -86,188 +62,224 @@ class ProcessState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Title
           const Text(
             'Estado de tu proceso',
             style: TextStyle(
               fontFamily: 'Public Sans',
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: textColor,
-              letterSpacing: 0.26,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: _textDark,
+              letterSpacing: 0.1,
             ),
           ),
-          const SizedBox(height: 12),
-          _buildCirclesRow(stepsCount),
+          const SizedBox(height: 14),
+
+          // Circles + connectors row
+          Row(
+            children: [
+              for (int i = 1; i <= count; i++) ...[
+                _StepCircle(state: _stateOf(i)),
+                if (i < count) _Connector(active: i < currentStep),
+              ],
+            ],
+          ),
           const SizedBox(height: 8),
-          _buildStepLabelsRow(stepsCount),
-          const SizedBox(height: 4),
-          _buildStepTitlesRow(_effectiveStepTitles),
+
+          // "PASO N" labels row
+          Row(
+            children: [
+              for (int i = 1; i <= count; i++) ...[
+                SizedBox(
+                  width: 72,
+                  child: Text(
+                    'PASO $i',
+                    style: const TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      color: _gray,
+                    ),
+                  ),
+                ),
+                if (i < count) const Spacer(),
+              ],
+            ],
+          ),
+          const SizedBox(height: 2),
+
+          // Step title row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 1; i <= count; i++) ...[
+                SizedBox(
+                  width: 72,
+                  child: Text(
+                    titles[i - 1],
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 11,
+                      fontWeight: _stateOf(i) == _StepState.pending
+                          ? FontWeight.w400
+                          : FontWeight.w600,
+                      color: _stateOf(i) == _StepState.pending
+                          ? _gray
+                          : _textDark,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+                if (i < count) const Spacer(),
+              ],
+            ],
+          ),
           const SizedBox(height: 8),
-          _buildStatusBadgesRow(stepsCount),
+
+          // Status badges row
+          Row(
+            children: [
+              for (int i = 1; i <= count; i++) ...[
+                _StatusBadge(state: _stateOf(i)),
+                if (i < count) const Spacer(),
+              ],
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCirclesRow(int stepsCount) {
-    return Row(
-      children: [
-        for (int i = 1; i <= stepsCount; i++) ...[
-          _buildCircle(_getStepState(i)),
-          if (i < stepsCount) _buildConnector(i),
-        ],
-      ],
-    );
+  _StepState _stateOf(int step) {
+    if (step < currentStep) return _StepState.completed;
+    if (step == currentStep) return _StepState.inProgress;
+    return _StepState.pending;
   }
+}
 
-  Widget _buildStepLabelsRow(int stepsCount) {
-    return Row(
-      children: [
-        for (int i = 1; i <= stepsCount; i++) ...[
-          SizedBox(
-            width: 75,
-            child: Text(
-              'PASO $i',
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: grayColor,
-              ),
-            ),
-          ),
-          if (i < stepsCount) const Spacer(),
-        ],
-      ],
-    );
-  }
+// ── Step states ────────────────────────────────────────────────────────────
+enum _StepState { completed, inProgress, pending }
 
-  Widget _buildStepTitlesRow(List<String> titles) {
-    final stepsCount = titles.length;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (int i = 1; i <= stepsCount; i++) ...[
-          SizedBox(
-            width: 78,
-            child: Text(
-              titles[i - 1],
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: textColor,
-                height: 1.3,
-              ),
-            ),
-          ),
-          if (i < stepsCount) const Spacer(),
-        ],
-      ],
-    );
-  }
+// ── Circle indicator ───────────────────────────────────────────────────────
+class _StepCircle extends StatelessWidget {
+  const _StepCircle({required this.state});
+  final _StepState state;
 
-  Widget _buildStatusBadgesRow(int stepsCount) {
-    return Row(
-      children: [
-        for (int i = 1; i <= stepsCount; i++) ...[
-          _buildStatusBadge(_getStepState(i)),
-          if (i < stepsCount) const Spacer(),
-        ],
-      ],
-    );
-  }
+  static const Color _teal = Color(0xFF007376);
+  static const Color _tealLight = Color(0xFF70ACAD);
+  static const Color _gray = Color(0xFFCCCCCC);
 
-  Widget _buildCircle(StepState state) {
+  @override
+  Widget build(BuildContext context) {
     switch (state) {
-      case StepState.completed:
+      case _StepState.completed:
         return Container(
-          width: 18,
-          height: 18,
+          width: 28,
+          height: 28,
           decoration: const BoxDecoration(
-            color: primaryColor,
+            color: _teal,
             shape: BoxShape.circle,
           ),
         );
-      case StepState.inProgress:
+      case _StepState.inProgress:
+        // Outer ring + inner filled dot
         return Container(
-          width: 18,
-          height: 18,
+          width: 28,
+          height: 28,
           decoration: BoxDecoration(
             color: Colors.transparent,
             shape: BoxShape.circle,
-            border: Border.all(color: primaryLightCircle, width: 1.5),
+            border: Border.all(color: _tealLight, width: 2.0),
           ),
           child: Center(
             child: Container(
-              width: 12,
-              height: 12,
+              width: 16,
+              height: 16,
               decoration: const BoxDecoration(
-                color: primaryLightCircle,
+                color: _tealLight,
                 shape: BoxShape.circle,
               ),
             ),
           ),
         );
-      case StepState.pending:
+      case _StepState.pending:
         return Container(
-          width: 14,
-          height: 14,
+          width: 26,
+          height: 26,
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFFCCCCCC), width: 1.5),
+            border: Border.all(color: _gray, width: 1.5),
           ),
         );
     }
   }
+}
 
-  Widget _buildConnector(int afterStep) {
-    final bool isCompleted = afterStep < currentStep;
+// ── Connector line ─────────────────────────────────────────────────────────
+class _Connector extends StatelessWidget {
+  const _Connector({required this.active});
+  final bool active;
 
+  static const Color _teal = Color(0xFF007376);
+  static const Color _grayLight = Color(0xFFE0E0E0);
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        height: 3,
+        height: 2,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: isCompleted ? primaryColor : grayColor.withAlpha(77),
-          borderRadius: BorderRadius.circular(1.5),
+          color: active ? _teal : _grayLight,
+          borderRadius: BorderRadius.circular(1),
         ),
       ),
     );
   }
+}
 
-  Widget _buildStatusBadge(StepState state) {
-    String label;
-    Color backgroundColor;
-    Color badgeTextColor;
+// ── Status badge ───────────────────────────────────────────────────────────
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.state});
+  final _StepState state;
+
+  static const Color _teal = Color(0xFF007376);
+  static const Color _tealLight = Color(0xFF70ACAD);
+  static const Color _tealLightBg = Color(0xFFD2EAEB);
+  static const Color _completedBg = Color(0x1A007376);
+  static const Color _gray = Color(0xFFA8AABC);
+
+  @override
+  Widget build(BuildContext context) {
+    late String label;
+    late Color bg;
+    late Color textColor;
     Border? border;
 
     switch (state) {
-      case StepState.completed:
+      case _StepState.completed:
         label = 'Completado';
-        backgroundColor = completedBadgeBg;
-        badgeTextColor = primaryColor;
-        border = null;
+        bg = _completedBg;
+        textColor = _teal;
         break;
-      case StepState.inProgress:
+      case _StepState.inProgress:
         label = 'En Proceso';
-        backgroundColor = primaryLightBg;
-        badgeTextColor = primaryLightCircle;
-        border = null;
+        bg = _tealLightBg;
+        textColor = _tealLight;
         break;
-      case StepState.pending:
+      case _StepState.pending:
         label = 'Pendiente';
-        backgroundColor = Colors.white;
-        badgeTextColor = grayColor;
-        border = Border.all(color: grayColor, width: 0.77);
+        bg = Colors.white;
+        textColor = _gray;
+        border = Border.all(color: _gray, width: 0.8);
         break;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: bg,
         borderRadius: BorderRadius.circular(6),
         border: border,
       ),
@@ -277,21 +289,9 @@ class ProcessState extends StatelessWidget {
           fontFamily: 'Public Sans',
           fontSize: 10,
           fontWeight: FontWeight.w500,
-          color: badgeTextColor,
+          color: textColor,
         ),
       ),
     );
   }
-
-  StepState _getStepState(int stepNumber) {
-    if (stepNumber < currentStep) {
-      return StepState.completed;
-    } else if (stepNumber == currentStep) {
-      return StepState.inProgress;
-    } else {
-      return StepState.pending;
-    }
-  }
 }
-
-enum StepState { completed, inProgress, pending }
