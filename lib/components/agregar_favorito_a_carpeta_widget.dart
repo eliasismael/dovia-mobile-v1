@@ -2,14 +2,11 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'agregar_favorito_a_carpeta_model.dart';
 export 'agregar_favorito_a_carpeta_model.dart';
 
@@ -58,7 +55,7 @@ class _AgregarFavoritoACarpetaWidgetState
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,7 +76,8 @@ class _AgregarFavoritoACarpetaWidgetState
                   ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: FutureBuilder<ApiCallResponse>(
                 future:
                     DOVIAAPIFavoriteContextGroup.getAllFavoriteFoldersCall.call(
@@ -114,7 +112,7 @@ class _AgregarFavoritoACarpetaWidgetState
                               [];
 
                       return ListView.separated(
-                        padding: EdgeInsets.fromLTRB(
+                        padding: const EdgeInsets.fromLTRB(
                           0,
                           0,
                           0,
@@ -123,7 +121,8 @@ class _AgregarFavoritoACarpetaWidgetState
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         itemCount: eachFolder.length,
-                        separatorBuilder: (_, __) => SizedBox(height: 12.0),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: 12.0),
                         itemBuilder: (context, eachFolderIndex) {
                           final eachFolderItem = eachFolder[eachFolderIndex];
                           return Builder(
@@ -153,7 +152,7 @@ class _AgregarFavoritoACarpetaWidgetState
                                           .addPropertyToFavoritesCall
                                           .call(
                                     authToken: currentAuthenticationToken,
-                                    propertyId: widget!.houseId,
+                                    propertyId: widget.houseId,
                                     folderId: getJsonField(
                                       eachFolderItem,
                                       r'''$.id''',
@@ -169,11 +168,11 @@ class _AgregarFavoritoACarpetaWidgetState
                                           elevation: 0,
                                           insetPadding: EdgeInsets.zero,
                                           backgroundColor: Colors.transparent,
-                                          alignment: AlignmentDirectional(
+                                          alignment: const AlignmentDirectional(
                                                   0.0, 0.0)
                                               .resolve(
                                                   Directionality.of(context)),
-                                          child: Container(
+                                          child: SizedBox(
                                             height: 400.0,
                                             width: 80.0,
                                             child: PopupExitoWidget(
@@ -193,7 +192,7 @@ class _AgregarFavoritoACarpetaWidgetState
                                       context: context,
                                       builder: (alertDialogContext) {
                                         return AlertDialog(
-                                          title: Text('error'),
+                                          title: const Text('error'),
                                           content: Text(
                                               (_model.apiResultv19?.jsonBody ??
                                                       '')
@@ -202,7 +201,7 @@ class _AgregarFavoritoACarpetaWidgetState
                                             TextButton(
                                               onPressed: () => Navigator.pop(
                                                   alertDialogContext),
-                                              child: Text('Ok'),
+                                              child: const Text('Ok'),
                                             ),
                                           ],
                                         );

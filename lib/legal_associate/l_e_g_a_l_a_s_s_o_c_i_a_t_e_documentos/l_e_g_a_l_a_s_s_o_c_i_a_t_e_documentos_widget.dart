@@ -3,13 +3,10 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos_model.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos_model.dart';
 
@@ -62,22 +59,22 @@ class _LEGALASSOCIATEDocumentosWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            decoration: BoxDecoration(),
+                            decoration: const BoxDecoration(),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -109,7 +106,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 8.0)),
+                              ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
                           RichText(
@@ -191,20 +188,20 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -214,7 +211,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -244,7 +241,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                         width:
                                             MediaQuery.sizeOf(context).width *
                                                 0.6,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -252,8 +249,9 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -393,19 +391,17 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                   ),
                                                   Container(
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xFFFFE69F),
+                                                      color: const Color(
+                                                          0xFFFFE69F),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               24.0),
                                                     ),
                                                     child: Padding(
                                                       padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  16.0,
-                                                                  4.0,
-                                                                  16.0,
-                                                                  4.0),
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(16.0,
+                                                              4.0, 16.0, 4.0),
                                                       child: Text(
                                                         'Pendiente',
                                                         style:
@@ -423,7 +419,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                                         .bodyMedium
                                                                         .fontStyle,
                                                                   ),
-                                                                  color: Color(
+                                                                  color: const Color(
                                                                       0xFFD59E08),
                                                                   letterSpacing:
                                                                       0.0,
@@ -441,8 +437,9 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                 ],
                                               ),
                                               Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 8.0, 0.0, 0.0),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
@@ -466,13 +463,13 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                         0.55,
                                                     height: 30.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color: FlutterFlowTheme.of(
                                                             context)
                                                         .primary,
@@ -514,13 +511,13 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -530,7 +527,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -560,7 +557,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                         width:
                                             MediaQuery.sizeOf(context).width *
                                                 0.6,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -568,8 +565,9 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -709,19 +707,17 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                   ),
                                                   Container(
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xFFBAFF9F),
+                                                      color: const Color(
+                                                          0xFFBAFF9F),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               24.0),
                                                     ),
                                                     child: Padding(
                                                       padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  16.0,
-                                                                  4.0,
-                                                                  16.0,
-                                                                  4.0),
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(16.0,
+                                                              4.0, 16.0, 4.0),
                                                       child: Text(
                                                         'Aprobado',
                                                         style:
@@ -739,7 +735,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                                         .bodyMedium
                                                                         .fontStyle,
                                                                   ),
-                                                                  color: Color(
+                                                                  color: const Color(
                                                                       0xFF236300),
                                                                   letterSpacing:
                                                                       0.0,
@@ -757,8 +753,9 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                 ],
                                               ),
                                               Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 8.0, 0.0, 0.0),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
@@ -782,13 +779,13 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                         0.55,
                                                     height: 30.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color: FlutterFlowTheme.of(
                                                             context)
                                                         .primary,
@@ -830,13 +827,13 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -846,7 +843,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -876,7 +873,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                         width:
                                             MediaQuery.sizeOf(context).width *
                                                 0.6,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -884,8 +881,9 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -1025,19 +1023,17 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                   ),
                                                   Container(
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xFFFF7878),
+                                                      color: const Color(
+                                                          0xFFFF7878),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               24.0),
                                                     ),
                                                     child: Padding(
                                                       padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  16.0,
-                                                                  4.0,
-                                                                  16.0,
-                                                                  4.0),
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(16.0,
+                                                              4.0, 16.0, 4.0),
                                                       child: Text(
                                                         'Rechazado',
                                                         style:
@@ -1055,7 +1051,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                                         .bodyMedium
                                                                         .fontStyle,
                                                                   ),
-                                                                  color: Color(
+                                                                  color: const Color(
                                                                       0xFF570200),
                                                                   letterSpacing:
                                                                       0.0,
@@ -1073,8 +1069,9 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                 ],
                                               ),
                                               Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 8.0, 0.0, 0.0),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
@@ -1098,13 +1095,13 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                                         0.55,
                                                     height: 30.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color: FlutterFlowTheme.of(
                                                             context)
                                                         .primary,
@@ -1146,7 +1143,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
@@ -1158,7 +1155,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -1166,7 +1163,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                     wrapWithModel(
                       model: _model.lEGALASSOCAITENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALASSOCAITENavbarWidget(),
+                      child: const LEGALASSOCAITENavbarWidget(),
                     ),
                   ],
                 ),

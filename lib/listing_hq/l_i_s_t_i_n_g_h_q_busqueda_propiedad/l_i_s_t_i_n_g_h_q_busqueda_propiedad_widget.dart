@@ -1,15 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_busqueda_propiedad_model.dart';
 export 'l_i_s_t_i_n_g_h_q_busqueda_propiedad_model.dart';
 
@@ -65,22 +61,22 @@ class _LISTINGHQBusquedaPropiedadWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            decoration: BoxDecoration(),
+                            decoration: const BoxDecoration(),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -112,7 +108,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 8.0)),
+                              ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
                           RichText(
@@ -223,19 +219,19 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 30.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -255,7 +251,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                     decoration: BoxDecoration(
                                       color: FlutterFlowTheme.of(context)
                                           .secondaryBackground,
-                                      borderRadius: BorderRadius.only(
+                                      borderRadius: const BorderRadius.only(
                                         bottomLeft: Radius.circular(25.0),
                                         bottomRight: Radius.circular(0.0),
                                         topLeft: Radius.circular(25.0),
@@ -263,8 +259,9 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                       ),
                                     ),
                                     child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          10.0, 10.0, 10.0, 10.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              10.0, 10.0, 10.0, 10.0),
                                       child: ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(8.0),
@@ -279,7 +276,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                   ),
                                 ),
                                 Expanded(
-                                  child: Container(
+                                  child: SizedBox(
                                     width: 200.0,
                                     child: TextFormField(
                                       controller: _model.textController,
@@ -336,7 +333,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                                       .labelMedium
                                                       .fontStyle,
                                             ),
-                                        enabledBorder: OutlineInputBorder(
+                                        enabledBorder: const OutlineInputBorder(
                                           borderSide: BorderSide(
                                             color: Color(0x00000000),
                                             width: 1.0,
@@ -348,7 +345,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                             topRight: Radius.circular(25.0),
                                           ),
                                         ),
-                                        focusedBorder: OutlineInputBorder(
+                                        focusedBorder: const OutlineInputBorder(
                                           borderSide: BorderSide(
                                             color: Color(0x00000000),
                                             width: 1.0,
@@ -366,7 +363,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                                 .error,
                                             width: 1.0,
                                           ),
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                             bottomLeft: Radius.circular(0.0),
                                             bottomRight: Radius.circular(25.0),
                                             topLeft: Radius.circular(0.0),
@@ -379,7 +376,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                                 .error,
                                             width: 1.0,
                                           ),
-                                          borderRadius: BorderRadius.only(
+                                          borderRadius: const BorderRadius.only(
                                             bottomLeft: Radius.circular(0.0),
                                             bottomRight: Radius.circular(25.0),
                                             topLeft: Radius.circular(0.0),
@@ -426,7 +423,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -436,7 +433,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -467,7 +464,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                       height:
                                           MediaQuery.sizeOf(context).height *
                                               0.1,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
@@ -477,8 +474,9 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -580,8 +578,9 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 1.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, 1.0),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.max,
                                                 mainAxisAlignment:
@@ -635,12 +634,9 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                                     ),
                                                     child: Padding(
                                                       padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  16.0,
-                                                                  2.0,
-                                                                  16.0,
-                                                                  2.0),
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(16.0,
+                                                              2.0, 16.0, 2.0),
                                                       child: Text(
                                                         'Publicada',
                                                         style:
@@ -686,13 +682,13 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -702,7 +698,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -733,7 +729,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                       height:
                                           MediaQuery.sizeOf(context).height *
                                               0.1,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
@@ -743,8 +739,9 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -846,8 +843,9 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 1.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, 1.0),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.max,
                                                 mainAxisAlignment:
@@ -901,12 +899,9 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                                     ),
                                                     child: Padding(
                                                       padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  16.0,
-                                                                  2.0,
-                                                                  16.0,
-                                                                  2.0),
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(16.0,
+                                                              2.0, 16.0, 2.0),
                                                       child: Text(
                                                         'Publicada',
                                                         style:
@@ -952,7 +947,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
@@ -964,7 +959,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -972,7 +967,7 @@ class _LISTINGHQBusquedaPropiedadWidgetState
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

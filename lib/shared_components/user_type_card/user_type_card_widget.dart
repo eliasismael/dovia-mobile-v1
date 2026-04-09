@@ -1,12 +1,9 @@
 import '/backend/schema/enums/enums.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'user_type_card_model.dart';
 export 'user_type_card_model.dart';
 
@@ -52,7 +49,7 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
       width: MediaQuery.sizeOf(context).width * 1.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             blurRadius: 4.0,
             color: Color(0x33000000),
@@ -66,9 +63,10 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
       ),
       child: Builder(
         builder: (context) {
-          if (widget!.userType == UserType.asociado) {
+          if (widget.userType == UserType.asociado) {
             return Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -91,8 +89,8 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                   ),
                   Expanded(
                     child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -167,7 +165,7 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                                   ),
                             ),
                           ),
-                        ].divide(SizedBox(height: 10.0)),
+                        ].divide(const SizedBox(height: 10.0)),
                       ),
                     ),
                   ),
@@ -176,7 +174,8 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
             );
           } else {
             return Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -199,8 +198,8 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                   ),
                   Expanded(
                     child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -275,7 +274,7 @@ class _UserTypeCardWidgetState extends State<UserTypeCardWidget> {
                                   ),
                             ),
                           ),
-                        ].divide(SizedBox(height: 10.0)),
+                        ].divide(const SizedBox(height: 10.0)),
                       ),
                     ),
                   ),

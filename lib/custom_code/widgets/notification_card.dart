@@ -1,10 +1,6 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -19,7 +15,7 @@ class NotificationCard extends StatelessWidget {
   final double? width;
   final double? height;
   const NotificationCard({
-    Key? key,
+    super.key,
     this.width,
     this.height,
     this.label = 'XXX',
@@ -28,7 +24,7 @@ class NotificationCard extends StatelessWidget {
     this.description =
         'La empresa no ha llenado las preguntas y le falta finalizarlas.',
     this.footerDate = '10/04/2025 - Hora XX',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_ofeta_compra_caracteristicas_dadas_por_propietario_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_ofeta_compra_caracteristicas_dadas_por_propietario_model.dart';
 
@@ -64,7 +61,7 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
       mainAxisSize: MainAxisSize.max,
       children: [
         Align(
-          alignment: AlignmentDirectional(-1.0, 0.0),
+          alignment: const AlignmentDirectional(-1.0, 0.0),
           child: Text(
             'Características que proporcionó el propietario',
             style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -82,20 +79,20 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
           ),
         ),
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Align(
-                alignment: AlignmentDirectional(-1.0, 0.0),
+                alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(-1.0, 0.0),
+                      alignment: const AlignmentDirectional(-1.0, 0.0),
                       child: Text(
                         'Precio',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -119,8 +116,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-                      child: Container(
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                      child: SizedBox(
                         width: MediaQuery.sizeOf(context).width * 0.4,
                         child: TextFormField(
                           controller: _model.textController1,
@@ -171,14 +168,14 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                                       .fontStyle,
                                 ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: Color(0x00000000),
                                 width: 1.0,
                               ),
                               borderRadius: BorderRadius.circular(8.0),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: Color(0x00000000),
                                 width: 1.0,
                               ),
@@ -255,8 +252,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-                    child: Container(
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    child: SizedBox(
                       width: MediaQuery.sizeOf(context).width * 0.4,
                       child: TextFormField(
                         controller: _model.textController2,
@@ -305,14 +302,14 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                                         .fontStyle,
                                   ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Color(0x00000000),
                               width: 1.0,
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Color(0x00000000),
                               width: 1.0,
                             ),
@@ -366,15 +363,15 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
           ),
         ),
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
-            decoration: BoxDecoration(),
+            decoration: const BoxDecoration(),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(-1.0, 0.0),
+                  alignment: const AlignmentDirectional(-1.0, 0.0),
                   child: Text(
                     'Uso no permitido de esta propiedad',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -397,8 +394,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-                  child: Container(
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                  child: SizedBox(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     child: TextFormField(
                       controller: _model.textController3,
@@ -447,14 +444,14 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                                       .fontStyle,
                                 ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0x00000000),
                             width: 1.0,
                           ),
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0x00000000),
                             width: 1.0,
                           ),
@@ -476,7 +473,7 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                         ),
                         filled: true,
                         fillColor: FlutterFlowTheme.of(context).alternate,
-                        contentPadding: EdgeInsetsDirectional.fromSTEB(
+                        contentPadding: const EdgeInsetsDirectional.fromSTEB(
                             10.0, 40.0, 0.0, 40.0),
                       ),
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -509,15 +506,15 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
           ),
         ),
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
-            decoration: BoxDecoration(),
+            decoration: const BoxDecoration(),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(-1.0, 0.0),
+                  alignment: const AlignmentDirectional(-1.0, 0.0),
                   child: Text(
                     'Otras Consideraciones',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -540,8 +537,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-                  child: Container(
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                  child: SizedBox(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     child: TextFormField(
                       controller: _model.textController4,
@@ -590,14 +587,14 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                                       .fontStyle,
                                 ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0x00000000),
                             width: 1.0,
                           ),
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0x00000000),
                             width: 1.0,
                           ),
@@ -619,7 +616,7 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                         ),
                         filled: true,
                         fillColor: FlutterFlowTheme.of(context).alternate,
-                        contentPadding: EdgeInsetsDirectional.fromSTEB(
+                        contentPadding: const EdgeInsetsDirectional.fromSTEB(
                             10.0, 40.0, 0.0, 40.0),
                       ),
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -652,7 +649,7 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
           ),
         ),
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
             height: 1.0,

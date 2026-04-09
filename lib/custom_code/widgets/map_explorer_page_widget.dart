@@ -1,15 +1,13 @@
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import '/index.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
 
 import 'package:flutter/scheduler.dart';
@@ -19,7 +17,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/components/house_card_component_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
-import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MapExplorerPageWidget
@@ -1019,7 +1016,7 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                   children: [
                     Expanded(
                       child: Text(
-                        hasValue ? selected! : placeholder,
+                        hasValue ? selected : placeholder,
                         style: GoogleFonts.publicSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,

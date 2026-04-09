@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'favorite_houses_card_model.dart';
 export 'favorite_houses_card_model.dart';
 
@@ -16,9 +13,9 @@ class FavoriteHousesCardWidget extends StatefulWidget {
     String? price,
     String? type,
     this.onHertTap,
-  })  : this.name = name ?? '[name]',
-        this.price = price ?? '[price]',
-        this.type = type ?? '[type]';
+  })  : name = name ?? '[name]',
+        price = price ?? '[price]',
+        type = type ?? '[type]';
 
   final String name;
   final String price;
@@ -63,7 +60,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -71,9 +68,9 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
                   child: Container(
-                    decoration: BoxDecoration(),
+                    decoration: const BoxDecoration(),
                     child: Stack(
                       children: [
                         ClipRRect(
@@ -86,7 +83,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               2.0, 2.0, 0.0, 0.0),
                           child: InkWell(
                             splashColor: Colors.transparent,
@@ -130,7 +127,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        widget!.name,
+                        widget.name,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -150,7 +147,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                             ),
                       ),
                       Text(
-                        widget!.type,
+                        widget.type,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -172,12 +169,12 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                     ],
                   ),
                   Align(
-                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                       child: Text(
-                        widget!.price,
+                        widget.price,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -199,12 +196,12 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 10.0, 0.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(0.0),
@@ -217,7 +214,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 20.0, 0.0),
                           child: Text(
                             'M2',
@@ -245,7 +242,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 10.0, 0.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(0.0),
@@ -285,10 +282,10 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(-1.0, -1.0),
+                    alignment: const AlignmentDirectional(-1.0, -1.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
                       child: Wrap(
                         spacing: 0.0,
                         runSpacing: 0.0,
@@ -303,7 +300,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 10.0, 0.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(0.0),
@@ -316,7 +313,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 20.0, 0.0),
                                 child: Text(
                                   'Habitaciones',
@@ -351,7 +348,7 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 10.0, 0.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(0.0),

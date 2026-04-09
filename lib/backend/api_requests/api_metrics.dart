@@ -1,8 +1,4 @@
-import '../schema/structs/index.dart';
-
-import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
-import 'api_helpers.dart';
 
 /// Start DOVIA API - Metrics Context Group Code
 
@@ -26,10 +22,10 @@ class TrackPropertyViewCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Track Property View',
-      apiUrl: '${baseUrl}/metrics/properties/${propertyId}/view',
+      apiUrl: '$baseUrl/metrics/properties/$propertyId/view',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${bearerAuth}',
+        'Authorization': 'Bearer $bearerAuth',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -52,10 +48,10 @@ class TrackPropertyInteractionCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Track Property Interaction',
-      apiUrl: '${baseUrl}/metrics/properties/${propertyId}/interact',
+      apiUrl: '$baseUrl/metrics/properties/$propertyId/interact',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${bearerAuth}',
+        'Authorization': 'Bearer $bearerAuth',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -78,10 +74,10 @@ class GetPropertyStatisticsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Property Statistics',
-      apiUrl: '${baseUrl}/metrics/properties/${propertyId}/statistics',
+      apiUrl: '$baseUrl/metrics/properties/$propertyId/statistics',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${bearerAuth}',
+        'Authorization': 'Bearer $bearerAuth',
       },
       params: {},
       returnBody: true,

@@ -9,7 +9,16 @@ import 'agendar_cita_model.dart';
 export 'agendar_cita_model.dart';
 
 class AgendarCitaWidget extends StatefulWidget {
-  const AgendarCitaWidget({super.key});
+  final String? propertyId;
+  final bool hasPendingVisit;
+  final VoidCallback? onNavigateToVisits;
+
+  const AgendarCitaWidget({
+    super.key,
+    this.propertyId,
+    this.hasPendingVisit = false,
+    this.onNavigateToVisits,
+  });
 
   @override
   State<AgendarCitaWidget> createState() => _AgendarCitaWidgetState();
@@ -47,37 +56,14 @@ class _AgendarCitaWidgetState extends State<AgendarCitaWidget> {
       child: custom_widgets.ScheduleAppointmentWidget(
         width: MediaQuery.sizeOf(context).width * 1.0,
         height: MediaQuery.sizeOf(context).height * 1.0,
+        propertyId: widget.propertyId,
+        hasPendingVisit: widget.hasPendingVisit,
+        onNavigateToVisits: widget.onNavigateToVisits,
         onAccept: () async {
-          await showDialog(
-            context: context,
-            builder: (alertDialogContext) {
-              return AlertDialog(
-                content: Text('acept'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(alertDialogContext),
-                    child: Text('Ok'),
-                  ),
-                ],
-              );
-            },
-          );
+          Navigator.of(context).pop();
         },
         onClose: () async {
-          await showDialog(
-            context: context,
-            builder: (alertDialogContext) {
-              return AlertDialog(
-                content: Text('close'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(alertDialogContext),
-                    child: Text('Ok'),
-                  ),
-                ],
-              );
-            },
-          );
+          Navigator.of(context).pop();
         },
       ),
     );

@@ -1,15 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_documentos_pendientes_model.dart';
 export 'l_i_s_t_i_n_g_h_q_documentos_pendientes_model.dart';
 
@@ -62,22 +58,22 @@ class _LISTINGHQDocumentosPendientesWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            decoration: BoxDecoration(),
+                            decoration: const BoxDecoration(),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -109,7 +105,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 8.0)),
+                              ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
                           RichText(
@@ -220,19 +216,19 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -259,7 +255,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -291,7 +287,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -301,8 +297,9 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -406,8 +403,9 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 1.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 1.0),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
@@ -451,20 +449,17 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFD78D),
+                                                        color: const Color(
+                                                            0xFFFFD78D),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    2.0,
-                                                                    16.0,
-                                                                    2.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                2.0, 16.0, 2.0),
                                                         child: Text(
                                                           'Publicada',
                                                           style: FlutterFlowTheme
@@ -505,14 +500,14 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 10.0)),
+                                    ].divide(const SizedBox(width: 10.0)),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -539,7 +534,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -571,7 +566,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -581,8 +576,9 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -686,8 +682,9 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 1.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 1.0),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
@@ -731,20 +728,17 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFD78D),
+                                                        color: const Color(
+                                                            0xFFFFD78D),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    2.0,
-                                                                    16.0,
-                                                                    2.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                2.0, 16.0, 2.0),
                                                         child: Text(
                                                           'Publicada',
                                                           style: FlutterFlowTheme
@@ -785,14 +779,14 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 10.0)),
+                                    ].divide(const SizedBox(width: 10.0)),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -819,7 +813,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -851,7 +845,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -861,8 +855,9 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -966,8 +961,9 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 1.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 1.0),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
@@ -1011,20 +1007,17 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFD78D),
+                                                        color: const Color(
+                                                            0xFFFFD78D),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    2.0,
-                                                                    16.0,
-                                                                    2.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                2.0, 16.0, 2.0),
                                                         child: Text(
                                                           'Publicada',
                                                           style: FlutterFlowTheme
@@ -1065,7 +1058,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 10.0)),
+                                    ].divide(const SizedBox(width: 10.0)),
                                   ),
                                 ),
                               ),
@@ -1078,7 +1071,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -1086,7 +1079,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

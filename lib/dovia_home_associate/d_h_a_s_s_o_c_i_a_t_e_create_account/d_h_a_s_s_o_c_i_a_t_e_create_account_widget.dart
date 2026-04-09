@@ -6,7 +6,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -53,7 +52,7 @@ class _DHASSOCIATECreateAccountWidgetState
             },
             child: Padding(
               padding: MediaQuery.viewInsetsOf(context),
-              child: DHASSOCIATESelectRolePopupWidget(),
+              child: const DHASSOCIATESelectRolePopupWidget(),
             ),
           );
         },
@@ -87,20 +86,20 @@ class _DHASSOCIATECreateAccountWidgetState
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             Container(
               width: MediaQuery.sizeOf(context).width * 1.0,
               height: MediaQuery.sizeOf(context).height * 1.0,
-              decoration: BoxDecoration(),
+              decoration: const BoxDecoration(),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(0.0),
                         child: SvgPicture.asset(
@@ -113,7 +112,7 @@ class _DHASSOCIATECreateAccountWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
                       child: Text(
                         'Crea tu cuenta',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -123,7 +122,7 @@ class _DHASSOCIATECreateAccountWidgetState
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: Color(0xFF00444B),
+                              color: const Color(0xFF00444B),
                               fontSize: 26.0,
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.w600,
@@ -135,7 +134,7 @@ class _DHASSOCIATECreateAccountWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 49.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 49.0, 0.0, 0.0),
                       child: Container(
                         width: 350.0,
                         decoration: BoxDecoration(
@@ -143,13 +142,13 @@ class _DHASSOCIATECreateAccountWidgetState
                               FlutterFlowTheme.of(context).secondaryBackground,
                           borderRadius: BorderRadius.circular(10.0),
                         ),
-                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 'Selecciona tu rol',
                                 textAlign: TextAlign.start,
@@ -176,13 +175,13 @@ class _DHASSOCIATECreateAccountWidgetState
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
                               child: FlutterFlowDropDown<String>(
                                 controller:
                                     _model.roleDropdownValueController ??=
                                         FormFieldController<String>(null),
-                                options: [
+                                options: const [
                                   'Dovia Showing',
                                   'Dovia Operative Lister',
                                   'Dovia Lister HQ',
@@ -229,7 +228,7 @@ class _DHASSOCIATECreateAccountWidgetState
                                 borderColor: Colors.transparent,
                                 borderWidth: 0.0,
                                 borderRadius: 10.0,
-                                margin: EdgeInsetsDirectional.fromSTEB(
+                                margin: const EdgeInsetsDirectional.fromSTEB(
                                     12.0, 0.0, 12.0, 0.0),
                                 hidesUnderline: true,
                                 isOverButton: false,
@@ -243,7 +242,7 @@ class _DHASSOCIATECreateAccountWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 118.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 118.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: () async {
                           FFAppState().UserRole = () {
@@ -278,7 +277,7 @@ class _DHASSOCIATECreateAccountWidgetState
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.pop(alertDialogContext),
-                                    child: Text('Ok'),
+                                    child: const Text('Ok'),
                                   ),
                                 ],
                               );
@@ -291,9 +290,9 @@ class _DHASSOCIATECreateAccountWidgetState
                         options: FFButtonOptions(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 40.0,
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               16.0, 0.0, 16.0, 0.0),
-                          iconPadding: EdgeInsetsDirectional.fromSTEB(
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 0.0, 0.0),
                           color: FlutterFlowTheme.of(context).primary,
                           textStyle:

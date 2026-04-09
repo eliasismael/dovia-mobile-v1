@@ -1,16 +1,12 @@
 import '/backend/schema/structs/index.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/interactive_map_component/interactive_map_component_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_model.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_model.dart';
 
@@ -63,7 +59,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -72,18 +68,18 @@ class _LEGALASSOCIATEProcesos2WidgetState
                     wrapWithModel(
                       model: _model.legalAssociateHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalAssociateHeaderWidget(
+                      child: const LegalAssociateHeaderWidget(
                         titleText: 'Proceso X',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Container(
+                          SizedBox(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: MediaQuery.sizeOf(context).height * 1.0,
                             child: custom_widgets.DetalleProcesoWidget(
@@ -123,7 +119,8 @@ class _LEGALASSOCIATEProcesos2WidgetState
                               onFinalizarProceso: () async {},
                               onVerContratoSubido: () async {},
                               onContinuar: () async {},
-                              mapWidget: () => InteractiveMapComponentWidget(),
+                              mapWidget: () =>
+                                  const InteractiveMapComponentWidget(),
                             ),
                           ),
                         ],
@@ -133,7 +130,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -141,7 +138,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
                     wrapWithModel(
                       model: _model.lEGALASSOCAITENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALASSOCAITENavbarWidget(),
+                      child: const LEGALASSOCAITENavbarWidget(),
                     ),
                   ],
                 ),

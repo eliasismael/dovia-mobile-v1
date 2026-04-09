@@ -1,12 +1,9 @@
 import '/dovia_client/app/ajustes/delette_account_3/delette_account3_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'delete_account2_model.dart';
 export 'delete_account2_model.dart';
 
@@ -53,7 +50,7 @@ class _DeleteAccount2WidgetState extends State<DeleteAccount2Widget> {
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -75,7 +72,7 @@ class _DeleteAccount2WidgetState extends State<DeleteAccount2Widget> {
                         FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                   ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.sizeOf(context).width * 1.0,
               child: TextFormField(
                 controller: _model.textController,
@@ -117,14 +114,14 @@ class _DeleteAccount2WidgetState extends State<DeleteAccount2Widget> {
                             FlutterFlowTheme.of(context).labelMedium.fontStyle,
                       ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Color(0x00000000),
                       width: 1.0,
                     ),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Color(0x00000000),
                       width: 1.0,
                     ),
@@ -179,7 +176,7 @@ class _DeleteAccount2WidgetState extends State<DeleteAccount2Widget> {
                   builder: (context) {
                     return Padding(
                       padding: MediaQuery.viewInsetsOf(context),
-                      child: DeletteAccount3Widget(),
+                      child: const DeletteAccount3Widget(),
                     );
                   },
                 ).then((value) => safeSetState(() {}));

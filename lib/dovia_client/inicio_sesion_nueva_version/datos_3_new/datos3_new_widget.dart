@@ -4,12 +4,10 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'datos3_new_model.dart';
 export 'datos3_new_model.dart';
 
@@ -63,10 +61,10 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 80.0, 20.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 80.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -89,16 +87,16 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                           ),
                     ),
                     Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
+                      alignment: const AlignmentDirectional(0.0, 0.0),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: MediaQuery.sizeOf(context).height * 0.8,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context).tertiary,
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 blurRadius: 4.0,
                                 color: Color(0x33000000),
@@ -111,17 +109,17 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                             borderRadius: BorderRadius.circular(15.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 0.0, 20.0, 0.0),
                             child: SingleChildScrollView(
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 45.0, 0.0, 0.0),
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -162,7 +160,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                           ),
                                           Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: FlutterFlowDropDown<String>(
                                               controller: _model
@@ -173,7 +171,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               ),
                                               options: List<String>.from(
                                                   ['HOUSE', 'APARTMENT']),
-                                              optionLabels: [
+                                              optionLabels: const [
                                                 'Casa',
                                                 'Deparamento'
                                               ],
@@ -235,7 +233,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               borderColor: Colors.transparent,
                                               borderWidth: 0.0,
                                               borderRadius: 10.0,
-                                              margin: EdgeInsetsDirectional
+                                              margin: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       12.0, 0.0, 12.0, 0.0),
                                               hidesUnderline: true,
@@ -249,10 +247,10 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 21.0, 0.0, 0.0),
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -293,7 +291,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                           ),
                                           Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: FlutterFlowDropDown<String>(
                                               controller: _model
@@ -304,7 +302,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               ),
                                               options: List<String>.from(
                                                   ['SALE', 'RENT']),
-                                              optionLabels: ['Compra', 'Renta'],
+                                              optionLabels: const ['Compra', 'Renta'],
                                               onChanged: (val) => safeSetState(
                                                   () => _model
                                                           .modalidadDropDownValue =
@@ -363,7 +361,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               borderColor: Colors.transparent,
                                               borderWidth: 0.0,
                                               borderRadius: 10.0,
-                                              margin: EdgeInsetsDirectional
+                                              margin: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       12.0, 0.0, 12.0, 0.0),
                                               hidesUnderline: true,
@@ -377,10 +375,10 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 21.0, 0.0, 0.0),
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -390,7 +388,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                         children: [
                                           Align(
                                             alignment:
-                                                AlignmentDirectional(-1.0, 0.0),
+                                                const AlignmentDirectional(-1.0, 0.0),
                                             child: Text(
                                               'Selecciona el perímetro de interés',
                                               style:
@@ -426,7 +424,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                           ),
                                           Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 12.0, 0.0, 0.0),
                                             child: Container(
                                               width: MediaQuery.sizeOf(context)
@@ -438,7 +436,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                     FlutterFlowTheme.of(context)
                                                         .secondaryBackground,
                                               ),
-                                              child: Container(
+                                              child: SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -474,12 +472,12 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 21.0, 0.0, 0.0),
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -520,7 +518,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                           ),
                                           Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 12.0, 0.0, 12.0),
                                             child: Text(
                                               'La IA se encargará de captar la mayor cantidad \nde filtros',
@@ -541,7 +539,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                                   .fontStyle,
                                                         ),
                                                         color:
-                                                            Color(0xFF5D9299),
+                                                            const Color(0xFF5D9299),
                                                         fontSize: 12.0,
                                                         letterSpacing: 0.24,
                                                         fontWeight:
@@ -557,7 +555,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                       ),
                                             ),
                                           ),
-                                          Container(
+                                          SizedBox(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
                                                 1.0,
@@ -632,7 +630,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                         ),
                                                 enabledBorder:
                                                     OutlineInputBorder(
-                                                  borderSide: BorderSide(
+                                                  borderSide: const BorderSide(
                                                     color: Color(0x00000000),
                                                     width: 1.0,
                                                   ),
@@ -642,7 +640,7 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                 ),
                                                 focusedBorder:
                                                     OutlineInputBorder(
-                                                  borderSide: BorderSide(
+                                                  borderSide: const BorderSide(
                                                     color: Color(0x00000000),
                                                     width: 1.0,
                                                   ),
@@ -721,12 +719,12 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 30.0, 0.0, 50.0),
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -746,11 +744,11 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                             .width *
                                                         1.0,
                                                 height: 42.0,
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
-                                                    EdgeInsetsDirectional
+                                                    const EdgeInsetsDirectional
                                                         .fromSTEB(
                                                             0.0, 0.0, 0.0, 0.0),
                                                 color:
@@ -814,11 +812,11 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                             .width *
                                                         1.0,
                                                 height: 42.0,
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
-                                                    EdgeInsetsDirectional
+                                                    const EdgeInsetsDirectional
                                                         .fromSTEB(
                                                             0.0, 0.0, 0.0, 0.0),
                                                 color:
@@ -860,11 +858,11 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               ),
                                             ),
                                           ),
-                                        ].divide(SizedBox(width: 18.0)),
+                                        ].divide(const SizedBox(width: 18.0)),
                                       ),
                                     ),
                                   ),
-                                ].divide(SizedBox(height: 12.0)),
+                                ].divide(const SizedBox(height: 12.0)),
                               ),
                             ),
                           ),

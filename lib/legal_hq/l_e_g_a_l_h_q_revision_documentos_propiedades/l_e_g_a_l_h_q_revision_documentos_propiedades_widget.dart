@@ -1,15 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
 import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_h_q_revision_documentos_propiedades_model.dart';
 export 'l_e_g_a_l_h_q_revision_documentos_propiedades_model.dart';
 
@@ -63,7 +59,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -72,12 +68,12 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                     wrapWithModel(
                       model: _model.legalHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalHQHeaderWidget(
+                      child: const LegalHQHeaderWidget(
                         text: 'Orchard House',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 40.0, 20.0, 100.0),
                       child: SingleChildScrollView(
                         child: Column(
@@ -90,7 +86,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                     .secondaryBackground,
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: IntrinsicWidth(
                                   child: Column(
@@ -99,8 +95,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                         CrossAxisAlignment.start,
                                     children: [
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: RichText(
                                           textScaler:
                                               MediaQuery.of(context).textScaler,
@@ -134,7 +130,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'Propietario: xx',
                                                 style: TextStyle(),
                                               )
@@ -207,13 +203,14 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                           ),
                                           Container(
                                             decoration: BoxDecoration(
-                                              color: Color(0xFFFFE69F),
+                                              color: const Color(0xFFFFE69F),
                                               borderRadius:
                                                   BorderRadius.circular(24.0),
                                             ),
                                             child: Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       16.0, 4.0, 16.0, 4.0),
                                               child: Text(
                                                 'Pendiente de revisión',
@@ -231,8 +228,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                                                     .bodyMedium
                                                                     .fontStyle,
                                                           ),
-                                                          color:
-                                                              Color(0xFFD59E08),
+                                                          color: const Color(
+                                                              0xFFD59E08),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w600,
@@ -253,7 +250,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Documentos de la propiedad',
@@ -277,7 +274,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                             ),
                             Expanded(
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Wrap(
                                   spacing: 0.0,
@@ -292,7 +289,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.4,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment:
@@ -309,8 +306,9 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                                   BorderRadius.circular(24.0),
                                             ),
                                             child: Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, 0.0),
                                               child: Text(
                                                 'PDF',
                                                 style: FlutterFlowTheme.of(
@@ -349,9 +347,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: Text(
                                               'Contrato de convenio',
                                               style:
@@ -379,9 +376,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 8.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 8.0, 0.0, 0.0),
                                             child: Text(
                                               'En proceso de revisión',
                                               style:
@@ -415,9 +411,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: LinearPercentIndicator(
                                               percent: 0.5,
                                               lineHeight: 12.0,
@@ -429,7 +424,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                               backgroundColor:
                                                   FlutterFlowTheme.of(context)
                                                       .primaryText,
-                                              barRadius: Radius.circular(50.0),
+                                              barRadius:
+                                                  const Radius.circular(50.0),
                                               padding: EdgeInsets.zero,
                                             ),
                                           ),
@@ -439,7 +435,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.4,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -454,8 +450,9 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                                   BorderRadius.circular(24.0),
                                             ),
                                             child: Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, 0.0),
                                               child: Text(
                                                 'PDF',
                                                 style: FlutterFlowTheme.of(
@@ -494,9 +491,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: Text(
                                               'Certificación registrl',
                                               style:
@@ -524,9 +520,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 8.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 8.0, 0.0, 0.0),
                                             child: Text(
                                               'En proceso de revisión',
                                               style:
@@ -560,9 +555,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: LinearPercentIndicator(
                                               percent: 0.5,
                                               lineHeight: 12.0,
@@ -574,7 +568,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                                               backgroundColor:
                                                   FlutterFlowTheme.of(context)
                                                       .primaryText,
-                                              barRadius: Radius.circular(50.0),
+                                              barRadius:
+                                                  const Radius.circular(50.0),
                                               padding: EdgeInsets.zero,
                                             ),
                                           ),
@@ -593,7 +588,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -601,7 +596,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                     wrapWithModel(
                       model: _model.lEGALHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALHQNavbarWidget(),
+                      child: const LEGALHQNavbarWidget(),
                     ),
                   ],
                 ),

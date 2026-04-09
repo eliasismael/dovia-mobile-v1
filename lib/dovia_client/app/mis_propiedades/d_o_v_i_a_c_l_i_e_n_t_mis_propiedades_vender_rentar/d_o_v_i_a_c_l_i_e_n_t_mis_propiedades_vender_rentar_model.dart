@@ -19,6 +19,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '/flutter_flow/form_field_controller.dart';
+
 class DOVIACLIENTMisPropiedadesVenderRentarModel
     extends FlutterFlowModel<DOVIACLIENTMisPropiedadesVenderRentarWidget> {
   ///  Local state fields for this page.
@@ -72,6 +74,22 @@ class DOVIACLIENTMisPropiedadesVenderRentarModel
   FocusNode? rentaOtrosFocusNode;
   TextEditingController? rentaOtrosTextController;
   String? Function(BuildContext, String?)? rentaOtrosTextControllerValidator;
+
+  // New fields for Rent
+  FocusNode? disponibleDesdeFocusNode;
+  TextEditingController? disponibleDesdeTextController;
+  String? Function(BuildContext, String?)? disponibleDesdeTextControllerValidator;
+
+  FocusNode? usoPermitidoFocusNode;
+  TextEditingController? usoPermitidoTextController;
+  String? Function(BuildContext, String?)? usoPermitidoTextControllerValidator;
+
+  FocusNode? usoNoPermitidoFocusNode;
+  TextEditingController? usoNoPermitidoTextController;
+  String? Function(BuildContext, String?)? usoNoPermitidoTextControllerValidator;
+  // State field(s) for Zona widget.
+  String? zonaValue;
+  FormFieldController<String>? zonaValueController;
   // State field(s) for DireccionPropiedad widget.
   FocusNode? direccionPropiedadFocusNode;
   TextEditingController? direccionPropiedadTextController;
@@ -166,6 +184,15 @@ class DOVIACLIENTMisPropiedadesVenderRentarModel
 
     rentaOtrosFocusNode?.dispose();
     rentaOtrosTextController?.dispose();
+
+    disponibleDesdeFocusNode?.dispose();
+    disponibleDesdeTextController?.dispose();
+
+    usoPermitidoFocusNode?.dispose();
+    usoPermitidoTextController?.dispose();
+
+    usoNoPermitidoFocusNode?.dispose();
+    usoNoPermitidoTextController?.dispose();
 
     direccionPropiedadFocusNode?.dispose();
     direccionPropiedadTextController?.dispose();

@@ -3,16 +3,13 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:aligned_dialog/aligned_dialog.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'recover_password2_model.dart';
 export 'recover_password2_model.dart';
 
@@ -69,10 +66,10 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -80,7 +77,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                   children: [
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(0.0),
                         child: SvgPicture.asset(
@@ -93,7 +90,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
                       child: Text(
                         '¿Olvidaste tu contraseña?',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -103,7 +100,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: Color(0xFF00444B),
+                              color: const Color(0xFF00444B),
                               fontSize: 26.0,
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.w600,
@@ -115,14 +112,14 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                     ),
                     Container(
                       width: 350.0,
-                      decoration: BoxDecoration(),
-                      alignment: AlignmentDirectional(-1.0, 0.0),
+                      decoration: const BoxDecoration(),
+                      alignment: const AlignmentDirectional(-1.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 36.0, 0.0, 0.0),
                             child: RichText(
                               textScaler: MediaQuery.of(context).textScaler,
@@ -155,11 +152,11 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                   .fontStyle,
                                         ),
                                   ),
-                                  TextSpan(
+                                  const TextSpan(
                                     text: 'correo',
                                     style: TextStyle(),
                                   ),
-                                  TextSpan(
+                                  const TextSpan(
                                     text:
                                         '. Ingrese el código de 6 dígitos que se menciona en el correo electrónico.',
                                     style: TextStyle(),
@@ -188,7 +185,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 12.0, 0.0, 0.0),
                             child: PinCodeTextField(
                               autoDisposeControllers: false,
@@ -231,7 +228,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                 fieldHeight: 44.0,
                                 fieldWidth: 44.0,
                                 borderWidth: 2.0,
-                                borderRadius: BorderRadius.only(
+                                borderRadius: const BorderRadius.only(
                                   bottomLeft: Radius.circular(12.0),
                                   bottomRight: Radius.circular(12.0),
                                   topLeft: Radius.circular(12.0),
@@ -258,7 +255,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -324,10 +321,10 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                     ),
                     Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
-                      decoration: BoxDecoration(),
+                      decoration: const BoxDecoration(),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 35.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 35.0, 0.0, 0.0),
                         child: Form(
                           key: _model.formKey,
                           autovalidateMode: AutovalidateMode.disabled,
@@ -364,10 +361,10 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                         ),
                                   ),
                                   Container(
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Align(
                                       alignment:
-                                          AlignmentDirectional(-1.0, 0.0),
+                                          const AlignmentDirectional(-1.0, 0.0),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.max,
                                         crossAxisAlignment:
@@ -375,7 +372,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                         children: [
                                           Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 41.0, 0.0, 0.0),
                                             child: Text(
                                               'Ingresa tu contraseña',
@@ -412,12 +409,12 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                           ),
                                           Align(
                                             alignment:
-                                                AlignmentDirectional(-1.0, 0.0),
+                                                const AlignmentDirectional(-1.0, 0.0),
                                             child: Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 12.0, 0.0, 0.0),
-                                              child: Container(
+                                              child: SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -494,7 +491,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide: const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -505,7 +502,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide: const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -610,13 +607,13 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 16.0, 0.0, 0.0),
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment:
@@ -655,13 +652,13 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                       ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   -1.0, 0.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         0.0, 12.0, 0.0, 0.0),
-                                                child: Container(
+                                                child: SizedBox(
                                                   width:
                                                       MediaQuery.sizeOf(context)
                                                               .width *
@@ -736,7 +733,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                               ),
                                                       enabledBorder:
                                                           OutlineInputBorder(
-                                                        borderSide: BorderSide(
+                                                        borderSide: const BorderSide(
                                                           color:
                                                               Color(0x00000000),
                                                           width: 1.0,
@@ -747,7 +744,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                       ),
                                                       focusedBorder:
                                                           OutlineInputBorder(
-                                                        borderSide: BorderSide(
+                                                        borderSide: const BorderSide(
                                                           color:
                                                               Color(0x00000000),
                                                           width: 1.0,
@@ -853,7 +850,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
@@ -964,7 +961,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                 ],
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 16.0, 0.0, 0.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -998,7 +995,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                 width: 2,
                                                 color:
                                                     FlutterFlowTheme.of(context)
-                                                        .alternate!,
+                                                        .alternate,
                                               )
                                             : null,
                                         activeColor:
@@ -1009,7 +1006,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
                                           10.0, 0.0, 0.0, 0.0),
                                       child: Text(
                                         'Mostrar contraseña',
@@ -1043,13 +1040,11 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                               ),
                               Builder(
                                 builder: (context) => Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 41.0, 0.0, 41.0),
                                   child: FFButtonWidget(
                                     onPressed: () async {
                                       if (_model.pinCodeController!.text !=
-                                              null &&
-                                          _model.pinCodeController!.text !=
                                               '') {
                                         // Set isValidEmailToTrue
                                         _model.isValidEmailCode = true;
@@ -1070,16 +1065,16 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                           }
                                           // ShowPopUp
                                           await showAlignedDialog(
-                                            barrierColor: Color(0x4D000000),
+                                            barrierColor: const Color(0x4D000000),
                                             context: context,
                                             isGlobal: false,
                                             avoidOverflow: false,
-                                            targetAnchor: AlignmentDirectional(
+                                            targetAnchor: const AlignmentDirectional(
                                                     0.0, 0.0)
                                                 .resolve(
                                                     Directionality.of(context)),
                                             followerAnchor:
-                                                AlignmentDirectional(0.0, 0.0)
+                                                const AlignmentDirectional(0.0, 0.0)
                                                     .resolve(Directionality.of(
                                                         context)),
                                             builder: (dialogContext) {
@@ -1093,7 +1088,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                         .instance.primaryFocus
                                                         ?.unfocus();
                                                   },
-                                                  child: Container(
+                                                  child: SizedBox(
                                                     height: MediaQuery.sizeOf(
                                                                 context)
                                                             .height *
@@ -1103,7 +1098,7 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                                             .width *
                                                         1.0,
                                                     child:
-                                                        PasswordSuccessfullyChangedWidget(),
+                                                        const PasswordSuccessfullyChangedWidget(),
                                                   ),
                                                 ),
                                               );
@@ -1134,10 +1129,10 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       height: 42.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 10.0, 20.0, 10.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).primary,

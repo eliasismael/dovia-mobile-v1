@@ -6,10 +6,11 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
+import '/shared_components/popup_exito/popup_exito_widget.dart';
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_offers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_oferta_renta_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_oferta_renta_model.dart';
 
@@ -94,7 +95,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
   Widget build(BuildContext context) {
     return FutureBuilder<ApiCallResponse>(
       future: DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
-        propertyId: widget!.propertyId,
+        propertyId: widget.propertyId,
       ),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
@@ -131,7 +132,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                   wrapWithModel(
                     model: _model.cornerGradientBackgroundModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: CornerGradientBackgroundWidget(),
+                    child: const CornerGradientBackgroundWidget(),
                   ),
                   SingleChildScrollView(
                     child: Column(
@@ -140,18 +141,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                         wrapWithModel(
                           model: _model.dOVIASHAREDHeaderModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: DOVIASHAREDHeaderWidget(
-                            title: 'Mi visita en [lugar]',
+                          child: const DOVIASHAREDHeaderWidget(
+                            title: 'Oferta de renta',
+                            hideActions: true,
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 0.0, 20.0, 100.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Container(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
@@ -162,8 +164,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Text(
                                           'Características que proporcionó el propietario',
                                           style: FlutterFlowTheme.of(context)
@@ -194,13 +196,13 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -238,7 +240,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -321,7 +323,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -332,7 +335,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -412,18 +416,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -461,7 +466,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -537,7 +542,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -548,7 +554,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -628,18 +635,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -677,7 +685,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -753,7 +761,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -764,7 +773,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -844,18 +854,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -893,7 +904,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -976,7 +987,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -987,7 +999,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1067,18 +1080,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -1116,7 +1130,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -1192,7 +1206,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1203,7 +1218,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1283,18 +1299,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -1332,7 +1349,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -1408,7 +1425,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1419,7 +1437,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1499,13 +1518,14 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -1518,12 +1538,11 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                         ),
                                       ),
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Tu propuesta',
                                             style: FlutterFlowTheme.of(context)
@@ -1557,12 +1576,11 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                         ),
                                       ),
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Moneda de pago',
                                             style: FlutterFlowTheme.of(context)
@@ -1596,15 +1614,16 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.max,
                                           children: [
                                             Expanded(
                                               child: Container(
                                                 width: 100.0,
-                                                decoration: BoxDecoration(),
+                                                decoration:
+                                                    const BoxDecoration(),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
                                                     _model.selectedCurrency =
@@ -1615,20 +1634,21 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                   options: FFButtonOptions(
                                                     height: 40.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color:
                                                         _model.selectedCurrency ==
                                                                 'USD'
                                                             ? FlutterFlowTheme
                                                                     .of(context)
                                                                 .primary
-                                                            : Color(0x00FFFFFF),
+                                                            : const Color(
+                                                                0x00FFFFFF),
                                                     textStyle:
                                                         FlutterFlowTheme.of(
                                                                 context)
@@ -1672,7 +1692,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       color: _model
                                                                   .selectedCurrency ==
                                                               'USD'
-                                                          ? Color(0x00000000)
+                                                          ? const Color(
+                                                              0x00000000)
                                                           : FlutterFlowTheme.of(
                                                                   context)
                                                               .primary,
@@ -1688,7 +1709,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                             Expanded(
                                               child: Container(
                                                 width: 100.0,
-                                                decoration: BoxDecoration(),
+                                                decoration:
+                                                    const BoxDecoration(),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
                                                     _model.selectedCurrency =
@@ -1699,20 +1721,21 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                   options: FFButtonOptions(
                                                     height: 40.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color:
                                                         _model.selectedCurrency ==
                                                                 'Quetzales'
                                                             ? FlutterFlowTheme
                                                                     .of(context)
                                                                 .primary
-                                                            : Color(0x00FFFFFF),
+                                                            : const Color(
+                                                                0x00FFFFFF),
                                                     textStyle:
                                                         FlutterFlowTheme.of(
                                                                 context)
@@ -1756,7 +1779,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       color: _model
                                                                   .selectedCurrency ==
                                                               'Quetzales'
-                                                          ? Color(0x00000000)
+                                                          ? const Color(
+                                                              0x00000000)
                                                           : FlutterFlowTheme.of(
                                                                   context)
                                                               .primary,
@@ -1768,17 +1792,17 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                 ),
                                               ),
                                             ),
-                                          ].divide(SizedBox(width: 10.0)),
+                                          ].divide(const SizedBox(width: 10.0)),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -1816,7 +1840,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -1891,7 +1915,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1902,7 +1927,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1986,18 +2012,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -2035,7 +2062,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -2110,7 +2137,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2121,7 +2149,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2205,18 +2234,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -2254,7 +2284,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -2329,7 +2359,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2340,7 +2371,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2424,18 +2456,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -2473,7 +2506,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -2548,7 +2581,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2559,7 +2593,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2643,18 +2678,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -2692,7 +2728,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -2767,7 +2803,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2778,7 +2815,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2862,18 +2900,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -2911,7 +2950,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -2986,7 +3025,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -2997,7 +3037,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3077,17 +3118,17 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Si es empresa',
                                             style: FlutterFlowTheme.of(context)
@@ -3121,13 +3162,13 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -3165,7 +3206,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -3240,7 +3281,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3251,7 +3293,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3331,18 +3374,19 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -3380,7 +3424,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -3455,7 +3499,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3466,7 +3511,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3546,13 +3592,14 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -3564,9 +3611,9 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    20.0, 40.0, 20.0, 40.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                20.0, 40.0, 20.0, 40.0),
                                             child: Text(
                                               'Entiendo que en este complejo NO se permite:\n• Airbnb\n• Subarrendamiento\n• Eventos\n• Mascotas \n• Otros (según listing)',
                                               style: FlutterFlowTheme.of(
@@ -3604,8 +3651,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: Text(
                                           'Al enviar tu propuesta, el propietario podrá aceptarla, rechazarla o solicitar cambios.',
                                           style: FlutterFlowTheme.of(context)
@@ -3636,15 +3683,89 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: wrapWithModel(
                                           model: _model.primaryButtonModel,
                                           updateCallback: () =>
                                               safeSetState(() {}),
                                           child: PrimaryButtonWidget(
                                             text: 'Aceptar',
-                                            onTap: () async {},
+                                            onTap: () async {
+                                              // Call the Rent offer API
+                                              _model.apiResultRentOffer =
+                                                  await DOVIAAPIOfferContextGroup
+                                                      .createOfferRENTIndividualCall
+                                                      .call(
+                                                propertyId: widget.propertyId,
+                                                authToken:
+                                                    currentAuthenticationToken,
+                                              );
+
+                                              if (!mounted) return;
+
+                                              if ((_model.apiResultRentOffer
+                                                          ?.succeeded ??
+                                                      false) ==
+                                                  false) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Error al enviar la oferta de renta. Inténtalo de nuevo.',
+                                                    ),
+                                                  ),
+                                                );
+                                                return;
+                                              }
+
+                                              // Show success modal
+                                              showGeneralDialog(
+                                                context: context,
+                                                barrierDismissible: true,
+                                                barrierLabel:
+                                                    MaterialLocalizations.of(
+                                                            context)
+                                                        .modalBarrierDismissLabel,
+                                                barrierColor: Colors.black54,
+                                                transitionDuration:
+                                                    Duration.zero,
+                                                pageBuilder:
+                                                    (dialogContext, _, __) {
+                                                  Future.delayed(
+                                                    const Duration(seconds: 2),
+                                                    () {
+                                                      if (dialogContext
+                                                          .mounted) {
+                                                        Navigator.of(
+                                                                dialogContext)
+                                                            .pop();
+                                                      }
+                                                    },
+                                                  );
+                                                  return Center(
+                                                    child: Material(
+                                                      color: Colors.transparent,
+                                                      child:
+                                                          const PopupExitoWidget(
+                                                        title:
+                                                            'Se envió la oferta correctamente',
+                                                        text:
+                                                            'Tu solicitud de oferta ha sido enviada con éxito. Puedes ir a visualizar y hacer seguimiento de esta oferta a Mis visitas',
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                              await Future.delayed(
+                                                  const Duration(
+                                                      milliseconds: 2100));
+
+                                              // Navigate back to the property profile
+                                              if (mounted) {
+                                                context.safePop();
+                                              }
+                                            },
                                           ),
                                         ),
                                       ),
@@ -3654,20 +3775,6 @@ class _DOVIACLIENTOfertaRentaWidgetState
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional(0.0, 0.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        wrapWithModel(
-                          model: _model.dOVIACLIENTNavbarModel,
-                          updateCallback: () => safeSetState(() {}),
-                          child: DOVIACLIENTNavbarWidget(),
                         ),
                       ],
                     ),

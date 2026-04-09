@@ -1,12 +1,11 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '/repositories/visits_repository.dart';
+import '/core/result.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -16,6 +15,7 @@ class ScheduleAppointmentWidget extends StatefulWidget {
   final VoidCallback? onClose;
   final VoidCallback? onNavigateToVisits;
   final bool hasPendingVisit;
+  final String? propertyId;
   final double? width;
   final double? height;
 
@@ -27,6 +27,7 @@ class ScheduleAppointmentWidget extends StatefulWidget {
     this.onClose,
     this.onNavigateToVisits,
     this.hasPendingVisit = false,
+    this.propertyId,
   });
 
   @override
@@ -45,6 +46,8 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
   List<TimeOfDay?> selectedTimes = [null, null, null];
 
   bool _showPendingModal = false;
+  bool _isSubmitting = false;
+  String? _errorMessage;
 
   bool get _canSubmit =>
       selectedDates[0] != null &&
@@ -55,11 +58,7 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.hasPendingVisit) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() => _showPendingModal = true);
-      });
-    }
+    _showPendingModal = widget.hasPendingVisit;
   }
 
   Future<void> _pickDate(int index) async {
@@ -82,7 +81,10 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
       ),
     );
     if (picked != null) {
-      setState(() => selectedDates[index] = picked);
+      setState(() {
+        selectedDates[index] = picked;
+        _errorMessage = null;
+      });
     }
   }
 
@@ -102,11 +104,67 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
       ),
     );
     if (picked != null) {
-      setState(() => selectedTimes[index] = picked);
+      setState(() {
+        selectedTimes[index] = picked;
+        _errorMessage = null;
+      });
     }
   }
 
-  void _handleAccept() {
+  Future<void> _handleAccept() async {
+    if (widget.propertyId == null || widget.propertyId!.isEmpty) {
+      setState(() => _errorMessage = 'Error: No se ha seleccionado una propiedad.');
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final repo = context.read<VisitsRepository>();
+      final fmtDate = (DateTime d) => "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
+      final fmtTime = (TimeOfDay t) => "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+
+      final String slot1 = "${fmtDate(selectedDates[0]!)} ${fmtTime(selectedTimes[0]!)}";
+      final String slot2 = "${fmtDate(selectedDates[1]!)} ${fmtTime(selectedTimes[1]!)}";
+      final String? slot3 = selectedDates[2] != null && selectedTimes[2] != null
+          ? "${fmtDate(selectedDates[2]!)} ${fmtTime(selectedTimes[2]!)}"
+          : null;
+
+      if (slot1 == slot2 || (slot3 != null && (slot3 == slot1 || slot3 == slot2))) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Las opciones de fecha y hora deben ser distintas entre sí.';
+            _isSubmitting = false;
+          });
+        }
+        return;
+      }
+
+      final res = await repo.createVisitRequest(
+        propertyId: widget.propertyId!,
+        dateOne: fmtDate(selectedDates[0]!),
+        hourOne: fmtTime(selectedTimes[0]!),
+        dateTwo: fmtDate(selectedDates[1]!),
+        hourTwo: fmtTime(selectedTimes[1]!),
+        dateThree: selectedDates[2] != null ? fmtDate(selectedDates[2]!) : '0000-00-00',
+        hourThree: selectedTimes[2] != null ? fmtTime(selectedTimes[2]!) : '00:00',
+      );
+
+      if (!res.isSuccess) {
+        if (mounted) {
+          setState(() => _errorMessage = res.errorOrNull ?? 'Error al solicitar cita.');
+        }
+        return;
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+
+    if (!mounted) return;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -124,14 +182,14 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => Navigator.of(dialogContext).pop(true),
-            child: SizedBox.expand(
+            child: const SizedBox.expand(
               child: Center(
                 child: SizedBox(
                   height: 340,
-                  child: const PopupExitoWidget(
+                  child: PopupExitoWidget(
                     title: '¡Solicitud enviada!',
                     text:
-                        'Se envió con éxito tu solicitud. Recibirás confirmación de tu próxima visita. Podrás gestionar tu visita en \'Mis visitas\'.',
+                        "Se envió con éxito tu solicitud. Recibirás confirmación de tu próxima visita. Podrás gestionar tu visita en 'Mis visitas'.",
                   ),
                 ),
               ),
@@ -140,7 +198,9 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
         );
       },
     ).then((_) {
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        widget.onAccept?.call();
+      }
     });
   }
 
@@ -238,6 +298,40 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
                   ),
                 ),
 
+                // Inline error message
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF0F0),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFFFCDD2)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: Color(0xFFD32F2F), size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(
+                                fontFamily: 'Public Sans',
+                                fontSize: 13,
+                                color: Color(0xFFD32F2F),
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 // Accept button
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -255,15 +349,24 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Aceptar',
-                        style: TextStyle(
-                          fontFamily: 'Public Sans',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Aceptar',
+                              style: TextStyle(
+                                fontFamily: 'Public Sans',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -326,7 +429,7 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
                           height: 44,
                           child: ElevatedButton(
                             onPressed: () {
-                              setState(() => _showPendingModal = false);
+                              Navigator.of(context).pop();
                               widget.onNavigateToVisits?.call();
                             },
                             style: ElevatedButton.styleFrom(
@@ -395,7 +498,7 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
             icon: Icons.calendar_today_outlined,
             onTap: () => _pickDate(index),
           ),
-          Divider(height: 1, color: borderColor),
+          const Divider(height: 1, color: borderColor),
           _buildPickerRow(
             label: selectedTimes[index] != null
                 ? _formatTime(selectedTimes[index]!)

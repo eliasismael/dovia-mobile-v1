@@ -3,12 +3,9 @@ import '/backend/schema/structs/index.dart';
 import '/components/map_with_houses_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'map_with_houses_test_model.dart';
 export 'map_with_houses_test_model.dart';
 
@@ -53,7 +50,7 @@ class _MapWithHousesTestWidgetState extends State<MapWithHousesTestWidget> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(alertDialogContext),
-                  child: Text('Ok'),
+                  child: const Text('Ok'),
                 ),
               ],
             );
@@ -64,12 +61,12 @@ class _MapWithHousesTestWidgetState extends State<MapWithHousesTestWidget> {
           context: context,
           builder: (alertDialogContext) {
             return AlertDialog(
-              title: Text('err'),
+              title: const Text('err'),
               content: Text((_model.apiResultob5?.jsonBody ?? '').toString()),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(alertDialogContext),
-                  child: Text('Ok'),
+                  child: const Text('Ok'),
                 ),
               ],
             );
@@ -101,11 +98,11 @@ class _MapWithHousesTestWidgetState extends State<MapWithHousesTestWidget> {
         body: SafeArea(
           top: true,
           child: Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
+            alignment: const AlignmentDirectional(0.0, 0.0),
             child: wrapWithModel(
               model: _model.mapWithHousesModel,
               updateCallback: () => safeSetState(() {}),
-              child: MapWithHousesWidget(),
+              child: const MapWithHousesWidget(),
             ),
           ),
         ),

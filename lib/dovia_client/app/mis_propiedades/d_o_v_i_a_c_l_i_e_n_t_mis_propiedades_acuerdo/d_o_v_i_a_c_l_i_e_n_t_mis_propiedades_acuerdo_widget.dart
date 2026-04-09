@@ -8,13 +8,10 @@ import '/shared_components/legal_associate_card/legal_associate_card_widget.dart
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/subir_archivo/subir_archivo_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_model.dart';
 
@@ -23,7 +20,7 @@ class DOVIACLIENTMisPropiedadesAcuerdoWidget extends StatefulWidget {
     super.key,
     double? negociationStep,
     required this.paymentMethod,
-  }) : this.negociationStep = negociationStep ?? 2.0;
+  }) : negociationStep = negociationStep ?? 2.0;
 
   /// Current negotiation step.
   ///
@@ -134,7 +131,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -143,38 +140,38 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
+                      child: const DOVIASHAREDHeaderWidget(
                         title: 'Acuerdo',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Container(
+                            SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 200.0,
                               child: custom_widgets.ProcessState(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 200.0,
                                 currentStep: () {
-                                  if (widget!.negociationStep == 3.5) {
+                                  if (widget.negociationStep == 3.5) {
                                     return 3;
-                                  } else if (widget!.negociationStep == 2.0) {
+                                  } else if (widget.negociationStep == 2.0) {
                                     return 2;
-                                  } else if (widget!.negociationStep == 3.0) {
+                                  } else if (widget.negociationStep == 3.0) {
                                     return 3;
-                                  } else if (widget!.negociationStep == 4.0) {
+                                  } else if (widget.negociationStep == 4.0) {
                                     return 4;
                                   } else {
                                     return 2;
                                   }
                                 }(),
-                                stepNames: [
+                                stepNames: const [
                                   'Negociación',
                                   'Estructuración de acuerdo',
                                   'Firma de contrato',
@@ -184,16 +181,16 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                             ),
                             Builder(
                               builder: (context) {
-                                if (widget!.negociationStep == 2.0) {
+                                if (widget.negociationStep == 2.0) {
                                   return Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Builder(
                                         builder: (context) {
-                                          if (widget!.paymentMethod ==
+                                          if (widget.paymentMethod ==
                                               'contado') {
                                             return Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Row(
@@ -252,7 +249,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .fontStyle,
                                                               ),
                                                         ),
-                                                        Container(
+                                                        SizedBox(
                                                           width: 200.0,
                                                           child: TextFormField(
                                                             controller: _model
@@ -317,7 +314,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -330,7 +327,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -415,7 +412,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     context),
                                                           ),
                                                         ),
-                                                      ].divide(SizedBox(
+                                                      ].divide(const SizedBox(
                                                           height: 8.0)),
                                                     ),
                                                   ),
@@ -469,7 +466,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .fontStyle,
                                                               ),
                                                         ),
-                                                        Container(
+                                                        SizedBox(
                                                           width: 200.0,
                                                           child: TextFormField(
                                                             controller: _model
@@ -533,7 +530,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -546,7 +543,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -631,20 +628,20 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     context),
                                                           ),
                                                         ),
-                                                      ].divide(SizedBox(
+                                                      ].divide(const SizedBox(
                                                           height: 8.0)),
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             );
-                                          } else if (widget!.paymentMethod ==
+                                          } else if (widget.paymentMethod ==
                                               'hipoteca') {
                                             return Column(
                                               mainAxisSize: MainAxisSize.max,
                                               children: [
                                                 Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
@@ -661,7 +658,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .width *
                                                                 0.42,
                                                         decoration:
-                                                            BoxDecoration(),
+                                                            const BoxDecoration(),
                                                         child: Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -701,7 +698,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -767,7 +764,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -780,7 +777,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -862,7 +859,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -873,7 +870,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .width *
                                                                 0.42,
                                                         decoration:
-                                                            BoxDecoration(),
+                                                            const BoxDecoration(),
                                                         child: Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -913,7 +910,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -979,7 +976,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -992,7 +989,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1074,7 +1071,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -1082,7 +1079,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
@@ -1099,7 +1096,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .width *
                                                                 0.42,
                                                         decoration:
-                                                            BoxDecoration(),
+                                                            const BoxDecoration(),
                                                         child: Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1139,7 +1136,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -1205,7 +1202,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1218,7 +1215,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1300,7 +1297,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -1311,7 +1308,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .width *
                                                                 0.42,
                                                         decoration:
-                                                            BoxDecoration(),
+                                                            const BoxDecoration(),
                                                         child: Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1351,7 +1348,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -1417,7 +1414,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1430,7 +1427,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1512,7 +1509,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -1521,13 +1518,13 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 ),
                                               ],
                                             );
-                                          } else if (widget!.paymentMethod ==
+                                          } else if (widget.paymentMethod ==
                                               'promesa') {
                                             return Column(
                                               mainAxisSize: MainAxisSize.max,
                                               children: [
                                                 Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
@@ -1544,7 +1541,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .width *
                                                                 0.42,
                                                         decoration:
-                                                            BoxDecoration(),
+                                                            const BoxDecoration(),
                                                         child: Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1584,7 +1581,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -1650,7 +1647,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1663,7 +1660,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1745,7 +1742,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -1756,7 +1753,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .width *
                                                                 0.42,
                                                         decoration:
-                                                            BoxDecoration(),
+                                                            const BoxDecoration(),
                                                         child: Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -1796,7 +1793,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -1862,7 +1859,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1875,7 +1872,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -1957,7 +1954,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -1965,7 +1962,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
@@ -2027,7 +2024,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -2093,7 +2090,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -2106,7 +2103,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -2188,7 +2185,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -2199,7 +2196,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     .width *
                                                                 0.42,
                                                         decoration:
-                                                            BoxDecoration(),
+                                                            const BoxDecoration(),
                                                         child: Column(
                                                           mainAxisSize:
                                                               MainAxisSize.max,
@@ -2239,7 +2236,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: 200.0,
                                                               child:
                                                                   TextFormField(
@@ -2305,7 +2302,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -2318,7 +2315,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -2400,7 +2397,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -2408,7 +2405,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
@@ -2470,7 +2467,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            Container(
+                                                            SizedBox(
                                                               width: MediaQuery
                                                                           .sizeOf(
                                                                               context)
@@ -2540,7 +2537,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   enabledBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -2553,7 +2550,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   focusedBorder:
                                                                       OutlineInputBorder(
                                                                     borderSide:
-                                                                        BorderSide(
+                                                                        const BorderSide(
                                                                       color: Color(
                                                                           0x00000000),
                                                                       width:
@@ -2635,7 +2632,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(SizedBox(
+                                                          ].divide(const SizedBox(
                                                               height: 8.0)),
                                                         ),
                                                       ),
@@ -2658,7 +2655,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         },
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
@@ -2672,7 +2669,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     20.0, 40.0, 20.0, 40.0),
                                             child: Text(
                                               'Siguientes pasos:\n• Nuestro DOVIA Legal Associate se pondrá en contacto contigo para coordinar los detalles del acuerdo.\n• Revisará la información proporcionada y preparará la documentación legal.\n• Compartiremos los documentos para tu revisión\n• Una vez aprobado, se programará la firma\n• DOVIA supervisará todo el proceso hasta finalizar la operación e inscripción.',
@@ -2709,7 +2706,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Text(
                                           'Abogado verificado por DOVIA que prepara y supervisa todo el proceso legal para proteger tus intereses. ',
@@ -2741,30 +2738,30 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: wrapWithModel(
                                           model:
                                               _model.legalAssociateCardModel1,
                                           updateCallback: () =>
                                               safeSetState(() {}),
-                                          child: LegalAssociateCardWidget(),
+                                          child: const LegalAssociateCardWidget(),
                                         ),
                                       ),
                                     ],
                                   );
-                                } else if (widget!.negociationStep == 3.0) {
+                                } else if (widget.negociationStep == 3.0) {
                                   return Builder(
                                     builder: (context) {
-                                      if (widget!.paymentMethod == 'hipoteca') {
+                                      if (widget.paymentMethod == 'hipoteca') {
                                         return Column(
                                           mainAxisSize: MainAxisSize.max,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   -1.0, 0.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         0.0, 20.0, 0.0, 0.0),
                                                 child: RichText(
@@ -2803,12 +2800,12 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             'Como la compra se realizará a través de una hipoteca bancaria, el proceso legal será gestionado por el abogado asignado por el banco.\n\nDOVIA enviará toda la documentación necesaria y te mantendrá informado en cada etapa.\n\nNuestro equipo de DOVIA HQ estará en contacto contigo para resolver dudas, coordinar documentos y asegurarse de que todo avance de manera segura, rápida y sin retrasos.\n\n',
                                                         style: TextStyle(),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             '¿Qué sigue?\n\nFirma el acuerdo de reconocimiento de honorarios de DOVIA.\n\n',
                                                         style: TextStyle(
@@ -2816,12 +2813,12 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               FontWeight.bold,
                                                         ),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             '- Este documento aparecerá aquí mismo en la app para tu firma digital (se compartirá al banco)\n\n',
                                                         style: TextStyle(),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             'DOVIA comparte tu expediente al banco\n\n',
                                                         style: TextStyle(
@@ -2829,12 +2826,12 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               FontWeight.bold,
                                                         ),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             '- Verificamos toda la información y la enviamos al abogado del banco.\n\n',
                                                         style: TextStyle(),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             'Contacto del abogado del banco\n\n',
                                                         style: TextStyle(
@@ -2842,12 +2839,12 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               FontWeight.bold,
                                                         ),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             '- Te llamará para continuar con el proceso hipotecario y coordinar la cita de firma.\n\n',
                                                         style: TextStyle(),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             'Firma con el banco y entrega del enganche.\n\n',
                                                         style: TextStyle(
@@ -2855,12 +2852,12 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               FontWeight.bold,
                                                         ),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             '- Al momento de la firma del contrato hipotecario, el banco solicitará el enganche.\n- En ese mismo momento se debe cancelar el fee DOVIA\n\n',
                                                         style: TextStyle(),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             'Acompañamiento DOVIA\n\n',
                                                         style: TextStyle(
@@ -2868,7 +2865,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               FontWeight.bold,
                                                         ),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text:
                                                             '- Supervisamos todo el proceso para que la compra sea clara, segura y sin complicaciones.',
                                                         style: TextStyle(),
@@ -2903,10 +2900,10 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   -1.0, 0.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         0.0, 20.0, 0.0, 0.0),
                                                 child: Text(
@@ -2937,7 +2934,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(0.0, 8.0, 0.0, 0.0),
                                               child: Text(
                                                 'Aquí Dovia desplegar avances sobre procesos y documento para firmar',
@@ -2967,7 +2964,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
@@ -2993,7 +2990,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                   children: [
                                                     Padding(
                                                       padding:
-                                                          EdgeInsetsDirectional
+                                                          const EdgeInsetsDirectional
                                                               .fromSTEB(
                                                                   10.0,
                                                                   0.0,
@@ -3033,7 +3030,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     ),
                                                     Container(
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Row(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -3043,7 +3040,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                 (context) =>
                                                                     Padding(
                                                               padding:
-                                                                  EdgeInsetsDirectional
+                                                                  const EdgeInsetsDirectional
                                                                       .fromSTEB(
                                                                           0.0,
                                                                           0.0,
@@ -3074,7 +3071,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         backgroundColor:
                                                                             Colors.transparent,
                                                                         alignment:
-                                                                            AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                                                            const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
                                                                         child:
                                                                             GestureDetector(
                                                                           onTap:
@@ -3083,7 +3080,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                             FocusManager.instance.primaryFocus?.unfocus();
                                                                           },
                                                                           child:
-                                                                              PopupExitoWidget(
+                                                                              const PopupExitoWidget(
                                                                             title:
                                                                                 'Se descargó con éxito',
                                                                             text:
@@ -3142,7 +3139,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                       backgroundColor:
                                                                           Colors
                                                                               .transparent,
-                                                                      alignment: AlignmentDirectional(
+                                                                      alignment: const AlignmentDirectional(
                                                                               0.0,
                                                                               0.0)
                                                                           .resolve(
@@ -3159,7 +3156,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                               ?.unfocus();
                                                                         },
                                                                         child:
-                                                                            SubirArchivoWidget(),
+                                                                            const SubirArchivoWidget(),
                                                                       ),
                                                                     );
                                                                   },
@@ -3190,7 +3187,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: wrapWithModel(
@@ -3258,7 +3255,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   .fontStyle,
                                                         ),
                                                   ),
-                                                  Container(
+                                                  SizedBox(
                                                     width: MediaQuery.sizeOf(
                                                                 context)
                                                             .width *
@@ -3335,7 +3332,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         enabledBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -3348,7 +3345,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         focusedBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -3433,7 +3430,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           .asValidator(context),
                                                     ),
                                                   ),
-                                                ].divide(SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(height: 8.0)),
                                               ),
                                             ),
                                             Container(
@@ -3484,7 +3481,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   .fontStyle,
                                                         ),
                                                   ),
-                                                  Container(
+                                                  SizedBox(
                                                     width: MediaQuery.sizeOf(
                                                                 context)
                                                             .width *
@@ -3561,7 +3558,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         enabledBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -3574,7 +3571,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         focusedBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -3659,7 +3656,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           .asValidator(context),
                                                     ),
                                                   ),
-                                                ].divide(SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(height: 8.0)),
                                               ),
                                             ),
                                             Container(
@@ -3715,7 +3712,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         MainAxisSize.max,
                                                     children: [
                                                       Expanded(
-                                                        child: Container(
+                                                        child: SizedBox(
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
@@ -3783,7 +3780,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -3796,7 +3793,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -3883,7 +3880,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         ),
                                                       ),
                                                       Expanded(
-                                                        child: Container(
+                                                        child: SizedBox(
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
@@ -3951,7 +3948,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -3964,7 +3961,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -4051,7 +4048,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         ),
                                                       ),
                                                       Expanded(
-                                                        child: Container(
+                                                        child: SizedBox(
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
@@ -4119,7 +4116,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -4132,7 +4129,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -4220,7 +4217,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                     ],
                                                   ),
-                                                ].divide(SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(height: 8.0)),
                                               ),
                                             ),
                                             Container(
@@ -4271,7 +4268,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   .fontStyle,
                                                         ),
                                                   ),
-                                                  Container(
+                                                  SizedBox(
                                                     width: MediaQuery.sizeOf(
                                                                 context)
                                                             .width *
@@ -4348,7 +4345,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         enabledBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -4361,7 +4358,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         focusedBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -4447,11 +4444,11 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           .asValidator(context),
                                                     ),
                                                   ),
-                                                ].divide(SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(height: 8.0)),
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   -1.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
@@ -4460,11 +4457,11 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 text: 'Abrir ubicación',
                                                 options: FFButtonOptions(
                                                   height: 30.0,
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
-                                                      EdgeInsetsDirectional
+                                                      const EdgeInsetsDirectional
                                                           .fromSTEB(0.0, 0.0,
                                                               0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
@@ -4506,7 +4503,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
@@ -4519,7 +4516,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
@@ -4592,7 +4589,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
@@ -4605,7 +4602,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
@@ -4678,7 +4675,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
@@ -4691,7 +4688,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
@@ -4764,7 +4761,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
@@ -4777,7 +4774,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
@@ -4850,7 +4847,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
@@ -4863,7 +4860,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
@@ -4935,17 +4932,17 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 ),
                                               ),
                                             ),
-                                          ].divide(SizedBox(height: 8.0)),
+                                          ].divide(const SizedBox(height: 8.0)),
                                         );
                                       }
                                     },
                                   );
-                                } else if (widget!.negociationStep == 3.5) {
+                                } else if (widget.negociationStep == 3.5) {
                                   return Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -4956,7 +4953,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5014,7 +5011,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                             backgroundColor:
                                                                 Colors
                                                                     .transparent,
-                                                            alignment: AlignmentDirectional(
+                                                            alignment: const AlignmentDirectional(
                                                                     0.0, 0.0)
                                                                 .resolve(
                                                                     Directionality.of(
@@ -5031,7 +5028,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     ?.unfocus();
                                                               },
                                                               child:
-                                                                  SubirArchivoWidget(),
+                                                                  const SubirArchivoWidget(),
                                                             ),
                                                           );
                                                         },
@@ -5040,7 +5037,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     child: Container(
                                                       width: 40.0,
                                                       height: 40.0,
-                                                      decoration: BoxDecoration(
+                                                      decoration: const BoxDecoration(
                                                         shape: BoxShape.circle,
                                                       ),
                                                       child: ClipRRect(
@@ -5063,7 +5060,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
@@ -5077,7 +5074,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     20.0, 40.0, 20.0, 40.0),
                                             child: Text(
                                               'Podrás ver los archivos pero no puedes descargarlos hasta realizar el pago a Dovia. El pago será revisado y aprobado.',
@@ -5115,7 +5112,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5126,7 +5123,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5188,7 +5185,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5199,7 +5196,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5261,7 +5258,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5272,7 +5269,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5334,7 +5331,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5345,7 +5342,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5406,25 +5403,25 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(height: 8.0)),
+                                    ].divide(const SizedBox(height: 8.0)),
                                   );
                                 } else {
                                   return Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: wrapWithModel(
                                           model:
                                               _model.legalAssociateCardModel2,
                                           updateCallback: () =>
                                               safeSetState(() {}),
-                                          child: LegalAssociateCardWidget(),
+                                          child: const LegalAssociateCardWidget(),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5435,7 +5432,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5497,7 +5494,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5508,7 +5505,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5544,7 +5541,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: BoxDecoration(
+                                                  decoration: const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -5600,7 +5597,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   backgroundColor:
                                                                       Colors
                                                                           .transparent,
-                                                                  alignment: AlignmentDirectional(
+                                                                  alignment: const AlignmentDirectional(
                                                                           0.0,
                                                                           0.0)
                                                                       .resolve(
@@ -5618,7 +5615,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                           ?.unfocus();
                                                                     },
                                                                     child:
-                                                                        PopupExitoWidget(
+                                                                        const PopupExitoWidget(
                                                                       title:
                                                                           'Se descargó con éxito',
                                                                       text:
@@ -5656,7 +5653,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         ),
                                                       ),
                                                     ].divide(
-                                                        SizedBox(width: 4.0)),
+                                                        const SizedBox(width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -5665,7 +5662,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5676,7 +5673,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5712,7 +5709,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: BoxDecoration(
+                                                  decoration: const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -5768,7 +5765,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   backgroundColor:
                                                                       Colors
                                                                           .transparent,
-                                                                  alignment: AlignmentDirectional(
+                                                                  alignment: const AlignmentDirectional(
                                                                           0.0,
                                                                           0.0)
                                                                       .resolve(
@@ -5786,7 +5783,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                           ?.unfocus();
                                                                     },
                                                                     child:
-                                                                        PopupExitoWidget(
+                                                                        const PopupExitoWidget(
                                                                       title:
                                                                           'Se descargó con éxito',
                                                                       text:
@@ -5824,7 +5821,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         ),
                                                       ),
                                                     ].divide(
-                                                        SizedBox(width: 4.0)),
+                                                        const SizedBox(width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -5833,7 +5830,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -5844,7 +5841,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -5880,7 +5877,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: BoxDecoration(
+                                                  decoration: const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -5936,7 +5933,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   backgroundColor:
                                                                       Colors
                                                                           .transparent,
-                                                                  alignment: AlignmentDirectional(
+                                                                  alignment: const AlignmentDirectional(
                                                                           0.0,
                                                                           0.0)
                                                                       .resolve(
@@ -5954,7 +5951,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                           ?.unfocus();
                                                                     },
                                                                     child:
-                                                                        PopupExitoWidget(
+                                                                        const PopupExitoWidget(
                                                                       title:
                                                                           'Se descargó con éxito',
                                                                       text:
@@ -5992,7 +5989,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         ),
                                                       ),
                                                     ].divide(
-                                                        SizedBox(width: 4.0)),
+                                                        const SizedBox(width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -6001,7 +5998,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -6012,7 +6009,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
@@ -6048,7 +6045,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: BoxDecoration(
+                                                  decoration: const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -6104,7 +6101,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                   backgroundColor:
                                                                       Colors
                                                                           .transparent,
-                                                                  alignment: AlignmentDirectional(
+                                                                  alignment: const AlignmentDirectional(
                                                                           0.0,
                                                                           0.0)
                                                                       .resolve(
@@ -6122,7 +6119,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                           ?.unfocus();
                                                                     },
                                                                     child:
-                                                                        PopupExitoWidget(
+                                                                        const PopupExitoWidget(
                                                                       title:
                                                                           'Se descargó con éxito',
                                                                       text:
@@ -6160,7 +6157,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                         ),
                                                       ),
                                                     ].divide(
-                                                        SizedBox(width: 4.0)),
+                                                        const SizedBox(width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -6168,7 +6165,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(height: 8.0)),
+                                    ].divide(const SizedBox(height: 8.0)),
                                   );
                                 }
                               },
@@ -6181,7 +6178,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -6189,7 +6186,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

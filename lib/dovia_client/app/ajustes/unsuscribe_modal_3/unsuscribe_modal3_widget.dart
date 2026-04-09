@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'unsuscribe_modal3_model.dart';
 export 'unsuscribe_modal3_model.dart';
 
@@ -45,7 +42,7 @@ class _UnsuscribeModal3WidgetState extends State<UnsuscribeModal3Widget> {
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
             decoration: BoxDecoration(
@@ -58,7 +55,7 @@ class _UnsuscribeModal3WidgetState extends State<UnsuscribeModal3Widget> {
               children: [
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(42.0, 71.0, 42.0, 34.0),
+                      const EdgeInsetsDirectional.fromSTEB(42.0, 71.0, 42.0, 34.0),
                   child: Text(
                     'Se canceló con éxito',
                     textAlign: TextAlign.center,
@@ -101,7 +98,7 @@ class _UnsuscribeModal3WidgetState extends State<UnsuscribeModal3Widget> {
           ),
         ),
         Align(
-          alignment: AlignmentDirectional(0.0, -1.0),
+          alignment: const AlignmentDirectional(0.0, -1.0),
           child: Container(
             width: 104.0,
             height: 104.0,

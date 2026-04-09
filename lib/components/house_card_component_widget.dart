@@ -1,7 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
@@ -68,7 +67,7 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
+          SizedBox(
             width: MediaQuery.sizeOf(context).width * 1.0,
             height: 250.0,
             child: custom_widgets.DoviaClientHouseCard(
@@ -142,7 +141,7 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
             ),
           ),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
             child: wrapWithModel(
               model: _model.primaryButtonModel,
               updateCallback: () => safeSetState(() {}),

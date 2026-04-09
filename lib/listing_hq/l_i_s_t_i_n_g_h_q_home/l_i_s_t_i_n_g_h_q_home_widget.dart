@@ -4,12 +4,9 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_home_model.dart';
 export 'l_i_s_t_i_n_g_h_q_home_model.dart';
 
@@ -60,7 +57,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -69,18 +66,18 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                     wrapWithModel(
                       model: _model.lISTINGHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQHeaderWidget(
+                      child: const LISTINGHQHeaderWidget(
                         titleText: 'Home',
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -88,7 +85,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Align(
-                                  alignment: AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Text(
                                     'Propiedades pendientes\npor publicar',
                                     style: FlutterFlowTheme.of(context)
@@ -124,10 +122,12 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                   text: 'Ver todo',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -157,7 +157,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -167,7 +167,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -228,13 +228,14 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                               text: 'Visita realizada',
                                               options: FFButtonOptions(
                                                 height: 40.0,
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
-                                                    EdgeInsetsDirectional
+                                                    const EdgeInsetsDirectional
                                                         .fromSTEB(
-                                                            0.0, 0.0, 0.0, 0.0),
+                                                        0.0, 0.0, 0.0, 0.0),
                                                 color:
                                                     FlutterFlowTheme.of(context)
                                                         .accent1,
@@ -312,14 +313,16 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                               ),
                                               Container(
                                                 decoration: BoxDecoration(
-                                                  color: Color(0xFFF4D476),
+                                                  color:
+                                                      const Color(0xFFF4D476),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           24.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           16.0, 2.0, 16.0, 2.0),
                                                   child: Text(
                                                     'Pendiente',
@@ -340,8 +343,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                                     .bodyMedium
                                                                     .fontStyle,
                                                           ),
-                                                          color:
-                                                              Color(0xFFF99F58),
+                                                          color: const Color(
+                                                              0xFFF99F58),
                                                           fontSize: 12.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -370,11 +373,14 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                       .width *
                                                   1.0,
                                               height: 25.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       16.0, 0.0, 16.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              iconPadding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 0.0, 0.0, 0.0),
                                               color:
                                                   FlutterFlowTheme.of(context)
                                                       .primary,
@@ -407,7 +413,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                   BorderRadius.circular(24.0),
                                             ),
                                           ),
-                                        ].divide(SizedBox(height: 6.0)),
+                                        ].divide(const SizedBox(height: 6.0)),
                                       ),
                                     ),
                                     Container(
@@ -429,13 +435,13 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 4.0)),
+                                  ].divide(const SizedBox(width: 4.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -445,7 +451,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -506,13 +512,14 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                               text: 'Visita realizada',
                                               options: FFButtonOptions(
                                                 height: 40.0,
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
-                                                    EdgeInsetsDirectional
+                                                    const EdgeInsetsDirectional
                                                         .fromSTEB(
-                                                            0.0, 0.0, 0.0, 0.0),
+                                                        0.0, 0.0, 0.0, 0.0),
                                                 color:
                                                     FlutterFlowTheme.of(context)
                                                         .accent1,
@@ -590,14 +597,16 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                               ),
                                               Container(
                                                 decoration: BoxDecoration(
-                                                  color: Color(0xFFF4D476),
+                                                  color:
+                                                      const Color(0xFFF4D476),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           24.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           16.0, 2.0, 16.0, 2.0),
                                                   child: Text(
                                                     'Pendiente',
@@ -618,8 +627,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                                     .bodyMedium
                                                                     .fontStyle,
                                                           ),
-                                                          color:
-                                                              Color(0xFFF99F58),
+                                                          color: const Color(
+                                                              0xFFF99F58),
                                                           fontSize: 12.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -648,11 +657,14 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                       .width *
                                                   1.0,
                                               height: 25.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       16.0, 0.0, 16.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              iconPadding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 0.0, 0.0, 0.0),
                                               color:
                                                   FlutterFlowTheme.of(context)
                                                       .primary,
@@ -685,7 +697,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                   BorderRadius.circular(24.0),
                                             ),
                                           ),
-                                        ].divide(SizedBox(height: 6.0)),
+                                        ].divide(const SizedBox(height: 6.0)),
                                       ),
                                     ),
                                     Container(
@@ -707,13 +719,13 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 4.0)),
+                                  ].divide(const SizedBox(width: 4.0)),
                                 ),
                               ),
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Text(
                               'Propiedades a la espera de publicar',
                               style: FlutterFlowTheme.of(context)
@@ -739,7 +751,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -749,7 +761,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -777,7 +789,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -785,8 +797,9 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -928,13 +941,14 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                             .width *
                                                         0.55,
                                                 height: 30.0,
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
-                                                    EdgeInsetsDirectional
+                                                    const EdgeInsetsDirectional
                                                         .fromSTEB(
-                                                            0.0, 0.0, 0.0, 0.0),
+                                                        0.0, 0.0, 0.0, 0.0),
                                                 color:
                                                     FlutterFlowTheme.of(context)
                                                         .error,
@@ -973,7 +987,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
@@ -985,7 +999,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -993,7 +1007,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

@@ -54,10 +54,10 @@ class UploadPropertyOwnerIDDocumentCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Property Owner ID Document',
-      apiUrl: '${baseUrl}/properties/${propertyId}/documents/owner-document',
+      apiUrl: '$baseUrl/properties/$propertyId/documents/owner-document',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'file': file,
@@ -84,10 +84,10 @@ class UploadPropertyCertificationCall {
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Property Certification',
       apiUrl:
-          '${baseUrl}/properties/${propertyId}/documents/property-certification',
+          '$baseUrl/properties/$propertyId/documents/property-certification',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'file': file,
@@ -119,6 +119,9 @@ class CreatePropertyBasicSALEAndRENTCall {
     double? monthlyRent,
     int? minimumTimeRent,
     String? othersRent = '',
+    String? allowedUses = '',
+    String? prohibitedUses = '',
+    String? availableFrom = '',
     bool? isCompanyOwned,
     String? companyName = '',
     String? legalRepresentative = '',
@@ -134,8 +137,8 @@ class CreatePropertyBasicSALEAndRENTCall {
   "name": "${escapeStringForJson(name)}",
   "address": "${escapeStringForJson(address)}",
   "geoLocation": {
-    "longitude": ${longitude},
-    "latitude": ${latitude}
+    "longitude": $longitude,
+    "latitude": $latitude
   },
   "legalInfo": {
     "finca": "${escapeStringForJson(finca)}",
@@ -143,29 +146,32 @@ class CreatePropertyBasicSALEAndRENTCall {
     "libro": "${escapeStringForJson(libro)}"
   },
   "saleInfo": {
-    "salePrice": ${salePrice},
-    "maintenanceFee": ${maintenanceFee},
-    "singlePropertyTax": ${singlePropertyTax}
+    "salePrice": $salePrice,
+    "maintenanceFee": $maintenanceFee,
+    "singlePropertyTax": $singlePropertyTax
   },
   "rentInfo": {
-    "monthlyRent": ${monthlyRent},
+    "monthlyRent": $monthlyRent,
     "rentalConditions": {
-      "minimumTime": ${minimumTimeRent},
+      "minimumTime": $minimumTimeRent,
+      "allowedUses": "${escapeStringForJson(allowedUses)}",
+      "prohibitedUses": "${escapeStringForJson(prohibitedUses)}",
+      "availableFrom": "${escapeStringForJson(availableFrom)}",
       "others": "${escapeStringForJson(othersRent)}"
     }
   },
   "ownership": {
-    "isCompanyOwned": ${isCompanyOwned},
+    "isCompanyOwned": $isCompanyOwned,
     "companyName": "${escapeStringForJson(companyName)}",
     "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
   }
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic SALE and RENT',
-      apiUrl: '${baseUrl}/properties/basic',
+      apiUrl: '$baseUrl/properties/basic',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -193,6 +199,9 @@ class CreatePropertyBasicRENTCall {
     double? monthlyRent,
     int? minimumTimeRent,
     String? othersRent = '',
+    String? allowedUses = '',
+    String? prohibitedUses = '',
+    String? availableFrom = '',
     bool? isCompanyOwned,
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
@@ -205,8 +214,8 @@ class CreatePropertyBasicRENTCall {
   "name": "${escapeStringForJson(name)}",
   "address": "${escapeStringForJson(address)}",
   "geoLocation": {
-    "longitude": ${longitude},
-    "latitude": ${latitude}
+    "longitude": $longitude,
+    "latitude": $latitude
   },
   "legalInfo": {
     "finca": "${escapeStringForJson(finca)}",
@@ -214,22 +223,25 @@ class CreatePropertyBasicRENTCall {
     "libro": "${escapeStringForJson(libro)}"
   },
   "rentInfo": {
-    "monthlyRent": ${monthlyRent},
+    "monthlyRent": $monthlyRent,
     "rentalConditions": {
-      "minimumTime": ${minimumTimeRent},
+      "minimumTime": $minimumTimeRent,
+      "allowedUses": "${escapeStringForJson(allowedUses)}",
+      "prohibitedUses": "${escapeStringForJson(prohibitedUses)}",
+      "availableFrom": "${escapeStringForJson(availableFrom)}",
       "others": "${escapeStringForJson(othersRent)}"
     }
   },
   "ownership": {
-    "isCompanyOwned": ${isCompanyOwned}
+    "isCompanyOwned": $isCompanyOwned
   }
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic RENT',
-      apiUrl: '${baseUrl}/properties/basic',
+      apiUrl: '$baseUrl/properties/basic',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -276,8 +288,8 @@ class CreatePropertyBasicSALECall {
   "name": "${escapeStringForJson(name)}",
   "address": "${escapeStringForJson(address)}",
   "geoLocation": {
-    "longitude": ${longitude},
-    "latitude": ${latitude}
+    "longitude": $longitude,
+    "latitude": $latitude
   },
   "legalInfo": {
     "finca": "${escapeStringForJson(finca)}",
@@ -285,22 +297,22 @@ class CreatePropertyBasicSALECall {
     "libro": "${escapeStringForJson(libro)}"
   },
   "saleInfo": {
-    "salePrice": ${salePrice},
-    "maintenanceFee": ${maintenanceFee},
-    "singlePropertyTax": ${singlePropertyTax}
+    "salePrice": $salePrice,
+    "maintenanceFee": $maintenanceFee,
+    "singlePropertyTax": $singlePropertyTax
   },
   "ownership": {
-    "isCompanyOwned": ${isCompanyOwned},
+    "isCompanyOwned": $isCompanyOwned,
     "companyName": "${escapeStringForJson(companyName)}",
     "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
   }
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic SALE',
-      apiUrl: '${baseUrl}/properties/basic',
+      apiUrl: '$baseUrl/properties/basic',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -334,10 +346,10 @@ class ListPropertiesCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'List Properties',
-      apiUrl: '${baseUrl}/properties',
+      apiUrl: '$baseUrl/properties',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'page': page,
@@ -451,7 +463,7 @@ class GetPropertiesForMapCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Properties for Map',
-      apiUrl: '${baseUrl}/properties/map',
+      apiUrl: '$baseUrl/properties/map',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
@@ -471,7 +483,7 @@ class GetPropertiesForHomeCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Properties for Home',
-      apiUrl: '${baseUrl}/properties/home',
+      apiUrl: '$baseUrl/properties/home',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
@@ -496,10 +508,10 @@ class GetMyPropertiesCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get My Properties',
-      apiUrl: '${baseUrl}/properties/my-properties',
+      apiUrl: '$baseUrl/properties/my-properties',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'page': page,
@@ -603,7 +615,7 @@ class GetPropertyByIDCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Property by ID',
-      apiUrl: '${baseUrl}/properties/${propertyId}',
+      apiUrl: '$baseUrl/properties/$propertyId',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
@@ -636,7 +648,7 @@ class GetPropertyByIDCall {
         response,
         r'''$.data.data.saleInfo.salePrice''',
       ));
-  dynamic? saleInfo(dynamic response) => getJsonField(
+  dynamic saleInfo(dynamic response) => getJsonField(
         response,
         r'''$.data.data.saleInfo''',
       );
@@ -701,11 +713,11 @@ class UpdatePropertyCall {
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update Property',
-      apiUrl: '${baseUrl}/properties/${propertyId}',
+      apiUrl: '$baseUrl/properties/$propertyId',
       callType: ApiCallType.PATCH,
       headers: {},
       params: {},
@@ -728,11 +740,11 @@ class UploadPropertyDocumentCall {
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Property Document',
-      apiUrl: '${baseUrl}/properties/${propertyId}/documents/${documentType}',
+      apiUrl: '$baseUrl/properties/$propertyId/documents/$documentType',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -756,7 +768,7 @@ class CompletePropertyHardcodedTEMPCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Complete Property (Hardcoded - TEMP)',
-      apiUrl: '${baseUrl}/property/hard/completing-property/${propertyId}',
+      apiUrl: '$baseUrl/property/hard/completing-property/$propertyId',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -780,10 +792,10 @@ class GetPropertyBackofficeCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Property Backoffice',
-      apiUrl: '${baseUrl}/properties/${propertyId}/backoffice',
+      apiUrl: '$baseUrl/properties/$propertyId/backoffice',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -810,10 +822,10 @@ class ChangePropertyStatusCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Change Property Status',
-      apiUrl: '${baseUrl}/properties/${propertyId}/status',
+      apiUrl: '$baseUrl/properties/$propertyId/status',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -836,10 +848,10 @@ class GetPublishableZonesCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Publishable Zones',
-      apiUrl: '${baseUrl}/properties/publishable-zones',
+      apiUrl: '$baseUrl/properties/publishable-zones',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -856,7 +868,7 @@ class PresignPropertyImagesCall {
   Future<ApiCallResponse> call({
     String? propertyId = '',
     String? authToken = '',
-    dynamic? uploads,
+    dynamic uploads,
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
@@ -866,10 +878,10 @@ class PresignPropertyImagesCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Presign Property Images',
-      apiUrl: '${baseUrl}/properties/${propertyId}/images/presign',
+      apiUrl: '$baseUrl/properties/$propertyId/images/presign',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -888,7 +900,7 @@ class ConfirmPropertyImagesCall {
   Future<ApiCallResponse> call({
     String? propertyId = '',
     String? authToken = '',
-    dynamic? uploads,
+    dynamic uploads,
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
@@ -898,10 +910,10 @@ class ConfirmPropertyImagesCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Confirm Property Images',
-      apiUrl: '${baseUrl}/properties/${propertyId}/images/confirm',
+      apiUrl: '$baseUrl/properties/$propertyId/images/confirm',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,

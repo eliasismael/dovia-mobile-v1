@@ -1,6 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
-import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -10,11 +9,8 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
-import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_oferta_compra_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_oferta_compra_model.dart';
 
@@ -22,9 +18,16 @@ class DOVIACLIENTOfertaCompraWidget extends StatefulWidget {
   const DOVIACLIENTOfertaCompraWidget({
     super.key,
     required this.propertyId,
+    this.offerType = 'compra',
+    this.fromSelectionScreen = false,
+    this.isAmbosFlow = false,
   });
 
   final String? propertyId;
+  /// 'compra', 'renta', or 'ambos'
+  final String offerType;
+  final bool fromSelectionScreen;
+  final bool isAmbosFlow;
 
   static String routeName = 'DOVIA_CLIENT_OfertaCompra';
   static String routePath = '/dOVIACLIENTOfertaCompra';
@@ -57,6 +60,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
 
     _model.propuestaEconomicaTextController ??= TextEditingController();
     _model.propuestaEconomicaFocusNode ??= FocusNode();
+
+    _model.propuestaRentaTextController ??= TextEditingController();
+    _model.propuestaRentaFocusNode ??= FocusNode();
 
     _model.cONTADOTiempoEstimadoDePagoTextController ??=
         TextEditingController();
@@ -96,6 +102,15 @@ class _DOVIACLIENTOfertaCompraWidgetState
     _model.consideracionesTextController ??= TextEditingController();
     _model.consideracionesFocusNode ??= FocusNode();
 
+    _model.fechaInicioContratoTextController ??= TextEditingController();
+    _model.fechaInicioContratoFocusNode ??= FocusNode();
+
+    _model.fechaFinalizacionContratoTextController ??= TextEditingController();
+    _model.fechaFinalizacionContratoFocusNode ??= FocusNode();
+
+    _model.duracionContratoTextController ??= TextEditingController();
+    _model.duracionContratoFocusNode ??= FocusNode();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -110,7 +125,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
   Widget build(BuildContext context) {
     return FutureBuilder<ApiCallResponse>(
       future: DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
-        propertyId: widget!.propertyId,
+        propertyId: widget.propertyId,
       ),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
@@ -147,7 +162,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                   wrapWithModel(
                     model: _model.cornerGradientBackgroundModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: CornerGradientBackgroundWidget(),
+                    child: const CornerGradientBackgroundWidget(),
                   ),
                   SingleChildScrollView(
                     child: Column(
@@ -157,17 +172,22 @@ class _DOVIACLIENTOfertaCompraWidgetState
                           model: _model.dOVIASHAREDHeaderModel,
                           updateCallback: () => safeSetState(() {}),
                           child: DOVIASHAREDHeaderWidget(
-                            title: 'Oferta de compra',
+                            title: widget.offerType == 'renta'
+                                ? 'Oferta de renta'
+                                : widget.offerType == 'ambos'
+                                    ? 'Oferta de compra y renta'
+                                    : 'Oferta de compra',
+                            hideActions: true,
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 0.0, 20.0, 100.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Container(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
@@ -178,8 +198,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Text(
                                           'Características que proporcionó el propietario',
                                           style: FlutterFlowTheme.of(context)
@@ -210,20 +230,22 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Precio',
+                                                widget.offerType == 'renta'
+                                                    ? 'Precio mensual'
+                                                    : 'Precio',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -254,7 +276,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -263,8 +285,13 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   controller: _model
                                                           .precioTextController ??=
                                                       TextEditingController(
-                                                    text:
-                                                        DOVIAAPIPropertyContextGroup
+                                                    text: widget.offerType == 'renta'
+                                                        ? getJsonField(
+                                                            dOVIACLIENTOfertaCompraGetPropertyByIDResponse
+                                                                .jsonBody,
+                                                            r'''$.data.data.rentInfo.monthlyRent''',
+                                                          )?.toString()
+                                                        : DOVIAAPIPropertyContextGroup
                                                             .getPropertyByIDCall
                                                             .salePrice(
                                                               dOVIACLIENTOfertaCompraGetPropertyByIDResponse
@@ -340,7 +367,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -351,7 +379,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -431,18 +460,19 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -480,7 +510,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -556,7 +586,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -567,7 +598,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -647,18 +679,19 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -696,7 +729,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -772,7 +805,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -783,7 +817,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -863,18 +898,19 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -912,7 +948,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -996,7 +1032,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1007,7 +1044,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1087,13 +1125,14 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -1106,12 +1145,11 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Tu propuesta',
                                             style: FlutterFlowTheme.of(context)
@@ -1145,12 +1183,11 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Moneda de pago',
                                             style: FlutterFlowTheme.of(context)
@@ -1184,15 +1221,16 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.max,
                                           children: [
                                             Expanded(
                                               child: Container(
                                                 width: 100.0,
-                                                decoration: BoxDecoration(),
+                                                decoration:
+                                                    const BoxDecoration(),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
                                                     _model.selectedCurrency =
@@ -1203,20 +1241,21 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   options: FFButtonOptions(
                                                     height: 40.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color:
                                                         _model.selectedCurrency ==
                                                                 'USD'
                                                             ? FlutterFlowTheme
                                                                     .of(context)
                                                                 .primary
-                                                            : Color(0x00FFFFFF),
+                                                            : const Color(
+                                                                0x00FFFFFF),
                                                     textStyle:
                                                         FlutterFlowTheme.of(
                                                                 context)
@@ -1260,7 +1299,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       color: _model
                                                                   .selectedCurrency ==
                                                               'USD'
-                                                          ? Color(0x00000000)
+                                                          ? const Color(
+                                                              0x00000000)
                                                           : FlutterFlowTheme.of(
                                                                   context)
                                                               .primary,
@@ -1276,7 +1316,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                             Expanded(
                                               child: Container(
                                                 width: 100.0,
-                                                decoration: BoxDecoration(),
+                                                decoration:
+                                                    const BoxDecoration(),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
                                                     _model.selectedCurrency =
@@ -1287,20 +1328,21 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   options: FFButtonOptions(
                                                     height: 40.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color:
                                                         _model.selectedCurrency ==
                                                                 'Quetzales'
                                                             ? FlutterFlowTheme
                                                                     .of(context)
                                                                 .primary
-                                                            : Color(0x00FFFFFF),
+                                                            : const Color(
+                                                                0x00FFFFFF),
                                                     textStyle:
                                                         FlutterFlowTheme.of(
                                                                 context)
@@ -1344,7 +1386,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       color: _model
                                                                   .selectedCurrency ==
                                                               'Quetzales'
-                                                          ? Color(0x00000000)
+                                                          ? const Color(
+                                                              0x00000000)
                                                           : FlutterFlowTheme.of(
                                                                   context)
                                                               .primary,
@@ -1356,16 +1399,16 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 ),
                                               ),
                                             ),
-                                          ].divide(SizedBox(width: 10.0)),
+                                          ].divide(const SizedBox(width: 10.0)),
                                         ),
                                       ),
+                                      if (widget.offerType != 'renta') ...[              
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Método de pago',
                                             style: FlutterFlowTheme.of(context)
@@ -1399,8 +1442,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: FlutterFlowDropDown<String>(
                                           controller:
                                               _model.dropDownValueController ??=
@@ -1408,7 +1451,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                             _model.dropDownValue ??=
                                                 _model.paymentMethod,
                                           ),
-                                          options: [
+                                          options: const [
                                             'Contado',
                                             'Hipoteca',
                                             'Promesa de compra'
@@ -1463,30 +1506,110 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                           borderColor: Colors.transparent,
                                           borderWidth: 0.0,
                                           borderRadius: 8.0,
-                                          margin:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  12.0, 0.0, 12.0, 0.0),
+                                          margin: const EdgeInsetsDirectional
+                                              .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                           hidesUnderline: true,
                                           isOverButton: false,
                                           isSearchable: false,
                                           isMultiSelect: false,
                                         ),
                                       ),
+                                      if (widget.offerType == 'ambos') ...[
+                                        Padding(
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 20.0, 0.0, 0.0),
+                                          child: Container(
+                                            width: MediaQuery.sizeOf(context)
+                                                    .width *
+                                                1.0,
+                                            decoration: const BoxDecoration(),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Precio mensual propuesto (renta)',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium,
+                                                ),
+                                                const SizedBox(height: 8.0),
+                                                TextFormField(
+                                                  controller: _model
+                                                      .propuestaRentaTextController,
+                                                  focusNode: _model
+                                                      .propuestaRentaFocusNode,
+                                                  autofocus: false,
+                                                  obscureText: false,
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  decoration: InputDecoration(
+                                                    isDense: true,
+                                                    hintText:
+                                                        'Ej. 1500.00',
+                                                    hintStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .labelMedium,
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10.0),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                              color: Color(
+                                                                  0x00000000)),
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10.0),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                              color: Color(
+                                                                  0x00000000)),
+                                                    ),
+                                                    filled: true,
+                                                    fillColor:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .tertiary,
+                                                    contentPadding:
+                                                        const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 12.0,
+                                                            vertical: 14.0),
+                                                  ),
+                                                  style:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Propuesta económica',
+                                                widget.offerType == 'ambos'
+                                                    ? 'Precio propuesto (compra)'
+                                                    : 'Propuesta económica',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -1517,7 +1640,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -1592,7 +1715,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1603,7 +1727,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -1687,27 +1812,30 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Builder(
                                           builder: (context) {
                                             if (_model.paymentMethod ==
                                                 'Contado') {
                                               return Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 20.0, 0.0, 0.0),
                                                 child: Container(
                                                   width:
                                                       MediaQuery.sizeOf(context)
                                                               .width *
                                                           1.0,
-                                                  decoration: BoxDecoration(),
+                                                  decoration:
+                                                      const BoxDecoration(),
                                                   child: Column(
                                                     mainAxisSize:
                                                         MainAxisSize.max,
@@ -1746,7 +1874,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                       ),
-                                                      Container(
+                                                      SizedBox(
                                                         width:
                                                             MediaQuery.sizeOf(
                                                                         context)
@@ -1816,7 +1944,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             enabledBorder:
                                                                 OutlineInputBorder(
                                                               borderSide:
-                                                                  BorderSide(
+                                                                  const BorderSide(
                                                                 color: Color(
                                                                     0x00000000),
                                                                 width: 1.0,
@@ -1829,7 +1957,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             focusedBorder:
                                                                 OutlineInputBorder(
                                                               borderSide:
-                                                                  BorderSide(
+                                                                  const BorderSide(
                                                                 color: Color(
                                                                     0x00000000),
                                                                 width: 1.0,
@@ -1915,8 +2043,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   context),
                                                         ),
                                                       ),
-                                                    ].divide(
-                                                        SizedBox(height: 12.0)),
+                                                    ].divide(const SizedBox(
+                                                        height: 12.0)),
                                                   ),
                                                 ),
                                               );
@@ -1927,7 +2055,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 children: [
                                                   Align(
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                             -1.0, 0.0),
                                                     child: Text(
                                                       'Estructura hipotecaria',
@@ -1963,16 +2091,16 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 20.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: Container(
                                                       width: MediaQuery.sizeOf(
                                                                   context)
                                                               .width *
                                                           1.0,
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -2010,7 +2138,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery
                                                                         .sizeOf(
                                                                             context)
@@ -2081,7 +2209,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 enabledBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2094,7 +2222,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 focusedBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2181,23 +2309,23 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       context),
                                                             ),
                                                           ),
-                                                        ].divide(SizedBox(
+                                                        ].divide(const SizedBox(
                                                             height: 12.0)),
                                                       ),
                                                     ),
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 20.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: Container(
                                                       width: MediaQuery.sizeOf(
                                                                   context)
                                                               .width *
                                                           1.0,
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -2235,7 +2363,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery
                                                                         .sizeOf(
                                                                             context)
@@ -2305,7 +2433,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 enabledBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2318,7 +2446,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 focusedBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2400,23 +2528,23 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       context),
                                                             ),
                                                           ),
-                                                        ].divide(SizedBox(
+                                                        ].divide(const SizedBox(
                                                             height: 12.0)),
                                                       ),
                                                     ),
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 20.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: Container(
                                                       width: MediaQuery.sizeOf(
                                                                   context)
                                                               .width *
                                                           1.0,
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -2454,7 +2582,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery
                                                                         .sizeOf(
                                                                             context)
@@ -2524,7 +2652,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 enabledBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2537,7 +2665,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 focusedBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2619,23 +2747,23 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       context),
                                                             ),
                                                           ),
-                                                        ].divide(SizedBox(
+                                                        ].divide(const SizedBox(
                                                             height: 12.0)),
                                                       ),
                                                     ),
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 20.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: Container(
                                                       width: MediaQuery.sizeOf(
                                                                   context)
                                                               .width *
                                                           1.0,
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -2673,7 +2801,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery
                                                                         .sizeOf(
                                                                             context)
@@ -2743,7 +2871,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 enabledBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2756,7 +2884,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 focusedBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -2838,7 +2966,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       context),
                                                             ),
                                                           ),
-                                                        ].divide(SizedBox(
+                                                        ].divide(const SizedBox(
                                                             height: 12.0)),
                                                       ),
                                                     ),
@@ -2852,7 +2980,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 children: [
                                                   Align(
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                             -1.0, 0.0),
                                                     child: Text(
                                                       'Estructura de pago',
@@ -2888,16 +3016,16 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 20.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: Container(
                                                       width: MediaQuery.sizeOf(
                                                                   context)
                                                               .width *
                                                           1.0,
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -2935,7 +3063,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery
                                                                         .sizeOf(
                                                                             context)
@@ -3005,7 +3133,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 enabledBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -3018,7 +3146,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 focusedBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -3100,23 +3228,23 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       context),
                                                             ),
                                                           ),
-                                                        ].divide(SizedBox(
+                                                        ].divide(const SizedBox(
                                                             height: 12.0)),
                                                       ),
                                                     ),
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 20.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: Container(
                                                       width: MediaQuery.sizeOf(
                                                                   context)
                                                               .width *
                                                           1.0,
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -3154,7 +3282,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery
                                                                         .sizeOf(
                                                                             context)
@@ -3224,7 +3352,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 enabledBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -3237,7 +3365,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 focusedBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -3319,23 +3447,23 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       context),
                                                             ),
                                                           ),
-                                                        ].divide(SizedBox(
+                                                        ].divide(const SizedBox(
                                                             height: 12.0)),
                                                       ),
                                                     ),
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 20.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: Container(
                                                       width: MediaQuery.sizeOf(
                                                                   context)
                                                               .width *
                                                           1.0,
                                                       decoration:
-                                                          BoxDecoration(),
+                                                          const BoxDecoration(),
                                                       child: Column(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
@@ -3373,7 +3501,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery
                                                                         .sizeOf(
                                                                             context)
@@ -3443,7 +3571,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 enabledBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -3456,7 +3584,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 focusedBorder:
                                                                     OutlineInputBorder(
                                                                   borderSide:
-                                                                      BorderSide(
+                                                                      const BorderSide(
                                                                     color: Color(
                                                                         0x00000000),
                                                                     width: 1.0,
@@ -3538,7 +3666,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       context),
                                                             ),
                                                           ),
-                                                        ].divide(SizedBox(
+                                                        ].divide(const SizedBox(
                                                             height: 12.0)),
                                                       ),
                                                     ),
@@ -3560,12 +3688,11 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             '¿Quién será el comprador?',
                                             style: FlutterFlowTheme.of(context)
@@ -3598,21 +3725,24 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                           ),
                                         ),
                                       ),
+                                      ], // end purchase-only sections
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Nombre del comprador',
+                                                widget.offerType == 'renta'
+                                                    ? 'Nombre del arrendatario'
+                                                    : 'Nombre del comprador',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -3643,7 +3773,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -3718,7 +3848,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3729,7 +3860,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3809,17 +3941,17 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Si es empresa',
                                             style: FlutterFlowTheme.of(context)
@@ -3853,13 +3985,13 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -3897,7 +4029,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -3972,7 +4104,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -3983,7 +4116,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -4063,18 +4197,19 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -4112,7 +4247,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -4187,7 +4322,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -4198,7 +4334,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -4278,18 +4415,19 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -4327,7 +4465,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              Container(
+                                              SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -4402,7 +4540,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -4413,7 +4552,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
-                                                      borderSide: BorderSide(
+                                                      borderSide:
+                                                          const BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
@@ -4493,13 +4633,198 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       .asValidator(context),
                                                 ),
                                               ),
-                                            ].divide(SizedBox(height: 12.0)),
+                                            ].divide(
+                                                const SizedBox(height: 12.0)),
                                           ),
                                         ),
                                       ),
+                                      if (widget.offerType == 'renta' || widget.offerType == 'ambos') ...[
+                                        Padding(
+                                          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                                          child: Container(
+                                            width: MediaQuery.sizeOf(context).width * 1.0,
+                                            decoration: const BoxDecoration(),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  mainAxisSize: MainAxisSize.max,
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        'Fecha de inicio de contrato',
+                                                        style: FlutterFlowTheme.of(context).bodyMedium,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 12.0),
+                                                    Expanded(
+                                                      child: Text(
+                                                        'Fecha de finalización',
+                                                        style: FlutterFlowTheme.of(context).bodyMedium,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 12.0),
+                                                Row(
+                                                  mainAxisSize: MainAxisSize.max,
+                                                  children: [
+                                                    Expanded(
+                                                      child: TextFormField(
+                                                        controller: _model.fechaInicioContratoTextController,
+                                                        focusNode: _model.fechaInicioContratoFocusNode,
+                                                        autofocus: false,
+                                                        obscureText: false,
+                                                        readOnly: true,
+                                                        onTap: () async {
+                                                          final selectedDate = await showDatePicker(
+                                                            context: context,
+                                                            initialDate: DateTime.now(),
+                                                            firstDate: DateTime.now(),
+                                                            lastDate: DateTime(2050),
+                                                            builder: (context, child) {
+                                                              return Theme(
+                                                                data: Theme.of(context).copyWith(
+                                                                  colorScheme: ColorScheme.light(
+                                                                    primary: FlutterFlowTheme.of(context).primary, 
+                                                                  ),
+                                                                ),
+                                                                child: child!,
+                                                              );
+                                                            },
+                                                          );
+                                                          if (selectedDate != null) {
+                                                            final yyyy = selectedDate.year.toString();
+                                                            final mm = selectedDate.month.toString().padLeft(2, '0');
+                                                            final dd = selectedDate.day.toString().padLeft(2, '0');
+                                                            safeSetState(() {
+                                                              _model.fechaInicioContratoTextController?.text = '$yyyy-$mm-$dd';
+                                                            });
+                                                          }
+                                                        },
+                                                        decoration: InputDecoration(
+                                                          hintText: 'Ej. 2024-01-01',
+                                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(color: Color(0x00000000))),
+                                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(color: Color(0x00000000))),
+                                                          filled: true,
+                                                          fillColor: FlutterFlowTheme.of(context).tertiary,
+                                                        ),
+                                                        style: FlutterFlowTheme.of(context).bodyMedium,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 12.0),
+                                                    Expanded(
+                                                      child: TextFormField(
+                                                        controller: _model.fechaFinalizacionContratoTextController,
+                                                        focusNode: _model.fechaFinalizacionContratoFocusNode,
+                                                        autofocus: false,
+                                                        obscureText: false,
+                                                        readOnly: true,
+                                                        onTap: () async {
+                                                          final initiald = DateTime.now();
+                                                          final selectedDate = await showDatePicker(
+                                                            context: context,
+                                                            initialDate: DateTime(initiald.year + 1, initiald.month, initiald.day),
+                                                            firstDate: DateTime.now(),
+                                                            lastDate: DateTime(2050),
+                                                            builder: (context, child) {
+                                                              return Theme(
+                                                                data: Theme.of(context).copyWith(
+                                                                  colorScheme: ColorScheme.light(
+                                                                    primary: FlutterFlowTheme.of(context).primary, 
+                                                                  ),
+                                                                ),
+                                                                child: child!,
+                                                              );
+                                                            },
+                                                          );
+                                                          if (selectedDate != null) {
+                                                            final yyyy = selectedDate.year.toString();
+                                                            final mm = selectedDate.month.toString().padLeft(2, '0');
+                                                            final dd = selectedDate.day.toString().padLeft(2, '0');
+                                                            safeSetState(() {
+                                                              _model.fechaFinalizacionContratoTextController?.text = '$yyyy-$mm-$dd';
+                                                            });
+                                                          }
+                                                        },
+                                                        decoration: InputDecoration(
+                                                          hintText: 'Ej. 2025-01-01',
+                                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(color: Color(0x00000000))),
+                                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(color: Color(0x00000000))),
+                                                          filled: true,
+                                                          fillColor: FlutterFlowTheme.of(context).tertiary,
+                                                        ),
+                                                        style: FlutterFlowTheme.of(context).bodyMedium,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 20.0),
+                                                Text(
+                                                  'Duración del contrato',
+                                                  style: FlutterFlowTheme.of(context).bodyMedium,
+                                                ),
+                                                const SizedBox(height: 12.0),
+                                                TextFormField(
+                                                  controller: _model.duracionContratoTextController,
+                                                  focusNode: _model.duracionContratoFocusNode,
+                                                  autofocus: false,
+                                                  obscureText: false,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Cálculo en base a fechas (Ej. 12 meses)',
+                                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(color: Color(0x00000000))),
+                                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(color: Color(0x00000000))),
+                                                    filled: true,
+                                                    fillColor: FlutterFlowTheme.of(context).tertiary,
+                                                  ),
+                                                  style: FlutterFlowTheme.of(context).bodyMedium,
+                                                ),
+                                                const SizedBox(height: 20.0),
+                                                Text(
+                                                  '¿Qué uso le darás a la propiedad?',
+                                                  style: FlutterFlowTheme.of(context).bodyMedium,
+                                                ),
+                                                const SizedBox(height: 12.0),
+                                                FlutterFlowDropDown<String>(
+                                                  controller: _model.usoADarPropertyUseValueController ??= FormFieldController<String>(
+                                                    _model.usoADarPropertyUseValue ??= 'Vivienda personal',
+                                                  ),
+                                                  options: const [
+                                                    'Vivienda personal',
+                                                    'Oficina comercial',
+                                                    'Oficina',
+                                                    'Local comercial',
+                                                    'Bodega',
+                                                    'Commercial Office Space',
+                                                    'Otro'
+                                                  ],
+                                                  onChanged: (val) => safeSetState(() => _model.usoADarPropertyUseValue = val),
+                                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                                  height: 56.0,
+                                                  textStyle: FlutterFlowTheme.of(context).bodyMedium,
+                                                  hintText: 'Vivienda personal',
+                                                  icon: Icon(
+                                                    Icons.chevron_right_rounded,
+                                                    color: FlutterFlowTheme.of(context).secondaryText,
+                                                    size: 24.0,
+                                                  ),
+                                                  fillColor: FlutterFlowTheme.of(context).tertiary,
+                                                  elevation: 0.0,
+                                                  borderColor: Colors.transparent,
+                                                  borderWidth: 1.0,
+                                                  borderRadius: 10.0,
+                                                  margin: const EdgeInsetsDirectional.fromSTEB(16.0, 4.0, 16.0, 4.0),
+                                                  hidesUnderline: true,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -4511,9 +4836,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    20.0, 40.0, 20.0, 40.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                20.0, 40.0, 20.0, 40.0),
                                             child: Text(
                                               'Entiendo que en este complejo NO se permite:\n• Airbnb\n• Subarrendamiento\n• Eventos\n• Mascotas (si aplica)',
                                               style: FlutterFlowTheme.of(
@@ -4551,8 +4876,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: Text(
                                           'Al enviar tu propuesta, el propietario podrá aceptarla, rechazarla o solicitar cambios.',
                                           style: FlutterFlowTheme.of(context)
@@ -4584,9 +4909,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                       ),
                                       Builder(
                                         builder: (context) => Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 20.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                           child: wrapWithModel(
                                             model: _model.primaryButtonModel,
                                             updateCallback: () =>
@@ -4594,7 +4918,204 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                             child: PrimaryButtonWidget(
                                               text: 'Aceptar',
                                               onTap: () async {
-                                                var _shouldSetState = false;
+                                                var shouldSetState = false;
+
+                                                // Handle BOTH (ambos) offer type: submit rent + purchase
+                                                if (widget.offerType == 'ambos') {
+                                                  // 1. Submit RENT offer
+                                                  final rentResult = await DOVIAAPIOfferContextGroup
+                                                      .createOfferRENTIndividualCall
+                                                      .call(
+                                                    propertyId: widget.propertyId,
+                                                    authToken: currentAuthenticationToken,
+                                                    contractStartDate: _model.fechaInicioContratoTextController?.text != null && _model.fechaInicioContratoTextController!.text.isNotEmpty ? '${_model.fechaInicioContratoTextController!.text}T00:00:00.000Z' : '',
+                                                    contractEndDate: _model.fechaFinalizacionContratoTextController?.text != null && _model.fechaFinalizacionContratoTextController!.text.isNotEmpty ? '${_model.fechaFinalizacionContratoTextController!.text}T00:00:00.000Z' : '',
+                                                    currency: _model.selectedCurrency,
+                                                    proposedAmount: double.tryParse(_model.propuestaRentaTextController?.text ?? ''),
+                                                    propertyUse: _model.usoADarPropertyUseValue,
+                                                    considerations: _model.consideracionesTextController?.text,
+                                                    tenantType: (_model.razonSocialTextController?.text ?? '').isNotEmpty ? 'company' : 'individual',
+                                                    tenantName: _model.nombreCompradorTextController?.text,
+                                                    tenantLegalName: _model.razonSocialTextController?.text,
+                                                    tenantRepresentative: _model.representanteLegalTextController?.text,
+                                                  );
+                                                  if (!mounted) return;
+                                                  if (!rentResult.succeeded) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(content: Text('Error al enviar la oferta de renta. Inténtalo de nuevo.')),
+                                                    );
+                                                    return;
+                                                  }
+
+                                                  // 2. Submit PURCHASE offer
+                                                  ApiCallResponse? purchaseResult;
+                                                  if (_model.paymentMethod == 'Contado') {
+                                                    purchaseResult = await DOVIAAPIOfferContextGroup
+                                                        .createOfferPURCHASECashCall
+                                                        .call(
+                                                      propertyId: widget.propertyId,
+                                                      authToken: currentAuthenticationToken,
+                                                      estimatedPaymentTime: int.tryParse(_model.cONTADOTiempoEstimadoDePagoTextController.text),
+                                                      currency: _model.selectedCurrency,
+                                                      proposedAmount: double.tryParse(_model.propuestaEconomicaTextController.text),
+                                                      considerations: _model.consideracionesTextController.text,
+                                                      buyerType: _model.razonSocialTextController.text != '' ? 'company' : 'individual',
+                                                      buyerName: _model.nombreCompradorTextController.text,
+                                                      buyerLegalName: _model.razonSocialTextController.text != '' ? _model.razonSocialTextController.text : '',
+                                                      buyerRepresentative: _model.razonSocialTextController.text != '' ? _model.representanteLegalTextController.text : '',
+                                                    );
+                                                  } else if (_model.paymentMethod == 'Hipoteca') {
+                                                    purchaseResult = await DOVIAAPIOfferContextGroup
+                                                        .createOfferPURCHASEMortgageCall
+                                                        .call(
+                                                      propertyId: widget.propertyId,
+                                                      authToken: currentAuthenticationToken,
+                                                      currency: _model.selectedCurrency,
+                                                      proposedAmount: double.tryParse(_model.propuestaEconomicaTextController.text),
+                                                      considerations: _model.consideracionesTextController.text,
+                                                      buyerType: _model.razonSocialTextController.text != '' ? 'company' : 'individual',
+                                                      buyerName: _model.nombreCompradorTextController.text,
+                                                      downPaymentPercentage: int.tryParse(_model.hIPOTECAEngancheTextController.text),
+                                                      bankName: _model.hIPOTECABancoTextController.text,
+                                                      creditStatus: _model.hIPOTECAEstadoCreditoTextController.text,
+                                                      estimatedApprovalTime: int.tryParse(_model.hIPOTECATiempoAprobacionBancoTextController.text),
+                                                      legalName: _model.razonSocialTextController.text,
+                                                      legalRepresentative: _model.representanteLegalTextController.text,
+                                                    );
+                                                  } else {
+                                                    purchaseResult = await DOVIAAPIOfferContextGroup
+                                                        .createOfferPURCHASEPurchasePromiseCall
+                                                        .call(
+                                                      propertyId: widget.propertyId,
+                                                      authToken: currentAuthenticationToken,
+                                                      currency: _model.selectedCurrency,
+                                                      proposedAmount: double.tryParse(_model.propuestaEconomicaTextController.text),
+                                                      considerations: _model.consideracionesTextController.text,
+                                                      buyerType: _model.razonSocialTextController.text != '' ? 'company' : 'individual',
+                                                      buyerName: _model.nombreCompradorTextController.text,
+                                                      buyerLegalName: _model.razonSocialTextController.text,
+                                                      buyerLegalRepresentative: _model.representanteLegalTextController.text,
+                                                      initialReserve: double.tryParse(_model.pROMESAReservaInicialTextController.text),
+                                                      promiseTimeMonths: int.tryParse(_model.pROMESATiempoPromesaTextController.text),
+                                                    );
+                                                  }
+
+                                                  if (!mounted) return;
+                                                  if (purchaseResult == null || !purchaseResult.succeeded) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(content: Text('Error al enviar la oferta de compra. Inténtalo de nuevo.')),
+                                                    );
+                                                    return;
+                                                  }
+
+                                                  // 3. Show success modal
+                                                  showGeneralDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                                                    barrierColor: Colors.black54,
+                                                    transitionDuration: Duration.zero,
+                                                    pageBuilder: (dialogContext, _, __) {
+                                                      Future.delayed(
+                                                        const Duration(seconds: 2),
+                                                        () {
+                                                          if (dialogContext.mounted) {
+                                                            Navigator.of(dialogContext).pop();
+                                                          }
+                                                        },
+                                                      );
+                                                      return Center(
+                                                        child: Material(
+                                                          color: Colors.transparent,
+                                                          child: const PopupExitoWidget(
+                                                            title: 'Se envió la oferta correctamente',
+                                                            text: 'Tu solicitud de oferta ha sido enviada con éxito. Puedes ir a visualizar y hacer seguimiento de esta oferta a Mis visitas',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                  await Future.delayed(const Duration(milliseconds: 2100));
+
+                                                  // 4. Pop past Ofertar screen to property profile if needed
+                                                  if (mounted) {
+                                                    context.safePop(); // pop OfertaCompra
+                                                    if (widget.fromSelectionScreen) {
+                                                      context.safePop(); // pop Ofertar selection screen
+                                                    }
+                                                  }
+                                                  return;
+                                                }
+
+                                                // Handle RENT offer type
+                                                if (widget.offerType == 'renta') {
+                                                  final rentResult = await DOVIAAPIOfferContextGroup
+                                                      .createOfferRENTIndividualCall
+                                                      .call(
+                                                    propertyId: widget.propertyId,
+                                                    authToken: currentAuthenticationToken,
+                                                    contractStartDate: _model.fechaInicioContratoTextController?.text != null && _model.fechaInicioContratoTextController!.text.isNotEmpty ? '${_model.fechaInicioContratoTextController!.text}T00:00:00.000Z' : '',
+                                                    contractEndDate: _model.fechaFinalizacionContratoTextController?.text != null && _model.fechaFinalizacionContratoTextController!.text.isNotEmpty ? '${_model.fechaFinalizacionContratoTextController!.text}T00:00:00.000Z' : '',
+                                                    currency: _model.selectedCurrency,
+                                                    proposedAmount: double.tryParse(_model.propuestaEconomicaTextController?.text ?? ''),
+                                                    propertyUse: _model.usoADarPropertyUseValue,
+                                                    considerations: _model.consideracionesTextController?.text,
+                                                    tenantType: _model.razonSocialTextController?.text != null && _model.razonSocialTextController!.text.isNotEmpty ? 'company' : 'individual',
+                                                    tenantName: _model.nombreCompradorTextController?.text,
+                                                    tenantLegalName: _model.razonSocialTextController?.text,
+                                                    tenantRepresentative: _model.representanteLegalTextController?.text,
+                                                  );
+
+                                                  if (!mounted) return;
+
+                                                  if (!(rentResult.succeeded)) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text('Error al enviar la oferta de renta. Inténtalo de nuevo.'),
+                                                      ),
+                                                    );
+                                                    return;
+                                                  }
+
+                                                  // Show success modal
+                                                  showGeneralDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                                                    barrierColor: Colors.black54,
+                                                    transitionDuration: Duration.zero,
+                                                    pageBuilder: (dialogContext, _, __) {
+                                                      Future.delayed(
+                                                        const Duration(seconds: 2),
+                                                        () {
+                                                          if (dialogContext.mounted) {
+                                                            Navigator.of(dialogContext).pop();
+                                                          }
+                                                        },
+                                                      );
+                                                      return Center(
+                                                        child: Material(
+                                                          color: Colors.transparent,
+                                                          child: const PopupExitoWidget(
+                                                            title: 'Se envió la oferta correctamente',
+                                                            text: 'Tu solicitud de oferta ha sido enviada con éxito. Puedes ir a visualizar y hacer seguimiento de esta oferta a Mis visitas',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                  await Future.delayed(const Duration(milliseconds: 2100));
+
+                                                  if (mounted) {
+                                                    context.safePop();
+                                                    if (widget.fromSelectionScreen) {
+                                                      context.safePop();
+                                                    }
+                                                  }
+                                                  return;
+                                                }
+
+                                                // Handle PURCHASE offer types
                                                 if (_model.paymentMethod ==
                                                     'Contado') {
                                                   _model.ofertaContado =
@@ -4602,7 +5123,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                           .createOfferPURCHASECashCall
                                                           .call(
                                                     propertyId:
-                                                        widget!.propertyId,
+                                                        widget.propertyId,
                                                     authToken:
                                                         currentAuthenticationToken,
                                                     estimatedPaymentTime:
@@ -4620,41 +5141,32 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         .text,
                                                     buyerType:
                                                         _model.razonSocialTextController
-                                                                        .text !=
-                                                                    null &&
-                                                                _model.razonSocialTextController
-                                                                        .text !=
-                                                                    ''
+                                                                    .text !=
+                                                                ''
                                                             ? 'company'
                                                             : 'individual',
                                                     buyerName: _model
                                                         .nombreCompradorTextController
                                                         .text,
                                                     buyerLegalName: _model
-                                                                    .razonSocialTextController
-                                                                    .text !=
-                                                                null &&
-                                                            _model.razonSocialTextController
-                                                                    .text !=
-                                                                ''
+                                                                .razonSocialTextController
+                                                                .text !=
+                                                            ''
                                                         ? _model
                                                             .razonSocialTextController
                                                             .text
                                                         : '',
                                                     buyerRepresentative: _model
-                                                                    .razonSocialTextController
-                                                                    .text !=
-                                                                null &&
-                                                            _model.razonSocialTextController
-                                                                    .text !=
-                                                                ''
+                                                                .razonSocialTextController
+                                                                .text !=
+                                                            ''
                                                         ? _model
                                                             .representanteLegalTextController
                                                             .text
                                                         : '',
                                                   );
 
-                                                  _shouldSetState = true;
+                                                  shouldSetState = true;
                                                   if ((_model.ofertaContado
                                                           ?.succeeded ??
                                                       true)) {
@@ -4663,7 +5175,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       builder:
                                                           (alertDialogContext) {
                                                         return AlertDialog(
-                                                          title: Text('exito'),
+                                                          title: const Text(
+                                                              'exito'),
                                                           content: Text((_model
                                                                       .ofertaContado
                                                                       ?.jsonBody ??
@@ -4674,7 +5187,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               onPressed: () =>
                                                                   Navigator.pop(
                                                                       alertDialogContext),
-                                                              child: Text('Ok'),
+                                                              child: const Text(
+                                                                  'Ok'),
                                                             ),
                                                           ],
                                                         );
@@ -4686,7 +5200,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       builder:
                                                           (alertDialogContext) {
                                                         return AlertDialog(
-                                                          title: Text('error'),
+                                                          title: const Text(
+                                                              'error'),
                                                           content: Text((_model
                                                                       .ofertaContado
                                                                       ?.jsonBody ??
@@ -4697,14 +5212,16 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               onPressed: () =>
                                                                   Navigator.pop(
                                                                       alertDialogContext),
-                                                              child: Text('Ok'),
+                                                              child: const Text(
+                                                                  'Ok'),
                                                             ),
                                                           ],
                                                         );
                                                       },
                                                     );
-                                                    if (_shouldSetState)
+                                                    if (shouldSetState) {
                                                       safeSetState(() {});
+                                                    }
                                                     return;
                                                   }
                                                 } else {
@@ -4715,7 +5232,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             .createOfferPURCHASEMortgageCall
                                                             .call(
                                                       propertyId:
-                                                          widget!.propertyId,
+                                                          widget.propertyId,
                                                       authToken:
                                                           currentAuthenticationToken,
                                                       currency: _model
@@ -4727,15 +5244,12 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
-                                                      buyerType: _model
-                                                                      .razonSocialTextController
-                                                                      .text !=
-                                                                  null &&
-                                                              _model.razonSocialTextController
+                                                      buyerType:
+                                                          _model.razonSocialTextController
                                                                       .text !=
                                                                   ''
-                                                          ? 'company'
-                                                          : 'individual',
+                                                              ? 'company'
+                                                              : 'individual',
                                                       buyerName: _model
                                                           .nombreCompradorTextController
                                                           .text,
@@ -4754,30 +5268,24 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               .hIPOTECATiempoAprobacionBancoTextController
                                                               .text),
                                                       legalName: _model
-                                                                      .razonSocialTextController
-                                                                      .text !=
-                                                                  null &&
-                                                              _model.razonSocialTextController
-                                                                      .text !=
-                                                                  ''
+                                                                  .razonSocialTextController
+                                                                  .text !=
+                                                              ''
                                                           ? _model
                                                               .razonSocialTextController
                                                               .text
                                                           : '',
                                                       legalRepresentative: _model
-                                                                      .razonSocialTextController
-                                                                      .text !=
-                                                                  null &&
-                                                              _model.razonSocialTextController
-                                                                      .text !=
-                                                                  ''
+                                                                  .razonSocialTextController
+                                                                  .text !=
+                                                              ''
                                                           ? _model
                                                               .representanteLegalTextController
                                                               .text
                                                           : '',
                                                     );
 
-                                                    _shouldSetState = true;
+                                                    shouldSetState = true;
                                                     if ((_model.ofertaHipoteca
                                                             ?.succeeded ??
                                                         true)) {
@@ -4786,8 +5294,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         builder:
                                                             (alertDialogContext) {
                                                           return AlertDialog(
-                                                            title:
-                                                                Text('exito'),
+                                                            title: const Text(
+                                                                'exito'),
                                                             content: Text((_model
                                                                         .ofertaHipoteca
                                                                         ?.jsonBody ??
@@ -4799,7 +5307,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     Navigator.pop(
                                                                         alertDialogContext),
                                                                 child:
-                                                                    Text('Ok'),
+                                                                    const Text(
+                                                                        'Ok'),
                                                               ),
                                                             ],
                                                           );
@@ -4811,8 +5320,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         builder:
                                                             (alertDialogContext) {
                                                           return AlertDialog(
-                                                            title:
-                                                                Text('error'),
+                                                            title: const Text(
+                                                                'error'),
                                                             content: Text((_model
                                                                         .ofertaHipoteca
                                                                         ?.jsonBody ??
@@ -4824,14 +5333,16 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     Navigator.pop(
                                                                         alertDialogContext),
                                                                 child:
-                                                                    Text('Ok'),
+                                                                    const Text(
+                                                                        'Ok'),
                                                               ),
                                                             ],
                                                           );
                                                         },
                                                       );
-                                                      if (_shouldSetState)
+                                                      if (shouldSetState) {
                                                         safeSetState(() {});
+                                                      }
                                                       return;
                                                     }
                                                   } else {
@@ -4844,7 +5355,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         authToken:
                                                             currentAuthenticationToken,
                                                         propertyId:
-                                                            widget!.propertyId,
+                                                            widget.propertyId,
                                                         currency: _model
                                                             .selectedCurrency,
                                                         proposedAmount: double
@@ -4854,40 +5365,31 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         considerations: _model
                                                             .consideracionesTextController
                                                             .text,
-                                                        buyerType: _model
-                                                                        .razonSocialTextController
-                                                                        .text !=
-                                                                    null &&
-                                                                _model.razonSocialTextController
+                                                        buyerType:
+                                                            _model.razonSocialTextController
                                                                         .text !=
                                                                     ''
-                                                            ? 'company'
-                                                            : 'individual',
+                                                                ? 'company'
+                                                                : 'individual',
                                                         buyerName: _model
                                                             .nombreCompradorTextController
                                                             .text,
                                                         buyerLegalName: _model
-                                                                        .razonSocialTextController
-                                                                        .text !=
-                                                                    null &&
-                                                                _model.razonSocialTextController
-                                                                        .text !=
-                                                                    ''
+                                                                    .razonSocialTextController
+                                                                    .text !=
+                                                                ''
                                                             ? _model
                                                                 .razonSocialTextController
                                                                 .text
                                                             : '',
-                                                        buyerLegalRepresentative: _model
-                                                                        .razonSocialTextController
-                                                                        .text !=
-                                                                    null &&
-                                                                _model.razonSocialTextController
+                                                        buyerLegalRepresentative:
+                                                            _model.razonSocialTextController
                                                                         .text !=
                                                                     ''
-                                                            ? _model
-                                                                .representanteLegalTextController
-                                                                .text
-                                                            : '',
+                                                                ? _model
+                                                                    .representanteLegalTextController
+                                                                    .text
+                                                                : '',
                                                         initialReserve: double
                                                             .tryParse(_model
                                                                 .pROMESAReservaInicialTextController
@@ -4898,7 +5400,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 .text),
                                                       );
 
-                                                      _shouldSetState = true;
+                                                      shouldSetState = true;
                                                       if ((_model.ofertaPromesa
                                                               ?.succeeded ??
                                                           true)) {
@@ -4907,8 +5409,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                           builder:
                                                               (alertDialogContext) {
                                                             return AlertDialog(
-                                                              title:
-                                                                  Text('exito'),
+                                                              title: const Text(
+                                                                  'exito'),
                                                               content: Text((_model
                                                                           .ofertaPromesa
                                                                           ?.jsonBody ??
@@ -4919,8 +5421,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   onPressed: () =>
                                                                       Navigator.pop(
                                                                           alertDialogContext),
-                                                                  child: Text(
-                                                                      'Ok'),
+                                                                  child:
+                                                                      const Text(
+                                                                          'Ok'),
                                                                 ),
                                                               ],
                                                             );
@@ -4932,8 +5435,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                           builder:
                                                               (alertDialogContext) {
                                                             return AlertDialog(
-                                                              title:
-                                                                  Text('error'),
+                                                              title: const Text(
+                                                                  'error'),
                                                               content: Text((_model
                                                                           .ofertaPromesa
                                                                           ?.jsonBody ??
@@ -4944,77 +5447,93 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   onPressed: () =>
                                                                       Navigator.pop(
                                                                           alertDialogContext),
-                                                                  child: Text(
-                                                                      'Ok'),
+                                                                  child:
+                                                                      const Text(
+                                                                          'Ok'),
                                                                 ),
                                                               ],
                                                             );
                                                           },
                                                         );
-                                                        if (_shouldSetState)
+                                                        if (shouldSetState) {
                                                           safeSetState(() {});
+                                                        }
                                                         return;
                                                       }
                                                     } else {
-                                                      if (_shouldSetState)
+                                                      if (shouldSetState) {
                                                         safeSetState(() {});
+                                                      }
                                                       return;
                                                     }
                                                   }
                                                 }
 
-                                                await showDialog(
+                                                showGeneralDialog(
                                                   context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
+                                                  barrierDismissible: true,
+                                                  barrierLabel:
+                                                      MaterialLocalizations.of(
+                                                              context)
+                                                          .modalBarrierDismissLabel,
+                                                  barrierColor:
+                                                      Colors.black54,
+                                                  transitionDuration:
+                                                      Duration.zero,
+                                                  pageBuilder:
+                                                      (dialogContext, _, __) {
+                                                    Future.delayed(
+                                                      const Duration(
+                                                          seconds: 2),
+                                                      () {
+                                                        if (dialogContext
+                                                            .mounted) {
+                                                          Navigator.of(
                                                                   dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child: PopupExitoWidget(
-                                                          title:
-                                                              'Se envió con éxito',
-                                                          text:
-                                                              'Tu propuesta se envió con éxito',
+                                                              .pop();
+                                                        }
+                                                      },
+                                                    );
+                                                    return Center(
+                                                      child: Material(
+                                                        color: Colors
+                                                            .transparent,
+                                                        child:
+                                                            PopupExitoWidget(
+                                                          title: widget.isAmbosFlow ? 'Oferta de compra enviada' : 'Se envió la oferta correctamente',
+                                                          text: widget.isAmbosFlow ? 'Tu propuesta de compra ha sido enviada. A continuación, serás redirigido al formulario para tu propuesta de renta.' : 'Tu solicitud de oferta ha sido enviada con éxito. Puedes ir a visualizar y hacer seguimiento de esta oferta a Mis visitas',
                                                         ),
                                                       ),
                                                     );
                                                   },
                                                 );
+                                                await Future.delayed(
+                                                    const Duration(
+                                                        milliseconds: 2100));
 
-                                                context.pushNamed(
-                                                  DOVIACLIENTMisVisitasTuPropuestaWidget
-                                                      .routeName,
-                                                  queryParameters: {
-                                                    'propuestaState': serializeParam(
-                                                      'pending',
-                                                      ParamType.String,
-                                                    ),
-                                                    'paymentMethod': serializeParam(
-                                                      _model.paymentMethod,
-                                                      ParamType.String,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
+                                                // Navigate back to the property profile or transition to Rent
+                                                if (mounted) {
+                                                  if (widget.isAmbosFlow) {
+                                                    context.pushReplacementNamed(
+                                                      DOVIACLIENTOfertaCompraWidget.routeName,
+                                                      queryParameters: {
+                                                        'propertyId': serializeParam(widget.propertyId, ParamType.String),
+                                                        'offerType': serializeParam('renta', ParamType.String),
+                                                        'fromSelectionScreen': serializeParam(widget.fromSelectionScreen, ParamType.bool),
+                                                        'isAmbosFlow': serializeParam(false, ParamType.bool),
+                                                      }.withoutNulls,
+                                                    );
+                                                  } else {
+                                                    context.safePop();
+                                                    if (widget.fromSelectionScreen) {
+                                                      context.safePop();
+                                                    }
+                                                  }
+                                                }
 
-                                                if (_shouldSetState)
+                                                if (shouldSetState) {
                                                   safeSetState(() {});
+                                                }
                                               },
                                             ),
                                           ),
@@ -5026,20 +5545,6 @@ class _DOVIACLIENTOfertaCompraWidgetState
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional(0.0, 0.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        wrapWithModel(
-                          model: _model.dOVIACLIENTNavbarModel,
-                          updateCallback: () => safeSetState(() {}),
-                          child: DOVIACLIENTNavbarWidget(),
                         ),
                       ],
                     ),

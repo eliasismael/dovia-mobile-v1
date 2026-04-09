@@ -1,15 +1,9 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
-import '/index.dart';
 import 'visitor_restriction_popup_widget.dart'
     show VisitorRestrictionPopupWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class VisitorRestrictionPopupModel
     extends FlutterFlowModel<VisitorRestrictionPopupWidget> {

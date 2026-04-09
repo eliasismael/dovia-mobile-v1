@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'propiedad_caracteristicas_model.dart';
 export 'propiedad_caracteristicas_model.dart';
 
@@ -64,10 +61,10 @@ class _PropiedadCaracteristicasWidgetState
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
       child: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
-        decoration: BoxDecoration(),
+        decoration: const BoxDecoration(),
         child: Container(
           width: double.infinity,
           color: FlutterFlowTheme.of(context).tertiary,
@@ -81,10 +78,10 @@ class _PropiedadCaracteristicasWidgetState
                   color: FlutterFlowTheme.of(context).secondaryBackground,
                 ),
                 child: Align(
-                  alignment: AlignmentDirectional(-1.0, 0.0),
+                  alignment: const AlignmentDirectional(-1.0, 0.0),
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                     child: Text(
                       'Características',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -107,7 +104,7 @@ class _PropiedadCaracteristicasWidgetState
               ),
               collapsed: Container(
                 width: 0.0,
-                decoration: BoxDecoration(),
+                decoration: const BoxDecoration(),
               ),
               expanded: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -116,12 +113,12 @@ class _PropiedadCaracteristicasWidgetState
                 ),
                 child: Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+                      const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Text(
                           'Cracterísticas generales',
                           style:
@@ -142,19 +139,19 @@ class _PropiedadCaracteristicasWidgetState
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Habitaciones',
                                       style: FlutterFlowTheme.of(context)
@@ -206,7 +203,7 @@ class _PropiedadCaracteristicasWidgetState
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                      SizedBox(
                                         width: 120.0,
                                         child: TextFormField(
                                           controller: _model.textController1,
@@ -275,7 +272,7 @@ class _PropiedadCaracteristicasWidgetState
                                                               .fontStyle,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -283,7 +280,7 @@ class _PropiedadCaracteristicasWidgetState
                                                   BorderRadius.circular(10.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -350,19 +347,19 @@ class _PropiedadCaracteristicasWidgetState
                                               .asValidator(context),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 8.0)),
+                                    ].divide(const SizedBox(width: 8.0)),
                                   ),
-                                ].divide(SizedBox(height: 4.0)),
+                                ].divide(const SizedBox(height: 4.0)),
                               ),
                             ),
                             Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Baños',
                                       style: FlutterFlowTheme.of(context)
@@ -414,7 +411,7 @@ class _PropiedadCaracteristicasWidgetState
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                      SizedBox(
                                         width: 120.0,
                                         child: TextFormField(
                                           controller: _model.textController2,
@@ -483,7 +480,7 @@ class _PropiedadCaracteristicasWidgetState
                                                               .fontStyle,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -491,7 +488,7 @@ class _PropiedadCaracteristicasWidgetState
                                                   BorderRadius.circular(10.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -558,29 +555,29 @@ class _PropiedadCaracteristicasWidgetState
                                               .asValidator(context),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 8.0)),
+                                    ].divide(const SizedBox(width: 8.0)),
                                   ),
-                                ].divide(SizedBox(height: 4.0)),
+                                ].divide(const SizedBox(height: 4.0)),
                               ),
                             ),
-                          ].divide(SizedBox(width: 12.0)),
+                          ].divide(const SizedBox(width: 12.0)),
                         ),
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Medio baños',
                                       style: FlutterFlowTheme.of(context)
@@ -632,7 +629,7 @@ class _PropiedadCaracteristicasWidgetState
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                      SizedBox(
                                         width: 120.0,
                                         child: TextFormField(
                                           controller: _model.textController3,
@@ -701,7 +698,7 @@ class _PropiedadCaracteristicasWidgetState
                                                               .fontStyle,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -709,7 +706,7 @@ class _PropiedadCaracteristicasWidgetState
                                                   BorderRadius.circular(10.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -776,19 +773,19 @@ class _PropiedadCaracteristicasWidgetState
                                               .asValidator(context),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 8.0)),
+                                    ].divide(const SizedBox(width: 8.0)),
                                   ),
-                                ].divide(SizedBox(height: 4.0)),
+                                ].divide(const SizedBox(height: 4.0)),
                               ),
                             ),
                             Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Parqueo',
                                       style: FlutterFlowTheme.of(context)
@@ -840,7 +837,7 @@ class _PropiedadCaracteristicasWidgetState
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                      SizedBox(
                                         width: 120.0,
                                         child: TextFormField(
                                           controller: _model.textController4,
@@ -909,7 +906,7 @@ class _PropiedadCaracteristicasWidgetState
                                                               .fontStyle,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -917,7 +914,7 @@ class _PropiedadCaracteristicasWidgetState
                                                   BorderRadius.circular(10.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -984,29 +981,29 @@ class _PropiedadCaracteristicasWidgetState
                                               .asValidator(context),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 8.0)),
+                                    ].divide(const SizedBox(width: 8.0)),
                                   ),
-                                ].divide(SizedBox(height: 4.0)),
+                                ].divide(const SizedBox(height: 4.0)),
                               ),
                             ),
-                          ].divide(SizedBox(width: 12.0)),
+                          ].divide(const SizedBox(width: 12.0)),
                         ),
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Medio baños',
                                       style: FlutterFlowTheme.of(context)
@@ -1058,7 +1055,7 @@ class _PropiedadCaracteristicasWidgetState
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                      SizedBox(
                                         width: 120.0,
                                         child: TextFormField(
                                           controller: _model.textController5,
@@ -1127,7 +1124,7 @@ class _PropiedadCaracteristicasWidgetState
                                                               .fontStyle,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -1135,7 +1132,7 @@ class _PropiedadCaracteristicasWidgetState
                                                   BorderRadius.circular(10.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -1202,17 +1199,17 @@ class _PropiedadCaracteristicasWidgetState
                                               .asValidator(context),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 8.0)),
+                                    ].divide(const SizedBox(width: 8.0)),
                                   ),
-                                ].divide(SizedBox(height: 4.0)),
+                                ].divide(const SizedBox(height: 4.0)),
                               ),
                             ),
-                          ].divide(SizedBox(width: 12.0)),
+                          ].divide(const SizedBox(width: 12.0)),
                         ),
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1301,8 +1298,8 @@ class _PropiedadCaracteristicasWidgetState
                                         ),
                                   ),
                                 ]
-                                    .divide(SizedBox(height: 12.0))
-                                    .addToStart(SizedBox(height: 12.0)),
+                                    .divide(const SizedBox(height: 12.0))
+                                    .addToStart(const SizedBox(height: 12.0)),
                               ),
                             ),
                             Column(
@@ -1382,15 +1379,15 @@ class _PropiedadCaracteristicasWidgetState
                                       ),
                                 ),
                               ]
-                                  .divide(SizedBox(height: 12.0))
-                                  .addToStart(SizedBox(height: 12.0)),
+                                  .divide(const SizedBox(height: 12.0))
+                                  .addToStart(const SizedBox(height: 12.0)),
                             ),
                           ],
                         ),
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 1.0,
@@ -1400,9 +1397,9 @@ class _PropiedadCaracteristicasWidgetState
                         ),
                       ),
                       Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 10.0, 0.0, 0.0),
                           child: Text(
                             'Otras características',
@@ -1426,7 +1423,7 @@ class _PropiedadCaracteristicasWidgetState
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1482,7 +1479,7 @@ class _PropiedadCaracteristicasWidgetState
                   ),
                 ),
               ),
-              theme: ExpandableThemeData(
+              theme: const ExpandableThemeData(
                 tapHeaderToExpand: true,
                 tapBodyToExpand: false,
                 tapBodyToCollapse: false,

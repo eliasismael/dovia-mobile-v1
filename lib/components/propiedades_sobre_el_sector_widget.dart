@@ -1,14 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'propiedades_sobre_el_sector_model.dart';
 export 'propiedades_sobre_el_sector_model.dart';
 
@@ -55,7 +52,7 @@ class _PropiedadesSobreElSectorWidgetState
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      decoration: BoxDecoration(),
+      decoration: const BoxDecoration(),
       child: Container(
         width: double.infinity,
         color: FlutterFlowTheme.of(context).tertiary,
@@ -69,9 +66,9 @@ class _PropiedadesSobreElSectorWidgetState
                 color: FlutterFlowTheme.of(context).secondaryBackground,
               ),
               child: Align(
-                alignment: AlignmentDirectional(-1.0, 0.0),
+                alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                   child: Text(
                     'Sobre el sector',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -94,19 +91,19 @@ class _PropiedadesSobreElSectorWidgetState
             collapsed: Container(
               width: 0.0,
               height: 0.0,
-              decoration: BoxDecoration(),
+              decoration: const BoxDecoration(),
             ),
             expanded: Container(
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).tertiary,
               ),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 20.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 20.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
+                      SizedBox(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         height: 200.0,
                         child: custom_widgets.InteractiveMap(
@@ -119,8 +116,8 @@ class _PropiedadesSobreElSectorWidgetState
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-                        child: Container(
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                        child: SizedBox(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           child: TextFormField(
                             controller: _model.textController,
@@ -171,14 +168,14 @@ class _PropiedadesSobreElSectorWidgetState
                                         .fontStyle,
                                   ),
                               enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: Color(0x00000000),
                                   width: 1.0,
                                 ),
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: Color(0x00000000),
                                   width: 1.0,
                                 ),
@@ -231,7 +228,7 @@ class _PropiedadesSobreElSectorWidgetState
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 125.0,
@@ -240,7 +237,7 @@ class _PropiedadesSobreElSectorWidgetState
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 10.0, 10.0, 10.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
@@ -302,7 +299,7 @@ class _PropiedadesSobreElSectorWidgetState
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 125.0,
@@ -311,7 +308,7 @@ class _PropiedadesSobreElSectorWidgetState
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 10.0, 10.0, 10.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
@@ -373,7 +370,7 @@ class _PropiedadesSobreElSectorWidgetState
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 125.0,
@@ -382,7 +379,7 @@ class _PropiedadesSobreElSectorWidgetState
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 10.0, 10.0, 10.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
@@ -447,7 +444,7 @@ class _PropiedadesSobreElSectorWidgetState
                 ),
               ),
             ),
-            theme: ExpandableThemeData(
+            theme: const ExpandableThemeData(
               tapHeaderToExpand: true,
               tapBodyToExpand: false,
               tapBodyToCollapse: false,

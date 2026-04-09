@@ -5,12 +5,9 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_cotizaciones_recibidas_model.dart';
 export 'd_h_c_l_i_e_n_t_cotizaciones_recibidas_model.dart';
 
@@ -61,7 +58,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             SingleChildScrollView(
               child: Column(
@@ -70,25 +67,25 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                   wrapWithModel(
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: DOVIASHAREDHeaderWidget(
+                    child: const DOVIASHAREDHeaderWidget(
                       title: 'Cotizaciones\nrecibidas',
                     ),
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 12.0, 0.0, 0.0),
                           child: Container(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
-                              boxShadow: [
+                              boxShadow: const [
                                 BoxShadow(
                                   blurRadius: 4.0,
                                   color: Color(0x33000000),
@@ -101,7 +98,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   8.0, 21.0, 8.0, 21.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -133,7 +130,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                               width: 2,
                                               color:
                                                   FlutterFlowTheme.of(context)
-                                                      .primary!,
+                                                      .primary,
                                             )
                                           : null,
                                       activeColor:
@@ -143,7 +140,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         14.0, 0.0, 0.0, 0.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
@@ -179,38 +176,38 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'Trabajo realizado:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text:
                                                     'Tiempo estimado del trabajo:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'Precio:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
@@ -256,14 +253,14 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 12.0, 0.0, 0.0),
                           child: Container(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
-                              boxShadow: [
+                              boxShadow: const [
                                 BoxShadow(
                                   blurRadius: 4.0,
                                   color: Color(0x33000000),
@@ -276,7 +273,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   8.0, 21.0, 8.0, 21.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -308,7 +305,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                               width: 2,
                                               color:
                                                   FlutterFlowTheme.of(context)
-                                                      .primary!,
+                                                      .primary,
                                             )
                                           : null,
                                       activeColor:
@@ -318,7 +315,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         14.0, 0.0, 0.0, 0.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
@@ -354,38 +351,38 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'Trabajo realizado:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text:
                                                     'Tiempo estimado del trabajo:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'Precio:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
@@ -431,14 +428,14 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 12.0, 0.0, 0.0),
                           child: Container(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
-                              boxShadow: [
+                              boxShadow: const [
                                 BoxShadow(
                                   blurRadius: 4.0,
                                   color: Color(0x33000000),
@@ -451,7 +448,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   8.0, 21.0, 8.0, 21.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -483,7 +480,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                               width: 2,
                                               color:
                                                   FlutterFlowTheme.of(context)
-                                                      .primary!,
+                                                      .primary,
                                             )
                                           : null,
                                       activeColor:
@@ -493,7 +490,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         14.0, 0.0, 0.0, 0.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
@@ -529,38 +526,38 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                                                   .fontStyle,
                                                         ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'Trabajo realizado:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text:
                                                     'Tiempo estimado del trabajo:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'Precio:\n',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
                                                 ),
                                               ),
-                                              TextSpan(
+                                              const TextSpan(
                                                 text: 'xxx',
                                                 style: TextStyle(
                                                   fontSize: 12.0,
@@ -606,7 +603,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 55.0, 0.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
@@ -616,9 +613,9 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                             options: FFButtonOptions(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 42.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
                               color: FlutterFlowTheme.of(context).primary,
                               textStyle: FlutterFlowTheme.of(context)
@@ -654,27 +651,27 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
               ),
             ),
             Align(
-              alignment: AlignmentDirectional(0.0, 0.0),
+              alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Align(
-                    alignment: AlignmentDirectional(1.0, 0.0),
+                    alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: FixedDoviaIconWidget(),
+                        child: const FixedDoviaIconWidget(),
                       ),
                     ),
                   ),
                   wrapWithModel(
                     model: _model.dHCLIENTNavbarModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: DHCLIENTNavbarWidget(),
+                    child: const DHCLIENTNavbarWidget(),
                   ),
                 ],
               ),

@@ -1,5 +1,3 @@
-import '../schema/structs/index.dart';
-
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
 import 'api_helpers.dart';

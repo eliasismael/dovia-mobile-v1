@@ -1,21 +1,15 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import 'dart:typed_data';
 
 import 'package:provider/provider.dart';
-import '/app_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 
 class DoviaAssociateFormWidget extends StatefulWidget {
   final double? width;
@@ -242,7 +236,9 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
         final now = DateTime.now();
         int age = now.year - birth.year;
         if (now.month < birth.month ||
-            (now.month == birth.month && now.day < birth.day)) age--;
+            (now.month == birth.month && now.day < birth.day)) {
+          age--;
+        }
         _edadController.text = age.toString();
       }
 
@@ -818,7 +814,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
-                          file!.name,
+                          file.name,
                           style: TextStyle(
                               fontFamily: 'Public Sans',
                               fontSize: 12,

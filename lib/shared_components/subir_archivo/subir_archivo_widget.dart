@@ -1,14 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'subir_archivo_model.dart';
 export 'subir_archivo_model.dart';
 
@@ -51,7 +48,7 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 40.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 40.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -73,7 +70,8 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
                   ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: InkWell(
                 splashColor: Colors.transparent,
                 focusColor: Colors.transparent,
@@ -123,7 +121,8 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
             ),
             Builder(
               builder: (context) => Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                 child: wrapWithModel(
                   model: _model.primaryButtonModel,
                   updateCallback: () => safeSetState(() {}),
@@ -137,9 +136,9 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
                             elevation: 0,
                             insetPadding: EdgeInsets.zero,
                             backgroundColor: Colors.transparent,
-                            alignment: AlignmentDirectional(0.0, 0.0)
+                            alignment: const AlignmentDirectional(0.0, 0.0)
                                 .resolve(Directionality.of(context)),
-                            child: PopupExitoWidget(
+                            child: const PopupExitoWidget(
                               title: 'Se subió el documento con éxito',
                               text:
                                   'Se subió el documento  de convenio entre Dovia y el propietario con éxito.',

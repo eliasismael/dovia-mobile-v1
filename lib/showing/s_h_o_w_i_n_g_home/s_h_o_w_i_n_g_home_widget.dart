@@ -4,11 +4,8 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 's_h_o_w_i_n_g_home_model.dart';
 export 's_h_o_w_i_n_g_home_model.dart';
 
@@ -59,7 +56,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -68,18 +65,18 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                     wrapWithModel(
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: SHOWINGHeaderWidget(
+                      child: const SHOWINGHeaderWidget(
                         title: 'Home',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -87,7 +84,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Align(
-                                  alignment: AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Text(
                                     'Tu próxima visita',
                                     style: FlutterFlowTheme.of(context)
@@ -114,7 +112,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -124,7 +122,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -152,7 +150,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -160,8 +158,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -225,11 +224,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                                     .fontStyle,
                                                           ),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Fecha\n',
                                                       style: TextStyle(),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Hora\n',
                                                       style: TextStyle(),
                                                     ),
@@ -313,14 +312,15 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                   options: FFButtonOptions(
                                                     height: 30.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
+                                                            16.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
-                                                    color: Color(0x00007376),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
+                                                    color:
+                                                        const Color(0x00007376),
                                                     textStyle: FlutterFlowTheme
                                                             .of(context)
                                                         .titleSmall
@@ -370,13 +370,13 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                   options: FFButtonOptions(
                                                     height: 30.0,
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(20.0, 0.0,
-                                                                20.0, 0.0),
+                                                            20.0, 0.0),
                                                     iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
                                                     color: FlutterFlowTheme.of(
                                                             context)
                                                         .primary,
@@ -418,13 +418,13 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -432,7 +432,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Align(
-                                  alignment: AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Text(
                                     'Visitas de hoy',
                                     style: FlutterFlowTheme.of(context)
@@ -462,10 +463,12 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                   text: 'Ver todo',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -495,7 +498,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -505,7 +508,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -533,7 +536,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -541,8 +544,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -606,11 +610,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                                     .fontStyle,
                                                           ),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Fecha\n',
                                                       style: TextStyle(),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Hora\n',
                                                       style: TextStyle(),
                                                     ),
@@ -682,8 +686,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 1.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, 1.0),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.max,
                                                 mainAxisAlignment:
@@ -727,25 +732,22 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 0.0,
-                                                                20.0, 0.0),
+                                                            20.0, 0.0),
                                                     child: Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFD78D),
+                                                        color: const Color(
+                                                            0xFFFFD78D),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    2.0,
-                                                                    16.0,
-                                                                    2.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                2.0, 16.0, 2.0),
                                                         child: Text(
                                                           'Pendiente',
                                                           style: FlutterFlowTheme
@@ -784,8 +786,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 10.0, 0.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
@@ -798,13 +801,14 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                               .width *
                                                           0.55,
                                                   height: 30.0,
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(0.0, 0.0,
-                                                              0.0, 0.0),
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                          0.0, 0.0, 0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .primary,
@@ -844,13 +848,13 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -858,7 +862,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Align(
-                                  alignment: AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Text(
                                     'Visitas aceptadas',
                                     style: FlutterFlowTheme.of(context)
@@ -888,10 +893,12 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                   text: 'Ver todo',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -921,9 +928,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 10.0, 0.0, 0.0),
                               child: Text(
                                 '22 de Enero de 2026',
@@ -947,7 +954,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -957,7 +964,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -985,7 +992,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -993,8 +1000,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -1058,7 +1066,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                                     .fontStyle,
                                                           ),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Fecha\n',
                                                       style: TextStyle(),
                                                     ),
@@ -1130,8 +1138,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 10.0, 0.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
@@ -1144,13 +1153,14 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                               .width *
                                                           0.55,
                                                   height: 30.0,
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(0.0, 0.0,
-                                                              0.0, 0.0),
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                          0.0, 0.0, 0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .primary,
@@ -1190,15 +1200,15 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 10.0, 0.0, 0.0),
                               child: Text(
                                 '23 de Enero de 2026',
@@ -1222,7 +1232,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -1232,7 +1242,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -1260,7 +1270,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -1268,8 +1278,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -1333,7 +1344,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                                     .fontStyle,
                                                           ),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Fecha\n',
                                                       style: TextStyle(),
                                                     ),
@@ -1405,8 +1416,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 10.0, 0.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
@@ -1419,13 +1431,14 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                                               .width *
                                                           0.55,
                                                   height: 30.0,
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(0.0, 0.0,
-                                                              0.0, 0.0),
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                          0.0, 0.0, 0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .primary,
@@ -1465,7 +1478,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
@@ -1477,7 +1490,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -1485,7 +1498,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

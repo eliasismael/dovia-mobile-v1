@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__de22ec06-bf07-439a-9ac3-fb1e7e5779fb__clickup_get_folder",
+      "mcp__de22ec06-bf07-439a-9ac3-fb1e7e5779fb__clickup_get_list",
+      "mcp__de22ec06-bf07-439a-9ac3-fb1e7e5779fb__clickup_get_custom_fields"
+    ]
+  }
+}

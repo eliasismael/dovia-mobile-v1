@@ -73,7 +73,9 @@ class CreateVisitRequestCall {
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    String ffApiRequestBody = '';
+    if (dateThree != null && dateThree != '0000-00-00' && dateThree.isNotEmpty) {
+      ffApiRequestBody = '''
 {
   "proposedTimeSlots": [
     {
@@ -90,6 +92,21 @@ class CreateVisitRequestCall {
     }
   ]
 }''';
+    } else {
+      ffApiRequestBody = '''
+{
+  "proposedTimeSlots": [
+    {
+      "date": "${escapeStringForJson(dateOne)}",
+      "time": "${escapeStringForJson(hourOne)}"
+    },
+    {
+      "date": "${escapeStringForJson(dateTwo)}",
+      "time": "${escapeStringForJson(hourTwo)}"
+    }
+  ]
+}''';
+    }
     return ApiManager.instance.makeApiCall(
       callName: 'Create Visit Request',
       apiUrl: '${baseUrl}/visits/properties/${propertyId}/visit-requests',
@@ -242,12 +259,12 @@ class GetMyVisitsCall {
         'Authorization': 'Bearer ${authToken}',
       },
       params: {
-        'filter': filter,
-        'today': today,
-        'status': status,
-        'substatus': substatus,
-        'page': page,
-        'limit': limit,
+        if (filter != null && filter.isNotEmpty) 'filter': filter,
+        if (today != null && today.isNotEmpty) 'today': today,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (substatus != null && substatus.isNotEmpty) 'substatus': substatus,
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -323,7 +340,9 @@ class RescheduleVisitCall {
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    String ffApiRequestBody = '';
+    if (dateThree != null && dateThree != '0000-00-00' && dateThree.isNotEmpty) {
+      ffApiRequestBody = '''
 {
   "proposedTimeSlots": [
     { "date": "${escapeStringForJson(dateOne)}", "time": "${escapeStringForJson(hourOne)}" },
@@ -331,6 +350,15 @@ class RescheduleVisitCall {
     { "date": "${escapeStringForJson(dateThree)}", "time": "${escapeStringForJson(hourThree)}" }
   ]
 }''';
+    } else {
+      ffApiRequestBody = '''
+{
+  "proposedTimeSlots": [
+    { "date": "${escapeStringForJson(dateOne)}", "time": "${escapeStringForJson(hourOne)}" },
+    { "date": "${escapeStringForJson(dateTwo)}", "time": "${escapeStringForJson(hourTwo)}" }
+  ]
+}''';
+    }
     return ApiManager.instance.makeApiCall(
       callName: 'Reschedule Visit',
       apiUrl: '${baseUrl}/visits/${visitId}/visit-reschedule',

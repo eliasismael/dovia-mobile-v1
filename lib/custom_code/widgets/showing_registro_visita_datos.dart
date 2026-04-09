@@ -1,10 +1,6 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -310,7 +306,7 @@ class _ShowingRegistroVisitaDatosState
         alignment: Alignment.center,
         child: Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Public Sans',
             fontSize: 14,
             fontWeight: FontWeight.w400,
@@ -650,7 +646,7 @@ class _ShowingRegistroVisitaDatosState
                     const SizedBox(height: 8),
                     Text(
                       label,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Public Sans',
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -701,7 +697,7 @@ class _ShowingRegistroVisitaDatosState
             alignment: Alignment.center,
             child: Text(
               reason,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -765,7 +761,7 @@ class _ShowingRegistroVisitaDatosState
               alignment: Alignment.center,
               child: Text(
                 step,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Public Sans',
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -791,15 +787,15 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
 
         // Fotos
-        Row(
+        const Row(
           children: [
             Icon(
               Icons.camera_alt_outlined,
               size: 16,
               color: textColor,
             ),
-            const SizedBox(width: 4),
-            const Text(
+            SizedBox(width: 4),
+            Text(
               'Fotos',
               style: TextStyle(
                 fontFamily: 'Public Sans',
@@ -818,15 +814,15 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
 
         // Comentario
-        Row(
+        const Row(
           children: [
             Icon(
               Icons.chat_bubble_outline,
               size: 16,
               color: textColor,
             ),
-            const SizedBox(width: 4),
-            const Text(
+            SizedBox(width: 4),
+            Text(
               'Comentario',
               style: TextStyle(
                 fontFamily: 'Public Sans',

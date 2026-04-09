@@ -1,5 +1,3 @@
-import '../schema/structs/index.dart';
-
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
 import 'api_helpers.dart';
@@ -44,10 +42,11 @@ class AddPropertyToFavoritesCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Add Property to Favorites',
-      apiUrl: '${baseUrl}/favorites/${propertyId}${folderId != null && folderId.isNotEmpty ? "?folderId=$folderId" : ""}',
+      apiUrl:
+          '$baseUrl/favorites/$propertyId${folderId != null && folderId.isNotEmpty ? "?folderId=$folderId" : ""}',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -70,10 +69,10 @@ class RemovePropertyFromFavoritesCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Remove Property from Favorites',
-      apiUrl: '${baseUrl}/favorites/${propertyId}',
+      apiUrl: '$baseUrl/favorites/$propertyId',
       callType: ApiCallType.DELETE,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -96,10 +95,10 @@ class GetDefaultFavoritesCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Default Favorites',
-      apiUrl: '${baseUrl}/favorites',
+      apiUrl: '$baseUrl/favorites',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'page': page,
@@ -184,7 +183,7 @@ class GetDefaultFavoritesCall {
         response,
         r'''$.data[:].features.general.parkingSpots''',
       ));
-  dynamic? meta(dynamic response) => getJsonField(
+  dynamic meta(dynamic response) => getJsonField(
         response,
         r'''$.meta''',
       );
@@ -200,7 +199,7 @@ class GetDefaultFavoritesCall {
         response,
         r'''$.meta.path''',
       ));
-  dynamic? metaPagination(dynamic response) => getJsonField(
+  dynamic metaPagination(dynamic response) => getJsonField(
         response,
         r'''$.meta.pagination''',
       );
@@ -236,15 +235,15 @@ class GetDefaultFavoritesCall {
         response,
         r'''$.data[:].features.general.landArea''',
       ));
-  dynamic? itemFeaturesGeneral(dynamic response) => getJsonField(
+  dynamic itemFeaturesGeneral(dynamic response) => getJsonField(
         response,
         r'''$.data[:].features.general''',
       );
-  dynamic? itemFeatures(dynamic response) => getJsonField(
+  dynamic itemFeatures(dynamic response) => getJsonField(
         response,
         r'''$.data[:].features''',
       );
-  dynamic? itemDescription(dynamic response) => getJsonField(
+  dynamic itemDescription(dynamic response) => getJsonField(
         response,
         r'''$.data[:].description''',
       );
@@ -261,7 +260,7 @@ class GetDefaultFavoritesCall {
         response,
         r'''$.data[:].location.geo.type''',
       ));
-  dynamic? itemGeo(dynamic response) => getJsonField(
+  dynamic itemGeo(dynamic response) => getJsonField(
         response,
         r'''$.data[:].location.geo''',
       );
@@ -269,11 +268,11 @@ class GetDefaultFavoritesCall {
         response,
         r'''$.data[:].location.address.fullAddress''',
       ));
-  dynamic? itemAddress(dynamic response) => getJsonField(
+  dynamic itemAddress(dynamic response) => getJsonField(
         response,
         r'''$.data[:].location.address''',
       );
-  dynamic? itemLocation(dynamic response) => getJsonField(
+  dynamic itemLocation(dynamic response) => getJsonField(
         response,
         r'''$.data[:].location''',
       );
@@ -293,7 +292,7 @@ class GetDefaultFavoritesCall {
         response,
         r'''$.data[:].saleInfo.salePrice''',
       ));
-  dynamic? itemSaleInfo(dynamic response) => getJsonField(
+  dynamic itemSaleInfo(dynamic response) => getJsonField(
         response,
         r'''$.data[:].saleInfo''',
       );
@@ -316,10 +315,10 @@ class CheckIfPropertyIsFavoritedCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Check if Property is Favorited',
-      apiUrl: '${baseUrl}/favorites/check/${propertyId}',
+      apiUrl: '$baseUrl/favorites/check/$propertyId',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -331,7 +330,7 @@ class CheckIfPropertyIsFavoritedCall {
     );
   }
 
-  dynamic? data(dynamic response) => getJsonField(
+  dynamic data(dynamic response) => getJsonField(
         response,
         r'''$.data''',
       );
@@ -359,10 +358,10 @@ class CreateFavoriteFolderCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Favorite Folder',
-      apiUrl: '${baseUrl}/favorites/folders',
+      apiUrl: '$baseUrl/favorites/folders',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -385,10 +384,10 @@ class GetAllFavoriteFoldersCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get All Favorite Folders',
-      apiUrl: '${baseUrl}/favorites/folders',
+      apiUrl: '$baseUrl/favorites/folders',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -438,7 +437,7 @@ class UpdateFavoriteFolderNameCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update Favorite Folder Name',
-      apiUrl: '${baseUrl}/favorites/folders/${folderId}',
+      apiUrl: '$baseUrl/favorites/folders/$folderId',
       callType: ApiCallType.PATCH,
       headers: {},
       params: {},
@@ -463,10 +462,10 @@ class DeleteFavoriteFolderCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Delete Favorite Folder',
-      apiUrl: '${baseUrl}/favorites/folders/${folderId}',
+      apiUrl: '$baseUrl/favorites/folders/$folderId',
       callType: ApiCallType.DELETE,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -490,10 +489,10 @@ class GetFavoritesInFolderCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Favorites in Folder',
-      apiUrl: '${baseUrl}/favorites/folders/${folderId}/properties',
+      apiUrl: '$baseUrl/favorites/folders/$folderId/properties',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'page': page,
@@ -519,11 +518,10 @@ class RemoveFavoriteFromFolderCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Remove Favorite from Folder',
-      apiUrl:
-          '${baseUrl}/favorites/folders/${folderId}/properties/${propertyId}',
+      apiUrl: '$baseUrl/favorites/folders/$folderId/properties/$propertyId',
       callType: ApiCallType.DELETE,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -546,11 +544,10 @@ class AddFavoriteToFolderCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Add Favorite to Folder',
-      apiUrl:
-          '${baseUrl}/favorites/folders/${folderId}/properties/${propertyId}',
+      apiUrl: '$baseUrl/favorites/folders/$folderId/properties/$propertyId',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,

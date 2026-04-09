@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_notification_card_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_notification_card_model.dart';
 
@@ -47,11 +44,11 @@ class _DHASSOCIATENotificationCardWidgetState
       width: MediaQuery.sizeOf(context).width * 1.0,
       height: 96.6,
       decoration: BoxDecoration(
-        color: Color(0xFFF4F6F8),
+        color: const Color(0xFFF4F6F8),
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(40.0, 10.0, 40.0, 10.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(40.0, 10.0, 40.0, 10.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -97,9 +94,9 @@ class _DHASSOCIATENotificationCardWidgetState
               ],
             ),
             Align(
-              alignment: AlignmentDirectional(-1.0, 0.0),
+              alignment: const AlignmentDirectional(-1.0, 0.0),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +124,7 @@ class _DHASSOCIATENotificationCardWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
                       child: Text(
                         'Están buscando plomero',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -139,7 +136,7 @@ class _DHASSOCIATENotificationCardWidgetState
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: Color(0xFF00444B),
+                              color: const Color(0xFF00444B),
                               fontSize: 12.0,
                               letterSpacing: 0.0,
                               fontWeight: FlutterFlowTheme.of(context)
@@ -153,7 +150,7 @@ class _DHASSOCIATENotificationCardWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
                       child: Text(
                         '10/04/2025 - Hora XX',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(

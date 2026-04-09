@@ -3,13 +3,10 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 's_h_o_w_i_n_g_visita_del_dia_model.dart';
 export 's_h_o_w_i_n_g_visita_del_dia_model.dart';
 
@@ -61,22 +58,22 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            decoration: BoxDecoration(),
+                            decoration: const BoxDecoration(),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -108,13 +105,13 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 8.0)),
+                              ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
                           RichText(
                             textScaler: MediaQuery.of(context).textScaler,
                             text: TextSpan(
-                              children: [
+                              children: const [
                                 TextSpan(
                                   text: 'Visita del día',
                                   style: TextStyle(),
@@ -202,19 +199,19 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -222,7 +219,8 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Align(
-                                  alignment: AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Text(
                                     'Tu próxima visita',
                                     style: FlutterFlowTheme.of(context)
@@ -249,7 +247,7 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -259,7 +257,7 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
@@ -286,13 +284,14 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 20.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 20.0, 0.0, 0.0),
                                       child: Container(
                                         width:
                                             MediaQuery.sizeOf(context).width *
                                                 1.0,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -300,8 +299,9 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -367,11 +367,11 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                                                       .fontStyle,
                                                             ),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text: 'Fecha\n',
                                                         style: TextStyle(),
                                                       ),
-                                                      TextSpan(
+                                                      const TextSpan(
                                                         text: 'Hora\n',
                                                         style: TextStyle(),
                                                       ),
@@ -458,21 +458,15 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                                       options: FFButtonOptions(
                                                         height: 30.0,
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    0.0,
-                                                                    16.0,
-                                                                    0.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                0.0, 16.0, 0.0),
                                                         iconPadding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    0.0,
-                                                                    0.0,
-                                                                    0.0,
-                                                                    0.0),
-                                                        color:
-                                                            Color(0x00007376),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(0.0,
+                                                                0.0, 0.0, 0.0),
+                                                        color: const Color(
+                                                            0x00007376),
                                                         textStyle:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -526,19 +520,13 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                                       options: FFButtonOptions(
                                                         height: 30.0,
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    20.0,
-                                                                    0.0,
-                                                                    20.0,
-                                                                    0.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(20.0,
+                                                                0.0, 20.0, 0.0),
                                                         iconPadding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    0.0,
-                                                                    0.0,
-                                                                    0.0,
-                                                                    0.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(0.0,
+                                                                0.0, 0.0, 0.0),
                                                         color:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -579,7 +567,8 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                                       ),
                                                     ),
                                                   ),
-                                                ].divide(SizedBox(width: 4.0)),
+                                                ].divide(
+                                                    const SizedBox(width: 4.0)),
                                               ),
                                             ],
                                           ),
@@ -598,7 +587,7 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -606,7 +595,7 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

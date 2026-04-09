@@ -1,14 +1,11 @@
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_oferta_compra_tu_propuesta_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_oferta_compra_tu_propuesta_model.dart';
 
@@ -131,7 +128,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
               mainAxisSize: MainAxisSize.max,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(-1.0, 0.0),
+                  alignment: const AlignmentDirectional(-1.0, 0.0),
                   child: Text(
                     'Tu propuesta',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -150,10 +147,10 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                   ),
                 ),
                 Align(
-                  alignment: AlignmentDirectional(-1.0, 0.0),
+                  alignment: const AlignmentDirectional(-1.0, 0.0),
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 38.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 38.0, 0.0, 0.0),
                     child: Text(
                       'Método de pago',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -177,11 +174,11 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                   child: FlutterFlowDropDown<String>(
                     controller: _model.dropDownValueController ??=
                         FormFieldController<String>(null),
-                    options: ['Hipoteca', 'Contado', 'Promesa de compra'],
+                    options: const ['Hipoteca', 'Contado', 'Promesa de compra'],
                     onChanged: (val) =>
                         safeSetState(() => _model.dropDownValue = val),
                     width: MediaQuery.sizeOf(context).width * 1.0,
@@ -214,7 +211,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                     borderWidth: 0.0,
                     borderRadius: 10.0,
                     margin:
-                        EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                     hidesUnderline: true,
                     isOverButton: false,
                     isSearchable: false,
@@ -222,7 +219,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
                   child: Builder(
                     builder: (context) {
                       if (_model.dropDownValue == 'Hipoteca') {
@@ -230,7 +227,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 'Estructura hipotecaria',
                                 style: FlutterFlowTheme.of(context)
@@ -256,7 +253,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 'Moneda de pago',
                                 style: FlutterFlowTheme.of(context)
@@ -328,7 +325,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Enganche',
                                       style: FlutterFlowTheme.of(context)
@@ -358,9 +355,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -425,7 +422,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -433,7 +430,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -510,7 +507,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 21.0, 0.0, 0.0),
                                   child: Container(
                                     width:
@@ -524,7 +521,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                       children: [
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Text(
                                             'Propuesta económica',
                                             style: FlutterFlowTheme.of(context)
@@ -559,9 +556,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                         ),
                                         Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 12.0, 0.0, 0.0),
-                                          child: Container(
+                                          child: SizedBox(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
                                                 1.0,
@@ -636,7 +633,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         ),
                                                 enabledBorder:
                                                     OutlineInputBorder(
-                                                  borderSide: BorderSide(
+                                                  borderSide: const BorderSide(
                                                     color: Color(0x00000000),
                                                     width: 1.0,
                                                   ),
@@ -646,7 +643,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 ),
                                                 focusedBorder:
                                                     OutlineInputBorder(
-                                                  borderSide: BorderSide(
+                                                  borderSide: const BorderSide(
                                                     color: Color(0x00000000),
                                                     width: 1.0,
                                                   ),
@@ -729,7 +726,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 21.0, 0.0, 0.0),
                                   child: Container(
                                     width:
@@ -743,7 +740,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                       children: [
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Text(
                                             'Banco a utilizar',
                                             style: FlutterFlowTheme.of(context)
@@ -778,9 +775,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                         ),
                                         Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 12.0, 0.0, 0.0),
-                                          child: Container(
+                                          child: SizedBox(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
                                                 1.0,
@@ -855,7 +852,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         ),
                                                 enabledBorder:
                                                     OutlineInputBorder(
-                                                  borderSide: BorderSide(
+                                                  borderSide: const BorderSide(
                                                     color: Color(0x00000000),
                                                     width: 1.0,
                                                   ),
@@ -865,7 +862,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 ),
                                                 focusedBorder:
                                                     OutlineInputBorder(
-                                                  borderSide: BorderSide(
+                                                  borderSide: const BorderSide(
                                                     color: Color(0x00000000),
                                                     width: 1.0,
                                                   ),
@@ -959,7 +956,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Estado de crédito',
                                       style: FlutterFlowTheme.of(context)
@@ -989,9 +986,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -1056,7 +1053,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1064,7 +1061,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1146,7 +1143,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Tiempo estimado para aprobación del banco',
                                       style: FlutterFlowTheme.of(context)
@@ -1176,9 +1173,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -1243,7 +1240,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1251,7 +1248,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1324,7 +1321,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 '¿Quién será el comprador?',
                                 style: FlutterFlowTheme.of(context)
@@ -1355,7 +1352,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Nombre del comprador',
                                       style: FlutterFlowTheme.of(context)
@@ -1385,9 +1382,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -1452,7 +1449,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1460,7 +1457,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1533,9 +1530,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 12.0, 0.0, 0.0),
                                 child: Text(
                                   'Si es empresa',
@@ -1574,7 +1571,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Razón social',
                                       style: FlutterFlowTheme.of(context)
@@ -1604,9 +1601,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -1671,7 +1668,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1679,7 +1676,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1761,7 +1758,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Representante legal',
                                       style: FlutterFlowTheme.of(context)
@@ -1791,9 +1788,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -1858,7 +1855,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1866,7 +1863,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1948,7 +1945,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Consideraciones o solicitudes',
                                       style: FlutterFlowTheme.of(context)
@@ -1978,9 +1975,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -2045,7 +2042,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2053,7 +2050,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2086,7 +2083,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                               FlutterFlowTheme.of(context)
                                                   .secondaryBackground,
                                           contentPadding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 40.0, 0.0, 40.0),
                                         ),
                                         style: FlutterFlowTheme.of(context)
@@ -2128,14 +2125,14 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 ],
                               ),
                             ),
-                          ].divide(SizedBox(height: 18.0)),
+                          ].divide(const SizedBox(height: 18.0)),
                         );
                       } else if (_model.dropDownValue == 'Contado') {
                         return Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 'Moneda de pago',
                                 style: FlutterFlowTheme.of(context)
@@ -2207,7 +2204,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Propuesta económica',
                                       style: FlutterFlowTheme.of(context)
@@ -2237,9 +2234,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -2304,7 +2301,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2312,7 +2309,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2394,7 +2391,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Tiempo estimado de pago tras aceptación de oferta',
                                       style: FlutterFlowTheme.of(context)
@@ -2424,9 +2421,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -2491,7 +2488,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2499,7 +2496,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2572,7 +2569,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 '¿Quién será el comprador?',
                                 style: FlutterFlowTheme.of(context)
@@ -2603,7 +2600,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Nombre del comprador',
                                       style: FlutterFlowTheme.of(context)
@@ -2633,9 +2630,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -2700,7 +2697,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2708,7 +2705,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2781,9 +2778,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 12.0, 0.0, 0.0),
                                 child: Text(
                                   'Si es empresa',
@@ -2822,7 +2819,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Razón social',
                                       style: FlutterFlowTheme.of(context)
@@ -2852,9 +2849,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -2919,7 +2916,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -2927,7 +2924,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3009,7 +3006,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Representante legal',
                                       style: FlutterFlowTheme.of(context)
@@ -3039,9 +3036,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -3106,7 +3103,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3114,7 +3111,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3196,7 +3193,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Consideraciones o solicitudes',
                                       style: FlutterFlowTheme.of(context)
@@ -3226,9 +3223,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -3293,7 +3290,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3301,7 +3298,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3334,7 +3331,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                               FlutterFlowTheme.of(context)
                                                   .secondaryBackground,
                                           contentPadding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 40.0, 0.0, 40.0),
                                         ),
                                         style: FlutterFlowTheme.of(context)
@@ -3376,14 +3373,14 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 ],
                               ),
                             ),
-                          ].divide(SizedBox(height: 18.0)),
+                          ].divide(const SizedBox(height: 18.0)),
                         );
                       } else if (_model.dropDownValue == 'Promesa de compra') {
                         return Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 'Moneda de pago',
                                 style: FlutterFlowTheme.of(context)
@@ -3455,7 +3452,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Propuesta económica',
                                       style: FlutterFlowTheme.of(context)
@@ -3485,9 +3482,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -3552,7 +3549,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3560,7 +3557,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3633,7 +3630,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 'Estructura de pago',
                                 style: FlutterFlowTheme.of(context)
@@ -3668,7 +3665,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Reserva inicial',
                                       style: FlutterFlowTheme.of(context)
@@ -3698,9 +3695,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -3765,7 +3762,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3773,7 +3770,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3855,7 +3852,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Pago final',
                                       style: FlutterFlowTheme.of(context)
@@ -3885,9 +3882,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -3952,7 +3949,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -3960,7 +3957,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4042,7 +4039,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Tiempo de promesa',
                                       style: FlutterFlowTheme.of(context)
@@ -4072,9 +4069,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -4139,7 +4136,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4147,7 +4144,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4220,7 +4217,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 '¿Quién será el comprador?',
                                 style: FlutterFlowTheme.of(context)
@@ -4251,7 +4248,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Nombre del arrendatario',
                                       style: FlutterFlowTheme.of(context)
@@ -4281,9 +4278,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -4348,7 +4345,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4356,7 +4353,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4429,9 +4426,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 12.0, 0.0, 0.0),
                                 child: Text(
                                   'Si es empresa',
@@ -4470,7 +4467,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Razón social',
                                       style: FlutterFlowTheme.of(context)
@@ -4500,9 +4497,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -4567,7 +4564,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4575,7 +4572,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4657,7 +4654,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Representante legal',
                                       style: FlutterFlowTheme.of(context)
@@ -4687,9 +4684,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -4754,7 +4751,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4762,7 +4759,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4844,7 +4841,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Consideraciones o solicitudes',
                                       style: FlutterFlowTheme.of(context)
@@ -4874,9 +4871,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -4941,7 +4938,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4949,7 +4946,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -4982,7 +4979,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                               FlutterFlowTheme.of(context)
                                                   .secondaryBackground,
                                           contentPadding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 40.0, 0.0, 40.0),
                                         ),
                                         style: FlutterFlowTheme.of(context)
@@ -5024,7 +5021,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 ],
                               ),
                             ),
-                          ].divide(SizedBox(height: 18.0)),
+                          ].divide(const SizedBox(height: 18.0)),
                         );
                       } else {
                         return Container(
@@ -5044,11 +5041,11 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                     Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       decoration: BoxDecoration(
-                        color: Color(0x32007376),
+                        color: const Color(0x32007376),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 40.0, 20.0, 40.0),
                         child: Text(
                           'Entiendo que en este complejo NO se permite:\n• Airbnb\n• Subarrendamiento\n• Eventos\n• Mascotas (si aplica)',
@@ -5097,7 +5094,7 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                         onTap: () async {},
                       ),
                     ),
-                  ].divide(SizedBox(height: 18.0)),
+                  ].divide(const SizedBox(height: 18.0)),
                 ),
               ],
             ),

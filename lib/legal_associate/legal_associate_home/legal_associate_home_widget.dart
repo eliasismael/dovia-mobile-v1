@@ -5,12 +5,9 @@ import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/texto_y_boton/texto_y_boton_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'legal_associate_home_model.dart';
 export 'legal_associate_home_model.dart';
 
@@ -62,7 +59,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -71,12 +68,12 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                     wrapWithModel(
                       model: _model.legalAssociateHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalAssociateHeaderWidget(
+                      child: const LegalAssociateHeaderWidget(
                         titleText: 'Home',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
@@ -85,10 +82,10 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                           wrapWithModel(
                             model: _model.textoYBotonModel,
                             updateCallback: () => safeSetState(() {}),
-                            child: TextoYBotonWidget(),
+                            child: const TextoYBotonWidget(),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -98,7 +95,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -109,8 +106,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
-                                          alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: RichText(
                                             textScaler: MediaQuery.of(context)
                                                 .textScaler,
@@ -200,7 +197,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                                                 .fontStyle,
                                                       ),
                                                 ),
-                                                TextSpan(
+                                                const TextSpan(
                                                   text: 'Podras ganar: x',
                                                   style: TextStyle(),
                                                 )
@@ -265,7 +262,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -275,7 +272,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -286,8 +283,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
-                                          alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: RichText(
                                             textScaler: MediaQuery.of(context)
                                                 .textScaler,
@@ -377,7 +374,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                                                 .fontStyle,
                                                       ),
                                                 ),
-                                                TextSpan(
+                                                const TextSpan(
                                                   text: 'Podras ganar: x',
                                                   style: TextStyle(),
                                                 )
@@ -442,7 +439,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -452,7 +449,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -463,8 +460,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
-                                          alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: RichText(
                                             textScaler: MediaQuery.of(context)
                                                 .textScaler,
@@ -554,7 +551,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                                                 .fontStyle,
                                                       ),
                                                 ),
-                                                TextSpan(
+                                                const TextSpan(
                                                   text: 'Podras ganar: x',
                                                   style: TextStyle(),
                                                 )
@@ -619,7 +616,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -627,7 +624,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Align(
-                                  alignment: AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Text(
                                     'Propiedades pendientes\npor revisar',
                                     style: FlutterFlowTheme.of(context)
@@ -663,10 +661,12 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                   text: 'Ver más',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -696,7 +696,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -706,7 +706,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -734,7 +734,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -742,8 +742,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -853,14 +854,15 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                                             .width *
                                                         0.55,
                                                 height: 30.0,
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
-                                                    EdgeInsetsDirectional
+                                                    const EdgeInsetsDirectional
                                                         .fromSTEB(
-                                                            0.0, 0.0, 0.0, 0.0),
-                                                color: Color(0xFFFFD959),
+                                                        0.0, 0.0, 0.0, 0.0),
+                                                color: const Color(0xFFFFD959),
                                                 textStyle:
                                                     FlutterFlowTheme.of(context)
                                                         .titleSmall
@@ -896,13 +898,13 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -912,7 +914,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -940,7 +942,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -948,8 +950,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -1059,14 +1062,15 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                                             .width *
                                                         0.55,
                                                 height: 30.0,
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
-                                                    EdgeInsetsDirectional
+                                                    const EdgeInsetsDirectional
                                                         .fromSTEB(
-                                                            0.0, 0.0, 0.0, 0.0),
-                                                color: Color(0xFFFF9859),
+                                                        0.0, 0.0, 0.0, 0.0),
+                                                color: const Color(0xFFFF9859),
                                                 textStyle:
                                                     FlutterFlowTheme.of(context)
                                                         .titleSmall
@@ -1102,7 +1106,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
@@ -1114,7 +1118,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -1122,7 +1126,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                     wrapWithModel(
                       model: _model.lEGALASSOCAITENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALASSOCAITENavbarWidget(),
+                      child: const LEGALASSOCAITENavbarWidget(),
                     ),
                   ],
                 ),

@@ -1,14 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_documentos2_model.dart';
 export 'l_i_s_t_i_n_g_h_q_documentos2_model.dart';
 
@@ -66,7 +63,7 @@ class _LISTINGHQDocumentos2WidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -76,17 +73,17 @@ class _LISTINGHQDocumentos2WidgetState
                       model: _model.lISTINGHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: LISTINGHQHeaderWidget(
-                        titleText: widget!.propiedad!,
+                        titleText: widget.propiedad!,
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -105,8 +102,8 @@ class _LISTINGHQDocumentos2WidgetState
                                             BorderRadius.circular(24.0),
                                       ),
                                       child: Align(
-                                        alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            0.0, 0.0),
                                         child: Text(
                                           'PDF',
                                           style: FlutterFlowTheme.of(context)
@@ -141,8 +138,9 @@ class _LISTINGHQDocumentos2WidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Text(
                                         'Contrato',
                                         style: FlutterFlowTheme.of(context)
@@ -171,8 +169,9 @@ class _LISTINGHQDocumentos2WidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: LinearPercentIndicator(
                                         percent: 0.5,
                                         width: 120.0,
@@ -185,7 +184,7 @@ class _LISTINGHQDocumentos2WidgetState
                                         backgroundColor:
                                             FlutterFlowTheme.of(context)
                                                 .primaryText,
-                                        barRadius: Radius.circular(50.0),
+                                        barRadius: const Radius.circular(50.0),
                                         padding: EdgeInsets.zero,
                                       ),
                                     ),
@@ -204,8 +203,8 @@ class _LISTINGHQDocumentos2WidgetState
                                             BorderRadius.circular(24.0),
                                       ),
                                       child: Align(
-                                        alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            0.0, 0.0),
                                         child: Text(
                                           'PDF',
                                           style: FlutterFlowTheme.of(context)
@@ -240,8 +239,9 @@ class _LISTINGHQDocumentos2WidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Text(
                                         'Documento',
                                         style: FlutterFlowTheme.of(context)
@@ -270,8 +270,9 @@ class _LISTINGHQDocumentos2WidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: LinearPercentIndicator(
                                         percent: 0.5,
                                         width: 120.0,
@@ -284,7 +285,7 @@ class _LISTINGHQDocumentos2WidgetState
                                         backgroundColor:
                                             FlutterFlowTheme.of(context)
                                                 .primaryText,
-                                        barRadius: Radius.circular(50.0),
+                                        barRadius: const Radius.circular(50.0),
                                         padding: EdgeInsets.zero,
                                       ),
                                     ),
@@ -300,7 +301,7 @@ class _LISTINGHQDocumentos2WidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -308,7 +309,7 @@ class _LISTINGHQDocumentos2WidgetState
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

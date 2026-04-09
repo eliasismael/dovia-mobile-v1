@@ -6,10 +6,8 @@ import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_h_q_documento_model.dart';
 export 'l_e_g_a_l_h_q_documento_model.dart';
 
@@ -17,7 +15,7 @@ class LEGALHQDocumentoWidget extends StatefulWidget {
   const LEGALHQDocumentoWidget({
     super.key,
     String? nombreDocumento,
-  }) : this.nombreDocumento = nombreDocumento ?? 'Contrato de convenio';
+  }) : nombreDocumento = nombreDocumento ?? 'Contrato de convenio';
 
   final String nombreDocumento;
 
@@ -68,7 +66,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -77,12 +75,12 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                     wrapWithModel(
                       model: _model.legalHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalHQHeaderWidget(
+                      child: const LegalHQHeaderWidget(
                         text: 'Documento',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 40.0, 20.0, 100.0),
                       child: SingleChildScrollView(
                         child: Column(
@@ -90,7 +88,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -99,9 +97,10 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
-                                      widget!.nombreDocumento,
+                                      widget.nombreDocumento,
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -129,10 +128,11 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                     text: 'Descargar',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -164,7 +164,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Container(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -205,7 +205,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                                     backgroundColor:
                                                         Colors.transparent,
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                                 0.0, 0.0)
                                                             .resolve(
                                                                 Directionality.of(
@@ -219,13 +219,14 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                                             .primaryFocus
                                                             ?.unfocus();
                                                       },
-                                                      child: Container(
+                                                      child: SizedBox(
                                                         width:
                                                             MediaQuery.sizeOf(
                                                                         context)
                                                                     .width *
                                                                 0.8,
-                                                        child: PopupExitoWidget(
+                                                        child:
+                                                            const PopupExitoWidget(
                                                           title:
                                                               'Se aprobó con éxito',
                                                           text:
@@ -240,11 +241,10 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                       text: 'Aprobar',
                                       options: FFButtonOptions(
                                         height: 40.0,
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            16.0, 0.0, 16.0, 0.0),
-                                        iconPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                        iconPadding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                         color: FlutterFlowTheme.of(context)
                                             .primary,
                                         textStyle: FlutterFlowTheme.of(context)
@@ -274,7 +274,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                         elevation: 0.0,
                                         borderRadius:
                                             BorderRadius.circular(8.0),
-                                        disabledColor: Color(0xFF858585),
+                                        disabledColor: const Color(0xFF858585),
                                       ),
                                     ),
                                   ),
@@ -290,10 +290,11 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                     text: 'Rechazar',
                                     options: FFButtonOptions(
                                       height: 40.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color: FlutterFlowTheme.of(context).error,
                                       textStyle: FlutterFlowTheme.of(context)
@@ -322,12 +323,12 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                           ),
                                       elevation: 0.0,
                                       borderRadius: BorderRadius.circular(8.0),
-                                      disabledColor: Color(0xFF979797),
+                                      disabledColor: const Color(0xFF979797),
                                       disabledTextColor: Colors.white,
                                     ),
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 10.0)),
+                              ].divide(const SizedBox(width: 10.0)),
                             ),
                             Builder(
                               builder: (context) {
@@ -336,12 +337,11 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Align(
-                                        alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Indica por qué rechazas los documentos',
                                             style: FlutterFlowTheme.of(context)
@@ -368,8 +368,8 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: Text(
                                           'Le indicaremos al propietario que deberá revisar tus observaciones y volver a subir el documento corregidos.',
                                           style: FlutterFlowTheme.of(context)
@@ -400,9 +400,9 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
-                                        child: Container(
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                        child: SizedBox(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
@@ -473,7 +473,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                                                 .fontStyle,
                                                       ),
                                               enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 1.0,
                                                 ),
@@ -481,7 +481,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                                     BorderRadius.circular(8.0),
                                               ),
                                               focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 1.0,
                                                 ),
@@ -514,9 +514,9 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                                   FlutterFlowTheme.of(context)
                                                       .alternate,
                                               contentPadding:
-                                                  EdgeInsetsDirectional
-                                                      .fromSTEB(20.0, 20.0, 0.0,
-                                                          20.0),
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      20.0, 20.0, 0.0, 20.0),
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
@@ -558,9 +558,8 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                       ),
                                       Builder(
                                         builder: (context) => Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 20.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                           child: wrapWithModel(
                                             model: _model.primaryButtonModel,
                                             updateCallback: () =>
@@ -578,7 +577,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                                       backgroundColor:
                                                           Colors.transparent,
                                                       alignment:
-                                                          AlignmentDirectional(
+                                                          const AlignmentDirectional(
                                                                   0.0, 0.0)
                                                               .resolve(
                                                                   Directionality.of(
@@ -592,14 +591,14 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                                                               .primaryFocus
                                                               ?.unfocus();
                                                         },
-                                                        child: Container(
+                                                        child: SizedBox(
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
                                                                       .width *
                                                                   0.8,
                                                           child:
-                                                              PopupExitoWidget(
+                                                              const PopupExitoWidget(
                                                             title:
                                                                 'Se envió con éxito',
                                                             text:
@@ -637,7 +636,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -645,7 +644,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                     wrapWithModel(
                       model: _model.lEGALHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALHQNavbarWidget(),
+                      child: const LEGALHQNavbarWidget(),
                     ),
                   ],
                 ),

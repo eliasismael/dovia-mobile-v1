@@ -4,16 +4,13 @@ import '/components/house_card_component_widget.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'map_with_houses_model.dart';
 export 'map_with_houses_model.dart';
 
@@ -57,12 +54,12 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
           context: context,
           builder: (alertDialogContext) {
             return AlertDialog(
-              title: Text('err'),
+              title: const Text('err'),
               content: Text((_model.apiResultob5?.jsonBody ?? '').toString()),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(alertDialogContext),
-                  child: Text('Ok'),
+                  child: const Text('Ok'),
                 ),
               ],
             );
@@ -94,7 +91,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
         color: FlutterFlowTheme.of(context).tertiary,
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -123,7 +120,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                   controller: _model.dropDownListingValueController ??=
                       FormFieldController<String>(null),
                   options: List<String>.from(['SALE', 'RENT']),
-                  optionLabels: ['Compra', 'Renta'],
+                  optionLabels: const ['Compra', 'Renta'],
                   onChanged: (val) async {
                     safeSetState(() => _model.dropDownListingValue = val);
                     _model.filterListing = _model.dropDownListingValue;
@@ -132,13 +129,13 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                       context: context,
                       builder: (alertDialogContext) {
                         return AlertDialog(
-                          title: Text('valor filterdLsiting'),
+                          title: const Text('valor filterdLsiting'),
                           content: Text(_model.filterListing!),
                           actions: [
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(alertDialogContext),
-                              child: Text('Ok'),
+                              child: const Text('Ok'),
                             ),
                           ],
                         );
@@ -148,14 +145,14 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                       context: context,
                       builder: (alertDialogContext) {
                         return AlertDialog(
-                          title: Text('valor filteredProperties antes'),
+                          title: const Text('valor filteredProperties antes'),
                           content:
                               Text(_model.filteredProperties.length.toString()),
                           actions: [
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(alertDialogContext),
-                              child: Text('Ok'),
+                              child: const Text('Ok'),
                             ),
                           ],
                         );
@@ -165,14 +162,14 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                       context: context,
                       builder: (alertDialogContext) {
                         return AlertDialog(
-                          title: Text('despues'),
+                          title: const Text('despues'),
                           content:
                               Text(_model.filteredProperties.length.toString()),
                           actions: [
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(alertDialogContext),
-                              child: Text('Ok'),
+                              child: const Text('Ok'),
                             ),
                           ],
                         );
@@ -205,13 +202,13 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                   borderColor: Colors.transparent,
                   borderWidth: 0.0,
                   borderRadius: 8.0,
-                  margin: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                  margin: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                   hidesUnderline: true,
                   isOverButton: false,
                   isSearchable: false,
                   isMultiSelect: false,
                 ),
-              ].divide(SizedBox(height: 12.0)),
+              ].divide(const SizedBox(height: 12.0)),
             ),
             Column(
               mainAxisSize: MainAxisSize.max,
@@ -238,7 +235,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                   controller: _model.dropDownPropertyTypeValueController ??=
                       FormFieldController<String>(null),
                   options: List<String>.from(['HOUSE', 'APARTMENT']),
-                  optionLabels: ['Casa', 'Departamento'],
+                  optionLabels: const ['Casa', 'Departamento'],
                   onChanged: (val) async {
                     safeSetState(() => _model.dropDownPropertyTypeValue = val);
                     _model.filterType = _model.dropDownPropertyTypeValue;
@@ -270,13 +267,13 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                   borderColor: Colors.transparent,
                   borderWidth: 0.0,
                   borderRadius: 8.0,
-                  margin: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                  margin: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                   hidesUnderline: true,
                   isOverButton: false,
                   isSearchable: false,
                   isMultiSelect: false,
                 ),
-              ].divide(SizedBox(height: 12.0)),
+              ].divide(const SizedBox(height: 12.0)),
             ),
             Row(
               mainAxisSize: MainAxisSize.max,
@@ -306,14 +303,14 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                                 .fontStyle,
                           ),
                     ),
-                    Container(
+                    SizedBox(
                       width: MediaQuery.sizeOf(context).width * 0.4,
                       child: TextFormField(
                         controller: _model.textController1,
                         focusNode: _model.textFieldFocusNode1,
                         onChanged: (_) => EasyDebounce.debounce(
                           '_model.textController1',
-                          Duration(milliseconds: 2000),
+                          const Duration(milliseconds: 2000),
                           () async {
                             _model.filterMinPrice =
                                 double.tryParse(_model.textController1.text);
@@ -363,14 +360,14 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                                         .fontStyle,
                                   ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Color(0x00000000),
                               width: 1.0,
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Color(0x00000000),
                               width: 1.0,
                             ),
@@ -419,7 +416,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                             .asValidator(context),
                       ),
                     ),
-                  ].divide(SizedBox(height: 12.0)),
+                  ].divide(const SizedBox(height: 12.0)),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.max,
@@ -445,14 +442,14 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                                 .fontStyle,
                           ),
                     ),
-                    Container(
+                    SizedBox(
                       width: MediaQuery.sizeOf(context).width * 0.4,
                       child: TextFormField(
                         controller: _model.textController2,
                         focusNode: _model.textFieldFocusNode2,
                         onChanged: (_) => EasyDebounce.debounce(
                           '_model.textController2',
-                          Duration(milliseconds: 2000),
+                          const Duration(milliseconds: 2000),
                           () async {
                             _model.filterMaxPricewe =
                                 double.tryParse(_model.textController2.text);
@@ -502,14 +499,14 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                                         .fontStyle,
                                   ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Color(0x00000000),
                               width: 1.0,
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Color(0x00000000),
                               width: 1.0,
                             ),
@@ -558,11 +555,11 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                             .asValidator(context),
                       ),
                     ),
-                  ].divide(SizedBox(height: 12.0)),
+                  ].divide(const SizedBox(height: 12.0)),
                 ),
               ],
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.sizeOf(context).width * 1.0,
               height: MediaQuery.sizeOf(context).height * 0.6,
               child: custom_widgets.DoviaMapExplorerWidget(
@@ -583,7 +580,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                     builder: (context) {
                       return Padding(
                         padding: MediaQuery.viewInsetsOf(context),
-                        child: Container(
+                        child: SizedBox(
                           height: 400.0,
                           child: HouseCardComponentWidget(
                             propertyId: propertyId,
@@ -600,7 +597,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                 },
               ),
             ),
-          ].divide(SizedBox(height: 12.0)),
+          ].divide(const SizedBox(height: 12.0)),
         ),
       ),
     );

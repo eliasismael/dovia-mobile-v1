@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/dovia_suupport_messages/dovia_suupport_messages_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'dovia_support_model.dart';
 export 'dovia_support_model.dart';
 
@@ -47,7 +44,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
       mainAxisSize: MainAxisSize.max,
       children: [
         Stack(
-          alignment: AlignmentDirectional(0.0, 1.0),
+          alignment: const AlignmentDirectional(0.0, 1.0),
           children: [
             Container(
               decoration: BoxDecoration(
@@ -60,18 +57,18 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0x85007376),
+                      const Color(0x85007376),
                       FlutterFlowTheme.of(context).secondary
                     ],
-                    stops: [0.0, 1.0],
-                    begin: AlignmentDirectional(0.0, -1.0),
-                    end: AlignmentDirectional(0, 1.0),
+                    stops: const [0.0, 1.0],
+                    begin: const AlignmentDirectional(0.0, -1.0),
+                    end: const AlignmentDirectional(0, 1.0),
                   ),
                   borderRadius: BorderRadius.circular(18.0),
                 ),
                 child: Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 30.0, 20.0, 0.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -110,9 +107,9 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                         ],
                       ),
                       Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 50.0, 0.0, 0.0),
                           child: Text(
                             '¡Hola!',
@@ -138,7 +135,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                         ),
                       ),
                       Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Text(
                           '¿Necesitas ayuda? Escríbenos \npor aquI',
                           style:
@@ -159,15 +156,15 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 27.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 27.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 100.0,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 blurRadius: 4.0,
                                 color: Color(0x33000000),
@@ -180,7 +177,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 14.0, 14.0, 14.0, 14.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
@@ -238,15 +235,15 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 14.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 100.0,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 blurRadius: 4.0,
                                 color: Color(0x33000000),
@@ -259,7 +256,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 14.0, 14.0, 14.0, 14.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
@@ -322,11 +319,12 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(20.0, 120.0, 20.0, 20.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 120.0, 20.0, 20.0),
               child: Container(
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).tertiary,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       blurRadius: 4.0,
                       color: Color(0x4B000000),
@@ -343,8 +341,8 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 0.0, 20.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 0.0, 20.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -383,8 +381,8 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 20.0, 20.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 20.0, 20.0, 20.0),
                       child: InkWell(
                         splashColor: Colors.transparent,
                         focusColor: Colors.transparent,
@@ -399,7 +397,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                             builder: (context) {
                               return Padding(
                                 padding: MediaQuery.viewInsetsOf(context),
-                                child: DoviaSuupportMessagesWidget(),
+                                child: const DoviaSuupportMessagesWidget(),
                               );
                             },
                           ).then((value) => safeSetState(() {}));

@@ -1,16 +1,13 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_documentos3_model.dart';
 export 'l_i_s_t_i_n_g_h_q_documentos3_model.dart';
 
@@ -19,7 +16,7 @@ class LISTINGHQDocumentos3Widget extends StatefulWidget {
     super.key,
     required this.propiedad,
     String? nombreDocumento,
-  }) : this.nombreDocumento = nombreDocumento ?? 'Contrato';
+  }) : nombreDocumento = nombreDocumento ?? 'Contrato';
 
   final String? propiedad;
   final String nombreDocumento;
@@ -70,7 +67,7 @@ class _LISTINGHQDocumentos3WidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -80,23 +77,23 @@ class _LISTINGHQDocumentos3WidgetState
                       model: _model.lISTINGHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: LISTINGHQHeaderWidget(
-                        titleText: widget!.propiedad!,
+                        titleText: widget.propiedad!,
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Text(
-                                  widget!.nombreDocumento,
+                                  widget.nombreDocumento,
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -122,7 +119,7 @@ class _LISTINGHQDocumentos3WidgetState
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Container(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -144,7 +141,7 @@ class _LISTINGHQDocumentos3WidgetState
                             ),
                             Builder(
                               builder: (context) => Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: wrapWithModel(
                                   model: _model.secondaryButtonModel,
@@ -159,10 +156,11 @@ class _LISTINGHQDocumentos3WidgetState
                                             elevation: 0,
                                             insetPadding: EdgeInsets.zero,
                                             backgroundColor: Colors.transparent,
-                                            alignment: AlignmentDirectional(
-                                                    0.0, 0.0)
-                                                .resolve(
-                                                    Directionality.of(context)),
+                                            alignment:
+                                                const AlignmentDirectional(
+                                                        0.0, 0.0)
+                                                    .resolve(Directionality.of(
+                                                        context)),
                                             child: GestureDetector(
                                               onTap: () {
                                                 FocusScope.of(dialogContext)
@@ -171,7 +169,7 @@ class _LISTINGHQDocumentos3WidgetState
                                                     .instance.primaryFocus
                                                     ?.unfocus();
                                               },
-                                              child: PopupExitoWidget(
+                                              child: const PopupExitoWidget(
                                                 title:
                                                     'Se envió con éxito al propietario',
                                                 text:
@@ -188,7 +186,7 @@ class _LISTINGHQDocumentos3WidgetState
                             ),
                             Builder(
                               builder: (context) => Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: wrapWithModel(
                                   model: _model.primaryButtonModel,
@@ -203,10 +201,11 @@ class _LISTINGHQDocumentos3WidgetState
                                             elevation: 0,
                                             insetPadding: EdgeInsets.zero,
                                             backgroundColor: Colors.transparent,
-                                            alignment: AlignmentDirectional(
-                                                    0.0, 0.0)
-                                                .resolve(
-                                                    Directionality.of(context)),
+                                            alignment:
+                                                const AlignmentDirectional(
+                                                        0.0, 0.0)
+                                                    .resolve(Directionality.of(
+                                                        context)),
                                             child: GestureDetector(
                                               onTap: () {
                                                 FocusScope.of(dialogContext)
@@ -215,7 +214,7 @@ class _LISTINGHQDocumentos3WidgetState
                                                     .instance.primaryFocus
                                                     ?.unfocus();
                                               },
-                                              child: PopupExitoWidget(
+                                              child: const PopupExitoWidget(
                                                 title:
                                                     'Se envió con éxito al Equipo Legal',
                                                 text:
@@ -238,7 +237,7 @@ class _LISTINGHQDocumentos3WidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -246,7 +245,7 @@ class _LISTINGHQDocumentos3WidgetState
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

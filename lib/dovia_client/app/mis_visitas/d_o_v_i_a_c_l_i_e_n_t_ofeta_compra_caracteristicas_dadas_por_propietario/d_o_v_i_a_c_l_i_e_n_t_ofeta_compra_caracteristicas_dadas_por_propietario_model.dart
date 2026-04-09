@@ -1,12 +1,7 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'd_o_v_i_a_c_l_i_e_n_t_ofeta_compra_caracteristicas_dadas_por_propietario_widget.dart'
     show DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioModel
     extends FlutterFlowModel<

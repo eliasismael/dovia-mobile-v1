@@ -1,4 +1,3 @@
-import '../schema/structs/index.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
@@ -32,10 +31,10 @@ class GetAuthenticatedUserProfileCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Authenticated User Profile',
-      apiUrl: '${baseUrl}/users/me',
+      apiUrl: '$baseUrl/users/me',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -67,7 +66,7 @@ class ListUsersByRoleCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'List Users by Role',
-      apiUrl: '${baseUrl}/users',
+      apiUrl: '$baseUrl/users',
       callType: ApiCallType.GET,
       headers: {},
       params: {
@@ -93,7 +92,7 @@ class GetUserByIDNEWCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get User by ID NEW',
-      apiUrl: '${baseUrl}/users/${userId}',
+      apiUrl: '$baseUrl/users/$userId',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
@@ -113,11 +112,11 @@ class UpdateUserPreferencesNEWCall {
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update User Preferences NEW',
-      apiUrl: '${baseUrl}/users/${userId}/preferences',
+      apiUrl: '$baseUrl/users/$userId/preferences',
       callType: ApiCallType.PUT,
       headers: {},
       params: {},
@@ -140,11 +139,11 @@ class UploadUserDocumentCall {
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upload User Document',
-      apiUrl: '${baseUrl}/users/${userId}/documents/${documentType}',
+      apiUrl: '$baseUrl/users/$userId/documents/$documentType',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -164,11 +163,11 @@ class UploadProfilePictureCall {
   Future<ApiCallResponse> call() async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Profile Picture',
-      apiUrl: '${baseUrl}/users/profile-picture',
+      apiUrl: '$baseUrl/users/profile-picture',
       callType: ApiCallType.PUT,
       headers: {},
       params: {},
@@ -209,10 +208,10 @@ class UpdateUserProfileCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update User Profile',
-      apiUrl: '${baseUrl}/users/${userId}',
+      apiUrl: '$baseUrl/users/$userId',
       callType: ApiCallType.PATCH,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -236,10 +235,10 @@ class AdminVerifyUserCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Admin Verify User',
-      apiUrl: '${baseUrl}/admin/users/${userId}/verify',
+      apiUrl: '$baseUrl/admin/users/$userId/verify',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       bodyType: BodyType.JSON,
