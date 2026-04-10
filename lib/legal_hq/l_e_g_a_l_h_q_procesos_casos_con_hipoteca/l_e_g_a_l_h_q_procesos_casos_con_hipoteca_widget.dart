@@ -1,14 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
 import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_h_q_procesos_casos_con_hipoteca_model.dart';
 export 'l_e_g_a_l_h_q_procesos_casos_con_hipoteca_model.dart';
 
@@ -61,7 +57,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -70,19 +66,19 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
                     wrapWithModel(
                       model: _model.legalHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalHQHeaderWidget(
+                      child: const LegalHQHeaderWidget(
                         text: 'Home',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 40.0, 20.0, 100.0),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Container(
+                            SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: MediaQuery.sizeOf(context).height * 1.0,
                               child: custom_widgets.CasosConHipotecaWidget(
@@ -101,7 +97,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -109,7 +105,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
                     wrapWithModel(
                       model: _model.lEGALHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALHQNavbarWidget(),
+                      child: const LEGALHQNavbarWidget(),
                     ),
                   ],
                 ),

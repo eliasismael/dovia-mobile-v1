@@ -1,15 +1,11 @@
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_servicios_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_servicios_model.dart';
 
@@ -62,21 +58,21 @@ class _DHASSOCIATEServiciosWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          decoration: BoxDecoration(),
+                          decoration: const BoxDecoration(),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -107,7 +103,7 @@ class _DHASSOCIATEServiciosWidgetState
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ),
                         RichText(
@@ -195,14 +191,14 @@ class _DHASSOCIATEServiciosWidgetState
                                 ),
                               ),
                             ),
-                          ].divide(SizedBox(width: 8.0)),
+                          ].divide(const SizedBox(width: 8.0)),
                         ),
                       ],
                     ),
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       decoration: BoxDecoration(
@@ -210,7 +206,7 @@ class _DHASSOCIATEServiciosWidgetState
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 10.0, 0.0, 10.0),
                         child: Wrap(
                           spacing: 10.0,
@@ -226,7 +222,7 @@ class _DHASSOCIATEServiciosWidgetState
                               width: 100.0,
                               height: 100.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF7F7F7),
+                                color: const Color(0xFFF7F7F7),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Column(
@@ -238,7 +234,7 @@ class _DHASSOCIATEServiciosWidgetState
                                     width: 40.0,
                                     height: 40.0,
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF70ACAD),
+                                      color: const Color(0xFF70ACAD),
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: ClipRRect(
@@ -278,7 +274,7 @@ class _DHASSOCIATEServiciosWidgetState
                               width: 100.0,
                               height: 100.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF7F7F7),
+                                color: const Color(0xFFF7F7F7),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Column(
@@ -290,7 +286,7 @@ class _DHASSOCIATEServiciosWidgetState
                                     width: 40.0,
                                     height: 40.0,
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF70ACAD),
+                                      color: const Color(0xFF70ACAD),
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: ClipRRect(
@@ -330,7 +326,7 @@ class _DHASSOCIATEServiciosWidgetState
                               width: 100.0,
                               height: 100.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF7F7F7),
+                                color: const Color(0xFFF7F7F7),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Column(
@@ -342,7 +338,7 @@ class _DHASSOCIATEServiciosWidgetState
                                     width: 40.0,
                                     height: 40.0,
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF70ACAD),
+                                      color: const Color(0xFF70ACAD),
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: ClipRRect(
@@ -382,7 +378,7 @@ class _DHASSOCIATEServiciosWidgetState
                               width: 100.0,
                               height: 100.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF7F7F7),
+                                color: const Color(0xFFF7F7F7),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Column(
@@ -394,7 +390,7 @@ class _DHASSOCIATEServiciosWidgetState
                                     width: 40.0,
                                     height: 40.0,
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF70ACAD),
+                                      color: const Color(0xFF70ACAD),
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: ClipRRect(
@@ -434,7 +430,7 @@ class _DHASSOCIATEServiciosWidgetState
                               width: 100.0,
                               height: 100.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF7F7F7),
+                                color: const Color(0xFFF7F7F7),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Column(
@@ -446,7 +442,7 @@ class _DHASSOCIATEServiciosWidgetState
                                     width: 40.0,
                                     height: 40.0,
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF70ACAD),
+                                      color: const Color(0xFF70ACAD),
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: ClipRRect(
@@ -494,23 +490,23 @@ class _DHASSOCIATEServiciosWidgetState
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Align(
-                    alignment: AlignmentDirectional(1.0, 0.0),
+                    alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: FixedDoviaIconWidget(),
+                        child: const FixedDoviaIconWidget(),
                       ),
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(0.0, 1.0),
+                    alignment: const AlignmentDirectional(0.0, 1.0),
                     child: wrapWithModel(
                       model: _model.dHASSOCIATENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DHASSOCIATENavbarWidget(),
+                      child: const DHASSOCIATENavbarWidget(),
                     ),
                   ),
                 ],

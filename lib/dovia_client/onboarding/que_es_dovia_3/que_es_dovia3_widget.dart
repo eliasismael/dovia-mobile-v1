@@ -1,13 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'que_es_dovia3_model.dart';
 export 'que_es_dovia3_model.dart';
 
@@ -57,15 +54,15 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
         Container(
           width: 100.0,
           height: MediaQuery.sizeOf(context).height * 1.0,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
               Padding(
-                padding:
-                    EdgeInsetsDirectional.fromSTEB(157.0, 109.0, 156.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    157.0, 109.0, 156.0, 0.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(0.0),
                   child: SvgPicture.asset(
@@ -77,7 +74,8 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(40.0, 36.0, 40.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(40.0, 36.0, 40.0, 0.0),
                 child: RichText(
                   textScaler: MediaQuery.of(context).textScaler,
                   text: TextSpan(
@@ -91,7 +89,7 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: Color(0xFF007376),
+                              color: const Color(0xFF007376),
                               fontSize: 24.0,
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.w600,
@@ -109,7 +107,7 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                                 .bodyMedium
                                 .fontStyle,
                           ),
-                          color: Color(0xFFEBEAE3),
+                          color: const Color(0xFFEBEAE3),
                           fontSize: 24.0,
                           letterSpacing: 0.0,
                           fontWeight: FontWeight.normal,
@@ -122,15 +120,16 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(33.0, 18.0, 24.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(33.0, 18.0, 24.0, 0.0),
                 child: Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(),
+                  decoration: const BoxDecoration(),
                   child: Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 36.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 36.0, 0.0, 0.0),
                     child: Container(
-                      decoration: BoxDecoration(),
+                      decoration: const BoxDecoration(),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +149,7 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                                     .secondaryBackground,
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 0.0, 0.0, 0.0),
                                 child: RichText(
                                   textScaler: MediaQuery.of(context).textScaler,
@@ -169,7 +168,7 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                                                         .bodyMedium
                                                         .fontStyle,
                                               ),
-                                              color: Color(0xFF007376),
+                                              color: const Color(0xFF007376),
                                               fontSize: 16.0,
                                               letterSpacing: 0.0,
                                               fontWeight: FontWeight.normal,
@@ -179,12 +178,12 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                                                       .fontStyle,
                                             ),
                                       ),
-                                      TextSpan(
+                                      const TextSpan(
                                         text:
                                             'Recibe ofertas directas y seguras.\n',
                                         style: TextStyle(),
                                       ),
-                                      TextSpan(
+                                      const TextSpan(
                                         text:
                                             '\n\n\nCierra con respaldo legal verificado\n',
                                         style: TextStyle(),
@@ -200,7 +199,7 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                                                     .bodyMedium
                                                     .fontStyle,
                                           ),
-                                          color: Color(0xFF007376),
+                                          color: const Color(0xFF007376),
                                           fontSize: 16.0,
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.normal,
@@ -222,7 +221,8 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 31.0, 21.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 31.0, 21.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
                     await widget.onSiguienteTap?.call();
@@ -231,11 +231,11 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                   options: FFButtonOptions(
                     width: double.infinity,
                     height: 49.0,
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                    iconPadding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                    color: Color(0xFF007376),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        16.0, 0.0, 16.0, 0.0),
+                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 0.0, 0.0),
+                    color: const Color(0xFF007376),
                     textStyle: FlutterFlowTheme.of(context).labelLarge.override(
                           font: GoogleFonts.publicSans(
                             fontWeight: FlutterFlowTheme.of(context)
@@ -259,8 +259,8 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                 ),
               ),
               Padding(
-                padding:
-                    EdgeInsetsDirectional.fromSTEB(158.0, 10.0, 159.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    158.0, 10.0, 159.0, 0.0),
                 child: InkWell(
                   splashColor: Colors.transparent,
                   focusColor: Colors.transparent,
@@ -278,7 +278,7 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                                 .bodyMedium
                                 .fontStyle,
                           ),
-                          color: Color(0xFF007376),
+                          color: const Color(0xFF007376),
                           fontSize: 15.0,
                           letterSpacing: 0.0,
                           fontWeight: FontWeight.w600,
@@ -290,7 +290,8 @@ class _QueEsDovia3WidgetState extends State<QueEsDovia3Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(85.0, 25.0, 86.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(85.0, 25.0, 86.0, 0.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: SvgPicture.asset(

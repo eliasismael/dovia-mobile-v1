@@ -1,15 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_documentos_model.dart';
 export 'l_i_s_t_i_n_g_h_q_documentos_model.dart';
 
@@ -61,7 +57,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -70,18 +66,18 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                     wrapWithModel(
                       model: _model.lISTINGHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQHeaderWidget(
+                      child: const LISTINGHQHeaderWidget(
                         titleText: 'Documentos',
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Text(
                               'Documentos',
                               style: FlutterFlowTheme.of(context)
@@ -103,7 +99,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -130,7 +126,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -162,7 +158,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -172,8 +168,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -277,8 +274,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 1.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 1.0),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
@@ -322,20 +320,17 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFD78D),
+                                                        color: const Color(
+                                                            0xFFFFD78D),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    2.0,
-                                                                    16.0,
-                                                                    2.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                2.0, 16.0, 2.0),
                                                         child: Text(
                                                           'Publicada',
                                                           style: FlutterFlowTheme
@@ -376,14 +371,14 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 10.0)),
+                                    ].divide(const SizedBox(width: 10.0)),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -410,7 +405,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -442,7 +437,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -452,8 +447,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -557,8 +553,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 1.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 1.0),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
@@ -602,20 +599,17 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFD78D),
+                                                        color: const Color(
+                                                            0xFFFFD78D),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    2.0,
-                                                                    16.0,
-                                                                    2.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                2.0, 16.0, 2.0),
                                                         child: Text(
                                                           'Publicada',
                                                           style: FlutterFlowTheme
@@ -656,14 +650,14 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 10.0)),
+                                    ].divide(const SizedBox(width: 10.0)),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -690,7 +684,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -722,7 +716,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: IntrinsicWidth(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -732,8 +726,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    -1.0, 0.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        -1.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
                                                       MediaQuery.of(context)
@@ -837,8 +832,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 1.0),
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 1.0),
                                                 child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
@@ -882,20 +878,17 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFD78D),
+                                                        color: const Color(
+                                                            0xFFFFD78D),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    2.0,
-                                                                    16.0,
-                                                                    2.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                2.0, 16.0, 2.0),
                                                         child: Text(
                                                           'Publicada',
                                                           style: FlutterFlowTheme
@@ -936,7 +929,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 10.0)),
+                                    ].divide(const SizedBox(width: 10.0)),
                                   ),
                                 ),
                               ),
@@ -949,7 +942,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -957,7 +950,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

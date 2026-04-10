@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'porpiedades_amenidades_model.dart';
 export 'porpiedades_amenidades_model.dart';
 
@@ -49,7 +46,7 @@ class _PorpiedadesAmenidadesWidgetState
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      decoration: BoxDecoration(),
+      decoration: const BoxDecoration(),
       child: Container(
         width: double.infinity,
         color: FlutterFlowTheme.of(context).tertiary,
@@ -63,9 +60,9 @@ class _PorpiedadesAmenidadesWidgetState
                 color: FlutterFlowTheme.of(context).secondaryBackground,
               ),
               child: Align(
-                alignment: AlignmentDirectional(-1.0, 0.0),
+                alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                   child: Text(
                     'Amenidades',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -88,19 +85,19 @@ class _PorpiedadesAmenidadesWidgetState
             collapsed: Container(
               width: 0.0,
               height: 0.0,
-              decoration: BoxDecoration(),
+              decoration: const BoxDecoration(),
             ),
             expanded: Container(
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).tertiary,
               ),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 20.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 20.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(-1.0, 0.0),
+                      alignment: const AlignmentDirectional(-1.0, 0.0),
                       child: Text(
                         'Propiedad',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -120,7 +117,7 @@ class _PorpiedadesAmenidadesWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -203,8 +200,8 @@ class _PorpiedadesAmenidadesWidgetState
                                       ),
                                 ),
                               ]
-                                  .divide(SizedBox(height: 12.0))
-                                  .addToStart(SizedBox(height: 12.0)),
+                                  .divide(const SizedBox(height: 12.0))
+                                  .addToStart(const SizedBox(height: 12.0)),
                             ),
                           ),
                           Column(
@@ -256,15 +253,15 @@ class _PorpiedadesAmenidadesWidgetState
                                     ),
                               ),
                             ]
-                                .divide(SizedBox(height: 12.0))
-                                .addToStart(SizedBox(height: 12.0)),
+                                .divide(const SizedBox(height: 12.0))
+                                .addToStart(const SizedBox(height: 12.0)),
                           ),
                         ],
                       ),
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         height: 1.0,
@@ -274,10 +271,10 @@ class _PorpiedadesAmenidadesWidgetState
                       ),
                     ),
                     Align(
-                      alignment: AlignmentDirectional(-1.0, 0.0),
+                      alignment: const AlignmentDirectional(-1.0, 0.0),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                         child: Text(
                           'Áreas comúnes',
                           style:
@@ -303,9 +300,9 @@ class _PorpiedadesAmenidadesWidgetState
                       children: [
                         Expanded(
                           child: Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
@@ -415,14 +412,14 @@ class _PorpiedadesAmenidadesWidgetState
                                                   .fontStyle,
                                         ),
                                   ),
-                                ].divide(SizedBox(height: 12.0)),
+                                ].divide(const SizedBox(height: 12.0)),
                               ),
                             ),
                           ),
                         ),
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 12.0, 0.0, 0.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
@@ -500,7 +497,7 @@ class _PorpiedadesAmenidadesWidgetState
                                             .fontStyle,
                                       ),
                                 ),
-                              ].divide(SizedBox(height: 12.0)),
+                              ].divide(const SizedBox(height: 12.0)),
                             ),
                           ),
                         ),
@@ -510,7 +507,7 @@ class _PorpiedadesAmenidadesWidgetState
                 ),
               ),
             ),
-            theme: ExpandableThemeData(
+            theme: const ExpandableThemeData(
               tapHeaderToExpand: true,
               tapBodyToExpand: false,
               tapBodyToCollapse: false,

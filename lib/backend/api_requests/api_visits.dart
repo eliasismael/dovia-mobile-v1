@@ -73,7 +73,9 @@ class CreateVisitRequestCall {
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    String ffApiRequestBody = '';
+    if (dateThree != null && dateThree != '0000-00-00' && dateThree.isNotEmpty) {
+      ffApiRequestBody = '''
 {
   "proposedTimeSlots": [
     {
@@ -90,6 +92,21 @@ class CreateVisitRequestCall {
     }
   ]
 }''';
+    } else {
+      ffApiRequestBody = '''
+{
+  "proposedTimeSlots": [
+    {
+      "date": "${escapeStringForJson(dateOne)}",
+      "time": "${escapeStringForJson(hourOne)}"
+    },
+    {
+      "date": "${escapeStringForJson(dateTwo)}",
+      "time": "${escapeStringForJson(hourTwo)}"
+    }
+  ]
+}''';
+    }
     return ApiManager.instance.makeApiCall(
       callName: 'Create Visit Request',
       apiUrl: '${baseUrl}/visits/properties/${propertyId}/visit-requests',
@@ -113,17 +130,23 @@ class CreateVisitRequestCall {
 class CreateOperativeListingVisitCall {
   Future<ApiCallResponse> call({
     String? propertyId = '',
+    String? authToken = '',
+    dynamic ranges,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{}''';
+    String ffApiRequestBody = '''
+{
+  "proposedAvailabilityRanges": ${serializeJson(ranges, true)}
+}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Operative Listing Visit',
       apiUrl:
           '${baseUrl}/visits/properties/${propertyId}/operative-listing-visits',
       callType: ApiCallType.POST,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -140,19 +163,22 @@ class CreateOperativeListingVisitCall {
 class UploadSignedContractCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
+    String? authToken = '',
+    FFUploadedFile? file,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Signed Contract',
       apiUrl: '${baseUrl}/visits/${visitId}/documents/signed-contract',
       callType: ApiCallType.POST,
-      headers: {},
-      params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.JSON,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
@@ -166,16 +192,22 @@ class UploadSignedContractCall {
 class UpdateVisitInstructionsCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
+    String? authToken = '',
+    String? instructions = '',
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
     final ffApiRequestBody = '''
-{}''';
+{
+  "instructions": "${escapeStringForJson(instructions)}"
+}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update Visit Instructions',
       apiUrl: '${baseUrl}/visits/${visitId}/instructions',
       callType: ApiCallType.PUT,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -242,12 +274,12 @@ class GetMyVisitsCall {
         'Authorization': 'Bearer ${authToken}',
       },
       params: {
-        'filter': filter,
-        'today': today,
-        'status': status,
-        'substatus': substatus,
-        'page': page,
-        'limit': limit,
+        if (filter != null && filter.isNotEmpty) 'filter': filter,
+        if (today != null && today.isNotEmpty) 'today': today,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (substatus != null && substatus.isNotEmpty) 'substatus': substatus,
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -323,7 +355,9 @@ class RescheduleVisitCall {
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    String ffApiRequestBody = '';
+    if (dateThree != null && dateThree != '0000-00-00' && dateThree.isNotEmpty) {
+      ffApiRequestBody = '''
 {
   "proposedTimeSlots": [
     { "date": "${escapeStringForJson(dateOne)}", "time": "${escapeStringForJson(hourOne)}" },
@@ -331,6 +365,15 @@ class RescheduleVisitCall {
     { "date": "${escapeStringForJson(dateThree)}", "time": "${escapeStringForJson(hourThree)}" }
   ]
 }''';
+    } else {
+      ffApiRequestBody = '''
+{
+  "proposedTimeSlots": [
+    { "date": "${escapeStringForJson(dateOne)}", "time": "${escapeStringForJson(hourOne)}" },
+    { "date": "${escapeStringForJson(dateTwo)}", "time": "${escapeStringForJson(hourTwo)}" }
+  ]
+}''';
+    }
     return ApiManager.instance.makeApiCall(
       callName: 'Reschedule Visit',
       apiUrl: '${baseUrl}/visits/${visitId}/visit-reschedule',
@@ -573,7 +616,7 @@ class ReviewChecklistDocumentsCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
     String? authToken = '',
-    dynamic? items,
+    dynamic items,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 

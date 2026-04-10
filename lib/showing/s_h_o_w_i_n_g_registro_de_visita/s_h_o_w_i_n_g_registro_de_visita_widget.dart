@@ -4,12 +4,9 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 's_h_o_w_i_n_g_registro_de_visita_model.dart';
 export 's_h_o_w_i_n_g_registro_de_visita_model.dart';
 
@@ -62,7 +59,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -71,20 +68,20 @@ class _SHOWINGRegistroDeVisitaWidgetState
                     wrapWithModel(
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: SHOWINGHeaderWidget(
+                      child: const SHOWINGHeaderWidget(
                         title: 'Registro de visita',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 80.0,
                               child: custom_widgets.DateSelectorWidget(
@@ -96,9 +93,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Hoy 22 de enero 2026',
@@ -122,7 +119,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -132,7 +129,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -160,7 +157,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -168,8 +165,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -233,11 +231,11 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                                                     .fontStyle,
                                                           ),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Fecha\n',
                                                       style: TextStyle(),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Hora\n',
                                                       style: TextStyle(),
                                                     ),
@@ -309,8 +307,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 10.0, 0.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
@@ -323,13 +322,14 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                                               .width *
                                                           0.55,
                                                   height: 30.0,
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(0.0, 0.0,
-                                                              0.0, 0.0),
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                          0.0, 0.0, 0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .primary,
@@ -369,13 +369,13 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -385,7 +385,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -413,7 +413,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -421,8 +421,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -486,11 +487,11 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                                                     .fontStyle,
                                                           ),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Fecha\n',
                                                       style: TextStyle(),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Hora\n',
                                                       style: TextStyle(),
                                                     ),
@@ -562,8 +563,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 10.0, 0.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
@@ -576,13 +578,14 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                                               .width *
                                                           0.55,
                                                   height: 30.0,
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(0.0, 0.0,
-                                                              0.0, 0.0),
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                          0.0, 0.0, 0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .primary,
@@ -622,13 +625,13 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -638,7 +641,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -666,7 +669,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                     Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           0.6,
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: IntrinsicWidth(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -674,8 +677,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                               CrossAxisAlignment.start,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: RichText(
                                                 textScaler:
                                                     MediaQuery.of(context)
@@ -739,11 +743,11 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                                                     .fontStyle,
                                                           ),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Fecha\n',
                                                       style: TextStyle(),
                                                     ),
-                                                    TextSpan(
+                                                    const TextSpan(
                                                       text: 'Hora\n',
                                                       style: TextStyle(),
                                                     ),
@@ -815,8 +819,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 10.0, 0.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
@@ -829,13 +834,14 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                                               .width *
                                                           0.55,
                                                   height: 30.0,
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(0.0, 0.0,
-                                                              0.0, 0.0),
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                          0.0, 0.0, 0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .primary,
@@ -875,7 +881,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 10.0)),
+                                  ].divide(const SizedBox(width: 10.0)),
                                 ),
                               ),
                             ),
@@ -887,7 +893,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -895,7 +901,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                     wrapWithModel(
                       model: _model.sHOWINGNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: SHOWINGNavbarWidget(),
+                      child: const SHOWINGNavbarWidget(),
                     ),
                   ],
                 ),

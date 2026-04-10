@@ -11,12 +11,10 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_model.dart';
 
@@ -49,12 +47,10 @@ class _DOVIACLIENTMisPropiedadesWidgetState
       final result = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
           .call(authToken: currentAuthenticationToken);
       if (!mounted) return;
-      final properties =
-          DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(
+      final properties = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(
         result.jsonBody,
       );
-      if ((properties == null || properties.isEmpty) &&
-          result.succeeded) {
+      if ((properties == null || properties.isEmpty) && result.succeeded) {
         context.goNamed(DOVIACLIENTComoFuncionaWidget.routeName);
       }
     });
@@ -84,7 +80,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -93,12 +89,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
+                      child: const DOVIASHAREDHeaderWidget(
                         title: 'Mis Propiedades',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
@@ -109,9 +105,10 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Align(
-                                alignment: AlignmentDirectional(-1.0, 0.0),
+                                alignment:
+                                    const AlignmentDirectional(-1.0, 0.0),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 33.0, 0.0, 0.0),
                                   child: Text(
                                     'Mis Propiedades\nPublicadas',
@@ -145,11 +142,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                 text: 'Publicar más',
                                 options: FFButtonOptions(
                                   height: 40.0,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       20.0, 0.0, 20.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: Color(0x30007376),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
+                                  color: const Color(0x30007376),
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .override(
@@ -180,7 +178,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                             ],
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: FutureBuilder<ApiCallResponse>(
                               future: DOVIAAPIPropertyContextGroup
@@ -230,7 +228,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                         final eachOwnPropertyItem =
                                             eachOwnProperty[
                                                 eachOwnPropertyIndex];
-                                        return Container(
+                                        return SizedBox(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
@@ -246,108 +244,167 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                             isFavorite: getJsonField(
                                               eachOwnPropertyItem,
                                               r'''$.isFavorite''',
-                                            ),                                              onAddToFavorites: () async {
-                                                if (FFAppState().UserRole != 'VISITOR') {
-                                                  _model.apiResultj56 =
-                                                      await DOVIAAPIFavoriteContextGroup
-                                                          .addPropertyToFavoritesCall
-                                                          .call(
-                                                    authToken: currentAuthenticationToken,
-                                                    propertyId: getJsonField(eachOwnPropertyItem, r'''$.id''').toString(),
-                                                  );
+                                            ),
+                                            onAddToFavorites: () async {
+                                              if (FFAppState().UserRole !=
+                                                  'VISITOR') {
+                                                _model.apiResultj56 =
+                                                    await DOVIAAPIFavoriteContextGroup
+                                                        .addPropertyToFavoritesCall
+                                                        .call(
+                                                  authToken:
+                                                      currentAuthenticationToken,
+                                                  propertyId: getJsonField(
+                                                          eachOwnPropertyItem,
+                                                          r'''$.id''')
+                                                      .toString(),
+                                                );
 
-                                                  if ((_model.apiResultj56?.succeeded ?? true)) {
-                                                    await showModalBottomSheet(
-                                                      isScrollControlled: true,
-                                                      backgroundColor: Colors.transparent,
-                                                      enableDrag: false,
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return GestureDetector(
-                                                          onTap: () {
-                                                            FocusScope.of(context).unfocus();
-                                                            FocusManager.instance.primaryFocus?.unfocus();
-                                                          },
-                                                          child: Padding(
-                                                            padding: MediaQuery.viewInsetsOf(context),
-                                                            child: TusFavoritosCarpetasModalWidget(
-                                                              isCreatingNewFolderPARAM: false,
-                                                              houseId: getJsonField(eachOwnPropertyItem, r'''$.id''').toString(),
-                                                              propertyName: getJsonField(eachOwnPropertyItem, r'''$.name''').toString(),
-                                                              propertyImage: '',
-                                                              propertyIsFavorite: false,
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ).then((value) => safeSetState(() {}));
-                                                  } else {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder: (alertDialogContext) {
-                                                        return AlertDialog(
-                                                          title: Text('Error'),
-                                                          content: Text((_model.apiResultj56?.bodyText ?? '')),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () => Navigator.pop(alertDialogContext),
-                                                              child: Text('Ok'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-                                                } else {
-                                                  await showDialog(
-                                                    context: context,
-                                                    builder: (dialogContext) {
-                                                      return Dialog(
-                                                        elevation: 0,
-                                                        insetPadding: EdgeInsets.zero,
-                                                        backgroundColor: Colors.transparent,
-                                                        alignment: AlignmentDirectional(0.0, 0.0)
-                                                            .resolve(Directionality.of(context)),
-                                                        child: GestureDetector(
-                                                          onTap: () {
-                                                            FocusScope.of(dialogContext).unfocus();
-                                                            FocusManager.instance.primaryFocus?.unfocus();
-                                                          },
-                                                          child: VisitorRestrictionPopupWidget(),
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                }
-                                                safeSetState(() {});
-                                              },
-                                              onRemoveFromFavorites: () async {
+                                                if ((_model.apiResultj56
+                                                        ?.succeeded ??
+                                                    true)) {
                                                   await showModalBottomSheet(
                                                     isScrollControlled: true,
-                                                    backgroundColor: Colors.transparent,
+                                                    backgroundColor:
+                                                        Colors.transparent,
                                                     enableDrag: false,
                                                     context: context,
                                                     builder: (context) {
                                                       return GestureDetector(
                                                         onTap: () {
-                                                          FocusScope.of(context).unfocus();
-                                                          FocusManager.instance.primaryFocus?.unfocus();
+                                                          FocusScope.of(context)
+                                                              .unfocus();
+                                                          FocusManager.instance
+                                                              .primaryFocus
+                                                              ?.unfocus();
                                                         },
                                                         child: Padding(
-                                                          padding: MediaQuery.viewInsetsOf(context),
-                                                          child: TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM: false,
-                                                            houseId: getJsonField(eachOwnPropertyItem, r'''$.id''').toString(),
-                                                            propertyName: getJsonField(eachOwnPropertyItem, r'''$.name''').toString(),
+                                                          padding: MediaQuery
+                                                              .viewInsetsOf(
+                                                                  context),
+                                                          child:
+                                                              TusFavoritosCarpetasModalWidget(
+                                                            isCreatingNewFolderPARAM:
+                                                                false,
+                                                            houseId: getJsonField(
+                                                                    eachOwnPropertyItem,
+                                                                    r'''$.id''')
+                                                                .toString(),
+                                                            propertyName: getJsonField(
+                                                                    eachOwnPropertyItem,
+                                                                    r'''$.name''')
+                                                                .toString(),
                                                             propertyImage: '',
-                                                            propertyIsFavorite: true,
+                                                            propertyIsFavorite:
+                                                                false,
                                                           ),
                                                         ),
                                                       );
                                                     },
-                                                  ).then((value) => safeSetState(() {}));
-                                                safeSetState(() {});
-                                              },
+                                                  ).then((value) =>
+                                                      safeSetState(() {}));
+                                                } else {
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (alertDialogContext) {
+                                                      return AlertDialog(
+                                                        title:
+                                                            const Text('Error'),
+                                                        content: Text((_model
+                                                                .apiResultj56
+                                                                ?.bodyText ??
+                                                            '')),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    alertDialogContext),
+                                                            child: const Text(
+                                                                'Ok'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                }
+                                              } else {
+                                                await showDialog(
+                                                  context: context,
+                                                  builder: (dialogContext) {
+                                                    return Dialog(
+                                                      elevation: 0,
+                                                      insetPadding:
+                                                          EdgeInsets.zero,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      alignment:
+                                                          const AlignmentDirectional(
+                                                                  0.0, 0.0)
+                                                              .resolve(
+                                                                  Directionality.of(
+                                                                      context)),
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          FocusScope.of(
+                                                                  dialogContext)
+                                                              .unfocus();
+                                                          FocusManager.instance
+                                                              .primaryFocus
+                                                              ?.unfocus();
+                                                        },
+                                                        child:
+                                                            const VisitorRestrictionPopupWidget(),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              }
+                                              safeSetState(() {});
+                                            },
+                                            onRemoveFromFavorites: () async {
+                                              await showModalBottomSheet(
+                                                isScrollControlled: true,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                enableDrag: false,
+                                                context: context,
+                                                builder: (context) {
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      FocusScope.of(context)
+                                                          .unfocus();
+                                                      FocusManager
+                                                          .instance.primaryFocus
+                                                          ?.unfocus();
+                                                    },
+                                                    child: Padding(
+                                                      padding: MediaQuery
+                                                          .viewInsetsOf(
+                                                              context),
+                                                      child:
+                                                          TusFavoritosCarpetasModalWidget(
+                                                        isCreatingNewFolderPARAM:
+                                                            false,
+                                                        houseId: getJsonField(
+                                                                eachOwnPropertyItem,
+                                                                r'''$.id''')
+                                                            .toString(),
+                                                        propertyName: getJsonField(
+                                                                eachOwnPropertyItem,
+                                                                r'''$.name''')
+                                                            .toString(),
+                                                        propertyImage: '',
+                                                        propertyIsFavorite:
+                                                            true,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ).then((value) =>
+                                                  safeSetState(() {}));
+                                              safeSetState(() {});
+                                            },
                                           ),
                                         );
                                       },
@@ -363,9 +420,10 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Align(
-                                alignment: AlignmentDirectional(-1.0, 0.0),
+                                alignment:
+                                    const AlignmentDirectional(-1.0, 0.0),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 33.0, 0.0, 0.0),
                                   child: Text(
                                     'Propiedades aún no\npublicadas',
@@ -401,11 +459,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                 text: 'Ver estatus',
                                 options: FFButtonOptions(
                                   height: 40.0,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       20.0, 0.0, 20.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: Color(0x30007376),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
+                                  color: const Color(0x30007376),
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .override(
@@ -436,7 +495,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                             ],
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model.favoriteHousesCardModel,
@@ -449,7 +508,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                           wrapWithModel(
                             model: _model.misPropiedadesHouseCardModel,
                             updateCallback: () => safeSetState(() {}),
-                            child: MisPropiedadesHouseCardWidget(),
+                            child: const MisPropiedadesHouseCardWidget(),
                           ),
                         ],
                       ),
@@ -458,20 +517,20 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 15.0, 100.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),

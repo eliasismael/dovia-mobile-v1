@@ -1,22 +1,18 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 class TermsScroller extends StatefulWidget {
   const TermsScroller({
-    Key? key,
+    super.key,
     this.width,
     this.height,
     required this.terminos,
     required this.onBottomReached,
-  }) : super(key: key);
+  });
 
   final double? width;
   final double? height;
@@ -63,14 +59,14 @@ class _TermsScrollerState extends State<TermsScroller> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width,
       height: widget.height,
       child: SingleChildScrollView(
         controller: _scrollController,
         child: Text(
           widget.terminos,
-          style: TextStyle(
+          style: const TextStyle(
             color: Color(0xFF004D40), // Tu color verde oscuro
             fontSize: 14.0,
           ),

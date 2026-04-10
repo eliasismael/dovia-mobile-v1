@@ -2,10 +2,8 @@ import '/dovia_client/app/ajustes/delete_account_2/delete_account2_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'delete_account1_model.dart';
 export 'delete_account1_model.dart';
 
@@ -48,7 +46,7 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -81,9 +79,9 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
                     width: 120.0,
                     height: 40.0,
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
                     iconPadding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).tertiary,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           font: GoogleFonts.publicSans(
@@ -118,7 +116,7 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
                         builder: (context) {
                           return Padding(
                             padding: MediaQuery.viewInsetsOf(context),
-                            child: DeleteAccount2Widget(),
+                            child: const DeleteAccount2Widget(),
                           );
                         },
                       ).then((value) => safeSetState(() {}));
@@ -127,10 +125,10 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
                     options: FFButtonOptions(
                       height: 40.0,
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
                       iconPadding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: Color(0xFFFF0000),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      color: const Color(0xFFFF0000),
                       textStyle:
                           FlutterFlowTheme.of(context).titleSmall.override(
                                 font: GoogleFonts.publicSans(
@@ -152,7 +150,7 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
                     ),
                   ),
                 ),
-              ].divide(SizedBox(width: 8.0)),
+              ].divide(const SizedBox(width: 8.0)),
             ),
           ],
         ),

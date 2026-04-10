@@ -4,13 +4,10 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_tu_trabajo_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_tu_trabajo_model.dart';
 
@@ -70,7 +67,7 @@ class _DHASSOCIATETuTrabajoWidgetState
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             SingleChildScrollView(
               child: Column(
@@ -78,14 +75,14 @@ class _DHASSOCIATETuTrabajoWidgetState
                 children: [
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          decoration: BoxDecoration(),
+                          decoration: const BoxDecoration(),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -116,7 +113,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ),
                         RichText(
@@ -204,22 +201,22 @@ class _DHASSOCIATETuTrabajoWidgetState
                                 ),
                               ),
                             ),
-                          ].divide(SizedBox(width: 8.0)),
+                          ].divide(const SizedBox(width: 8.0)),
                         ),
                       ],
                     ),
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 35.0, 20.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 35.0, 20.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
-                      decoration: BoxDecoration(),
+                      decoration: const BoxDecoration(),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Text(
                               'Información preliminar',
                               style: FlutterFlowTheme.of(context)
@@ -242,16 +239,16 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Trabajos a realizar',
                                       style: FlutterFlowTheme.of(context)
@@ -280,7 +277,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
@@ -292,7 +289,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                             BorderRadius.circular(10.0),
                                       ),
                                       child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             15.0, 12.0, 15.0, 0.0),
                                         child: RichText(
                                           textScaler:
@@ -440,7 +437,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -451,7 +448,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Imagenes o video del trabajo',
                                       style: FlutterFlowTheme.of(context)
@@ -482,9 +479,9 @@ class _DHASSOCIATETuTrabajoWidgetState
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 12.0, 0.0, 0.0),
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
@@ -533,7 +530,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                 fit: BoxFit.cover,
                                               ),
                                             ),
-                                          ].divide(SizedBox(width: 15.0)),
+                                          ].divide(const SizedBox(width: 15.0)),
                                         ),
                                       ),
                                     ),
@@ -543,7 +540,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -555,7 +552,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Dirección exacta',
                                       style: FlutterFlowTheme.of(context)
@@ -585,9 +582,9 @@ class _DHASSOCIATETuTrabajoWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -652,7 +649,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -660,7 +657,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -734,16 +731,16 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Mapa',
                                       style: FlutterFlowTheme.of(context)
@@ -771,7 +768,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                           ),
                                     ),
                                   ),
-                                  Container(
+                                  SizedBox(
                                     width:
                                         MediaQuery.sizeOf(context).width * 1.0,
                                     height: 200.0,
@@ -790,16 +787,16 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Instrucciones de ingreso',
                                       style: FlutterFlowTheme.of(context)
@@ -829,9 +826,9 @@ class _DHASSOCIATETuTrabajoWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -896,7 +893,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -904,7 +901,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -975,15 +972,15 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
                             child: Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Debes llevar',
                                       style: FlutterFlowTheme.of(context)
@@ -1012,9 +1009,9 @@ class _DHASSOCIATETuTrabajoWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       child: TextFormField(
@@ -1079,7 +1076,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                         .fontStyle,
                                               ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1087,7 +1084,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -1120,7 +1117,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                               FlutterFlowTheme.of(context)
                                                   .secondaryBackground,
                                           contentPadding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   10.0, 0.0, 0.0, 100.0),
                                         ),
                                         style: FlutterFlowTheme.of(context)
@@ -1162,9 +1159,9 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 21.0, 0.0, 0.0),
                               child: Text(
                                 'Ya llegué al punto',
@@ -1191,7 +1188,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 12.0, 0.0, 158.0),
                             child: FFButtonWidget(
                               onPressed: () {
@@ -1201,9 +1198,9 @@ class _DHASSOCIATETuTrabajoWidgetState
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 42.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
                                 textStyle: FlutterFlowTheme.of(context)
@@ -1239,29 +1236,29 @@ class _DHASSOCIATETuTrabajoWidgetState
               ),
             ),
             Align(
-              alignment: AlignmentDirectional(0.0, 0.0),
+              alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Align(
-                    alignment: AlignmentDirectional(1.0, 0.0),
+                    alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: FixedDoviaIconWidget(),
+                        child: const FixedDoviaIconWidget(),
                       ),
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(0.0, 1.0),
+                    alignment: const AlignmentDirectional(0.0, 1.0),
                     child: wrapWithModel(
                       model: _model.dHASSOCIATENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DHASSOCIATENavbarWidget(),
+                      child: const DHASSOCIATENavbarWidget(),
                     ),
                   ),
                 ],

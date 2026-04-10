@@ -1,6 +1,3 @@
-import '../schema/structs/index.dart';
-
-import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
 import 'api_helpers.dart';
 
@@ -67,7 +64,7 @@ class CreateOfferPURCHASEPurchasePromiseCall {
   "offerData": {
     "paymentMethod": "purchase_promise",
     "currency": "${escapeStringForJson(currency)}",
-    "proposedAmount": ${proposedAmount},
+    "proposedAmount": $proposedAmount,
     "considerations": "${escapeStringForJson(considerations)}",
     "buyerInfo": {
       "type": "${escapeStringForJson(buyerType)}",
@@ -75,16 +72,16 @@ class CreateOfferPURCHASEPurchasePromiseCall {
       "legalName": "${escapeStringForJson(buyerLegalName)}",
       "legalRepresentative": "${escapeStringForJson(buyerLegalRepresentative)}"
     },
-    "initialReserve": ${initialReserve},
-    "promiseTimeMonths": ${promiseTimeMonths}
+    "initialReserve": $initialReserve,
+    "promiseTimeMonths": $promiseTimeMonths
   }
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Offer - PURCHASE (Purchase Promise)',
-      apiUrl: '${baseUrl}/offers/properties/${propertyId}',
+      apiUrl: '$baseUrl/offers/properties/$propertyId',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -111,7 +108,7 @@ class ListOffersByPropertyCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'List Offers by Property',
-      apiUrl: '${baseUrl}/offers/properties/${propertyId}',
+      apiUrl: '$baseUrl/offers/properties/$propertyId',
       callType: ApiCallType.GET,
       headers: {},
       params: {
@@ -136,7 +133,7 @@ class MakeCounterOfferPURCHASEPurchasePromiseCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "counterOfferData": {
     "paymentMethod": "purchase_promise",
@@ -149,7 +146,7 @@ class MakeCounterOfferPURCHASEPurchasePromiseCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Make Counter Offer - PURCHASE (Purchase Promise)',
-      apiUrl: '${baseUrl}/offers/${offerId}/counter-offer',
+      apiUrl: '$baseUrl/offers/$offerId/counter-offer',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -173,7 +170,7 @@ class GetOfferByIDCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Offer by ID',
-      apiUrl: '${baseUrl}/offers/${offerId}',
+      apiUrl: '$baseUrl/offers/$offerId',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
@@ -193,13 +190,13 @@ class AcceptOfferCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "acceptedBy": "OWNER"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Accept Offer',
-      apiUrl: '${baseUrl}/offers/${offerId}/accept',
+      apiUrl: '$baseUrl/offers/$offerId/accept',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -221,14 +218,14 @@ class RejectOfferCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "rejectedBy": "OWNER",
   "reason": "Price does not meet expectations"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Reject Offer',
-      apiUrl: '${baseUrl}/offers/${offerId}/reject',
+      apiUrl: '$baseUrl/offers/$offerId/reject',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -250,13 +247,13 @@ class SelectLegalAssociateCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "legalAssociateId": "{{legalAssociateId}}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Select Legal Associate',
-      apiUrl: '${baseUrl}/offers/${offerId}/select-legal-associate',
+      apiUrl: '$baseUrl/offers/$offerId/select-legal-associate',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -278,7 +275,7 @@ class SubmitBankAgentDataCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "banco": "Banco de Bogotá",
   "nombre": "María",
@@ -288,7 +285,7 @@ class SubmitBankAgentDataCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Submit Bank Agent Data',
-      apiUrl: '${baseUrl}/offers/${offerId}/bank-agent-data',
+      apiUrl: '$baseUrl/offers/$offerId/bank-agent-data',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -311,14 +308,18 @@ class ListMyOffersCall {
     String? offerType = '',
     String? offerStatus = '',
     String? processStatus = '',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
     return ApiManager.instance.makeApiCall(
       callName: 'List My Offers',
-      apiUrl: '${baseUrl}/offers/my-offers',
+      apiUrl: '$baseUrl/offers/my-offers',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {
         'page': page,
         'limit': limit,
@@ -348,7 +349,7 @@ class ListOffersOnMyPropertiesCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'List Offers On My Properties',
-      apiUrl: '${baseUrl}/offers/my-properties',
+      apiUrl: '$baseUrl/offers/my-properties',
       callType: ApiCallType.GET,
       headers: {},
       params: {
@@ -370,46 +371,45 @@ class ListOffersOnMyPropertiesCall {
 
 class CreateOfferRENTIndividualCall {
   Future<ApiCallResponse> call({
-    String? propertyId = '1',
+    String? propertyId = '',
     String? authToken = '',
+    String? contractStartDate = '',
+    String? contractEndDate = '',
+    String? currency = '',
+    double? proposedAmount,
+    String? propertyUse = '',
+    String? considerations = '',
+    String? tenantType = '',
+    String? tenantName = '',
+    String? tenantLegalName = '',
+    String? tenantRepresentative = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
     final ffApiRequestBody = '''
 {
-  "listingType": [
-    "RENT"
-  ],
-  "name": "Apartamento en el Centro - Calle 123 #45-67",
-  "address": "Calle 123 #45-67, Barrio El Centro, Bogotá, Colombia",
-  "zone": "Zona 10",
-  "geoLocation": {
-    "longitude": -74.0721,
-    "latitude": 4.711
-  },
-  "legalInfo": {
-    "finca": "12345",
-    "folio": "67890",
-    "libro": "ABC123"
-  },
-  "rentInfo": {
-    "monthlyRent": 2500000,
-    "rentalConditions": {
-      "minimumTime": 12,
-      "others": "Se requiere fiador o depósito equivalente a 2 meses de renta. No se permiten mascotas. El contrato incluye servicios públicos básicos. Se requiere verificación de ingresos y referencias laborales."
+  "offerType": "RENT",
+  "offerData": {
+    "contractStartDate": "${escapeStringForJson(contractStartDate)}",
+    "contractEndDate": "${escapeStringForJson(contractEndDate)}",
+    "currency": "${escapeStringForJson(currency)}",
+    "propertyUse": "${escapeStringForJson(propertyUse)}",
+    "considerations": "${escapeStringForJson(considerations)}",
+    "proposedAmount": $proposedAmount,
+    "tenantInfo": {
+      "type": "${escapeStringForJson(tenantType)}",
+      "name": "${escapeStringForJson(tenantName)}",
+      "legalName": "${escapeStringForJson(tenantLegalName)}",
+      "legalRepresentative": "${escapeStringForJson(tenantRepresentative)}"
     }
-  },
-  "ownership": {
-    "isCompanyOwned": false,
-    "legalRepresentative": "Carlos Alberto Rodríguez Martínez"
   }
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Offer RENT Individual',
-      apiUrl: '${baseUrl}/offers/properties/${propertyId}',
+      apiUrl: '$baseUrl/offers/properties/$propertyId',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -430,7 +430,7 @@ class CreateOfferRENTCompanyCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "offerType": "RENT",
   "offerData": {
@@ -449,7 +449,7 @@ class CreateOfferRENTCompanyCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Offer RENT Company',
-      apiUrl: '${baseUrl}/offers/properties/${propertyId}',
+      apiUrl: '$baseUrl/offers/properties/$propertyId',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -489,7 +489,7 @@ class CreateOfferPURCHASEMortgageCall {
   "offerData": {
     "paymentMethod": "mortgage",
     "currency": "${escapeStringForJson(currency)}",
-    "proposedAmount": ${proposedAmount},
+    "proposedAmount": $proposedAmount,
     "considerations": "${escapeStringForJson(considerations)}",
     "buyerInfo": {
       "type": "${escapeStringForJson(buyerType)}",
@@ -497,18 +497,18 @@ class CreateOfferPURCHASEMortgageCall {
       "legalName": "${escapeStringForJson(legalName)}",
       "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
     },
-    "downPaymentPercentage": ${downPaymentPercentage},
+    "downPaymentPercentage": $downPaymentPercentage,
     "bankName": "${escapeStringForJson(bankName)}",
     "creditStatus": "${escapeStringForJson(creditStatus)}",
-    "estimatedApprovalTime": ${estimatedApprovalTime}
+    "estimatedApprovalTime": $estimatedApprovalTime
   }
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Offer  PURCHASE Mortgage',
-      apiUrl: '${baseUrl}/offers/properties/${propertyId}',
+      apiUrl: '$baseUrl/offers/properties/$propertyId',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -529,7 +529,7 @@ class MakeCounterOfferPURCHASEMortgageCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "counterOfferData": {
     "paymentMethod": "mortgage",
@@ -542,7 +542,7 @@ class MakeCounterOfferPURCHASEMortgageCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Make Counter Offer  PURCHASE Mortgage',
-      apiUrl: '${baseUrl}/offers/${offerId}/counter-offer',
+      apiUrl: '$baseUrl/offers/$offerId/counter-offer',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -564,7 +564,7 @@ class MakeCounterOfferPURCHASECashCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "counterOfferData": {
     "paymentMethod": "cash",
@@ -575,7 +575,7 @@ class MakeCounterOfferPURCHASECashCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Make Counter Offer  PURCHASE Cash',
-      apiUrl: '${baseUrl}/offers/${offerId}/counter-offer',
+      apiUrl: '$baseUrl/offers/$offerId/counter-offer',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -612,7 +612,7 @@ class CreateOfferPURCHASECashCall {
   "offerData": {
     "paymentMethod": "cash",
     "currency": "${escapeStringForJson(currency)}",
-    "proposedAmount": ${proposedAmount},
+    "proposedAmount": $proposedAmount,
     "considerations": "${escapeStringForJson(considerations)}",
     "buyerInfo": {
       "type": "${escapeStringForJson(buyerType)}",
@@ -620,15 +620,15 @@ class CreateOfferPURCHASECashCall {
       "legalName": "${escapeStringForJson(buyerLegalName)}",
       "legalRepresentative": "${escapeStringForJson(buyerRepresentative)}"
     },
-    "estimatedPaymentTime": ${estimatedPaymentTime}
+    "estimatedPaymentTime": $estimatedPaymentTime
   }
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Offer  PURCHASE Cash',
-      apiUrl: '${baseUrl}/offers/properties/${propertyId}',
+      apiUrl: '$baseUrl/offers/properties/$propertyId',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -649,7 +649,7 @@ class MakeCounterOfferRENTCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "counterOfferData": {
     "contractStartDate": "2026-04-01T00:00:00.000Z",
@@ -660,7 +660,7 @@ class MakeCounterOfferRENTCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Make Counter Offer  RENT',
-      apiUrl: '${baseUrl}/offers/${offerId}/counter-offer',
+      apiUrl: '$baseUrl/offers/$offerId/counter-offer',
       callType: ApiCallType.POST,
       headers: {},
       params: {},

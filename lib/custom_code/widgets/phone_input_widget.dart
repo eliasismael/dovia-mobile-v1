@@ -1,10 +1,6 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -13,12 +9,12 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 
 class PhoneInputWidget extends StatefulWidget {
   const PhoneInputWidget({
-    Key? key,
+    super.key,
     this.width,
     this.height,
     this.initialCountryCode,
     this.onPhoneUpdate,
-  }) : super(key: key);
+  });
 
   final double? width;
   final double? height;
@@ -32,7 +28,7 @@ class PhoneInputWidget extends StatefulWidget {
 class _PhoneInputWidgetState extends State<PhoneInputWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width,
       height: widget.height ?? 80.0,
       child: Column(
@@ -40,7 +36,7 @@ class _PhoneInputWidgetState extends State<PhoneInputWidget> {
         children: [
           // Etiqueta superior idéntica a tu imagen
           RichText(
-            text: TextSpan(
+            text: const TextSpan(
               children: [
                 TextSpan(
                   text: 'Teléfono ',
@@ -60,10 +56,10 @@ class _PhoneInputWidgetState extends State<PhoneInputWidget> {
               ],
             ),
           ),
-          SizedBox(height: 8.0),
+          const SizedBox(height: 8.0),
           // Campo de teléfono sin bordes
           IntlPhoneField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: '123456789',
               hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
               border: InputBorder.none,
@@ -75,8 +71,8 @@ class _PhoneInputWidgetState extends State<PhoneInputWidget> {
             initialCountryCode: widget.initialCountryCode ?? 'PE',
             showDropdownIcon:
                 false, // Mantiene el diseño minimalista de tu imagen
-            flagsButtonPadding: EdgeInsets.only(right: 8),
-            style: TextStyle(
+            flagsButtonPadding: const EdgeInsets.only(right: 8),
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.black, // Color del texto cuando el usuario escribe
             ),

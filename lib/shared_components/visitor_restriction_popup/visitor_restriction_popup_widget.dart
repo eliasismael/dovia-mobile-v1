@@ -1,13 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'visitor_restriction_popup_model.dart';
 export 'visitor_restriction_popup_model.dart';
 
@@ -47,12 +44,12 @@ class _VisitorRestrictionPopupWidgetState
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: AlignmentDirectional(0.0, 0.0),
+      alignment: const AlignmentDirectional(0.0, 0.0),
       child: Container(
         width: MediaQuery.sizeOf(context).width * 0.9,
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).secondaryBackground,
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               blurRadius: 4.0,
               color: Color(0x33000000),
@@ -65,7 +62,7 @@ class _VisitorRestrictionPopupWidgetState
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 10.0, 20.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 10.0, 20.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -138,9 +135,9 @@ class _VisitorRestrictionPopupWidgetState
                       ),
                     ),
                   ),
-                ].divide(SizedBox(width: 8.0)),
+                ].divide(const SizedBox(width: 8.0)),
               ),
-            ].divide(SizedBox(height: 20.0)),
+            ].divide(const SizedBox(height: 20.0)),
           ),
         ),
       ),

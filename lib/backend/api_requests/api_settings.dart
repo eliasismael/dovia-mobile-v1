@@ -1,8 +1,5 @@
-import '../schema/structs/index.dart';
 
-import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
-import 'api_helpers.dart';
 
 /// Start DOVIA API - Settings Context Group Code
 
@@ -28,10 +25,10 @@ class ListSettingsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'List Settings',
-      apiUrl: '${baseUrl}/settings',
+      apiUrl: '$baseUrl/settings',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${bearerAuth}',
+        'Authorization': 'Bearer $bearerAuth',
       },
       params: {
         'page': page,
@@ -56,10 +53,10 @@ class GetSettingByKeyCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Setting By Key',
-      apiUrl: '${baseUrl}/settings/${settingKey}',
+      apiUrl: '$baseUrl/settings/$settingKey',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${bearerAuth}',
+        'Authorization': 'Bearer $bearerAuth',
       },
       params: {
         'settingKey': settingKey,
@@ -81,7 +78,7 @@ class UpsertSettingByKeyCall {
   }) async {
     final baseUrl = DOVIAAPISettingsContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
+    const ffApiRequestBody = '''
 {
   "name": "Horarios operativos de visitas",
   "valueType": "array",
@@ -92,10 +89,10 @@ class UpsertSettingByKeyCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upsert Setting By Key',
-      apiUrl: '${baseUrl}/settings/${settingKey}',
+      apiUrl: '$baseUrl/settings/$settingKey',
       callType: ApiCallType.PUT,
       headers: {
-        'Authorization': 'Bearer ${bearerAuth}',
+        'Authorization': 'Bearer $bearerAuth',
       },
       params: {},
       body: ffApiRequestBody,
@@ -119,10 +116,10 @@ class DeleteSettingByKeyCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Delete Setting By Key',
-      apiUrl: '${baseUrl}/settings/${settingKey}',
+      apiUrl: '$baseUrl/settings/$settingKey',
       callType: ApiCallType.DELETE,
       headers: {
-        'Authorization': 'Bearer ${bearerAuth}',
+        'Authorization': 'Bearer $bearerAuth',
       },
       params: {},
       returnBody: true,

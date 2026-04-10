@@ -1,14 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_notifications_model.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_notifications_model.dart';
 
@@ -61,7 +57,7 @@ class _LEGALASSOCIATENotificationsWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -70,19 +66,19 @@ class _LEGALASSOCIATENotificationsWidgetState
                     wrapWithModel(
                       model: _model.legalAssociateHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalAssociateHeaderWidget(
+                      child: const LegalAssociateHeaderWidget(
                         titleText: 'Notificaciones',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 40.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -92,14 +88,15 @@ class _LEGALASSOCIATENotificationsWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -170,7 +167,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                                     ),
                                     Align(
                                       alignment:
-                                          AlignmentDirectional(-1.0, 0.0),
+                                          const AlignmentDirectional(-1.0, 0.0),
                                       child: RichText(
                                         textScaler:
                                             MediaQuery.of(context).textScaler,
@@ -261,7 +258,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                                                                 .fontStyle,
                                                       ),
                                             ),
-                                            TextSpan(
+                                            const TextSpan(
                                               text: '10/04/2025 - Hora XX',
                                               style: TextStyle(),
                                             )
@@ -301,7 +298,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -311,14 +308,15 @@ class _LEGALASSOCIATENotificationsWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -389,7 +387,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                                     ),
                                     Align(
                                       alignment:
-                                          AlignmentDirectional(-1.0, 0.0),
+                                          const AlignmentDirectional(-1.0, 0.0),
                                       child: RichText(
                                         textScaler:
                                             MediaQuery.of(context).textScaler,
@@ -480,7 +478,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                                                                 .fontStyle,
                                                       ),
                                             ),
-                                            TextSpan(
+                                            const TextSpan(
                                               text: '10/04/2025 - Hora XX',
                                               style: TextStyle(),
                                             )
@@ -520,7 +518,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -530,14 +528,15 @@ class _LEGALASSOCIATENotificationsWidgetState
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 10.0, 20.0, 10.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -608,7 +607,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                                     ),
                                     Align(
                                       alignment:
-                                          AlignmentDirectional(-1.0, 0.0),
+                                          const AlignmentDirectional(-1.0, 0.0),
                                       child: RichText(
                                         textScaler:
                                             MediaQuery.of(context).textScaler,
@@ -699,7 +698,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                                                                 .fontStyle,
                                                       ),
                                             ),
-                                            TextSpan(
+                                            const TextSpan(
                                               text: '10/04/2025 - Hora XX',
                                               style: TextStyle(),
                                             )
@@ -745,7 +744,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -753,7 +752,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                     wrapWithModel(
                       model: _model.lEGALASSOCAITENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALASSOCAITENavbarWidget(),
+                      child: const LEGALASSOCAITENavbarWidget(),
                     ),
                   ],
                 ),

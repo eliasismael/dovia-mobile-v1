@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_exito_programar_agenda_model.dart';
 export 'd_h_c_l_i_e_n_t_exito_programar_agenda_model.dart';
 
@@ -47,7 +44,7 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
             decoration: BoxDecoration(
@@ -55,14 +52,14 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
               borderRadius: BorderRadius.circular(10.4),
             ),
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(42.0, 0.0, 42.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(42.0, 0.0, 42.0, 0.0),
                     child: Text(
                       'Se programó con éxito',
                       textAlign: TextAlign.center,
@@ -84,7 +81,7 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 34.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 34.0, 0.0, 0.0),
                     child: Text(
                       'Programaste con éxito tu servicio para la Casa A.',
                       textAlign: TextAlign.center,
@@ -114,7 +111,7 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
           ),
         ),
         Align(
-          alignment: AlignmentDirectional(0.0, -1.0),
+          alignment: const AlignmentDirectional(0.0, -1.0),
           child: Container(
             width: 104.0,
             height: 104.0,

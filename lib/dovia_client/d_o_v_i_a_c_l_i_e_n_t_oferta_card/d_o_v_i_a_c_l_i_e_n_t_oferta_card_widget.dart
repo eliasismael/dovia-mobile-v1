@@ -1,12 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_oferta_card_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_oferta_card_model.dart';
 
@@ -50,7 +48,7 @@ class _DOVIACLIENTOfertaCardWidgetState
       height: 137.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             blurRadius: 4.0,
             color: Color(0x33000000),
@@ -63,25 +61,25 @@ class _DOVIACLIENTOfertaCardWidgetState
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100.0),
                 ),
-                child: Container(
+                child: SizedBox(
                   width: 118.0,
                   height: 100.0,
                   child: Stack(
                     children: [
                       Align(
-                        alignment: AlignmentDirectional(0.0, -1.0),
+                        alignment: const AlignmentDirectional(0.0, -1.0),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(10.0),
                             bottomRight: Radius.circular(10.0),
                             topLeft: Radius.circular(10.0),
@@ -96,13 +94,13 @@ class _DOVIACLIENTOfertaCardWidgetState
                         ),
                       ),
                       Align(
-                        alignment: AlignmentDirectional(0.0, 1.0),
+                        alignment: const AlignmentDirectional(0.0, 1.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 44.0,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context).tertiary,
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 blurRadius: 4.0,
                                 color: Color(0x33000000),
@@ -112,7 +110,7 @@ class _DOVIACLIENTOfertaCardWidgetState
                                 ),
                               )
                             ],
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                               bottomLeft: Radius.circular(10.0),
                               bottomRight: Radius.circular(10.0),
                               topLeft: Radius.circular(0.0),
@@ -120,9 +118,9 @@ class _DOVIACLIENTOfertaCardWidgetState
                             ),
                           ),
                           child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
+                            alignment: const AlignmentDirectional(0.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   10.0, 0.0, 10.0, 0.0),
                               child: Text(
                                 'Ver ficha de propiedada',
@@ -169,20 +167,20 @@ class _DOVIACLIENTOfertaCardWidgetState
                     animation: true,
                     animateFromLastPercent: true,
                     progressColor: FlutterFlowTheme.of(context).primary,
-                    backgroundColor: Color(0x7D007376),
-                    barRadius: Radius.circular(10.0),
+                    backgroundColor: const Color(0x7D007376),
+                    barRadius: const Radius.circular(10.0),
                     padding: EdgeInsets.zero,
                   ),
                   Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     height: 30.0,
                     decoration: BoxDecoration(
-                      color: Color(0x2B007376),
+                      color: const Color(0x2B007376),
                       borderRadius: BorderRadius.circular(24.0),
                     ),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -218,7 +216,7 @@ class _DOVIACLIENTOfertaCardWidgetState
                                       .fontStyle,
                                 ),
                           ),
-                        ].divide(SizedBox(width: 5.0)),
+                        ].divide(const SizedBox(width: 5.0)),
                       ),
                     ),
                   ),
@@ -231,9 +229,9 @@ class _DOVIACLIENTOfertaCardWidgetState
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       height: 30.0,
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 0.0),
                       iconPadding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                       color: FlutterFlowTheme.of(context).tertiary,
                       textStyle:
                           FlutterFlowTheme.of(context).titleSmall.override(

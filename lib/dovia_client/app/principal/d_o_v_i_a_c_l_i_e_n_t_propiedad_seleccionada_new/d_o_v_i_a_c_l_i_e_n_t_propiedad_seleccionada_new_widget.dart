@@ -21,6 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/repositories/visits_repository.dart';
+import '/dovia_client/app/mis_visitas/d_o_v_i_a_c_l_i_e_n_t_mis_visitas/d_o_v_i_a_c_l_i_e_n_t_mis_visitas_widget.dart';
+import '/backend/api_requests/api_offers.dart';
+import '/auth/custom_auth/auth_util.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
 
@@ -47,6 +51,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   ApiCallResponse? _propertyData;
+  List<String> _listingType = [];
 
   @override
   void initState() {
@@ -55,7 +60,10 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         createModel(context, () => DOVIACLIENTPropiedadSeleccionadaNewModel());
 
     _loadPropertyData();
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<VisitsRepository>().loadMyVisits();
+      safeSetState(() {});
+    });
   }
 
   @override
@@ -72,8 +80,16 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
       propertyId: widget.propertyId,
     );
     if (mounted) {
+      final listingTypeRaw =
+          getJsonField(response.jsonBody, r'''$.data.data.listingType''') ??
+          getJsonField(response.jsonBody, r'''$.data.listingType''');
+      final parsed = (listingTypeRaw as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [];
       safeSetState(() {
         _propertyData = response;
+        _listingType = parsed;
       });
     }
   }
@@ -101,7 +117,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
 
     if (planos == null || planos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay planos disponibles para esta propiedad.')),
+        const SnackBar(
+            content: Text('No hay planos disponibles para esta propiedad.')),
       );
       return;
     }
@@ -130,9 +147,231 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('El recorrido 360° no está disponible para esta propiedad.')),
+        const SnackBar(
+            content: Text(
+                'El recorrido 360° no está disponible para esta propiedad.')),
       );
     }
+  }
+
+  Future<void> _handleOfertar() async {
+    if (widget.propertyId == null || widget.propertyId!.isEmpty) return;
+
+    if (FFAppState().UserRole == 'VISITOR') {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: GestureDetector(
+            onTap: () {
+              FocusScope.of(dialogContext).unfocus();
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: const VisitorRestrictionPopupWidget(),
+          ),
+        ),
+      );
+      return;
+    }
+
+    final offersResponse =
+        await DOVIAAPIOfferContextGroup.listMyOffersCall.call(
+      authToken: currentAuthenticationToken,
+    );
+
+    if (!mounted) return;
+
+    // Dynamic routing based on property listingType
+    final listingTypeStr = _listingType.toString().toUpperCase();
+    final hasSale = listingTypeStr.contains('SALE');
+    final hasRent = listingTypeStr.contains('RENT');
+
+    if (offersResponse.succeeded) {
+      List items = [];
+      final body = offersResponse.jsonBody;
+      if (body is List) {
+        items = body;
+      } else {
+        items = getJsonField(body, r'''$.data.items''') as List? ??
+                getJsonField(body, r'''$.data''') as List? ??
+                getJsonField(body, r'''$.items''') as List? ?? 
+                [];
+      }
+      
+      final activeOffers = items.where((item) {
+        final status1 = getJsonField(item, r'''$.status''')?.toString().toUpperCase() ?? '';
+        final status2 = getJsonField(item, r'''$.offerStatus''')?.toString().toUpperCase() ?? '';
+        final status3 = getJsonField(item, r'''$.processStatus''')?.toString().toUpperCase() ?? '';
+        
+        final isCancelled = (status1 == 'CANCELLED' || status2 == 'CANCELLED' || status3 == 'CANCELLED');
+        final isRejected = (status1 == 'REJECTED' || status2 == 'REJECTED' || status3 == 'REJECTED');
+
+        final itemStr = item.toString();
+        final wid = widget.propertyId ?? 'UNKNOWN_ID';
+        final propIdMatch = itemStr.contains(wid);
+
+        return propIdMatch && !isCancelled && !isRejected;
+      }).toList();
+
+      bool blockOffers = false;
+      if (hasSale && hasRent) {
+         if (activeOffers.length >= 2) blockOffers = true;
+      } else {
+         if (activeOffers.isNotEmpty) blockOffers = true;
+      }
+
+      if (blockOffers) {
+        _showActiveOfferModal();
+        return;
+      }
+    }
+
+    if (!mounted) return;
+
+    if (hasSale && hasRent) {
+      // Mixed property — show selection screen
+      context.pushNamed(
+        DOVIACLIENTOfertarWidget.routeName,
+        queryParameters: {
+          'propertyId': serializeParam(widget.propertyId, ParamType.String),
+        }.withoutNulls,
+      );
+    } else if (hasSale) {
+      // SALE only — go directly to unified form in compra mode
+      context.pushNamed(
+        DOVIACLIENTOfertaCompraWidget.routeName,
+        queryParameters: {
+          'propertyId': serializeParam(widget.propertyId, ParamType.String),
+          'offerType': serializeParam('compra', ParamType.String),
+        }.withoutNulls,
+      );
+    } else {
+      // RENT only (or unknown) — go directly to unified form in renta mode
+      context.pushNamed(
+        DOVIACLIENTOfertaCompraWidget.routeName,
+        queryParameters: {
+          'propertyId': serializeParam(widget.propertyId, ParamType.String),
+          'offerType': serializeParam('renta', ParamType.String),
+        }.withoutNulls,
+      );
+    }
+  }
+
+  void _showActiveOfferModal() {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Ya tienes una oferta en curso',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FlutterFlowTheme.of(context)
+                            .bodyMedium
+                            .fontStyle,
+                      ),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Ya tienes una oferta en pendiente de acetar o una contraoferta para este inmueble. Visualiza el estatus en la pantalla de Mis Visitas.',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.inter(
+                        fontWeight: FlutterFlowTheme.of(context)
+                            .bodyMedium
+                            .fontWeight,
+                        fontStyle: FlutterFlowTheme.of(context)
+                            .bodyMedium
+                            .fontStyle,
+                      ),
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                      letterSpacing: 0,
+                    ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                            color: FlutterFlowTheme.of(context).primary),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontStyle,
+                              ),
+                              color: FlutterFlowTheme.of(context).primary,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0,
+                            ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop();
+                        context.pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: FlutterFlowTheme.of(context).primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Ir a Mis visitas',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontStyle,
+                              ),
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -355,65 +594,43 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       ),
                                     ),
                                   ),
-                                    Container(
-                                      width: 320.0,
-                                      height: 160.0,
-                                      child: CarouselSlider(
-                                        items: [
-                                          GestureDetector(
-                                            onTap: _showGallery,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              child: Container(
-                                                width: 212.0,
-                                                height: MediaQuery.sizeOf(context)
-                                                        .height *
-                                                    1.6,
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12.0),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8.0),
-                                                  child: Image.asset(
-                                                    'assets/images/casa_card_sobreMiVisita.png',
-                                                    width: 100.0,
-                                                    height: 100.0,
-                                                    fit: BoxFit.cover,
-                                                  ),
+                                  Container(
+                                    width: 320.0,
+                                    height: 160.0,
+                                    child: CarouselSlider(
+                                      items: [
+                                        GestureDetector(
+                                          onTap: _showGallery,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            child: Container(
+                                              width: 212.0,
+                                              height: MediaQuery.sizeOf(context)
+                                                      .height *
+                                                  1.6,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                child: Image.asset(
+                                                  'assets/images/casa_card_sobreMiVisita.png',
+                                                  width: 100.0,
+                                                  height: 100.0,
+                                                  fit: BoxFit.cover,
                                                 ),
                                               ),
                                             ),
                                           ),
-                                          GestureDetector(
-                                            onTap: _showGallery,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              child: Container(
-                                                width: 212.0,
-                                                height: 160.0,
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12.0),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12.0),
-                                                  child: Image.network(
-                                                    'https://picsum.photos/seed/146/600',
-                                                    width: 212.0,
-                                                    height: 160.0,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            onTap: _showGallery,
+                                        ),
+                                        GestureDetector(
+                                          onTap: _showGallery,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
                                             child: Container(
                                               width: 212.0,
                                               height: 160.0,
@@ -425,7 +642,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                 borderRadius:
                                                     BorderRadius.circular(12.0),
                                                 child: Image.network(
-                                                  'https://picsum.photos/seed/119/600',
+                                                  'https://picsum.photos/seed/146/600',
                                                   width: 212.0,
                                                   height: 160.0,
                                                   fit: BoxFit.cover,
@@ -433,7 +650,29 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                               ),
                                             ),
                                           ),
-                                        ],
+                                        ),
+                                        GestureDetector(
+                                          onTap: _showGallery,
+                                          child: Container(
+                                            width: 212.0,
+                                            height: 160.0,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                              child: Image.network(
+                                                'https://picsum.photos/seed/119/600',
+                                                width: 212.0,
+                                                height: 160.0,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                       carouselController:
                                           _model.carouselController ??=
                                               CarouselSliderController(),
@@ -906,36 +1145,87 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                   },
                                                 );
                                               } else {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            AgendarCitaWidget(),
-                                                      ),
-                                                    );
-                                                  },
-                                                );
+                                                final repo = context
+                                                    .read<VisitsRepository>();
+                                                final hasPending = await repo
+                                                    .hasActiveVisitForProperty(
+                                                        widget.propertyId ?? '');
+
+                                                if (hasPending) {
+                                                  // Show pending visit modal directly — skip the scheduling form
+                                                  await showDialog(
+                                                    context: context,
+                                                    barrierColor: Colors.black
+                                                        .withOpacity(0.5),
+                                                    builder: (dialogContext) {
+                                                      return Dialog(
+                                                        elevation: 0,
+                                                        insetPadding:
+                                                            EdgeInsets.zero,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        child: _PendingVisitDialog(
+                                                          onViewVisits: () {
+                                                            Navigator.of(
+                                                                    dialogContext)
+                                                                .pop();
+                                                            context.pushNamed(
+                                                                DOVIACLIENTMisVisitasWidget
+                                                                    .routeName);
+                                                          },
+                                                          onDismiss: () =>
+                                                              Navigator.of(
+                                                                      dialogContext)
+                                                                  .pop(),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                } else {
+                                                  // No pending visit — open the scheduling form
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder: (dialogContext) {
+                                                      return Dialog(
+                                                        elevation: 0,
+                                                        insetPadding:
+                                                            EdgeInsets.zero,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        alignment:
+                                                            AlignmentDirectional(
+                                                                    0.0, 0.0)
+                                                                .resolve(
+                                                                    Directionality.of(
+                                                                        context)),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    dialogContext)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
+                                                          child:
+                                                              AgendarCitaWidget(
+                                                            propertyId:
+                                                                widget.propertyId,
+                                                            hasPendingVisit:
+                                                                false,
+                                                            onNavigateToVisits:
+                                                                () {
+                                                              context.pushNamed(
+                                                                  DOVIACLIENTMisVisitasWidget
+                                                                      .routeName);
+                                                            },
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                }
                                               }
                                             },
                                           ),
@@ -953,53 +1243,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                               safeSetState(() {}),
                                           child: SecondaryButtonWidget(
                                             text: 'Ofertar',
-                                            onTap: () async {
-                                              if (FFAppState().UserRole !=
-                                                  'VISITOR') {
-                                                context.pushNamed(
-                                                  DOVIACLIENTOfertarWidget
-                                                      .routeName,
-                                                  queryParameters: {
-                                                    'propertyId':
-                                                        serializeParam(
-                                                      widget!.propertyId,
-                                                      ParamType.String,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              } else {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            VisitorRestrictionPopupWidget(),
-                                                      ),
-                                                    );
-                                                  },
-                                                );
-                                              }
-                                            },
+                                            onTap: _handleOfertar,
                                           ),
                                         ),
                                       ),
@@ -1457,6 +1701,123 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Modal shown when the user already has a pending or approved visit for this property.
+class _PendingVisitDialog extends StatelessWidget {
+  final VoidCallback onViewVisits;
+  final VoidCallback onDismiss;
+
+  const _PendingVisitDialog({
+    required this.onViewVisits,
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE8F5F5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.event_available_rounded,
+                      color: Color(0xFF007376),
+                      size: 34,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Ya tienes una visita en proceso',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF00444B),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Ya solicitaste o tienes confirmada una cita para esta propiedad. Puedes revisar el estado en tu sección de visitas.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF666666),
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: onViewVisits,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF007376),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Ver mis visitas',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: onDismiss,
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF007376),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'Volver a la propiedad',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

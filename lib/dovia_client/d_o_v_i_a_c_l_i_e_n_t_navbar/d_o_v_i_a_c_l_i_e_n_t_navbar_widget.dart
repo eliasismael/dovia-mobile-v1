@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_navbar_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_navbar_model.dart';
@@ -69,7 +66,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
         borderRadius: BorderRadius.circular(24.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 0.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 0.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -135,9 +132,9 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                           elevation: 0,
                           insetPadding: EdgeInsets.zero,
                           backgroundColor: Colors.transparent,
-                          alignment: AlignmentDirectional(0.0, 0.0)
+                          alignment: const AlignmentDirectional(0.0, 0.0)
                               .resolve(Directionality.of(context)),
-                          child: VisitorRestrictionPopupWidget(),
+                          child: const VisitorRestrictionPopupWidget(),
                         );
                       },
                     );
@@ -196,9 +193,9 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                           elevation: 0,
                           insetPadding: EdgeInsets.zero,
                           backgroundColor: Colors.transparent,
-                          alignment: AlignmentDirectional(0.0, 0.0)
+                          alignment: const AlignmentDirectional(0.0, 0.0)
                               .resolve(Directionality.of(context)),
-                          child: VisitorRestrictionPopupWidget(),
+                          child: const VisitorRestrictionPopupWidget(),
                         );
                       },
                     );

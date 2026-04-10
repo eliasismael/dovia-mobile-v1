@@ -3,15 +3,12 @@ import '/dovia_client/app/principal/filtro_complete_popup/filtro_complete_popup_
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import '/dovia_client/app/principal/filtro_busqueda_i_a/filtro_busqueda_i_a_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_homepage_busqueda_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_homepage_busqueda_model.dart';
@@ -68,7 +65,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -77,13 +74,13 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
+                      child: const DOVIASHAREDHeaderWidget(
                         title: 'Búsqueda',
                       ),
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -96,7 +93,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                 decoration: BoxDecoration(
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
-                                  borderRadius: BorderRadius.only(
+                                  borderRadius: const BorderRadius.only(
                                     bottomLeft: Radius.circular(25.0),
                                     bottomRight: Radius.circular(0.0),
                                     topLeft: Radius.circular(25.0),
@@ -114,7 +111,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                 ),
                               ),
                               Expanded(
-                                child: Container(
+                                child: SizedBox(
                                   width: 200.0,
                                   child: TextFormField(
                                     controller: _model.textController,
@@ -171,7 +168,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                                     .labelMedium
                                                     .fontStyle,
                                           ),
-                                      enabledBorder: OutlineInputBorder(
+                                      enabledBorder: const OutlineInputBorder(
                                         borderSide: BorderSide(
                                           color: Color(0x00000000),
                                           width: 1.0,
@@ -183,7 +180,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                           topRight: Radius.circular(25.0),
                                         ),
                                       ),
-                                      focusedBorder: OutlineInputBorder(
+                                      focusedBorder: const OutlineInputBorder(
                                         borderSide: BorderSide(
                                           color: Color(0x00000000),
                                           width: 1.0,
@@ -201,7 +198,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                               .error,
                                           width: 1.0,
                                         ),
-                                        borderRadius: BorderRadius.only(
+                                        borderRadius: const BorderRadius.only(
                                           bottomLeft: Radius.circular(0.0),
                                           bottomRight: Radius.circular(25.0),
                                           topLeft: Radius.circular(0.0),
@@ -214,7 +211,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                               .error,
                                           width: 1.0,
                                         ),
-                                        borderRadius: BorderRadius.only(
+                                        borderRadius: const BorderRadius.only(
                                           bottomLeft: Radius.circular(0.0),
                                           bottomRight: Radius.circular(25.0),
                                           topLeft: Radius.circular(0.0),
@@ -272,13 +269,13 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                               padding:
                                                   MediaQuery.viewInsetsOf(
                                                       context),
-                                              child: Container(
+                                              child: SizedBox(
                                                 height:
                                                     MediaQuery.sizeOf(context)
                                                             .height *
                                                         0.5,
                                                 child:
-                                                    FiltroBusquedaIAWidget(),
+                                                    const FiltroBusquedaIAWidget(),
                                               ),
                                             ),
                                           );
@@ -292,7 +289,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     4.0, 0.0, 0.0, 0.0),
                                 child: InkWell(
                                   splashColor: Colors.transparent,
@@ -315,7 +312,7 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                           child: Padding(
                                             padding: MediaQuery.viewInsetsOf(
                                                 context),
-                                            child: Container(
+                                            child: SizedBox(
                                               height: MediaQuery.sizeOf(context)
                                                       .height *
                                                   0.6,
@@ -382,12 +379,12 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                             ],
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model.mapWithHousesModel,
                               updateCallback: () => safeSetState(() {}),
-                              child: MapWithHousesWidget(),
+                              child: const MapWithHousesWidget(),
                             ),
                           ),
                         ],
@@ -399,27 +396,27 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
 
               // Al usar busqueda con IA entiendo que se muestra el modal inferior con las casas, y solo tocando el logo de al lado de los filtros sale otro modal de los filtros
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

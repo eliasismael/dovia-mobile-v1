@@ -3,7 +3,6 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -58,30 +57,30 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        body: Container(
+        body: SizedBox(
           width: MediaQuery.sizeOf(context).width * 1.0,
           height: MediaQuery.sizeOf(context).height * 1.0,
           child: Stack(
-            alignment: AlignmentDirectional(0.0, -1.0),
+            alignment: const AlignmentDirectional(0.0, -1.0),
             children: [
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
                         child: Container(
                           width: 80.0,
                           height: 100.0,
-                          decoration: BoxDecoration(),
+                          decoration: const BoxDecoration(),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(0.0),
                             child: SvgPicture.asset(
@@ -95,7 +94,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 84.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 84.0, 0.0, 0.0),
                         child: Text(
                           'Ingresa el código que recibiste en tu correo',
                           style:
@@ -106,7 +105,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                           .bodyMedium
                                           .fontStyle,
                                     ),
-                                    color: Color(0xFF00444B),
+                                    color: const Color(0xFF00444B),
                                     fontSize: 30.0,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.w600,
@@ -122,14 +121,14 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(0.0),
                         ),
-                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Align(
-                              alignment: AlignmentDirectional(0.0, 0.0),
+                              alignment: const AlignmentDirectional(0.0, 0.0),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 39.0, 0.0, 0.0),
                                 child: Text(
                                   'Ingresa el código',
@@ -156,7 +155,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                             ),
                             Expanded(
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 8.0, 0.0, 0.0),
                                 child: PinCodeTextField(
                                   autoDisposeControllers: false,
@@ -203,7 +202,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                     fieldHeight: 44.0,
                                     fieldWidth: 44.0,
                                     borderWidth: 2.0,
-                                    borderRadius: BorderRadius.only(
+                                    borderRadius: const BorderRadius.only(
                                       bottomLeft: Radius.circular(12.0),
                                       bottomRight: Radius.circular(12.0),
                                       topLeft: Radius.circular(12.0),
@@ -229,7 +228,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                       context: context,
                                       builder: (alertDialogContext) {
                                         return AlertDialog(
-                                          title: Text('CODE'),
+                                          title: const Text('CODE'),
                                           content: Text(
                                               _model.pinCodeController!.text),
                                           actions: [
@@ -260,7 +259,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                         context: context,
                                         builder: (alertDialogContext) {
                                           return AlertDialog(
-                                            title: Text('ERROR EN CODIGO'),
+                                            title: const Text('ERROR EN CODIGO'),
                                             content: Text((_model.apiResultvj1
                                                         ?.jsonBody ??
                                                     '')
@@ -269,7 +268,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                               TextButton(
                                                 onPressed: () => Navigator.pop(
                                                     alertDialogContext),
-                                                child: Text('Ok'),
+                                                child: const Text('Ok'),
                                               ),
                                             ],
                                           );
@@ -289,7 +288,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
                               child: Builder(
                                 builder: (context) {
@@ -340,7 +339,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                       ),
                       Flexible(
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 29.0, 0.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -390,13 +389,13 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                       context: context,
                                       builder: (alertDialogContext) {
                                         return AlertDialog(
-                                          content: Text(
+                                          content: const Text(
                                               'CODIGO REENVIADO. INTRODUCE EL UEVO CODIGO'),
                                           actions: [
                                             TextButton(
                                               onPressed: () => Navigator.pop(
                                                   alertDialogContext),
-                                              child: Text('Ok'),
+                                              child: const Text('Ok'),
                                             ),
                                           ],
                                         );
@@ -407,7 +406,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                       context: context,
                                       builder: (alertDialogContext) {
                                         return AlertDialog(
-                                          title: Text(
+                                          title: const Text(
                                               'ERROR ENVIANDO NUIEVO CODIGO'),
                                           content: Text(
                                               (_model.apiResult4de?.jsonBody ??
@@ -417,7 +416,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                             TextButton(
                                               onPressed: () => Navigator.pop(
                                                   alertDialogContext),
-                                              child: Text('Ok'),
+                                              child: const Text('Ok'),
                                             ),
                                           ],
                                         );
@@ -459,7 +458,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 63.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 63.0, 0.0, 0.0),
                         child: FFButtonWidget(
                           onPressed: () async {
                             context.safePop();
@@ -468,9 +467,9 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                           options: FFButtonOptions(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: 42.0,
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 10.0, 20.0, 10.0),
-                            iconPadding: EdgeInsetsDirectional.fromSTEB(
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 0.0),
                             color: FlutterFlowTheme.of(context).primary,
                             textStyle: FlutterFlowTheme.of(context)

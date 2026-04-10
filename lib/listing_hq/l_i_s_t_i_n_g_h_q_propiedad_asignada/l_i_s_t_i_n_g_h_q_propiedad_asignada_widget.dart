@@ -5,11 +5,9 @@ import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dar
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
 
@@ -62,7 +60,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -71,18 +69,18 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                     wrapWithModel(
                       model: _model.lISTINGHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQHeaderWidget(
+                      child: const LISTINGHQHeaderWidget(
                         titleText: 'Propiedad\nasignada',
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -103,8 +101,9 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                     ),
                                   ),
                                   child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 10.0, 10.0, 10.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            10.0, 10.0, 10.0, 10.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
@@ -119,9 +118,8 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Container(
                                             decoration: BoxDecoration(
                                               color:
@@ -131,13 +129,16 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                                   BorderRadius.circular(24.0),
                                             ),
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, -1.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, -1.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: Text(
                                                   'Información de propietario',
@@ -177,9 +178,8 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Nombre Apellido',
                                             style: FlutterFlowTheme.of(context)
@@ -222,8 +222,9 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                     ),
                                   ),
                                   child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 10.0, 10.0, 10.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            10.0, 10.0, 10.0, 10.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
@@ -238,9 +239,8 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Container(
                                             decoration: BoxDecoration(
                                               color:
@@ -250,13 +250,16 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                                   BorderRadius.circular(24.0),
                                             ),
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, -1.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, -1.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: Text(
                                                   'Información Operative\nListing Associate',
@@ -297,9 +300,8 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Nombre Apellido',
                                             style: FlutterFlowTheme.of(context)
@@ -325,9 +327,8 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: FFButtonWidget(
                                             onPressed: () {
                                               print('Button pressed ...');
@@ -338,11 +339,14 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                                       .width *
                                                   1.0,
                                               height: 20.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       16.0, 0.0, 16.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              iconPadding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 0.0, 0.0, 0.0),
                                               color:
                                                   FlutterFlowTheme.of(context)
                                                       .primary,
@@ -391,9 +395,9 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Información privada',
@@ -416,7 +420,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Text(
                               'Finca X, Folio X, Libro X',
                               style: FlutterFlowTheme.of(context)
@@ -443,9 +447,9 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Propietario registrado',
@@ -474,7 +478,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -605,7 +609,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model.primaryButtonModel,
@@ -623,7 +627,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -631,7 +635,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                     wrapWithModel(
                       model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LISTINGHQNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

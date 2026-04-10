@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'fixed_dovia_icon_model.dart';
 export 'fixed_dovia_icon_model.dart';
 
@@ -56,7 +53,7 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
           builder: (context) {
             return Padding(
               padding: MediaQuery.viewInsetsOf(context),
-              child: DoviaSupportWidget(),
+              child: const DoviaSupportWidget(),
             );
           },
         ).then((value) => safeSetState(() {}));
@@ -68,7 +65,7 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
           color: FlutterFlowTheme.of(context).primary,
           shape: BoxShape.circle,
         ),
-        alignment: AlignmentDirectional(0.0, 0.0),
+        alignment: const AlignmentDirectional(0.0, 0.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(0.0),
           child: SvgPicture.asset(

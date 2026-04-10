@@ -1,20 +1,10 @@
-import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
-import '/flutter_flow/flutter_flow_drop_down.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
-import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'datos_widget.dart' show DatosWidget;
-import 'package:easy_debounce/easy_debounce.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class DatosModel extends FlutterFlowModel<DatosWidget> {
   ///  Local state fields for this page.

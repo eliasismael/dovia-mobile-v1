@@ -1,14 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'bienvenida_model.dart';
 export 'bienvenida_model.dart';
 
@@ -62,7 +59,7 @@ class _BienvenidaWidgetState extends State<BienvenidaWidget> {
               Container(
                 width: 100.0,
                 height: MediaQuery.sizeOf(context).height * 1.0,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFF007376), Color(0xFF70ACAD)],
                     stops: [0.0, 1.0],
@@ -71,14 +68,14 @@ class _BienvenidaWidgetState extends State<BienvenidaWidget> {
                   ),
                 ),
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 40.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 40.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(0.0),
                           child: SvgPicture.asset(
@@ -90,11 +87,11 @@ class _BienvenidaWidgetState extends State<BienvenidaWidget> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 0.0, 200.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 0.8,
-                          decoration: BoxDecoration(),
+                          decoration: const BoxDecoration(),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -129,7 +126,7 @@ class _BienvenidaWidgetState extends State<BienvenidaWidget> {
                                   borderRadius: BorderRadius.circular(16.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       40.0, 20.0, 40.0, 20.0),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -175,7 +172,7 @@ class _BienvenidaWidgetState extends State<BienvenidaWidget> {
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(height: 41.0)),
+                            ].divide(const SizedBox(height: 41.0)),
                           ),
                         ),
                       ),

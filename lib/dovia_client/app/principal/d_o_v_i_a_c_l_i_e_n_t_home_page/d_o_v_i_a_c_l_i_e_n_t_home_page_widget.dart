@@ -10,7 +10,6 @@ import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/dovia_suupport_messages/dovia_suupport_messages_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
@@ -165,18 +164,18 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(0.0, -1.0),
+                      alignment: const AlignmentDirectional(0.0, -1.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         height: 200.0,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [Color(0xFF007376), Color(0xFF70ACAD)],
                             stops: [0.0, 1.0],
@@ -192,7 +191,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                           shape: BoxShape.rectangle,
                         ),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 30.0, 20.0, 8.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
@@ -216,13 +215,13 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 8.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 8.0, 0.0, 0.0),
                                         child: FlutterFlowDropDown<String>(
                                           controller: _model
                                                   .dropDownValueController ??=
                                               FormFieldController<String>(null),
-                                          options: ['USD', 'GTQ'],
+                                          options: const ['USD', 'GTQ'],
                                           onChanged: (val) => safeSetState(
                                               () => _model.dropDownValue = val),
                                           width: 90.0,
@@ -267,9 +266,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           borderColor: Colors.transparent,
                                           borderWidth: 0.0,
                                           borderRadius: 67.0,
-                                          margin:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  12.0, 0.0, 12.0, 0.0),
+                                          margin: const EdgeInsetsDirectional
+                                              .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                           hidesUnderline: true,
                                           isOverButton: false,
                                           isSearchable: false,
@@ -361,7 +359,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       MediaQuery.viewInsetsOf(
                                                           context),
                                                   child:
-                                                      DoviaSuupportMessagesWidget(),
+                                                      const DoviaSuupportMessagesWidget(),
                                                 ),
                                               );
                                             },
@@ -388,18 +386,18 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 8.0)),
+                                    ].divide(const SizedBox(width: 8.0)),
                                   ),
                                 ],
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 30.0, 0.0, 0.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Expanded(
-                                      child: Container(
+                                      child: SizedBox(
                                         width: 200.0,
                                         child: TextFormField(
                                           controller: _model.textController,
@@ -466,7 +464,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                               .labelMedium
                                                               .fontStyle,
                                                     ),
-                                            enabledBorder: OutlineInputBorder(
+                                            enabledBorder:
+                                                const OutlineInputBorder(
                                               borderSide: BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
@@ -480,7 +479,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 topRight: Radius.circular(25.0),
                                               ),
                                             ),
-                                            focusedBorder: OutlineInputBorder(
+                                            focusedBorder:
+                                                const OutlineInputBorder(
                                               borderSide: BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
@@ -501,7 +501,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                         .error,
                                                 width: 1.0,
                                               ),
-                                              borderRadius: BorderRadius.only(
+                                              borderRadius:
+                                                  const BorderRadius.only(
                                                 bottomLeft:
                                                     Radius.circular(25.0),
                                                 bottomRight:
@@ -518,7 +519,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                         .error,
                                                 width: 1.0,
                                               ),
-                                              borderRadius: BorderRadius.only(
+                                              borderRadius:
+                                                  const BorderRadius.only(
                                                 bottomLeft:
                                                     Radius.circular(25.0),
                                                 bottomRight:
@@ -531,7 +533,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                             fillColor:
                                                 FlutterFlowTheme.of(context)
                                                     .secondaryBackground,
-                                            prefixIcon: Icon(
+                                            prefixIcon: const Icon(
                                               Icons.search_rounded,
                                               size: 24.0,
                                             ),
@@ -581,19 +583,19 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 22.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 22.0, 0.0, 0.0),
                       child: Container(
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               10.0, 10.0, 10.0, 10.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 10.0, 0.0, 10.0),
                                 child: InkWell(
                                   splashColor: Colors.transparent,
@@ -609,14 +611,15 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                     height: 30.0,
                                     decoration: BoxDecoration(
                                       color: _model.comprarORentar == 'comprar'
-                                          ? Color(0x32007376)
+                                          ? const Color(0x32007376)
                                           : FlutterFlowTheme.of(context)
                                               .tertiary,
                                       borderRadius: BorderRadius.circular(24.0),
                                     ),
                                     child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          20.0, 0.0, 20.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              20.0, 0.0, 20.0, 0.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -634,7 +637,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           ),
                                           Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Text(
                                               'Comprar',
                                               style:
@@ -677,14 +681,14 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       ),
                                             ),
                                           ),
-                                        ].divide(SizedBox(width: 8.0)),
+                                        ].divide(const SizedBox(width: 8.0)),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 10.0, 0.0, 10.0),
                                 child: InkWell(
                                   splashColor: Colors.transparent,
@@ -721,8 +725,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           ),
                                         ),
                                         Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              0.0, 0.0),
                                           child: Text(
                                             'Rentar',
                                             textAlign: TextAlign.center,
@@ -759,12 +763,12 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 ),
                                           ),
                                         ),
-                                      ].divide(SizedBox(width: 8.0)),
+                                      ].divide(const SizedBox(width: 8.0)),
                                     ),
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(width: 20.0)),
+                            ].divide(const SizedBox(width: 20.0)),
                           ),
                         ),
                       ),
@@ -774,7 +778,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 20.0, 20.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -817,10 +821,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 },
                                 text: 'Ver mas',
                                 options: FFButtonOptions(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
                                   color: FlutterFlowTheme.of(context).accent1,
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
@@ -849,7 +854,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 20.0, 20.0, 0.0),
                           child: FutureBuilder<ApiCallResponse>(
                             future: DOVIAAPIPropertyContextGroup
@@ -926,7 +931,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                     backgroundColor:
                                                         Colors.transparent,
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                                 0.0, 0.0)
                                                             .resolve(
                                                                 Directionality.of(
@@ -958,8 +963,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               height: 0.0,
                                               imageUrl:
                                                   'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
-                                              isFavorite:
-                                                  _isHouseFavorite(eachHouseItem),
+                                              isFavorite: _isHouseFavorite(
+                                                  eachHouseItem),
                                               name: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.name''',
@@ -997,15 +1002,15 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       _model.addFavoriteNew;
                                                   final isAlreadyFavorite =
                                                       (addFavoriteResponse
-                                                              ?.statusCode ==
-                                                          409) ||
+                                                                  ?.statusCode ==
+                                                              409) ||
                                                           (addFavoriteResponse
-                                                                  ?.jsonBody ??
-                                                              '')
-                                                          .toString()
-                                                          .toLowerCase()
-                                                          .contains(
-                                                              'already');
+                                                                      ?.jsonBody ??
+                                                                  '')
+                                                              .toString()
+                                                              .toLowerCase()
+                                                              .contains(
+                                                                  'already');
 
                                                   if ((addFavoriteResponse
                                                               ?.succeeded ??
@@ -1061,17 +1066,20 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       builder:
                                                           (alertDialogContext) {
                                                         return AlertDialog(
-                                                          title: Text('Error'),
-                                                          content: Text((addFavoriteResponse
-                                                                      ?.jsonBody ??
-                                                                  '')
-                                                              .toString()),
+                                                          title: const Text(
+                                                              'Error'),
+                                                          content: Text(
+                                                              (addFavoriteResponse
+                                                                          ?.jsonBody ??
+                                                                      '')
+                                                                  .toString()),
                                                           actions: [
                                                             TextButton(
                                                               onPressed: () =>
                                                                   Navigator.pop(
                                                                       alertDialogContext),
-                                                              child: Text('Ok'),
+                                                              child: const Text(
+                                                                  'Ok'),
                                                             ),
                                                           ],
                                                         );
@@ -1089,7 +1097,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                         backgroundColor:
                                                             Colors.transparent,
                                                         alignment:
-                                                            AlignmentDirectional(
+                                                            const AlignmentDirectional(
                                                                     0.0, 0.0)
                                                                 .resolve(
                                                                     Directionality.of(
@@ -1105,7 +1113,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                 ?.unfocus();
                                                           },
                                                           child:
-                                                              VisitorRestrictionPopupWidget(),
+                                                              const VisitorRestrictionPopupWidget(),
                                                         ),
                                                       );
                                                     },
@@ -1115,55 +1123,54 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 safeSetState(() {});
                                               },
                                               onRemoveFromFavorites: () async {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    enableDrag: false,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child: Padding(
-                                                          padding: MediaQuery
-                                                              .viewInsetsOf(
-                                                                  context),
-                                                          child:
-                                                              TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM:
-                                                                false,
-                                                            houseId:
-                                                                getJsonField(
-                                                              eachHouseItem,
-                                                              r'''$.id''',
-                                                            ).toString(),
-                                                            propertyName:
-                                                                getJsonField(
-                                                              eachHouseItem,
-                                                              r'''$.name''',
-                                                            ).toString(),
-                                                            propertyImage: '',
-                                                            propertyIsFavorite:
-                                                                true,
-                                                          ),
+                                                await showModalBottomSheet(
+                                                  isScrollControlled: true,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  enableDrag: false,
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        FocusScope.of(context)
+                                                            .unfocus();
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                      },
+                                                      child: Padding(
+                                                        padding: MediaQuery
+                                                            .viewInsetsOf(
+                                                                context),
+                                                        child:
+                                                            TusFavoritosCarpetasModalWidget(
+                                                          isCreatingNewFolderPARAM:
+                                                              false,
+                                                          houseId: getJsonField(
+                                                            eachHouseItem,
+                                                            r'''$.id''',
+                                                          ).toString(),
+                                                          propertyName:
+                                                              getJsonField(
+                                                            eachHouseItem,
+                                                            r'''$.name''',
+                                                          ).toString(),
+                                                          propertyImage: '',
+                                                          propertyIsFavorite:
+                                                              true,
                                                         ),
-                                                      );
-                                                    },
-                                                  ).then((value) =>
-                                                      safeSetState(() {}));
+                                                      ),
+                                                    );
+                                                  },
+                                                ).then((value) =>
+                                                    safeSetState(() {}));
 
                                                 safeSetState(() {});
                                               },
                                             ),
                                           ),
                                         );
-                                      }).divide(SizedBox(width: 16.0)),
+                                      }).divide(const SizedBox(width: 16.0)),
                                     ),
                                   );
                                 },
@@ -1177,7 +1184,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 20.0, 20.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -1220,10 +1227,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 },
                                 text: 'Ver mas',
                                 options: FFButtonOptions(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
                                   color: FlutterFlowTheme.of(context).accent1,
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
@@ -1252,7 +1260,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 20.0, 20.0, 0.0),
                           child: FutureBuilder<ApiCallResponse>(
                             future: DOVIAAPIPropertyContextGroup
@@ -1329,7 +1337,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                     backgroundColor:
                                                         Colors.transparent,
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                                 0.0, 0.0)
                                                             .resolve(
                                                                 Directionality.of(
@@ -1361,8 +1369,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               height: 0.0,
                                               imageUrl:
                                                   'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
-                                              isFavorite:
-                                                  _isHouseFavorite(eachHouseItem),
+                                              isFavorite: _isHouseFavorite(
+                                                  eachHouseItem),
                                               name: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.name''',
@@ -1401,15 +1409,15 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                           .addFvoriteRecommended;
                                                   final isAlreadyFavorite =
                                                       (addFavoriteResponse
-                                                              ?.statusCode ==
-                                                          409) ||
+                                                                  ?.statusCode ==
+                                                              409) ||
                                                           (addFavoriteResponse
-                                                                  ?.jsonBody ??
-                                                              '')
-                                                          .toString()
-                                                          .toLowerCase()
-                                                          .contains(
-                                                              'already');
+                                                                      ?.jsonBody ??
+                                                                  '')
+                                                              .toString()
+                                                              .toLowerCase()
+                                                              .contains(
+                                                                  'already');
 
                                                   if ((addFavoriteResponse
                                                               ?.succeeded ??
@@ -1465,7 +1473,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       builder:
                                                           (alertDialogContext) {
                                                         return AlertDialog(
-                                                          title: Text('Error'),
+                                                          title: const Text(
+                                                              'Error'),
                                                           content: Text(
                                                               (addFavoriteResponse
                                                                           ?.jsonBody ??
@@ -1476,7 +1485,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                               onPressed: () =>
                                                                   Navigator.pop(
                                                                       alertDialogContext),
-                                                              child: Text('Ok'),
+                                                              child: const Text(
+                                                                  'Ok'),
                                                             ),
                                                           ],
                                                         );
@@ -1494,7 +1504,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                         backgroundColor:
                                                             Colors.transparent,
                                                         alignment:
-                                                            AlignmentDirectional(
+                                                            const AlignmentDirectional(
                                                                     0.0, 0.0)
                                                                 .resolve(
                                                                     Directionality.of(
@@ -1510,7 +1520,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                 ?.unfocus();
                                                           },
                                                           child:
-                                                              VisitorRestrictionPopupWidget(),
+                                                              const VisitorRestrictionPopupWidget(),
                                                         ),
                                                       );
                                                     },
@@ -1520,55 +1530,54 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 safeSetState(() {});
                                               },
                                               onRemoveFromFavorites: () async {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    enableDrag: false,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child: Padding(
-                                                          padding: MediaQuery
-                                                              .viewInsetsOf(
-                                                                  context),
-                                                          child:
-                                                              TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM:
-                                                                false,
-                                                            houseId:
-                                                                getJsonField(
-                                                              eachHouseItem,
-                                                              r'''$.id''',
-                                                            ).toString(),
-                                                            propertyName:
-                                                                getJsonField(
-                                                              eachHouseItem,
-                                                              r'''$.name''',
-                                                            ).toString(),
-                                                            propertyImage: '',
-                                                            propertyIsFavorite:
-                                                                true,
-                                                          ),
+                                                await showModalBottomSheet(
+                                                  isScrollControlled: true,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  enableDrag: false,
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        FocusScope.of(context)
+                                                            .unfocus();
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                      },
+                                                      child: Padding(
+                                                        padding: MediaQuery
+                                                            .viewInsetsOf(
+                                                                context),
+                                                        child:
+                                                            TusFavoritosCarpetasModalWidget(
+                                                          isCreatingNewFolderPARAM:
+                                                              false,
+                                                          houseId: getJsonField(
+                                                            eachHouseItem,
+                                                            r'''$.id''',
+                                                          ).toString(),
+                                                          propertyName:
+                                                              getJsonField(
+                                                            eachHouseItem,
+                                                            r'''$.name''',
+                                                          ).toString(),
+                                                          propertyImage: '',
+                                                          propertyIsFavorite:
+                                                              true,
                                                         ),
-                                                      );
-                                                    },
-                                                  ).then((value) =>
-                                                      safeSetState(() {}));
+                                                      ),
+                                                    );
+                                                  },
+                                                ).then((value) =>
+                                                    safeSetState(() {}));
 
                                                 safeSetState(() {});
                                               },
                                             ),
                                           ),
                                         );
-                                      }).divide(SizedBox(width: 16.0)),
+                                      }).divide(const SizedBox(width: 16.0)),
                                     ),
                                   );
                                 },
@@ -1582,7 +1591,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 20.0, 20.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -1625,10 +1634,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 },
                                 text: 'Ver mas',
                                 options: FFButtonOptions(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
                                   color: FlutterFlowTheme.of(context).accent1,
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
@@ -1657,7 +1667,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 20.0, 20.0, 0.0),
                           child: FutureBuilder<ApiCallResponse>(
                             future: DOVIAAPIPropertyContextGroup
@@ -1734,7 +1744,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                     backgroundColor:
                                                         Colors.transparent,
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                                 0.0, 0.0)
                                                             .resolve(
                                                                 Directionality.of(
@@ -1766,8 +1776,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               height: 0.0,
                                               imageUrl:
                                                   'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
-                                              isFavorite:
-                                                  _isHouseFavorite(eachHouseItem),
+                                              isFavorite: _isHouseFavorite(
+                                                  eachHouseItem),
                                               name: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.name''',
@@ -1801,20 +1811,19 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                         currentAuthenticationToken,
                                                   );
 
-                                                  final addFavoriteResponse =
-                                                      _model
-                                                          .addFavoriteViewedRecently;
+                                                  final addFavoriteResponse = _model
+                                                      .addFavoriteViewedRecently;
                                                   final isAlreadyFavorite =
                                                       (addFavoriteResponse
-                                                              ?.statusCode ==
-                                                          409) ||
+                                                                  ?.statusCode ==
+                                                              409) ||
                                                           (addFavoriteResponse
-                                                                  ?.jsonBody ??
-                                                              '')
-                                                          .toString()
-                                                          .toLowerCase()
-                                                          .contains(
-                                                              'already');
+                                                                      ?.jsonBody ??
+                                                                  '')
+                                                              .toString()
+                                                              .toLowerCase()
+                                                              .contains(
+                                                                  'already');
 
                                                   if ((addFavoriteResponse
                                                               ?.succeeded ??
@@ -1870,17 +1879,20 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       builder:
                                                           (alertDialogContext) {
                                                         return AlertDialog(
-                                                          title: Text('Error'),
-                                                          content: Text((addFavoriteResponse
-                                                                      ?.jsonBody ??
-                                                                  '')
-                                                              .toString()),
+                                                          title: const Text(
+                                                              'Error'),
+                                                          content: Text(
+                                                              (addFavoriteResponse
+                                                                          ?.jsonBody ??
+                                                                      '')
+                                                                  .toString()),
                                                           actions: [
                                                             TextButton(
                                                               onPressed: () =>
                                                                   Navigator.pop(
                                                                       alertDialogContext),
-                                                              child: Text('Ok'),
+                                                              child: const Text(
+                                                                  'Ok'),
                                                             ),
                                                           ],
                                                         );
@@ -1898,7 +1910,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                         backgroundColor:
                                                             Colors.transparent,
                                                         alignment:
-                                                            AlignmentDirectional(
+                                                            const AlignmentDirectional(
                                                                     0.0, 0.0)
                                                                 .resolve(
                                                                     Directionality.of(
@@ -1914,7 +1926,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                 ?.unfocus();
                                                           },
                                                           child:
-                                                              VisitorRestrictionPopupWidget(),
+                                                              const VisitorRestrictionPopupWidget(),
                                                         ),
                                                       );
                                                     },
@@ -1924,38 +1936,53 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 safeSetState(() {});
                                               },
                                               onRemoveFromFavorites: () async {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    enableDrag: false,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context).unfocus();
-                                                          FocusManager.instance.primaryFocus?.unfocus();
-                                                        },
-                                                        child: Padding(
-                                                          padding: MediaQuery.viewInsetsOf(context),
-                                                          child: TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM: false,
-                                                            houseId: getJsonField(eachHouseItem, r'''$.id''').toString(),
-                                                            propertyName: getJsonField(eachHouseItem, r'''$.name''').toString(),
-                                                            propertyImage: '',
-                                                            propertyIsFavorite: true,
-                                                          ),
+                                                await showModalBottomSheet(
+                                                  isScrollControlled: true,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  enableDrag: false,
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        FocusScope.of(context)
+                                                            .unfocus();
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                      },
+                                                      child: Padding(
+                                                        padding: MediaQuery
+                                                            .viewInsetsOf(
+                                                                context),
+                                                        child:
+                                                            TusFavoritosCarpetasModalWidget(
+                                                          isCreatingNewFolderPARAM:
+                                                              false,
+                                                          houseId: getJsonField(
+                                                                  eachHouseItem,
+                                                                  r'''$.id''')
+                                                              .toString(),
+                                                          propertyName: getJsonField(
+                                                                  eachHouseItem,
+                                                                  r'''$.name''')
+                                                              .toString(),
+                                                          propertyImage: '',
+                                                          propertyIsFavorite:
+                                                              true,
                                                         ),
-                                                      );
-                                                    },
-                                                  ).then((value) => safeSetState(() {}));
+                                                      ),
+                                                    );
+                                                  },
+                                                ).then((value) =>
+                                                    safeSetState(() {}));
 
                                                 safeSetState(() {});
                                               },
                                             ),
                                           ),
                                         );
-                                      }).divide(SizedBox(width: 16.0)),
+                                      }).divide(const SizedBox(width: 16.0)),
                                     ),
                                   );
                                 },
@@ -1969,7 +1996,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,

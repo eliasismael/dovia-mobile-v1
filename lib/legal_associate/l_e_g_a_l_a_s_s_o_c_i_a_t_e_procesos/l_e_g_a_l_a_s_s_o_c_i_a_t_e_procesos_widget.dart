@@ -4,11 +4,8 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_model.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_model.dart';
 
@@ -61,7 +58,7 @@ class _LEGALASSOCIATEProcesosWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -70,19 +67,19 @@ class _LEGALASSOCIATEProcesosWidgetState
                     wrapWithModel(
                       model: _model.legalAssociateHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalAssociateHeaderWidget(
+                      child: const LegalAssociateHeaderWidget(
                         titleText: 'Procesos',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -98,10 +95,11 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     text: 'Todos',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -136,10 +134,11 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     text: 'Pendientes',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -174,10 +173,11 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     text: 'En redacción',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -212,10 +212,11 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     text: 'Reunión agendada',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -250,10 +251,11 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     text: 'En revisión Legal HQ',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -288,10 +290,11 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     text: 'Rechazados',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -326,10 +329,11 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     text: 'Aprobados',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -357,7 +361,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                                       borderRadius: BorderRadius.circular(24.0),
                                     ),
                                   ),
-                                ].divide(SizedBox(width: 10.0)),
+                                ].divide(const SizedBox(width: 10.0)),
                               ),
                             ),
                           ),
@@ -365,7 +369,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Container(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
@@ -375,8 +379,9 @@ class _LEGALASSOCIATEProcesosWidgetState
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 10.0, 10.0, 10.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            10.0, 10.0, 10.0, 10.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
@@ -403,14 +408,13 @@ class _LEGALASSOCIATEProcesosWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 20.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                           child: Container(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
                                                 1.0,
-                                            decoration: BoxDecoration(),
+                                            decoration: const BoxDecoration(),
                                             child: IntrinsicWidth(
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
@@ -419,7 +423,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                                                 children: [
                                                   Align(
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                             -1.0, 0.0),
                                                     child: RichText(
                                                       textScaler:
@@ -488,7 +492,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                                                                       .fontStyle,
                                                                 ),
                                                           ),
-                                                          TextSpan(
+                                                          const TextSpan(
                                                             text: 'Dirección:',
                                                             style: TextStyle(),
                                                           )
@@ -566,8 +570,8 @@ class _LEGALASSOCIATEProcesosWidgetState
                                                       Container(
                                                         decoration:
                                                             BoxDecoration(
-                                                          color:
-                                                              Color(0xFFFFE69F),
+                                                          color: const Color(
+                                                              0xFFFFE69F),
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(
@@ -575,12 +579,12 @@ class _LEGALASSOCIATEProcesosWidgetState
                                                         ),
                                                         child: Padding(
                                                           padding:
-                                                              EdgeInsetsDirectional
+                                                              const EdgeInsetsDirectional
                                                                   .fromSTEB(
-                                                                      16.0,
-                                                                      4.0,
-                                                                      16.0,
-                                                                      4.0),
+                                                                  16.0,
+                                                                  4.0,
+                                                                  16.0,
+                                                                  4.0),
                                                           child: Text(
                                                             'Pendiente',
                                                             style: FlutterFlowTheme
@@ -597,7 +601,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                                                                         .bodyMedium
                                                                         .fontStyle,
                                                                   ),
-                                                                  color: Color(
+                                                                  color: const Color(
                                                                       0xFFD59E08),
                                                                   letterSpacing:
                                                                       0.0,
@@ -616,9 +620,9 @@ class _LEGALASSOCIATEProcesosWidgetState
                                                   ),
                                                   Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 12.0,
-                                                                0.0, 0.0),
+                                                            0.0, 0.0),
                                                     child: FFButtonWidget(
                                                       onPressed: () {
                                                         print(
@@ -634,19 +638,13 @@ class _LEGALASSOCIATEProcesosWidgetState
                                                                 1.0,
                                                         height: 30.0,
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    0.0,
-                                                                    16.0,
-                                                                    0.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                0.0, 16.0, 0.0),
                                                         iconPadding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    0.0,
-                                                                    0.0,
-                                                                    0.0,
-                                                                    0.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(0.0,
+                                                                0.0, 0.0, 0.0),
                                                         color:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -706,7 +704,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -714,7 +712,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                     wrapWithModel(
                       model: _model.lEGALASSOCAITENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALASSOCAITENavbarWidget(),
+                      child: const LEGALASSOCAITENavbarWidget(),
                     ),
                   ],
                 ),

@@ -1,16 +1,12 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos2_model.dart';
 export 'l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos2_model.dart';
 
@@ -68,22 +64,22 @@ class _LEGALASSOCAITEDocumentos2WidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            decoration: BoxDecoration(),
+                            decoration: const BoxDecoration(),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -115,7 +111,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 8.0)),
+                              ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
                           RichText(
@@ -123,7 +119,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: widget!.selectedProperty!,
+                                  text: widget.selectedProperty!,
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -197,13 +193,13 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
@@ -211,7 +207,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                         children: [
                           Expanded(
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Wrap(
                                 spacing: 0.0,
@@ -226,7 +222,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                   Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 0.4,
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment:
@@ -243,7 +239,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                           child: Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Text(
                                               'PDF',
                                               style:
@@ -282,9 +279,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Copia de contratos',
                                             style: FlutterFlowTheme.of(context)
@@ -317,9 +313,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: LinearPercentIndicator(
                                             percent: 0.5,
                                             lineHeight: 12.0,
@@ -331,7 +326,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                             backgroundColor:
                                                 FlutterFlowTheme.of(context)
                                                     .primaryText,
-                                            barRadius: Radius.circular(50.0),
+                                            barRadius:
+                                                const Radius.circular(50.0),
                                             padding: EdgeInsets.zero,
                                           ),
                                         ),
@@ -341,7 +337,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                   Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 0.4,
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -356,7 +352,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                           child: Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Text(
                                               'PDF',
                                               style:
@@ -395,9 +392,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Copia de depósito a\ncuenta Dovia',
                                             style: FlutterFlowTheme.of(context)
@@ -430,9 +426,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: LinearPercentIndicator(
                                             percent: 0.5,
                                             lineHeight: 12.0,
@@ -444,7 +439,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                             backgroundColor:
                                                 FlutterFlowTheme.of(context)
                                                     .primaryText,
-                                            barRadius: Radius.circular(50.0),
+                                            barRadius:
+                                                const Radius.circular(50.0),
                                             padding: EdgeInsets.zero,
                                           ),
                                         ),
@@ -454,7 +450,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                   Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 0.4,
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -469,7 +465,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                           child: Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Text(
                                               'PDF',
                                               style:
@@ -508,9 +505,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Copia de ingreso de\ninscripción en de registro',
                                             style: FlutterFlowTheme.of(context)
@@ -543,9 +539,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: LinearPercentIndicator(
                                             percent: 0.5,
                                             lineHeight: 12.0,
@@ -557,7 +552,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                             backgroundColor:
                                                 FlutterFlowTheme.of(context)
                                                     .primaryText,
-                                            barRadius: Radius.circular(50.0),
+                                            barRadius:
+                                                const Radius.circular(50.0),
                                             padding: EdgeInsets.zero,
                                           ),
                                         ),
@@ -567,7 +563,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                   Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 0.4,
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -582,7 +578,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                           child: Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Text(
                                               'PDF',
                                               style:
@@ -621,9 +618,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Copia de certificación \nde registro',
                                             style: FlutterFlowTheme.of(context)
@@ -656,9 +652,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: LinearPercentIndicator(
                                             percent: 0.5,
                                             lineHeight: 12.0,
@@ -670,7 +665,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                             backgroundColor:
                                                 FlutterFlowTheme.of(context)
                                                     .primaryText,
-                                            barRadius: Radius.circular(50.0),
+                                            barRadius:
+                                                const Radius.circular(50.0),
                                             padding: EdgeInsets.zero,
                                           ),
                                         ),
@@ -680,7 +676,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                   Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 0.4,
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -695,7 +691,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                           child: Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    0.0, 0.0),
                                             child: Text(
                                               'PDF',
                                               style:
@@ -734,9 +731,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: Text(
                                             'Copia de aviso a \nmunicipalidad',
                                             style: FlutterFlowTheme.of(context)
@@ -769,9 +765,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: LinearPercentIndicator(
                                             percent: 0.5,
                                             lineHeight: 12.0,
@@ -783,7 +778,8 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                             backgroundColor:
                                                 FlutterFlowTheme.of(context)
                                                     .primaryText,
-                                            barRadius: Radius.circular(50.0),
+                                            barRadius:
+                                                const Radius.circular(50.0),
                                             padding: EdgeInsets.zero,
                                           ),
                                         ),
@@ -801,7 +797,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -809,7 +805,7 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                     wrapWithModel(
                       model: _model.lEGALASSOCAITENavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALASSOCAITENavbarWidget(),
+                      child: const LEGALASSOCAITENavbarWidget(),
                     ),
                   ],
                 ),

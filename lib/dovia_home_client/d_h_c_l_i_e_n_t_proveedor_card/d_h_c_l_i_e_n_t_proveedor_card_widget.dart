@@ -1,11 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_proveedor_card_model.dart';
 export 'd_h_c_l_i_e_n_t_proveedor_card_model.dart';
 
@@ -54,7 +52,7 @@ class _DHCLIENTProveedorCardWidgetState
         ),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(18.0, 27.0, 18.0, 18.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(18.0, 27.0, 18.0, 18.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -68,7 +66,7 @@ class _DHCLIENTProveedorCardWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: SvgPicture.asset(
@@ -78,15 +76,15 @@ class _DHCLIENTProveedorCardWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.75,
                 height: 28.0,
                 decoration: BoxDecoration(
-                  color: Color(0x3370ACAD),
+                  color: const Color(0x3370ACAD),
                   borderRadius: BorderRadius.circular(24.0),
                 ),
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Text(
                   'Dovia Home Associate',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -138,7 +136,7 @@ class _DHCLIENTProveedorCardWidgetState
                   ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
               child: Text(
                 'Sobre mí',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -157,7 +155,7 @@ class _DHCLIENTProveedorCardWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
               child: Text(
                 'ID',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -174,7 +172,7 @@ class _DHCLIENTProveedorCardWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
               child: FFButtonWidget(
                 onPressed: () {
                   print('Button pressed ...');
@@ -183,9 +181,9 @@ class _DHCLIENTProveedorCardWidgetState
                 options: FFButtonOptions(
                   width: MediaQuery.sizeOf(context).width * 1.0,
                   height: 42.0,
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
                   iconPadding:
-                      EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                   color: FlutterFlowTheme.of(context).primary,
                   textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                         font: GoogleFonts.publicSans(

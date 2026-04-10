@@ -1,10 +1,8 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -12,7 +10,6 @@ import 'package:flutter/material.dart';
 // CUSTOM RECOVER PASSWORD 1
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -88,9 +85,9 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
               child: Stack(
                 children: [
                   Align(
-                    alignment: AlignmentDirectional(-1.0, 1.0),
+                    alignment: const AlignmentDirectional(-1.0, 1.0),
                     child: Container(
-                      decoration: BoxDecoration(shape: BoxShape.rectangle),
+                      decoration: const BoxDecoration(shape: BoxShape.rectangle),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.asset(
@@ -103,9 +100,9 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(1.0, -1.0),
+                    alignment: const AlignmentDirectional(1.0, -1.0),
                     child: Container(
-                      decoration: BoxDecoration(),
+                      decoration: const BoxDecoration(),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.asset(
@@ -124,16 +121,16 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
             Container(
               width: MediaQuery.sizeOf(context).width * 1.0,
               height: MediaQuery.sizeOf(context).height * 1.0,
-              decoration: BoxDecoration(),
+              decoration: const BoxDecoration(),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(0.0),
                         child: SvgPicture.asset(
@@ -146,7 +143,7 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
                       child: Text(
                         '¿Olvidaste tu contraseña?',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -156,7 +153,7 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: Color(0xFF00444B),
+                              color: const Color(0xFF00444B),
                               fontSize: 26.0,
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.w600,
@@ -168,11 +165,11 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 41.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 41.0, 0.0, 0.0),
                       child: Container(
                         width: 350.0,
-                        decoration: BoxDecoration(),
-                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        decoration: const BoxDecoration(),
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -200,9 +197,9 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                   ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 30.0, 0.0, 0.0),
                                 child: Text(
                                   'Correo',
@@ -240,11 +237,11 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 12.0, 0.0, 0.0),
-                                      child: Container(
+                                      child: SizedBox(
                                         width:
                                             MediaQuery.sizeOf(context).width *
                                                 1.0,
@@ -316,7 +313,7 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                                               .fontStyle,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -324,7 +321,7 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                                   BorderRadius.circular(10.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0xFF007376),
                                                 width: 1.5,
                                               ),
@@ -402,7 +399,7 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 67.0, 0.0, 0.0),
                                     child: FFButtonWidget(
                                       onPressed: isEmailValid
@@ -435,13 +432,13 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                       options: FFButtonOptions(
                                         width: 349.0,
                                         height: 42.0,
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             20.0, 10.0, 20.0, 10.0),
                                         iconPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
+                                            const EdgeInsetsDirectional.fromSTEB(
                                                 0.0, 0.0, 0.0, 0.0),
                                         color: isEmailValid
-                                            ? Color(0xFF00444B)
+                                            ? const Color(0xFF00444B)
                                             : FlutterFlowTheme.of(context)
                                                 .alternate,
                                         textStyle: FlutterFlowTheme.of(context)

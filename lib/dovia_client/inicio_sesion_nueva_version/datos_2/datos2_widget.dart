@@ -5,13 +5,10 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/terminos_condiciones/terminos_condiciones_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'datos2_model.dart';
 export 'datos2_model.dart';
 
@@ -60,7 +57,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             Column(
               mainAxisSize: MainAxisSize.max,
@@ -68,7 +65,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                 Container(
                   width: MediaQuery.sizeOf(context).width * 1.0,
                   height: MediaQuery.sizeOf(context).height * 1.0,
-                  decoration: BoxDecoration(),
+                  decoration: const BoxDecoration(),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -76,9 +73,9 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                     children: [
                       Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               283.0, 40.0, 59.0, 0.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
@@ -92,16 +89,16 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                         ),
                       ),
                       Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
+                        alignment: const AlignmentDirectional(0.0, 0.0),
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 54.0, 0.0, 0.0),
                           child: Container(
                             width: MediaQuery.sizeOf(context).width * 1.0,
-                            decoration: BoxDecoration(),
-                            alignment: AlignmentDirectional(0.0, -1.0),
+                            decoration: const BoxDecoration(),
+                            alignment: const AlignmentDirectional(0.0, -1.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   20.0, 0.0, 20.0, 0.0),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
@@ -130,10 +127,10 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                         ),
                                   ),
                                   Container(
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Align(
                                       alignment:
-                                          AlignmentDirectional(-1.0, 0.0),
+                                          const AlignmentDirectional(-1.0, 0.0),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.max,
                                         crossAxisAlignment:
@@ -141,7 +138,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                         children: [
                                           Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 19.0, 0.0, 0.0),
                                             child: Text(
                                               'Sube el ID o pasaporte',
@@ -178,7 +175,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                           ),
                                           Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 12.0, 0.0, 0.0),
                                             child: InkWell(
                                               splashColor: Colors.transparent,
@@ -259,9 +256,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                                 ),
                                                 child: Builder(
                                                   builder: (context) {
-                                                    if (_model.uploadedLocalFile_uploadData5so !=
-                                                            null &&
-                                                        (_model
+                                                    if ((_model
                                                                 .uploadedLocalFile_uploadData5so
                                                                 .bytes
                                                                 ?.isNotEmpty ??
@@ -310,7 +305,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                       ),
                       Builder(
                         builder: (context) => Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 19.0, 20.0, 0.0),
                           child: InkWell(
                             splashColor: Colors.transparent,
@@ -327,7 +322,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                       elevation: 0,
                                       insetPadding: EdgeInsets.zero,
                                       backgroundColor: Colors.transparent,
-                                      alignment: AlignmentDirectional(0.0, 0.0)
+                                      alignment: const AlignmentDirectional(0.0, 0.0)
                                           .resolve(Directionality.of(context)),
                                       child: GestureDetector(
                                         onTap: () {
@@ -336,7 +331,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                           FocusManager.instance.primaryFocus
                                               ?.unfocus();
                                         },
-                                        child: Container(
+                                        child: SizedBox(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   0.9,
@@ -364,7 +359,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                       elevation: 0,
                                       insetPadding: EdgeInsets.zero,
                                       backgroundColor: Colors.transparent,
-                                      alignment: AlignmentDirectional(0.0, 0.0)
+                                      alignment: const AlignmentDirectional(0.0, 0.0)
                                           .resolve(Directionality.of(context)),
                                       child: GestureDetector(
                                         onTap: () {
@@ -373,14 +368,14 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                           FocusManager.instance.primaryFocus
                                               ?.unfocus();
                                         },
-                                        child: Container(
+                                        child: SizedBox(
                                           height: MediaQuery.sizeOf(context)
                                                   .height *
                                               0.5,
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   0.9,
-                                          child: TerminosCondicionesWidget(),
+                                          child: const TerminosCondicionesWidget(),
                                         ),
                                       ),
                                     );
@@ -421,7 +416,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                         ? BorderSide(
                                             width: 2,
                                             color: FlutterFlowTheme.of(context)
-                                                .alternate!,
+                                                .alternate,
                                           )
                                         : null,
                                     activeColor:
@@ -468,7 +463,7 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                                         .fontStyle,
                                               ),
                                         ),
-                                        TextSpan(
+                                        const TextSpan(
                                           text: 'términos y condiciones',
                                           style: TextStyle(),
                                         )
@@ -505,12 +500,10 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 18.0, 20.0, 25.0),
                         child: FFButtonWidget(
-                          onPressed: ((_model.uploadedLocalFile_uploadData5so ==
-                                          null ||
-                                      (_model.uploadedLocalFile_uploadData5so
+                          onPressed: (((_model.uploadedLocalFile_uploadData5so
                                               .bytes?.isEmpty ??
                                           true)) ||
                                   (_model.terminosAceptados == false))
@@ -523,9 +516,9 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                           options: FFButtonOptions(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: 40.0,
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 16.0, 0.0, 16.0, 0.0),
-                            iconPadding: EdgeInsetsDirectional.fromSTEB(
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 0.0),
                             color: FlutterFlowTheme.of(context).primary,
                             textStyle: FlutterFlowTheme.of(context)

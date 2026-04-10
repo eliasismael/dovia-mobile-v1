@@ -1,11 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import 'popup_exito_model.dart';
 export 'popup_exito_model.dart';
 
@@ -14,10 +12,14 @@ class PopupExitoWidget extends StatefulWidget {
     super.key,
     required this.title,
     required this.text,
+    this.continueText,
+    this.onContinue,
   });
 
   final String? title;
   final String? text;
+  final String? continueText;
+  final VoidCallback? onContinue;
 
   @override
   State<PopupExitoWidget> createState() => _PopupExitoWidgetState();
@@ -120,6 +122,30 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
                           ),
                     ),
                   ),
+                  if (widget.onContinue != null)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 32.0, 0.0, 0.0),
+                      child: FFButtonWidget(
+                        onPressed: widget.onContinue,
+                        text: widget.continueText ?? 'Continuar',
+                        options: FFButtonOptions(
+                          width: double.infinity,
+                          height: 50.0,
+                          color: FlutterFlowTheme.of(context).primary,
+                          textStyle: FlutterFlowTheme.of(context)
+                              .titleSmall
+                              .override(
+                                font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600),
+                                color: Colors.white,
+                                letterSpacing: 0.0,
+                              ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

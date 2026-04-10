@@ -1,10 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_no_tiene_plan_model.dart';
 export 'd_h_c_l_i_e_n_t_no_tiene_plan_model.dart';
 
@@ -49,7 +47,7 @@ class _DHCLIENTNoTienePlanWidgetState extends State<DHCLIENTNoTienePlanWidget> {
         borderRadius: BorderRadius.circular(25.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -80,8 +78,8 @@ class _DHCLIENTNoTienePlanWidgetState extends State<DHCLIENTNoTienePlanWidget> {
               options: FFButtonOptions(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 height: 42.0,
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                 color: FlutterFlowTheme.of(context).secondaryBackground,
                 textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                       font: GoogleFonts.publicSans(
@@ -90,7 +88,7 @@ class _DHCLIENTNoTienePlanWidgetState extends State<DHCLIENTNoTienePlanWidget> {
                         fontStyle:
                             FlutterFlowTheme.of(context).titleSmall.fontStyle,
                       ),
-                      color: Color(0xE1007376),
+                      color: const Color(0xE1007376),
                       letterSpacing: 0.0,
                       fontWeight:
                           FlutterFlowTheme.of(context).titleSmall.fontWeight,
@@ -98,7 +96,7 @@ class _DHCLIENTNoTienePlanWidgetState extends State<DHCLIENTNoTienePlanWidget> {
                           FlutterFlowTheme.of(context).titleSmall.fontStyle,
                     ),
                 elevation: 0.0,
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Color(0xFF02494B),
                   width: 1.0,
                 ),

@@ -1,10 +1,6 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -687,10 +683,10 @@ class _DoviaClientMisPropiedadesRentarState
         color: infoCardColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Revisaremos la información que ingresaste para asegurar que todo esté correcto y listo para continuar con el proceso.',
             style: TextStyle(
               fontFamily: 'Public Sans',
@@ -701,8 +697,8 @@ class _DoviaClientMisPropiedadesRentarState
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: 16),
+          Text(
             'Si eres el propietario legal, te enviaremos un Acuerdo de Autorización para que apruebes la comercialización de tu propiedad dentro de DOVIA.',
             style: TextStyle(
               fontFamily: 'Public Sans',
@@ -713,8 +709,8 @@ class _DoviaClientMisPropiedadesRentarState
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: 16),
+          Text(
             'Si la cuenta fue creada por un familiar, administrador o representante, te pediremos que confirme la relación con el propietario y que este firme digitalmente la autorización correspondiente.',
             style: TextStyle(
               fontFamily: 'Public Sans',
@@ -725,8 +721,8 @@ class _DoviaClientMisPropiedadesRentarState
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: 16),
+          Text(
             'Todo el proceso es sencillo, guiado y 100% seguro.',
             style: TextStyle(
               fontFamily: 'Public Sans',

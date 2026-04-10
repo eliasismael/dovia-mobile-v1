@@ -92,6 +92,8 @@ class DOVIACLIENTOfertaRentaModel
   TextEditingController? representanteLegalTextController;
   String? Function(BuildContext, String?)?
       representanteLegalTextControllerValidator;
+  // Stores the API call response for rent offer creation.
+  ApiCallResponse? apiResultRentOffer;
   // Model for PrimaryButton component.
   late PrimaryButtonModel primaryButtonModel;
   // Model for DOVIA_CLIENT_Navbar component.

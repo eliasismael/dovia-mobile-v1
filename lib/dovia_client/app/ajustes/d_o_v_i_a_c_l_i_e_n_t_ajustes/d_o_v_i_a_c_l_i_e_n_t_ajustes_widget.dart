@@ -9,12 +9,10 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_ajustes_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_ajustes_model.dart';
 
@@ -66,7 +64,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -75,13 +73,13 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
+                      child: const DOVIASHAREDHeaderWidget(
                         title: 'Ajustes',
                       ),
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 100.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -97,9 +95,9 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                             text: 'cerrar sesion',
                             options: FFButtonOptions(
                               height: 40.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
                               color: FlutterFlowTheme.of(context).primary,
                               textStyle: FlutterFlowTheme.of(context)
@@ -127,7 +125,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 20.0, 20.0, 20.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -154,7 +152,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                       decoration: BoxDecoration(
                                         color:
                                             _model.selectedSection == 'perfil'
-                                                ? Color(0x34007376)
+                                                ? const Color(0x34007376)
                                                 : FlutterFlowTheme.of(context)
                                                     .tertiary,
                                         borderRadius:
@@ -162,10 +160,10 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                       ),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                            const AlignmentDirectional(0.0, 0.0),
                                         child: Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   30.0, 10.0, 30.0, 10.0),
                                           child: Text(
                                             'Perfil y seguridad',
@@ -224,7 +222,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                       decoration: BoxDecoration(
                                         color: _model.selectedSection ==
                                                 'notificaciones'
-                                            ? Color(0x34007376)
+                                            ? const Color(0x34007376)
                                             : FlutterFlowTheme.of(context)
                                                 .tertiary,
                                         borderRadius:
@@ -232,10 +230,10 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                       ),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                            const AlignmentDirectional(0.0, 0.0),
                                         child: Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   30.0, 10.0, 30.0, 10.0),
                                           child: Text(
                                             'Notificaciones',
@@ -288,7 +286,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                           Builder(
                             builder: (context) {
                               if (_model.selectedSection == 'perfil') {
-                                return Container(
+                                return SizedBox(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
                                   height:
                                       MediaQuery.sizeOf(context).height * 1.0,
@@ -313,7 +311,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                             child: Padding(
                                               padding: MediaQuery.viewInsetsOf(
                                                   context),
-                                              child: UnsuscribeModal1Widget(),
+                                              child: const UnsuscribeModal1Widget(),
                                             ),
                                           );
                                         },
@@ -335,7 +333,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                             child: Padding(
                                               padding: MediaQuery.viewInsetsOf(
                                                   context),
-                                              child: DeleteAccount1Widget(),
+                                              child: const DeleteAccount1Widget(),
                                             ),
                                           );
                                         },
@@ -347,35 +345,35 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                 return wrapWithModel(
                                   model: _model.opcionesDeNotificacionesModel,
                                   updateCallback: () => safeSetState(() {}),
-                                  child: OpcionesDeNotificacionesWidget(),
+                                  child: const OpcionesDeNotificacionesWidget(),
                                 );
                               }
                             },
                           ),
                         ]
-                            .divide(SizedBox(height: 12.0))
-                            .addToStart(SizedBox(height: 12.0))
-                            .addToEnd(SizedBox(height: 12.0)),
+                            .divide(const SizedBox(height: 12.0))
+                            .addToStart(const SizedBox(height: 12.0))
+                            .addToEnd(const SizedBox(height: 12.0)),
                       ),
                     ),
                   ],
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 15.0, 100.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),

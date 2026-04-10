@@ -1,13 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_header_model.dart';
 export 'l_i_s_t_i_n_g_h_q_header_model.dart';
 
@@ -50,14 +46,14 @@ class _LISTINGHQHeaderWidgetState extends State<LISTINGHQHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            decoration: BoxDecoration(),
+            decoration: const BoxDecoration(),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -97,7 +93,7 @@ class _LISTINGHQHeaderWidgetState extends State<LISTINGHQHeaderWidget> {
                     fit: BoxFit.cover,
                   ),
                 ),
-              ].divide(SizedBox(width: 8.0)),
+              ].divide(const SizedBox(width: 8.0)),
             ),
           ),
           RichText(
@@ -105,7 +101,7 @@ class _LISTINGHQHeaderWidgetState extends State<LISTINGHQHeaderWidget> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: widget!.titleText!,
+                  text: widget.titleText!,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: GoogleFonts.publicSans(
                           fontWeight: FontWeight.w600,
@@ -195,7 +191,7 @@ class _LISTINGHQHeaderWidgetState extends State<LISTINGHQHeaderWidget> {
                   ),
                 ),
               ),
-            ].divide(SizedBox(width: 8.0)),
+            ].divide(const SizedBox(width: 8.0)),
           ),
         ],
       ),

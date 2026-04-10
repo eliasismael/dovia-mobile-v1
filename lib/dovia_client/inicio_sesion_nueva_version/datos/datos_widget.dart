@@ -6,11 +6,9 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:easy_debounce/easy_debounce.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -94,7 +92,7 @@ class _DatosWidgetState extends State<DatosWidget> {
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             SingleChildScrollView(
               child: Column(
@@ -107,16 +105,16 @@ class _DatosWidgetState extends State<DatosWidget> {
                     children: [
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 54.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 54.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 0.99,
-                          decoration: BoxDecoration(),
-                          alignment: AlignmentDirectional(0.0, -1.0),
+                          decoration: const BoxDecoration(),
+                          alignment: const AlignmentDirectional(0.0, -1.0),
                           child: Form(
                             key: _model.formKey,
                             autovalidateMode: AutovalidateMode.disabled,
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   20.0, 0.0, 20.0, 0.0),
                               child: SingleChildScrollView(
                                 child: Column(
@@ -146,13 +144,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                           ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 12.0, 0.0, 0.0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -263,13 +261,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
+                                                alignment: const AlignmentDirectional(
                                                     -1.0, 0.0),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 12.0, 0.0, 0.0),
-                                                  child: Container(
+                                                  child: SizedBox(
                                                     width: MediaQuery.sizeOf(
                                                                 context)
                                                             .width *
@@ -346,7 +344,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                         enabledBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -359,7 +357,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                         focusedBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -450,13 +448,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 12.0, 0.0, 0.0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -567,13 +565,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
+                                                alignment: const AlignmentDirectional(
                                                     -1.0, 0.0),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 12.0, 0.0, 0.0),
-                                                  child: Container(
+                                                  child: SizedBox(
                                                     width: MediaQuery.sizeOf(
                                                                 context)
                                                             .width *
@@ -650,7 +648,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                         enabledBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -663,7 +661,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                         focusedBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -754,13 +752,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 12.0, 0.0, 0.0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -880,17 +878,17 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                   Expanded(
                                                     child: Align(
                                                       alignment:
-                                                          AlignmentDirectional(
+                                                          const AlignmentDirectional(
                                                               -1.0, 0.0),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
+                                                            const EdgeInsetsDirectional
                                                                 .fromSTEB(
                                                                     0.0,
                                                                     12.0,
                                                                     0.0,
                                                                     0.0),
-                                                        child: Container(
+                                                        child: SizedBox(
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
@@ -959,7 +957,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -972,7 +970,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -1066,17 +1064,17 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                   Expanded(
                                                     child: Align(
                                                       alignment:
-                                                          AlignmentDirectional(
+                                                          const AlignmentDirectional(
                                                               -1.0, 0.0),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
+                                                            const EdgeInsetsDirectional
                                                                 .fromSTEB(
                                                                     0.0,
                                                                     12.0,
                                                                     0.0,
                                                                     0.0),
-                                                        child: Container(
+                                                        child: SizedBox(
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
@@ -1145,7 +1143,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -1158,7 +1156,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -1252,17 +1250,17 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                   Expanded(
                                                     child: Align(
                                                       alignment:
-                                                          AlignmentDirectional(
+                                                          const AlignmentDirectional(
                                                               -1.0, 0.0),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
+                                                            const EdgeInsetsDirectional
                                                                 .fromSTEB(
                                                                     0.0,
                                                                     12.0,
                                                                     0.0,
                                                                     0.0),
-                                                        child: Container(
+                                                        child: SizedBox(
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
@@ -1329,7 +1327,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               enabledBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -1342,7 +1340,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               focusedBorder:
                                                                   OutlineInputBorder(
                                                                 borderSide:
-                                                                    BorderSide(
+                                                                    const BorderSide(
                                                                   color: Color(
                                                                       0x00000000),
                                                                   width: 1.0,
@@ -1433,7 +1431,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                       ),
                                                     ),
                                                   ),
-                                                ].divide(SizedBox(width: 17.0)),
+                                                ].divide(const SizedBox(width: 17.0)),
                                               ),
                                             ],
                                           ),
@@ -1441,13 +1439,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 12.0, 0.0, 0.0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -1558,7 +1556,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                 ),
                                               ),
                                               Padding(
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         0.0, 12.0, 0.0, 0.0),
                                                 child:
@@ -1567,7 +1565,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                           .sexoInpotValueController ??=
                                                       FormFieldController<
                                                           String>(null),
-                                                  options: [
+                                                  options: const [
                                                     'Masculino',
                                                     'Femenino',
                                                     'Otro',
@@ -1633,7 +1631,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                       Colors.transparent,
                                                   borderWidth: 0.0,
                                                   borderRadius: 8.0,
-                                                  margin: EdgeInsetsDirectional
+                                                  margin: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           12.0, 0.0, 12.0, 0.0),
                                                   hidesUnderline: true,
@@ -1648,10 +1646,10 @@ class _DatosWidgetState extends State<DatosWidget> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment:
@@ -1764,14 +1762,14 @@ class _DatosWidgetState extends State<DatosWidget> {
                                               children: [
                                                 Align(
                                                   alignment:
-                                                      AlignmentDirectional(
+                                                      const AlignmentDirectional(
                                                           -1.0, 0.0),
                                                   child: Padding(
                                                     padding:
-                                                        EdgeInsetsDirectional
+                                                        const EdgeInsetsDirectional
                                                             .fromSTEB(0.0, 12.0,
                                                                 0.0, 0.0),
-                                                    child: Container(
+                                                    child: SizedBox(
                                                       width: 56.0,
                                                       child: TextFormField(
                                                         controller: _model
@@ -1844,7 +1842,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                           enabledBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0x00000000),
                                                               width: 1.0,
@@ -1857,7 +1855,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                           focusedBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0x00000000),
                                                               width: 1.0,
@@ -1947,17 +1945,17 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                 Expanded(
                                                   child: Align(
                                                     alignment:
-                                                        AlignmentDirectional(
+                                                        const AlignmentDirectional(
                                                             -1.0, 0.0),
                                                     child: Padding(
                                                       padding:
-                                                          EdgeInsetsDirectional
+                                                          const EdgeInsetsDirectional
                                                               .fromSTEB(
                                                                   8.0,
                                                                   12.0,
                                                                   0.0,
                                                                   0.0),
-                                                      child: Container(
+                                                      child: SizedBox(
                                                         width:
                                                             MediaQuery.sizeOf(
                                                                         context)
@@ -2031,7 +2029,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                             enabledBorder:
                                                                 OutlineInputBorder(
                                                               borderSide:
-                                                                  BorderSide(
+                                                                  const BorderSide(
                                                                 color: Color(
                                                                     0x00000000),
                                                                 width: 1.0,
@@ -2044,7 +2042,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                             focusedBorder:
                                                                 OutlineInputBorder(
                                                               borderSide:
-                                                                  BorderSide(
+                                                                  const BorderSide(
                                                                 color: Color(
                                                                     0x00000000),
                                                                 width: 1.0,
@@ -2134,10 +2132,10 @@ class _DatosWidgetState extends State<DatosWidget> {
                                               ],
                                             ),
                                             Padding(
-                                              padding: EdgeInsetsDirectional
+                                              padding: const EdgeInsetsDirectional
                                                   .fromSTEB(
                                                       0.0, 12.0, 0.0, 0.0),
-                                              child: Container(
+                                              child: SizedBox(
                                                 width:
                                                     MediaQuery.sizeOf(context)
                                                             .width *
@@ -2161,13 +2159,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Padding(
                                           padding:
-                                              EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 12.0, 0.0, 0.0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -2278,13 +2276,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                 ),
                                               ),
                                               Align(
-                                                alignment: AlignmentDirectional(
+                                                alignment: const AlignmentDirectional(
                                                     -1.0, 0.0),
                                                 child: Padding(
-                                                  padding: EdgeInsetsDirectional
+                                                  padding: const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                           0.0, 12.0, 0.0, 0.0),
-                                                  child: Container(
+                                                  child: SizedBox(
                                                     width: MediaQuery.sizeOf(
                                                                 context)
                                                             .width *
@@ -2363,7 +2361,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                         enabledBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -2376,7 +2374,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                         focusedBorder:
                                                             OutlineInputBorder(
                                                           borderSide:
-                                                              BorderSide(
+                                                              const BorderSide(
                                                             color: Color(
                                                                 0x00000000),
                                                             width: 1.0,
@@ -2468,10 +2466,10 @@ class _DatosWidgetState extends State<DatosWidget> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment:
@@ -2580,13 +2578,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   -1.0, 0.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         0.0, 12.0, 0.0, 0.0),
-                                                child: Container(
+                                                child: SizedBox(
                                                   width:
                                                       MediaQuery.sizeOf(context)
                                                               .width *
@@ -2599,7 +2597,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                     onChanged: (_) =>
                                                         EasyDebounce.debounce(
                                                       '_model.passwordInputTextController',
-                                                      Duration(
+                                                      const Duration(
                                                           milliseconds: 2000),
                                                       () async {
                                                         _model.password = _model
@@ -2685,7 +2683,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               ),
                                                       enabledBorder:
                                                           OutlineInputBorder(
-                                                        borderSide: BorderSide(
+                                                        borderSide: const BorderSide(
                                                           color:
                                                               Color(0x00000000),
                                                           width: 1.0,
@@ -2696,7 +2694,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                       ),
                                                       focusedBorder:
                                                           OutlineInputBorder(
-                                                        borderSide: BorderSide(
+                                                        borderSide: const BorderSide(
                                                           color:
                                                               Color(0x00000000),
                                                           width: 1.0,
@@ -2802,10 +2800,10 @@ class _DatosWidgetState extends State<DatosWidget> {
                                       ),
                                     ),
                                     Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(-1.0, 0.0),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment:
@@ -2915,13 +2913,13 @@ class _DatosWidgetState extends State<DatosWidget> {
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   -1.0, 0.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         0.0, 12.0, 0.0, 0.0),
-                                                child: Container(
+                                                child: SizedBox(
                                                   width:
                                                       MediaQuery.sizeOf(context)
                                                               .width *
@@ -2934,7 +2932,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                     onChanged: (_) =>
                                                         EasyDebounce.debounce(
                                                       '_model.confirmPasswordInputTextController',
-                                                      Duration(
+                                                      const Duration(
                                                           milliseconds: 2000),
                                                       () async {
                                                         _model.confirmPassword =
@@ -3021,7 +3019,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                               ),
                                                       enabledBorder:
                                                           OutlineInputBorder(
-                                                        borderSide: BorderSide(
+                                                        borderSide: const BorderSide(
                                                           color:
                                                               Color(0x00000000),
                                                           width: 1.0,
@@ -3032,7 +3030,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                       ),
                                                       focusedBorder:
                                                           OutlineInputBorder(
-                                                        borderSide: BorderSide(
+                                                        borderSide: const BorderSide(
                                                           color:
                                                               Color(0x00000000),
                                                           width: 1.0,
@@ -3134,10 +3132,10 @@ class _DatosWidgetState extends State<DatosWidget> {
                                               ),
                                             ),
                                             Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   0.0, 0.0),
                                               child: Padding(
-                                                padding: EdgeInsetsDirectional
+                                                padding: const EdgeInsetsDirectional
                                                     .fromSTEB(
                                                         0.0, 12.0, 0.0, 0.0),
                                                 child: Builder(
@@ -3211,7 +3209,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 19.0, 20.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 19.0, 20.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -3246,7 +3244,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                 ? BorderSide(
                                     width: 2,
                                     color:
-                                        FlutterFlowTheme.of(context).alternate!,
+                                        FlutterFlowTheme.of(context).alternate,
                                   )
                                 : null,
                             activeColor: FlutterFlowTheme.of(context).primary,
@@ -3284,7 +3282,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                             .fontStyle,
                                       ),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: 'términos y condiciones',
                                   style: TextStyle(),
                                 )
@@ -3316,7 +3314,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 18.0, 20.0, 25.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 18.0, 20.0, 25.0),
                     child: FFButtonWidget(
                       onPressed: !_model.isAceptingTerms
                           ? null
@@ -3394,7 +3392,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                         TextButton(
                                           onPressed: () =>
                                               Navigator.pop(alertDialogContext),
-                                          child: Text('Ok'),
+                                          child: const Text('Ok'),
                                         ),
                                       ],
                                     );
@@ -3408,10 +3406,10 @@ class _DatosWidgetState extends State<DatosWidget> {
                       options: FFButtonOptions(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         height: 40.0,
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             16.0, 0.0, 16.0, 0.0),
                         iconPadding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                         color: FlutterFlowTheme.of(context).primary,
                         textStyle:
                             FlutterFlowTheme.of(context).titleSmall.override(
@@ -3431,8 +3429,8 @@ class _DatosWidgetState extends State<DatosWidget> {
                                 ),
                         elevation: 0.0,
                         borderRadius: BorderRadius.circular(25.0),
-                        disabledColor: Color(0xAD007376),
-                        disabledTextColor: Color(0x9FFFFFFF),
+                        disabledColor: const Color(0xAD007376),
+                        disabledTextColor: const Color(0x9FFFFFFF),
                       ),
                     ),
                   ),

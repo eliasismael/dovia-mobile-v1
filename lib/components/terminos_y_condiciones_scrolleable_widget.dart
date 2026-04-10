@@ -1,11 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'terminos_y_condiciones_scrolleable_model.dart';
 export 'terminos_y_condiciones_scrolleable_model.dart';
 
@@ -59,7 +57,7 @@ class _TerminosYCondicionesScrolleableWidgetState
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
             child: Text(
               'Términos y condiciones',
               style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -79,12 +77,12 @@ class _TerminosYCondicionesScrolleableWidgetState
             ),
           ),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 0.0),
+            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 0.0),
             child: Container(
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).secondaryBackground,
               ),
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 height: 400.0,
                 child: custom_widgets.TermsScroller(
@@ -100,19 +98,19 @@ class _TerminosYCondicionesScrolleableWidgetState
             ),
           ),
           Align(
-            alignment: AlignmentDirectional(0.0, 1.0),
+            alignment: const AlignmentDirectional(0.0, 1.0),
             child: Container(
               width: MediaQuery.sizeOf(context).width * 1.0,
               height: 150.0,
-              decoration: BoxDecoration(),
+              decoration: const BoxDecoration(),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
                       child: Text(
                         'Al aceptar, significa que he leído y acepto los términos y condiciones de uso',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -133,7 +131,7 @@ class _TerminosYCondicionesScrolleableWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: !_model.hasCompletedScroll
                             ? null
@@ -145,9 +143,9 @@ class _TerminosYCondicionesScrolleableWidgetState
                         options: FFButtonOptions(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 40.0,
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               16.0, 0.0, 16.0, 0.0),
-                          iconPadding: EdgeInsetsDirectional.fromSTEB(
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 0.0, 0.0),
                           color: FlutterFlowTheme.of(context).primary,
                           textStyle:

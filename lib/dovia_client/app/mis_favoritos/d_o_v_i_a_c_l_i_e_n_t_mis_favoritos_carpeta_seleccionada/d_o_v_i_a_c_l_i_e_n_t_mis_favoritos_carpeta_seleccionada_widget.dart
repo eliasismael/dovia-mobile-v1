@@ -3,14 +3,11 @@ import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/mis_favoritos/favorite_houses_card/favorite_houses_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_favoritos_carpeta_seleccionada_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_favoritos_carpeta_seleccionada_model.dart';
 
@@ -71,7 +68,8 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
           child: Stack(
             children: [
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    20.0, 20.0, 20.0, 20.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -109,7 +107,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.folderName,
+                              widget.folderName,
                               'Casas en esta carpeta',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -167,7 +165,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                             .getFavoritesInFolderCall
                             .call(
                           authToken: currentAuthenticationToken,
-                          folderId: widget!.folderId,
+                          folderId: widget.folderId,
                         ),
                         builder: (context, snapshot) {
                           // Customize what your widget looks like when it's loading.
@@ -205,8 +203,9 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                       eachFavoriteInFolder[
                                           eachFavoriteInFolderIndex];
                                   return Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 20.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 20.0, 0.0, 0.0),
                                     child: FavoriteHousesCardWidget(
                                       key: Key(
                                           'Key76k_${eachFavoriteInFolderIndex}_of_${eachFavoriteInFolder.length}'),
@@ -220,78 +219,131 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                       ).toString(),
                                       type: getJsonField(
                                         eachFavoriteInFolderItem,
-                                        r'''$.listingType[0][0]''',
+                                        r'''$.listingType''',
                                       ).toString(),
                                       onHertTap: () async {
-                                        final confirmDelete = await showDialog<bool>(
-                                                      context: context,
-                                                      builder: (alertDialogContext) {
-                                                        return Dialog(
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.circular(20),
-                                                          ),
-                                                          elevation: 0,
-                                                          backgroundColor: Colors.transparent,
-                                                          child: Container(
-                                                            padding: EdgeInsets.all(24),
-                                                            decoration: BoxDecoration(
-                                                              color: Colors.white,
-                                                              shape: BoxShape.rectangle,
-                                                              borderRadius: BorderRadius.circular(20),
+                                        final confirmDelete = await showDialog<
+                                                bool>(
+                                              context: context,
+                                              builder: (alertDialogContext) {
+                                                return Dialog(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                  ),
+                                                  elevation: 0,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            24),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      shape: BoxShape.rectangle,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: <Widget>[
+                                                        const Icon(
+                                                            Icons
+                                                                .warning_rounded,
+                                                            color: Colors.amber,
+                                                            size: 60),
+                                                        const SizedBox(
+                                                            height: 16.0),
+                                                        Text(
+                                                          "¿Estás seguro que querés sacar de favoritos este inmueble?",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .bodyMedium
+                                                              .override(
+                                                                font: GoogleFonts
+                                                                    .inter(),
+                                                                fontSize: 16.0,
+                                                              ),
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 24.0),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          children: [
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.of(
+                                                                          alertDialogContext)
+                                                                      .pop(
+                                                                          false),
+                                                              child: const Text(
+                                                                "Cancelar",
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                    fontSize:
+                                                                        16),
+                                                              ),
                                                             ),
-                                                            child: Column(
-                                                              mainAxisSize: MainAxisSize.min,
-                                                              children: <Widget>[
-                                                                Icon(Icons.warning_rounded, color: Colors.amber, size: 60),
-                                                                SizedBox(height: 16.0),
-                                                                Text(
-                                                                  "¿Estás seguro que querés sacar de favoritos este inmueble?",
-                                                                  textAlign: TextAlign.center,
-                                                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                    font: GoogleFonts.inter(),
-                                                                    fontSize: 16.0,
-                                                                  ),
+                                                            ElevatedButton(
+                                                              onPressed: () =>
+                                                                  Navigator.of(
+                                                                          alertDialogContext)
+                                                                      .pop(
+                                                                          true),
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .amber,
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10),
                                                                 ),
-                                                                SizedBox(height: 24.0),
-                                                                Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                  children: [
-                                                                    TextButton(
-                                                                      onPressed: () => Navigator.of(alertDialogContext).pop(false),
-                                                                      child: Text(
-                                                                        "Cancelar",
-                                                                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                                                                      ),
-                                                                    ),
-                                                                    ElevatedButton(
-                                                                      onPressed: () => Navigator.of(alertDialogContext).pop(true),
-                                                                      style: ElevatedButton.styleFrom(
-                                                                        backgroundColor: Colors.amber,
-                                                                        shape: RoundedRectangleBorder(
-                                                                          borderRadius: BorderRadius.circular(10),
-                                                                        ),
-                                                                      ),
-                                                                      child: Text(
-                                                                        "Aceptar",
-                                                                        style: TextStyle(color: Colors.white, fontSize: 16),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
+                                                              ),
+                                                              child: const Text(
+                                                                "Aceptar",
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
+                                                                        16),
+                                                              ),
                                                             ),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ) ?? false;
-                                        
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ) ??
+                                            false;
+
                                         if (confirmDelete) {
-                                          await DOVIAAPIFavoriteContextGroup.removeFavoriteFromFolderCall.call(
-                                            folderId: widget!.folderId,
-                                            propertyId: getJsonField(eachFavoriteInFolderItem, r'''$.propertyId''').toString(),
-                                            authToken: currentAuthenticationToken,
+                                          await DOVIAAPIFavoriteContextGroup
+                                              .removeFavoriteFromFolderCall
+                                              .call(
+                                            folderId: widget.folderId,
+                                            propertyId: getJsonField(
+                                                    eachFavoriteInFolderItem,
+                                                    r'''$.propertyId''')
+                                                .toString(),
+                                            authToken:
+                                                currentAuthenticationToken,
                                           );
-                                          safeSetState((){});
+                                          safeSetState(() {});
                                         }
                                       },
                                     ),
@@ -307,20 +359,20 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 15.0, 100.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),

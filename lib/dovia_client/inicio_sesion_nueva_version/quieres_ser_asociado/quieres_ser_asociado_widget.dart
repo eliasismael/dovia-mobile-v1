@@ -1,14 +1,11 @@
 import '/components/que_significa_ser_asociado_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'quieres_ser_asociado_model.dart';
 export 'quieres_ser_asociado_model.dart';
 
@@ -47,23 +44,23 @@ class _QuieresSerAsociadoWidgetState extends State<QuieresSerAsociadoWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
       child: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).primary,
         ),
         child: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
               Align(
-                alignment: AlignmentDirectional(0.0, 1.0),
+                alignment: const AlignmentDirectional(0.0, 1.0),
                 child: Builder(
                   builder: (context) => Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 40.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 40.0),
                     child: InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
@@ -71,16 +68,16 @@ class _QuieresSerAsociadoWidgetState extends State<QuieresSerAsociadoWidget> {
                       highlightColor: Colors.transparent,
                       onTap: () async {
                         await showDialog(
-                          barrierColor: Color(0xB2000000),
+                          barrierColor: const Color(0xB2000000),
                           context: context,
                           builder: (dialogContext) {
                             return Dialog(
                               elevation: 0,
                               insetPadding: EdgeInsets.zero,
                               backgroundColor: Colors.transparent,
-                              alignment: AlignmentDirectional(0.0, 0.0)
+                              alignment: const AlignmentDirectional(0.0, 0.0)
                                   .resolve(Directionality.of(context)),
-                              child: QueSignificaSerAsociadoWidget(),
+                              child: const QueSignificaSerAsociadoWidget(),
                             );
                           },
                         );
@@ -123,7 +120,7 @@ class _QuieresSerAsociadoWidgetState extends State<QuieresSerAsociadoWidget> {
                               fit: BoxFit.cover,
                             ),
                           ),
-                        ].divide(SizedBox(width: 6.0)),
+                        ].divide(const SizedBox(width: 6.0)),
                       ),
                     ),
                   ),
@@ -140,7 +137,7 @@ class _QuieresSerAsociadoWidgetState extends State<QuieresSerAsociadoWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                 child: wrapWithModel(
                   model: _model.secondaryButtonModel2,
                   updateCallback: () => safeSetState(() {}),

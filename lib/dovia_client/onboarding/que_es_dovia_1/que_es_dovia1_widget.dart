@@ -1,13 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'que_es_dovia1_model.dart';
 export 'que_es_dovia1_model.dart';
 
@@ -58,7 +55,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
         Container(
           width: 100.0,
           height: MediaQuery.sizeOf(context).height * 1.0,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF007376), Color(0xFF70ACAD)],
               stops: [0.0, 1.0],
@@ -71,7 +68,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
             children: [
               Padding(
                 padding:
-                    EdgeInsetsDirectional.fromSTEB(157.0, 109.0, 156.0, 0.0),
+                    const EdgeInsetsDirectional.fromSTEB(157.0, 109.0, 156.0, 0.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(0.0),
                   child: SvgPicture.asset(
@@ -83,7 +80,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(24.0, 31.0, 24.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(24.0, 31.0, 24.0, 0.0),
                 child: RichText(
                   textScaler: MediaQuery.of(context).textScaler,
                   text: TextSpan(
@@ -113,7 +110,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                           fontSize: 24.0,
                         ),
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: 'inmobiliario',
                         style: TextStyle(
                           color: Colors.white,
@@ -129,7 +126,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                                 .bodyMedium
                                 .fontStyle,
                           ),
-                          color: Color(0xFFEBEAE3),
+                          color: const Color(0xFFEBEAE3),
                           fontSize: 24.0,
                           letterSpacing: 0.0,
                           fontWeight: FontWeight.w600,
@@ -141,10 +138,10 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(33.0, 18.0, 24.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(33.0, 18.0, 24.0, 0.0),
                 child: Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(),
+                  decoration: const BoxDecoration(),
                   child: RichText(
                     textScaler: MediaQuery.of(context).textScaler,
                     text: TextSpan(
@@ -168,11 +165,11 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                                         .fontStyle,
                                   ),
                         ),
-                        TextSpan(
+                        const TextSpan(
                           text: ' •   Poca transparencia\n',
                           style: TextStyle(),
                         ),
-                        TextSpan(
+                        const TextSpan(
                           text: ' •   Comisiones sin entido\n\n',
                           style: TextStyle(),
                         ),
@@ -183,7 +180,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                             fontSize: 16.0,
                           ),
                         ),
-                        TextSpan(
+                        const TextSpan(
                           text:
                               'transforma la forma de comprar,\nvender y rentar propiedades.',
                           style: TextStyle(),
@@ -210,7 +207,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 31.0, 21.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 31.0, 21.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
                     await widget.onSiguienteTap?.call();
@@ -220,10 +217,10 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                     width: double.infinity,
                     height: 42.0,
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
                     iconPadding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                    color: Color(0xFFEBEAE3),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    color: const Color(0xFFEBEAE3),
                     textStyle: FlutterFlowTheme.of(context).labelLarge.override(
                           font: GoogleFonts.publicSans(
                             fontWeight: FlutterFlowTheme.of(context)
@@ -233,7 +230,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                                 .labelLarge
                                 .fontStyle,
                           ),
-                          color: Color(0xFF007376),
+                          color: const Color(0xFF007376),
                           letterSpacing: 0.0,
                           fontWeight: FlutterFlowTheme.of(context)
                               .labelLarge
@@ -248,7 +245,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
               ),
               Padding(
                 padding:
-                    EdgeInsetsDirectional.fromSTEB(158.0, 10.0, 159.0, 0.0),
+                    const EdgeInsetsDirectional.fromSTEB(158.0, 10.0, 159.0, 0.0),
                 child: InkWell(
                   splashColor: Colors.transparent,
                   focusColor: Colors.transparent,
@@ -278,7 +275,7 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(79.0, 25.0, 79.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(79.0, 25.0, 79.0, 0.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: SvgPicture.asset(

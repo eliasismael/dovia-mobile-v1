@@ -1,12 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_model.dart';
 export 'l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_model.dart';
 
@@ -50,7 +46,7 @@ class _LEGALASSOCAITENavbarWidgetState
       height: 69.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             blurRadius: 8.0,
             color: Color(0x33000000),
@@ -63,7 +59,7 @@ class _LEGALASSOCAITENavbarWidgetState
         borderRadius: BorderRadius.circular(30.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(25.0, 22.0, 25.0, 22.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(25.0, 22.0, 25.0, 22.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,

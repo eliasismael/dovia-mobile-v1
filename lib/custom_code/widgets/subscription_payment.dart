@@ -1,15 +1,10 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import '/custom_code/widgets/index.dart';
 // import '/flutter_flow/custom_functions.dart'; // <--- ELIMINADO PARA QUE NO DE ERROR
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,7 +23,7 @@ class SubscriptionPayment extends StatefulWidget {
   final String amexLogo;
 
   const SubscriptionPayment({
-    Key? key,
+    super.key,
     this.width,
     this.height,
     required this.onActionPressed,
@@ -38,7 +33,7 @@ class SubscriptionPayment extends StatefulWidget {
     this.visaLogo = 'assets/images/visa_logo.png',
     this.mastercardLogo = 'assets/images/mastercard_logo.png',
     this.amexLogo = 'assets/images/amex_logo.png',
-  }) : super(key: key);
+  });
 
   @override
   _SubscriptionPaymentState createState() => _SubscriptionPaymentState();

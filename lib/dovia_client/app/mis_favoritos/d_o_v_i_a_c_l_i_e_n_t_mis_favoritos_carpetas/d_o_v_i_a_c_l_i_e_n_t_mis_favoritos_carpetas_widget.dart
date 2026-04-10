@@ -4,7 +4,6 @@ import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favorit
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -59,7 +58,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
           child: Stack(
             children: [
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -137,7 +136,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                     },
                                     child: Padding(
                                       padding: MediaQuery.viewInsetsOf(context),
-                                      child: TusFavoritosCarpetasModalWidget(
+                                      child: const TusFavoritosCarpetasModalWidget(
                                         isCreatingNewFolderPARAM: true,
                                         houseId: '-',
                                         propertyName: '-',
@@ -172,10 +171,10 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                       ),
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
-                          decoration: BoxDecoration(),
+                          decoration: const BoxDecoration(),
                           child: FutureBuilder<ApiCallResponse>(
                             future: DOVIAAPIFavoriteContextGroup
                                 .getAllFavoriteFoldersCall
@@ -215,7 +214,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                   return GridView.builder(
                                     padding: EdgeInsets.zero,
                                     gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
                                       crossAxisSpacing: 10.0,
                                       mainAxisSpacing: 10.0,
@@ -260,17 +259,17 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Stack(
-                                              alignment: AlignmentDirectional(1.0, -1.0),
+                                              alignment: const AlignmentDirectional(1.0, -1.0),
                                               children: [
                                                 Container(
                                                   width: MediaQuery.sizeOf(context)
                                                           .width *
                                                       1.0,
-                                                  decoration: BoxDecoration(),
+                                                  decoration: const BoxDecoration(),
                                                   child: GridView(
                                                 padding: EdgeInsets.zero,
                                                 gridDelegate:
-                                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                                    const SliverGridDelegateWithFixedCrossAxisCount(
                                                   crossAxisCount: 2,
                                                   crossAxisSpacing: 0.0,
                                                   mainAxisSpacing: 0.0,
@@ -328,7 +327,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                               ),
                                             ),
                                               Padding(
-                                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 5.0, 0.0),
+                                                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 5.0, 0.0),
                                                 child: InkWell(
                                                   splashColor: Colors.transparent,
                                                   focusColor: Colors.transparent,
@@ -347,7 +346,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                         elevation: 0,
                                                         backgroundColor: Colors.transparent,
                                                         child: Container(
-                                                          padding: EdgeInsets.all(24),
+                                                          padding: const EdgeInsets.all(24),
                                                           decoration: BoxDecoration(
                                                             color: Colors.white,
                                                             shape: BoxShape.rectangle,
@@ -356,8 +355,8 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                           child: Column(
                                                             mainAxisSize: MainAxisSize.min,
                                                             children: <Widget>[
-                                                              Icon(Icons.warning_rounded, color: Colors.redAccent, size: 60),
-                                                              SizedBox(height: 16.0),
+                                                              const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 60),
+                                                              const SizedBox(height: 16.0),
                                                               Text(
                                                                 "Estás seguro que querés borrar esta carpeta. Se borrarán todos tus inmuebles guardados en ella",
                                                                 textAlign: TextAlign.center,
@@ -366,13 +365,13 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                                   fontSize: 16.0,
                                                                 ),
                                                               ),
-                                                              SizedBox(height: 24.0),
+                                                              const SizedBox(height: 24.0),
                                                               Row(
                                                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                                 children: [
                                                                   TextButton(
                                                                     onPressed: () => Navigator.of(alertDialogContext).pop(false),
-                                                                    child: Text(
+                                                                    child: const Text(
                                                                       "Cancelar",
                                                                       style: TextStyle(color: Colors.grey, fontSize: 16),
                                                                     ),
@@ -385,7 +384,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                                         borderRadius: BorderRadius.circular(10),
                                                                       ),
                                                                     ),
-                                                                    child: Text(
+                                                                    child: const Text(
                                                                       "Aceptar",
                                                                       style: TextStyle(color: Colors.white, fontSize: 16),
                                                                     ),
@@ -415,15 +414,15 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                           builder:
                                                               (alertDialogContext) {
                                                             return AlertDialog(
-                                                              title: Text('Error'),
-                                                              content: Text(
+                                                              title: const Text('Error'),
+                                                              content: const Text(
                                                                   'No se pudo borrar la carpeta. Intentá nuevamente.'),
                                                               actions: [
                                                                 TextButton(
                                                                   onPressed: () =>
                                                                       Navigator.pop(
                                                                           alertDialogContext),
-                                                                  child: Text('Ok'),
+                                                                  child: const Text('Ok'),
                                                                 ),
                                                               ],
                                                             );
@@ -435,7 +434,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                   child: Container(
                                                     width: 30.0,
                                                     height: 30.0,
-                                                    decoration: BoxDecoration(
+                                                    decoration: const BoxDecoration(
                                                       color: Colors.white,
                                                       shape: BoxShape.circle,
                                                     ),
@@ -499,20 +498,20 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 15.0, 100.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),

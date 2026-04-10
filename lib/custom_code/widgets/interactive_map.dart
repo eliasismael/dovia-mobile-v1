@@ -1,10 +1,6 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/schema/enums/enums.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom widgets
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+// Imports other custom widgets
+// Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -14,13 +10,13 @@ import 'package:latlong2/latlong.dart' as latLng;
 
 class InteractiveMap extends StatefulWidget {
   const InteractiveMap({
-    Key? key,
+    super.key,
     this.width,
     this.height,
     required this.accessToken,
     this.startLat = -34.6037,
     this.startLng = -58.3816,
-  }) : super(key: key);
+  });
 
   final double? width;
   final double? height;
@@ -35,7 +31,7 @@ class InteractiveMap extends StatefulWidget {
 class _InteractiveMapState extends State<InteractiveMap> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width,
       height: widget.height,
       child: FlutterMap(
@@ -62,7 +58,7 @@ class _InteractiveMapState extends State<InteractiveMap> {
                   onTap: () {
                     print("Marcador tocado");
                   },
-                  child: Icon(Icons.location_on, color: Colors.red, size: 40),
+                  child: const Icon(Icons.location_on, color: Colors.red, size: 40),
                 ),
               ),
             ],

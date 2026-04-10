@@ -8,11 +8,9 @@ import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_agenda_model.dart';
 export 'd_h_c_l_i_e_n_t_agenda_model.dart';
 
@@ -61,7 +59,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             SingleChildScrollView(
               child: Column(
@@ -70,20 +68,20 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                   wrapWithModel(
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: DOVIASHAREDHeaderWidget(
+                    child: const DOVIASHAREDHeaderWidget(
                       title: 'Agenda',
                     ),
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 24.0, 0.0, 0.0),
                             child: Text(
                               'Selecciona fecha y hora para tu servicio',
@@ -107,17 +105,17 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 12.0, 0.0, 0.0),
                           child: Container(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: 200.0,
                             decoration: BoxDecoration(
-                              color: Color(0xFFF7F7F7),
+                              color: const Color(0xFFF7F7F7),
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   20.0, 20.0, 20.0, 20.0),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
@@ -126,7 +124,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                     controller:
                                         _model.dropDownValueController1 ??=
                                             FormFieldController<String>(null),
-                                    options: [
+                                    options: const [
                                       'Option 1',
                                       'Option 2',
                                       'Option 3'
@@ -172,7 +170,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                     borderColor: Colors.transparent,
                                     borderWidth: 0.0,
                                     borderRadius: 10.0,
-                                    margin: EdgeInsetsDirectional.fromSTEB(
+                                    margin: const EdgeInsetsDirectional.fromSTEB(
                                         12.0, 0.0, 12.0, 0.0),
                                     hidesUnderline: true,
                                     isOverButton: false,
@@ -180,13 +178,13 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                     isMultiSelect: false,
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 12.0, 0.0, 0.0),
                                     child: FlutterFlowDropDown<String>(
                                       controller:
                                           _model.dropDownValueController2 ??=
                                               FormFieldController<String>(null),
-                                      options: [
+                                      options: const [
                                         '7:00 - 8:00',
                                         '8:00 - 9:00',
                                         '9:00 - 10:00'
@@ -232,7 +230,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                       borderColor: Colors.transparent,
                                       borderWidth: 0.0,
                                       borderRadius: 10.0,
-                                      margin: EdgeInsetsDirectional.fromSTEB(
+                                      margin: const EdgeInsetsDirectional.fromSTEB(
                                           12.0, 0.0, 12.0, 0.0),
                                       hidesUnderline: true,
                                       isOverButton: false,
@@ -246,9 +244,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                           ),
                         ),
                         Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 18.0, 0.0, 0.0),
                             child: Text(
                               'Selecciona el lugar del servicio',
@@ -273,7 +271,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 12.0, 0.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
@@ -283,9 +281,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                             options: FFButtonOptions(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 42.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
@@ -320,7 +318,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 12.0, 0.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
@@ -331,9 +329,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                             options: FFButtonOptions(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 42.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
@@ -368,9 +366,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                           ),
                         ),
                         Align(
-                          alignment: AlignmentDirectional(0.0, 1.0),
+                          alignment: const AlignmentDirectional(0.0, 1.0),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 150.0, 0.0, 0.0),
                             child: FFButtonWidget(
                               onPressed: () async {
@@ -390,7 +388,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                         padding:
                                             MediaQuery.viewInsetsOf(context),
                                         child:
-                                            DHCLIENTExitoProgramarAgendaWidget(),
+                                            const DHCLIENTExitoProgramarAgendaWidget(),
                                       ),
                                     );
                                   },
@@ -400,9 +398,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 42.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
                                 textStyle: FlutterFlowTheme.of(context)
@@ -439,27 +437,27 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
               ),
             ),
             Align(
-              alignment: AlignmentDirectional(0.0, 0.0),
+              alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Align(
-                    alignment: AlignmentDirectional(1.0, 0.0),
+                    alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: FixedDoviaIconWidget(),
+                        child: const FixedDoviaIconWidget(),
                       ),
                     ),
                   ),
                   wrapWithModel(
                     model: _model.dHCLIENTNavbarModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: DHCLIENTNavbarWidget(),
+                    child: const DHCLIENTNavbarWidget(),
                   ),
                 ],
               ),

@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 's_h_o_w_i_n_g_to_navegation_app_model.dart';
 export 's_h_o_w_i_n_g_to_navegation_app_model.dart';
 
@@ -51,7 +48,7 @@ class _SHOWINGToNavegationAppWidgetState
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 40.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 40.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -89,14 +86,14 @@ class _SHOWINGToNavegationAppWidgetState
             ),
             Container(
               width: MediaQuery.sizeOf(context).width * 1.0,
-              decoration: BoxDecoration(),
+              decoration: const BoxDecoration(),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Container(
                     width: MediaQuery.sizeOf(context).width * 0.4,
-                    decoration: BoxDecoration(),
+                    decoration: const BoxDecoration(),
                     child: wrapWithModel(
                       model: _model.secondaryButtonModel,
                       updateCallback: () => safeSetState(() {}),
@@ -108,7 +105,7 @@ class _SHOWINGToNavegationAppWidgetState
                   ),
                   Container(
                     width: MediaQuery.sizeOf(context).width * 0.4,
-                    decoration: BoxDecoration(),
+                    decoration: const BoxDecoration(),
                     child: wrapWithModel(
                       model: _model.primaryButtonModel,
                       updateCallback: () => safeSetState(() {}),
@@ -121,7 +118,7 @@ class _SHOWINGToNavegationAppWidgetState
                 ],
               ),
             ),
-          ].divide(SizedBox(height: 8.0)),
+          ].divide(const SizedBox(height: 8.0)),
         ),
       ),
     );

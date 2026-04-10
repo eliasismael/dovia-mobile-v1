@@ -1,14 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 's_h_o_w_i_n_g_profile_model.dart';
 export 's_h_o_w_i_n_g_profile_model.dart';
 
@@ -59,7 +55,7 @@ class _SHOWINGProfileWidgetState extends State<SHOWINGProfileWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -68,17 +64,17 @@ class _SHOWINGProfileWidgetState extends State<SHOWINGProfileWidget> {
                     wrapWithModel(
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: SHOWINGHeaderWidget(
+                      child: const SHOWINGHeaderWidget(
                         title: 'Profile',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          Container(
+                          SizedBox(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: MediaQuery.sizeOf(context).height * 1.0,
                             child: custom_widgets.OperativeListingProfile(
@@ -98,7 +94,7 @@ class _SHOWINGProfileWidgetState extends State<SHOWINGProfileWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -106,7 +102,7 @@ class _SHOWINGProfileWidgetState extends State<SHOWINGProfileWidget> {
                     wrapWithModel(
                       model: _model.sHOWINGNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: SHOWINGNavbarWidget(),
+                      child: const SHOWINGNavbarWidget(),
                     ),
                   ],
                 ),

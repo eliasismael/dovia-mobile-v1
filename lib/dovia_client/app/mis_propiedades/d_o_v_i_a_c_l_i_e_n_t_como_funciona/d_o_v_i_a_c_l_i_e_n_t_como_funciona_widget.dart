@@ -5,7 +5,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';

@@ -1,9 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'corner_gradient_background_model.dart';
 export 'corner_gradient_background_model.dart';
 
@@ -42,7 +39,7 @@ class _CornerGradientBackgroundWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: MediaQuery.sizeOf(context).width * 1.0,
       height: MediaQuery.sizeOf(context).height * 1.0,
       child: Stack(
@@ -56,9 +53,9 @@ class _CornerGradientBackgroundWidgetState
             child: Stack(
               children: [
                 Align(
-                  alignment: AlignmentDirectional(-1.0, 1.0),
+                  alignment: const AlignmentDirectional(-1.0, 1.0),
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.rectangle,
                     ),
                     child: ClipRRect(
@@ -73,9 +70,9 @@ class _CornerGradientBackgroundWidgetState
                   ),
                 ),
                 Align(
-                  alignment: AlignmentDirectional(1.0, -1.0),
+                  alignment: const AlignmentDirectional(1.0, -1.0),
                   child: Container(
-                    decoration: BoxDecoration(),
+                    decoration: const BoxDecoration(),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
                       child: Image.asset(

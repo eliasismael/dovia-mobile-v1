@@ -1,14 +1,8 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
-import 'dart:ui';
-import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'map_widget_page_test_widget.dart' show MapWidgetPageTestWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class MapWidgetPageTestModel extends FlutterFlowModel<MapWidgetPageTestWidget> {
   ///  State fields for stateful widgets in this page.

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'opciones_de_notificaciones_model.dart';
 export 'opciones_de_notificaciones_model.dart';
 
@@ -52,7 +49,7 @@ class _OpcionesDeNotificacionesWidgetState
       width: MediaQuery.sizeOf(context).width * 1.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).tertiary,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             blurRadius: 4.0,
             color: Color(0x33000000),
@@ -65,12 +62,12 @@ class _OpcionesDeNotificacionesWidgetState
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
             Align(
-              alignment: AlignmentDirectional(-1.0, 0.0),
+              alignment: const AlignmentDirectional(-1.0, 0.0),
               child: Text(
                 'Notificaciones',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -90,7 +87,7 @@ class _OpcionesDeNotificacionesWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 height: 2.0,
@@ -101,7 +98,7 @@ class _OpcionesDeNotificacionesWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -109,7 +106,7 @@ class _OpcionesDeNotificacionesWidgetState
                 children: [
                   Container(
                     width: MediaQuery.sizeOf(context).width * 0.7,
-                    constraints: BoxConstraints(
+                    constraints: const BoxConstraints(
                       minHeight: 100.0,
                     ),
                     decoration: BoxDecoration(
@@ -119,7 +116,7 @@ class _OpcionesDeNotificacionesWidgetState
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
                             'Daily listing',
                             style: FlutterFlowTheme.of(context)
@@ -140,7 +137,7 @@ class _OpcionesDeNotificacionesWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 4.0, 0.0, 0.0),
                           child: Text(
                             'Recibe notificaciones cuando publiquemos nuevas propiedades que pueden interesarte',
@@ -173,7 +170,7 @@ class _OpcionesDeNotificacionesWidgetState
                   Switch.adaptive(
                     value: _model.switchValue1!,
                     onChanged: (newValue) async {
-                      safeSetState(() => _model.switchValue1 = newValue!);
+                      safeSetState(() => _model.switchValue1 = newValue);
                     },
                     activeColor: FlutterFlowTheme.of(context).primaryText,
                     activeTrackColor: FlutterFlowTheme.of(context).primary,
@@ -185,7 +182,7 @@ class _OpcionesDeNotificacionesWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -201,7 +198,7 @@ class _OpcionesDeNotificacionesWidgetState
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
                             'Recomedaciomes',
                             style: FlutterFlowTheme.of(context)
@@ -222,7 +219,7 @@ class _OpcionesDeNotificacionesWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 4.0, 0.0, 0.0),
                           child: Text(
                             'Recibe notificaciones cuando encontremos propiedades que se ajusten a tus búsquedas recientes.',
@@ -255,7 +252,7 @@ class _OpcionesDeNotificacionesWidgetState
                   Switch.adaptive(
                     value: _model.switchValue2!,
                     onChanged: (newValue) async {
-                      safeSetState(() => _model.switchValue2 = newValue!);
+                      safeSetState(() => _model.switchValue2 = newValue);
                     },
                     activeColor: FlutterFlowTheme.of(context).primaryText,
                     activeTrackColor: FlutterFlowTheme.of(context).primary,
@@ -267,7 +264,7 @@ class _OpcionesDeNotificacionesWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -283,7 +280,7 @@ class _OpcionesDeNotificacionesWidgetState
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
                             'Tips',
                             style: FlutterFlowTheme.of(context)
@@ -304,7 +301,7 @@ class _OpcionesDeNotificacionesWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 4.0, 0.0, 0.0),
                           child: Text(
                             'Recibe notificaciones con tips semanales',
@@ -337,7 +334,7 @@ class _OpcionesDeNotificacionesWidgetState
                   Switch.adaptive(
                     value: _model.switchValue3!,
                     onChanged: (newValue) async {
-                      safeSetState(() => _model.switchValue3 = newValue!);
+                      safeSetState(() => _model.switchValue3 = newValue);
                     },
                     activeColor: FlutterFlowTheme.of(context).primaryText,
                     activeTrackColor: FlutterFlowTheme.of(context).primary,
@@ -349,7 +346,7 @@ class _OpcionesDeNotificacionesWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -365,7 +362,7 @@ class _OpcionesDeNotificacionesWidgetState
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
                             'Novedades',
                             style: FlutterFlowTheme.of(context)
@@ -386,7 +383,7 @@ class _OpcionesDeNotificacionesWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 4.0, 0.0, 0.0),
                           child: Text(
                             'Recibe notificaciones sobre novedades en Dovia',
@@ -419,7 +416,7 @@ class _OpcionesDeNotificacionesWidgetState
                   Switch.adaptive(
                     value: _model.switchValue4!,
                     onChanged: (newValue) async {
-                      safeSetState(() => _model.switchValue4 = newValue!);
+                      safeSetState(() => _model.switchValue4 = newValue);
                     },
                     activeColor: FlutterFlowTheme.of(context).primaryText,
                     activeTrackColor: FlutterFlowTheme.of(context).primary,
@@ -431,7 +428,7 @@ class _OpcionesDeNotificacionesWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -447,7 +444,7 @@ class _OpcionesDeNotificacionesWidgetState
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
                             'Informe semanal',
                             style: FlutterFlowTheme.of(context)
@@ -468,7 +465,7 @@ class _OpcionesDeNotificacionesWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 4.0, 0.0, 0.0),
                           child: Text(
                             'Recibe un informe semanal sobre la interacción que tuvo tu propiedad.',
@@ -501,7 +498,7 @@ class _OpcionesDeNotificacionesWidgetState
                   Switch.adaptive(
                     value: _model.switchValue5!,
                     onChanged: (newValue) async {
-                      safeSetState(() => _model.switchValue5 = newValue!);
+                      safeSetState(() => _model.switchValue5 = newValue);
                     },
                     activeColor: FlutterFlowTheme.of(context).primaryText,
                     activeTrackColor: FlutterFlowTheme.of(context).primary,

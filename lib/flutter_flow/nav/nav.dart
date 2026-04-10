@@ -85,225 +85,229 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
       errorBuilder: (context, state) => appStateNotifier.loggedIn
-          ? DOVIACLIENTHomePageWidget()
-          : QueEsDoviaWidget(),
+          ? const DOVIACLIENTHomePageWidget()
+          : const QueEsDoviaWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
           builder: (context, _) => appStateNotifier.loggedIn
-              ? DOVIACLIENTHomePageWidget()
-              : QueEsDoviaWidget(),
+              ? const DOVIACLIENTHomePageWidget()
+              : const QueEsDoviaWidget(),
         ),
         FFRoute(
           name: QueEsDoviaWidget.routeName,
           path: QueEsDoviaWidget.routePath,
-          builder: (context, params) => QueEsDoviaWidget(),
+          builder: (context, params) => const QueEsDoviaWidget(),
         ),
         FFRoute(
           name: InicioWidget.routeName,
           path: InicioWidget.routePath,
-          builder: (context, params) => InicioWidget(),
+          builder: (context, params) => const InicioWidget(),
         ),
         FFRoute(
           name: SignInWidget.routeName,
           path: SignInWidget.routePath,
-          builder: (context, params) => SignInWidget(),
+          builder: (context, params) => const SignInWidget(),
         ),
         FFRoute(
           name: CreateAccountWidget.routeName,
           path: CreateAccountWidget.routePath,
-          builder: (context, params) => CreateAccountWidget(),
+          builder: (context, params) => const CreateAccountWidget(),
         ),
         FFRoute(
           name: CreateAccount2Widget.routeName,
           path: CreateAccount2Widget.routePath,
-          builder: (context, params) => CreateAccount2Widget(),
+          builder: (context, params) => const CreateAccount2Widget(),
         ),
         FFRoute(
           name: DatosWidget.routeName,
           path: DatosWidget.routePath,
-          builder: (context, params) => DatosWidget(),
+          builder: (context, params) => const DatosWidget(),
         ),
         FFRoute(
           name: Datos2Widget.routeName,
           path: Datos2Widget.routePath,
-          builder: (context, params) => Datos2Widget(),
+          builder: (context, params) => const Datos2Widget(),
         ),
         FFRoute(
           name: Datos3Widget.routeName,
           path: Datos3Widget.routePath,
-          builder: (context, params) => Datos3Widget(),
+          builder: (context, params) => const Datos3Widget(),
         ),
         FFRoute(
           name: RecoverPassword1Widget.routeName,
           path: RecoverPassword1Widget.routePath,
-          builder: (context, params) => RecoverPassword1Widget(),
+          builder: (context, params) => const RecoverPassword1Widget(),
         ),
         FFRoute(
           name: RecoverPassword2Widget.routeName,
           path: RecoverPassword2Widget.routePath,
-          builder: (context, params) => RecoverPassword2Widget(),
+          builder: (context, params) => const RecoverPassword2Widget(),
         ),
         FFRoute(
           name: DOVIACLIENTHomePageWidget.routeName,
           path: DOVIACLIENTHomePageWidget.routePath,
-          builder: (context, params) => DOVIACLIENTHomePageWidget(),
+          builder: (context, params) => const DOVIACLIENTHomePageWidget(),
         ),
         FFRoute(
           name: DHASSOCIATECreateAccountWidget.routeName,
           path: DHASSOCIATECreateAccountWidget.routePath,
-          builder: (context, params) => DHASSOCIATECreateAccountWidget(),
+          builder: (context, params) => const DHASSOCIATECreateAccountWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEBienvenidaWidget.routeName,
           path: DHASSOCIATEBienvenidaWidget.routePath,
-          builder: (context, params) => DHASSOCIATEBienvenidaWidget(),
+          builder: (context, params) => const DHASSOCIATEBienvenidaWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEServiciosWidget.routeName,
           path: DHASSOCIATEServiciosWidget.routePath,
-          builder: (context, params) => DHASSOCIATEServiciosWidget(),
+          builder: (context, params) => const DHASSOCIATEServiciosWidget(),
         ),
         FFRoute(
           name: DHASSOCIATENotificacionesWidget.routeName,
           path: DHASSOCIATENotificacionesWidget.routePath,
-          builder: (context, params) => DHASSOCIATENotificacionesWidget(),
+          builder: (context, params) => const DHASSOCIATENotificacionesWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEAjustesWidget.routeName,
           path: DHASSOCIATEAjustesWidget.routePath,
-          builder: (context, params) => DHASSOCIATEAjustesWidget(),
+          builder: (context, params) => const DHASSOCIATEAjustesWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEHomePageWidget.routeName,
           path: DHASSOCIATEHomePageWidget.routePath,
-          builder: (context, params) => DHASSOCIATEHomePageWidget(),
+          builder: (context, params) => const DHASSOCIATEHomePageWidget(),
         ),
         FFRoute(
           name: DHASSOCIATETuTrabajoWidget.routeName,
           path: DHASSOCIATETuTrabajoWidget.routePath,
-          builder: (context, params) => DHASSOCIATETuTrabajoWidget(),
+          builder: (context, params) => const DHASSOCIATETuTrabajoWidget(),
         ),
         FFRoute(
           name: DHASSOCIATETrabajoARealizarWidget.routeName,
           path: DHASSOCIATETrabajoARealizarWidget.routePath,
-          builder: (context, params) => DHASSOCIATETrabajoARealizarWidget(),
+          builder: (context, params) =>
+              const DHASSOCIATETrabajoARealizarWidget(),
         ),
         FFRoute(
           name: DHASSOCIATETrabajoFinalizadoWidget.routeName,
           path: DHASSOCIATETrabajoFinalizadoWidget.routePath,
-          builder: (context, params) => DHASSOCIATETrabajoFinalizadoWidget(),
+          builder: (context, params) =>
+              const DHASSOCIATETrabajoFinalizadoWidget(),
         ),
         FFRoute(
           name: DHASSOCIATETrabajoAdicionalWidget.routeName,
           path: DHASSOCIATETrabajoAdicionalWidget.routePath,
-          builder: (context, params) => DHASSOCIATETrabajoAdicionalWidget(),
+          builder: (context, params) =>
+              const DHASSOCIATETrabajoAdicionalWidget(),
         ),
         FFRoute(
           name: DHCLIENTBienvenidaWidget.routeName,
           path: DHCLIENTBienvenidaWidget.routePath,
-          builder: (context, params) => DHCLIENTBienvenidaWidget(),
+          builder: (context, params) => const DHCLIENTBienvenidaWidget(),
         ),
         FFRoute(
           name: DHCLIENTPlanesPageWidget.routeName,
           path: DHCLIENTPlanesPageWidget.routePath,
-          builder: (context, params) => DHCLIENTPlanesPageWidget(),
+          builder: (context, params) => const DHCLIENTPlanesPageWidget(),
         ),
         FFRoute(
           name: DHCLIENTUbicacionWidget.routeName,
           path: DHCLIENTUbicacionWidget.routePath,
-          builder: (context, params) => DHCLIENTUbicacionWidget(),
+          builder: (context, params) => const DHCLIENTUbicacionWidget(),
         ),
         FFRoute(
           name: DHCLIENTHomepageWidget.routeName,
           path: DHCLIENTHomepageWidget.routePath,
-          builder: (context, params) => DHCLIENTHomepageWidget(),
+          builder: (context, params) => const DHCLIENTHomepageWidget(),
         ),
         FFRoute(
           name: DHCLIENTEmergenciasWidget.routeName,
           path: DHCLIENTEmergenciasWidget.routePath,
-          builder: (context, params) => DHCLIENTEmergenciasWidget(),
+          builder: (context, params) => const DHCLIENTEmergenciasWidget(),
         ),
         FFRoute(
           name: DHCLIENTInstalacionWidget.routeName,
           path: DHCLIENTInstalacionWidget.routePath,
-          builder: (context, params) => DHCLIENTInstalacionWidget(),
+          builder: (context, params) => const DHCLIENTInstalacionWidget(),
         ),
         FFRoute(
           name: DHCLIENTCotizacionWidget.routeName,
           path: DHCLIENTCotizacionWidget.routePath,
-          builder: (context, params) => DHCLIENTCotizacionWidget(),
+          builder: (context, params) => const DHCLIENTCotizacionWidget(),
         ),
         FFRoute(
           name: DHCLIENTAgendaWidget.routeName,
           path: DHCLIENTAgendaWidget.routePath,
-          builder: (context, params) => DHCLIENTAgendaWidget(),
+          builder: (context, params) => const DHCLIENTAgendaWidget(),
         ),
         FFRoute(
           name: DHCLIENTCasaAWidget.routeName,
           path: DHCLIENTCasaAWidget.routePath,
-          builder: (context, params) => DHCLIENTCasaAWidget(),
+          builder: (context, params) => const DHCLIENTCasaAWidget(),
         ),
         FFRoute(
           name: DHCLIENTOtraUbicacionWidget.routeName,
           path: DHCLIENTOtraUbicacionWidget.routePath,
-          builder: (context, params) => DHCLIENTOtraUbicacionWidget(),
+          builder: (context, params) => const DHCLIENTOtraUbicacionWidget(),
         ),
         FFRoute(
           name: DHCLIENTCotizacionesRecibidasWidget.routeName,
           path: DHCLIENTCotizacionesRecibidasWidget.routePath,
-          builder: (context, params) => DHCLIENTCotizacionesRecibidasWidget(),
+          builder: (context, params) =>
+              const DHCLIENTCotizacionesRecibidasWidget(),
         ),
         FFRoute(
           name: DHCLIENTMaterialesWidget.routeName,
           path: DHCLIENTMaterialesWidget.routePath,
-          builder: (context, params) => DHCLIENTMaterialesWidget(),
+          builder: (context, params) => const DHCLIENTMaterialesWidget(),
         ),
         FFRoute(
           name: DHCLIENTFueraDeAlcanceWidget.routeName,
           path: DHCLIENTFueraDeAlcanceWidget.routePath,
-          builder: (context, params) => DHCLIENTFueraDeAlcanceWidget(),
+          builder: (context, params) => const DHCLIENTFueraDeAlcanceWidget(),
         ),
         FFRoute(
           name: DHCLIENTTrabajoFinalizadoWidget.routeName,
           path: DHCLIENTTrabajoFinalizadoWidget.routePath,
-          builder: (context, params) => DHCLIENTTrabajoFinalizadoWidget(),
+          builder: (context, params) => const DHCLIENTTrabajoFinalizadoWidget(),
         ),
         FFRoute(
           name: DHCLIENTReportarProblemaWidget.routeName,
           path: DHCLIENTReportarProblemaWidget.routePath,
-          builder: (context, params) => DHCLIENTReportarProblemaWidget(),
+          builder: (context, params) => const DHCLIENTReportarProblemaWidget(),
         ),
         FFRoute(
           name: DHCLIENTCalificarWidget.routeName,
           path: DHCLIENTCalificarWidget.routePath,
-          builder: (context, params) => DHCLIENTCalificarWidget(),
+          builder: (context, params) => const DHCLIENTCalificarWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisFavoritosWidget.routeName,
           path: DOVIACLIENTMisFavoritosWidget.routePath,
-          builder: (context, params) => DOVIACLIENTMisFavoritosWidget(),
+          builder: (context, params) => const DOVIACLIENTMisFavoritosWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesWidget.routeName,
           path: DOVIACLIENTMisPropiedadesWidget.routePath,
-          builder: (context, params) => DOVIACLIENTMisPropiedadesWidget(),
+          builder: (context, params) => const DOVIACLIENTMisPropiedadesWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisVisitasWidget.routeName,
           path: DOVIACLIENTMisVisitasWidget.routePath,
-          builder: (context, params) => DOVIACLIENTMisVisitasWidget(),
+          builder: (context, params) => const DOVIACLIENTMisVisitasWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTNotificacionesWidget.routeName,
           path: DOVIACLIENTNotificacionesWidget.routePath,
-          builder: (context, params) => DOVIACLIENTNotificacionesWidget(),
+          builder: (context, params) => const DOVIACLIENTNotificacionesWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTAjustesWidget.routeName,
           path: DOVIACLIENTAjustesWidget.routePath,
-          builder: (context, params) => DOVIACLIENTAjustesWidget(),
+          builder: (context, params) => const DOVIACLIENTAjustesWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTSobreMiVisitaWidget.routeName,
@@ -338,7 +342,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DOVIACLIENTRentaWidget.routeName,
           path: DOVIACLIENTRentaWidget.routePath,
-          builder: (context, params) => DOVIACLIENTRentaWidget(),
+          builder: (context, params) => const DOVIACLIENTRentaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTOfertaCompraWidget.routeName,
@@ -348,31 +352,42 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'propertyId',
               ParamType.String,
             ),
+            offerType: params.getParam(
+              'offerType',
+              ParamType.String,
+            ) ?? 'compra',
+            fromSelectionScreen: params.getParam(
+              'fromSelectionScreen',
+              ParamType.bool,
+            ) ?? false,
+            isAmbosFlow: params.getParam(
+              'isAmbosFlow',
+              ParamType.bool,
+            ) ?? false,
           ),
         ),
         FFRoute(
           name: DOVIACLIENTMisVisitasTuPropuestaWidget.routeName,
           path: DOVIACLIENTMisVisitasTuPropuestaWidget.routePath,
-          builder: (context, params) =>
-              DOVIACLIENTMisVisitasTuPropuestaWidget(
-                propuestaState: params.getParam('propuestaState', ParamType.String),
-                paymentMethod: params.getParam('paymentMethod', ParamType.String),
-              ),
+          builder: (context, params) => DOVIACLIENTMisVisitasTuPropuestaWidget(
+            propuestaState: params.getParam('propuestaState', ParamType.String),
+            paymentMethod: params.getParam('paymentMethod', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DCFormaPagoSuscripcion2Widget.routeName,
           path: DCFormaPagoSuscripcion2Widget.routePath,
-          builder: (context, params) => DCFormaPagoSuscripcion2Widget(),
+          builder: (context, params) => const DCFormaPagoSuscripcion2Widget(),
         ),
         FFRoute(
           name: DCFormaPagoSuscripcion1Widget.routeName,
           path: DCFormaPagoSuscripcion1Widget.routePath,
-          builder: (context, params) => DCFormaPagoSuscripcion1Widget(),
+          builder: (context, params) => const DCFormaPagoSuscripcion1Widget(),
         ),
         FFRoute(
           name: DOVIACLIENTHomePage2MapaWidget.routeName,
           path: DOVIACLIENTHomePage2MapaWidget.routePath,
-          builder: (context, params) => DOVIACLIENTHomePage2MapaWidget(),
+          builder: (context, params) => const DOVIACLIENTHomePage2MapaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTPropiedadSeleccionadaWidget.routeName,
@@ -387,12 +402,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DOVIACLIENTHomepageBusquedaWidget.routeName,
           path: DOVIACLIENTHomepageBusquedaWidget.routePath,
-          builder: (context, params) => DOVIACLIENTHomepageBusquedaWidget(),
+          builder: (context, params) =>
+              const DOVIACLIENTHomepageBusquedaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisFavoritosCarpetasWidget.routeName,
           path: DOVIACLIENTMisFavoritosCarpetasWidget.routePath,
-          builder: (context, params) => DOVIACLIENTMisFavoritosCarpetasWidget(),
+          builder: (context, params) =>
+              const DOVIACLIENTMisFavoritosCarpetasWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidget.routeName,
@@ -412,23 +429,25 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DOVIACLIENTComoFuncionaWidget.routeName,
           path: DOVIACLIENTComoFuncionaWidget.routePath,
-          builder: (context, params) => DOVIACLIENTComoFuncionaWidget(),
+          builder: (context, params) => const DOVIACLIENTComoFuncionaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesAccionesARealizarWidget.routeName,
           path: DOVIACLIENTMisPropiedadesAccionesARealizarWidget.routePath,
           builder: (context, params) =>
-              DOVIACLIENTMisPropiedadesAccionesARealizarWidget(),
+              const DOVIACLIENTMisPropiedadesAccionesARealizarWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesVenderWidget.routeName,
           path: DOVIACLIENTMisPropiedadesVenderWidget.routePath,
-          builder: (context, params) => DOVIACLIENTMisPropiedadesVenderWidget(),
+          builder: (context, params) =>
+              const DOVIACLIENTMisPropiedadesVenderWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesRentarWidget.routeName,
           path: DOVIACLIENTMisPropiedadesRentarWidget.routePath,
-          builder: (context, params) => DOVIACLIENTMisPropiedadesRentarWidget(),
+          builder: (context, params) =>
+              const DOVIACLIENTMisPropiedadesRentarWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesAgendarVisitaWidget.routeName,
@@ -445,25 +464,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: DOVIACLIENTMisPropiedadesVisita1Widget.routeName,
           path: DOVIACLIENTMisPropiedadesVisita1Widget.routePath,
           builder: (context, params) =>
-              DOVIACLIENTMisPropiedadesVisita1Widget(),
-        ),
-        FFRoute(
-          name: DOVIACLIENTMisPropiedadesVisita2Widget.routeName,
-          path: DOVIACLIENTMisPropiedadesVisita2Widget.routePath,
-          builder: (context, params) =>
-              DOVIACLIENTMisPropiedadesVisita2Widget(),
-        ),
-        FFRoute(
-          name: DOVIACLIENTMisPropiedadesVisita3Widget.routeName,
-          path: DOVIACLIENTMisPropiedadesVisita3Widget.routePath,
-          builder: (context, params) =>
-              DOVIACLIENTMisPropiedadesVisita3Widget(),
+              DOVIACLIENTMisPropiedadesVisita1Widget(
+            visitId: params.getParam(
+              'visitId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routeName,
           path: DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routePath,
           builder: (context, params) =>
-              DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget(),
+              const DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesPropuestaWidget.routeName,
@@ -504,47 +516,51 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: OPERATIVELISTINGHomeWidget.routeName,
           path: OPERATIVELISTINGHomeWidget.routePath,
-          builder: (context, params) => OPERATIVELISTINGHomeWidget(),
+          builder: (context, params) => const OPERATIVELISTINGHomeWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGPrimeraVisitaWidget.routeName,
           path: OPERATIVELISTINGPrimeraVisitaWidget.routePath,
-          builder: (context, params) => OPERATIVELISTINGPrimeraVisitaWidget(),
+          builder: (context, params) =>
+              const OPERATIVELISTINGPrimeraVisitaWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGProfileWidget.routeName,
           path: OPERATIVELISTINGProfileWidget.routePath,
-          builder: (context, params) => OPERATIVELISTINGProfileWidget(),
+          builder: (context, params) => const OPERATIVELISTINGProfileWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGChecklistWidget.routeName,
           path: OPERATIVELISTINGChecklistWidget.routePath,
-          builder: (context, params) => OPERATIVELISTINGChecklistWidget(),
+          builder: (context, params) => const OPERATIVELISTINGChecklistWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGAgendaWidget.routeName,
           path: OPERATIVELISTINGAgendaWidget.routePath,
-          builder: (context, params) => OPERATIVELISTINGAgendaWidget(),
+          builder: (context, params) => const OPERATIVELISTINGAgendaWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGNotificationsWidget.routeName,
           path: OPERATIVELISTINGNotificationsWidget.routePath,
-          builder: (context, params) => OPERATIVELISTINGNotificationsWidget(),
+          builder: (context, params) =>
+              const OPERATIVELISTINGNotificationsWidget(),
         ),
         FFRoute(
           name: LISTINGHQHomeWidget.routeName,
           path: LISTINGHQHomeWidget.routePath,
-          builder: (context, params) => LISTINGHQHomeWidget(),
+          builder: (context, params) => const LISTINGHQHomeWidget(),
         ),
         FFRoute(
           name: LISTINGHQBusquedaPropiedadWidget.routeName,
           path: LISTINGHQBusquedaPropiedadWidget.routePath,
-          builder: (context, params) => LISTINGHQBusquedaPropiedadWidget(),
+          builder: (context, params) =>
+              const LISTINGHQBusquedaPropiedadWidget(),
         ),
         FFRoute(
           name: LISTINGHQDocumentosPendientesWidget.routeName,
           path: LISTINGHQDocumentosPendientesWidget.routePath,
-          builder: (context, params) => LISTINGHQDocumentosPendientesWidget(),
+          builder: (context, params) =>
+              const LISTINGHQDocumentosPendientesWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadArchivosPendientesWidget.routeName,
@@ -560,32 +576,33 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: LISTINGHQNotificationsWidget.routeName,
           path: LISTINGHQNotificationsWidget.routePath,
-          builder: (context, params) => LISTINGHQNotificationsWidget(),
+          builder: (context, params) => const LISTINGHQNotificationsWidget(),
         ),
         FFRoute(
           name: LISTINGHQProfileWidget.routeName,
           path: LISTINGHQProfileWidget.routePath,
-          builder: (context, params) => LISTINGHQProfileWidget(),
+          builder: (context, params) => const LISTINGHQProfileWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadesWidget.routeName,
           path: LISTINGHQPropiedadesWidget.routePath,
-          builder: (context, params) => LISTINGHQPropiedadesWidget(),
+          builder: (context, params) => const LISTINGHQPropiedadesWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadAsignadaWidget.routeName,
           path: LISTINGHQPropiedadAsignadaWidget.routePath,
-          builder: (context, params) => LISTINGHQPropiedadAsignadaWidget(),
+          builder: (context, params) =>
+              const LISTINGHQPropiedadAsignadaWidget(),
         ),
         FFRoute(
           name: LISTINGHQDocumentosWidget.routeName,
           path: LISTINGHQDocumentosWidget.routePath,
-          builder: (context, params) => LISTINGHQDocumentosWidget(),
+          builder: (context, params) => const LISTINGHQDocumentosWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadWidget.routeName,
           path: LISTINGHQPropiedadWidget.routePath,
-          builder: (context, params) => LISTINGHQPropiedadWidget(),
+          builder: (context, params) => const LISTINGHQPropiedadWidget(),
         ),
         FFRoute(
           name: LISTINGHQDocumentos2Widget.routeName,
@@ -614,72 +631,73 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SHOWINGHomeWidget.routeName,
           path: SHOWINGHomeWidget.routePath,
-          builder: (context, params) => SHOWINGHomeWidget(),
+          builder: (context, params) => const SHOWINGHomeWidget(),
         ),
         FFRoute(
           name: SHOWINGVisitaDelDiaWidget.routeName,
           path: SHOWINGVisitaDelDiaWidget.routePath,
-          builder: (context, params) => SHOWINGVisitaDelDiaWidget(),
+          builder: (context, params) => const SHOWINGVisitaDelDiaWidget(),
         ),
         FFRoute(
           name: SHOWINGNotificationsWidget.routeName,
           path: SHOWINGNotificationsWidget.routePath,
-          builder: (context, params) => SHOWINGNotificationsWidget(),
+          builder: (context, params) => const SHOWINGNotificationsWidget(),
         ),
         FFRoute(
           name: SHOWINGProfileWidget.routeName,
           path: SHOWINGProfileWidget.routePath,
-          builder: (context, params) => SHOWINGProfileWidget(),
+          builder: (context, params) => const SHOWINGProfileWidget(),
         ),
         FFRoute(
           name: SHOWINGPropiedadesAMostrarWidget.routeName,
           path: SHOWINGPropiedadesAMostrarWidget.routePath,
-          builder: (context, params) => SHOWINGPropiedadesAMostrarWidget(),
+          builder: (context, params) =>
+              const SHOWINGPropiedadesAMostrarWidget(),
         ),
         FFRoute(
           name: SHOWINGPropiedadAMostrarWidget.routeName,
           path: SHOWINGPropiedadAMostrarWidget.routePath,
-          builder: (context, params) => SHOWINGPropiedadAMostrarWidget(),
+          builder: (context, params) => const SHOWINGPropiedadAMostrarWidget(),
         ),
         FFRoute(
           name: SHOWINGRegistroDeVisitaWidget.routeName,
           path: SHOWINGRegistroDeVisitaWidget.routePath,
-          builder: (context, params) => SHOWINGRegistroDeVisitaWidget(),
+          builder: (context, params) => const SHOWINGRegistroDeVisitaWidget(),
         ),
         FFRoute(
           name: SHOWINGRegistroDeVisita2Widget.routeName,
           path: SHOWINGRegistroDeVisita2Widget.routePath,
-          builder: (context, params) => SHOWINGRegistroDeVisita2Widget(),
+          builder: (context, params) => const SHOWINGRegistroDeVisita2Widget(),
         ),
         FFRoute(
           name: BienvenidaWidget.routeName,
           path: BienvenidaWidget.routePath,
-          builder: (context, params) => BienvenidaWidget(),
+          builder: (context, params) => const BienvenidaWidget(),
         ),
         FFRoute(
           name: Datos3NewWidget.routeName,
           path: Datos3NewWidget.routePath,
-          builder: (context, params) => Datos3NewWidget(),
+          builder: (context, params) => const Datos3NewWidget(),
         ),
         FFRoute(
           name: ElegirRolAsociadoWidget.routeName,
           path: ElegirRolAsociadoWidget.routePath,
-          builder: (context, params) => ElegirRolAsociadoWidget(),
+          builder: (context, params) => const ElegirRolAsociadoWidget(),
         ),
         FFRoute(
           name: FormAssociateWidget.routeName,
           path: FormAssociateWidget.routePath,
-          builder: (context, params) => FormAssociateWidget(),
+          builder: (context, params) => const FormAssociateWidget(),
         ),
         FFRoute(
           name: LegalAssociateHomeWidget.routeName,
           path: LegalAssociateHomeWidget.routePath,
-          builder: (context, params) => LegalAssociateHomeWidget(),
+          builder: (context, params) => const LegalAssociateHomeWidget(),
         ),
         FFRoute(
           name: LEGALASSOCIATEDocumentosWidget.routeName,
           path: LEGALASSOCIATEDocumentosWidget.routePath,
-          builder: (context, params) => LEGALASSOCIATEDocumentosWidget(),
+          builder: (context, params) => const LEGALASSOCIATEDocumentosWidget(),
         ),
         FFRoute(
           name: LEGALASSOCAITEDocumentos2Widget.routeName,
@@ -694,53 +712,55 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: LEGALASSOCIATEProcesosWidget.routeName,
           path: LEGALASSOCIATEProcesosWidget.routePath,
-          builder: (context, params) => LEGALASSOCIATEProcesosWidget(),
+          builder: (context, params) => const LEGALASSOCIATEProcesosWidget(),
         ),
         FFRoute(
           name: LEGALASSOCIATEProcesos2Widget.routeName,
           path: LEGALASSOCIATEProcesos2Widget.routePath,
-          builder: (context, params) => LEGALASSOCIATEProcesos2Widget(),
+          builder: (context, params) => const LEGALASSOCIATEProcesos2Widget(),
         ),
         FFRoute(
           name: LEGALASSOCIATENotificationsWidget.routeName,
           path: LEGALASSOCIATENotificationsWidget.routePath,
-          builder: (context, params) => LEGALASSOCIATENotificationsWidget(),
+          builder: (context, params) =>
+              const LEGALASSOCIATENotificationsWidget(),
         ),
         FFRoute(
           name: LEGALASSOCIATEAjustesWidget.routeName,
           path: LEGALASSOCIATEAjustesWidget.routePath,
-          builder: (context, params) => LEGALASSOCIATEAjustesWidget(),
+          builder: (context, params) => const LEGALASSOCIATEAjustesWidget(),
         ),
         FFRoute(
           name: LEGALHQHomeWidget.routeName,
           path: LEGALHQHomeWidget.routePath,
-          builder: (context, params) => LEGALHQHomeWidget(),
+          builder: (context, params) => const LEGALHQHomeWidget(),
         ),
         FFRoute(
           name: LEGALHQProcesosCasosConHipotecaWidget.routeName,
           path: LEGALHQProcesosCasosConHipotecaWidget.routePath,
-          builder: (context, params) => LEGALHQProcesosCasosConHipotecaWidget(),
+          builder: (context, params) =>
+              const LEGALHQProcesosCasosConHipotecaWidget(),
         ),
         FFRoute(
           name: LEGALHQAjustesWidget.routeName,
           path: LEGALHQAjustesWidget.routePath,
-          builder: (context, params) => LEGALHQAjustesWidget(),
+          builder: (context, params) => const LEGALHQAjustesWidget(),
         ),
         FFRoute(
           name: LEGALHQNotificacionesWidget.routeName,
           path: LEGALHQNotificacionesWidget.routePath,
-          builder: (context, params) => LEGALHQNotificacionesWidget(),
+          builder: (context, params) => const LEGALHQNotificacionesWidget(),
         ),
         FFRoute(
           name: LEGALHQProcesosWidget.routeName,
           path: LEGALHQProcesosWidget.routePath,
-          builder: (context, params) => LEGALHQProcesosWidget(),
+          builder: (context, params) => const LEGALHQProcesosWidget(),
         ),
         FFRoute(
           name: LEGALHQRevisionDocumentosPropiedadesWidget.routeName,
           path: LEGALHQRevisionDocumentosPropiedadesWidget.routePath,
           builder: (context, params) =>
-              LEGALHQRevisionDocumentosPropiedadesWidget(),
+              const LEGALHQRevisionDocumentosPropiedadesWidget(),
         ),
         FFRoute(
           name: LEGALHQDocumentoWidget.routeName,
@@ -755,7 +775,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: LEGALHQPostVentaWidget.routeName,
           path: LEGALHQPostVentaWidget.routePath,
-          builder: (context, params) => LEGALHQPostVentaWidget(),
+          builder: (context, params) => const LEGALHQPostVentaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesVenderRentarWidget.routeName,
@@ -775,7 +795,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: ComoUsarasTuCuentaWidget.routeName,
           path: ComoUsarasTuCuentaWidget.routePath,
-          builder: (context, params) => ComoUsarasTuCuentaWidget(),
+          builder: (context, params) => const ComoUsarasTuCuentaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTPropiedadSeleccionadaNewWidget.routeName,
@@ -791,12 +811,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: MapWithHousesTestWidget.routeName,
           path: MapWithHousesTestWidget.routePath,
-          builder: (context, params) => MapWithHousesTestWidget(),
+          builder: (context, params) => const MapWithHousesTestWidget(),
         ),
         FFRoute(
           name: DatosCustomWidget.routeName,
           path: DatosCustomWidget.routePath,
-          builder: (context, params) => DatosCustomWidget(),
+          builder: (context, params) => const DatosCustomWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTVerMasPropiedadesWidget.routeName,
@@ -811,12 +831,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: MapWidgetPageTestWidget.routeName,
           path: MapWidgetPageTestWidget.routePath,
-          builder: (context, params) => MapWidgetPageTestWidget(),
+          builder: (context, params) => const MapWidgetPageTestWidget(),
         ),
         FFRoute(
           name: RecoverPasswordStep1Widget.routeName,
           path: RecoverPasswordStep1Widget.routePath,
-          builder: (context, params) => RecoverPasswordStep1Widget(),
+          builder: (context, params) => const RecoverPasswordStep1Widget(),
         ),
         FFRoute(
           name: RecoverPasswordStep2Widget.routeName,
@@ -1065,7 +1085,8 @@ class TransitionInfo {
   final Duration duration;
   final Alignment? alignment;
 
-  static TransitionInfo appDefault() => TransitionInfo(hasTransition: false);
+  static TransitionInfo appDefault() =>
+      const TransitionInfo(hasTransition: false);
 }
 
 class RootPageContext {

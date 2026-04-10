@@ -3,14 +3,11 @@ import '/backend/api_requests/api_calls.dart';
 import '/backend/schema/enums/enums.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/user_type_card/user_type_card_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'como_usaras_tu_cuenta_model.dart';
 export 'como_usaras_tu_cuenta_model.dart';
 
@@ -62,17 +59,17 @@ class _ComoUsarasTuCuentaWidgetState extends State<ComoUsarasTuCuentaWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
+                      alignment: const AlignmentDirectional(0.0, 0.0),
                       child: Text(
                         '¿Qué quieres hacer en DOVIA?',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -102,7 +99,7 @@ class _ComoUsarasTuCuentaWidgetState extends State<ComoUsarasTuCuentaWidget> {
                       child: wrapWithModel(
                         model: _model.userTypeCardModel1,
                         updateCallback: () => safeSetState(() {}),
-                        child: UserTypeCardWidget(
+                        child: const UserTypeCardWidget(
                           userType: UserType.asociado,
                         ),
                       ),
@@ -147,12 +144,12 @@ class _ComoUsarasTuCuentaWidgetState extends State<ComoUsarasTuCuentaWidget> {
                       child: wrapWithModel(
                         model: _model.userTypeCardModel2,
                         updateCallback: () => safeSetState(() {}),
-                        child: UserTypeCardWidget(
+                        child: const UserTypeCardWidget(
                           userType: UserType.usuario,
                         ),
                       ),
                     ),
-                  ].divide(SizedBox(height: 20.0)),
+                  ].divide(const SizedBox(height: 20.0)),
                 ),
               ),
             ],

@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_select_role_popup_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_select_role_popup_model.dart';
 
@@ -52,7 +49,7 @@ class _DHASSOCIATESelectRolePopupWidgetState
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(26.0, 13.0, 26.0, 13.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(26.0, 13.0, 26.0, 13.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -61,7 +58,7 @@ class _DHASSOCIATESelectRolePopupWidgetState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(-1.0, 0.0),
+                  alignment: const AlignmentDirectional(-1.0, 0.0),
                   child: Text(
                     'Selecciona el rol',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -101,7 +98,7 @@ class _DHASSOCIATESelectRolePopupWidgetState
               ],
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
               child: Text(
                 'Cada rol en Dovia tiene funciones diferentes. Elige el que corresponde a tu actividad:',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -119,7 +116,7 @@ class _DHASSOCIATESelectRolePopupWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
               child: RichText(
                 textScaler: MediaQuery.of(context).textScaler,
                 text: TextSpan(
@@ -236,9 +233,9 @@ class _DHASSOCIATESelectRolePopupWidgetState
               ),
             ),
             Align(
-              alignment: AlignmentDirectional(1.0, 0.0),
+              alignment: const AlignmentDirectional(1.0, 0.0),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () {
                     print('Button pressed ...');
@@ -247,10 +244,10 @@ class _DHASSOCIATESelectRolePopupWidgetState
                   options: FFButtonOptions(
                     width: 81.0,
                     height: 24.0,
-                    padding: EdgeInsetsDirectional.fromSTEB(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
                         11.43, 5.71, 11.43, 5.71),
                     iconPadding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).primary,
                     textStyle: FlutterFlowTheme.of(context).bodySmall.override(
                           font: GoogleFonts.inter(

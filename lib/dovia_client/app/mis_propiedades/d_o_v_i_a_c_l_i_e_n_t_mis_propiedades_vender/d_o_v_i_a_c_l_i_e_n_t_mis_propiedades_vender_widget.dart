@@ -1,15 +1,12 @@
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_model.dart';
 
@@ -65,7 +62,7 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -74,20 +71,20 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
+                      child: const DOVIASHAREDHeaderWidget(
                         title: 'Vender',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: MediaQuery.sizeOf(context).height * 1.0,
                               child: custom_widgets
@@ -130,9 +127,9 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
                                 ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
                               child: Text(
                                 'Describe de manera natural tu propiedad y el complejo',
@@ -159,9 +156,9 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller: _model.textController,
@@ -215,14 +212,14 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -246,7 +243,7 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 40.0, 0.0, 40.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -284,7 +281,7 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -292,7 +289,7 @@ class _DOVIACLIENTMisPropiedadesVenderWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

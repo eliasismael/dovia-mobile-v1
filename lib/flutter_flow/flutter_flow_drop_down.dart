@@ -1,6 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 
-import 'package:flutter/foundation.dart';
 import 'form_field_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -187,7 +186,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
 
   Widget _buildLegacyDropdown() {
     return DropdownButtonFormField<T>(
-      value: currentValue,
+      initialValue: currentValue,
       hint: _createHintText(),
       items: _createMenuItems(),
       elevation: widget.elevation.toInt(),

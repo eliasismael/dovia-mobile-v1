@@ -4,16 +4,12 @@ import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_home_page2_mapa_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_home_page2_mapa_model.dart';
 
@@ -69,7 +65,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -77,15 +73,15 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                   children: [
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
                       child: Stack(
-                        alignment: AlignmentDirectional(0.0, 0.0),
+                        alignment: const AlignmentDirectional(0.0, 0.0),
                         children: [
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Container(
-                              decoration: BoxDecoration(),
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              decoration: const BoxDecoration(),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -137,12 +133,12 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                       ),
                                     ),
                                   ),
-                                ].divide(SizedBox(width: 8.0)),
+                                ].divide(const SizedBox(width: 8.0)),
                               ),
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
+                            alignment: const AlignmentDirectional(0.0, 0.0),
                             child: RichText(
                               textScaler: MediaQuery.of(context).textScaler,
                               text: TextSpan(
@@ -193,9 +189,9 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(1.0, 0.0),
+                            alignment: const AlignmentDirectional(1.0, 0.0),
                             child: Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -204,7 +200,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                     controller:
                                         _model.dropDownValueController ??=
                                             FormFieldController<String>(null),
-                                    options: ['USD', 'Quetzal'],
+                                    options: const ['USD', 'Quetzal'],
                                     onChanged: (val) => safeSetState(
                                         () => _model.dropDownValue = val),
                                     width: 90.0,
@@ -245,7 +241,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                     borderColor: Colors.transparent,
                                     borderWidth: 0.0,
                                     borderRadius: 67.0,
-                                    margin: EdgeInsetsDirectional.fromSTEB(
+                                    margin: const EdgeInsetsDirectional.fromSTEB(
                                         12.0, 0.0, 12.0, 0.0),
                                     hidesUnderline: true,
                                     isOverButton: false,
@@ -253,7 +249,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                     isMultiSelect: false,
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         4.0, 0.0, 0.0, 0.0),
                                     child: InkWell(
                                       splashColor: Colors.transparent,
@@ -279,7 +275,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                                 padding:
                                                     MediaQuery.viewInsetsOf(
                                                         context),
-                                                child: Container(
+                                                child: SizedBox(
                                                   height:
                                                       MediaQuery.sizeOf(context)
                                                               .height *
@@ -292,14 +288,14 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                                         builder:
                                                             (alertDialogContext) {
                                                           return AlertDialog(
-                                                            title: Text('ok'),
+                                                            title: const Text('ok'),
                                                             actions: [
                                                               TextButton(
                                                                 onPressed: () =>
                                                                     Navigator.pop(
                                                                         alertDialogContext),
                                                                 child:
-                                                                    Text('Ok'),
+                                                                    const Text('Ok'),
                                                               ),
                                                             ],
                                                           );
@@ -312,14 +308,14 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                                         builder:
                                                             (alertDialogContext) {
                                                           return AlertDialog(
-                                                            title: Text('ok'),
+                                                            title: const Text('ok'),
                                                             actions: [
                                                               TextButton(
                                                                 onPressed: () =>
                                                                     Navigator.pop(
                                                                         alertDialogContext),
                                                                 child:
-                                                                    Text('Ok'),
+                                                                    const Text('Ok'),
                                                               ),
                                                             ],
                                                           );
@@ -384,7 +380,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -397,7 +393,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                 decoration: BoxDecoration(
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
-                                  borderRadius: BorderRadius.only(
+                                  borderRadius: const BorderRadius.only(
                                     bottomLeft: Radius.circular(25.0),
                                     bottomRight: Radius.circular(0.0),
                                     topLeft: Radius.circular(25.0),
@@ -415,7 +411,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                 ),
                               ),
                               Expanded(
-                                child: Container(
+                                child: SizedBox(
                                   width: 200.0,
                                   child: TextFormField(
                                     controller: _model.textController,
@@ -472,7 +468,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                                     .labelMedium
                                                     .fontStyle,
                                           ),
-                                      enabledBorder: OutlineInputBorder(
+                                      enabledBorder: const OutlineInputBorder(
                                         borderSide: BorderSide(
                                           color: Color(0x00000000),
                                           width: 1.0,
@@ -484,7 +480,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                           topRight: Radius.circular(25.0),
                                         ),
                                       ),
-                                      focusedBorder: OutlineInputBorder(
+                                      focusedBorder: const OutlineInputBorder(
                                         borderSide: BorderSide(
                                           color: Color(0x00000000),
                                           width: 1.0,
@@ -502,7 +498,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                               .error,
                                           width: 1.0,
                                         ),
-                                        borderRadius: BorderRadius.only(
+                                        borderRadius: const BorderRadius.only(
                                           bottomLeft: Radius.circular(0.0),
                                           bottomRight: Radius.circular(25.0),
                                           topLeft: Radius.circular(0.0),
@@ -515,7 +511,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                               .error,
                                           width: 1.0,
                                         ),
-                                        borderRadius: BorderRadius.only(
+                                        borderRadius: const BorderRadius.only(
                                           bottomLeft: Radius.circular(0.0),
                                           bottomRight: Radius.circular(25.0),
                                           topLeft: Radius.circular(0.0),
@@ -560,12 +556,12 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                             ],
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model.mapWithHousesModel,
                               updateCallback: () => safeSetState(() {}),
-                              child: MapWithHousesWidget(),
+                              child: const MapWithHousesWidget(),
                             ),
                           ),
                         ],
@@ -577,7 +573,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
 
               // Al usar busqueda con IA entiendo que se muestra el modal inferior con las casas, y solo tocando el logo de al lado de los filtros sale otro modal de los filtros
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -585,7 +581,7 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

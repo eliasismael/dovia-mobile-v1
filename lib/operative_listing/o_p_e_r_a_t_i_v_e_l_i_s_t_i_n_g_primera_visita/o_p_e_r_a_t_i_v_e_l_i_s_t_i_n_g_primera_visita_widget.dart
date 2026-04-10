@@ -4,13 +4,10 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
 
@@ -63,22 +60,22 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            decoration: BoxDecoration(),
+                            decoration: const BoxDecoration(),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -110,7 +107,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 8.0)),
+                              ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
                           RichText(
@@ -180,21 +177,21 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                   ),
                                 ),
                               ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ].divide(const SizedBox(width: 8.0)),
                           ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Informaciión del propietario',
@@ -222,7 +219,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -231,7 +228,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                     .secondaryBackground,
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 20.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
@@ -241,7 +238,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                     Container(
                                       width: 70.0,
                                       height: 70.0,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
                                       ),
                                       child: ClipRRect(
@@ -256,8 +253,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Text(
                                         'Nombre Apellido',
                                         style: FlutterFlowTheme.of(context)
@@ -286,8 +284,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 20.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 20.0, 0.0, 0.0),
                                       child: Container(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -305,8 +304,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                               MainAxisAlignment.spaceEvenly,
                                           children: [
                                             Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, 0.0),
                                               child: Text(
                                                 'Hablar con dovia HQ',
                                                 style:
@@ -340,7 +340,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                         ),
                                               ),
                                             ),
-                                            Row(
+                                            const Row(
                                               mainAxisSize: MainAxisSize.max,
                                               children: [],
                                             ),
@@ -354,9 +354,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Tipo de vivienda',
@@ -380,9 +380,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
                               child: Text(
                                 'Dirección',
@@ -409,9 +409,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Descripción sobre la propiedad',
@@ -438,9 +438,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 250.0,
                               child: custom_widgets.InteractiveMap(
@@ -453,7 +453,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: FFButtonWidget(
                               onPressed: () {
@@ -463,10 +463,11 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 40.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).accent1,
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
@@ -492,7 +493,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Text(
                               'Ya llegué al punto, enviar mi ubicación',
@@ -520,7 +521,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: FFButtonWidget(
                               onPressed: () {
@@ -530,11 +531,12 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 40.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
-                                color: Color(0x00007376),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
+                                color: const Color(0x00007376),
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
                                     .override(
@@ -564,7 +566,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model.primaryButtonModel,
@@ -582,7 +584,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -590,7 +592,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                     wrapWithModel(
                       model: _model.oPERATIVELISTINGNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: OPERATIVELISTINGNavbarWidget(),
+                      child: const OPERATIVELISTINGNavbarWidget(),
                     ),
                   ],
                 ),

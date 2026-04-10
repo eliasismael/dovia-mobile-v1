@@ -4,11 +4,8 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
 import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import 'dart:ui';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_h_q_home_model.dart';
 export 'l_e_g_a_l_h_q_home_model.dart';
 
@@ -59,7 +56,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -68,12 +65,12 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                     wrapWithModel(
                       model: _model.legalHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalHQHeaderWidget(
+                      child: const LegalHQHeaderWidget(
                         text: 'Home',
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 40.0, 20.0, 100.0),
                       child: SingleChildScrollView(
                         child: Column(
@@ -81,7 +78,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -90,7 +87,8 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Propiedades pendientes\npor revisión',
                                       style: FlutterFlowTheme.of(context)
@@ -120,10 +118,11 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                     text: 'Ver más',
                                     options: FFButtonOptions(
                                       height: 30.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
                                       color:
                                           FlutterFlowTheme.of(context).accent1,
@@ -155,7 +154,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Container(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -165,7 +164,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
@@ -193,13 +192,13 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(),
+                                          decoration: const BoxDecoration(),
                                           child: IntrinsicWidth(
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
@@ -208,7 +207,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                               children: [
                                                 Align(
                                                   alignment:
-                                                      AlignmentDirectional(
+                                                      const AlignmentDirectional(
                                                           -1.0, 0.0),
                                                   child: RichText(
                                                     textScaler:
@@ -275,7 +274,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                                                     .fontStyle,
                                                               ),
                                                         ),
-                                                        TextSpan(
+                                                        const TextSpan(
                                                           text: 'Dirección:',
                                                           style: TextStyle(),
                                                         )
@@ -351,20 +350,17 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFFFFE69F),
+                                                        color: const Color(
+                                                            0xFFFFE69F),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
                                                       ),
                                                       child: Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    16.0,
-                                                                    4.0,
-                                                                    16.0,
-                                                                    4.0),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(16.0,
+                                                                4.0, 16.0, 4.0),
                                                         child: Text(
                                                           'Pendiente',
                                                           style: FlutterFlowTheme
@@ -381,7 +377,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                                                       .bodyMedium
                                                                       .fontStyle,
                                                                 ),
-                                                                color: Color(
+                                                                color: const Color(
                                                                     0xFFD59E08),
                                                                 letterSpacing:
                                                                     0.0,
@@ -399,8 +395,9 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                                   ],
                                                 ),
                                                 Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           0.0, 12.0, 0.0, 0.0),
                                                   child: FFButtonWidget(
                                                     onPressed: () {
@@ -415,19 +412,13 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                                           1.0,
                                                       height: 30.0,
                                                       padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  16.0,
-                                                                  0.0,
-                                                                  16.0,
-                                                                  0.0),
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(16.0,
+                                                              0.0, 16.0, 0.0),
                                                       iconPadding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0),
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(0.0,
+                                                              0.0, 0.0, 0.0),
                                                       color:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -485,7 +476,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -493,7 +484,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                     wrapWithModel(
                       model: _model.lEGALHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LEGALHQNavbarWidget(),
+                      child: const LEGALHQNavbarWidget(),
                     ),
                   ],
                 ),

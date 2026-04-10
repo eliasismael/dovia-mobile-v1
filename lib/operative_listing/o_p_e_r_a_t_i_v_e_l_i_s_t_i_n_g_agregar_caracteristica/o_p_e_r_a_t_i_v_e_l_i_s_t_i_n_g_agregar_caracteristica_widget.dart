@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_agregar_caracteristica_model.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_agregar_caracteristica_model.dart';
 
@@ -55,21 +52,21 @@ class _OPERATIVELISTINGAgregarCaracteristicaWidgetState
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      constraints: BoxConstraints(
+      constraints: const BoxConstraints(
         minHeight: 200.0,
       ),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
               valueOrDefault<String>(
-                widget!.text,
+                widget.text,
                 'text',
               ),
               style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -86,7 +83,7 @@ class _OPERATIVELISTINGAgregarCaracteristicaWidgetState
                         FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                   ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.sizeOf(context).width * 1.0,
               child: TextFormField(
                 controller: _model.textController,
@@ -128,14 +125,14 @@ class _OPERATIVELISTINGAgregarCaracteristicaWidgetState
                             FlutterFlowTheme.of(context).labelMedium.fontStyle,
                       ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Color(0x00000000),
                       width: 1.0,
                     ),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Color(0x00000000),
                       width: 1.0,
                     ),

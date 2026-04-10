@@ -4,11 +4,9 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_bienvenida_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_bienvenida_model.dart';
 
@@ -58,17 +56,17 @@ class _DHASSOCIATEBienvenidaWidgetState
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             Column(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(0.0, -1.0),
+                  alignment: const AlignmentDirectional(0.0, -1.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     height: 305.0,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [Color(0xFF007376), Color(0xFF70ACAD)],
                         stops: [0.0, 1.0],
@@ -85,7 +83,7 @@ class _DHASSOCIATEBienvenidaWidgetState
                     ),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -142,12 +140,12 @@ class _DHASSOCIATEBienvenidaWidgetState
                                       ),
                                     ),
                                   ),
-                                ].divide(SizedBox(width: 8.0)),
+                                ].divide(const SizedBox(width: 8.0)),
                               ),
                             ],
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 21.0, 72.0, 21.0, 42.0),
                             child: Text(
                               'Bienvenido Dovia home associate',
@@ -178,7 +176,7 @@ class _DHASSOCIATEBienvenidaWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(35.0, 24.0, 35.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(35.0, 24.0, 35.0, 0.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -205,7 +203,7 @@ class _DHASSOCIATEBienvenidaWidgetState
                             ),
                       ),
                       Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             38.0, 35.0, 38.0, 0.0),
                         child: FFButtonWidget(
                           onPressed: () {
@@ -215,9 +213,9 @@ class _DHASSOCIATEBienvenidaWidgetState
                           options: FFButtonOptions(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: 40.0,
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 16.0, 0.0, 16.0, 0.0),
-                            iconPadding: EdgeInsetsDirectional.fromSTEB(
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 0.0),
                             color: FlutterFlowTheme.of(context).primary,
                             textStyle: FlutterFlowTheme.of(context)
@@ -256,23 +254,23 @@ class _DHASSOCIATEBienvenidaWidgetState
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(1.0, 0.0),
+                  alignment: const AlignmentDirectional(1.0, 0.0),
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
                     child: wrapWithModel(
                       model: _model.fixedDoviaIconModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: FixedDoviaIconWidget(),
+                      child: const FixedDoviaIconWidget(),
                     ),
                   ),
                 ),
                 Align(
-                  alignment: AlignmentDirectional(0.0, 1.0),
+                  alignment: const AlignmentDirectional(0.0, 1.0),
                   child: wrapWithModel(
                     model: _model.dHASSOCIATENavbarModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: DHASSOCIATENavbarWidget(),
+                    child: const DHASSOCIATENavbarWidget(),
                   ),
                 ),
               ],

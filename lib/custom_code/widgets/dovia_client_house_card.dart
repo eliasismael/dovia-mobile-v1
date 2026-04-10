@@ -13,7 +13,7 @@ class DoviaClientHouseCard extends StatefulWidget {
   final double? height;
   final String imageUrl;
   final String? name;
-  final String? type;
+  final dynamic type;
   final String? price;
   final double? landArea;
   final bool? isFavorite;
@@ -259,7 +259,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   ),
                 ),
                 Text(
-                  widget.type ?? "",
+                  _getDisplayType(widget.type),
                   style: GoogleFonts.publicSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -301,5 +301,44 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
         color: const Color(0xFF858585),
       ),
     );
+  }
+
+  String _getDisplayType(dynamic type) {
+    if (type == null) return '';
+    try {
+      List<String> items = [];
+      if (type is String) {
+        if (type.startsWith('[') && type.endsWith(']')) {
+          // It looks like a JSON-style string: ["SALE", "RENT"]
+          items = type
+              .replaceAll('[', '')
+              .replaceAll(']', '')
+              .replaceAll('"', '')
+              .replaceAll("'", '')
+              .split(',')
+              .map((e) => e.trim().toUpperCase())
+              .toList();
+        } else {
+          // Simple string: "SALE" or "SALE, RENT"
+          items = type.split(',').map((e) => e.trim().toUpperCase()).toList();
+        }
+      } else if (type is Iterable) {
+        items = type.map((e) => e.toString().trim().toUpperCase()).toList();
+      } else {
+        items = [type.toString().trim().toUpperCase()];
+      }
+
+      final hasSale = items.contains('SALE');
+      final hasRent = items.contains('RENT');
+
+      if (hasSale && hasRent) return 'Venta y Renta';
+      if (hasSale) return 'Venta';
+      if (hasRent) return 'Renta';
+
+      // Fallback for other types or untranslated strings
+      return items.join(', ');
+    } catch (_) {
+      return type.toString();
+    }
   }
 }

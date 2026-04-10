@@ -1,16 +1,15 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
+import '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_visita_1/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_visita1_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
-import 'dart:ui';
-import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_agendar_visita_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_agendar_visita_model.dart';
 
@@ -36,20 +35,162 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  static const List<String> _dayLabels = [
+    'Lun',
+    'Mar',
+    'Mié',
+    'Jue',
+    'Vie',
+    'Sáb',
+    'Dom',
+  ];
+
+  // Colors matching DOVIA Teal primary
+  static const Color _teal = Color(0xFF006B6B);
+
   @override
   void initState() {
     super.initState();
     _model = createModel(
         context, () => DOVIACLIENTMisPropiedadesAgendarVisitaModel());
-
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
+  }
+
+  String _formatTime(TimeOfDay? t) {
+    if (t == null) return '--:--';
+    final m = t.minute.toString().padLeft(2, '0');
+    final period = t.hour < 12 ? 'AM' : 'PM';
+    final h12 = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    return '${h12.toString().padLeft(2, '0')}:$m $period';
+  }
+
+  String _timeToApi(TimeOfDay t) {
+    final h = t.hour.toString().padLeft(2, '0');
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  Future<void> _pickTime({required bool isFrom}) async {
+    final initial = isFrom
+        ? (_model.timeFrom ?? const TimeOfDay(hour: 9, minute: 0))
+        : (_model.timeTo ?? const TimeOfDay(hour: 12, minute: 0));
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      initialEntryMode: TimePickerEntryMode.input,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+        child: child!,
+      ),
+    );
+
+    if (picked == null) return;
+
+    if (isFrom) {
+      _model.timeFrom = picked;
+    } else {
+      // Validate: "Hasta" must be after "Desde"
+      if (_model.timeFrom != null) {
+        final fromMinutes =
+            _model.timeFrom!.hour * 60 + _model.timeFrom!.minute;
+        final toMinutes = picked.hour * 60 + picked.minute;
+        if (toMinutes <= fromMinutes) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                    'La hora de finalización debe ser posterior a la de inicio'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+      }
+      _model.timeTo = picked;
+    }
+    safeSetState(() {});
+  }
+
+  Future<void> _onContinuar() async {
+    if (!_model.canContinue) return;
+
+    final List<String> dayNames = [
+      'MONDAY',
+      'TUESDAY',
+      'WEDNESDAY',
+      'THURSDAY',
+      'FRIDAY',
+      'SATURDAY',
+      'SUNDAY',
+    ];
+
+    final sortedDays = _model.selectedDays.toList()..sort();
+    final startTimeStr = _timeToApi(_model.timeFrom!);
+    final endTimeStr = _timeToApi(_model.timeTo!);
+
+    final ranges = sortedDays.map((dayIndex) => {
+          'dayOfWeek': dayNames[dayIndex],
+          'startTime': startTimeStr,
+          'endTime': endTimeStr,
+        }).toList();
+
+    _model.apiResCreateVisitRequest =
+        await DOVIAAPIVisitContextGroup.createOperativeListingVisitCall.call(
+      propertyId: widget.propertyId,
+      authToken: currentAuthenticationToken,
+      ranges: ranges,
+    );
+
+    if (!mounted) return;
+
+    if (_model.apiResCreateVisitRequest?.succeeded ?? false) {
+      final visitId = getJsonField(
+        _model.apiResCreateVisitRequest!.jsonBody,
+        r'$.id',
+      )?.toString();
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: PopupExitoWidget(
+            title: '¡Listo!',
+            text: 'Tu visita ha sido agendada con éxito.',
+            continueText: 'Ir a seguimiento',
+            onContinue: () {
+              Navigator.pop(context);
+              context.pushNamed(
+                DOVIACLIENTMisPropiedadesVisita1Widget.routeName,
+                queryParameters: {
+                  if (visitId != null && visitId.isNotEmpty) 'visitId': visitId,
+                },
+              );
+            },
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error al agendar la visita. Intenta de nuevo.',
+            style: FlutterFlowTheme.of(context)
+                .bodyMedium
+                .override(font: GoogleFonts.inter()),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
+    }
+    safeSetState(() {});
   }
 
   @override
@@ -69,7 +210,7 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -78,109 +219,311 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIASHAREDHeaderWidget(
-                        title: 'Agendar visita',
+                      child: const DOVIASHAREDHeaderWidget(
+                        title: 'Agenda tu visita',
+                        showMap: false,
+                        showCurrency: false,
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 0.0),
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: MediaQuery.sizeOf(context).height * 1.0,
-                              child: custom_widgets
-                                  .DoviaClientMisPropiedadesAgendarVisita(
-                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: MediaQuery.sizeOf(context).height * 1.0,
-                                onContinue: () async {
-                                  _model.apiResCreateVisitRequest =
-                                      await DOVIAAPIVisitContextGroup
-                                          .createVisitRequestCall
-                                          .call(
-                                    propertyId: widget!.propertyId,
-                                    authToken: currentAuthenticationToken,
-                                    dateOne: _model.dateOne,
-                                    hourOne: _model.hourOne,
-                                    dateTwo: _model.dateTwo,
-                                    hourTwo: _model.hourTwo,
-                                    dateThree: _model.dateThree,
-                                    hourThree: _model.hourThee,
-                                  );
+                          // Explanatory text
+                          Text(
+                            'Selecciona una fecha para preparar el material comercial de tu propiedad. Nuestro asociado llegará en la fecha y hora que elijas.',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  letterSpacing: 0.0,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  lineHeight: 1.5,
+                                ),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Text(
+                            'Este contenido nos permite presentar tu propiedad con la mejor calidad posible y atraer compradores reales.',
+                            style: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                  letterSpacing: 0.0,
+                                  lineHeight: 1.5,
+                                ),
+                          ),
 
-                                  if ((_model.apiResCreateVisitRequest
-                                          ?.succeeded ??
-                                      true)) {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          title: Text('ok'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child: Text('Ok'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  } else {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          title: Text('err'),
-                                          content: Text((_model
-                                                      .apiResCreateVisitRequest
-                                                      ?.jsonBody ??
-                                                  '')
-                                              .toString()),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child: Text('Ok'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  }
+                          const SizedBox(height: 20.0),
 
-                                  safeSetState(() {});
-                                },
-                                onDateOne: (dateOne) async {
-                                  _model.dateOne = dateOne;
-                                  safeSetState(() {});
-                                },
-                                onHourOne: (hourOne) async {
-                                  _model.hourOne = hourOne;
-                                  safeSetState(() {});
-                                },
-                                onDateTwo: (dateTwo) async {
-                                  _model.dateTwo = dateTwo;
-                                  safeSetState(() {});
-                                },
-                                onHourTwo: (hourTwo) async {
-                                  _model.hourTwo = hourTwo;
-                                  safeSetState(() {});
-                                },
-                                onDateThree: (dateThree) async {
-                                  _model.dateThree = dateThree;
-                                  safeSetState(() {});
-                                },
-                                onHourThree: (hourThree) async {
-                                  _model.hourThee = hourThree;
-                                  safeSetState(() {});
-                                },
+                          // 5 bullet points
+                          _BulletPoint(
+                              icon: Icons.camera_alt_outlined,
+                              text: 'Fotos profesionales'),
+                          const SizedBox(height: 10.0),
+                          _BulletPoint(
+                              icon: Icons.vrpano_outlined,
+                              text: 'Recorrido virtual'),
+                          const SizedBox(height: 10.0),
+                          _BulletPoint(
+                              icon: Icons.architecture_outlined, text: 'Plano'),
+                          const SizedBox(height: 10.0),
+                          _BulletPoint(
+                              icon: Icons.location_on_outlined,
+                              text:
+                                  'Descripción de tu propiedad y del entorno'),
+                          const SizedBox(height: 10.0),
+                          _BulletPoint(
+                              icon: Icons.star_outline,
+                              text: 'Elaboración de gancho de venta'),
+
+                          const SizedBox(height: 28.0),
+
+                          // Day selector label
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Selecciona el día ',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w500),
+                                        letterSpacing: 0.0,
+                                      ),
+                                ),
+                                const TextSpan(
+                                  text: '*',
+                                  style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10.0),
+
+                          // Day chips row
+                          Wrap(
+                            spacing: 8.0,
+                            runSpacing: 8.0,
+                            children: List.generate(7, (index) {
+                              final isSelected =
+                                  _model.selectedDays.contains(index);
+                              final isSunday = index == 6;
+                              return GestureDetector(
+                                onTap: isSunday
+                                    ? null
+                                    : () {
+                                        safeSetState(() {
+                                          if (isSelected) {
+                                            _model.selectedDays.remove(index);
+                                          } else {
+                                            _model.selectedDays.add(index);
+                                          }
+                                        });
+                                      },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14.0, vertical: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? _teal.withOpacity(0.1)
+                                        : isSunday
+                                            ? FlutterFlowTheme.of(context)
+                                                .alternate
+                                            : FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? _teal
+                                          : isSunday
+                                              ? FlutterFlowTheme.of(context)
+                                                  .secondaryText
+                                                  .withOpacity(0.3)
+                                              : FlutterFlowTheme.of(context)
+                                                  .secondaryText
+                                                  .withAlpha(128),
+                                      width: isSelected ? 2.0 : 1.0,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  child: Text(
+                                    _dayLabels[index],
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodySmall
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                          ),
+                                          color: isSelected
+                                              ? _teal
+                                              : isSunday
+                                                  ? FlutterFlowTheme.of(context)
+                                                      .secondaryText
+                                                      .withOpacity(0.4)
+                                                  : FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                          letterSpacing: 0.0,
+                                        ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+
+                          const SizedBox(height: 24.0),
+
+                          // Time range label
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Horario disponible ',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w500),
+                                        letterSpacing: 0.0,
+                                      ),
+                                ),
+                                const TextSpan(
+                                  text: '*',
+                                  style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10.0),
+
+                          // Time pickers row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _TimePickerField(
+                                  label: 'Desde',
+                                  value: _formatTime(_model.timeFrom),
+                                  hasValue: _model.timeFrom != null,
+                                  onTap: () => _pickTime(isFrom: true),
+                                ),
                               ),
+                              const SizedBox(width: 12.0),
+                              Expanded(
+                                child: _TimePickerField(
+                                  label: 'Hasta',
+                                  value: _formatTime(_model.timeTo),
+                                  hasValue: _model.timeTo != null,
+                                  onTap: () => _pickTime(isFrom: false),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // Time validation error (only when times are set but range is invalid)
+                          if (_model.timeFrom != null &&
+                              _model.timeTo != null &&
+                              (_model.timeTo!.hour * 60 + _model.timeTo!.minute) <=
+                                  (_model.timeFrom!.hour * 60 +
+                                      _model.timeFrom!.minute))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6.0),
+                              child: Text(
+                                'La hora de finalización debe ser posterior a la de inicio',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .override(
+                                      font: GoogleFonts.inter(),
+                                      color: FlutterFlowTheme.of(context).error,
+                                      letterSpacing: 0.0,
+                                    ),
+                              ),
+                            ),
+
+                          const SizedBox(height: 28.0),
+
+                          // Trust info box
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: FlutterFlowTheme.of(context).alternate,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Te enviaremos los datos del asociado',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600),
+                                        letterSpacing: 0.0,
+                                      ),
+                                ),
+                                const SizedBox(height: 6.0),
+                                Text(
+                                  'Antes de la visita recibirás su nombre, fotografía y número de contacto. Además, junto con esta información te compartiremos el acuerdo de autorización de comercialización.',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w400),
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                        letterSpacing: 0.0,
+                                        lineHeight: 1.5,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 32.0),
+
+                          // Continue button
+                          FFButtonWidget(
+                            onPressed: _model.canContinue ? _onContinuar : null,
+                            text: 'Continuar',
+                            options: FFButtonOptions(
+                              width: double.infinity,
+                              height: 50.0,
+                              color: _model.canContinue
+                                  ? FlutterFlowTheme.of(context).primary
+                                  : FlutterFlowTheme.of(context).alternate,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600),
+                                    color: _model.canContinue
+                                        ? Colors.white
+                                        : FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
+                              elevation: 0.0,
+                              borderRadius: BorderRadius.circular(10.0),
                             ),
                           ),
                         ],
@@ -190,21 +533,116 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    wrapWithModel(
-                      model: _model.dOVIACLIENTNavbarModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
-                    ),
-                  ],
+                alignment: const AlignmentDirectional(0.0, 1.0),
+                child: wrapWithModel(
+                  model: _model.dOVIACLIENTNavbarModel,
+                  updateCallback: () => safeSetState(() {}),
+                  child: const DOVIACLIENTNavbarWidget(),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// Bullet point helper widget
+class _BulletPoint extends StatelessWidget {
+  const _BulletPoint({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20.0, color: FlutterFlowTheme.of(context).primary),
+        const SizedBox(width: 10.0),
+        Expanded(
+          child: Text(
+            text,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.inter(fontWeight: FontWeight.w400),
+                  letterSpacing: 0.0,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Time picker field helper widget
+class _TimePickerField extends StatelessWidget {
+  const _TimePickerField({
+    required this.label,
+    required this.value,
+    required this.hasValue,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final bool hasValue;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          border: Border.all(
+            color: hasValue
+                ? FlutterFlowTheme.of(context).primary
+                : FlutterFlowTheme.of(context).alternate,
+            width: hasValue ? 1.5 : 1.0,
+          ),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.access_time,
+              size: 18.0,
+              color: hasValue
+                  ? FlutterFlowTheme.of(context).primary
+                  : FlutterFlowTheme.of(context).secondaryText,
+            ),
+            const SizedBox(width: 8.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        font: GoogleFonts.inter(fontWeight: FontWeight.w400),
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 11.0,
+                        letterSpacing: 0.0,
+                      ),
+                ),
+                Text(
+                  value,
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.inter(
+                            fontWeight:
+                                hasValue ? FontWeight.w600 : FontWeight.w400),
+                        color: hasValue
+                            ? FlutterFlowTheme.of(context).primaryText
+                            : FlutterFlowTheme.of(context).secondaryText,
+                        letterSpacing: 0.0,
+                      ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

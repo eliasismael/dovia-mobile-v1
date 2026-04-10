@@ -1,10 +1,6 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'background_gradient_green_model.dart';
 export 'background_gradient_green_model.dart';
 
@@ -46,7 +42,7 @@ class _BackgroundGradientGreenWidgetState
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
       height: MediaQuery.sizeOf(context).height * 1.0,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF007376), Color(0xFF70ACAD)],
           stops: [0.0, 1.0],
@@ -55,7 +51,7 @@ class _BackgroundGradientGreenWidgetState
         ),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(141.0, 354.0, 141.0, 354.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(141.0, 354.0, 141.0, 354.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(0.0),
           child: SvgPicture.asset(

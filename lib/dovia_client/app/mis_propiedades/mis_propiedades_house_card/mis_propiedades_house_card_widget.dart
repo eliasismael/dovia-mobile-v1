@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'mis_propiedades_house_card_model.dart';
 export 'mis_propiedades_house_card_model.dart';
 
@@ -53,7 +50,7 @@ class _MisPropiedadesHouseCardWidgetState
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -61,9 +58,9 @@ class _MisPropiedadesHouseCardWidgetState
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
                   child: Container(
-                    decoration: BoxDecoration(),
+                    decoration: const BoxDecoration(),
                     child: Stack(
                       children: [
                         ClipRRect(
@@ -76,7 +73,7 @@ class _MisPropiedadesHouseCardWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               2.0, 2.0, 0.0, 0.0),
                           child: Container(
                             width: 20.0,
@@ -156,10 +153,10 @@ class _MisPropiedadesHouseCardWidgetState
                     ],
                   ),
                   Align(
-                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                       child: Text(
                         'Rp. 2.500.000.000 / Year',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -183,12 +180,12 @@ class _MisPropiedadesHouseCardWidgetState
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 10.0, 0.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(0.0),
@@ -201,7 +198,7 @@ class _MisPropiedadesHouseCardWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 20.0, 0.0),
                           child: Text(
                             'M2',
@@ -229,7 +226,7 @@ class _MisPropiedadesHouseCardWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 10.0, 0.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(0.0),
@@ -269,10 +266,10 @@ class _MisPropiedadesHouseCardWidgetState
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
                       child: Wrap(
                         spacing: 0.0,
                         runSpacing: 0.0,
@@ -287,7 +284,7 @@ class _MisPropiedadesHouseCardWidgetState
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 10.0, 0.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(0.0),
@@ -300,7 +297,7 @@ class _MisPropiedadesHouseCardWidgetState
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 20.0, 0.0),
                                 child: Text(
                                   'Habitaciones',
@@ -335,7 +332,7 @@ class _MisPropiedadesHouseCardWidgetState
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 10.0, 0.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(0.0),
@@ -412,7 +409,7 @@ class _MisPropiedadesHouseCardWidgetState
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: Color(0xFFF99032),
+                              color: const Color(0xFFF99032),
                               letterSpacing: 0.0,
                               fontWeight: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -426,7 +423,7 @@ class _MisPropiedadesHouseCardWidgetState
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                     child: LinearPercentIndicator(
                       percent: 0.33,
                       lineHeight: 12.0,
@@ -434,7 +431,7 @@ class _MisPropiedadesHouseCardWidgetState
                       animateFromLastPercent: true,
                       progressColor: FlutterFlowTheme.of(context).primaryText,
                       backgroundColor: FlutterFlowTheme.of(context).primary,
-                      barRadius: Radius.circular(25.0),
+                      barRadius: const Radius.circular(25.0),
                       padding: EdgeInsets.zero,
                     ),
                   ),

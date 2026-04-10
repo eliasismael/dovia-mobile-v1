@@ -1,16 +1,10 @@
-import '/flutter_flow/flutter_flow_drop_down.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
-import 'dart:ui';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_oferta_compra_tu_propuesta_widget.dart'
     show DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class DOVIACLIENTMisVisitasOfertaCompraTuPropuestaModel
     extends FlutterFlowModel<

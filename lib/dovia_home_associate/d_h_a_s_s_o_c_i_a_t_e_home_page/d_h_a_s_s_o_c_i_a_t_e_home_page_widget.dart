@@ -4,13 +4,10 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_home_page_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_home_page_model.dart';
 
@@ -60,21 +57,21 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
             wrapWithModel(
               model: _model.cornerGradientBackgroundModel,
               updateCallback: () => safeSetState(() {}),
-              child: CornerGradientBackgroundWidget(),
+              child: const CornerGradientBackgroundWidget(),
             ),
             Column(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -105,7 +102,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 fit: BoxFit.cover,
                               ),
                             ),
-                          ].divide(SizedBox(width: 8.0)),
+                          ].divide(const SizedBox(width: 8.0)),
                         ),
                       ),
                       RichText(
@@ -191,17 +188,17 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                               ),
                             ),
                           ),
-                        ].divide(SizedBox(width: 8.0)),
+                        ].divide(const SizedBox(width: 8.0)),
                       ),
                     ],
                   ),
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
-                    decoration: BoxDecoration(),
+                    decoration: const BoxDecoration(),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -237,11 +234,11 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                               text: 'Ver más',
                               options: FFButtonOptions(
                                 height: 30.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     24.0, 6.0, 24.0, 6.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 0.0),
-                                color: Color(0xFFCCE3E4),
+                                color: const Color(0xFFCCE3E4),
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
                                     .override(
@@ -267,7 +264,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                           ],
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 14.0, 0.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -277,7 +274,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 width: 100.0,
                                 height: 100.0,
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFF7F7F7),
+                                  color: const Color(0xFFF7F7F7),
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                                 child: Column(
@@ -289,7 +286,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                       width: 40.0,
                                       height: 40.0,
                                       decoration: BoxDecoration(
-                                        color: Color(0xFF70ACAD),
+                                        color: const Color(0xFF70ACAD),
                                         borderRadius:
                                             BorderRadius.circular(10.0),
                                       ),
@@ -331,7 +328,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 width: 100.0,
                                 height: 100.0,
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFF7F7F7),
+                                  color: const Color(0xFFF7F7F7),
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                                 child: Column(
@@ -343,7 +340,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                       width: 40.0,
                                       height: 40.0,
                                       decoration: BoxDecoration(
-                                        color: Color(0xFF70ACAD),
+                                        color: const Color(0xFF70ACAD),
                                         borderRadius:
                                             BorderRadius.circular(10.0),
                                       ),
@@ -385,7 +382,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 width: 100.0,
                                 height: 100.0,
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFF7F7F7),
+                                  color: const Color(0xFFF7F7F7),
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                                 child: Column(
@@ -397,7 +394,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                       width: 40.0,
                                       height: 40.0,
                                       decoration: BoxDecoration(
-                                        color: Color(0xFF70ACAD),
+                                        color: const Color(0xFF70ACAD),
                                         borderRadius:
                                             BorderRadius.circular(10.0),
                                       ),
@@ -444,7 +441,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(20.0, 46.0, 20.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(20.0, 46.0, 20.0, 0.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     decoration: BoxDecoration(
@@ -452,7 +449,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                     ),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 1.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 1.0, 0.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -487,11 +484,11 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 text: 'Ver más',
                                 options: FFButtonOptions(
                                   height: 30.0,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       24.0, 6.0, 24.0, 6.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                  iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 0.0, 0.0, 0.0),
-                                  color: Color(0xFFCCE3E4),
+                                  color: const Color(0xFFCCE3E4),
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .override(
@@ -518,16 +515,16 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                             ],
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 14.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF3F3EF),
+                                color: const Color(0xFFF3F3EF),
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 10.0, 10.0, 10.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -661,12 +658,12 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                                         .fontStyle,
                                               ),
                                         ),
-                                      ].divide(SizedBox(height: 4.0)),
+                                      ].divide(const SizedBox(height: 4.0)),
                                     ),
                                     Container(
                                       width: 40.0,
                                       height: 40.0,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: Color(0xFFCCE3E4),
                                         shape: BoxShape.circle,
                                       ),
@@ -698,23 +695,23 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(1.0, 0.0),
+                  alignment: const AlignmentDirectional(1.0, 0.0),
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
                     child: wrapWithModel(
                       model: _model.fixedDoviaIconModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: FixedDoviaIconWidget(),
+                      child: const FixedDoviaIconWidget(),
                     ),
                   ),
                 ),
                 Align(
-                  alignment: AlignmentDirectional(0.0, 1.0),
+                  alignment: const AlignmentDirectional(0.0, 1.0),
                   child: wrapWithModel(
                     model: _model.dHASSOCIATENavbarModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: DHASSOCIATENavbarWidget(),
+                    child: const DHASSOCIATENavbarWidget(),
                   ),
                 ),
               ],

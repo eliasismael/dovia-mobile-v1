@@ -3,13 +3,9 @@ import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_notification_card/d_h_a_s_s_o_c_i_a_t_e_notification_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_notificaciones_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_notificaciones_model.dart';
 
@@ -62,7 +58,7 @@ class _DHASSOCIATENotificacionesWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -71,16 +67,16 @@ class _DHASSOCIATENotificacionesWidgetState
                     wrapWithModel(
                       model: _model.dHASSOCIATEHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DHASSOCIATEHeaderWidget(
+                      child: const DHASSOCIATEHeaderWidget(
                         tittleText: 'Notificaciones',
                       ),
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(20.0, 35.0, 20.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(20.0, 35.0, 20.0, 0.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -92,7 +88,7 @@ class _DHASSOCIATENotificacionesWidgetState
                                 borderRadius: BorderRadius.circular(15.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 0.0, 10.0, 0.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
@@ -104,33 +100,33 @@ class _DHASSOCIATENotificacionesWidgetState
                                           .dHASSOCIATENotificationCardModel1,
                                       updateCallback: () => safeSetState(() {}),
                                       child:
-                                          DHASSOCIATENotificationCardWidget(),
+                                          const DHASSOCIATENotificationCardWidget(),
                                     ),
                                     wrapWithModel(
                                       model: _model
                                           .dHASSOCIATENotificationCardModel2,
                                       updateCallback: () => safeSetState(() {}),
                                       child:
-                                          DHASSOCIATENotificationCardWidget(),
+                                          const DHASSOCIATENotificationCardWidget(),
                                     ),
                                     wrapWithModel(
                                       model: _model
                                           .dHASSOCIATENotificationCardModel3,
                                       updateCallback: () => safeSetState(() {}),
                                       child:
-                                          DHASSOCIATENotificationCardWidget(),
+                                          const DHASSOCIATENotificationCardWidget(),
                                     ),
                                     wrapWithModel(
                                       model: _model
                                           .dHASSOCIATENotificationCardModel4,
                                       updateCallback: () => safeSetState(() {}),
                                       child:
-                                          DHASSOCIATENotificationCardWidget(),
+                                          const DHASSOCIATENotificationCardWidget(),
                                     ),
                                   ]
-                                      .divide(SizedBox(height: 10.0))
-                                      .addToStart(SizedBox(height: 10.0))
-                                      .addToEnd(SizedBox(height: 10.0)),
+                                      .divide(const SizedBox(height: 10.0))
+                                      .addToStart(const SizedBox(height: 10.0))
+                                      .addToEnd(const SizedBox(height: 10.0)),
                                 ),
                               ),
                             ),
@@ -142,29 +138,29 @@ class _DHASSOCIATENotificacionesWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(1.0, 0.0),
+                      alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: FixedDoviaIconWidget(),
+                          child: const FixedDoviaIconWidget(),
                         ),
                       ),
                     ),
                     Align(
-                      alignment: AlignmentDirectional(0.0, 1.0),
+                      alignment: const AlignmentDirectional(0.0, 1.0),
                       child: wrapWithModel(
                         model: _model.dHASSOCIATENavbarModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: DHASSOCIATENavbarWidget(),
+                        child: const DHASSOCIATENavbarWidget(),
                       ),
                     ),
                   ],
