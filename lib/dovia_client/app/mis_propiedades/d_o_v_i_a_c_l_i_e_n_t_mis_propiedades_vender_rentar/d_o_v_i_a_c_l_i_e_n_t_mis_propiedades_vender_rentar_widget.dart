@@ -177,8 +177,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             child: Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
-                              child: Text(
-                                'Describe de manera natural tu propiedad y el complejo',
+                              child: Text.rich(
+  TextSpan(
+    text: 'Describe de manera natural tu propiedad y el complejo ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -341,8 +344,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         Align(
                                           alignment:
                                               AlignmentDirectional(-1.0, 0.0),
-                                          child: Text(
-                                            'Precio de venta',
+                                          child: Text.rich(
+  TextSpan(
+    text: 'Precio de venta ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -390,6 +396,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     _model.precioVentaFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -531,10 +538,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -605,6 +609,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .cantidadARecibirFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -746,10 +751,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -820,6 +822,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .mantenimientoFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -961,10 +964,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -1035,6 +1035,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .impustoUnicoInmueblesFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1175,10 +1176,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -1225,8 +1223,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         Align(
                                           alignment:
                                               AlignmentDirectional(-1.0, 0.0),
-                                          child: Text(
-                                            'Precio de renta mensual (incluyendo IVA y mantenimiento)',
+                                          child: Text.rich(
+  TextSpan(
+    text: 'Precio de renta mensual (incluyendo IVA y mantenimiento) ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1274,6 +1275,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .precioRentaMensualFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1415,10 +1417,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -1801,6 +1800,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .tiempoMinimoFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1942,10 +1942,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -2130,6 +2127,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     _model.rentaOtrosFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -2471,8 +2469,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             child: Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   0.0, 10.0, 0.0, 0.0),
-                              child: Text(
-                                'Dirección de la propiedad',
+                              child: Text.rich(
+  TextSpan(
+    text: 'Dirección de la propiedad ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -3215,8 +3216,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             child: Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
-                              child: Text(
-                                'Nombre del propietario o sociedad',
+                              child: Text.rich(
+  TextSpan(
+    text: 'Nombre del propietario o sociedad ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -3740,6 +3744,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                           );
                                         },
                                       );
+                                          if (_shouldSetState) safeSetState(() {});
+                                          return;
                                     }
                                   } else {
                                     if (widget!.transactionType ==
@@ -3773,7 +3779,18 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .usoNoPermitidoTextController.text,
                                         availableFrom: _model
                                             .disponibleDesdeTextController.text,
-                                        isCompanyOwned: false,
+                                        isCompanyOwned: _model
+                                                    .nombreRepresentanteLegalTextController
+                                                    .text !=
+                                                null &&
+                                            _model.nombreRepresentanteLegalTextController
+                                                    .text !=
+                                                '',
+                                        companyName: _model
+                                            .nombrePropietarioTextController.text,
+                                        legalRepresentative: _model
+                                            .nombreRepresentanteLegalTextController
+                                            .text,
                                       );
 
                                       _shouldSetState = true;
@@ -3825,6 +3842,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             );
                                           },
                                         );
+                                          if (_shouldSetState) safeSetState(() {});
+                                          return;
                                       }
                                     } else {
                                       if (widget!.transactionType ==
@@ -3939,6 +3958,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               );
                                             },
                                           );
+                                          if (_shouldSetState) safeSetState(() {});
+                                          return;
                                         }
                                       } else {
                                         if (_shouldSetState)
