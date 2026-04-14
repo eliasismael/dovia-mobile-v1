@@ -140,7 +140,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
+                      child: DOVIASHAREDHeaderWidget(showMap: false, showCurrency: false,
                         title: 'Acuerdo',
                       ),
                     ),

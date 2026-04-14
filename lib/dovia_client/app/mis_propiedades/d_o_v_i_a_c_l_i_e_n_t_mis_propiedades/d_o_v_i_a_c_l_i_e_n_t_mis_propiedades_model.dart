@@ -31,6 +31,9 @@ class DOVIACLIENTMisPropiedadesModel
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DOVIA_CLIENT_Navbar component.
   late DOVIACLIENTNavbarModel dOVIACLIENTNavbarModel;
+  
+  FocusNode? searchFocusNode;
+  TextEditingController? searchController;
 
   @override
   void initState(BuildContext context) {
@@ -55,5 +58,7 @@ class DOVIACLIENTMisPropiedadesModel
     misPropiedadesHouseCardModel.dispose();
     fixedDoviaIconModel.dispose();
     dOVIACLIENTNavbarModel.dispose();
+    searchFocusNode?.dispose();
+    searchController?.dispose();
   }
 }

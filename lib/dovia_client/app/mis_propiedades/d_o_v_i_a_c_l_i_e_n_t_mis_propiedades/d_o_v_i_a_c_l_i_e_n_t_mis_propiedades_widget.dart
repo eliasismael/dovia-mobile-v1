@@ -1,5 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
+import '/backend/schema/enums/enums.dart';
 import '/dovia_client/app/mis_favoritos/favorite_houses_card/favorite_houses_card_widget.dart';
 import '/dovia_client/app/mis_propiedades/mis_propiedades_house_card/mis_propiedades_house_card_widget.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
@@ -35,6 +36,27 @@ class _DOVIACLIENTMisPropiedadesWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Future<ApiCallResponse> _fetchAllPending() async {
+    final draftResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+        .call(status: 'DRAFT', authToken: currentAuthenticationToken);
+    final inProcessResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+        .call(status: 'IN_PROCESS', authToken: currentAuthenticationToken);
+    final pendingReviewResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+        .call(status: 'PENDING_REVIEW', authToken: currentAuthenticationToken);
+    
+    final drafts = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(draftResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+    final inProcess = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(inProcessResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+    final pendingReview = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pendingReviewResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+    
+    final combined = [...drafts, ...inProcess, ...pendingReview];
+
+    return ApiCallResponse(
+      {"data": combined},
+      {},
+      200,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -44,13 +66,16 @@ class _DOVIACLIENTMisPropiedadesWidgetState
 
     // Empty state check: if user has no properties at all, redirect to ComoFunciona
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final result = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
-          .call(authToken: currentAuthenticationToken);
+      final pubResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+          .call(status: 'PUBLISHED', authToken: currentAuthenticationToken);
+      final pendingResponse = await _fetchAllPending();
+      
       if (!mounted) return;
-      final properties = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(
-        result.jsonBody,
-      );
-      if ((properties == null || properties.isEmpty) && result.succeeded) {
+
+      final pubProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pubResult.jsonBody) ?? [];
+      final pendProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pendingResponse.jsonBody) ?? [];
+
+      if (pubProps.isEmpty && pendProps.isEmpty && pubResult.succeeded && pendingResponse.succeeded) {
         context.goNamed(DOVIACLIENTComoFuncionaWidget.routeName);
       }
     });
@@ -91,6 +116,35 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Mis Propiedades',
+                        showMap: false,
+                        showCurrency: false,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 0.0),
+                      child: TextFormField(
+                        controller: _model.searchController,
+                        focusNode: _model.searchFocusNode,
+                        decoration: InputDecoration(
+                          hintText: 'Búsqueda con IA...',
+                          hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                                font: GoogleFonts.inter(),
+                                color: FlutterFlowTheme.of(context).secondaryText,
+                              ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: FlutterFlowTheme.of(context).secondaryText,
+                            size: 24.0,
+                          ),
+                          filled: true,
+                          fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: FlutterFlowTheme.of(context).bodyMedium,
+                        onChanged: (_) => safeSetState(() {}),
                       ),
                     ),
                     Padding(
@@ -137,9 +191,9 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                               FFButtonWidget(
                                 onPressed: () async {
                                   context.pushNamed(
-                                      DOVIACLIENTComoFuncionaWidget.routeName);
+                                      DOVIACLIENTMisPropiedadesAccionesARealizarWidget.routeName);
                                 },
-                                text: 'Publicar más',
+                                text: '+ Publicar más',
                                 options: FFButtonOptions(
                                   height: 40.0,
                                   padding: const EdgeInsetsDirectional.fromSTEB(
@@ -208,39 +262,48 @@ class _DOVIACLIENTMisPropiedadesWidgetState
 
                                 return Builder(
                                   builder: (context) {
-                                    final eachOwnProperty =
-                                        DOVIAAPIPropertyContextGroup
-                                                .getMyPropertiesCall
-                                                .data(
-                                                  listViewGetMyPropertiesResponse
-                                                      .jsonBody,
-                                                )
-                                                ?.toList() ??
-                                            [];
+                                    final eachOwnProperty = DOVIAAPIPropertyContextGroup
+                                            .getMyPropertiesCall
+                                            .data(listViewGetMyPropertiesResponse.jsonBody)
+                                            ?.toList() ?? [];
+                                    
+                                    final searchQuery = _model.searchController?.text.toLowerCase() ?? '';
+                                    final filteredPublished = eachOwnProperty.where((item) {
+                                      if (searchQuery.isEmpty) return true;
+                                      final itemName = getJsonField(item, r'''$.name''')?.toString().toLowerCase() ?? '';
+                                      return itemName.contains(searchQuery);
+                                    }).toList();
 
                                     return ListView.builder(
                                       padding: EdgeInsets.zero,
                                       shrinkWrap: true,
                                       scrollDirection: Axis.vertical,
-                                      itemCount: eachOwnProperty.length,
+                                      itemCount: filteredPublished.length,
                                       itemBuilder:
                                           (context, eachOwnPropertyIndex) {
                                         final eachOwnPropertyItem =
-                                            eachOwnProperty[
+                                            filteredPublished[
                                                 eachOwnPropertyIndex];
                                         return SizedBox(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
                                           height: 250.0,
-                                          child: custom_widgets
-                                              .DoviaClientHouseCard(
-                                            width: MediaQuery.sizeOf(context)
-                                                    .width *
-                                                1.0,
-                                            height: 250.0,
-                                            imageUrl:
-                                                'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              context.pushNamed(
+                                                'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada',
+                                                pathParameters: {'propertyId': getJsonField(eachOwnPropertyItem, r'''$.id''').toString()},
+                                              );
+                                            },
+                                            child: custom_widgets
+                                                .DoviaClientHouseCard(
+                                              width: MediaQuery.sizeOf(context)
+                                                      .width *
+                                                  1.0,
+                                              height: 250.0,
+                                              imageUrl:
+                                                  'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
                                             isFavorite: getJsonField(
                                               eachOwnPropertyItem,
                                               r'''$.isFavorite''',
@@ -405,6 +468,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                   safeSetState(() {}));
                                               safeSetState(() {});
                                             },
+                                            ),
                                           ),
                                         );
                                       },
@@ -497,18 +561,84 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.favoriteHousesCardModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FavoriteHousesCardWidget(
-                                onHertTap: () async {},
-                              ),
+                            child: FutureBuilder<ApiCallResponse>(
+                              future: _fetchAllPending(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        FlutterFlowTheme.of(context).primary,
+                                      ),
+                                    ),
+                                  );
+                                }
+                                final res = snapshot.data!;
+                                final allProperties = res.jsonBody['data'] as List<dynamic>? ?? [];
+                                
+                                final searchQuery2 = _model.searchController?.text.toLowerCase() ?? '';
+                                final filteredPending = allProperties.where((p) {
+                                  final isPendingStatus = (getJsonField(p, r'''$.status''') as String?) != 'PUBLISHED';
+                                  if (!isPendingStatus) return false;
+                                  if (searchQuery2.isEmpty) return true;
+                                  final name = getJsonField(p, r'''$.name''')?.toString().toLowerCase() ?? '';
+                                  return name.contains(searchQuery2);
+                                }).toList();
+
+                                return ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: filteredPending.length,
+                                  itemBuilder: (context, idx) {
+                                    final p = filteredPending[idx];
+                                    final status = getJsonField(p, r'''$.status''') as String? ?? '';
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 12.0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          final visitIdFromApi = getJsonField(p, r'''$.operativeListerVisit.visitId''')?.toString();
+                                          final hasVisit = visitIdFromApi != null || getJsonField(p, r'''$.lastVisitId''') != null;
+                                          final finalVisitId = visitIdFromApi ?? getJsonField(p, r'''$.lastVisitId''')?.toString() ?? '';
+
+                                          if (status == 'IN_PROCESS' || status == 'PENDING_REVIEW' || (status == 'DRAFT' && hasVisit)) {
+                                            context.pushNamed(
+                                              'DOVIA_CLIENT_MisPropiedades_Visita_1',
+                                              queryParameters: {
+                                                'visitId': serializeParam(finalVisitId, ParamType.String),
+                                              },
+                                            );
+                                          } else if (status == 'DRAFT') {
+                                            final listingTypeField = getJsonField(p, r'''$.listingType''');
+                                            final listingTypeStr = listingTypeField?.toString() ?? '';
+                                            PropertyPublicationType parsedType = PropertyPublicationType.SALE;
+                                            String title = 'Vender';
+                                            if (listingTypeStr.contains('SALE') && listingTypeStr.contains('RENT')) {
+                                              parsedType = PropertyPublicationType.SALE_AND_RENT;
+                                              title = 'Vender / Rentar';
+                                            } else if (listingTypeStr.contains('RENT')) {
+                                              parsedType = PropertyPublicationType.RENT;
+                                              title = 'Rentar';
+                                            }
+
+                                            context.pushNamed(
+                                              'DOVIA_CLIENT_MisPropiedades_VenderRentar',
+                                              queryParameters: {
+                                                'title': serializeParam(title, ParamType.String),
+                                                'transactionType': serializeParam(parsedType, ParamType.Enum),
+                                              },
+                                            );
+                                          }
+                                        },
+                                        child: MisPropiedadesHouseCardWidget(
+                                          property: p,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                             ),
-                          ),
-                          wrapWithModel(
-                            model: _model.misPropiedadesHouseCardModel,
-                            updateCallback: () => safeSetState(() {}),
-                            child: const MisPropiedadesHouseCardWidget(),
                           ),
                         ],
                       ),

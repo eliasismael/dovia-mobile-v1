@@ -9,7 +9,8 @@ export 'mis_propiedades_house_card_model.dart';
 
 /// Same as fav house card but wiith status
 class MisPropiedadesHouseCardWidget extends StatefulWidget {
-  const MisPropiedadesHouseCardWidget({super.key});
+  const MisPropiedadesHouseCardWidget({super.key, this.property});
+  final dynamic property;
 
   @override
   State<MisPropiedadesHouseCardWidget> createState() =>
@@ -43,6 +44,27 @@ class _MisPropiedadesHouseCardWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final statusKey = getJsonField(widget.property, r'''$.status''') as String? ?? 'DRAFT';
+    final name = getJsonField(widget.property, r'''$.name''') as String? ?? 'Propiedad sin nombre';
+    final typeName = getJsonField(widget.property, r'''$.propertyType.name''') as String? ?? 'Casa';
+    final propPrice = getJsonField(widget.property, r'''$.offerOptions[0].price''')?.toString() ?? '0';
+    final currency = getJsonField(widget.property, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD';
+
+    final hasVisit = getJsonField(widget.property, r'''$.operativeListerVisit.visitId''') != null || getJsonField(widget.property, r'''$.lastVisitId''') != null;
+
+    String statusText = 'Pendiente';
+    double percent = 0.25;
+    if (statusKey == 'PENDING_REVIEW') {
+      statusText = 'En revisión';
+      percent = 0.75;
+    } else if (statusKey == 'IN_PROCESS' || (statusKey == 'DRAFT' && hasVisit)) {
+      statusText = 'En proceso';
+      percent = 0.5;
+    } else if (statusKey == 'DRAFT') {
+      statusText = 'Borrador';
+      percent = 0.25;
+    }
+
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
       decoration: BoxDecoration(
@@ -111,7 +133,7 @@ class _MisPropiedadesHouseCardWidgetState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Orchard House',
+                        name,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -131,7 +153,7 @@ class _MisPropiedadesHouseCardWidgetState
                             ),
                       ),
                       Text(
-                        'Tipo',
+                        typeName,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -158,7 +180,7 @@ class _MisPropiedadesHouseCardWidgetState
                       padding:
                           const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                       child: Text(
-                        'Rp. 2.500.000.000 / Year',
+                        '$currency ${NumberFormat.decimalPattern().format(int.tryParse(propPrice) ?? 0)}',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -399,7 +421,7 @@ class _MisPropiedadesHouseCardWidgetState
                             ),
                       ),
                       Text(
-                        'Pendiente',
+                        statusText,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -425,12 +447,12 @@ class _MisPropiedadesHouseCardWidgetState
                     padding:
                         const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                     child: LinearPercentIndicator(
-                      percent: 0.33,
+                      percent: percent,
                       lineHeight: 12.0,
                       animation: true,
                       animateFromLastPercent: true,
-                      progressColor: FlutterFlowTheme.of(context).primaryText,
-                      backgroundColor: FlutterFlowTheme.of(context).primary,
+                      progressColor: const Color(0xFF32D74B),
+                      backgroundColor: FlutterFlowTheme.of(context).secondaryText.withOpacity(0.2),
                       barRadius: const Radius.circular(25.0),
                       padding: EdgeInsets.zero,
                     ),
