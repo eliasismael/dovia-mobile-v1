@@ -51,10 +51,16 @@ class _MisPropiedadesHouseCardWidgetState
     final currency = getJsonField(widget.property, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD';
 
     final hasVisit = getJsonField(widget.property, r'''$.operativeListerVisit.visitId''') != null || getJsonField(widget.property, r'''$.lastVisitId''') != null;
+    final isPaused = statusKey == 'ARCHIVED';
 
     String statusText = 'Pendiente';
+    Color statusColor = const Color(0xFFF99032);
     double percent = 0.25;
-    if (statusKey == 'PENDING_REVIEW') {
+    if (isPaused) {
+      statusText = 'Pausada';
+      statusColor = const Color(0xFFE85D75);
+      percent = 1.0;
+    } else if (statusKey == 'PENDING_REVIEW') {
       statusText = 'En revisión';
       percent = 0.75;
     } else if (statusKey == 'IN_PROCESS' || (statusKey == 'DRAFT' && hasVisit)) {
@@ -87,34 +93,67 @@ class _MisPropiedadesHouseCardWidgetState
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image.asset(
-                            'assets/images/casa_card_sobreMiVisita.png',
-                            width: 72.0,
-                            height: 108.0,
-                            fit: BoxFit.cover,
+                          child: ColorFiltered(
+                            colorFilter: isPaused
+                                ? const ColorFilter.mode(
+                                    Color(0x55000000), BlendMode.darken)
+                                : const ColorFilter.mode(
+                                    Colors.transparent, BlendMode.multiply),
+                            child: Image.asset(
+                              'assets/images/casa_card_sobreMiVisita.png',
+                              width: 72.0,
+                              height: 108.0,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              2.0, 2.0, 0.0, 0.0),
-                          child: Container(
-                            width: 20.0,
-                            height: 20.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).primary,
-                              shape: BoxShape.circle,
+                        if (isPaused)
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              height: 28,
+                              decoration: const BoxDecoration(
+                                color: Color(0xCCE85D75),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(8),
+                                  bottomRight: Radius.circular(8),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Pausada',
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(24.0),
-                              child: SvgPicture.asset(
-                                'assets/images/hearIcon.svg',
-                                width: 10.0,
-                                height: 10.0,
-                                fit: BoxFit.none,
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                2.0, 2.0, 0.0, 0.0),
+                            child: Container(
+                              width: 20.0,
+                              height: 20.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(24.0),
+                                child: SvgPicture.asset(
+                                  'assets/images/hearIcon.svg',
+                                  width: 10.0,
+                                  height: 10.0,
+                                  fit: BoxFit.none,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -431,11 +470,9 @@ class _MisPropiedadesHouseCardWidgetState
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: const Color(0xFFF99032),
+                              color: statusColor,
                               letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
+                              fontWeight: FontWeight.w700,
                               fontStyle: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .fontStyle,

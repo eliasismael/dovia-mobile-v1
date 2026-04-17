@@ -474,6 +474,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'propertyId',
               ParamType.String,
             ),
+            propertyStatus: params.getParam(
+              'propertyStatus',
+              ParamType.String,
+            ),
           ),
         ),
         FFRoute(

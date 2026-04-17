@@ -42,12 +42,16 @@ class _DOVIACLIENTMisPropiedadesWidgetState
         .call(status: 'IN_PROCESS', authToken: currentAuthenticationToken);
     final pendingReviewResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
         .call(status: 'PENDING_REVIEW', authToken: currentAuthenticationToken);
-    
+    // Include ARCHIVED (paused) properties so the owner can see & reactivate them
+    final archivedResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+        .call(status: 'ARCHIVED', authToken: currentAuthenticationToken);
+
     final drafts = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(draftResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
     final inProcess = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(inProcessResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
     final pendingReview = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pendingReviewResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
-    
-    final combined = [...drafts, ...inProcess, ...pendingReview];
+    final archived = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(archivedResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+
+    final combined = [...drafts, ...inProcess, ...pendingReview, ...archived];
 
     return ApiCallResponse(
       {"data": combined},
@@ -74,7 +78,13 @@ class _DOVIACLIENTMisPropiedadesWidgetState
       final pubProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pubResult.jsonBody) ?? [];
       final pendProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pendingResponse.jsonBody) ?? [];
 
-      if (pubProps.isEmpty && pendProps.isEmpty && pubResult.succeeded && pendingResponse.succeeded) {
+      // Also check archived: a user with only paused properties should NOT be redirected
+      final archivedCheck = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+          .call(status: 'ARCHIVED', authToken: currentAuthenticationToken);
+      if (!mounted) return;
+      final archivedProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(archivedCheck.jsonBody) ?? [];
+
+      if (pubProps.isEmpty && pendProps.isEmpty && archivedProps.isEmpty && pubResult.succeeded && pendingResponse.succeeded) {
         context.goNamed(DOVIACLIENTComoFuncionaWidget.routeName);
       }
     });
@@ -297,6 +307,10 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                     getJsonField(eachOwnPropertyItem, r'''$.id''').toString(),
                                                     ParamType.String,
                                                   ),
+                                                  'propertyStatus': serializeParam(
+                                                    'PUBLISHED',
+                                                    ParamType.String,
+                                                  ),
                                                 }.withoutNulls,
                                               );
                                             },
@@ -494,7 +508,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                   padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 33.0, 0.0, 0.0),
                                   child: Text(
-                                    'Propiedades aún no\npublicadas',
+                                    'Propiedades aún no\npublicadas / Pausadas',
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
@@ -605,7 +619,22 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                           final hasVisit = visitIdFromApi != null || getJsonField(p, r'''$.lastVisitId''') != null;
                                           final finalVisitId = visitIdFromApi ?? getJsonField(p, r'''$.lastVisitId''')?.toString() ?? '';
 
-                                          if (status == 'IN_PROCESS' || status == 'PENDING_REVIEW' || (status == 'DRAFT' && hasVisit)) {
+                                          if (status == 'ARCHIVED') {
+                                            // Paused: go to property dashboard to reactivate
+                                            context.pushNamed(
+                                              'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada',
+                                              queryParameters: {
+                                                'propertyId': serializeParam(
+                                                  getJsonField(p, r'''$.id''').toString(),
+                                                  ParamType.String,
+                                                ),
+                                                'propertyStatus': serializeParam(
+                                                  'ARCHIVED',
+                                                  ParamType.String,
+                                                ),
+                                              }.withoutNulls,
+                                            );
+                                          } else if (status == 'IN_PROCESS' || status == 'PENDING_REVIEW' || (status == 'DRAFT' && hasVisit)) {
                                             context.pushNamed(
                                               'DOVIA_CLIENT_MisPropiedades_Visita_1',
                                               queryParameters: {

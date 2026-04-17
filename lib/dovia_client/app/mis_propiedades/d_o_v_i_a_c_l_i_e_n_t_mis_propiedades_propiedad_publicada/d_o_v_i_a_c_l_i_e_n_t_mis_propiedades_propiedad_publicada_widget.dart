@@ -18,9 +18,11 @@ export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_model.dart';
 
 class DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget extends StatefulWidget {
   const DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget(
-      {super.key, this.propertyId});
+      {super.key, this.propertyId, this.propertyStatus});
 
   final String? propertyId;
+  /// Status passed from the list screen (GET /properties/{id} doesn't return status)
+  final String? propertyStatus;
 
   static String routeName = 'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada';
   static String routePath = '/dOVIACLIENTMisPropiedadesPropiedadPublicada';
@@ -58,6 +60,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
 
   // ─── Property data ─────────────────────────────────────────────────────────
   dynamic _propertyData;
+  // Pre-initialized from nav param since GET /properties/{id} omits 'status'
+  late String _propertyStatus;
   bool _isLoadingProperty = true;
 
   // ─── Accordion state ──────────────────────────────────────────────────────
@@ -73,6 +77,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
   @override
   void initState() {
     super.initState();
+    // Initialize status from nav param immediately — API response omits 'status'
+    _propertyStatus = widget.propertyStatus ?? '';
     _model = createModel(
         context, () => DOVIACLIENTMisPropiedadesPropiedadPublicadaModel());
 
@@ -122,6 +128,16 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
       safeSetState(() {
         _propertyData = getJsonField(res.jsonBody, r'''$.data.data''') ??
             getJsonField(res.jsonBody, r'''$.data''');
+        // Only update status if the API response actually contains it;
+        // otherwise keep the value passed via navigation param.
+        final apiStatus =
+            getJsonField(_propertyData, r'''$.status''')?.toString() ??
+            getJsonField(res.jsonBody, r'''$.data.data.status''')?.toString() ??
+            getJsonField(res.jsonBody, r'''$.data.status''')?.toString();
+        if (apiStatus != null && apiStatus.isNotEmpty) {
+          _propertyStatus = apiStatus;
+        }
+        debugPrint('[PropertyDashboard] status=$_propertyStatus id=${widget.propertyId}');
         _isLoadingProperty = false;
       });
     } else if (mounted) {
@@ -416,59 +432,148 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
   }
 
   void _showPausaModal() {
-    showDialog<void>(
+    showGeneralDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Pausar propiedad',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
-        content: Text(
-          'Al pausar la propiedad, se ocultará del mapa y búsquedas temporalmente. Podrás reactivarla cuando quieras.',
-          style: GoogleFonts.inter(fontSize: 14),
+      barrierDismissible: true,
+      barrierLabel: 'close-pausa',
+      barrierColor: Colors.black.withOpacity(0.55),
+      transitionDuration: const Duration(milliseconds: 240),
+      transitionBuilder: (ctx, anim, _, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut),
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.92, end: 1.0).animate(
+              CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+          child: child,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: _primary),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              // TODO: llamar API de cambio de estado a PAUSED
-            },
-            child: const Text('Pausar'),
-          ),
-        ],
+      ),
+      pageBuilder: (ctx, _, __) => _PausaModal(
+        primaryColor: _primary,
+        onConfirm: (String? motivo) async {
+          final messenger = ScaffoldMessenger.of(context);
+          final res = await DOVIAAPIPropertyContextGroup
+              .changePropertyStatusCall
+              .call(
+            propertyId: widget.propertyId,
+            authToken: currentAuthenticationToken,
+            status: 'ARCHIVED',
+            note: motivo,
+          );
+          if (!mounted) return;
+          if (res.succeeded) {
+            _propertyStatus = 'ARCHIVED'; // Update immediately
+            await _loadPropertyData();
+            messenger.showSnackBar(
+              SnackBar(
+                content: const Text('Propiedad pausada correctamente'),
+                backgroundColor: _primary,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+          } else {
+            debugPrint(
+                '[PausarPropiedad] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
+            messenger.showSnackBar(
+              const SnackBar(
+                content: Text('Error al pausar la propiedad'),
+                backgroundColor: _errorRed,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
       ),
     );
   }
 
-  void _showNoDisponibleModal() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('¿Dar de baja la propiedad?',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
-        content: Text(
-          'Esta acción eliminará la propiedad del mapa, favoritos y cancelará todas las operaciones activas. Esta acción es definitiva.',
-          style: GoogleFonts.inter(fontSize: 14),
+  Future<void> _reactivarPropiedad() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final res = await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
+      propertyId: widget.propertyId,
+      authToken: currentAuthenticationToken,
+      status: 'PUBLISHED',
+    );
+    if (!mounted) return;
+    if (res.succeeded) {
+      _propertyStatus = 'PUBLISHED'; // Update immediately
+      await _loadPropertyData();
+      messenger.showSnackBar(
+        SnackBar(
+          content: const Text('¡Propiedad reactivada correctamente!'),
+          backgroundColor: _primary,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: _errorRed),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              // TODO: llamar API de cambio de estado a INACTIVE
-            },
-            child: const Text('Dar de baja'),
-          ),
-        ],
+      );
+    } else {
+      debugPrint(
+          '[ReactivarPropiedad] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Error al reactivar la propiedad'),
+          backgroundColor: _errorRed,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _showNoDisponibleModal() {
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'close-no-disponible',
+      barrierColor: Colors.black.withOpacity(0.65),
+      transitionDuration: const Duration(milliseconds: 260),
+      transitionBuilder: (ctx, anim, _, child) => ScaleTransition(
+        scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
+        child: FadeTransition(opacity: anim, child: child),
+      ),
+      pageBuilder: (ctx, _, __) => _NoDisponibleModal(
+        primaryColor: _primary,
+        errorColor: _errorRed,
+        propertyName: _propName(),
+        onConfirm: (String? reason) async {
+          final messenger = ScaffoldMessenger.of(context);
+          final nav = Navigator.of(context);
+
+          final res = await DOVIAAPIPropertyContextGroup
+              .changePropertyStatusCall
+              .call(
+            propertyId: widget.propertyId,
+            authToken: currentAuthenticationToken,
+            status: 'DELETED',
+            note: reason,
+          );
+
+          if (!mounted) return;
+
+          if (res.succeeded) {
+            messenger.showSnackBar(
+              SnackBar(
+                content: const Text('Propiedad marcada como no disponible'),
+                backgroundColor: _errorRed,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+            // Pop back to "Mis Propiedades" list
+            nav.pop();
+          } else {
+            debugPrint(
+                '[ChangePropertyStatus] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
+            messenger.showSnackBar(
+              const SnackBar(
+                content: Text('Error al dar de baja la propiedad'),
+                backgroundColor: Color(0xFFD32F2F),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
       ),
     );
   }
@@ -1517,59 +1622,127 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             ),
                           ),
                           const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: 48,
-                                  child: OutlinedButton(
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                          color: _primary, width: 1.5),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(24)),
+                          // ── Pausa / No disponible / Reactivar ────────────
+                          Builder(builder: (context) {
+                            // Read from the dedicated reactive state variable
+                            final isPaused = _propertyStatus == 'ARCHIVED';
+
+                            if (isPaused) {
+                              // ── Property is paused: show banner + Reactivar
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE85D75)
+                                          .withOpacity(0.10),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                          color: const Color(0xFFE85D75),
+                                          width: 1),
                                     ),
-                                    onPressed: _showPausaModal,
-                                    child: Text(
-                                      'Propiedad en pausa',
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.inter(
-                                        color: _primary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                            Icons.pause_circle_outline_rounded,
+                                            color: Color(0xFFE85D75),
+                                            size: 20),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            'Esta propiedad está pausada y no se muestra en el mapa ni en búsquedas.',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              color: const Color(0xFFE85D75),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SizedBox(
+                                    height: 48,
+                                    child: FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: _primary,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(24)),
+                                      ),
+                                      onPressed: _reactivarPropiedad,
+                                      child: Text(
+                                        'Activar propiedad',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            // ── Active property: Pausa + No disponible ────
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(
+                                            color: _primary, width: 1.5),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(24)),
+                                      ),
+                                      onPressed: _showPausaModal,
+                                      child: Text(
+                                        'Propiedad en pausa',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.inter(
+                                          color: _primary,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: SizedBox(
-                                  height: 48,
-                                  child: OutlinedButton(
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                          color: _errorRed, width: 1.5),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(24)),
-                                    ),
-                                    onPressed: _showNoDisponibleModal,
-                                    child: Text(
-                                      'No disponible',
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.inter(
-                                        color: _errorRed,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(
+                                            color: _errorRed, width: 1.5),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(24)),
+                                      ),
+                                      onPressed: _showNoDisponibleModal,
+                                      child: Text(
+                                        'No disponible',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.inter(
+                                          color: _errorRed,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            );
+                          }),
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -2182,6 +2355,464 @@ class _EditPriceModalState extends State<_EditPriceModal> {
               child: Divider(
                   color: widget.primaryColor.withOpacity(0.2), thickness: 1)),
         ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Modal: Propiedad No Disponible (baja definitiva)
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _NoDisponibleModal extends StatefulWidget {
+  final Color primaryColor;
+  final Color errorColor;
+  final String propertyName;
+  /// Called with the optional reason text when the user taps [No disponible].
+  /// The caller is responsible for the API call and navigation.
+  final Future<void> Function(String? reason) onConfirm;
+
+  const _NoDisponibleModal({
+    required this.primaryColor,
+    required this.errorColor,
+    required this.propertyName,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_NoDisponibleModal> createState() => _NoDisponibleModalState();
+}
+
+class _NoDisponibleModalState extends State<_NoDisponibleModal> {
+  final TextEditingController _motivoCtrl = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _motivoCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleConfirm() async {
+    setState(() => _isLoading = true);
+    final reason = _motivoCtrl.text.trim().isEmpty ? null : _motivoCtrl.text.trim();
+    // Close the modal first — then the caller shows snackbar / pops the page
+    if (mounted) Navigator.of(context).pop();
+    await widget.onConfirm(reason);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Critical warning header ──────────────────────────────────────
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            decoration: BoxDecoration(
+              color: widget.errorColor,
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '¿Estás seguro de poner la propiedad no disponible?',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Body ─────────────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Explanatory text
+                Text(
+                  'Al marcar la propiedad como no disponible:',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF333333),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _bulletPoint('Se retirará del mapa y de las búsquedas.'),
+                _bulletPoint('Se eliminará de los favoritos de todos los usuarios.'),
+                _bulletPoint('Se cancelarán las visitas y propuestas activas.'),
+                _bulletPoint('Se notificará a los equipos internos de DOVIA.'),
+                const SizedBox(height: 4),
+                Text(
+                  'Esta acción es definitiva.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: widget.errorColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Motivo (optional textarea)
+                Text(
+                  'Motivo (opcional)',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF444444),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _motivoCtrl,
+                  maxLines: 4,
+                  maxLength: 500,
+                  keyboardType: TextInputType.multiline,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: GoogleFonts.inter(fontSize: 13),
+                  decoration: InputDecoration(
+                    hintText: 'Ej: La propiedad ya fue vendida de forma privada…',
+                    hintStyle: GoogleFonts.inter(
+                        fontSize: 13, color: const Color(0xFFAAAAAA)),
+                    filled: true,
+                    fillColor: const Color(0xFFF7F7F7),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: widget.errorColor, width: 1.5),
+                    ),
+                    contentPadding: const EdgeInsets.all(12),
+                    counterStyle: GoogleFonts.inter(
+                        fontSize: 11, color: const Color(0xFFAAAAAA)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ── Buttons ────────────────────────────────────────────────
+                Row(
+                  children: [
+                    // Cancelar
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: OutlinedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                                color: Color(0xFFCCCCCC), width: 1.5),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100)),
+                          ),
+                          child: Text(
+                            'Cancelar',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF555555),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // No disponible
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: FilledButton(
+                          onPressed: _isLoading ? null : _handleConfirm,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: widget.errorColor,
+                            disabledBackgroundColor:
+                                widget.errorColor.withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100)),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2),
+                                )
+                              : Text(
+                                  'No disponible',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 5, right: 7),
+            child: Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: widget.errorColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.inter(
+                  fontSize: 13, color: const Color(0xFF555555), height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Modal: Pausar Publicación (diseño Figma 2471:95378)
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _PausaModal extends StatefulWidget {
+  final Color primaryColor;
+  /// Called with the optional motivo when the user taps [Pausar Propiedad].
+  final Future<void> Function(String? motivo) onConfirm;
+
+  const _PausaModal({
+    required this.primaryColor,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_PausaModal> createState() => _PausaModalState();
+}
+
+class _PausaModalState extends State<_PausaModal> {
+  final TextEditingController _motivoCtrl = TextEditingController();
+  bool _isLoading = false;
+
+  static const Color _pink = Color(0xFFE85D75);
+
+  @override
+  void dispose() {
+    _motivoCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleConfirm() async {
+    setState(() => _isLoading = true);
+    final motivo =
+        _motivoCtrl.text.trim().isEmpty ? null : _motivoCtrl.text.trim();
+    if (mounted) Navigator.of(context).pop();
+    await widget.onConfirm(motivo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      backgroundColor: Colors.white,
+      elevation: 15,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Close button (top-right) ──────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  // Title
+                  child: Text(
+                    '¿Quieres pausar la publicacion de la propiedad?',
+                    style: GoogleFonts.publicSans(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF00444B),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Opacity(
+                    opacity: 0.7,
+                    child: Icon(Icons.close,
+                        size: 16,
+                        color: Colors.black.withOpacity(0.8)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // ── Subtitle ─────────────────────────────────────────────────
+            Text(
+              'No se mostrara la propiedad hasta que lo vuelvas activar.',
+              style: GoogleFonts.publicSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF00444B),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // ── Textarea ─────────────────────────────────────────────────
+            Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F3F5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.transparent),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFA1A1A1).withOpacity(0.13),
+                    blurRadius: 0,
+                    spreadRadius: 0.775,
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _motivoCtrl,
+                maxLines: null,
+                expands: true,
+                keyboardType: TextInputType.multiline,
+                textCapitalization: TextCapitalization.sentences,
+                style:
+                    GoogleFonts.publicSans(fontSize: 14, color: Colors.black87),
+                decoration: InputDecoration(
+                  hintText:
+                      'Describe por qué se quieres pausar la publicacion de la propiedad...',
+                  hintStyle: GoogleFonts.publicSans(
+                    fontSize: 14,
+                    color: const Color(0xFF717182),
+                    fontWeight: FontWeight.w400,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // ── Buttons ───────────────────────────────────────────────────
+            Row(
+              children: [
+                // Cancelar — outlined teal
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: OutlinedButton(
+                      onPressed: _isLoading
+                          ? null
+                          : () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                            color: widget.primaryColor, width: 1),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: GoogleFonts.publicSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: widget.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Pausar Propiedad — pink filled
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: FilledButton(
+                      onPressed: _isLoading ? null : _handleConfirm,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: _pink,
+                        disabledBackgroundColor: _pink.withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
+                            )
+                          : Text(
+                              'Pausar Propiedad',
+                              style: GoogleFonts.publicSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

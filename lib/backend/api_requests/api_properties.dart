@@ -898,13 +898,15 @@ class ChangePropertyStatusCall {
     String? propertyId = '',
     String? status = '',
     String? authToken = '',
+    String? note, // optional, max 1000 chars — logged in event log
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  "status": "${escapeStringForJson(status)}"
-}''';
+    // API accepts: ARCHIVED (pause), DELETED (remove), PUBLISHED (reactivate)
+    // `note` is optional — included only when provided
+    final body = <String, dynamic>{'status': status};
+    if (note != null && note.isNotEmpty) body['note'] = note;
+    final ffApiRequestBody = jsonEncode(body);
     return ApiManager.instance.makeApiCall(
       callName: 'Change Property Status',
       apiUrl: '$baseUrl/properties/$propertyId/status',
