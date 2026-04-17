@@ -1,7 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/backend/schema/enums/enums.dart';
-import '/dovia_client/app/mis_favoritos/favorite_houses_card/favorite_houses_card_widget.dart';
 import '/dovia_client/app/mis_propiedades/mis_propiedades_house_card/mis_propiedades_house_card_widget.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
@@ -293,7 +292,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                             onTap: () {
                                               context.pushNamed(
                                                 'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada',
-                                                pathParameters: {'propertyId': getJsonField(eachOwnPropertyItem, r'''$.id''').toString()},
+                                                queryParameters: {
+                                                  'propertyId': serializeParam(
+                                                    getJsonField(eachOwnPropertyItem, r'''$.id''').toString(),
+                                                    ParamType.String,
+                                                  ),
+                                                }.withoutNulls,
                                               );
                                             },
                                             child: custom_widgets

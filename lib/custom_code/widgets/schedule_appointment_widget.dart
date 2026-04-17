@@ -124,8 +124,8 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
 
     try {
       final repo = context.read<VisitsRepository>();
-      final fmtDate = (DateTime d) => "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
-      final fmtTime = (TimeOfDay t) => "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
+      String fmtDate(DateTime d) => "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
+      String fmtTime(TimeOfDay t) => "${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}";
 
       final String slot1 = "${fmtDate(selectedDates[0]!)} ${fmtTime(selectedTimes[0]!)}";
       final String slot2 = "${fmtDate(selectedDates[1]!)} ${fmtTime(selectedTimes[1]!)}";

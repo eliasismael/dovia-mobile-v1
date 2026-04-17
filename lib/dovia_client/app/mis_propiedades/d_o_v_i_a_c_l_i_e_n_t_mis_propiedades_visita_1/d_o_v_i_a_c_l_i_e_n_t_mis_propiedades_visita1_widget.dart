@@ -361,7 +361,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                         border: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(10.0),
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: _teal, width: 1.5),
                                         ),
                                         enabledBorder: OutlineInputBorder(
@@ -375,7 +375,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(10.0),
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: _teal, width: 1.5),
                                         ),
                                       ),
@@ -1339,11 +1339,11 @@ class _Step4Content extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 12),
-        _InfoRow(label: 'Certificación registral'),
+        const _InfoRow(label: 'Certificación registral'),
         const SizedBox(height: 12),
-        _InfoRow(label: 'Contrato firmado'),
+        const _InfoRow(label: 'Contrato firmado'),
         const SizedBox(height: 12),
-        _InfoRow(label: 'Instrucciones para asociados'),
+        const _InfoRow(label: 'Instrucciones para asociados'),
       ],
     );
   }

@@ -240,7 +240,7 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
               ),
               const SizedBox(height: 16),
               Text(
-                'Ya tienes una oferta en pendiente de acetar o una contraoferta para este inmueble. Visualiza el estatus en la pantalla de Mis Visitas.',
+                'Ya tienes una oferta en pendiente de aceptar o una contraoferta para este inmueble. Visualiza el estatus en la pantalla de Mis Visitas.',
                 textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.inter(

@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 import '/backend/schema/structs/index.dart';
@@ -10,12 +8,8 @@ import '/backend/schema/enums/enums.dart';
 
 import '/auth/custom_auth/custom_auth_user_provider.dart';
 
-import '/main.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/lat_lng.dart';
-import '/flutter_flow/place.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'serialization_util.dart';
 
 import '/index.dart';
 
@@ -475,7 +469,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routeName,
           path: DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routePath,
           builder: (context, params) =>
-              const DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget(),
+              DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget(
+            propertyId: params.getParam(
+              'propertyId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesPropuestaWidget.routeName,

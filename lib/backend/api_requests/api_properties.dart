@@ -1,5 +1,3 @@
-import '../schema/structs/index.dart';
-import 'dart:convert';
 
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
@@ -162,7 +160,7 @@ class CreatePropertyBasicSALEAndRENTCall {
       };
     }
 
-    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative!.isNotEmpty)
+    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
         ? legalRepresentative
         : companyName;
 
@@ -250,7 +248,7 @@ class CreatePropertyBasicRENTCall {
       };
     }
 
-    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative!.isNotEmpty)
+    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
         ? legalRepresentative
         : companyName;
 
@@ -335,7 +333,7 @@ class CreatePropertyBasicSALECall {
       };
     }
 
-    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative!.isNotEmpty)
+    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
         ? legalRepresentative
         : companyName;
 
