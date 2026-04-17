@@ -754,16 +754,57 @@ class GetPropertyByIDCall {
 class UpdatePropertyCall {
   Future<ApiCallResponse> call({
     String? propertyId = '',
+    String? authToken = '',
+    List<String>? listingType,
+    double? salePrice,
+    double? maintenanceFee,
+    double? singlePropertyTax,
+    double? monthlyRent,
+    int? minimumTimeRent,
+    String? othersRent,
+    String? allowedUses,
+    String? availableFrom,
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
-{}''';
+    final Map<String, dynamic> body = {};
+
+    if (listingType != null && listingType.isNotEmpty) {
+      body['listingType'] = listingType;
+    }
+
+    final bool hasSale = listingType?.contains('SALE') == true;
+    final bool hasRent = listingType?.contains('RENT') == true;
+
+    if (hasSale) {
+      final Map<String, dynamic> saleInfo = {};
+      // amountToReceive is computed server-side — not accepted in PATCH
+      if (salePrice != null) saleInfo['salePrice'] = salePrice;
+      if (maintenanceFee != null) saleInfo['maintenanceFee'] = maintenanceFee;
+      if (singlePropertyTax != null) saleInfo['singlePropertyTax'] = singlePropertyTax;
+      if (saleInfo.isNotEmpty) body['saleInfo'] = saleInfo;
+    }
+
+    if (hasRent) {
+      final Map<String, dynamic> rentInfo = {};
+      if (monthlyRent != null) rentInfo['monthlyRent'] = monthlyRent;
+      final Map<String, dynamic> conditions = {};
+      if (minimumTimeRent != null) conditions['minimumTime'] = minimumTimeRent;
+      if (othersRent?.isNotEmpty == true) conditions['others'] = othersRent;
+      if (allowedUses?.isNotEmpty == true) conditions['allowedUses'] = allowedUses;
+      if (availableFrom?.isNotEmpty == true) conditions['availableFrom'] = availableFrom;
+      if (conditions.isNotEmpty) rentInfo['rentalConditions'] = conditions;
+      if (rentInfo.isNotEmpty) body['rentInfo'] = rentInfo;
+    }
+
+    final ffApiRequestBody = jsonEncode(body);
     return ApiManager.instance.makeApiCall(
       callName: 'Update Property',
       apiUrl: '$baseUrl/properties/$propertyId',
       callType: ApiCallType.PATCH,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
