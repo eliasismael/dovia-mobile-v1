@@ -5,19 +5,16 @@ import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_rentar_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_rentar_model.dart';
 
@@ -129,7 +126,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
                 child: Column(
@@ -139,13 +136,13 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
-                        title: widget!.title!,
+                        title: widget.title!,
                         showCurrency: false,
                         showMap: false,
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
@@ -173,12 +170,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
-                              child: Text(
-                                'Describe de manera natural tu propiedad y el complejo',
+                              child: Text.rich(
+  TextSpan(
+    text: 'Describe de manera natural tu propiedad y el complejo ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -202,9 +202,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller:
@@ -260,14 +260,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -291,7 +291,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 40.0, 0.0, 40.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -327,22 +327,25 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             builder: (context) {
                               if ((String transactionType) {
                                 return transactionType.contains("SALE");
-                              }(widget!.transactionType!.name)) {
+                              }(widget.transactionType!.name)) {
                                 return Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 20.0, 0.0, 0.0),
                                   child: Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 1.0,
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
-                                          child: Text(
-                                            'Precio de venta',
+                                              const AlignmentDirectional(-1.0, 0.0),
+                                          child: Text.rich(
+  TextSpan(
+    text: 'Precio de venta ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -374,12 +377,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
@@ -390,6 +393,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     _model.precioVentaFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -452,7 +456,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -462,7 +466,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -531,10 +535,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -549,10 +550,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: Text(
                                               'Cantidad a recibir (3.5% de comisión Dovia)',
@@ -589,12 +590,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
@@ -605,6 +606,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .cantidadARecibirFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -667,7 +669,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -677,7 +679,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -746,10 +748,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -764,10 +763,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: Text(
                                               'Mantenimiento',
@@ -804,12 +803,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
@@ -820,6 +819,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .mantenimientoFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -882,7 +882,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -892,7 +892,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -961,10 +961,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -979,10 +976,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: Text(
                                               'Impuesto único sobre inmuebles',
@@ -1019,12 +1016,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
@@ -1035,6 +1032,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .impustoUnicoInmueblesFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1096,7 +1094,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -1106,7 +1104,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -1175,10 +1173,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -1211,22 +1206,25 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             builder: (context) {
                               if ((String txType) {
                                 return txType.contains("RENT");
-                              }(widget!.transactionType!.name)) {
+                              }(widget.transactionType!.name)) {
                                 return Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 20.0, 0.0, 0.0),
                                   child: Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 1.0,
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
-                                          child: Text(
-                                            'Precio de renta mensual (incluyendo IVA y mantenimiento)',
+                                              const AlignmentDirectional(-1.0, 0.0),
+                                          child: Text.rich(
+  TextSpan(
+    text: 'Precio de renta mensual (incluyendo IVA y mantenimiento) ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1258,12 +1256,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
@@ -1274,6 +1272,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .precioRentaMensualFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1336,7 +1335,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -1346,7 +1345,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -1415,10 +1414,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -1433,10 +1429,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 8.0, 0.0, 0.0),
                                             child: Text(
                                               'Comisión Dovia: una renta',
@@ -1648,10 +1644,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         // ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: Text(
                                               'Condiciones de renta',
@@ -1745,10 +1741,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         // ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: Text(
                                               'Tiempo mínimo',
@@ -1785,12 +1781,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
@@ -1801,6 +1797,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     .tiempoMinimoFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1863,7 +1860,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -1873,7 +1870,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -1942,10 +1939,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
+                                                
                                                 cursorColor:
                                                     FlutterFlowTheme.of(context)
                                                         .primaryText,
@@ -2074,10 +2068,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         // ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
                                             child: Text(
                                               'Otros',
@@ -2114,12 +2108,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         ),
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(-1.0, 0.0),
+                                              const AlignmentDirectional(-1.0, 0.0),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 10.0, 0.0, 0.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
@@ -2130,6 +2124,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     _model.rentaOtrosFocusNode,
                                                 autofocus: false,
                                                 enabled: true,
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -2192,7 +2187,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -2202,7 +2197,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: BorderSide(
+                                                    borderSide: const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -2300,9 +2295,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             },
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 10.0, 0.0, 0.0),
                               child: RichText(
                                 textScaler:
@@ -2393,7 +2388,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 10.0, 0.0, 0.0),
                             child: FlutterFlowDropDown<String>(
                               controller: _model.zonaValueController ??=
@@ -2467,12 +2462,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 10.0, 0.0, 0.0),
-                              child: Text(
-                                'Dirección de la propiedad',
+                              child: Text.rich(
+  TextSpan(
+    text: 'Dirección de la propiedad ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -2496,9 +2494,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller:
@@ -2553,14 +2551,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -2584,7 +2582,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -2617,7 +2615,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model.drawMapComponentModel,
@@ -2630,7 +2628,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Text(
                               'Información legal\n\nEsta información se mantiene privada y no se compartirá sin tu consentimiento.',
@@ -2656,9 +2654,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 10.0, 0.0, 0.0),
                               child: Text(
                                 'Certificación de propiedad (en caso de tenerla)',
@@ -2685,7 +2683,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -2741,9 +2739,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Finca',
@@ -2770,9 +2768,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller: _model.fincaTextController,
@@ -2826,14 +2824,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -2857,7 +2855,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -2889,9 +2887,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Folio',
@@ -2918,9 +2916,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller: _model.folioTextController,
@@ -2974,14 +2972,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -3005,7 +3003,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -3037,9 +3035,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Libro',
@@ -3066,9 +3064,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller: _model.libroTextController,
@@ -3122,14 +3120,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -3153,7 +3151,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -3185,9 +3183,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Si la propiedad está a nombre de una sociedad:',
@@ -3211,12 +3209,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
-                              child: Text(
-                                'Nombre del propietario o sociedad',
+                              child: Text.rich(
+  TextSpan(
+    text: 'Nombre del propietario o sociedad ',
+    children: [TextSpan(text: '*', style: TextStyle(color: FlutterFlowTheme.of(context).error))]
+  ),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -3237,9 +3238,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller:
@@ -3294,14 +3295,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -3325,7 +3326,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -3358,9 +3359,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'En caso de ser una sociedad, indicar el nombre del representante legal: ',
@@ -3384,9 +3385,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 8.0, 0.0, 0.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               child: TextFormField(
                                 controller: _model
@@ -3442,14 +3443,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .fontStyle,
                                       ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
+                                    borderSide: const BorderSide(
                                       color: Color(0x00000000),
                                       width: 1.0,
                                     ),
@@ -3473,7 +3474,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   fillColor:
                                       FlutterFlowTheme.of(context).alternate,
                                   contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
+                                      const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -3506,9 +3507,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Subir identificación del propietario/representante legal',
@@ -3532,7 +3533,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: InkWell(
                               splashColor: Colors.transparent,
@@ -3587,7 +3588,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -3596,7 +3597,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 borderRadius: BorderRadius.circular(16.0),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 40.0, 20.0, 40.0),
                                 child: Text(
                                   'Revisaremos la información que ingresaste para asegurar que todo esté correcto y listo para continuar con el proceso.\n\nSi eres el propietario legal, te enviaremos un Acuerdo de Autorización para que apruebes la comercialización de tu propiedad dentro de DOVIA.\n\nSi la cuenta fue creada por un familiar, administrador o representante, te pediremos que confirmes la relación con el propietario y que éste firme digitalmente la autorización correspondiente.\n\nTodo el proceso es sencillo, guiado y 100% seguro.',
@@ -3626,7 +3627,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
                             child: wrapWithModel(
                               model: _model.primaryButtonModel,
@@ -3640,14 +3641,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                       context: context,
                                       builder: (alertDialogContext) {
                                         return AlertDialog(
-                                          title: Text('Campo Mandatorio'),
-                                          content: Text(
+                                          title: const Text('Campo Mandatorio'),
+                                          content: const Text(
                                               'Por favor selecciona una zona para continuar.'),
                                           actions: [
                                             TextButton(
                                               onPressed: () => Navigator.pop(
                                                   alertDialogContext),
-                                              child: Text('Ok'),
+                                              child: const Text('Ok'),
                                             ),
                                           ],
                                         );
@@ -3655,8 +3656,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     );
                                     return;
                                   }
-                                  var _shouldSetState = false;
-                                  if (widget!.transactionType ==
+                                  var shouldSetState = false;
+                                  if (widget.transactionType ==
                                       PropertyPublicationType.SALE) {
                                     _model.apiResultSale =
                                         await DOVIAAPIPropertyContextGroup
@@ -3681,11 +3682,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                       singlePropertyTax: int.tryParse(_model
                                           .impustoUnicoInmueblesTextController
                                           .text),
-                                      isCompanyOwned: _model
-                                                  .nombreRepresentanteLegalTextController
-                                                  .text !=
-                                              null &&
-                                          _model.nombreRepresentanteLegalTextController
+                                      isCompanyOwned: _model.nombreRepresentanteLegalTextController
                                                   .text !=
                                               '',
                                       companyName: _model
@@ -3695,19 +3692,19 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                           .text,
                                     );
 
-                                    _shouldSetState = true;
+                                    shouldSetState = true;
                                     if ((_model.apiResultSale?.succeeded ??
                                         true)) {
                                       await showDialog(
                                         context: context,
                                         builder: (alertDialogContext) {
                                           return AlertDialog(
-                                            title: Text('exito'),
+                                            title: const Text('exito'),
                                             actions: [
                                               TextButton(
                                                 onPressed: () => Navigator.pop(
                                                     alertDialogContext),
-                                                child: Text('Ok'),
+                                                child: const Text('Ok'),
                                               ),
                                             ],
                                           );
@@ -3725,7 +3722,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         context: context,
                                         builder: (alertDialogContext) {
                                           return AlertDialog(
-                                            title: Text('error'),
+                                            title: const Text('error'),
                                             content: Text((_model.apiResultSale
                                                         ?.jsonBody ??
                                                     '')
@@ -3734,15 +3731,17 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               TextButton(
                                                 onPressed: () => Navigator.pop(
                                                     alertDialogContext),
-                                                child: Text('Ok'),
+                                                child: const Text('Ok'),
                                               ),
                                             ],
                                           );
                                         },
                                       );
+                                          if (shouldSetState) safeSetState(() {});
+                                          return;
                                     }
                                   } else {
-                                    if (widget!.transactionType ==
+                                    if (widget.transactionType ==
                                         PropertyPublicationType.RENT) {
                                       _model.apiResultRent =
                                           await DOVIAAPIPropertyContextGroup
@@ -3773,23 +3772,30 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .usoNoPermitidoTextController.text,
                                         availableFrom: _model
                                             .disponibleDesdeTextController.text,
-                                        isCompanyOwned: false,
+                                        isCompanyOwned: _model.nombreRepresentanteLegalTextController
+                                                    .text !=
+                                                '',
+                                        companyName: _model
+                                            .nombrePropietarioTextController.text,
+                                        legalRepresentative: _model
+                                            .nombreRepresentanteLegalTextController
+                                            .text,
                                       );
 
-                                      _shouldSetState = true;
+                                      shouldSetState = true;
                                       if ((_model.apiResultRent?.succeeded ??
                                           true)) {
                                         await showDialog(
                                           context: context,
                                           builder: (alertDialogContext) {
                                             return AlertDialog(
-                                              title: Text('Extio renta'),
+                                              title: const Text('Extio renta'),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () =>
                                                       Navigator.pop(
                                                           alertDialogContext),
-                                                  child: Text('Ok'),
+                                                  child: const Text('Ok'),
                                                 ),
                                               ],
                                             );
@@ -3808,7 +3814,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                           context: context,
                                           builder: (alertDialogContext) {
                                             return AlertDialog(
-                                              title: Text('error renta'),
+                                              title: const Text('error renta'),
                                               content: Text((_model
                                                           .apiResultRent
                                                           ?.jsonBody ??
@@ -3819,15 +3825,17 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   onPressed: () =>
                                                       Navigator.pop(
                                                           alertDialogContext),
-                                                  child: Text('Ok'),
+                                                  child: const Text('Ok'),
                                                 ),
                                               ],
                                             );
                                           },
                                         );
+                                          if (shouldSetState) safeSetState(() {});
+                                          return;
                                       }
                                     } else {
-                                      if (widget!.transactionType ==
+                                      if (widget.transactionType ==
                                           PropertyPublicationType
                                               .SALE_AND_RENT) {
                                         _model.apiResultSaleAndRent =
@@ -3872,11 +3880,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                           availableFrom: _model
                                               .disponibleDesdeTextController
                                               .text,
-                                          isCompanyOwned: _model
-                                                      .nombreRepresentanteLegalTextController
-                                                      .text !=
-                                                  null &&
-                                              _model.nombreRepresentanteLegalTextController
+                                          isCompanyOwned: _model.nombreRepresentanteLegalTextController
                                                       .text !=
                                                   '',
                                           companyName: _model
@@ -3887,7 +3891,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               .text,
                                         );
 
-                                        _shouldSetState = true;
+                                        shouldSetState = true;
                                         if ((_model.apiResultSaleAndRent
                                                 ?.succeeded ??
                                             true)) {
@@ -3896,13 +3900,13 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
                                                 content:
-                                                    Text('Exito sale y rent'),
+                                                    const Text('Exito sale y rent'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             alertDialogContext),
-                                                    child: Text('Ok'),
+                                                    child: const Text('Ok'),
                                                   ),
                                                 ],
                                               );
@@ -3922,7 +3926,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
                                                 title:
-                                                    Text('error sale y rent'),
+                                                    const Text('error sale y rent'),
                                                 content: Text(
                                                     (_model.apiResultSaleAndRent
                                                                 ?.jsonBody ??
@@ -3933,16 +3937,19 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             alertDialogContext),
-                                                    child: Text('Ok'),
+                                                    child: const Text('Ok'),
                                                   ),
                                                 ],
                                               );
                                             },
                                           );
+                                          if (shouldSetState) safeSetState(() {});
+                                          return;
                                         }
                                       } else {
-                                        if (_shouldSetState)
+                                        if (shouldSetState) {
                                           safeSetState(() {});
+                                        }
                                         return;
                                       }
                                     }
@@ -3950,9 +3957,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
 
                                   await Future.wait([
                                     Future(() async {
-                                      if (_model.uploadedLocalFile_certifiacionDePropiedad !=
-                                              null &&
-                                          (_model.uploadedLocalFile_certifiacionDePropiedad
+                                      if ((_model.uploadedLocalFile_certifiacionDePropiedad
                                                   .bytes?.isNotEmpty ??
                                               false)) {
                                         _model.resCertificacionPropriedad =
@@ -3965,7 +3970,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               .uploadedLocalFile_certifiacionDePropiedad,
                                         );
 
-                                        _shouldSetState = true;
+                                        shouldSetState = true;
                                         if ((_model.resCertificacionPropriedad
                                                 ?.succeeded ??
                                             true)) {
@@ -3973,14 +3978,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             context: context,
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
-                                                title: Text(
+                                                title: const Text(
                                                     'exito certificacion propiedad'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             alertDialogContext),
-                                                    child: Text('Ok'),
+                                                    child: const Text('Ok'),
                                                   ),
                                                 ],
                                               );
@@ -3991,7 +3996,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             context: context,
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
-                                                title: Text(
+                                                title: const Text(
                                                     'error cert propiedad'),
                                                 content: Text(
                                                     (_model.resCertificacionPropriedad
@@ -4003,26 +4008,26 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             alertDialogContext),
-                                                    child: Text('Ok'),
+                                                    child: const Text('Ok'),
                                                   ),
                                                 ],
                                               );
                                             },
                                           );
-                                          if (_shouldSetState)
+                                          if (shouldSetState) {
                                             safeSetState(() {});
+                                          }
                                           return;
                                         }
                                       } else {
-                                        if (_shouldSetState)
+                                        if (shouldSetState) {
                                           safeSetState(() {});
+                                        }
                                         return;
                                       }
                                     }),
                                     Future(() async {
-                                      if (_model.uploadedLocalFile_propertyOwnerId !=
-                                              null &&
-                                          (_model.uploadedLocalFile_propertyOwnerId
+                                      if ((_model.uploadedLocalFile_propertyOwnerId
                                                   .bytes?.isNotEmpty ??
                                               false)) {
                                         _model.resOwnerId =
@@ -4035,20 +4040,20 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               .uploadedLocalFile_propertyOwnerId,
                                         );
 
-                                        _shouldSetState = true;
+                                        shouldSetState = true;
                                         if ((_model.resOwnerId?.succeeded ??
                                             true)) {
                                           await showDialog(
                                             context: context,
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
-                                                title: Text('exito owner id'),
+                                                title: const Text('exito owner id'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             alertDialogContext),
-                                                    child: Text('Ok'),
+                                                    child: const Text('Ok'),
                                                   ),
                                                 ],
                                               );
@@ -4059,7 +4064,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             context: context,
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
-                                                title: Text('error owner id'),
+                                                title: const Text('error owner id'),
                                                 content: Text((_model.resOwnerId
                                                             ?.jsonBody ??
                                                         '')
@@ -4069,19 +4074,21 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             alertDialogContext),
-                                                    child: Text('Ok'),
+                                                    child: const Text('Ok'),
                                                   ),
                                                 ],
                                               );
                                             },
                                           );
-                                          if (_shouldSetState)
+                                          if (shouldSetState) {
                                             safeSetState(() {});
+                                          }
                                           return;
                                         }
                                       } else {
-                                        if (_shouldSetState)
+                                        if (shouldSetState) {
                                           safeSetState(() {});
+                                        }
                                         return;
                                       }
                                     }),
@@ -4098,7 +4105,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     }.withoutNulls,
                                   );
 
-                                  if (_shouldSetState) safeSetState(() {});
+                                  if (shouldSetState) safeSetState(() {});
                                 },
                               ),
                             ),
@@ -4110,7 +4117,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -4118,7 +4125,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

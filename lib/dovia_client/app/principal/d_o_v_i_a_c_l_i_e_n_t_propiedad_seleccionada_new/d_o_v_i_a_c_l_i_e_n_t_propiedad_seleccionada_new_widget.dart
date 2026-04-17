@@ -8,23 +8,19 @@ import '/components/propiedades_sobre_el_sector_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
 import 'dart:ui';
 import '/index.dart';
+import '/auth/custom_auth/auth_util.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '/repositories/visits_repository.dart';
-import '/dovia_client/app/mis_visitas/d_o_v_i_a_c_l_i_e_n_t_mis_visitas/d_o_v_i_a_c_l_i_e_n_t_mis_visitas_widget.dart';
-import '/backend/api_requests/api_offers.dart';
-import '/auth/custom_auth/auth_util.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
 
@@ -91,10 +87,33 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         _propertyData = response;
         _listingType = parsed;
       });
+
+      final createdBy = getJsonField(response.jsonBody, r'''$.data.data.createdBy''')?.toString() ?? 
+                        getJsonField(response.jsonBody, r'''$.data.createdBy''')?.toString();
+      
+      if (createdBy != currentUserUid) {
+        DOVIAAPIMetricsContextGroup.trackPropertyViewCall.call(
+          propertyId: widget.propertyId,
+          bearerAuth: currentAuthenticationToken,
+        );
+      }
+    }
+  }
+
+  void _trackInteraction() {
+    if (widget.propertyId == null || widget.propertyId!.isEmpty) return;
+    final createdBy = getJsonField(_propertyData?.jsonBody, r'''$.data.data.createdBy''')?.toString() ?? 
+                      getJsonField(_propertyData?.jsonBody, r'''$.data.createdBy''')?.toString();
+    if (createdBy != currentUserUid) {
+      DOVIAAPIMetricsContextGroup.trackPropertyInteractionCall.call(
+        propertyId: widget.propertyId,
+        bearerAuth: currentAuthenticationToken,
+      );
     }
   }
 
   void _showGallery() async {
+    _trackInteraction();
     final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
     final body = _propertyData?.jsonBody;
 
@@ -111,6 +130,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   }
 
   void _showPlanos() async {
+    _trackInteraction();
     final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
     final body = _propertyData?.jsonBody;
     final planos = body != null ? api.imgPlanos(body) : null;
@@ -134,6 +154,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   }
 
   void _show360() async {
+    _trackInteraction();
     final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
     final body = _propertyData?.jsonBody;
     final url = body != null ? api.video360Url(body) : null;
@@ -155,6 +176,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   }
 
   Future<void> _handleOfertar() async {
+    _trackInteraction();
     if (widget.propertyId == null || widget.propertyId!.isEmpty) return;
 
     if (FFAppState().UserRole == 'VISITOR') {
@@ -393,16 +415,16 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
               wrapWithModel(
                 model: _model.cornerGradientBackgroundModel,
                 updateCallback: () => safeSetState(() {}),
-                child: CornerGradientBackgroundWidget(),
+                child: const CornerGradientBackgroundWidget(),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 42.0, 20.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
@@ -410,7 +432,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
-                              decoration: BoxDecoration(),
+                              decoration: const BoxDecoration(),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -462,7 +484,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       ),
                                     ),
                                   ),
-                                ].divide(SizedBox(width: 8.0)),
+                                ].divide(const SizedBox(width: 8.0)),
                               ),
                             ),
                             RichText(
@@ -541,7 +563,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 8.0)),
+                                  ].divide(const SizedBox(width: 8.0)),
                                 ),
                               ],
                             ),
@@ -549,13 +571,13 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 0.0, 20.0, 100.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 40.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -570,7 +592,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     onTap: () async {
                                       await _model.carouselController
                                           ?.previousPage(
-                                        duration: Duration(milliseconds: 300),
+                                        duration: const Duration(milliseconds: 300),
                                         curve: Curves.ease,
                                       );
                                     },
@@ -594,7 +616,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       ),
                                     ),
                                   ),
-                                  Container(
+                                  SizedBox(
                                     width: 320.0,
                                     height: 160.0,
                                     child: CarouselSlider(
@@ -697,7 +719,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     highlightColor: Colors.transparent,
                                     onTap: () async {
                                       await _model.carouselController?.nextPage(
-                                        duration: Duration(milliseconds: 300),
+                                        duration: const Duration(milliseconds: 300),
                                         curve: Curves.ease,
                                       );
                                     },
@@ -725,7 +747,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -733,7 +755,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
@@ -746,7 +768,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                           child: Container(
                                             width: 40.0,
                                             height: 40.0,
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               color: Color(0xFFF7F7F7),
                                               boxShadow: [
                                                 BoxShadow(
@@ -783,7 +805,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                           child: Container(
                                             width: 40.0,
                                             height: 40.0,
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               color: Color(0xFFF7F7F7),
                                               boxShadow: [
                                                 BoxShadow(
@@ -818,7 +840,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                           child: Container(
                                             width: 40.0,
                                             height: 40.0,
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               color: Color(0xFFF7F7F7),
                                               boxShadow: [
                                                 BoxShadow(
@@ -844,11 +866,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             ),
                                           ),
                                         ),
-                                      ].divide(SizedBox(width: 8.0)),
+                                      ].divide(const SizedBox(width: 8.0)),
                                     ),
                                   ),
                                   Container(
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       mainAxisAlignment: MainAxisAlignment.end,
@@ -856,7 +878,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         Container(
                                           width: 40.0,
                                           height: 40.0,
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             color: Color(0xFFF7F7F7),
                                             boxShadow: [
                                               BoxShadow(
@@ -870,21 +892,26 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             ],
                                             shape: BoxShape.circle,
                                           ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/download.svg',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.none,
+                                          child: InkWell(
+                                            onTap: () async {
+                                              _trackInteraction();
+                                            },
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/download.svg',
+                                                width: 200.0,
+                                                height: 200.0,
+                                                fit: BoxFit.none,
+                                              ),
                                             ),
                                           ),
                                         ),
                                         Container(
                                           width: 40.0,
                                           height: 40.0,
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             color: Color(0xFFF7F7F7),
                                             boxShadow: [
                                               BoxShadow(
@@ -898,32 +925,37 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             ],
                                             shape: BoxShape.circle,
                                           ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/share-android.svg',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.none,
+                                          child: InkWell(
+                                            onTap: () async {
+                                              _trackInteraction();
+                                            },
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/share-android.svg',
+                                                width: 200.0,
+                                                height: 200.0,
+                                                fit: BoxFit.none,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ].divide(SizedBox(width: 8.0)),
+                                      ].divide(const SizedBox(width: 8.0)),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 22.0, 0.0, 0.0),
                               child: Container(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 decoration: BoxDecoration(
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
-                                  boxShadow: [
+                                  boxShadow: const [
                                     BoxShadow(
                                       blurRadius: 4.0,
                                       color: Color(0x33000000),
@@ -936,7 +968,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                   borderRadius: BorderRadius.circular(100.0),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -944,7 +976,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 10.0, 0.0, 10.0),
                                         child: InkWell(
                                           splashColor: Colors.transparent,
@@ -969,7 +1001,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                   BorderRadius.circular(100.0),
                                             ),
                                             child: Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   0.0, 0.0),
                                               child: Text(
                                                 'Venta',
@@ -1017,7 +1049,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 10.0, 0.0, 10.0),
                                         child: InkWell(
                                           splashColor: Colors.transparent,
@@ -1042,7 +1074,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                   BorderRadius.circular(100.0),
                                             ),
                                             child: Align(
-                                              alignment: AlignmentDirectional(
+                                              alignment: const AlignmentDirectional(
                                                   0.0, 0.0),
                                               child: Text(
                                                 'Renta',
@@ -1090,20 +1122,20 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                           ),
                                         ),
                                       ),
-                                    ].divide(SizedBox(width: 20.0)),
+                                    ].divide(const SizedBox(width: 20.0)),
                                   ),
                                 ),
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Expanded(
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Builder(
                                         builder: (context) => wrapWithModel(
                                           model: _model.primaryButtonModel,
@@ -1124,7 +1156,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                       backgroundColor:
                                                           Colors.transparent,
                                                       alignment:
-                                                          AlignmentDirectional(
+                                                          const AlignmentDirectional(
                                                                   0.0, 0.0)
                                                               .resolve(
                                                                   Directionality.of(
@@ -1139,7 +1171,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                               ?.unfocus();
                                                         },
                                                         child:
-                                                            VisitorRestrictionPopupWidget(),
+                                                            const VisitorRestrictionPopupWidget(),
                                                       ),
                                                     );
                                                   },
@@ -1193,7 +1225,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                         backgroundColor:
                                                             Colors.transparent,
                                                         alignment:
-                                                            AlignmentDirectional(
+                                                            const AlignmentDirectional(
                                                                     0.0, 0.0)
                                                                 .resolve(
                                                                     Directionality.of(
@@ -1235,7 +1267,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                   ),
                                   Expanded(
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Builder(
                                         builder: (context) => wrapWithModel(
                                           model: _model.secondaryButtonModel,
@@ -1249,16 +1281,16 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       ),
                                     ),
                                   ),
-                                ].divide(SizedBox(width: 8.0)),
+                                ].divide(const SizedBox(width: 8.0)),
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Container(
-                                  decoration: BoxDecoration(),
+                                  decoration: const BoxDecoration(),
                                   child: RichText(
                                     textScaler:
                                         MediaQuery.of(context).textScaler,
@@ -1394,7 +1426,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
@@ -1477,7 +1509,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                           .fontStyle,
                                                 ),
                                           ),
-                                        ].divide(SizedBox(height: 5.0)),
+                                        ].divide(const SizedBox(height: 5.0)),
                                       ),
                                     ),
                                   ),
@@ -1559,7 +1591,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                           .fontStyle,
                                                 ),
                                           ),
-                                        ].divide(SizedBox(height: 5.0)),
+                                        ].divide(const SizedBox(height: 5.0)),
                                       ),
                                     ),
                                   ),
@@ -1641,11 +1673,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                           .fontStyle,
                                                 ),
                                           ),
-                                        ].divide(SizedBox(height: 5.0)),
+                                        ].divide(const SizedBox(height: 5.0)),
                                       ),
                                     ),
                                   ),
-                                ].divide(SizedBox(width: 8.0)),
+                                ].divide(const SizedBox(width: 8.0)),
                               ),
                             ),
                             SingleChildScrollView(
@@ -1653,19 +1685,19 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
-                                    decoration: BoxDecoration(),
+                                    decoration: const BoxDecoration(),
                                     child: wrapWithModel(
                                       model:
                                           _model.propiedadCaracteristicasModel,
                                       updateCallback: () => safeSetState(() {}),
-                                      child: PropiedadCaracteristicasWidget(),
+                                      child: const PropiedadCaracteristicasWidget(),
                                     ),
                                   ),
                                   Container(
                                     child: wrapWithModel(
                                       model: _model.porpiedadesAmenidadesModel,
                                       updateCallback: () => safeSetState(() {}),
-                                      child: PorpiedadesAmenidadesWidget(),
+                                      child: const PorpiedadesAmenidadesWidget(),
                                     ),
                                   ),
                                   Container(
@@ -1673,7 +1705,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       model:
                                           _model.propiedadesSobreElSectorModel,
                                       updateCallback: () => safeSetState(() {}),
-                                      child: PropiedadesSobreElSectorWidget(),
+                                      child: const PropiedadesSobreElSectorWidget(),
                                     ),
                                   ),
                                 ],
@@ -1687,7 +1719,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(0.0, 1.0),
+                alignment: const AlignmentDirectional(0.0, 1.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -1695,7 +1727,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: DOVIACLIENTNavbarWidget(),
+                      child: const DOVIACLIENTNavbarWidget(),
                     ),
                   ],
                 ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -26,6 +28,13 @@ class DOVIACLIENTMisPropiedadesVisita1Model
   bool contractUploaded = false;
   bool isUploadingContract = false;
 
+  // ── Step 3 polling ──────────────────────────────────────────────────────
+  /// Timer that polls visit status while the user is on Step 3.
+  Timer? pollingTimer;
+
+  /// Guards against showing the "published" modal more than once.
+  bool publishedModalShown = false;
+
   // ── Sub-component models ────────────────────────────────────────────────
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
@@ -45,6 +54,7 @@ class DOVIACLIENTMisPropiedadesVisita1Model
 
   @override
   void dispose() {
+    pollingTimer?.cancel();
     cornerGradientBackgroundModel.dispose();
     dOVIASHAREDHeaderModel.dispose();
     fixedDoviaIconModel.dispose();

@@ -9,7 +9,8 @@ export 'mis_propiedades_house_card_model.dart';
 
 /// Same as fav house card but wiith status
 class MisPropiedadesHouseCardWidget extends StatefulWidget {
-  const MisPropiedadesHouseCardWidget({super.key});
+  const MisPropiedadesHouseCardWidget({super.key, this.property});
+  final dynamic property;
 
   @override
   State<MisPropiedadesHouseCardWidget> createState() =>
@@ -43,6 +44,33 @@ class _MisPropiedadesHouseCardWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final statusKey = getJsonField(widget.property, r'''$.status''') as String? ?? 'DRAFT';
+    final name = getJsonField(widget.property, r'''$.name''') as String? ?? 'Propiedad sin nombre';
+    final typeName = getJsonField(widget.property, r'''$.propertyType.name''') as String? ?? 'Casa';
+    final propPrice = getJsonField(widget.property, r'''$.offerOptions[0].price''')?.toString() ?? '0';
+    final currency = getJsonField(widget.property, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD';
+
+    final hasVisit = getJsonField(widget.property, r'''$.operativeListerVisit.visitId''') != null || getJsonField(widget.property, r'''$.lastVisitId''') != null;
+    final isPaused = statusKey == 'ARCHIVED';
+
+    String statusText = 'Pendiente';
+    Color statusColor = const Color(0xFFF99032);
+    double percent = 0.25;
+    if (isPaused) {
+      statusText = 'Pausada';
+      statusColor = const Color(0xFFE85D75);
+      percent = 1.0;
+    } else if (statusKey == 'PENDING_REVIEW') {
+      statusText = 'En revisión';
+      percent = 0.75;
+    } else if (statusKey == 'IN_PROCESS' || (statusKey == 'DRAFT' && hasVisit)) {
+      statusText = 'En proceso';
+      percent = 0.5;
+    } else if (statusKey == 'DRAFT') {
+      statusText = 'Borrador';
+      percent = 0.25;
+    }
+
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
       decoration: BoxDecoration(
@@ -65,34 +93,67 @@ class _MisPropiedadesHouseCardWidgetState
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image.asset(
-                            'assets/images/casa_card_sobreMiVisita.png',
-                            width: 72.0,
-                            height: 108.0,
-                            fit: BoxFit.cover,
+                          child: ColorFiltered(
+                            colorFilter: isPaused
+                                ? const ColorFilter.mode(
+                                    Color(0x55000000), BlendMode.darken)
+                                : const ColorFilter.mode(
+                                    Colors.transparent, BlendMode.multiply),
+                            child: Image.asset(
+                              'assets/images/casa_card_sobreMiVisita.png',
+                              width: 72.0,
+                              height: 108.0,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              2.0, 2.0, 0.0, 0.0),
-                          child: Container(
-                            width: 20.0,
-                            height: 20.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).primary,
-                              shape: BoxShape.circle,
+                        if (isPaused)
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              height: 28,
+                              decoration: const BoxDecoration(
+                                color: Color(0xCCE85D75),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(8),
+                                  bottomRight: Radius.circular(8),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Pausada',
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(24.0),
-                              child: SvgPicture.asset(
-                                'assets/images/hearIcon.svg',
-                                width: 10.0,
-                                height: 10.0,
-                                fit: BoxFit.none,
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                2.0, 2.0, 0.0, 0.0),
+                            child: Container(
+                              width: 20.0,
+                              height: 20.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(24.0),
+                                child: SvgPicture.asset(
+                                  'assets/images/hearIcon.svg',
+                                  width: 10.0,
+                                  height: 10.0,
+                                  fit: BoxFit.none,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -111,7 +172,7 @@ class _MisPropiedadesHouseCardWidgetState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Orchard House',
+                        name,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -131,7 +192,7 @@ class _MisPropiedadesHouseCardWidgetState
                             ),
                       ),
                       Text(
-                        'Tipo',
+                        typeName,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -158,7 +219,7 @@ class _MisPropiedadesHouseCardWidgetState
                       padding:
                           const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                       child: Text(
-                        'Rp. 2.500.000.000 / Year',
+                        '$currency ${NumberFormat.decimalPattern().format(int.tryParse(propPrice) ?? 0)}',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -399,7 +460,7 @@ class _MisPropiedadesHouseCardWidgetState
                             ),
                       ),
                       Text(
-                        'Pendiente',
+                        statusText,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -409,11 +470,9 @@ class _MisPropiedadesHouseCardWidgetState
                                     .bodyMedium
                                     .fontStyle,
                               ),
-                              color: const Color(0xFFF99032),
+                              color: statusColor,
                               letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
+                              fontWeight: FontWeight.w700,
                               fontStyle: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .fontStyle,
@@ -425,12 +484,12 @@ class _MisPropiedadesHouseCardWidgetState
                     padding:
                         const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                     child: LinearPercentIndicator(
-                      percent: 0.33,
+                      percent: percent,
                       lineHeight: 12.0,
                       animation: true,
                       animateFromLastPercent: true,
-                      progressColor: FlutterFlowTheme.of(context).primaryText,
-                      backgroundColor: FlutterFlowTheme.of(context).primary,
+                      progressColor: const Color(0xFF32D74B),
+                      backgroundColor: FlutterFlowTheme.of(context).secondaryText.withOpacity(0.2),
                       barRadius: const Radius.circular(25.0),
                       padding: EdgeInsets.zero,
                     ),

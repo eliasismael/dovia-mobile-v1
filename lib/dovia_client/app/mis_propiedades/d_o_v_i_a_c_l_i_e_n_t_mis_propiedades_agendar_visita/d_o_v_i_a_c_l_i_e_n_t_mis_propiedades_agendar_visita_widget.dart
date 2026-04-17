@@ -136,11 +136,13 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
     final startTimeStr = _timeToApi(_model.timeFrom!);
     final endTimeStr = _timeToApi(_model.timeTo!);
 
-    final ranges = sortedDays.map((dayIndex) => {
-          'dayOfWeek': dayNames[dayIndex],
-          'startTime': startTimeStr,
-          'endTime': endTimeStr,
-        }).toList();
+    final ranges = sortedDays
+        .map((dayIndex) => {
+              'dayOfWeek': dayNames[dayIndex],
+              'startTime': startTimeStr,
+              'endTime': endTimeStr,
+            })
+        .toList();
 
     _model.apiResCreateVisitRequest =
         await DOVIAAPIVisitContextGroup.createOperativeListingVisitCall.call(
@@ -250,39 +252,38 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                           const SizedBox(height: 8.0),
                           Text(
                             'Este contenido nos permite presentar tu propiedad con la mejor calidad posible y atraer compradores reales.',
-                            style: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  letterSpacing: 0.0,
-                                  lineHeight: 1.5,
-                                ),
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      letterSpacing: 0.0,
+                                      lineHeight: 1.5,
+                                    ),
                           ),
 
                           const SizedBox(height: 20.0),
 
                           // 5 bullet points
-                          _BulletPoint(
+                          const _BulletPoint(
                               icon: Icons.camera_alt_outlined,
                               text: 'Fotos profesionales'),
                           const SizedBox(height: 10.0),
-                          _BulletPoint(
+                          const _BulletPoint(
                               icon: Icons.vrpano_outlined,
                               text: 'Recorrido virtual'),
                           const SizedBox(height: 10.0),
-                          _BulletPoint(
+                          const _BulletPoint(
                               icon: Icons.architecture_outlined, text: 'Plano'),
                           const SizedBox(height: 10.0),
-                          _BulletPoint(
+                          const _BulletPoint(
                               icon: Icons.location_on_outlined,
                               text:
                                   'Descripción de tu propiedad y del entorno'),
                           const SizedBox(height: 10.0),
-                          _BulletPoint(
+                          const _BulletPoint(
                               icon: Icons.star_outline,
                               text: 'Elaboración de gancho de venta'),
 
@@ -437,7 +438,8 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                           // Time validation error (only when times are set but range is invalid)
                           if (_model.timeFrom != null &&
                               _model.timeTo != null &&
-                              (_model.timeTo!.hour * 60 + _model.timeTo!.minute) <=
+                              (_model.timeTo!.hour * 60 +
+                                      _model.timeTo!.minute) <=
                                   (_model.timeFrom!.hour * 60 +
                                       _model.timeFrom!.minute))
                             Padding(
@@ -594,8 +596,7 @@ class _TimePickerField extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).secondaryBackground,
           border: Border.all(

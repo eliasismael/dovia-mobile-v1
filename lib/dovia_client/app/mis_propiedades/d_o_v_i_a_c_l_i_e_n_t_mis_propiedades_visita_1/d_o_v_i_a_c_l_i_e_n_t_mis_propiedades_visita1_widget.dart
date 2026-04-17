@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
+import '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_widget.dart';
+import '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -57,39 +61,89 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     super.dispose();
   }
 
-  Future<void> _fetchVisitDetails() async {
+  Future<void> _fetchVisitDetails({bool silent = false}) async {
     if (widget.visitId == null || widget.visitId!.isEmpty) return;
-    safeSetState(() => _model.isLoading = true);
+    if (!silent) safeSetState(() => _model.isLoading = true);
     _model.visitDetailsResponse =
         await DOVIAAPIVisitContextGroup.getVisitDetailsCall.call(
       visitId: widget.visitId,
       authToken: currentAuthenticationToken,
     );
-    if (mounted) {
-      final body = _model.visitDetailsResponse?.jsonBody;
-      if (body != null) {
-        final instructions = (body['instructions'] as String?) ?? '';
-        _model.instructionsController?.text = instructions;
+    if (!mounted) return;
+    final body = _model.visitDetailsResponse?.jsonBody;
+    if (body != null) {
+      final instructions = (body['instructions'] as String?) ?? '';
+      _model.instructionsController?.text = instructions;
 
-        // Restore contract upload state: true if the backend already has a
-        // signed contract on file (field may be a bool flag or a non-empty URL).
-        final uploaded = body['contractUploaded'];
-        final signedUrl = body['signedContractUrl'];
-        _model.contractUploaded = (uploaded == true) ||
-            (signedUrl != null && signedUrl.toString().isNotEmpty);
-      }
-      safeSetState(() => _model.isLoading = false);
+      final uploaded = body['contractUploaded'];
+      final signedUrl = body['signedContractUrl'];
+      _model.contractUploaded = (uploaded == true) ||
+          (signedUrl != null && signedUrl.toString().isNotEmpty);
+    }
+    if (!silent) safeSetState(() => _model.isLoading = false);
+
+    final newStep = _currentStep(body);
+
+    // Start polling once we land on step 3.
+    if (newStep == 3) _startPolling();
+
+    // When polling detects the property was published, show the modal once.
+    if (newStep == 4 && !_model.publishedModalShown) {
+      _stopPolling();
+      _model.publishedModalShown = true;
+      safeSetState(() {});
+      await Future.microtask(() {}); // let the frame rebuild first
+      if (mounted) _showPublishedModal();
+    } else if (!silent) {
+      safeSetState(() {});
     }
   }
 
-  /// Derive the step (1–4) from the visit status/substatus.
+  void _startPolling() {
+    if (_model.pollingTimer != null && _model.pollingTimer!.isActive) return;
+    _model.pollingTimer = Timer.periodic(
+      const Duration(seconds: 20),
+      (_) => _fetchVisitDetails(silent: true),
+    );
+  }
+
+  void _stopPolling() {
+    _model.pollingTimer?.cancel();
+    _model.pollingTimer = null;
+  }
+
+  void _showPublishedModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) => _PublishedModal(
+        onSkip: () {
+          Navigator.pop(context);
+          context.goNamed(DOVIACLIENTMisPropiedadesWidget.routeName);
+        },
+        onViewMore: () {
+          Navigator.pop(context);
+          context.goNamed(
+            DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routeName,
+          );
+        },
+      ),
+    );
+  }
+
+  /// Derive the step (1–4) from the visit status.
+  /// Step 3 activates when the backend status is IN_PROGRESS or En_Revision_HQ.
   int _currentStep(dynamic body) {
     if (body == null) return 2;
     final status = (body['status'] as String?) ?? '';
     switch (status) {
       case 'COMPLETED':
+      case 'PUBLISHED':
         return 4;
       case 'IN_PROGRESS':
+        return 2;
+      case 'En_Revision_HQ':
         return 3;
       case 'PENDING':
       default:
@@ -179,6 +233,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
   Widget build(BuildContext context) {
     final body = _model.visitDetailsResponse?.jsonBody;
     final step = _currentStep(body);
+    final headerTitle = step == 3 ? 'Preparar material' : 'Visita';
     final listerAssigned = _listerAssigned(body);
     final unsignedContractUrl = (body?['unsignedContractUrl'] as String?) ?? '';
 
@@ -216,8 +271,8 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                       wrapWithModel(
                         model: _model.dOVIASHAREDHeaderModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: const DOVIASHAREDHeaderWidget(
-                          title: 'Visita',
+                        child: DOVIASHAREDHeaderWidget(
+                          title: headerTitle,
                           showMap: false,
                           showCurrency: false,
                         ),
@@ -306,7 +361,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                         border: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(10.0),
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: _teal, width: 1.5),
                                         ),
                                         enabledBorder: OutlineInputBorder(
@@ -320,7 +375,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(10.0),
-                                          borderSide: BorderSide(
+                                          borderSide: const BorderSide(
                                               color: _teal, width: 1.5),
                                         ),
                                       ),
@@ -1284,11 +1339,11 @@ class _Step4Content extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 12),
-        _InfoRow(label: 'Certificación registral'),
+        const _InfoRow(label: 'Certificación registral'),
         const SizedBox(height: 12),
-        _InfoRow(label: 'Contrato firmado'),
+        const _InfoRow(label: 'Contrato firmado'),
         const SizedBox(height: 12),
-        _InfoRow(label: 'Instrucciones para asociados'),
+        const _InfoRow(label: 'Instrucciones para asociados'),
       ],
     );
   }
@@ -1329,6 +1384,118 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Modal: propiedad publicada ─────────────────────────────────────────────
+class _PublishedModal extends StatelessWidget {
+  const _PublishedModal({
+    required this.onSkip,
+    required this.onViewMore,
+  });
+
+  final VoidCallback onSkip;
+  final VoidCallback onViewMore;
+
+  static const Color _teal = Color(0xFF006B6B);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24.0, 28.0, 24.0, 24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Ícono de éxito ───────────────────────────────────────────
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: Color(0xFFD2EAEB),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_rounded, color: _teal, size: 36),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Título ───────────────────────────────────────────────────
+            Text(
+              'Tu propiedad ya se publicó',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).headlineSmall.override(
+                    font: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                    color: FlutterFlowTheme.of(context).primaryText,
+                    letterSpacing: 0.0,
+                  ),
+            ),
+            const SizedBox(height: 12),
+
+            // ── Subtítulo ────────────────────────────────────────────────
+            Text(
+              'DOVIA HQ ya verificó la información enviada y ha publicado tu propiedad. Ya puedes ver cómo quedó.',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.inter(fontWeight: FontWeight.w400),
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                    letterSpacing: 0.0,
+                    lineHeight: 1.5,
+                  ),
+            ),
+            const SizedBox(height: 28),
+
+            // ── Botones ──────────────────────────────────────────────────
+            Row(
+              children: [
+                // Omitir (contorno)
+                Expanded(
+                  child: FFButtonWidget(
+                    onPressed: onSkip,
+                    text: 'Omitir',
+                    options: FFButtonOptions(
+                      height: 46.0,
+                      color: Colors.transparent,
+                      textStyle:
+                          FlutterFlowTheme.of(context).bodyMedium.override(
+                                font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600),
+                                color: _teal,
+                                letterSpacing: 0.0,
+                              ),
+                      elevation: 0.0,
+                      borderSide: const BorderSide(color: _teal, width: 1.5),
+                      borderRadius: BorderRadius.circular(24.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Ver más (sólido)
+                Expanded(
+                  child: FFButtonWidget(
+                    onPressed: onViewMore,
+                    text: 'Ver más',
+                    options: FFButtonOptions(
+                      height: 46.0,
+                      color: _teal,
+                      textStyle:
+                          FlutterFlowTheme.of(context).bodyMedium.override(
+                                font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600),
+                                color: Colors.white,
+                                letterSpacing: 0.0,
+                              ),
+                      elevation: 0.0,
+                      borderRadius: BorderRadius.circular(24.0),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

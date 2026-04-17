@@ -50,7 +50,7 @@ class _AgendarCitaWidgetState extends State<AgendarCitaWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: MediaQuery.sizeOf(context).width * 1.0,
       height: MediaQuery.sizeOf(context).height * 1.0,
       child: custom_widgets.ScheduleAppointmentWidget(

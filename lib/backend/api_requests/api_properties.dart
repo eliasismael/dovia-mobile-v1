@@ -1,4 +1,3 @@
-import '../schema/structs/index.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
@@ -128,46 +127,57 @@ class CreatePropertyBasicSALEAndRENTCall {
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  "listingType": [
-    "SALE",
-    "RENT"
-  ],
-  "name": "${escapeStringForJson(name)}",
-  "address": "${escapeStringForJson(address)}",
-  "geoLocation": {
-    "longitude": $longitude,
-    "latitude": $latitude
-  },
-  "legalInfo": {
-    "finca": "${escapeStringForJson(finca)}",
-    "folio": "${escapeStringForJson(follio)}",
-    "libro": "${escapeStringForJson(libro)}"
-  },
-  "saleInfo": {
-    "salePrice": $salePrice,
-    "maintenanceFee": $maintenanceFee,
-    "singlePropertyTax": $singlePropertyTax
-  },
-  "rentInfo": {
-    "monthlyRent": $monthlyRent,
-    "rentalConditions": {
-      "minimumTime": $minimumTimeRent,
-      "allowedUses": "${escapeStringForJson(allowedUses)}",
-      "prohibitedUses": "${escapeStringForJson(prohibitedUses)}",
-      "availableFrom": "${escapeStringForJson(availableFrom)}",
-      "others": "${escapeStringForJson(othersRent)}"
+    Map<String, dynamic> bodyRaw = {
+      "listingType": ["SALE", "RENT"],
+      "name": name,
+      "address": address,
+      "geoLocation": {
+        "longitude": longitude,
+        "latitude": latitude
+      },
+      "saleInfo": {
+        if (salePrice != null) "salePrice": salePrice,
+        if (maintenanceFee != null) "maintenanceFee": maintenanceFee,
+        if (singlePropertyTax != null) "singlePropertyTax": singlePropertyTax
+      },
+      "rentInfo": {
+        if (monthlyRent != null) "monthlyRent": monthlyRent,
+        "rentalConditions": {
+          if (minimumTimeRent != null) "minimumTime": minimumTimeRent,
+          if (allowedUses?.isNotEmpty == true) "allowedUses": allowedUses,
+          if (prohibitedUses?.isNotEmpty == true) "prohibitedUses": prohibitedUses,
+          if (availableFrom?.isNotEmpty == true) "availableFrom": availableFrom,
+          if (othersRent?.isNotEmpty == true) "others": othersRent
+        }
+      },
+    };
+
+    if (finca?.isNotEmpty == true || follio?.isNotEmpty == true || libro?.isNotEmpty == true) {
+      bodyRaw["legalInfo"] = {
+        if (finca?.isNotEmpty == true) "finca": finca,
+        if (follio?.isNotEmpty == true) "folio": follio,
+        if (libro?.isNotEmpty == true) "libro": libro,
+      };
     }
-  },
-  "ownership": ${isCompanyOwned == true ? '''{
-    "isCompanyOwned": true,
-    "companyName": "${escapeStringForJson(companyName)}",
-    "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
-  }''' : '''{
-    "isCompanyOwned": false
-  }'''}
-}''';
+
+    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
+        ? legalRepresentative
+        : companyName;
+
+    if (isCompanyOwned == true) {
+      bodyRaw["ownership"] = {
+        "isCompanyOwned": true,
+        "companyName": companyName,
+        "legalRepresentative": effectiveLegalRep ?? ''
+      };
+    } else {
+      bodyRaw["ownership"] = {
+        "isCompanyOwned": false,
+        "legalRepresentative": effectiveLegalRep ?? ''
+      };
+    }
+
+    final ffApiRequestBody = jsonEncode(bodyRaw);
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic SALE and RENT',
       apiUrl: '$baseUrl/properties/basic',
@@ -205,39 +215,57 @@ class CreatePropertyBasicRENTCall {
     String? prohibitedUses = '',
     String? availableFrom = '',
     bool? isCompanyOwned,
+    String? companyName = '',
+    String? legalRepresentative = '',
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  "listingType": [
-    "RENT"
-  ],
-  "name": "${escapeStringForJson(name)}",
-  "address": "${escapeStringForJson(address)}",
-  "geoLocation": {
-    "longitude": $longitude,
-    "latitude": $latitude
-  },
-  "legalInfo": {
-    "finca": "${escapeStringForJson(finca)}",
-    "folio": "${escapeStringForJson(follio)}",
-    "libro": "${escapeStringForJson(libro)}"
-  },
-  "rentInfo": {
-    "monthlyRent": $monthlyRent,
-    "rentalConditions": {
-      "minimumTime": $minimumTimeRent,
-      "allowedUses": "${escapeStringForJson(allowedUses)}",
-      "prohibitedUses": "${escapeStringForJson(prohibitedUses)}",
-      "availableFrom": "${escapeStringForJson(availableFrom)}",
-      "others": "${escapeStringForJson(othersRent)}"
+    Map<String, dynamic> bodyRaw = {
+      "listingType": ["RENT"],
+      "name": name,
+      "address": address,
+      "geoLocation": {
+        "longitude": longitude,
+        "latitude": latitude
+      },
+      "rentInfo": {
+        if (monthlyRent != null) "monthlyRent": monthlyRent,
+        "rentalConditions": {
+          if (minimumTimeRent != null) "minimumTime": minimumTimeRent,
+          if (allowedUses?.isNotEmpty == true) "allowedUses": allowedUses,
+          if (prohibitedUses?.isNotEmpty == true) "prohibitedUses": prohibitedUses,
+          if (availableFrom?.isNotEmpty == true) "availableFrom": availableFrom,
+          if (othersRent?.isNotEmpty == true) "others": othersRent
+        }
+      },
+    };
+
+    if (finca?.isNotEmpty == true || follio?.isNotEmpty == true || libro?.isNotEmpty == true) {
+      bodyRaw["legalInfo"] = {
+        if (finca?.isNotEmpty == true) "finca": finca,
+        if (follio?.isNotEmpty == true) "folio": follio,
+        if (libro?.isNotEmpty == true) "libro": libro,
+      };
     }
-  },
-  "ownership": {
-    "isCompanyOwned": $isCompanyOwned
-  }
-}''';
+
+    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
+        ? legalRepresentative
+        : companyName;
+
+    if (isCompanyOwned == true) {
+      bodyRaw["ownership"] = {
+        "isCompanyOwned": true,
+        "companyName": companyName,
+        "legalRepresentative": effectiveLegalRep ?? ''
+      };
+    } else {
+      bodyRaw["ownership"] = {
+        "isCompanyOwned": false,
+        "legalRepresentative": effectiveLegalRep ?? ''
+      };
+    }
+
+    final ffApiRequestBody = jsonEncode(bodyRaw);
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic RENT',
       apiUrl: '$baseUrl/properties/basic',
@@ -282,35 +310,47 @@ class CreatePropertyBasicSALECall {
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  "listingType": [
-    "SALE"
-  ],
-  "name": "${escapeStringForJson(name)}",
-  "address": "${escapeStringForJson(address)}",
-  "geoLocation": {
-    "longitude": $longitude,
-    "latitude": $latitude
-  },
-  "legalInfo": {
-    "finca": "${escapeStringForJson(finca)}",
-    "folio": "${escapeStringForJson(follio)}",
-    "libro": "${escapeStringForJson(libro)}"
-  },
-  "saleInfo": {
-    "salePrice": $salePrice,
-    "maintenanceFee": $maintenanceFee,
-    "singlePropertyTax": $singlePropertyTax
-  },
-  "ownership": ${isCompanyOwned == true ? '''{
-    "isCompanyOwned": true,
-    "companyName": "${escapeStringForJson(companyName)}",
-    "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
-  }''' : '''{
-    "isCompanyOwned": false
-  }'''}
-}''';
+    Map<String, dynamic> bodyRaw = {
+      "listingType": ["SALE"],
+      "name": name,
+      "address": address,
+      "geoLocation": {
+        "longitude": longitude,
+        "latitude": latitude
+      },
+      "saleInfo": {
+        if (salePrice != null) "salePrice": salePrice,
+        if (maintenanceFee != null) "maintenanceFee": maintenanceFee,
+        if (singlePropertyTax != null) "singlePropertyTax": singlePropertyTax
+      },
+    };
+
+    if (finca?.isNotEmpty == true || follio?.isNotEmpty == true || libro?.isNotEmpty == true) {
+      bodyRaw["legalInfo"] = {
+        if (finca?.isNotEmpty == true) "finca": finca,
+        if (follio?.isNotEmpty == true) "folio": follio,
+        if (libro?.isNotEmpty == true) "libro": libro,
+      };
+    }
+
+    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
+        ? legalRepresentative
+        : companyName;
+
+    if (isCompanyOwned == true) {
+      bodyRaw["ownership"] = {
+        "isCompanyOwned": true,
+        "companyName": companyName,
+        "legalRepresentative": effectiveLegalRep ?? ''
+      };
+    } else {
+      bodyRaw["ownership"] = {
+        "isCompanyOwned": false,
+        "legalRepresentative": effectiveLegalRep ?? ''
+      };
+    }
+
+    final ffApiRequestBody = jsonEncode(bodyRaw);
     return ApiManager.instance.makeApiCall(
       callName: 'Create Property Basic SALE',
       apiUrl: '$baseUrl/properties/basic',
@@ -714,16 +754,57 @@ class GetPropertyByIDCall {
 class UpdatePropertyCall {
   Future<ApiCallResponse> call({
     String? propertyId = '',
+    String? authToken = '',
+    List<String>? listingType,
+    double? salePrice,
+    double? maintenanceFee,
+    double? singlePropertyTax,
+    double? monthlyRent,
+    int? minimumTimeRent,
+    String? othersRent,
+    String? allowedUses,
+    String? availableFrom,
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
-{}''';
+    final Map<String, dynamic> body = {};
+
+    if (listingType != null && listingType.isNotEmpty) {
+      body['listingType'] = listingType;
+    }
+
+    final bool hasSale = listingType?.contains('SALE') == true;
+    final bool hasRent = listingType?.contains('RENT') == true;
+
+    if (hasSale) {
+      final Map<String, dynamic> saleInfo = {};
+      // amountToReceive is computed server-side — not accepted in PATCH
+      if (salePrice != null) saleInfo['salePrice'] = salePrice;
+      if (maintenanceFee != null) saleInfo['maintenanceFee'] = maintenanceFee;
+      if (singlePropertyTax != null) saleInfo['singlePropertyTax'] = singlePropertyTax;
+      if (saleInfo.isNotEmpty) body['saleInfo'] = saleInfo;
+    }
+
+    if (hasRent) {
+      final Map<String, dynamic> rentInfo = {};
+      if (monthlyRent != null) rentInfo['monthlyRent'] = monthlyRent;
+      final Map<String, dynamic> conditions = {};
+      if (minimumTimeRent != null) conditions['minimumTime'] = minimumTimeRent;
+      if (othersRent?.isNotEmpty == true) conditions['others'] = othersRent;
+      if (allowedUses?.isNotEmpty == true) conditions['allowedUses'] = allowedUses;
+      if (availableFrom?.isNotEmpty == true) conditions['availableFrom'] = availableFrom;
+      if (conditions.isNotEmpty) rentInfo['rentalConditions'] = conditions;
+      if (rentInfo.isNotEmpty) body['rentInfo'] = rentInfo;
+    }
+
+    final ffApiRequestBody = jsonEncode(body);
     return ApiManager.instance.makeApiCall(
       callName: 'Update Property',
       apiUrl: '$baseUrl/properties/$propertyId',
       callType: ApiCallType.PATCH,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -817,13 +898,15 @@ class ChangePropertyStatusCall {
     String? propertyId = '',
     String? status = '',
     String? authToken = '',
+    String? note, // optional, max 1000 chars — logged in event log
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  "status": "${escapeStringForJson(status)}"
-}''';
+    // API accepts: ARCHIVED (pause), DELETED (remove), PUBLISHED (reactivate)
+    // `note` is optional — included only when provided
+    final body = <String, dynamic>{'status': status};
+    if (note != null && note.isNotEmpty) body['note'] = note;
+    final ffApiRequestBody = jsonEncode(body);
     return ApiManager.instance.makeApiCall(
       callName: 'Change Property Status',
       apiUrl: '$baseUrl/properties/$propertyId/status',

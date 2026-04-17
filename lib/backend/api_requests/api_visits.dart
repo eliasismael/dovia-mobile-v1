@@ -1,4 +1,3 @@
-import '../schema/structs/index.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
@@ -34,7 +33,8 @@ class DOVIAAPIVisitContextGroup {
       GetAdminOperativeListingVisitsCall();
   static AdminAssignListerHqCall adminAssignListerHqCall =
       AdminAssignListerHqCall();
-  static UploadListerHqChecklistDocumentCall uploadListerHqChecklistDocumentCall =
+  static UploadListerHqChecklistDocumentCall
+      uploadListerHqChecklistDocumentCall =
       UploadListerHqChecklistDocumentCall();
   static ReviewChecklistDocumentsCall reviewChecklistDocumentsCall =
       ReviewChecklistDocumentsCall();
@@ -74,7 +74,9 @@ class CreateVisitRequestCall {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
     String ffApiRequestBody = '';
-    if (dateThree != null && dateThree != '0000-00-00' && dateThree.isNotEmpty) {
+    if (dateThree != null &&
+        dateThree != '0000-00-00' &&
+        dateThree.isNotEmpty) {
       ffApiRequestBody = '''
 {
   "proposedTimeSlots": [
@@ -109,10 +111,10 @@ class CreateVisitRequestCall {
     }
     return ApiManager.instance.makeApiCall(
       callName: 'Create Visit Request',
-      apiUrl: '${baseUrl}/visits/properties/${propertyId}/visit-requests',
+      apiUrl: '$baseUrl/visits/properties/$propertyId/visit-requests',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -141,11 +143,10 @@ class CreateOperativeListingVisitCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Create Operative Listing Visit',
-      apiUrl:
-          '${baseUrl}/visits/properties/${propertyId}/operative-listing-visits',
+      apiUrl: '$baseUrl/visits/properties/$propertyId/operative-listing-visits',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -170,10 +171,10 @@ class UploadSignedContractCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Signed Contract',
-      apiUrl: '${baseUrl}/visits/${visitId}/documents/signed-contract',
+      apiUrl: '$baseUrl/visits/$visitId/documents/signed-contract',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'file': file,
@@ -203,10 +204,10 @@ class UpdateVisitInstructionsCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update Visit Instructions',
-      apiUrl: '${baseUrl}/visits/${visitId}/instructions',
+      apiUrl: '$baseUrl/visits/$visitId/instructions',
       callType: ApiCallType.PUT,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -232,14 +233,14 @@ class HardScheduleVisitCall {
     final ffApiRequestBody = '''
 {
   "visitId": "${escapeStringForJson(visitId)}",
-  "timeSlotIndex": ${timeSlotIndex}
+  "timeSlotIndex": $timeSlotIndex
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Hard Schedule Visit',
-      apiUrl: '${baseUrl}/visits/hard',
+      apiUrl: '$baseUrl/visits/hard',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -268,10 +269,10 @@ class GetMyVisitsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get My Visits',
-      apiUrl: '${baseUrl}/visits/me',
+      apiUrl: '$baseUrl/visits/me',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         if (filter != null && filter.isNotEmpty) 'filter': filter,
@@ -300,10 +301,10 @@ class GetVisitDetailsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Visit Details',
-      apiUrl: '${baseUrl}/visits/${visitId}/details',
+      apiUrl: '$baseUrl/visits/$visitId/details',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       returnBody: true,
@@ -325,10 +326,10 @@ class CancelVisitCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Cancel Visit',
-      apiUrl: '${baseUrl}/visits/${visitId}/cancel',
+      apiUrl: '$baseUrl/visits/$visitId/cancel',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -356,7 +357,9 @@ class RescheduleVisitCall {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
     String ffApiRequestBody = '';
-    if (dateThree != null && dateThree != '0000-00-00' && dateThree.isNotEmpty) {
+    if (dateThree != null &&
+        dateThree != '0000-00-00' &&
+        dateThree.isNotEmpty) {
       ffApiRequestBody = '''
 {
   "proposedTimeSlots": [
@@ -376,10 +379,10 @@ class RescheduleVisitCall {
     }
     return ApiManager.instance.makeApiCall(
       callName: 'Reschedule Visit',
-      apiUrl: '${baseUrl}/visits/${visitId}/visit-reschedule',
+      apiUrl: '$baseUrl/visits/$visitId/visit-reschedule',
       callType: ApiCallType.PATCH,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -405,10 +408,10 @@ class GetListerHqVisitsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Lister HQ Visits',
-      apiUrl: '${baseUrl}/visits/lister-hq',
+      apiUrl: '$baseUrl/visits/lister-hq',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'substatus': substatus,
@@ -436,10 +439,10 @@ class GetListerHqVisitDocumentsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Lister HQ Visit Documents',
-      apiUrl: '${baseUrl}/visits/lister-hq/documents',
+      apiUrl: '$baseUrl/visits/lister-hq/documents',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'status': status,
@@ -467,10 +470,10 @@ class GetOperativeListerVisitsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Operative Lister Visits',
-      apiUrl: '${baseUrl}/visits/operative-lister',
+      apiUrl: '$baseUrl/visits/operative-lister',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'substatus': substatus,
@@ -498,10 +501,10 @@ class GetOperativeListerScheduleCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Operative Lister Schedule',
-      apiUrl: '${baseUrl}/visits/operative-lister/schedule',
+      apiUrl: '$baseUrl/visits/operative-lister/schedule',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'year': year,
@@ -529,10 +532,10 @@ class GetAdminOperativeListingVisitsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Admin Operative Listing Visits',
-      apiUrl: '${baseUrl}/admin/visits/operative-listing',
+      apiUrl: '$baseUrl/admin/visits/operative-listing',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'withoutListerHq': withoutListerHq,
@@ -563,10 +566,10 @@ class AdminAssignListerHqCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Admin Assign Lister HQ',
-      apiUrl: '${baseUrl}/admin/visits/${visitId}/assign-lister-hq',
+      apiUrl: '$baseUrl/admin/visits/$visitId/assign-lister-hq',
       callType: ApiCallType.PATCH,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -592,11 +595,10 @@ class UploadListerHqChecklistDocumentCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Lister HQ Checklist Document',
-      apiUrl:
-          '${baseUrl}/visits/${visitId}/lister-hq/documents/${checklistType}',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/documents/$checklistType',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'file': file,
@@ -626,11 +628,10 @@ class ReviewChecklistDocumentsCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Review Checklist Documents',
-      apiUrl:
-          '${baseUrl}/visits/${visitId}/lister-hq/document-checklist/review',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/document-checklist/review',
       callType: ApiCallType.PATCH,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -654,10 +655,10 @@ class LegalApprovalCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Legal Approval',
-      apiUrl: '${baseUrl}/visits/${visitId}/legal-approval',
+      apiUrl: '$baseUrl/visits/$visitId/legal-approval',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -689,10 +690,10 @@ class AssignOperativeListerCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Assign Operative Lister',
-      apiUrl: '${baseUrl}/visits/${visitId}/assign-operative-lister',
+      apiUrl: '$baseUrl/visits/$visitId/assign-operative-lister',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -716,10 +717,10 @@ class MarkVisitedCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Mark Visited',
-      apiUrl: '${baseUrl}/visits/${visitId}/mark-visited',
+      apiUrl: '$baseUrl/visits/$visitId/mark-visited',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -742,10 +743,10 @@ class PublishPropertyAfterVisitCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Publish Property After Visit',
-      apiUrl: '${baseUrl}/visits/${visitId}/publish',
+      apiUrl: '$baseUrl/visits/$visitId/publish',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -774,10 +775,10 @@ class GetOwnerPropertyVisitsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Owner Property Visits',
-      apiUrl: '${baseUrl}/visits/properties/${propertyId}/owner',
+      apiUrl: '$baseUrl/visits/properties/$propertyId/owner',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'filter': filter,
@@ -813,10 +814,10 @@ class OwnerConfirmSlotCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Owner Confirm Slot',
-      apiUrl: '${baseUrl}/visits/${visitId}/owner/confirm',
+      apiUrl: '$baseUrl/visits/$visitId/owner/confirm',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -841,10 +842,10 @@ class GetShowingAgentUnassignedVisitsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Showing Agent Unassigned Visits',
-      apiUrl: '${baseUrl}/visits/showing-agent/unassigned',
+      apiUrl: '$baseUrl/visits/showing-agent/unassigned',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'page': page,
@@ -874,10 +875,10 @@ class GetShowingAgentVisitsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Showing Agent Visits',
-      apiUrl: '${baseUrl}/visits/showing-agent',
+      apiUrl: '$baseUrl/visits/showing-agent',
       callType: ApiCallType.GET,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {
         'filter': filter,
@@ -906,10 +907,10 @@ class ShowingAgentAcceptVisitCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Showing Agent Accept Visit',
-      apiUrl: '${baseUrl}/visits/${visitId}/showing-agent/accept',
+      apiUrl: '$baseUrl/visits/$visitId/showing-agent/accept',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       bodyType: BodyType.JSON,
@@ -937,10 +938,10 @@ class ShowingReportProblemCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Showing Report Problem',
-      apiUrl: '${baseUrl}/visits/${visitId}/showing/report-problem',
+      apiUrl: '$baseUrl/visits/$visitId/showing/report-problem',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,
@@ -969,10 +970,10 @@ class ShowingNotCompletedReportCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Showing Not Completed Report',
-      apiUrl: '${baseUrl}/visits/${visitId}/showing/not-completed-report',
+      apiUrl: '$baseUrl/visits/$visitId/showing/not-completed-report',
       callType: ApiCallType.POST,
       headers: {
-        'Authorization': 'Bearer ${authToken}',
+        'Authorization': 'Bearer $authToken',
       },
       params: {},
       body: ffApiRequestBody,

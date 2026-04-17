@@ -68,7 +68,7 @@ class _DOVIACLIENTMisPropiedadesRentarWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
+                      child: const DOVIASHAREDHeaderWidget(showMap: false, showCurrency: false,
                         title: 'Rentar',
                       ),
                     ),

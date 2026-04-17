@@ -3743,11 +3743,10 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                       }
                                                     },
                                                   );
-                                                  return Center(
+                                                  return const Center(
                                                     child: Material(
                                                       color: Colors.transparent,
-                                                      child:
-                                                          const PopupExitoWidget(
+                                                      child: PopupExitoWidget(
                                                         title:
                                                             'Se envió la oferta correctamente',
                                                         text:

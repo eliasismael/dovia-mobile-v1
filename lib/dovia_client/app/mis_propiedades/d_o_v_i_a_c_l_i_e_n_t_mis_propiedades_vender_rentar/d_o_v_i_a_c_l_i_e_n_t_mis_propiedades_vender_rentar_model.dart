@@ -1,23 +1,14 @@
-import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
-import '/backend/schema/enums/enums.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_rentar_widget.dart'
     show DOVIACLIENTMisPropiedadesVenderRentarWidget;
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 import '/flutter_flow/form_field_controller.dart';
 
