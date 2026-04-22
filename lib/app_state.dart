@@ -39,6 +39,10 @@ class FFAppState extends ChangeNotifier {
         }
       }
     });
+    _safeInit(() {
+      _requestedDateChangesVisits =
+          prefs.getStringList('ff_requestedDateChangesVisits') ?? _requestedDateChangesVisits;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -86,6 +90,23 @@ class FFAppState extends ChangeNotifier {
   void updateUserDataStruct(Function(UserDataFromRegisterFormStruct) updateFn) {
     updateFn(_UserData);
     prefs.setString('ff_UserData', _UserData.serialize());
+  }
+
+  List<String> _requestedDateChangesVisits = [];
+  List<String> get requestedDateChangesVisits => _requestedDateChangesVisits;
+  set requestedDateChangesVisits(List<String> value) {
+    _requestedDateChangesVisits = value;
+    prefs.setStringList('ff_requestedDateChangesVisits', value);
+  }
+
+  void addToRequestedDateChangesVisits(String value) {
+    _requestedDateChangesVisits.add(value);
+    prefs.setStringList('ff_requestedDateChangesVisits', _requestedDateChangesVisits);
+  }
+
+  void removeFromRequestedDateChangesVisits(String value) {
+    _requestedDateChangesVisits.remove(value);
+    prefs.setStringList('ff_requestedDateChangesVisits', _requestedDateChangesVisits);
   }
 }
 

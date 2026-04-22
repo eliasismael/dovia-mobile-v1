@@ -62,7 +62,8 @@ class _ComoUsarasTuCuentaWidgetState extends State<ComoUsarasTuCuentaWidget> {
                 child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -117,6 +118,40 @@ class _ComoUsarasTuCuentaWidgetState extends State<ComoUsarasTuCuentaWidget> {
                         );
 
                         if ((_model.apiResultcnl?.succeeded ?? false)) {
+                          String? newToken = DOVIAAPIAuthContextGroup
+                              .selectRoleCall
+                              .idToken(_model.apiResultcnl?.jsonBody);
+                          String? newRefreshToken = DOVIAAPIAuthContextGroup
+                              .selectRoleCall
+                              .refreshToken(_model.apiResultcnl?.jsonBody);
+
+                          debugPrint('[ComoUsaras] SelectRole succeeded. Token found: ${newToken != null}');
+                          if (newToken == null || newToken.isEmpty) {
+                            debugPrint('[ComoUsaras] No token in SelectRole, attempting Refresh...');
+                            final refreshRes = await DOVIAAPIAuthContextGroup.refreshTokenNEWCall.call(
+                              refreshToken: currentAuthRefreshToken,
+                            );
+                            debugPrint('[ComoUsaras] Refresh result: ${refreshRes.succeeded}');
+                            if (refreshRes.succeeded) {
+                              newToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall.idToken(refreshRes.jsonBody);
+                              newRefreshToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall.refreshTokenResponse(refreshRes.jsonBody);
+                            }
+                          }
+
+                          if (newToken != null && newToken.isNotEmpty) {
+                            debugPrint('[ComoUsaras] Updating auth data and setting UserRole to CLIENT');
+                            authManager.updateAuthUserData(
+                              authenticationToken: newToken,
+                              refreshToken: newRefreshToken,
+                              tokenExpiration: currentAuthTokenExpiration,
+                              authUid: currentUserUid,
+                            );
+                            FFAppState().UserRole = 'CLIENT';
+                            FFAppState().update(() {});
+                          } else {
+                            debugPrint('[ComoUsaras] WARNING: No token available even after refresh.');
+                          }
+
                           context.pushNamed(Datos3NewWidget.routeName);
                         } else {
                           await showDialog(

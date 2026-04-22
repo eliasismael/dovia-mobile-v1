@@ -97,6 +97,16 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
+                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              if (newToken != null && newToken.isNotEmpty) {
+                                authManager.updateAuthUserData(
+                                  authenticationToken: newToken,
+                                  refreshToken: newRefreshToken,
+                                  tokenExpiration: currentAuthTokenExpiration,
+                                  authUid: currentUserUid,
+                                );
+                              }
                               FFAppState().UserRole = 'SHOWING_AGENT';
                               if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
                             }
@@ -107,6 +117,16 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
+                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              if (newToken != null && newToken.isNotEmpty) {
+                                authManager.updateAuthUserData(
+                                  authenticationToken: newToken,
+                                  refreshToken: newRefreshToken,
+                                  tokenExpiration: currentAuthTokenExpiration,
+                                  authUid: currentUserUid,
+                                );
+                              }
                               FFAppState().UserRole = 'OPERATIVE_LISTER';
                               if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
                             }
@@ -117,6 +137,16 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
+                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              if (newToken != null && newToken.isNotEmpty) {
+                                authManager.updateAuthUserData(
+                                  authenticationToken: newToken,
+                                  refreshToken: newRefreshToken,
+                                  tokenExpiration: currentAuthTokenExpiration,
+                                  authUid: currentUserUid,
+                                );
+                              }
                               FFAppState().UserRole = 'HOME_ASSOCIATE';
                               if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
                             }
@@ -127,6 +157,16 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
+                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              if (newToken != null && newToken.isNotEmpty) {
+                                authManager.updateAuthUserData(
+                                  authenticationToken: newToken,
+                                  refreshToken: newRefreshToken,
+                                  tokenExpiration: currentAuthTokenExpiration,
+                                  authUid: currentUserUid,
+                                );
+                              }
                               FFAppState().UserRole = 'LEGAL_ASSOCIATE';
                               if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
                             }
