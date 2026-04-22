@@ -353,6 +353,18 @@ class RefreshTokenNEWCall {
       alwaysAllowBody: false,
     );
   }
+
+  String? accessToken(dynamic response) => 
+      castToType<String>(getJsonField(response, r'''$.data.accessToken''')) ??
+      castToType<String>(getJsonField(response, r'''$.data.tokens.accessToken'''));
+  
+  String? refreshTokenResponse(dynamic response) => 
+      castToType<String>(getJsonField(response, r'''$.data.refreshToken''')) ??
+      castToType<String>(getJsonField(response, r'''$.data.tokens.refreshToken'''));
+      
+  String? idToken(dynamic response) => 
+      castToType<String>(getJsonField(response, r'''$.data.idToken''')) ??
+      castToType<String>(getJsonField(response, r'''$.data.tokens.idToken'''));
 }
 
 class SelectRoleCall {
@@ -387,6 +399,20 @@ class SelectRoleCall {
       alwaysAllowBody: false,
     );
   }
+
+  String? accessToken(dynamic response) =>
+      castToType<String>(getJsonField(response, r'''$.data.accessToken''')) ??
+      castToType<String>(
+          getJsonField(response, r'''$.data.tokens.accessToken'''));
+
+  String? refreshToken(dynamic response) =>
+      castToType<String>(getJsonField(response, r'''$.data.refreshToken''')) ??
+      castToType<String>(
+          getJsonField(response, r'''$.data.tokens.refreshToken'''));
+
+  String? idToken(dynamic response) =>
+      castToType<String>(getJsonField(response, r'''$.data.idToken''')) ??
+      castToType<String>(getJsonField(response, r'''$.data.tokens.idToken'''));
 }
 
 /// End DOVIA API - Auth Context Group Code

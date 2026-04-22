@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '/app_state.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
+import '/backend/api_requests/api_auth.dart';
 import '/core/result.dart';
 import '/domain/visit_models.dart';
 
@@ -32,8 +33,7 @@ class VisitsRepository extends ChangeNotifier {
     notifyListeners();
 
     final token = currentAuthenticationToken ?? '';
-    final response =
-        await DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
+    final response = await DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
       authToken: token,
       filter: 'upcoming',
     );
@@ -64,10 +64,13 @@ class VisitsRepository extends ChangeNotifier {
     String dateThree = '0000-00-00',
     String hourThree = '00:00',
   }) async {
+    debugPrint('[VisitsRepo] Creating visit request. Current FFAppState.UserRole: ${FFAppState().UserRole}');
     if (FFAppState().UserRole != 'CLIENT') {
+      debugPrint('[VisitsRepo] REJECTED: Not a CLIENT');
       return const Failure('Solo usuarios CLIENT pueden solicitar visitas.');
     }
     final token = currentAuthenticationToken ?? '';
+    debugPrint('[VisitsRepo] Using token: ${token.isNotEmpty ? "PRESENT (starts with ${token.substring(0, 10)})" : "EMPTY"}');
     final response =
         await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
       propertyId: propertyId,
@@ -81,6 +84,42 @@ class VisitsRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
+      if (response.statusCode == 400 || response.statusCode == 401 || response.statusCode == 403) {
+        // Try healing the session silently with a token refresh. 
+        final refreshRes = await DOVIAAPIAuthContextGroup.refreshTokenNEWCall.call(
+          refreshToken: currentAuthRefreshToken,
+        );
+        if (refreshRes.succeeded) {
+          final newToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall.idToken(refreshRes.jsonBody);
+          final newRefreshToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall.refreshTokenResponse(refreshRes.jsonBody);
+          if (newToken != null && newToken.isNotEmpty) {
+            authManager.updateAuthUserData(
+              authenticationToken: newToken,
+              refreshToken: newRefreshToken,
+              tokenExpiration: currentAuthTokenExpiration,
+              authUid: currentUserUid,
+            );
+            
+            // Retry the request with the fresh token
+            final retryResponse = await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
+              propertyId: propertyId,
+              authToken: newToken,
+              dateOne: dateOne,
+              hourOne: hourOne,
+              dateTwo: dateTwo,
+              hourTwo: hourTwo,
+              dateThree: dateThree,
+              hourThree: hourThree,
+            );
+            
+            if (retryResponse.succeeded) {
+              _myVisits = [];
+              notifyListeners();
+              return const Success(null);
+            }
+          }
+        }
+      }
       return Failure(
         'No se pudo solicitar la visita',
         statusCode: response.statusCode,
@@ -122,8 +161,7 @@ class VisitsRepository extends ChangeNotifier {
     String hourThree = '00:00',
   }) async {
     final token = currentAuthenticationToken ?? '';
-    final response =
-        await DOVIAAPIVisitContextGroup.rescheduleVisitCall.call(
+    final response = await DOVIAAPIVisitContextGroup.rescheduleVisitCall.call(
       visitId: visitId,
       authToken: token,
       dateOne: dateOne,
@@ -152,7 +190,8 @@ class VisitsRepository extends ChangeNotifier {
   /// filter so that unconfirmed (PENDING) visits are always included.
   Future<bool> hasActiveVisitForProperty(String propertyId) async {
     if (FFAppState().UserRole != 'CLIENT') {
-      debugPrint('[VisitsRepo] hasActiveVisitForProperty: skipped — role is ${FFAppState().UserRole}');
+      debugPrint(
+          '[VisitsRepo] hasActiveVisitForProperty: skipped — role is ${FFAppState().UserRole}');
       return false;
     }
     final token = currentAuthenticationToken ?? '';
@@ -160,7 +199,8 @@ class VisitsRepository extends ChangeNotifier {
       authToken: token,
     );
 
-    debugPrint('[VisitsRepo] hasActiveVisitForProperty: HTTP ${response.statusCode}, succeeded=${response.succeeded}');
+    debugPrint(
+        '[VisitsRepo] hasActiveVisitForProperty: HTTP ${response.statusCode}, succeeded=${response.succeeded}');
     debugPrint('[VisitsRepo] raw body: ${response.jsonBody}');
 
     if (!response.succeeded) return false;
@@ -168,18 +208,24 @@ class VisitsRepository extends ChangeNotifier {
     final visits = (response.jsonBody?['data'] as List? ?? [])
         .cast<Map<String, dynamic>>();
 
-    debugPrint('[VisitsRepo] checking ${visits.length} visits for propertyId=$propertyId');
+    debugPrint(
+        '[VisitsRepo] checking ${visits.length} visits for propertyId=$propertyId');
     for (final v in visits) {
-      final vPropId = v['propertyId'] as String? ?? v['property']?['id'] as String? ?? '';
+      final vPropId =
+          v['propertyId'] as String? ?? v['property']?['id'] as String? ?? '';
       final vStatus = (v['status'] as String? ?? '').toUpperCase();
-      debugPrint('[VisitsRepo]   id=${v['id']}  propertyId=$vPropId  status=$vStatus');
+      debugPrint(
+          '[VisitsRepo]   id=${v['id']}  propertyId=$vPropId  status=$vStatus');
     }
 
     return visits.any((v) {
-      final vPropId = v['propertyId'] as String? ?? v['property']?['id'] as String? ?? '';
+      final vPropId =
+          v['propertyId'] as String? ?? v['property']?['id'] as String? ?? '';
       final vStatus = (v['status'] as String? ?? '').toUpperCase();
       return vPropId == propertyId &&
-          (vStatus == 'PENDING' || vStatus == 'APPROVED' || vStatus == 'SCHEDULED');
+          (vStatus == 'PENDING' ||
+              vStatus == 'APPROVED' ||
+              vStatus == 'SCHEDULED');
     });
   }
 

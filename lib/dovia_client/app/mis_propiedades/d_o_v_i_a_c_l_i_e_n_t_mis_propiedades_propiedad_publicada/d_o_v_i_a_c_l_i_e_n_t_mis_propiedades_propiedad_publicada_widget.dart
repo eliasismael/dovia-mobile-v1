@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_model.dart';
+import '../d_o_v_i_a_c_l_i_e_n_t_propuesta_de_visita/d_o_v_i_a_c_l_i_e_n_t_propuesta_de_visita_widget.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_model.dart';
 
 class DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget extends StatefulWidget {
@@ -173,10 +174,13 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
         await DOVIAAPIVisitContextGroup.getOwnerPropertyVisitsCall.call(
       propertyId: widget.propertyId,
       authToken: currentAuthenticationToken,
+      page: '1',
+      limit: '50',
     );
 
     if (mounted) {
       if (res.succeeded) {
+        debugPrint('[OwnerVisits] Success, body: ${res.jsonBody}');
         final raw = getJsonField(res.jsonBody, r'''$.data''');
         final List<dynamic> all = raw is List
             ? raw
@@ -205,7 +209,11 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             scheduledDate = DateTime.tryParse(scheduledDateStr);
           }
 
-          if (scheduledDate != null && scheduledDate.isBefore(now)) continue;
+          if (scheduledDate != null) {
+            final today = DateTime(now.year, now.month, now.day);
+            final visitDay = DateTime(scheduledDate.year, scheduledDate.month, scheduledDate.day);
+            if (visitDay.isBefore(today)) continue;
+          }
 
           if (subStatusRaw.contains('PENDING') ||
               statusRaw.contains('PENDING') ||
@@ -225,7 +233,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           _confirmedVisits = confirmed;
           _isLoadingVisits = false;
         });
+        debugPrint('[OwnerVisits] pending=${pending.length}, confirmed=${confirmed.length}');
       } else {
+        debugPrint('[OwnerVisits] Error: ${res.statusCode} ${res.jsonBody}');
         safeSetState(() => _isLoadingVisits = false);
       }
     }
@@ -1252,7 +1262,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     if (url.toLowerCase().endsWith('.pdf')) return 'PDF';
     if (url.toLowerCase().contains('.jpg') ||
         url.toLowerCase().contains('.jpeg') ||
-        url.toLowerCase().contains('.png')) return 'Imagen';
+        url.toLowerCase().contains('.png')) {
+      return 'Imagen';
+    }
     return 'Documento';
   }
 
@@ -1299,7 +1311,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  Icon(Icons.open_in_new_rounded,
+                  const Icon(Icons.open_in_new_rounded,
                       color: _primary, size: 48),
                   const SizedBox(height: 12),
                   Text(
@@ -1531,20 +1543,21 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                           else
                             ..._pendingVisits.map((v) {
                               final visitId =
+                                  getJsonField(v, r'''$.visitId''')?.toString() ??
                                   getJsonField(v, r'''$.id''')?.toString() ??
                                       '';
                               return _visitCard(context, v,
                                   statusLabel: 'Pendiente de confirmación',
                                   onViewTap: () {
                                 context.pushNamed(
-                                  DOVIACLIENTSobreMiVisitaWidget.routeName,
+                                  DOVIACLIENTPropuestaDeVisitaWidget.routeName,
                                   queryParameters: {
                                     'propertyId': serializeParam(
                                         widget.propertyId, ParamType.String),
                                     'visitId': serializeParam(
                                         visitId, ParamType.String),
                                   }.withoutNulls,
-                                );
+                                ).then((_) => _loadOwnerVisits());
                               });
                             }),
 
@@ -1557,6 +1570,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                           else
                             ..._confirmedVisits.map((v) {
                               final visitId =
+                                  getJsonField(v, r'''$.visitId''')?.toString() ??
                                   getJsonField(v, r'''$.id''')?.toString() ??
                                       '';
                               return _visitCard(context, v,
@@ -1570,7 +1584,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                     'visitId': serializeParam(
                                         visitId, ParamType.String),
                                   }.withoutNulls,
-                                );
+                                ).then((_) => _loadOwnerVisits());
                               });
                             }),
 
@@ -2020,8 +2034,8 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                         child: Container(
                           width: 32,
                           height: 32,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF0F0F0),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF0F0F0),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.close_rounded,
