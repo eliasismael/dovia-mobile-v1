@@ -249,7 +249,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     final res =
         await DOVIAAPIOfferContextGroup.listOffersByPropertyCall.call(
       propertyId: widget.propertyId,
-      offerStatus: 'ACTIVE',
+      authToken: currentAuthenticationToken,
     );
 
     if (mounted) {
@@ -262,16 +262,23 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
         final active = all.where((o) {
           final status =
               (getJsonField(o, r'''$.offerStatus''') ?? '').toString().toUpperCase();
+          // Exclude only truly terminal/rejected states — keep 'SENT', 'PENDING', 'ACTIVE', 'IN_NEGOTIATION', etc.
           return status != 'REJECTED' &&
               status != 'CANCELLED' &&
-              status != 'REJECTED_BY_OWNER';
+              status != 'REJECTED_BY_OWNER' &&
+              status != 'EXPIRED';
         }).toList();
 
         safeSetState(() {
           _activeOffers = active;
           _isLoadingOffers = false;
         });
+        // Debug: print first offer structure to see field names
+        if (active.isNotEmpty) {
+          debugPrint('[OfferCard] First offer JSON: ${active.first}');
+        }
       } else {
+        debugPrint('[OfferCard] API error: ${res.statusCode} ${res.jsonBody}');
         safeSetState(() => _isLoadingOffers = false);
       }
     }
@@ -710,12 +717,38 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
 
   Widget _offerCard(BuildContext context, dynamic offerJson) {
     final offerType = getJsonField(offerJson, r'''$.offerType''')?.toString() ?? '';
+
+    // API uses "activeOfferData" as the nested object (not "offerData")
     final paymentMethod =
-        getJsonField(offerJson, r'''$.offerData.paymentMethod''')?.toString() ?? '';
-    final proposedAmount =
-        getJsonField(offerJson, r'''$.offerData.proposedAmount''') ?? 0;
+        getJsonField(offerJson, r'''$.activeOfferData.paymentMethod''')?.toString() ??
+        getJsonField(offerJson, r'''$.offerData.paymentMethod''')?.toString() ??
+        getJsonField(offerJson, r'''$.paymentMethod''')?.toString() ?? '';
+
+    // Amount is nested in activeOfferData
+    final rawAmount =
+        getJsonField(offerJson, r'''$.activeOfferData.proposedAmount''') ??
+        getJsonField(offerJson, r'''$.offerData.proposedAmount''') ??
+        getJsonField(offerJson, r'''$.proposedAmount''') ??
+        getJsonField(offerJson, r'''$.amount''');
+
+    // Format amount — handle both int and double
+    String proposedAmountStr;
+    if (rawAmount == null) {
+      proposedAmountStr = '—';
+    } else {
+      final num val = rawAmount is num ? rawAmount : (num.tryParse(rawAmount.toString()) ?? 0);
+      proposedAmountStr = val.toStringAsFixed(val.truncateToDouble() == val ? 0 : 2);
+    }
+
     final dateLabel = _formatOfferDate(offerJson);
-    final offerId = getJsonField(offerJson, r'''$.id''')?.toString() ?? '';
+
+    // API returns "offerId" as the key (not "id")
+    final offerId = getJsonField(offerJson, r'''$.offerId''')?.toString() ??
+        getJsonField(offerJson, r'''$.id''')?.toString() ?? '';
+
+    // Buyer name from activeOfferData
+    final buyerName = getJsonField(offerJson, r'''$.activeOfferData.buyerInfo.name''')?.toString() ??
+        getJsonField(offerJson, r'''$.offerData.buyerInfo.name''')?.toString() ?? '';
 
     String typeLabel = offerType == 'RENT' ? 'Renta' : 'Compra';
     if (paymentMethod.isNotEmpty) {
@@ -750,8 +783,15 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                     style: GoogleFonts.inter(
                         fontSize: 12,
                         color: FlutterFlowTheme.of(context).secondaryText)),
+                if (buyerName.isNotEmpty) ...[  
+                  const SizedBox(height: 2),
+                  Text(buyerName,
+                      style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: FlutterFlowTheme.of(context).secondaryText)),
+                ],
                 const SizedBox(height: 4),
-                Text('\$$proposedAmount',
+                Text(rawAmount == null ? '—' : '\$$proposedAmountStr',
                     style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,

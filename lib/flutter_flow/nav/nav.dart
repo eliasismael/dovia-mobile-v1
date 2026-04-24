@@ -489,6 +489,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'proposalType',
               ParamType.String,
             ),
+            offerId: params.getParam(
+              'offerId',
+              ParamType.String,
+            ),
           ),
         ),
         FFRoute(
