@@ -347,17 +347,20 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               ParamType.String,
             ),
             offerType: params.getParam(
-              'offerType',
-              ParamType.String,
-            ) ?? 'compra',
+                  'offerType',
+                  ParamType.String,
+                ) ??
+                'compra',
             fromSelectionScreen: params.getParam(
-              'fromSelectionScreen',
-              ParamType.bool,
-            ) ?? false,
+                  'fromSelectionScreen',
+                  ParamType.bool,
+                ) ??
+                false,
             isAmbosFlow: params.getParam(
-              'isAmbosFlow',
-              ParamType.bool,
-            ) ?? false,
+                  'isAmbosFlow',
+                  ParamType.bool,
+                ) ??
+                false,
           ),
         ),
         FFRoute(
@@ -457,8 +460,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DOVIACLIENTMisPropiedadesVisita1Widget.routeName,
           path: DOVIACLIENTMisPropiedadesVisita1Widget.routePath,
-          builder: (context, params) =>
-              DOVIACLIENTMisPropiedadesVisita1Widget(
+          builder: (context, params) => DOVIACLIENTMisPropiedadesVisita1Widget(
             visitId: params.getParam(
               'visitId',
               ParamType.String,
@@ -500,13 +502,15 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: DOVIACLIENTPropuestaDeVisitaWidget.routePath,
           builder: (context, params) => DOVIACLIENTPropuestaDeVisitaWidget(
             propertyId: params.getParam(
-              'propertyId',
-              ParamType.String,
-            ) ?? '',
+                  'propertyId',
+                  ParamType.String,
+                ) ??
+                '',
             visitId: params.getParam(
-              'visitId',
-              ParamType.String,
-            ) ?? '',
+                  'visitId',
+                  ParamType.String,
+                ) ??
+                '',
           ),
         ),
         FFRoute(
@@ -514,10 +518,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: DOVIACLIENTMisPropiedadesContraofertarWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisPropiedadesContraofertarWidget(
-            proposalType: params.getParam(
-              'proposalType',
-              ParamType.String,
-            ),
+            proposalType: params.getParam('proposalType', ParamType.String),
+            offerId: params.getParam('offerId', ParamType.String),
+            initialAmount: params.getParam('initialAmount', ParamType.String),
+            currency: params.getParam('currency', ParamType.String),
+            paymentMethod: params.getParam('paymentMethod', ParamType.String),
+            considerations: params.getParam('considerations', ParamType.String),
           ),
         ),
         FFRoute(

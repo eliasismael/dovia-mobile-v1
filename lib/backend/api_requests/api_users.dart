@@ -160,19 +160,23 @@ class UploadUserDocumentCall {
 }
 
 class UploadProfilePictureCall {
-  Future<ApiCallResponse> call() async {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    FFUploadedFile? file,
+  }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
-{}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upload Profile Picture',
       apiUrl: '$baseUrl/users/profile-picture',
       callType: ApiCallType.PUT,
-      headers: {},
-      params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.JSON,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

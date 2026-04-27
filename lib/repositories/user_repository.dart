@@ -4,6 +4,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_users.dart';
 import '/core/result.dart';
 import '/domain/user_models.dart';
+import '/flutter_flow/uploaded_file.dart';
 
 /// Single Source of Truth for the authenticated user's profile.
 ///
@@ -66,6 +67,29 @@ class UserRepository extends ChangeNotifier {
     _profile = UserProfile.fromJson(body);
     notifyListeners();
     return Success(_profile!);
+  }
+
+  /// Uploads a new profile picture.
+  Future<Result<bool>> uploadAvatar(FFUploadedFile file) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIUserContextGroup.uploadProfilePictureCall
+        .call(authToken: token, file: file);
+
+    _isLoading = false;
+
+    if (!response.succeeded) {
+      _error = 'Error al subir la imagen';
+      notifyListeners();
+      return Failure(_error!, statusCode: response.statusCode);
+    }
+
+    // Refresh profile to show new image
+    await loadProfile(forceRefresh: true);
+    notifyListeners();
+    return Success(true);
   }
 
   /// Clears the cached profile (call on logout).

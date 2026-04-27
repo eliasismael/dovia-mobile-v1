@@ -52,8 +52,8 @@ class _UnsuscribeModal2WidgetState extends State<UnsuscribeModal2Widget> {
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
         child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
               'Cuéntanos por qué deseas cancelar la suscripción. ',
@@ -72,6 +72,7 @@ class _UnsuscribeModal2WidgetState extends State<UnsuscribeModal2Widget> {
                         FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                   ),
             ),
+            const SizedBox(height: 20),
             SizedBox(
               width: MediaQuery.sizeOf(context).width * 1.0,
               child: TextFormField(
@@ -162,6 +163,7 @@ class _UnsuscribeModal2WidgetState extends State<UnsuscribeModal2Widget> {
                 validator: _model.textControllerValidator.asValidator(context),
               ),
             ),
+            const SizedBox(height: 24),
             InkWell(
               splashColor: Colors.transparent,
               focusColor: Colors.transparent,
@@ -173,12 +175,19 @@ class _UnsuscribeModal2WidgetState extends State<UnsuscribeModal2Widget> {
                   backgroundColor: Colors.transparent,
                   enableDrag: false,
                   context: context,
-                  builder: (context) {
-                    return Padding(
-                      padding: MediaQuery.viewInsetsOf(context),
-                      child: const UnsuscribeModal3Widget(),
-                    );
-                  },
+                  builder: (context) => Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                      child: Padding(
+                        padding: MediaQuery.viewInsetsOf(context),
+                        child: const UnsuscribeModal3Widget(),
+                      ),
+                    ),
+                  ),
                 ).then((value) => safeSetState(() {}));
               },
               child: wrapWithModel(
