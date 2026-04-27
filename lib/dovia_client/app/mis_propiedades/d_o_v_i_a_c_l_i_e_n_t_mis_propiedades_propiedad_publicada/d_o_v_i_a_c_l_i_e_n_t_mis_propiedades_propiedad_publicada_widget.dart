@@ -1663,7 +1663,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                   onViewTap: () {
                                 context
                                     .pushNamed(
-                                      DOVIACLIENTSobreMiVisitaWidget.routeName,
+                                      DOVIACLIENTVisitaAceptadaWidget.routeName,
                                       queryParameters: {
                                         'propertyId': serializeParam(
                                             widget.propertyId,

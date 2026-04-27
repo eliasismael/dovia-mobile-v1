@@ -314,6 +314,22 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: DOVIACLIENTVisitaAceptadaWidget.routeName,
+          path: DOVIACLIENTVisitaAceptadaWidget.routePath,
+          builder: (context, params) => DOVIACLIENTVisitaAceptadaWidget(
+            propertyId: params.getParam(
+                  'propertyId',
+                  ParamType.String,
+                ) ??
+                '',
+            visitId: params.getParam(
+                  'visitId',
+                  ParamType.String,
+                ) ??
+                '',
+          ),
+        ),
+        FFRoute(
           name: DOVIACLIENTOfertarWidget.routeName,
           path: DOVIACLIENTOfertarWidget.routePath,
           builder: (context, params) => DOVIACLIENTOfertarWidget(
