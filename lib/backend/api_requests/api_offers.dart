@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'api_manager.dart';
 import 'api_helpers.dart';
 
@@ -40,6 +41,8 @@ class DOVIAAPIOfferContextGroup {
       CreateOfferPURCHASECashCall();
   static MakeCounterOfferRENTCall makeCounterOfferRENTCall =
       MakeCounterOfferRENTCall();
+  static CreateCounterOfferCall createCounterOfferCall =
+      CreateCounterOfferCall();
 }
 
 class CreateOfferPURCHASEPurchasePromiseCall {
@@ -686,6 +689,37 @@ class MakeCounterOfferRENTCall {
       headers: {},
       params: {},
       body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class CreateCounterOfferCall {
+  Future<ApiCallResponse> call({
+    String? offerId = '',
+    String? authToken = '',
+    dynamic counterOfferData,
+  }) async {
+    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
+    final body = {
+      'counterOfferData': counterOfferData,
+    };
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Create Counter Offer',
+      apiUrl: '$baseUrl/offers/$offerId/counter-offer',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: jsonEncode(body),
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

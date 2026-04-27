@@ -8,6 +8,9 @@ import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo/d_o_v_i_a_c_l_i_e_n_t_m
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '/repositories/offers_repository.dart';
+import '/core/result.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_model.dart';
 
@@ -102,33 +105,61 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
       return;
     }
 
+    if (widget.offerId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Error: No se encontró el ID de la oferta.'),
+        backgroundColor: _errorRed, behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+
     safeSetState(() => _isSending = true);
 
-    // TODO: Implement counterofferCall in api_offers.dart when endpoint is ready
-    await Future.delayed(const Duration(seconds: 1));
+    final repo = context.read<OffersRepository>();
+    
+    // Construct the counterOfferData map
+    final counterOfferData = {
+      'paymentMethod': widget.paymentMethod ?? 'cash',
+      'proposedAmount': amount,
+      'currency': _selectedCurrency,
+      'considerations': _considerationsCtrl.text.trim(),
+    };
+
+    final result = await repo.createCounterOffer(
+      offerId: widget.offerId!,
+      counterOfferData: counterOfferData,
+    );
 
     if (!mounted) return;
     safeSetState(() => _isSending = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: const Text('Contraoferta enviada exitosamente.'),
-      backgroundColor: _successGreen,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ));
+    switch (result) {
+      case Success():
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text('Contraoferta enviada exitosamente.'),
+          backgroundColor: _successGreen,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ));
 
-    // Navegar a la sección de Acuerdo, paso 2 (Estructuración de acuerdo)
-    if (mounted) {
-      context.pushNamed(
-        DOVIACLIENTMisPropiedadesAcuerdoWidget.routeName,
-        queryParameters: {
-          'negociationStep': serializeParam(2.0, ParamType.double),
-          'paymentMethod': serializeParam(
-            widget.paymentMethod ?? 'contado',
-            ParamType.String,
-          ),
-        }.withoutNulls,
-      );
+        // Navegar a la sección de Acuerdo, paso 2 (Estructuración de acuerdo)
+        context.pushNamed(
+          DOVIACLIENTMisPropiedadesAcuerdoWidget.routeName,
+          queryParameters: {
+            'negociationStep': serializeParam(2.0, ParamType.double),
+            'paymentMethod': serializeParam(
+              widget.paymentMethod ?? 'contado',
+              ParamType.String,
+            ),
+          }.withoutNulls,
+        );
+      case Failure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $message'),
+          backgroundColor: _errorRed,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ));
     }
   }
 
