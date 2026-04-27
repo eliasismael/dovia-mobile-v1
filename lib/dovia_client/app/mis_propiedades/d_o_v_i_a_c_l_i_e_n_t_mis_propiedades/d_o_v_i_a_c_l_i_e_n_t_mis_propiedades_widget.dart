@@ -312,7 +312,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                     ParamType.String,
                                                   ),
                                                 }.withoutNulls,
-                                              );
+                                              ).then((_) => safeSetState(() {}));
                                             },
                                               child: custom_widgets.DoviaClientHouseCard(
                                                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -636,7 +636,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                   ParamType.String,
                                                 ),
                                               }.withoutNulls,
-                                            );
+                                            ).then((_) => safeSetState(() {}));
                                           } else if (status == 'IN_PROCESS' || status == 'PENDING_REVIEW' || (status == 'DRAFT' && hasVisit)) {
                                             context.pushNamed(
                                               'DOVIA_CLIENT_MisPropiedades_Visita_1',

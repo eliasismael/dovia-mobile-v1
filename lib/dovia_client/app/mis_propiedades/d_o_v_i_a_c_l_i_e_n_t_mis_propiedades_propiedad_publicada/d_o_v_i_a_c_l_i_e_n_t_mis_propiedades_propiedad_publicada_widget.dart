@@ -584,8 +584,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                     borderRadius: BorderRadius.circular(12)),
               ),
             );
-            // Pop back to "Mis Propiedades" list
-            nav.pop();
+            // Go back to "Mis Propiedades" list and force a fresh state
+            context.goNamed(DOVIACLIENTMisPropiedadesWidget.routeName);
           } else {
             debugPrint(
                 '[ChangePropertyStatus] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
