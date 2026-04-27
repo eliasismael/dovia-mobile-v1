@@ -28,6 +28,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => PropertiesRepository()),
       ChangeNotifierProvider(create: (_) => UserRepository()),
       ChangeNotifierProvider(create: (_) => VisitsRepository()),
+      ChangeNotifierProvider(create: (_) => OffersRepository()),
     ],
     child: const MyApp(),
   ));

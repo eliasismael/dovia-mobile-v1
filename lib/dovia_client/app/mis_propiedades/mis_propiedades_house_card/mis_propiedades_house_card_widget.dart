@@ -49,6 +49,11 @@ class _MisPropiedadesHouseCardWidgetState
     final typeName = getJsonField(widget.property, r'''$.propertyType.name''') as String? ?? 'Casa';
     final propPrice = getJsonField(widget.property, r'''$.offerOptions[0].price''')?.toString() ?? '0';
     final currency = getJsonField(widget.property, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD';
+    final bedrooms = getJsonField(widget.property, r'''$.features.general.bedrooms''')?.toString() ?? '0';
+    final bathrooms = getJsonField(widget.property, r'''$.features.general.bathrooms''')?.toString() ?? '0';
+    final constructionArea = getJsonField(widget.property, r'''$.features.general.constructionArea''')?.toString() ?? '0';
+    final landArea = getJsonField(widget.property, r'''$.features.general.landArea''')?.toString() ?? '0';
+    final imageUrl = getJsonField(widget.property, r'''$.photos[0].url''')?.toString();
 
     final hasVisit = getJsonField(widget.property, r'''$.operativeListerVisit.visitId''') != null || getJsonField(widget.property, r'''$.lastVisitId''') != null;
     final isPaused = statusKey == 'ARCHIVED';
@@ -99,12 +104,25 @@ class _MisPropiedadesHouseCardWidgetState
                                     Color(0x55000000), BlendMode.darken)
                                 : const ColorFilter.mode(
                                     Colors.transparent, BlendMode.multiply),
-                            child: Image.asset(
-                              'assets/images/casa_card_sobreMiVisita.png',
-                              width: 72.0,
-                              height: 108.0,
-                              fit: BoxFit.cover,
-                            ),
+                            child: imageUrl != null
+                                ? Image.network(
+                                    imageUrl,
+                                    width: 72.0,
+                                    height: 108.0,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Image.asset(
+                                      'assets/images/casa_card_sobreMiVisita.png',
+                                      width: 72.0,
+                                      height: 108.0,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    'assets/images/casa_card_sobreMiVisita.png',
+                                    width: 72.0,
+                                    height: 108.0,
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ),
                         if (isPaused)
@@ -262,7 +280,7 @@ class _MisPropiedadesHouseCardWidgetState
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 20.0, 0.0),
                           child: Text(
-                            'M2',
+                            '$constructionArea M2',
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
@@ -300,7 +318,7 @@ class _MisPropiedadesHouseCardWidgetState
                           ),
                         ),
                         Text(
-                          'M2',
+                          '$landArea M2',
                           style: FlutterFlowTheme.of(context)
                               .bodyMedium
                               .override(
@@ -361,7 +379,7 @@ class _MisPropiedadesHouseCardWidgetState
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 20.0, 0.0),
                                 child: Text(
-                                  'Habitaciones',
+                                  '$bedrooms Hab.',
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -406,7 +424,7 @@ class _MisPropiedadesHouseCardWidgetState
                                 ),
                               ),
                               Text(
-                                'Baños',
+                                '$bathrooms Baños',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(

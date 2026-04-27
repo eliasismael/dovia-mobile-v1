@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'api_manager.dart';
 import 'api_helpers.dart';
 
@@ -40,6 +41,8 @@ class DOVIAAPIOfferContextGroup {
       CreateOfferPURCHASECashCall();
   static MakeCounterOfferRENTCall makeCounterOfferRENTCall =
       MakeCounterOfferRENTCall();
+  static CreateCounterOfferCall createCounterOfferCall =
+      CreateCounterOfferCall();
 }
 
 class CreateOfferPURCHASEPurchasePromiseCall {
@@ -103,6 +106,7 @@ class ListOffersByPropertyCall {
     String? offerStatus = '',
     String? processStatus = '',
     String? propertyId = '',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
@@ -110,7 +114,10 @@ class ListOffersByPropertyCall {
       callName: 'List Offers by Property',
       apiUrl: '$baseUrl/offers/properties/$propertyId',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {
         'page': page,
         'limit': limit,
@@ -165,6 +172,7 @@ class MakeCounterOfferPURCHASEPurchasePromiseCall {
 class GetOfferByIDCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
@@ -172,7 +180,10 @@ class GetOfferByIDCall {
       callName: 'Get Offer by ID',
       apiUrl: '$baseUrl/offers/$offerId',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -187,6 +198,7 @@ class GetOfferByIDCall {
 class AcceptOfferCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
@@ -198,7 +210,10 @@ class AcceptOfferCall {
       callName: 'Accept Offer',
       apiUrl: '$baseUrl/offers/$offerId/accept',
       callType: ApiCallType.POST,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -215,19 +230,24 @@ class AcceptOfferCall {
 class RejectOfferCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
+    String? authToken = '',
+    String? reason = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
+    final ffApiRequestBody = '''
 {
   "rejectedBy": "OWNER",
-  "reason": "Price does not meet expectations"
+  "reason": "${reason?.isNotEmpty == true ? reason : 'Price does not meet expectations'}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Reject Offer',
       apiUrl: '$baseUrl/offers/$offerId/reject',
       callType: ApiCallType.POST,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -344,6 +364,7 @@ class ListOffersOnMyPropertiesCall {
     String? offerType = '',
     String? offerStatus = '',
     String? processStatus = '',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
@@ -351,7 +372,10 @@ class ListOffersOnMyPropertiesCall {
       callName: 'List Offers On My Properties',
       apiUrl: '$baseUrl/offers/my-properties',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {
         'page': page,
         'limit': limit,
@@ -665,6 +689,37 @@ class MakeCounterOfferRENTCall {
       headers: {},
       params: {},
       body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class CreateCounterOfferCall {
+  Future<ApiCallResponse> call({
+    String? offerId = '',
+    String? authToken = '',
+    dynamic counterOfferData,
+  }) async {
+    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
+    final body = {
+      'counterOfferData': counterOfferData,
+    };
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Create Counter Offer',
+      apiUrl: '$baseUrl/offers/$offerId/counter-offer',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: jsonEncode(body),
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

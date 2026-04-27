@@ -1,4 +1,3 @@
-
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
 import 'api_helpers.dart';
@@ -58,6 +57,8 @@ class DOVIAAPIVisitContextGroup {
       ShowingReportProblemCall();
   static ShowingNotCompletedReportCall showingNotCompletedReportCall =
       ShowingNotCompletedReportCall();
+  static NotifyVisitReminderCall notifyVisitReminderCall =
+      NotifyVisitReminderCall();
 }
 
 class CreateVisitRequestCall {
@@ -977,6 +978,32 @@ class ShowingNotCompletedReportCall {
       },
       params: {},
       body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class NotifyVisitReminderCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Notify Visit Reminder',
+      apiUrl: '$baseUrl/visits/$visitId/reminder',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

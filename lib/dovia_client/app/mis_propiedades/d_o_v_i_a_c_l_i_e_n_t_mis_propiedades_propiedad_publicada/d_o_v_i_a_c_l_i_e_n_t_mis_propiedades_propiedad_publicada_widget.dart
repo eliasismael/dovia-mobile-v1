@@ -22,6 +22,7 @@ class DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget extends StatefulWidget {
       {super.key, this.propertyId, this.propertyStatus});
 
   final String? propertyId;
+
   /// Status passed from the list screen (GET /properties/{id} doesn't return status)
   final String? propertyStatus;
 
@@ -131,14 +132,15 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             getJsonField(res.jsonBody, r'''$.data''');
         // Only update status if the API response actually contains it;
         // otherwise keep the value passed via navigation param.
-        final apiStatus =
-            getJsonField(_propertyData, r'''$.status''')?.toString() ??
+        final apiStatus = getJsonField(_propertyData, r'''$.status''')
+                ?.toString() ??
             getJsonField(res.jsonBody, r'''$.data.data.status''')?.toString() ??
             getJsonField(res.jsonBody, r'''$.data.status''')?.toString();
         if (apiStatus != null && apiStatus.isNotEmpty) {
           _propertyStatus = apiStatus;
         }
-        debugPrint('[PropertyDashboard] status=$_propertyStatus id=${widget.propertyId}');
+        debugPrint(
+            '[PropertyDashboard] status=$_propertyStatus id=${widget.propertyId}');
         _isLoadingProperty = false;
       });
     } else if (mounted) {
@@ -149,7 +151,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
   Future<void> _loadMetrics() async {
     if (widget.propertyId == null || widget.propertyId!.isEmpty) return;
 
-    final res = await DOVIAAPIMetricsContextGroup.getPropertyStatisticsCall.call(
+    final res =
+        await DOVIAAPIMetricsContextGroup.getPropertyStatisticsCall.call(
       propertyId: widget.propertyId,
       bearerAuth: currentAuthenticationToken,
     );
@@ -170,8 +173,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
       safeSetState(() => _isLoadingVisits = false);
       return;
     }
-    final res =
-        await DOVIAAPIVisitContextGroup.getOwnerPropertyVisitsCall.call(
+    final res = await DOVIAAPIVisitContextGroup.getOwnerPropertyVisitsCall.call(
       propertyId: widget.propertyId,
       authToken: currentAuthenticationToken,
       page: '1',
@@ -201,8 +203,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
 
           final scheduledDateStr =
               getJsonField(v, r'''$.scheduledDate''')?.toString() ??
-              getJsonField(v, r'''$.confirmedSlot.date''')?.toString() ??
-              '';
+                  getJsonField(v, r'''$.confirmedSlot.date''')?.toString() ??
+                  '';
 
           DateTime? scheduledDate;
           if (scheduledDateStr.isNotEmpty) {
@@ -211,7 +213,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
 
           if (scheduledDate != null) {
             final today = DateTime(now.year, now.month, now.day);
-            final visitDay = DateTime(scheduledDate.year, scheduledDate.month, scheduledDate.day);
+            final visitDay = DateTime(
+                scheduledDate.year, scheduledDate.month, scheduledDate.day);
             if (visitDay.isBefore(today)) continue;
           }
 
@@ -233,7 +236,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           _confirmedVisits = confirmed;
           _isLoadingVisits = false;
         });
-        debugPrint('[OwnerVisits] pending=${pending.length}, confirmed=${confirmed.length}');
+        debugPrint(
+            '[OwnerVisits] pending=${pending.length}, confirmed=${confirmed.length}');
       } else {
         debugPrint('[OwnerVisits] Error: ${res.statusCode} ${res.jsonBody}');
         safeSetState(() => _isLoadingVisits = false);
@@ -246,10 +250,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
       safeSetState(() => _isLoadingOffers = false);
       return;
     }
-    final res =
-        await DOVIAAPIOfferContextGroup.listOffersByPropertyCall.call(
+    final res = await DOVIAAPIOfferContextGroup.listOffersByPropertyCall.call(
       propertyId: widget.propertyId,
-      offerStatus: 'ACTIVE',
+      authToken: currentAuthenticationToken,
     );
 
     if (mounted) {
@@ -260,18 +263,26 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             : (getJsonField(res.jsonBody, r'''$.data.items''') as List? ?? []);
 
         final active = all.where((o) {
-          final status =
-              (getJsonField(o, r'''$.offerStatus''') ?? '').toString().toUpperCase();
+          final status = (getJsonField(o, r'''$.offerStatus''') ?? '')
+              .toString()
+              .toUpperCase();
+          // Exclude only truly terminal/rejected states — keep 'SENT', 'PENDING', 'ACTIVE', 'IN_NEGOTIATION', etc.
           return status != 'REJECTED' &&
               status != 'CANCELLED' &&
-              status != 'REJECTED_BY_OWNER';
+              status != 'REJECTED_BY_OWNER' &&
+              status != 'EXPIRED';
         }).toList();
 
         safeSetState(() {
           _activeOffers = active;
           _isLoadingOffers = false;
         });
+        // Debug: print first offer structure to see field names
+        if (active.isNotEmpty) {
+          debugPrint('[OfferCard] First offer JSON: ${active.first}');
+        }
       } else {
+        debugPrint('[OfferCard] API error: ${res.statusCode} ${res.jsonBody}');
         safeSetState(() => _isLoadingOffers = false);
       }
     }
@@ -296,7 +307,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
   String _formatDate(dynamic visitJson) {
     final raw = getJsonField(visitJson, r'''$.scheduledDate''')?.toString() ??
         getJsonField(visitJson, r'''$.confirmedSlot.date''')?.toString() ??
-        getJsonField(visitJson, r'''$.proposedTimeSlots[0].date''')?.toString() ??
+        getJsonField(visitJson, r'''$.proposedTimeSlots[0].date''')
+            ?.toString() ??
         '';
     if (raw.isEmpty) return 'Fecha por confirmar';
     final dt = DateTime.tryParse(raw);
@@ -343,7 +355,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             : '');
     final impuestoCtrl = TextEditingController(
         text: saleInfo != null
-            ? (getJsonField(saleInfo, r'''$.singlePropertyTax''') ?? '').toString()
+            ? (getJsonField(saleInfo, r'''$.singlePropertyTax''') ?? '')
+                .toString()
             : '');
     final precioRentaCtrl = TextEditingController(
         text: rentInfo != null
@@ -391,7 +404,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           // Capture messenger before async gap
           final messenger = ScaffoldMessenger.of(context);
 
-          final res = await DOVIAAPIPropertyContextGroup.updatePropertyCall.call(
+          final res =
+              await DOVIAAPIPropertyContextGroup.updatePropertyCall.call(
             propertyId: widget.propertyId,
             authToken: currentAuthenticationToken,
             listingType: newListing,
@@ -427,7 +441,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             );
           } else {
             // Log the response for debugging
-            debugPrint('[UpdateProperty] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
+            debugPrint(
+                '[UpdateProperty] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
             messenger.showSnackBar(
               const SnackBar(
                 content: Text('Error al guardar los datos'),
@@ -460,9 +475,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
         primaryColor: _primary,
         onConfirm: (String? motivo) async {
           final messenger = ScaffoldMessenger.of(context);
-          final res = await DOVIAAPIPropertyContextGroup
-              .changePropertyStatusCall
-              .call(
+          final res =
+              await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
             propertyId: widget.propertyId,
             authToken: currentAuthenticationToken,
             status: 'ARCHIVED',
@@ -499,7 +513,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
 
   Future<void> _reactivarPropiedad() async {
     final messenger = ScaffoldMessenger.of(context);
-    final res = await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
+    final res =
+        await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
       propertyId: widget.propertyId,
       authToken: currentAuthenticationToken,
       status: 'PUBLISHED',
@@ -549,9 +564,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           final messenger = ScaffoldMessenger.of(context);
           final nav = Navigator.of(context);
 
-          final res = await DOVIAAPIPropertyContextGroup
-              .changePropertyStatusCall
-              .call(
+          final res =
+              await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
             propertyId: widget.propertyId,
             authToken: currentAuthenticationToken,
             status: 'DELETED',
@@ -570,8 +584,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                     borderRadius: BorderRadius.circular(12)),
               ),
             );
-            // Pop back to "Mis Propiedades" list
-            nav.pop();
+            // Go back to "Mis Propiedades" list and force a fresh state
+            context.goNamed(DOVIACLIENTMisPropiedadesWidget.routeName);
           } else {
             debugPrint(
                 '[ChangePropertyStatus] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
@@ -650,8 +664,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     final date = _formatDate(visitJson);
     final buyerName =
         getJsonField(visitJson, r'''$.buyer.name''')?.toString() ??
-        getJsonField(visitJson, r'''$.requester.name''')?.toString() ??
-        'Visitante';
+            getJsonField(visitJson, r'''$.requester.name''')?.toString() ??
+            'Visitante';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -709,13 +723,50 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
   }
 
   Widget _offerCard(BuildContext context, dynamic offerJson) {
-    final offerType = getJsonField(offerJson, r'''$.offerType''')?.toString() ?? '';
-    final paymentMethod =
-        getJsonField(offerJson, r'''$.offerData.paymentMethod''')?.toString() ?? '';
-    final proposedAmount =
-        getJsonField(offerJson, r'''$.offerData.proposedAmount''') ?? 0;
+    final offerType =
+        getJsonField(offerJson, r'''$.offerType''')?.toString() ?? '';
+
+    // API uses "activeOfferData" as the nested object (not "offerData")
+    final paymentMethod = getJsonField(
+                offerJson, r'''$.activeOfferData.paymentMethod''')
+            ?.toString() ??
+        getJsonField(offerJson, r'''$.offerData.paymentMethod''')?.toString() ??
+        getJsonField(offerJson, r'''$.paymentMethod''')?.toString() ??
+        '';
+
+    // Amount is nested in activeOfferData
+    final rawAmount =
+        getJsonField(offerJson, r'''$.activeOfferData.proposedAmount''') ??
+            getJsonField(offerJson, r'''$.offerData.proposedAmount''') ??
+            getJsonField(offerJson, r'''$.proposedAmount''') ??
+            getJsonField(offerJson, r'''$.amount''');
+
+    // Format amount — handle both int and double
+    String proposedAmountStr;
+    if (rawAmount == null) {
+      proposedAmountStr = '—';
+    } else {
+      final num val = rawAmount is num
+          ? rawAmount
+          : (num.tryParse(rawAmount.toString()) ?? 0);
+      proposedAmountStr =
+          val.toStringAsFixed(val.truncateToDouble() == val ? 0 : 2);
+    }
+
     final dateLabel = _formatOfferDate(offerJson);
-    final offerId = getJsonField(offerJson, r'''$.id''')?.toString() ?? '';
+
+    // API returns "offerId" as the key (not "id")
+    final offerId = getJsonField(offerJson, r'''$.offerId''')?.toString() ??
+        getJsonField(offerJson, r'''$.id''')?.toString() ??
+        '';
+
+    // Buyer name from activeOfferData
+    final buyerName =
+        getJsonField(offerJson, r'''$.activeOfferData.buyerInfo.name''')
+                ?.toString() ??
+            getJsonField(offerJson, r'''$.offerData.buyerInfo.name''')
+                ?.toString() ??
+            '';
 
     String typeLabel = offerType == 'RENT' ? 'Renta' : 'Compra';
     if (paymentMethod.isNotEmpty) {
@@ -750,8 +801,15 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                     style: GoogleFonts.inter(
                         fontSize: 12,
                         color: FlutterFlowTheme.of(context).secondaryText)),
+                if (buyerName.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(buyerName,
+                      style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: FlutterFlowTheme.of(context).secondaryText)),
+                ],
                 const SizedBox(height: 4),
-                Text('\$$proposedAmount',
+                Text(rawAmount == null ? '—' : '\$$proposedAmountStr',
                     style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -767,14 +825,16 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           GestureDetector(
             onTap: () {
               if (offerId.isNotEmpty) {
-                context.pushNamed(
-                  DOVIACLIENTMisPropiedadesPropuestaWidget.routeName,
-                  queryParameters: {
-                    'proposalType':
-                        serializeParam(offerType.toLowerCase(), ParamType.String),
-                    'offerId': serializeParam(offerId, ParamType.String),
-                  }.withoutNulls,
-                );
+                context
+                    .pushNamed(
+                      DOVIACLIENTMisPropiedadesPropuestaWidget.routeName,
+                      queryParameters: {
+                        'proposalType': serializeParam(
+                            offerType.toLowerCase(), ParamType.String),
+                        'offerId': serializeParam(offerId, ParamType.String),
+                      }.withoutNulls,
+                    )
+                    .then((_) => _loadPropertyOffers());
               }
             },
             child: Container(
@@ -824,9 +884,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     final name = _propName();
     final address =
         getJsonField(_propertyData, r'''$.location.address.fullAddress''')
-            ?.toString() ??
-        getJsonField(_propertyData, r'''$.address''')?.toString() ??
-        '—';
+                ?.toString() ??
+            getJsonField(_propertyData, r'''$.address''')?.toString() ??
+            '—';
     final listing = _listingType();
     final hasSale = listing.contains('SALE');
     final hasRent = listing.contains('RENT');
@@ -863,7 +923,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
-                  color: Color(0x12000000), blurRadius: 10, offset: Offset(0, 3)),
+                  color: Color(0x12000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 3)),
             ],
           ),
           padding: const EdgeInsets.fromLTRB(16, 16, 50, 16),
@@ -909,10 +971,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               Wrap(
                 spacing: 8,
                 children: [
-                  if (hasSale)
-                    _chip('Venta', Icons.sell_rounded),
-                  if (hasRent)
-                    _chip('Renta', Icons.key_rounded),
+                  if (hasSale) _chip('Venta', Icons.sell_rounded),
+                  if (hasRent) _chip('Renta', Icons.key_rounded),
                 ],
               ),
               const SizedBox(height: 16),
@@ -925,8 +985,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                 _priceRow('Imp. único inmuebles', '\$$singlePropertyTax',
                     small: true),
               ],
-              if (hasRent)
-                _priceRow('Renta mensual', '\$$monthlyRent'),
+              if (hasRent) _priceRow('Renta mensual', '\$$monthlyRent'),
             ],
           ),
         ),
@@ -949,8 +1008,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                       offset: const Offset(0, 3)),
                 ],
               ),
-              child: const Icon(Icons.edit_rounded,
-                  color: Colors.white, size: 18),
+              child:
+                  const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
             ),
           ),
         ),
@@ -1035,12 +1094,19 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             _internalFieldGroup(
               'Del propietario',
               [
-                _fieldItem('Instrucciones de ingreso',
-                    getJsonField(infoClient, r'''$.accessInstructions''')?.toString()),
-                _fieldItem('Consideraciones arquitectónicas',
-                    getJsonField(infoClient, r'''$.architecturalConsiderations''')?.toString()),
-                _fieldItem('Características importantes',
-                    getJsonField(infoClient, r'''$.importantFeatures''')?.toString()),
+                _fieldItem(
+                    'Instrucciones de ingreso',
+                    getJsonField(infoClient, r'''$.accessInstructions''')
+                        ?.toString()),
+                _fieldItem(
+                    'Consideraciones arquitectónicas',
+                    getJsonField(
+                            infoClient, r'''$.architecturalConsiderations''')
+                        ?.toString()),
+                _fieldItem(
+                    'Características importantes',
+                    getJsonField(infoClient, r'''$.importantFeatures''')
+                        ?.toString()),
                 _fieldItem('Nota de acceso',
                     getJsonField(infoClient, r'''$.accessNotes''')?.toString()),
               ],
@@ -1053,8 +1119,10 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               [
                 _fieldItem('Notas del lister',
                     getJsonField(infoLister, r'''$.notes''')?.toString()),
-                _fieldItem('Consideraciones de visita',
-                    getJsonField(infoLister, r'''$.visitConsiderations''')?.toString()),
+                _fieldItem(
+                    'Consideraciones de visita',
+                    getJsonField(infoLister, r'''$.visitConsiderations''')
+                        ?.toString()),
               ],
             ),
           ],
@@ -1063,8 +1131,10 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             _internalFieldGroup(
               'De HQ / Fotógrafo',
               [
-                _fieldItem('Consideraciones de muestra',
-                    getJsonField(infoHQ, r'''$.showingConsiderations''')?.toString()),
+                _fieldItem(
+                    'Consideraciones de muestra',
+                    getJsonField(infoHQ, r'''$.showingConsiderations''')
+                        ?.toString()),
                 _fieldItem('Notas internas',
                     getJsonField(infoHQ, r'''$.internalNotes''')?.toString()),
               ],
@@ -1121,7 +1191,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           Text(
             value,
             style: GoogleFonts.inter(
-                fontSize: 13, color: FlutterFlowTheme.of(context).secondaryText),
+                fontSize: 13,
+                color: FlutterFlowTheme.of(context).secondaryText),
           ),
         ],
       ),
@@ -1149,17 +1220,26 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     }
 
     // Also check for top-level document URLs
-    final certUrl = getJsonField(_propertyData, r'''$.certificationUrl''')?.toString();
-    final receiptUrl = getJsonField(_propertyData, r'''$.receiptUrl''')?.toString();
-    final contractUrl = getJsonField(_propertyData, r'''$.contractUrl''')?.toString();
-    if (certUrl?.isNotEmpty == true && docList.where((d) => d['type'] == 'certification').isEmpty) {
-      docList.add({'type': 'property-certification', 'url': certUrl, 'label': 'Certificación'});
+    final certUrl =
+        getJsonField(_propertyData, r'''$.certificationUrl''')?.toString();
+    final receiptUrl =
+        getJsonField(_propertyData, r'''$.receiptUrl''')?.toString();
+    final contractUrl =
+        getJsonField(_propertyData, r'''$.contractUrl''')?.toString();
+    if (certUrl?.isNotEmpty == true &&
+        docList.where((d) => d['type'] == 'certification').isEmpty) {
+      docList.add({
+        'type': 'property-certification',
+        'url': certUrl,
+        'label': 'Certificación'
+      });
     }
     if (receiptUrl?.isNotEmpty == true) {
       docList.add({'type': 'receipt', 'url': receiptUrl, 'label': 'Recibo'});
     }
     if (contractUrl?.isNotEmpty == true) {
-      docList.add({'type': 'contract', 'url': contractUrl, 'label': 'Contrato'});
+      docList
+          .add({'type': 'contract', 'url': contractUrl, 'label': 'Contrato'});
     }
 
     return _accordionSection(
@@ -1215,7 +1295,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             color: _primary.withOpacity(0.10),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(Icons.description_outlined, color: _primary, size: 20),
+          child:
+              const Icon(Icons.description_outlined, color: _primary, size: 20),
         ),
         title: Text(
           label,
@@ -1226,8 +1307,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
         ),
         subtitle: Text(
           _extensionLabel(url),
-          style: GoogleFonts.inter(
-              fontSize: 11, color: const Color(0xFF888888)),
+          style:
+              GoogleFonts.inter(fontSize: 11, color: const Color(0xFF888888)),
         ),
         trailing: url.isNotEmpty
             ? TextButton(
@@ -1283,8 +1364,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
                 color: _bannerGreen,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Row(
                 children: [
@@ -1302,7 +1382,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(ctx),
-                    child: const Icon(Icons.close, color: Colors.white, size: 22),
+                    child:
+                        const Icon(Icons.close, color: Colors.white, size: 22),
                   ),
                 ],
               ),
@@ -1410,8 +1491,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           SizeTransition(
             sizeFactor: animation,
             child: Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: content,
             ),
           ),
@@ -1500,8 +1580,10 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             children: [
-                              _metricCard(context, 'Vieron tu propiedad', _views),
-                              _metricCard(context, 'Interactuaron', _interactions),
+                              _metricCard(
+                                  context, 'Vieron tu propiedad', _views),
+                              _metricCard(
+                                  context, 'Interactuaron', _interactions),
                               _metricCard(context, 'Visitas', _visits),
                               _metricCard(context, 'Propuestas', _offers),
                             ],
@@ -1534,30 +1616,33 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             const Center(
                                 child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 20),
-                              child:
-                                  CircularProgressIndicator(color: _primary),
+                              child: CircularProgressIndicator(color: _primary),
                             ))
                           else if (_pendingVisits.isEmpty)
                             _emptyState(
                                 'No hay visitas pendientes de confirmación.')
                           else
                             ..._pendingVisits.map((v) {
-                              final visitId =
-                                  getJsonField(v, r'''$.visitId''')?.toString() ??
+                              final visitId = getJsonField(v, r'''$.visitId''')
+                                      ?.toString() ??
                                   getJsonField(v, r'''$.id''')?.toString() ??
-                                      '';
+                                  '';
                               return _visitCard(context, v,
                                   statusLabel: 'Pendiente de confirmación',
                                   onViewTap: () {
-                                context.pushNamed(
-                                  DOVIACLIENTPropuestaDeVisitaWidget.routeName,
-                                  queryParameters: {
-                                    'propertyId': serializeParam(
-                                        widget.propertyId, ParamType.String),
-                                    'visitId': serializeParam(
-                                        visitId, ParamType.String),
-                                  }.withoutNulls,
-                                ).then((_) => _loadOwnerVisits());
+                                context
+                                    .pushNamed(
+                                      DOVIACLIENTPropuestaDeVisitaWidget
+                                          .routeName,
+                                      queryParameters: {
+                                        'propertyId': serializeParam(
+                                            widget.propertyId,
+                                            ParamType.String),
+                                        'visitId': serializeParam(
+                                            visitId, ParamType.String),
+                                      }.withoutNulls,
+                                    )
+                                    .then((_) => _loadOwnerVisits());
                               });
                             }),
 
@@ -1569,22 +1654,25 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             _emptyState('No hay visitas confirmadas próximas.')
                           else
                             ..._confirmedVisits.map((v) {
-                              final visitId =
-                                  getJsonField(v, r'''$.visitId''')?.toString() ??
+                              final visitId = getJsonField(v, r'''$.visitId''')
+                                      ?.toString() ??
                                   getJsonField(v, r'''$.id''')?.toString() ??
-                                      '';
+                                  '';
                               return _visitCard(context, v,
                                   statusLabel: 'Visita confirmada',
                                   onViewTap: () {
-                                context.pushNamed(
-                                  DOVIACLIENTSobreMiVisitaWidget.routeName,
-                                  queryParameters: {
-                                    'propertyId': serializeParam(
-                                        widget.propertyId, ParamType.String),
-                                    'visitId': serializeParam(
-                                        visitId, ParamType.String),
-                                  }.withoutNulls,
-                                ).then((_) => _loadOwnerVisits());
+                                context
+                                    .pushNamed(
+                                      DOVIACLIENTVisitaAceptadaWidget.routeName,
+                                      queryParameters: {
+                                        'propertyId': serializeParam(
+                                            widget.propertyId,
+                                            ParamType.String),
+                                        'visitId': serializeParam(
+                                            visitId, ParamType.String),
+                                      }.withoutNulls,
+                                    )
+                                    .then((_) => _loadOwnerVisits());
                               });
                             }),
 
@@ -1594,14 +1682,12 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             const Center(
                                 child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 20),
-                              child:
-                                  CircularProgressIndicator(color: _primary),
+                              child: CircularProgressIndicator(color: _primary),
                             ))
                           else if (_activeOffers.isEmpty)
                             _emptyState('No hay propuestas activas por ahora.')
                           else
-                            ..._activeOffers
-                                .map((o) => _offerCard(context, o)),
+                            ..._activeOffers.map((o) => _offerCard(context, o)),
 
                           // ── BOTONES DE ACCIÓN ──────────────────────────────
                           const SizedBox(height: 32),
@@ -1866,8 +1952,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
   }
 
   void _clearError(String fieldKey) {
-    if (_fieldErrors.containsKey(fieldKey) &&
-        _fieldErrors[fieldKey] != null) {
+    if (_fieldErrors.containsKey(fieldKey) && _fieldErrors[fieldKey] != null) {
       setState(() => _fieldErrors[fieldKey] = null);
     }
   }
@@ -1912,7 +1997,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
     required TextEditingController controller,
     String hint = '',
     bool isNumeric = true,
-    String? fieldKey,   // optional: key into _fieldErrors for validation
+    String? fieldKey, // optional: key into _fieldErrors for validation
   }) {
     final hasError =
         fieldKey != null && (_fieldErrors[fieldKey]?.isNotEmpty == true);
@@ -1938,13 +2023,11 @@ class _EditPriceModalState extends State<_EditPriceModal> {
           inputFormatters: isNumeric
               ? [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))]
               : null,
-          onChanged: fieldKey != null
-              ? (_) => _clearError(fieldKey)
-              : null,
+          onChanged: fieldKey != null ? (_) => _clearError(fieldKey) : null,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.inter(
-                fontSize: 14, color: const Color(0xFFAAAAAA)),
+            hintStyle:
+                GoogleFonts.inter(fontSize: 14, color: const Color(0xFFAAAAAA)),
             isDense: true,
             filled: true,
             fillColor:
@@ -2136,8 +2219,8 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                                   color: const Color(0xFFEFF8F8),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                      color: widget.primaryColor
-                                          .withOpacity(0.3)),
+                                      color:
+                                          widget.primaryColor.withOpacity(0.3)),
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
@@ -2255,8 +2338,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                                 color: widget.primaryColor, width: 1.5),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24)),
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           onPressed:
                               _isSaving ? null : () => Navigator.pop(context),
@@ -2276,8 +2358,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                             backgroundColor: widget.primaryColor,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24)),
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           onPressed: _isSaving
                               ? null
@@ -2382,6 +2463,7 @@ class _NoDisponibleModal extends StatefulWidget {
   final Color primaryColor;
   final Color errorColor;
   final String propertyName;
+
   /// Called with the optional reason text when the user taps [No disponible].
   /// The caller is responsible for the API call and navigation.
   final Future<void> Function(String? reason) onConfirm;
@@ -2409,7 +2491,8 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
 
   Future<void> _handleConfirm() async {
     setState(() => _isLoading = true);
-    final reason = _motivoCtrl.text.trim().isEmpty ? null : _motivoCtrl.text.trim();
+    final reason =
+        _motivoCtrl.text.trim().isEmpty ? null : _motivoCtrl.text.trim();
     // Close the modal first — then the caller shows snackbar / pops the page
     if (mounted) Navigator.of(context).pop();
     await widget.onConfirm(reason);
@@ -2478,7 +2561,8 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                 ),
                 const SizedBox(height: 8),
                 _bulletPoint('Se retirará del mapa y de las búsquedas.'),
-                _bulletPoint('Se eliminará de los favoritos de todos los usuarios.'),
+                _bulletPoint(
+                    'Se eliminará de los favoritos de todos los usuarios.'),
                 _bulletPoint('Se cancelarán las visitas y propuestas activas.'),
                 _bulletPoint('Se notificará a los equipos internos de DOVIA.'),
                 const SizedBox(height: 4),
@@ -2510,7 +2594,8 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                   textCapitalization: TextCapitalization.sentences,
                   style: GoogleFonts.inter(fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Ej: La propiedad ya fue vendida de forma privada…',
+                    hintText:
+                        'Ej: La propiedad ya fue vendida de forma privada…',
                     hintStyle: GoogleFonts.inter(
                         fontSize: 13, color: const Color(0xFFAAAAAA)),
                     filled: true,
@@ -2641,6 +2726,7 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
 
 class _PausaModal extends StatefulWidget {
   final Color primaryColor;
+
   /// Called with the optional motivo when the user taps [Pausar Propiedad].
   final Future<void> Function(String? motivo) onConfirm;
 
@@ -2706,8 +2792,7 @@ class _PausaModalState extends State<_PausaModal> {
                   child: Opacity(
                     opacity: 0.7,
                     child: Icon(Icons.close,
-                        size: 16,
-                        color: Colors.black.withOpacity(0.8)),
+                        size: 16, color: Colors.black.withOpacity(0.8)),
                   ),
                 ),
               ],
@@ -2772,12 +2857,10 @@ class _PausaModalState extends State<_PausaModal> {
                   child: SizedBox(
                     height: 42,
                     child: OutlinedButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () => Navigator.of(context).pop(),
+                      onPressed:
+                          _isLoading ? null : () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                            color: widget.primaryColor, width: 1),
+                        side: BorderSide(color: widget.primaryColor, width: 1),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25)),
                       ),

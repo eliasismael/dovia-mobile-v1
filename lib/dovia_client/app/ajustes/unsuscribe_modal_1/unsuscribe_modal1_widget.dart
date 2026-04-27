@@ -48,8 +48,8 @@ class _UnsuscribeModal1WidgetState extends State<UnsuscribeModal1Widget> {
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
         child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
               '¿Estás seguro que quieres cancelar\nla suscripción?',
@@ -67,12 +67,13 @@ class _UnsuscribeModal1WidgetState extends State<UnsuscribeModal1Widget> {
                         FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                   ),
             ),
+            const SizedBox(height: 32),
             Row(
               mainAxisSize: MainAxisSize.max,
               children: [
                 FFButtonWidget(
                   onPressed: () {
-                    print('Button pressed ...');
+                    Navigator.of(context).pop();
                   },
                   text: 'Cancelar',
                   options: FFButtonOptions(
@@ -113,12 +114,19 @@ class _UnsuscribeModal1WidgetState extends State<UnsuscribeModal1Widget> {
                         backgroundColor: Colors.transparent,
                         enableDrag: false,
                         context: context,
-                        builder: (context) {
-                          return Padding(
-                            padding: MediaQuery.viewInsetsOf(context),
-                            child: const UnsuscribeModal2Widget(),
-                          );
-                        },
+                        builder: (context) => Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                            ),
+                            child: Padding(
+                              padding: MediaQuery.viewInsetsOf(context),
+                              child: const UnsuscribeModal2Widget(),
+                            ),
+                          ),
+                        ),
                       ).then((value) => safeSetState(() {}));
                     },
                     text: 'Cancelar suscripción',
@@ -128,7 +136,7 @@ class _UnsuscribeModal1WidgetState extends State<UnsuscribeModal1Widget> {
                           const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
                       iconPadding:
                           const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: const Color(0xFFFF0000),
+                      color: const Color(0xFFE57373),
                       textStyle:
                           FlutterFlowTheme.of(context).titleSmall.override(
                                 font: GoogleFonts.publicSans(

@@ -10,11 +10,17 @@ class DrawMapComponentWidget extends StatefulWidget {
     this.height,
     bool? singlePointMode,
     this.onPointSelected,
+    this.initialLatitude,
+    this.initialLongitude,
+    this.interactive = true,
   }) : singlePointMode = singlePointMode ?? false;
 
   final double? height;
   final bool singlePointMode;
   final Future Function(double latitude, double longitude)? onPointSelected;
+  final double? initialLatitude;
+  final double? initialLongitude;
+  final bool interactive;
 
   @override
   State<DrawMapComponentWidget> createState() => _DrawMapComponentWidgetState();
@@ -56,13 +62,14 @@ class _DrawMapComponentWidgetState extends State<DrawMapComponentWidget> {
           width: MediaQuery.sizeOf(context).width * 1.0,
           height: MediaQuery.sizeOf(context).height * 1.0,
           mapboxToken: FFAppConstants.MapboxAccessToken,
-          initialLatitude: 14.6407,
-          initialLongitude: -90.5133,
+          initialLatitude: widget.initialLatitude ?? 14.6407,
+          initialLongitude: widget.initialLongitude ?? -90.5133,
           singlePointMode: widget.singlePointMode,
+          interactive: widget.interactive,
           onPointSelected: (latitude, longitude) async {
             await widget.onPointSelected?.call(
-              1.0,
-              1.0,
+              latitude,
+              longitude,
             );
           },
         ),

@@ -122,23 +122,17 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           children: [
             // Avatar
             ClipOval(
-              child: Image.asset(
-                'assets/images/55a15263074a443ef0adbc59c5a1d36b4353026c.png',
+              child: Container(
                 width: 76,
                 height: 76,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 76,
-                  height: 76,
-                  decoration: const BoxDecoration(
-                    color: backgroundGray,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.person,
-                    size: 40,
-                    color: inputPlaceholder,
-                  ),
+                decoration: const BoxDecoration(
+                  color: backgroundGray,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person,
+                  size: 40,
+                  color: inputPlaceholder,
                 ),
               ),
             ),

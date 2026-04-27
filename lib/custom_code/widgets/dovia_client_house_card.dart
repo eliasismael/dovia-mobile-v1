@@ -18,6 +18,9 @@ class DoviaClientHouseCard extends StatefulWidget {
   final bool? isFavorite;
   final String? propertyId;
   final String? authToken;
+  final int? bedrooms;
+  final int? bathrooms;
+  final int? constructionArea;
   final Future<void> Function()? onAddToFavorites;
   final Future<void> Function()? onRemoveFromFavorites;
 
@@ -36,6 +39,9 @@ class DoviaClientHouseCard extends StatefulWidget {
     this.authToken,
     this.onAddToFavorites,
     this.onRemoveFromFavorites,
+    this.bedrooms,
+    this.bathrooms,
+    this.constructionArea,
   });
 
   @override
@@ -250,7 +256,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(
-                  widget.name ?? "",
+                  (widget.name == null || widget.name!.isEmpty) ? "Propiedad sin nombre" : widget.name!,
                   style: GoogleFonts.publicSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -277,10 +283,11 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildSpecItem(
-                        "M2 ${widget.landArea?.toStringAsFixed(0) ?? 'Nada'}"),
-                    _buildSpecItem("M2"),
-                    _buildSpecItem("Habitaciones"),
-                    _buildSpecItem("Baños"),
+                        "${widget.constructionArea ?? 0} M2"),
+                    _buildSpecItem(
+                        "${widget.landArea?.toInt() ?? 0} M2"),
+                    _buildSpecItem("${widget.bedrooms ?? 0} Hab."),
+                    _buildSpecItem("${widget.bathrooms ?? 0} Baños"),
                   ],
                 ),
               ],

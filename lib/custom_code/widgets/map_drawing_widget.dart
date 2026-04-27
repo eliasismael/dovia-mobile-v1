@@ -27,6 +27,9 @@ class MapDrawingWidget extends StatefulWidget {
     this.confirmButtonLabel,
     this.singlePointMode,
     this.onPointSelected,
+    this.interactive = true,
+    this.circleRadius = 500,
+    this.useRadiusInMeter = true,
   });
 
   final double? width;
@@ -46,6 +49,10 @@ class MapDrawingWidget extends StatefulWidget {
   /// Receives the latitude and longitude of the selected point.
   /// Use this in FlutterFlow to set page/app state variables.
   final Future Function(double latitude, double longitude)? onPointSelected;
+
+  final bool interactive;
+  final double circleRadius;
+  final bool useRadiusInMeter;
 
   @override
   State<MapDrawingWidget> createState() => _MapDrawingWidgetState();
@@ -114,6 +121,12 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
     _pinBounceAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _pinDropController, curve: Curves.easeOut),
     );
+
+    if (_isSinglePoint &&
+        widget.initialLatitude != 0 &&
+        widget.initialLongitude != 0) {
+      _selectedPoint = ll.LatLng(widget.initialLatitude, widget.initialLongitude);
+    }
   }
 
   @override
@@ -274,6 +287,7 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
   // ══════════════════════════════════════════════
 
   void _onMapTapSinglePoint(TapPosition tapPosition, ll.LatLng latLng) {
+    if (!widget.interactive) return;
     _pinDropController.reset();
     setState(() {
       _selectedPoint = latLng;
@@ -450,8 +464,10 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
         initialZoom: widget.initialZoom ?? 15,
         minZoom: 3,
         maxZoom: 20,
-        interactionOptions: const InteractionOptions(
-          flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+        interactionOptions: InteractionOptions(
+          flags: widget.interactive
+              ? InteractiveFlag.all & ~InteractiveFlag.rotate
+              : InteractiveFlag.none,
         ),
         onTap: _onMapTapSinglePoint,
       ),
@@ -488,10 +504,11 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
             circles: [
               CircleMarker(
                 point: _selectedPoint!,
-                radius: 6,
-                color: _drawingColor.withOpacity(0.3),
-                borderColor: _drawingColor.withOpacity(0.6),
-                borderStrokeWidth: 1.5,
+                radius: widget.circleRadius,
+                useRadiusInMeter: widget.useRadiusInMeter,
+                color: _drawingColor.withOpacity(0.15),
+                borderColor: _drawingColor.withOpacity(0.5),
+                borderStrokeWidth: 2,
               ),
             ],
           ),

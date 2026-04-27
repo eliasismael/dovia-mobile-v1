@@ -255,6 +255,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                         ),
                                       ),
                                       child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: Column(

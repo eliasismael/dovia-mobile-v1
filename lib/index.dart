@@ -238,3 +238,5 @@ export '/recover_password_step2/recover_password_step2_widget.dart'
     show RecoverPasswordStep2Widget;
 export '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_propuesta_de_visita/d_o_v_i_a_c_l_i_e_n_t_propuesta_de_visita_widget.dart'
     show DOVIACLIENTPropuestaDeVisitaWidget;
+export '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_visita_aceptada/d_o_v_i_a_c_l_i_e_n_t_visita_aceptada_widget.dart'
+    show DOVIACLIENTVisitaAceptadaWidget;

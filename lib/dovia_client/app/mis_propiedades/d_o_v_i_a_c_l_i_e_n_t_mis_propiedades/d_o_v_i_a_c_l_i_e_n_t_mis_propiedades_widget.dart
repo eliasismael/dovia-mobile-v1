@@ -312,16 +312,19 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                     ParamType.String,
                                                   ),
                                                 }.withoutNulls,
-                                              );
+                                              ).then((_) => safeSetState(() {}));
                                             },
-                                            child: custom_widgets
-                                                .DoviaClientHouseCard(
-                                              width: MediaQuery.sizeOf(context)
-                                                      .width *
-                                                  1.0,
-                                              height: 250.0,
-                                              imageUrl:
-                                                  'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                              child: custom_widgets.DoviaClientHouseCard(
+                                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                                height: 250.0,
+                                                imageUrl: getJsonField(eachOwnPropertyItem, r'''$.photos[0].url''')?.toString() ?? 'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                                name: getJsonField(eachOwnPropertyItem, r'''$.name''')?.toString(),
+                                                type: getJsonField(eachOwnPropertyItem, r'''$.listingType'''),
+                                                price: '${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD'} ${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].price''')?.toString() ?? '0'}',
+                                                landArea: castToType<double>(getJsonField(eachOwnPropertyItem, r'''$.features.general.landArea''')),
+                                                constructionArea: castToType<int>(getJsonField(eachOwnPropertyItem, r'''$.features.general.constructionArea''')),
+                                                bedrooms: castToType<int>(getJsonField(eachOwnPropertyItem, r'''$.features.general.bedrooms''')),
+                                                bathrooms: castToType<int>(getJsonField(eachOwnPropertyItem, r'''$.features.general.bathrooms''')),
                                             isFavorite: getJsonField(
                                               eachOwnPropertyItem,
                                               r'''$.isFavorite''',
@@ -633,7 +636,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                   ParamType.String,
                                                 ),
                                               }.withoutNulls,
-                                            );
+                                            ).then((_) => safeSetState(() {}));
                                           } else if (status == 'IN_PROCESS' || status == 'PENDING_REVIEW' || (status == 'DRAFT' && hasVisit)) {
                                             context.pushNamed(
                                               'DOVIA_CLIENT_MisPropiedades_Visita_1',

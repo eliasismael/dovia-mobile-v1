@@ -5,7 +5,6 @@ import '/dovia_client/app/ajustes/unsuscribe_modal_1/unsuscribe_modal1_widget.da
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
@@ -47,6 +46,16 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
     super.dispose();
   }
 
+  /// Sign-out: clear session and navigate to the landing/login screen.
+  Future<void> _signOut() async {
+    GoRouter.of(context).prepareAuthEvent();
+    await authManager.signOut();
+    GoRouter.of(context).clearRedirectLocation();
+    if (context.mounted) {
+      context.goNamedAuth(QueEsDoviaWidget.routeName, context.mounted);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -78,52 +87,12 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          FFButtonWidget(
-                            onPressed: () async {
-                              GoRouter.of(context).prepareAuthEvent();
-                              await authManager.signOut();
-                              GoRouter.of(context).clearRedirectLocation();
-
-                              context.goNamedAuth(
-                                  QueEsDoviaWidget.routeName, context.mounted);
-                            },
-                            text: 'cerrar sesion',
-                            options: FFButtonOptions(
-                              height: 40.0,
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 0.0, 16.0, 0.0),
-                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 0.0),
-                              color: FlutterFlowTheme.of(context).primary,
-                              textStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .override(
-                                    font: GoogleFonts.publicSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                    color: Colors.white,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
-                                  ),
-                              elevation: 0.0,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
+                          // ── Tab switcher ──────────────────────────
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 20.0, 20.0, 20.0),
@@ -139,220 +108,80 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      _model.selectedSection = 'perfil';
-                                      safeSetState(() {});
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color:
-                                            _model.selectedSection == 'perfil'
-                                                ? const Color(0x34007376)
-                                                : FlutterFlowTheme.of(context)
-                                                    .tertiary,
-                                        borderRadius:
-                                            BorderRadius.circular(25.0),
-                                      ),
-                                      child: Align(
-                                        alignment:
-                                            const AlignmentDirectional(0.0, 0.0),
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  30.0, 10.0, 30.0, 10.0),
-                                          child: Text(
-                                            'Perfil y seguridad',
-                                            textAlign: TextAlign.center,
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  color:
-                                                      _model.selectedSection ==
-                                                              'perfil'
-                                                          ? FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primaryText
-                                                          : FlutterFlowTheme.of(
-                                                                  context)
-                                                              .secondaryText,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      _model.selectedSection = 'notificaciones';
-                                      safeSetState(() {});
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: _model.selectedSection ==
-                                                'notificaciones'
-                                            ? const Color(0x34007376)
-                                            : FlutterFlowTheme.of(context)
-                                                .tertiary,
-                                        borderRadius:
-                                            BorderRadius.circular(25.0),
-                                      ),
-                                      child: Align(
-                                        alignment:
-                                            const AlignmentDirectional(0.0, 0.0),
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  30.0, 10.0, 30.0, 10.0),
-                                          child: Text(
-                                            'Notificaciones',
-                                            textAlign: TextAlign.center,
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  color:
-                                                      _model.selectedSection ==
-                                                              'notificaciones'
-                                                          ? FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primaryText
-                                                          : FlutterFlowTheme.of(
-                                                                  context)
-                                                              .secondaryText,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  _buildTab(context, 'Perfil y seguridad',
+                                      'perfil'),
+                                  _buildTab(context, 'Notificaciones',
+                                      'notificaciones'),
                                 ],
                               ),
                             ),
                           ),
+
+                          // ── Content area ──────────────────────────
                           Builder(
                             builder: (context) {
                               if (_model.selectedSection == 'perfil') {
                                 return SizedBox(
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  height:
-                                      MediaQuery.sizeOf(context).height * 1.0,
+                                  width:
+                                      MediaQuery.sizeOf(context).width * 1.0,
+                                  // Let AjustesScreen size itself naturally
                                   child: custom_widgets.AjustesScreen(
-                                    width:
-                                        MediaQuery.sizeOf(context).width * 1.0,
-                                    height:
-                                        MediaQuery.sizeOf(context).height * 1.0,
+                                    width: MediaQuery.sizeOf(context).width *
+                                        1.0,
+                                    height: null,
                                     onCancelSubscription: () async {
                                       await showModalBottomSheet(
                                         isScrollControlled: true,
                                         backgroundColor: Colors.transparent,
-                                        enableDrag: false,
                                         context: context,
-                                        builder: (context) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              FocusScope.of(context).unfocus();
-                                              FocusManager.instance.primaryFocus
-                                                  ?.unfocus();
-                                            },
-                                            child: Padding(
-                                              padding: MediaQuery.viewInsetsOf(
-                                                  context),
-                                              child: const UnsuscribeModal1Widget(),
+                                        builder: (context) => Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                                             ),
-                                          );
-                                        },
+                                            child: const UnsuscribeModal1Widget(),
+                                          ),
+                                        ),
                                       ).then((value) => safeSetState(() {}));
                                     },
                                     onDeleteAccount: () async {
                                       await showModalBottomSheet(
                                         isScrollControlled: true,
                                         backgroundColor: Colors.transparent,
-                                        enableDrag: false,
                                         context: context,
-                                        builder: (context) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              FocusScope.of(context).unfocus();
-                                              FocusManager.instance.primaryFocus
-                                                  ?.unfocus();
-                                            },
-                                            child: Padding(
-                                              padding: MediaQuery.viewInsetsOf(
-                                                  context),
-                                              child: const DeleteAccount1Widget(),
+                                        builder: (context) => Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                                             ),
-                                          );
-                                        },
+                                            child: const DeleteAccount1Widget(),
+                                          ),
+                                        ),
                                       ).then((value) => safeSetState(() {}));
+                                    },
+                                    onSignOut: () async {
+                                      await _signOut();
                                     },
                                   ),
                                 );
                               } else {
                                 return wrapWithModel(
-                                  model: _model.opcionesDeNotificacionesModel,
+                                  model:
+                                      _model.opcionesDeNotificacionesModel,
                                   updateCallback: () => safeSetState(() {}),
-                                  child: const OpcionesDeNotificacionesWidget(),
+                                  child:
+                                      const OpcionesDeNotificacionesWidget(),
                                 );
                               }
                             },
                           ),
                         ]
-                            .divide(const SizedBox(height: 12.0))
-                            .addToStart(const SizedBox(height: 12.0))
+                            .divide(const SizedBox(height: 0.0))
+                            .addToStart(const SizedBox(height: 0.0))
                             .addToEnd(const SizedBox(height: 12.0)),
                       ),
                     ),
@@ -388,6 +217,51 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTab(BuildContext context, String label, String section) {
+    final isActive = _model.selectedSection == section;
+    return InkWell(
+      splashColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTap: () {
+        _model.selectedSection = section;
+        safeSetState(() {});
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isActive
+              ? const Color(0x34007376)
+              : FlutterFlowTheme.of(context).tertiary,
+          borderRadius: BorderRadius.circular(25.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(30.0, 10.0, 30.0, 10.0),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.inter(
+                    fontWeight:
+                        FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                  ),
+                  color: isActive
+                      ? FlutterFlowTheme.of(context).primaryText
+                      : FlutterFlowTheme.of(context).secondaryText,
+                  letterSpacing: 0.0,
+                  fontWeight:
+                      FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                  fontStyle:
+                      FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                ),
           ),
         ),
       ),
