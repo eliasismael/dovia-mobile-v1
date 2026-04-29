@@ -46,7 +46,8 @@ class UserRepository extends ChangeNotifier {
     notifyListeners();
 
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall
+    final response = await DOVIAAPIUserContextGroup
+        .getAuthenticatedUserProfileCall
         .call(authToken: token);
 
     _isLoading = false;
@@ -89,7 +90,7 @@ class UserRepository extends ChangeNotifier {
     // Refresh profile to show new image
     await loadProfile(forceRefresh: true);
     notifyListeners();
-    return Success(true);
+    return const Success(true);
   }
 
   /// Clears the cached profile (call on logout).

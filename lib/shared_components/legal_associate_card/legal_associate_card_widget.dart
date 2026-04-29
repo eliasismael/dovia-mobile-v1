@@ -7,7 +7,18 @@ import 'legal_associate_card_model.dart';
 export 'legal_associate_card_model.dart';
 
 class LegalAssociateCardWidget extends StatefulWidget {
-  const LegalAssociateCardWidget({super.key});
+  const LegalAssociateCardWidget({
+    super.key,
+    this.name,
+    this.photoUrl,
+    this.phone,
+    this.email,
+  });
+
+  final String? name;
+  final String? photoUrl;
+  final String? phone;
+  final String? email;
 
   @override
   State<LegalAssociateCardWidget> createState() =>
@@ -56,12 +67,19 @@ class _LegalAssociateCardWidgetState extends State<LegalAssociateCardWidget> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(100.0),
-              child: Image.asset(
-                'assets/images/nahid_photo.png',
-                width: 113.0,
-                height: 113.0,
-                fit: BoxFit.cover,
-              ),
+              child: widget.photoUrl != null && widget.photoUrl!.isNotEmpty
+                  ? Image.network(
+                      widget.photoUrl!,
+                      width: 113.0,
+                      height: 113.0,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      'assets/images/nahid_photo.png',
+                      width: 113.0,
+                      height: 113.0,
+                      fit: BoxFit.cover,
+                    ),
             ),
             Padding(
               padding:
@@ -105,7 +123,7 @@ class _LegalAssociateCardWidgetState extends State<LegalAssociateCardWidget> {
               ),
             ),
             Text(
-              'Nombre y Apellido',
+              widget.name ?? 'Nombre y Apellido',
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     font: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
@@ -128,7 +146,7 @@ class _LegalAssociateCardWidgetState extends State<LegalAssociateCardWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    'Teléfono',
+                    widget.phone ?? 'Teléfono',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.inter(
                             fontWeight: FlutterFlowTheme.of(context)
@@ -147,7 +165,7 @@ class _LegalAssociateCardWidgetState extends State<LegalAssociateCardWidget> {
                         ),
                   ),
                   Text(
-                    'Email',
+                    widget.email ?? 'Email',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.inter(
                             fontWeight: FlutterFlowTheme.of(context)

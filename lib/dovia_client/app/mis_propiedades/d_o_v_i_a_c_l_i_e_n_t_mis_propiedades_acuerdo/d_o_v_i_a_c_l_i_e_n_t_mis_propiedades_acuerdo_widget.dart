@@ -9,6 +9,8 @@ import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/subir_archivo/subir_archivo_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_offers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +22,8 @@ class DOVIACLIENTMisPropiedadesAcuerdoWidget extends StatefulWidget {
     super.key,
     double? negociationStep,
     required this.paymentMethod,
+    this.proposedAmount,
+    this.offerId,
   }) : negociationStep = negociationStep ?? 2.0;
 
   /// Current negotiation step.
@@ -32,6 +36,11 @@ class DOVIACLIENTMisPropiedadesAcuerdoWidget extends StatefulWidget {
 
   /// contado, hipoteca, o promesa
   final String? paymentMethod;
+
+  /// Amount to be shown in the economic proposal input
+  final String? proposedAmount;
+
+  final String? offerId;
 
   static String routeName = 'DOVIA_CLIENT_MisPropiedades_Acuerdo';
   static String routePath = '/dOVIACLIENTMisPropiedadesAcuerdo';
@@ -47,6 +56,20 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  dynamic _offerData;
+  bool _isLoadingOffer = true;
+
+  double get _computedStep {
+    if (_offerData != null) {
+      final status =
+          getJsonField(_offerData, r'''$.processStatus''')?.toString();
+      if (status == 'agreement_structuring') return 2.0;
+      if (status == 'contract_signing') return 3.0;
+      if (status == 'completed') return 4.0;
+    }
+    return widget.negociationStep;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -56,25 +79,29 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
     _model.textController1 ??= TextEditingController(text: 'Contado');
     _model.textFieldFocusNode1 ??= FocusNode();
 
-    _model.textController2 ??= TextEditingController();
+    _model.textController2 ??=
+        TextEditingController(text: widget.proposedAmount ?? '');
     _model.textFieldFocusNode2 ??= FocusNode();
 
     _model.textController3 ??= TextEditingController(text: 'Contado');
     _model.textFieldFocusNode3 ??= FocusNode();
 
-    _model.textController4 ??= TextEditingController();
+    _model.textController4 ??=
+        TextEditingController(text: widget.proposedAmount ?? '');
     _model.textFieldFocusNode4 ??= FocusNode();
 
     _model.textController5 ??= TextEditingController(text: 'Contado');
     _model.textFieldFocusNode5 ??= FocusNode();
 
-    _model.textController6 ??= TextEditingController();
+    _model.textController6 ??=
+        TextEditingController(text: widget.proposedAmount ?? '');
     _model.textFieldFocusNode6 ??= FocusNode();
 
     _model.textController7 ??= TextEditingController(text: 'Contado');
     _model.textFieldFocusNode7 ??= FocusNode();
 
-    _model.textController8 ??= TextEditingController();
+    _model.textController8 ??=
+        TextEditingController(text: widget.proposedAmount ?? '');
     _model.textFieldFocusNode8 ??= FocusNode();
 
     _model.textController9 ??= TextEditingController();
@@ -104,7 +131,37 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
     _model.textController17 ??= TextEditingController();
     _model.textFieldFocusNode17 ??= FocusNode();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      safeSetState(() {});
+      _loadOffer();
+    });
+  }
+
+  Future<void> _loadOffer() async {
+    if (widget.offerId == null || widget.offerId!.isEmpty) {
+      safeSetState(() {
+        _isLoadingOffer = false;
+      });
+      return;
+    }
+    final res = await DOVIAAPIOfferContextGroup.getOfferByIDCall.call(
+      offerId: widget.offerId,
+      authToken: currentAuthenticationToken,
+    );
+    if (!mounted) return;
+    if (res.succeeded) {
+      safeSetState(() {
+        _offerData = getJsonField(res.jsonBody, r'''$.data''') ??
+            getJsonField(res.jsonBody, r'''$.offer''') ??
+            res.jsonBody;
+        _isLoadingOffer = false;
+      });
+      debugPrint('[Acuerdo] loaded offer: $_offerData');
+    } else {
+      safeSetState(() {
+        _isLoadingOffer = false;
+      });
+    }
   }
 
   @override
@@ -140,7 +197,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(showMap: false, showCurrency: false,
+                      child: const DOVIASHAREDHeaderWidget(
+                        showMap: false,
+                        showCurrency: false,
                         title: 'Acuerdo',
                       ),
                     ),
@@ -159,13 +218,13 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 200.0,
                                 currentStep: () {
-                                  if (widget.negociationStep == 3.5) {
+                                  if (_computedStep == 3.5) {
                                     return 3;
-                                  } else if (widget.negociationStep == 2.0) {
+                                  } else if (_computedStep == 2.0) {
                                     return 2;
-                                  } else if (widget.negociationStep == 3.0) {
+                                  } else if (_computedStep == 3.0) {
                                     return 3;
-                                  } else if (widget.negociationStep == 4.0) {
+                                  } else if (_computedStep == 4.0) {
                                     return 4;
                                   } else {
                                     return 2;
@@ -175,13 +234,13 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                   'Negociación',
                                   'Estructuración de acuerdo',
                                   'Firma de contrato',
-                                  'Finalizar acuerdo'
+                                  'Finaliza proceso'
                                 ],
                               ),
                             ),
                             Builder(
                               builder: (context) {
-                                if (widget.negociationStep == 2.0) {
+                                if (_computedStep == 2.0) {
                                   return Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
@@ -190,8 +249,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           if (widget.paymentMethod ==
                                               'contado') {
                                             return Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.max,
@@ -641,8 +701,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               mainAxisSize: MainAxisSize.max,
                                               children: [
                                                 Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -859,8 +920,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                       Container(
@@ -1071,16 +1133,18 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -1297,8 +1361,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                       Container(
@@ -1509,8 +1574,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                     ],
@@ -1524,8 +1590,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               mainAxisSize: MainAxisSize.max,
                                               children: [
                                                 Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -1742,8 +1809,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                       Container(
@@ -1954,16 +2022,18 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -2185,8 +2255,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                       Container(
@@ -2397,16 +2468,18 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           0.0, 20.0, 0.0, 0.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -2632,8 +2705,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         context),
                                                               ),
                                                             ),
-                                                          ].divide(const SizedBox(
-                                                              height: 8.0)),
+                                                          ].divide(
+                                                              const SizedBox(
+                                                                  height: 8.0)),
                                                         ),
                                                       ),
                                                     ],
@@ -2655,8 +2729,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         },
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -2668,9 +2742,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(20.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    20.0, 40.0, 20.0, 40.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                20.0, 40.0, 20.0, 40.0),
                                             child: Text(
                                               'Siguientes pasos:\n• Nuestro DOVIA Legal Associate se pondrá en contacto contigo para coordinar los detalles del acuerdo.\n• Revisará la información proporcionada y preparará la documentación legal.\n• Compartiremos los documentos para tu revisión\n• Una vez aprobado, se programará la firma\n• DOVIA supervisará todo el proceso hasta finalizar la operación e inscripción.',
                                               style:
@@ -2706,8 +2780,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Text(
                                           'Abogado verificado por DOVIA que prepara y supervisa todo el proceso legal para proteger tus intereses. ',
                                           style: FlutterFlowTheme.of(context)
@@ -2737,20 +2811,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
-                                        child: wrapWithModel(
-                                          model:
-                                              _model.legalAssociateCardModel1,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: const LegalAssociateCardWidget(),
-                                        ),
-                                      ),
                                     ],
                                   );
-                                } else if (widget.negociationStep == 3.0) {
+                                } else if (_computedStep == 3.0) {
                                   return Builder(
                                     builder: (context) {
                                       if (widget.paymentMethod == 'hipoteca') {
@@ -2758,11 +2821,13 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                           mainAxisSize: MainAxisSize.max,
                                           children: [
                                             Align(
-                                              alignment: const AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: Padding(
-                                                padding: const EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 20.0, 0.0, 0.0),
                                                 child: RichText(
                                                   textScaler:
@@ -2900,11 +2965,13 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Align(
-                                              alignment: const AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: Padding(
-                                                padding: const EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 20.0, 0.0, 0.0),
                                                 child: Text(
                                                   'Avances',
@@ -2934,8 +3001,10 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 8.0, 0.0, 0.0),
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 8.0, 0.0, 0.0),
                                               child: Text(
                                                 'Aquí Dovia desplegar avances sobre procesos y documento para firmar',
                                                 style:
@@ -2964,8 +3033,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
                                                 width:
@@ -2991,11 +3061,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     Padding(
                                                       padding:
                                                           const EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  10.0,
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0),
+                                                              .fromSTEB(10.0,
+                                                              0.0, 0.0, 0.0),
                                                       child: Text(
                                                         'Documento a firmar',
                                                         style:
@@ -3042,10 +3109,10 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               padding:
                                                                   const EdgeInsetsDirectional
                                                                       .fromSTEB(
-                                                                          0.0,
-                                                                          0.0,
-                                                                          10.0,
-                                                                          0.0),
+                                                                      0.0,
+                                                                      0.0,
+                                                                      10.0,
+                                                                      0.0),
                                                               child: InkWell(
                                                                 splashColor: Colors
                                                                     .transparent,
@@ -3187,8 +3254,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: wrapWithModel(
                                                 model:
@@ -3430,7 +3498,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           .asValidator(context),
                                                     ),
                                                   ),
-                                                ].divide(const SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(
+                                                    height: 8.0)),
                                               ),
                                             ),
                                             Container(
@@ -3656,7 +3725,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           .asValidator(context),
                                                     ),
                                                   ),
-                                                ].divide(const SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(
+                                                    height: 8.0)),
                                               ),
                                             ),
                                             Container(
@@ -4217,7 +4287,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                     ],
                                                   ),
-                                                ].divide(const SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(
+                                                    height: 8.0)),
                                               ),
                                             ),
                                             Container(
@@ -4444,12 +4515,14 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           .asValidator(context),
                                                     ),
                                                   ),
-                                                ].divide(const SizedBox(height: 8.0)),
+                                                ].divide(const SizedBox(
+                                                    height: 8.0)),
                                               ),
                                             ),
                                             Align(
-                                              alignment: const AlignmentDirectional(
-                                                  -1.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
                                               child: FFButtonWidget(
                                                 onPressed: () {
                                                   print('Button pressed ...');
@@ -4457,13 +4530,14 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 text: 'Abrir ubicación',
                                                 options: FFButtonOptions(
                                                   height: 30.0,
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
                                                           20.0, 0.0, 20.0, 0.0),
                                                   iconPadding:
                                                       const EdgeInsetsDirectional
-                                                          .fromSTEB(0.0, 0.0,
-                                                              0.0, 0.0),
+                                                          .fromSTEB(
+                                                          0.0, 0.0, 0.0, 0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .accent1,
@@ -4503,8 +4577,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -4516,8 +4591,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(10.0, 10.0,
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -4589,8 +4665,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -4602,8 +4679,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(10.0, 10.0,
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -4675,8 +4753,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -4688,8 +4767,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(10.0, 10.0,
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -4761,8 +4841,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -4774,8 +4855,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(10.0, 10.0,
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -4847,8 +4929,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       0.0, 20.0, 0.0, 0.0),
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -4860,8 +4943,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           10.0),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(10.0, 10.0,
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(10.0, 10.0,
                                                           10.0, 10.0),
                                                   child: Row(
                                                     mainAxisSize:
@@ -4937,13 +5021,13 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                       }
                                     },
                                   );
-                                } else if (widget.negociationStep == 3.5) {
+                                } else if (_computedStep == 3.5) {
                                   return Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -4952,9 +5036,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5037,7 +5121,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     child: Container(
                                                       width: 40.0,
                                                       height: 40.0,
-                                                      decoration: const BoxDecoration(
+                                                      decoration:
+                                                          const BoxDecoration(
                                                         shape: BoxShape.circle,
                                                       ),
                                                       child: ClipRRect(
@@ -5060,8 +5145,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -5073,9 +5158,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    20.0, 40.0, 20.0, 40.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                20.0, 40.0, 20.0, 40.0),
                                             child: Text(
                                               'Podrás ver los archivos pero no puedes descargarlos hasta realizar el pago a Dovia. El pago será revisado y aprobado.',
                                               style: FlutterFlowTheme.of(
@@ -5112,8 +5197,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5122,9 +5207,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5185,8 +5270,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5195,9 +5280,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5258,8 +5343,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5268,9 +5353,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5331,8 +5416,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5341,9 +5426,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5410,19 +5495,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
-                                        child: wrapWithModel(
-                                          model:
-                                              _model.legalAssociateCardModel2,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: const LegalAssociateCardWidget(),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5431,9 +5505,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5494,8 +5568,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5504,9 +5578,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5541,7 +5615,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: const BoxDecoration(
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -5652,8 +5727,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           ),
                                                         ),
                                                       ),
-                                                    ].divide(
-                                                        const SizedBox(width: 4.0)),
+                                                    ].divide(const SizedBox(
+                                                        width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -5662,8 +5737,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5672,9 +5747,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5709,7 +5784,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: const BoxDecoration(
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -5820,8 +5896,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           ),
                                                         ),
                                                       ),
-                                                    ].divide(
-                                                        const SizedBox(width: 4.0)),
+                                                    ].divide(const SizedBox(
+                                                        width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -5830,8 +5906,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -5840,9 +5916,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -5877,7 +5953,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: const BoxDecoration(
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -5988,8 +6065,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           ),
                                                         ),
                                                       ),
-                                                    ].divide(
-                                                        const SizedBox(width: 4.0)),
+                                                    ].divide(const SizedBox(
+                                                        width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -5998,8 +6075,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 20.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -6008,9 +6085,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 BorderRadius.circular(10.0),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    10.0, 10.0, 10.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                10.0, 10.0, 10.0, 10.0),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
@@ -6045,7 +6122,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                 ),
                                                 Container(
-                                                  decoration: const BoxDecoration(
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     shape: BoxShape.rectangle,
                                                   ),
                                                   child: Row(
@@ -6156,8 +6234,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           ),
                                                         ),
                                                       ),
-                                                    ].divide(
-                                                        const SizedBox(width: 4.0)),
+                                                    ].divide(const SizedBox(
+                                                        width: 4.0)),
                                                   ),
                                                 ),
                                               ],
@@ -6166,6 +6244,111 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                         ),
                                       ),
                                     ].divide(const SizedBox(height: 8.0)),
+                                  );
+                                }
+                              },
+                            ),
+                            Builder(
+                              builder: (context) {
+                                if (_isLoadingOffer) {
+                                  return const Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 24.0, 0.0, 24.0),
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF007376),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final profile = getJsonField(
+                                    _offerData, r'''$.legalAssociateProfile''');
+                                bool hasLegalAssociate = profile != null;
+                                if (hasLegalAssociate) {
+                                  final name =
+                                      getJsonField(profile, r'''$.fullName''')
+                                          ?.toString();
+                                  final photoUrl =
+                                      getJsonField(profile, r'''$.avatar''')
+                                          ?.toString();
+                                  final phoneNum = getJsonField(
+                                          profile, r'''$.phone.number''')
+                                      ?.toString();
+                                  final phoneCode = getJsonField(
+                                          profile, r'''$.phone.countryCode''')
+                                      ?.toString();
+                                  final phone = phoneNum != null
+                                      ? '${phoneCode ?? ''} $phoneNum'.trim()
+                                      : null;
+                                  final email =
+                                      getJsonField(profile, r'''$.email''')
+                                          ?.toString();
+
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 24.0, 0.0, 24.0),
+                                    child: LegalAssociateCardWidget(
+                                      name: name,
+                                      photoUrl: photoUrl,
+                                      phone: phone,
+                                      email: email,
+                                    ),
+                                  );
+                                } else {
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 24.0, 0.0, 24.0),
+                                    child: Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryBackground,
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                        border: Border.all(
+                                          color: FlutterFlowTheme.of(context)
+                                              .alternate,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'Asignando profesional legal...',
+                                            textAlign: TextAlign.center,
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.inter(
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        const Color(0xFF00444B),
+                                                  ),
+                                                  fontSize: 16.0,
+                                                ),
+                                          ),
+                                          const SizedBox(height: 8.0),
+                                          Text(
+                                            'En breve te asignaremos un especialista de nuestro equipo legal.',
+                                            textAlign: TextAlign.center,
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.inter(
+                                                    color:
+                                                        const Color(0xFF555555),
+                                                  ),
+                                                  fontSize: 14.0,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   );
                                 }
                               },

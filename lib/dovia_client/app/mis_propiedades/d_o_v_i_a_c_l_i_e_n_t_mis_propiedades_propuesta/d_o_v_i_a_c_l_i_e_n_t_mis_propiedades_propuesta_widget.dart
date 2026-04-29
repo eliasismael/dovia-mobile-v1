@@ -100,7 +100,32 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ));
-      await _loadOffer();
+      
+      final paymentMethodRaw = _resolveField([r'''$.activeOfferData.paymentMethod''', r'''$.offerData.paymentMethod''', r'''$.paymentMethod''']);
+      String paymentMethodClean = 'contado';
+      if (paymentMethodRaw.toLowerCase().contains('mortgage') || paymentMethodRaw.toLowerCase().contains('hipoteca')) {
+        paymentMethodClean = 'hipoteca';
+      } else if (paymentMethodRaw.toLowerCase().contains('promise') || paymentMethodRaw.toLowerCase().contains('promesa')) {
+        paymentMethodClean = 'promesa';
+      }
+
+      context.pushNamed(
+        'DOVIA_CLIENT_MisPropiedades_Acuerdo',
+        queryParameters: {
+          'paymentMethod': serializeParam(
+            paymentMethodClean,
+            ParamType.String,
+          ),
+          'proposedAmount': serializeParam(
+            _resolveField([r'''$.activeOfferData.offerPrice''', r'''$.offerData.offerPrice''', r'''$.offerPrice''', r'''$.amount''']).toString(),
+            ParamType.String,
+          ),
+          'offerId': serializeParam(
+            widget.offerId,
+            ParamType.String,
+          ),
+        }.withoutNulls,
+      );
     } else {
       messenger.showSnackBar(SnackBar(
         content: Text('Error al aceptar (${res.statusCode}).'),

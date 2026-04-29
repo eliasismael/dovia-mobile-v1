@@ -65,16 +65,20 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
 
     if (mounted && res.succeeded) {
       final body = res.jsonBody;
-      final data = (body is Map && body.containsKey('data')) ? body['data'] : body;
+      final data =
+          (body is Map && body.containsKey('data')) ? body['data'] : body;
       final visitObj = data is Map ? data['visit'] as Map? : null;
-      
+
       safeSetState(() {
         _visitData = data;
         _proposedSlots = (visitObj?['proposedTimeSlots'] as List?) ?? [];
         // Match JSON field 'confirmedTimeSlot'
-        _confirmedSlot = visitObj?['confirmedTimeSlot'] ?? visitObj?['confirmedSlot'];
+        _confirmedSlot =
+            visitObj?['confirmedTimeSlot'] ?? visitObj?['confirmedSlot'];
         // Match JSON path data['showing']
-        _showingAgent = data?['showing'] ?? visitObj?['showingAgent'] ?? visitObj?['advisor'];
+        _showingAgent = data?['showing'] ??
+            visitObj?['showingAgent'] ??
+            visitObj?['advisor'];
         _isLoading = false;
       });
       debugPrint('[VisitaAceptada] visitObj: $visitObj');
@@ -94,7 +98,8 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
 
   bool _isConfirmed(dynamic slot) {
     if (_confirmedSlot == null || slot == null) return false;
-    return slot['date'] == _confirmedSlot['date'] && slot['time'] == _confirmedSlot['time'];
+    return slot['date'] == _confirmedSlot['date'] &&
+        slot['time'] == _confirmedSlot['time'];
   }
 
   Future<void> _enviarNotificacion() async {
@@ -114,7 +119,8 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
             elevation: 0,
             child: PopupExitoWidget(
               title: 'Éxito',
-              text: 'Se envió con éxito. Se envió un recordatorio al interesado y al agente Showing.',
+              text:
+                  'Se envió con éxito. Se envió un recordatorio al interesado y al agente Showing.',
               continueText: 'Aceptar',
               onContinue: () {
                 Navigator.pop(ctx);
@@ -153,7 +159,7 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
                 wrapWithModel(
                   model: _model.dOVIASHAREDHeaderModel,
                   updateCallback: () => safeSetState(() {}),
-                  child: DOVIASHAREDHeaderWidget(
+                  child: const DOVIASHAREDHeaderWidget(
                     title: 'Visita aceptada',
                     showMap: false,
                     showCurrency: false,
@@ -173,11 +179,13 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: FlutterFlowTheme.of(context).primaryText,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              if (_proposedSlots.isEmpty && _confirmedSlot != null)
+                              if (_proposedSlots.isEmpty &&
+                                  _confirmedSlot != null)
                                 _slotCard(_confirmedSlot, 0, true)
                               else
                                 ..._proposedSlots.asMap().entries.map((entry) {
@@ -192,7 +200,8 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: FlutterFlowTheme.of(context).primaryText,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -202,11 +211,10 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
                                 onPressed: _enviarNotificacion,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: _primary,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(25)),
+                                      borderRadius: BorderRadius.circular(25)),
                                   elevation: 0,
                                 ),
                                 child: Text(
@@ -231,21 +239,18 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
   }
 
   Widget _slotCard(dynamic slot, int index, bool isConfirmed) {
-    final date = _formatDate((slot is Map ? slot['date'] : null)?.toString() ?? '');
+    final date =
+        _formatDate((slot is Map ? slot['date'] : null)?.toString() ?? '');
     final time = (slot is Map ? slot['time'] : null)?.toString() ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isConfirmed
-            ? _primary
-            : const Color(0xFFF1F4F8),
+        color: isConfirmed ? _primary : const Color(0xFFF1F4F8),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isConfirmed
-              ? _primary
-              : const Color(0xFFE0E3E7),
+          color: isConfirmed ? _primary : const Color(0xFFE0E3E7),
           width: 1,
         ),
       ),
@@ -254,17 +259,15 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
         children: [
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Opción ${index + 1}',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isConfirmed
-                        ? Colors.white70
-                        : const Color(0xFF57636C),
+                    color:
+                        isConfirmed ? Colors.white70 : const Color(0xFF57636C),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -273,9 +276,7 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: isConfirmed
-                        ? Colors.white
-                        : const Color(0xFF14181B),
+                    color: isConfirmed ? Colors.white : const Color(0xFF14181B),
                   ),
                 ),
               ],
@@ -301,20 +302,26 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
         name = fullName;
       } else if (fullName is Map) {
         final fName = fullName['name']?.toString() ?? '';
-        final lName = fullName['lastname']?.toString() ?? fullName['lastName']?.toString() ?? '';
+        final lName = fullName['lastname']?.toString() ??
+            fullName['lastName']?.toString() ??
+            '';
         name = '$fName $lName'.trim();
       } else {
-        final fName = _showingAgent['firstName']?.toString() ?? _showingAgent['name']?.toString() ?? '';
-        final lName = _showingAgent['lastName']?.toString() ?? _showingAgent['lastname']?.toString() ?? '';
+        final fName = _showingAgent['firstName']?.toString() ??
+            _showingAgent['name']?.toString() ??
+            '';
+        final lName = _showingAgent['lastName']?.toString() ??
+            _showingAgent['lastname']?.toString() ??
+            '';
         name = '$fName $lName'.trim();
       }
-      
+
       if (name.isEmpty) name = 'Asesor Dovia';
 
       // Robust photo extraction
-      photo = _showingAgent['avatar']?.toString() ?? 
-              _showingAgent['profilePicture']?.toString() ?? 
-              _showingAgent['profilePictureUrl']?.toString();
+      photo = _showingAgent['avatar']?.toString() ??
+          _showingAgent['profilePicture']?.toString() ??
+          _showingAgent['profilePictureUrl']?.toString();
     }
 
     return Container(
@@ -322,8 +329,7 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: const Color(0xFFE0E3E7)),
+        border: Border.all(color: const Color(0xFFE0E3E7)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -341,24 +347,23 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
               shape: BoxShape.circle,
               color: const Color(0xFFF1F4F8),
               image: photo != null && photo.isNotEmpty
-                ? DecorationImage(
-                    image: NetworkImage(photo),
-                    fit: BoxFit.cover,
-                  )
-                : const DecorationImage(
-                    image: NetworkImage('https://ui-avatars.com/api/?name=Showing&background=007376&color=fff'),
-                    fit: BoxFit.cover,
-                  ),
+                  ? DecorationImage(
+                      image: NetworkImage(photo),
+                      fit: BoxFit.cover,
+                    )
+                  : const DecorationImage(
+                      image: NetworkImage(
+                          'https://ui-avatars.com/api/?name=Showing&background=007376&color=fff'),
+                      fit: BoxFit.cover,
+                    ),
             ),
           ),
           const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
               color: const Color(0xFFE5F1F1),
-              borderRadius:
-                  BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
               'Showing',
@@ -394,5 +399,4 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
       ),
     );
   }
-
 }

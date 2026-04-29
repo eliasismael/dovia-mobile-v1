@@ -853,6 +853,112 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     );
   }
 
+  Widget _acceptedOfferCard(BuildContext context, dynamic offerJson) {
+    final offerType = getJsonField(offerJson, r'''$.offerType''')?.toString() ?? '';
+    final paymentMethod = getJsonField(offerJson, r'''$.activeOfferData.paymentMethod''')?.toString() ??
+        getJsonField(offerJson, r'''$.offerData.paymentMethod''')?.toString() ??
+        getJsonField(offerJson, r'''$.paymentMethod''')?.toString() ?? '';
+    final rawAmount = getJsonField(offerJson, r'''$.activeOfferData.proposedAmount''') ??
+        getJsonField(offerJson, r'''$.offerData.proposedAmount''') ??
+        getJsonField(offerJson, r'''$.proposedAmount''') ??
+        getJsonField(offerJson, r'''$.amount''');
+
+    String proposedAmountStr;
+    if (rawAmount == null) {
+      proposedAmountStr = '—';
+    } else {
+      final num val = rawAmount is num ? rawAmount : (num.tryParse(rawAmount.toString()) ?? 0);
+      proposedAmountStr = val.toStringAsFixed(val.truncateToDouble() == val ? 0 : 2);
+    }
+
+    final dateLabel = _formatOfferDate(offerJson);
+    final offerId = getJsonField(offerJson, r'''$.offerId''')?.toString() ??
+        getJsonField(offerJson, r'''$.id''')?.toString() ?? '';
+    final buyerName = getJsonField(offerJson, r'''$.activeOfferData.buyerInfo.name''')?.toString() ??
+        getJsonField(offerJson, r'''$.offerData.buyerInfo.name''')?.toString() ?? '';
+
+    String typeLabel = offerType == 'RENT' ? 'Renta' : 'Compra';
+    if (paymentMethod.isNotEmpty) {
+      typeLabel += ' · ${paymentMethod.replaceAll('_', ' ')}';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _bannerGreen, width: 1.5),
+        boxShadow: const [
+          BoxShadow(color: Color(0x0A000000), blurRadius: 6, offset: Offset(0, 2)),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.check_circle_rounded, color: _bannerGreen, size: 16),
+                    const SizedBox(width: 4),
+                    Text('Oferta aceptada (En Acuerdo)',
+                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: _bannerGreen)),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(typeLabel,
+                    style: GoogleFonts.inter(fontSize: 12, color: FlutterFlowTheme.of(context).secondaryText)),
+                if (buyerName.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(buyerName,
+                      style: GoogleFonts.inter(fontSize: 12, color: FlutterFlowTheme.of(context).secondaryText)),
+                ],
+                const SizedBox(height: 4),
+                Text(rawAmount == null ? '—' : '\$$proposedAmountStr',
+                    style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: _primary)),
+                if (dateLabel.isNotEmpty)
+                  Text(dateLabel,
+                      style: GoogleFonts.inter(fontSize: 11, color: FlutterFlowTheme.of(context).secondaryText)),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              if (offerId.isNotEmpty) {
+                String paymentMethodClean = 'contado';
+                if (paymentMethod.toLowerCase().contains('mortgage') || paymentMethod.toLowerCase().contains('hipoteca')) {
+                  paymentMethodClean = 'hipoteca';
+                } else if (paymentMethod.toLowerCase().contains('promise') || paymentMethod.toLowerCase().contains('promesa')) {
+                  paymentMethodClean = 'promesa';
+                }
+
+                context.pushNamed(
+                  'DOVIA_CLIENT_MisPropiedades_Acuerdo',
+                  queryParameters: {
+                    'paymentMethod': serializeParam(paymentMethodClean, ParamType.String),
+                    'proposedAmount': serializeParam(rawAmount?.toString(), ParamType.String),
+                    'offerId': serializeParam(offerId, ParamType.String),
+                  }.withoutNulls,
+                ).then((_) => _loadPropertyOffers());
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: _bannerGreen,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text('Ver acuerdo', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _emptyState(String message) {
     return Container(
       width: double.infinity,
@@ -1676,18 +1782,40 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                               });
                             }),
 
-                          // ── PROPUESTAS ─────────────────────────────────────
-                          _sectionTitle('Propuestas'),
-                          if (_isLoadingOffers)
-                            const Center(
-                                child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: CircularProgressIndicator(color: _primary),
-                            ))
-                          else if (_activeOffers.isEmpty)
-                            _emptyState('No hay propuestas activas por ahora.')
-                          else
-                            ..._activeOffers.map((o) => _offerCard(context, o)),
+                          // ── ACUERDOS Y PROPUESTAS ─────────────────────────────────────
+                          Builder(builder: (context) {
+                            final acceptedOffers = _activeOffers.where((o) {
+                               final status = (getJsonField(o, r'''$.offerStatus''') ?? '').toString().toUpperCase();
+                               return status == 'ACCEPTED';
+                            }).toList();
+
+                            final pendingOffers = _activeOffers.where((o) {
+                               final status = (getJsonField(o, r'''$.offerStatus''') ?? '').toString().toUpperCase();
+                               return status != 'ACCEPTED';
+                            }).toList();
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (acceptedOffers.isNotEmpty) ...[
+                                  _sectionTitle('Acuerdos en progreso'),
+                                  ...acceptedOffers.map((o) => _acceptedOfferCard(context, o)),
+                                ],
+
+                                _sectionTitle('Propuestas recibidas'),
+                                if (_isLoadingOffers)
+                                  const Center(
+                                      child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 20),
+                                    child: CircularProgressIndicator(color: _primary),
+                                  ))
+                                else if (pendingOffers.isEmpty)
+                                  _emptyState('No hay propuestas activas por ahora.')
+                                else
+                                  ...pendingOffers.map((o) => _offerCard(context, o)),
+                              ],
+                            );
+                          }),
 
                           // ── BOTONES DE ACCIÓN ──────────────────────────────
                           const SizedBox(height: 32),

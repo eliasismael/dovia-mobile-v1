@@ -151,6 +151,10 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               widget.paymentMethod ?? 'contado',
               ParamType.String,
             ),
+            'offerId': serializeParam(
+              widget.offerId,
+              ParamType.String,
+            ),
           }.withoutNulls,
         );
       case Failure(:final message):

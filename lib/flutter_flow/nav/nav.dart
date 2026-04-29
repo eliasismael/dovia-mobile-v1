@@ -554,6 +554,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'paymentMethod',
               ParamType.String,
             ),
+            proposedAmount: params.getParam(
+              'proposedAmount',
+              ParamType.String,
+            ),
+            offerId: params.getParam(
+              'offerId',
+              ParamType.String,
+            ),
           ),
         ),
         FFRoute(
