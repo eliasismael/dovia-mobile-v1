@@ -64,7 +64,13 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
       final status =
           getJsonField(_offerData, r'''$.processStatus''')?.toString();
       if (status == 'agreement_structuring') return 2.0;
-      if (status == 'contract_signing') return 3.0;
+      if (status == 'contract_signing') {
+        final contractSigned = getJsonField(_offerData, r'''$.contractSigned''');
+        if (contractSigned == true || contractSigned == 'true') {
+          return 3.5;
+        }
+        return 3.0;
+      }
       if (status == 'completed') return 4.0;
     }
     return widget.negociationStep;
