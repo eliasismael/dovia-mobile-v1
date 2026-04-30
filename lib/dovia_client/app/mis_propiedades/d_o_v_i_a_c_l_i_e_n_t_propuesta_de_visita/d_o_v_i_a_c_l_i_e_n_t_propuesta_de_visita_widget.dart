@@ -143,7 +143,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Error al confirmar la visita.'),
             backgroundColor: Color(0xFFD32F2F),
           ),
@@ -171,7 +171,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                 wrapWithModel(
                   model: _model.dOVIASHAREDHeaderModel,
                   updateCallback: () => safeSetState(() {}),
-                  child: DOVIASHAREDHeaderWidget(
+                  child: const DOVIASHAREDHeaderWidget(
                     title: 'Propuesta de visita',
                     showMap: false,
                     showCurrency: false,
@@ -330,7 +330,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: Colors.grey.shade300,
-                                          image: DecorationImage(
+                                          image: const DecorationImage(
                                             image: NetworkImage(
                                                 'https://ui-avatars.com/api/?name=Showing&background=random'),
                                             fit: BoxFit.cover,

@@ -7,6 +7,7 @@ import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_offers.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_widget.dart';
+import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propuesta_model.dart';
@@ -100,32 +101,21 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ));
-      
-      final paymentMethodRaw = _resolveField([r'''$.activeOfferData.paymentMethod''', r'''$.offerData.paymentMethod''', r'''$.paymentMethod''']);
-      String paymentMethodClean = 'contado';
-      if (paymentMethodRaw.toLowerCase().contains('mortgage') || paymentMethodRaw.toLowerCase().contains('hipoteca')) {
-        paymentMethodClean = 'hipoteca';
-      } else if (paymentMethodRaw.toLowerCase().contains('promise') || paymentMethodRaw.toLowerCase().contains('promesa')) {
-        paymentMethodClean = 'promesa';
+      await _loadOffer();
+      if (mounted) {
+        context.pushNamed(
+          DOVIACLIENTMisPropiedadesAcuerdoWidget.routeName,
+          queryParameters: {
+            'offerId': serializeParam(widget.offerId, ParamType.String),
+            'paymentMethod': serializeParam(
+                getJsonField(_offerData, r'''$.paymentMethod''') ??
+                    getJsonField(_offerData, r'''$.offerData.paymentMethod'''),
+                ParamType.String),
+            'proposedAmount': serializeParam(
+                _resolveAmount()?.toString(), ParamType.String),
+          }.withoutNulls,
+        );
       }
-
-      context.pushNamed(
-        'DOVIA_CLIENT_MisPropiedades_Acuerdo',
-        queryParameters: {
-          'paymentMethod': serializeParam(
-            paymentMethodClean,
-            ParamType.String,
-          ),
-          'proposedAmount': serializeParam(
-            _resolveField([r'''$.activeOfferData.offerPrice''', r'''$.offerData.offerPrice''', r'''$.offerPrice''', r'''$.amount''']).toString(),
-            ParamType.String,
-          ),
-          'offerId': serializeParam(
-            widget.offerId,
-            ParamType.String,
-          ),
-        }.withoutNulls,
-      );
     } else {
       messenger.showSnackBar(SnackBar(
         content: Text('Error al aceptar (${res.statusCode}).'),
@@ -174,7 +164,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: _primary),
+                        side: const BorderSide(color: _primary),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
@@ -321,7 +311,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
               wrapWithModel(model: _model.cornerGradientBackgroundModel, updateCallback: () => safeSetState(() {}), child: const CornerGradientBackgroundWidget()),
               Column(
                 children: [
-                  wrapWithModel(model: _model.dOVIASHAREDHeaderModel, updateCallback: () => safeSetState(() {}), child: DOVIASHAREDHeaderWidget(title: 'Propuesta', hideActions: true)),
+                  wrapWithModel(model: _model.dOVIASHAREDHeaderModel, updateCallback: () => safeSetState(() {}), child: const DOVIASHAREDHeaderWidget(title: 'Propuesta', hideActions: true)),
                   Expanded(child: _buildBody()),
                 ],
               ),
@@ -500,7 +490,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         // Rechazar
         Expanded(child: OutlinedButton(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: _primary),
+            side: const BorderSide(color: _primary),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
@@ -511,7 +501,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         // Contraoferta
         Expanded(child: OutlinedButton(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: _primary),
+            side: const BorderSide(color: _primary),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),

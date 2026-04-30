@@ -206,6 +206,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                       child: const DOVIASHAREDHeaderWidget(
                         showMap: false,
                         showCurrency: false,
+                        showLogo: false,
                         title: 'Acuerdo',
                       ),
                     ),

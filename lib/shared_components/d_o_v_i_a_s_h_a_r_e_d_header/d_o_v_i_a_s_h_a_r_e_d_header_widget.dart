@@ -16,12 +16,14 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.hideActions = false,
     this.showCurrency = true,
     this.showMap = true,
+    this.showLogo = true,
   }) : title = title ?? '[title]';
 
   final String title;
   final bool hideActions;
   final bool showCurrency;
   final bool showMap;
+  final bool showLogo;
 
   @override
   State<DOVIASHAREDHeaderWidget> createState() =>
@@ -93,24 +95,25 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                     ),
                   ),
                 ),
-                InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () async {
-                    context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(0.0),
-                    child: SvgPicture.asset(
-                      'assets/images/D-verde.svg',
-                      width: 28.0,
-                      height: 36.0,
-                      fit: BoxFit.cover,
+                if (widget.showLogo)
+                  InkWell(
+                    splashColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () async {
+                      context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(0.0),
+                      child: SvgPicture.asset(
+                        'assets/images/D-verde.svg',
+                        width: 28.0,
+                        height: 36.0,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
               ].divide(const SizedBox(width: 8.0)),
             ),
           ),
