@@ -185,17 +185,16 @@ class _ProposalScreenState extends State<ProposalScreen> {
       }
     }
 
-    switch (state) {
-      case NegotiationState.negotiation:
-        return _buildNegotiationContent();
-      case NegotiationState.structuring:
-        return _buildStructuringContent();
-      case NegotiationState.signing:
-        return _buildSigningContent(
-            isCompleted: false, isContractSigned: isContractSigned);
-      case NegotiationState.completed:
-        return _buildSigningContent(isCompleted: true, isContractSigned: true);
-    }
+    // switch (state) {
+    //   case NegotiationState.negotiation:
+    //     return _buildNegotiationContent();
+    //   case NegotiationState.structuring:
+    //     return _buildStructuringContent();
+    //   case NegotiationState.signing:
+    return _buildSigningContent(isCompleted: false, isContractSigned: true);
+    //   case NegotiationState.completed:
+    //     return _buildSigningContent(isCompleted: true, isContractSigned: true);
+    // }
   }
 
   String _getPaymentLabel(PaymentMethod m) {
@@ -609,41 +608,47 @@ class _ProposalScreenState extends State<ProposalScreen> {
         _buildSelectedAssociateCard(),
         const SizedBox(height: 24),
         if (!isCompleted && !isContractSigned) ...[
-          _buildField("Firma de acuerdo", "x"),
-          _buildField("Dirección exacta", "x"),
-          _buildField("Hora", "xx:xx"),
+          _buildMobileField("Firma de acuerdo", "x"),
+          _buildMobileField("Dirección exacta", "x"),
           const Text(
             "Fecha",
-            style: TextStyle(fontSize: 12, color: Color(0xFF004D4F)),
+            style: TextStyle(
+              fontSize: 16,
+              color: Color(0xFF00444B),
+              fontWeight: FontWeight.normal,
+            ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildSmallField("DD")),
-              const SizedBox(width: 8),
-              Expanded(child: _buildSmallField("MM")),
-              const SizedBox(width: 8),
-              Expanded(child: _buildSmallField("AAAA")),
+              Expanded(child: _buildMobileSmallField("DD")),
+              const SizedBox(width: 17),
+              Expanded(child: _buildMobileSmallField("MM")),
+              const SizedBox(width: 17),
+              Expanded(child: _buildMobileSmallField("AAAA")),
             ],
           ),
-          const SizedBox(height: 16),
-          _buildField("Instrucciones para llegar", "x\nx\nx", isTextArea: true),
-          _buildSecondaryButton("Abrir ubicación"),
-          const SizedBox(height: 24),
-          _buildDocumentItem(
-            "Comprobante de pago",
-            isCompleted: false,
-            status: _isUploadingPaymentProof ? "uploading" : "upload",
-            onTap: _isUploadingPaymentProof ? null : _uploadPaymentProof,
-          ),
+          const SizedBox(height: 18),
+          _buildMobileField("Instrucciones para llegar", "x\nx\nx",
+              isTextArea: true),
+          const SizedBox(height: 5),
+          _buildMobileSecondaryButton("Abrir ubicación"),
           const SizedBox(height: 24),
         ],
-        if (isCompleted || isContractSigned)
-          _buildDocumentItem(
-            "Comprobante de pago",
-            isCompleted: true,
-            status: "view",
+        if (isCompleted)
+          _buildPaymentProofUpload(
+            isUploading: false,
+            onTap: null, // Ya subido
           ),
+        if (!isCompleted && isContractSigned) ...[
+          _buildPaymentProofUpload(
+            isUploading: _isUploadingPaymentProof,
+            onTap: _isUploadingPaymentProof ? null : _uploadPaymentProof,
+          ),
+          const SizedBox(height: 18),
+          _buildPaymentNotification(),
+          const SizedBox(height: 24),
+        ],
         if (!isCompleted && !isContractSigned)
           _buildDocumentItem(
             "Acuerdo legal",
@@ -936,6 +941,169 @@ class _ProposalScreenState extends State<ProposalScreen> {
     );
   }
 
+  Widget _buildMobileField(String label, String placeholder,
+      {bool isTextArea = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.normal,
+            color: Color(0xFF00444B),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          height: isTextArea ? 104 : 42,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAFAFA),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: isTextArea
+              ? const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("x",
+                        style:
+                            TextStyle(color: Color(0xFF888888), fontSize: 14)),
+                    Text("x",
+                        style:
+                            TextStyle(color: Color(0xFF888888), fontSize: 14)),
+                    Text("x",
+                        style:
+                            TextStyle(color: Color(0xFF888888), fontSize: 14)),
+                  ],
+                )
+              : Text(
+                  placeholder,
+                  style: const TextStyle(
+                    color: Color(0xFF888888),
+                    fontSize: 14,
+                  ),
+                ),
+        ),
+        const SizedBox(height: 18),
+      ],
+    );
+  }
+
+  Widget _buildMobileSmallField(String placeholder) {
+    return Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Center(
+        child: Text(
+          placeholder,
+          style: const TextStyle(
+            color: Color(0xFF888888),
+            fontSize: 15,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileSecondaryButton(String text) {
+    return Container(
+      height: 27,
+      width: 134,
+      decoration: BoxDecoration(
+        color: const Color(0x3370ACAD),
+        borderRadius: BorderRadius.circular(65),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Color(0xFF00444B),
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentProofUpload({required bool isUploading, required VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(5),
+      child: Container(
+        height: 65,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEBEAE3),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: Text(
+                "Comprobante de pago a Dovia",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF00444B),
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(4.19),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F7F7),
+                borderRadius: BorderRadius.circular(99),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x3370ACAD),
+                    blurRadius: 1.35,
+                    offset: Offset(0, 2.7),
+                  )
+                ],
+              ),
+              child: isUploading 
+                ? const SizedBox(
+                    width: 18, height: 18, 
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2, 
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007376))
+                    )
+                  )
+                : const Icon(Icons.upload_outlined, color: Color(0xFF007376), size: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentNotification() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      decoration: BoxDecoration(
+        color: const Color(0x3370ACAD),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Text(
+        "Podrás ver los archivos pero no puedes descargarlos hasta realizar el pago a Dovia. El pago será revisado y aprobado.",
+        style: TextStyle(
+          fontSize: 16,
+          color: Color(0xFF00444B),
+          fontWeight: FontWeight.normal,
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
   Widget _buildSecondaryButton(String text) {
     return SizedBox(
       width: 150,
@@ -1030,57 +1198,84 @@ class _ProposalScreenState extends State<ProposalScreen> {
   }
 
   Widget _buildSelectedAssociateCard() {
+    final associate = widget.offerData?['legalAssociate'] ?? 
+                      widget.offerData?['legalProcess']?['legalAssociate'];
+    
+    String name = "Nombre Apellido";
+    String phone = "Teléfono";
+    String email = "Mail";
+
+    if (associate != null && associate is Map) {
+      if (associate['fullName'] != null) {
+        if (associate['fullName'] is Map) {
+          name = "${associate['fullName']['name'] ?? ''} ${associate['fullName']['lastname'] ?? ''}".trim();
+        } else {
+          name = associate['fullName'].toString();
+        }
+      } else if (associate['name'] != null || associate['lastname'] != null) {
+        name = "${associate['name'] ?? ''} ${associate['lastname'] ?? ''}".trim();
+      }
+      if (name.isEmpty) name = "Nombre Apellido";
+
+      phone = associate['phoneNumber']?.toString() ?? associate['phone']?.toString() ?? "Teléfono";
+      email = associate['email']?.toString() ?? "Mail";
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 23.9, bottom: 15.9, left: 15.9, right: 15.9),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFB2DFDB)),
+        borderRadius: BorderRadius.circular(5.47),
+        border: Border.all(color: const Color(0xFF007376), width: 0.5),
       ),
       child: Column(
         children: [
           const CircleAvatar(
-            radius: 50,
+            radius: 49.8,
             backgroundImage: AssetImage(
               'assets/images/ae3f449657ae0dc947fdf904e0ea70a030a118f3.png',
             ),
           ),
           const SizedBox(height: 12),
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFE0F2F1),
-              borderRadius: BorderRadius.circular(20),
+              color: const Color(0x3370ACAD),
+              borderRadius: BorderRadius.circular(65),
             ),
-            child: const Center(
-              child: Text(
-                "Dovia Legal Associate",
-                style: TextStyle(fontSize: 14, color: Color(0xFF00796B)),
-              ),
+            child: const Text(
+              "Dovia Legal",
+              style: TextStyle(fontSize: 14, color: Color(0xFF00444B)),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            "Nombre Apellido",
-            style: TextStyle(
+          Text(
+            name,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF004D4F),
+              color: Color(0xFF00444B),
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text(
-                "Teléfono",
-                style: TextStyle(fontSize: 12, color: Color(0xFF004D4F)),
+              Expanded(
+                child: Text(
+                  phone,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF00444B)),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              Text(
-                "Mail",
-                style: TextStyle(fontSize: 12, color: Color(0xFF004D4F)),
+              Expanded(
+                child: Text(
+                  email,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF00444B)),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
@@ -1126,8 +1321,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: const Color(0xFFFAFAFA),
+          borderRadius: BorderRadius.circular(10.7),
         ),
         child: Row(
           children: [
@@ -1135,9 +1330,9 @@ class _ProposalScreenState extends State<ProposalScreen> {
               child: Text(
                 label,
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF004D4F),
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: Color(0xFF00444B),
                 ),
               ),
             ),
@@ -1156,9 +1351,9 @@ class _ProposalScreenState extends State<ProposalScreen> {
             else
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE0F2F1),
-                  shape: BoxShape.circle,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCCE3E4),
+                  borderRadius: BorderRadius.circular(99),
                 ),
                 child: Icon(
                   status == "upload"
