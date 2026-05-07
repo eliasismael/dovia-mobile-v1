@@ -5,7 +5,6 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/auth/custom_auth/auth_util.dart';
-import '/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -63,8 +62,9 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
 
     if (mounted && res.succeeded) {
       final body = res.jsonBody;
-      final data = (body is Map && body.containsKey('data')) ? body['data'] : body;
-      
+      final data =
+          (body is Map && body.containsKey('data')) ? body['data'] : body;
+
       safeSetState(() {
         _visitData = data;
         final visitObj = data is Map ? data['visit'] as Map? : null;
@@ -132,7 +132,8 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
             elevation: 0,
             child: PopupExitoWidget(
               title: 'Visita Confirmada',
-              text: 'La visita ha sido confirmada y se asignará a un asesor Showing.',
+              text:
+                  'La visita ha sido confirmada y se asignará a un asesor Showing.',
               continueText: 'Aceptar',
               onContinue: () {
                 Navigator.pop(ctx);
@@ -186,18 +187,22 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (FFAppState().requestedDateChangesVisits.contains(widget.visitId))
+                              if (FFAppState()
+                                  .requestedDateChangesVisits
+                                  .contains(widget.visitId))
                                 Container(
                                   padding: const EdgeInsets.all(16),
                                   margin: const EdgeInsets.only(bottom: 24),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFE8F5E9),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFF81C784)),
+                                    border: Border.all(
+                                        color: const Color(0xFF81C784)),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.check_circle_outline, color: Color(0xFF388E3C), size: 24),
+                                      const Icon(Icons.check_circle_outline,
+                                          color: Color(0xFF388E3C), size: 24),
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
@@ -227,8 +232,13 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                   final idx = entry.key;
                                   final slot = entry.value;
                                   final date = _formatDate(
-                                      (slot is Map ? slot['date'] : null)?.toString() ?? '');
-                                  final time = (slot is Map ? slot['time'] : null)?.toString() ?? '';
+                                      (slot is Map ? slot['date'] : null)
+                                              ?.toString() ??
+                                          '');
+                                  final time =
+                                      (slot is Map ? slot['time'] : null)
+                                              ?.toString() ??
+                                          '';
                                   final isSelected =
                                       _model.selectedDateIndex == idx;
 
@@ -255,7 +265,8 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                         ),
                                       ),
                                       child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: Column(
@@ -384,7 +395,9 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                 ),
                               ],
                               const SizedBox(height: 32),
-                              if (!FFAppState().requestedDateChangesVisits.contains(widget.visitId)) ...[
+                              if (!FFAppState()
+                                  .requestedDateChangesVisits
+                                  .contains(widget.visitId)) ...[
                                 // Botón Secundario: Solicitar otra fecha
                                 OutlinedButton(
                                   onPressed: _solicitarOtraFecha,
@@ -414,7 +427,8 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                       : null,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: _primary,
-                                    disabledBackgroundColor: Colors.grey.shade300,
+                                    disabledBackgroundColor:
+                                        Colors.grey.shade300,
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),
                                     shape: RoundedRectangleBorder(

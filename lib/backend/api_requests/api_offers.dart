@@ -264,18 +264,22 @@ class RejectOfferCall {
 class SelectLegalAssociateCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
+    String? authToken = '',
+    String? legalAssociateId = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
+    final ffApiRequestBody = '''
 {
-  "legalAssociateId": "{{legalAssociateId}}"
+  "legalAssociateId": "${escapeStringForJson(legalAssociateId)}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Select Legal Associate',
       apiUrl: '$baseUrl/offers/$offerId/select-legal-associate',
       callType: ApiCallType.POST,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,

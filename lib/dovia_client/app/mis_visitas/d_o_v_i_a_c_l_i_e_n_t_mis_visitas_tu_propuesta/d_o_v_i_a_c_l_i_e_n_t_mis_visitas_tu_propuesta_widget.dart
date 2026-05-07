@@ -6,6 +6,8 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
+import '/backend/api_requests/api_offers.dart';
+import '/auth/custom_auth/auth_util.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_tu_propuesta_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_tu_propuesta_model.dart';
 
@@ -14,10 +16,12 @@ class DOVIACLIENTMisVisitasTuPropuestaWidget extends StatefulWidget {
     super.key,
     this.propuestaState,
     this.paymentMethod,
+    this.offerId,
   });
 
   final String? propuestaState;
   final String? paymentMethod;
+  final String? offerId;
 
   static String routeName = 'DOVIA_CLIENT_MisVisitas_TuPropuesta';
   static String routePath = '/dOVIACLIENTMisVisitasTuPropuesta';
@@ -33,13 +37,45 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  dynamic _offerData;
+  bool _isLoadingOffer = true;
+
   @override
   void initState() {
     super.initState();
     _model =
         createModel(context, () => DOVIACLIENTMisVisitasTuPropuestaModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      safeSetState(() {});
+      _loadOffer();
+    });
+  }
+
+  Future<void> _loadOffer() async {
+    if (widget.offerId == null || widget.offerId!.isEmpty) {
+      safeSetState(() {
+        _isLoadingOffer = false;
+      });
+      return;
+    }
+    final res = await DOVIAAPIOfferContextGroup.getOfferByIDCall.call(
+      offerId: widget.offerId,
+      authToken: currentAuthenticationToken,
+    );
+    if (!mounted) return;
+    if (res.succeeded) {
+      safeSetState(() {
+        _offerData = getJsonField(res.jsonBody, r'''$.data''') ??
+            getJsonField(res.jsonBody, r'''$.offer''') ??
+            res.jsonBody;
+        _isLoadingOffer = false;
+      });
+    } else {
+      safeSetState(() {
+        _isLoadingOffer = false;
+      });
+    }
   }
 
   @override
@@ -93,6 +129,7 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
                               height: MediaQuery.sizeOf(context).height * 1.0,
                               state: widget.propuestaState ?? 'pending',
                               paymentMethod: widget.paymentMethod ?? '',
+                              offerData: _offerData,
                             ),
                           ),
                         ],

@@ -12,3 +12,4 @@ export 'api_visits.dart';
 export 'api_metrics.dart';
 export 'api_recruitment.dart';
 export 'api_settings.dart';
+export 'api_legal_process.dart' hide UploadSignedContractCall;

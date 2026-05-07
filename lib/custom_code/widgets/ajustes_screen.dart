@@ -8,13 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '/repositories/user_repository.dart';
-import '/app_constants.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
-import '/shared_components/terminos_condiciones/terminos_condiciones_widget.dart';
 import '/core/result.dart';
-import '/flutter_flow/uploaded_file.dart';
 
 class AjustesScreen extends StatefulWidget {
   final double? width;
@@ -202,8 +199,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     height: 16,
                     decoration: const BoxDecoration(
                         color: Colors.white, shape: BoxShape.circle),
-                    child:
-                        const Icon(Icons.check, size: 10, color: _aqua),
+                    child: const Icon(Icons.check, size: 10, color: _aqua),
                   ),
                 ]),
               ),
@@ -290,8 +286,11 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   fontWeight: FontWeight.w600,
                   color: _textPrimary)),
           const SizedBox(height: 16),
-          _passwordField('Contraseña actual', _currentPasswordCtrl,
-              _obscureCurrent, () => setState(() => _obscureCurrent = !_obscureCurrent)),
+          _passwordField(
+              'Contraseña actual',
+              _currentPasswordCtrl,
+              _obscureCurrent,
+              () => setState(() => _obscureCurrent = !_obscureCurrent)),
           const SizedBox(height: 12),
           _passwordField('Contraseña nueva', _newPasswordCtrl, _obscureNew,
               () => setState(() => _obscureNew = !_obscureNew)),
@@ -302,7 +301,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   fontSize: 12,
                   color: _textSecondary)),
           const SizedBox(height: 12),
-          _passwordField('Repetir contraseña nueva', _repeatPasswordCtrl,
+          _passwordField(
+              'Repetir contraseña nueva',
+              _repeatPasswordCtrl,
               _obscureRepeat,
               () => setState(() => _obscureRepeat = !_obscureRepeat)),
           const SizedBox(height: 4),
@@ -484,9 +485,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
           Text(
             'Se renueva el $renewalDate',
             style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 12,
-                color: _textSecondary),
+                fontFamily: 'Public Sans', fontSize: 12, color: _textSecondary),
           ),
           const SizedBox(height: 4),
           const Text('Tu propiedad, siempre al día.',
@@ -716,7 +715,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
                 maxLines: 4,
                 decoration: InputDecoration(
                   hintText: 'Escribe tu motivo aquí...',
-                  hintStyle: const TextStyle(fontSize: 14, color: _textSecondary),
+                  hintStyle:
+                      const TextStyle(fontSize: 14, color: _textSecondary),
                   filled: true,
                   fillColor: _bgGray,
                   border: OutlineInputBorder(
@@ -781,91 +781,91 @@ class _AjustesScreenState extends State<AjustesScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: _textPrimary,
+              const SizedBox(height: 20),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: _textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 14,
-                color: _textSecondary,
+              const SizedBox(height: 8),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 14,
+                  color: _textSecondary,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: _aqua),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: _aqua),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
                         ),
+                        child: const Text('Cancelar',
+                            style: TextStyle(
+                                fontFamily: 'Public Sans',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: _textPrimary)),
                       ),
-                      child: const Text('Cancelar',
-                          style: TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: _textPrimary)),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        onConfirm();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDestructive ? _softRed : _aqua,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onConfirm();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDestructive ? _softRed : _aqua,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
+                        child: Text(confirmLabel,
+                            style: const TextStyle(
+                                fontFamily: 'Public Sans',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
                       ),
-                      child: Text(confirmLabel,
-                          style: const TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white)),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   // ── HELPERS ───────────────────────────────────────────────────────
   Widget _divider() => Container(height: 1, color: _aqua.withOpacity(0.3));
@@ -884,10 +884,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: _textPrimary)),
-        Icon(
-            isExpanded
-                ? Icons.keyboard_arrow_up
-                : Icons.keyboard_arrow_down,
+        Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
             color: _textPrimary),
       ]),
     );
@@ -897,9 +894,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(label,
           style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 13,
-              color: _textPrimary)),
+              fontFamily: 'Public Sans', fontSize: 13, color: _textPrimary)),
       const SizedBox(height: 6),
       Container(
         width: double.infinity,
@@ -913,9 +908,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
         child: Text(
           value.isEmpty ? '—' : value,
           style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              color: _textSecondary),
+              fontFamily: 'Public Sans', fontSize: 14, color: _textSecondary),
         ),
       ),
     ]);

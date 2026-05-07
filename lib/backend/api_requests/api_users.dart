@@ -61,6 +61,7 @@ class ListUsersByRoleCall {
     String? role = '',
     String? page = '',
     String? limit = '',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
@@ -68,7 +69,10 @@ class ListUsersByRoleCall {
       callName: 'List Users by Role',
       apiUrl: '$baseUrl/users',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {
         'role': role,
         'page': page,

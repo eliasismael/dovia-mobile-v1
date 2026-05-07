@@ -5,7 +5,6 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/auth/custom_auth/auth_util.dart';
-import '/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

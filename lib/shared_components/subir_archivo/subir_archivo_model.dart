@@ -10,6 +10,8 @@ class SubirArchivoModel extends FlutterFlowModel<SubirArchivoWidget> {
   FFUploadedFile uploadedLocalFile_documentoFirmado =
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
 
+  bool isUploading = false;
+
   // Model for PrimaryButton component.
   late PrimaryButtonModel primaryButtonModel;
 

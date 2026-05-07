@@ -1,3 +1,4 @@
+import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/upload_data.dart';
@@ -10,7 +11,17 @@ import 'subir_archivo_model.dart';
 export 'subir_archivo_model.dart';
 
 class SubirArchivoWidget extends StatefulWidget {
-  const SubirArchivoWidget({super.key});
+  const SubirArchivoWidget({
+    super.key,
+    this.processId,
+    this.authToken,
+  });
+
+  /// ID del proceso legal. Si se provee junto con authToken, el botón "Subir"
+  /// llama POST /legal-processes/{processId}/payment-proof en lugar de solo
+  /// mostrar el popup de éxito.
+  final String? processId;
+  final String? authToken;
 
   @override
   State<SubirArchivoWidget> createState() => _SubirArchivoWidgetState();
@@ -38,6 +49,86 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
     _model.maybeDispose();
 
     super.dispose();
+  }
+
+  Future<void> _handleUpload() async {
+    final file = _model.uploadedLocalFile_documentoFirmado;
+    final hasFile =
+        file.bytes != null && file.bytes!.isNotEmpty;
+
+    if (!hasFile) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Seleccioná un archivo primero')),
+      );
+      return;
+    }
+
+    final processId = widget.processId;
+    final authToken = widget.authToken;
+
+    if (processId != null &&
+        processId.isNotEmpty &&
+        authToken != null &&
+        authToken.isNotEmpty) {
+      safeSetState(() => _model.isUploading = true);
+
+      final res =
+          await DOVIAAPILegalProcessContextGroup.uploadPaymentProofCall.call(
+        processId: processId,
+        authToken: authToken,
+        file: file,
+      );
+
+      if (!mounted) return;
+      safeSetState(() => _model.isUploading = false);
+
+      if (res.succeeded) {
+        await showDialog(
+          context: context,
+          builder: (dialogContext) {
+            return Dialog(
+              elevation: 0,
+              insetPadding: EdgeInsets.zero,
+              backgroundColor: Colors.transparent,
+              alignment: const AlignmentDirectional(0.0, 0.0)
+                  .resolve(Directionality.of(context)),
+              child: const PopupExitoWidget(
+                title: 'Comprobante enviado',
+                text:
+                    'Tu comprobante de pago fue enviado a Dovia. Una vez validado, se habilitará la descarga de los documentos firmados.',
+              ),
+            );
+          },
+        );
+        if (mounted) Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'No se pudo enviar el comprobante. Intentá nuevamente.'),
+          ),
+        );
+      }
+    } else {
+      // Fallback: sin processId/authToken, solo muestra popup de éxito
+      await showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return Dialog(
+            elevation: 0,
+            insetPadding: EdgeInsets.zero,
+            backgroundColor: Colors.transparent,
+            alignment: const AlignmentDirectional(0.0, 0.0)
+                .resolve(Directionality.of(context)),
+            child: const PopupExitoWidget(
+              title: 'Se subió el documento con éxito',
+              text:
+                  'Se subió el documento de convenio entre Dovia y el propietario con éxito.',
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -119,35 +210,15 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
                 ),
               ),
             ),
-            Builder(
-              builder: (context) => Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                child: wrapWithModel(
-                  model: _model.primaryButtonModel,
-                  updateCallback: () => safeSetState(() {}),
-                  child: PrimaryButtonWidget(
-                    text: 'Subir Documento',
-                    onTap: () async {
-                      await showDialog(
-                        context: context,
-                        builder: (dialogContext) {
-                          return Dialog(
-                            elevation: 0,
-                            insetPadding: EdgeInsets.zero,
-                            backgroundColor: Colors.transparent,
-                            alignment: const AlignmentDirectional(0.0, 0.0)
-                                .resolve(Directionality.of(context)),
-                            child: const PopupExitoWidget(
-                              title: 'Se subió el documento con éxito',
-                              text:
-                                  'Se subió el documento  de convenio entre Dovia y el propietario con éxito.',
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+            Padding(
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              child: wrapWithModel(
+                model: _model.primaryButtonModel,
+                updateCallback: () => safeSetState(() {}),
+                child: PrimaryButtonWidget(
+                  text: _model.isUploading ? 'Enviando...' : 'Subir Documento',
+                  onTap: _model.isUploading ? null : _handleUpload,
                 ),
               ),
             ),

@@ -354,6 +354,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     final currency = _resolveField([r'''$.activeOfferData.currency''', r'''$.offerData.currency''', r'''$.currency''']);
     final currencySymbol = currency == 'USD' ? 'USD ' : '';
     final additionalRequest = _resolveField([r'''$.activeOfferData.considerations''', r'''$.offerData.considerations''', r'''$.considerations''']);
+    final bankName = _resolveField([r'''$.activeOfferData.bankName''', r'''$.offerData.bankName''', r'''$.bankName''']);
+    final downPayment = _resolveField([r'''$.activeOfferData.downPaymentPercentage''', r'''$.offerData.downPaymentPercentage''', r'''$.downPaymentPercentage''', r'''$.activeOfferData.downPayment''', r'''$.offerData.downPayment''', r'''$.downPayment''']);
     final canAct = _canAct();
 
     return SingleChildScrollView(
@@ -374,6 +376,23 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
           const SizedBox(height: 8),
           _readOnlyField(_paymentMethodLabel()),
           const SizedBox(height: 20),
+
+          if (_paymentMethodLabel() == 'Hipoteca') ...[
+            Row(children: [
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Banco'),
+                const SizedBox(height: 8),
+                _readOnlyField(bankName == '—' ? 'No especificado' : bankName),
+              ])),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Enganche'),
+                const SizedBox(height: 8),
+                _readOnlyField(downPayment == '—' ? 'No especificado' : '$downPayment%'),
+              ])),
+            ]),
+            const SizedBox(height: 20),
+          ],
 
           // ── Propuesta económica (dropdown) ────────────────────────────────
           _fieldLabel('Propuesta económica'),
@@ -485,6 +504,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
   }
 
   Widget _actionButtons() {
+    final bankName = _resolveField([r'''$.activeOfferData.bankName''', r'''$.offerData.bankName''', r'''$.bankName''']);
+    final downPayment = _resolveField([r'''$.activeOfferData.downPaymentPercentage''', r'''$.offerData.downPaymentPercentage''', r'''$.downPaymentPercentage''', r'''$.activeOfferData.downPayment''', r'''$.offerData.downPayment''', r'''$.downPayment''']);
+
     return Column(children: [
       Row(children: [
         // Rechazar
@@ -515,6 +537,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                 'currency': serializeParam(_resolveField([r'''$.activeOfferData.currency''', r'''$.currency''']), ParamType.String),
                 'paymentMethod': serializeParam(_resolveField([r'''$.activeOfferData.paymentMethod''', r'''$.paymentMethod''']), ParamType.String),
                 'considerations': serializeParam(_resolveField([r'''$.activeOfferData.considerations''', r'''$.considerations''']), ParamType.String),
+                'bankName': serializeParam(bankName == '—' ? null : bankName, ParamType.String),
+                'downPayment': serializeParam(downPayment == '—' ? null : downPayment, ParamType.String),
               }.withoutNulls,
             );
           },

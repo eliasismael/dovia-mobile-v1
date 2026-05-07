@@ -60,18 +60,25 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
   bool _isLoadingOffer = true;
 
   double get _computedStep {
+    // return 3.5;
     if (_offerData != null) {
       final status =
           getJsonField(_offerData, r'''$.processStatus''')?.toString();
-      if (status == 'agreement_structuring') return 2.0;
+      if (status == 'agreement_structuring') {
+        return widget.paymentMethod == 'hipoteca' ? 3.0 : 2.0;
+      }
       if (status == 'contract_signing') {
-        final contractSigned = getJsonField(_offerData, r'''$.contractSigned''');
+        final contractSigned =
+            getJsonField(_offerData, r'''$.contractSigned''');
         if (contractSigned == true || contractSigned == 'true') {
           return 3.5;
         }
         return 3.0;
       }
       if (status == 'completed') return 4.0;
+    }
+    if (widget.negociationStep == 2.0 && widget.paymentMethod == 'hipoteca') {
+      return 3.0;
     }
     return widget.negociationStep;
   }
@@ -207,6 +214,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                         showMap: false,
                         showCurrency: false,
                         showLogo: false,
+                        hideActions: true,
                         title: 'Acuerdo',
                       ),
                     ),
@@ -3272,7 +3280,30 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     safeSetState(() {}),
                                                 child: PrimaryButtonWidget(
                                                   text: 'Aceptar',
-                                                  onTap: () async {},
+                                                  onTap: () async {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Documentos enviados para validación.',
+                                                          style: TextStyle(
+                                                            color: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText,
+                                                          ),
+                                                        ),
+                                                        duration:
+                                                            const Duration(
+                                                                milliseconds:
+                                                                    4000),
+                                                        backgroundColor:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .secondary,
+                                                      ),
+                                                    );
+                                                  },
                                                 ),
                                               ),
                                             ),
@@ -5119,7 +5150,15 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                     ?.unfocus();
                                                               },
                                                               child:
-                                                                  const SubirArchivoWidget(),
+                                                                  SubirArchivoWidget(
+                                                                processId: getJsonField(
+                                                                      _offerData,
+                                                                      r'''$.legalProcessId''',
+                                                                    )?.toString() ??
+                                                                    '019df3fa-6499-71a9-956e-fdd924137464', // TODO: remove before prod
+                                                                authToken:
+                                                                    currentAuthenticationToken,
+                                                              ),
                                                             ),
                                                           );
                                                         },

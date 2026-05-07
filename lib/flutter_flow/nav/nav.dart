@@ -385,6 +385,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => DOVIACLIENTMisVisitasTuPropuestaWidget(
             propuestaState: params.getParam('propuestaState', ParamType.String),
             paymentMethod: params.getParam('paymentMethod', ParamType.String),
+            offerId: params.getParam('offerId', ParamType.String),
           ),
         ),
         FFRoute(
@@ -540,6 +541,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             currency: params.getParam('currency', ParamType.String),
             paymentMethod: params.getParam('paymentMethod', ParamType.String),
             considerations: params.getParam('considerations', ParamType.String),
+            bankName: params.getParam('bankName', ParamType.String),
+            downPayment: params.getParam('downPayment', ParamType.String),
           ),
         ),
         FFRoute(
