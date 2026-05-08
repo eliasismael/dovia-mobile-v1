@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
+import '/backend/api_requests/api_offers.dart';
+import '/backend/api_requests/api_manager.dart';
+import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/upload_data.dart';
 import '/flutter_flow/uploaded_file.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
@@ -43,6 +46,125 @@ class _ProposalScreenState extends State<ProposalScreen> {
   String? _selectedLegalAssociateId;
   bool _isSelectingAssociate = false;
   bool _isRejecting = false;
+  bool _isActioning = false;
+  late TextEditingController _rejectReasonController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rejectReasonController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _rejectReasonController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _acceptOffer() async {
+    final offerId = widget.offerData?['offerId']?.toString();
+    if (offerId == null) return;
+
+    setState(() => _isActioning = true);
+    
+    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
+    final res = await ApiManager.instance.makeApiCall(
+      callName: 'Accept Offer Client',
+      apiUrl: '$baseUrl/offers/$offerId/accept',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $currentAuthenticationToken',
+      },
+      params: {},
+      body: '{"acceptedBy": "CLIENT"}',
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+
+    if (res.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Oferta aceptada con éxito!')),
+      );
+      // Recargar datos o navegar
+      if (mounted) context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al aceptar la oferta: ${res.statusCode}')),
+      );
+    }
+    setState(() => _isActioning = false);
+  }
+
+  Future<void> _rejectOffer() async {
+    final offerId = widget.offerData?['offerId']?.toString();
+    if (offerId == null) return;
+
+    final reason = _rejectReasonController.text.trim();
+    if (reason.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, indica un motivo para el rechazo.')),
+      );
+      return;
+    }
+
+    setState(() => _isActioning = true);
+    
+    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
+    final body = jsonEncode({
+      "rejectedBy": "CLIENT",
+      "reason": reason
+    });
+    
+    final res = await ApiManager.instance.makeApiCall(
+      callName: 'Reject Offer Client',
+      apiUrl: '$baseUrl/offers/$offerId/reject',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $currentAuthenticationToken',
+      },
+      params: {},
+      body: body,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+
+    if (res.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Oferta rechazada.')),
+      );
+      if (mounted) context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al rechazar la oferta: ${res.statusCode}')),
+      );
+    }
+    setState(() => _isActioning = false);
+  }
+
+  void _counterOffer() {
+    final offerId = widget.offerData?['offerId']?.toString();
+    final propertyId = widget.offerData?['propertyId']?.toString();
+    
+    // Navegar a la pantalla de oferta para que el cliente haga una nueva
+    context.pushNamed(
+      'DOVIA_CLIENT_Ofertar',
+      queryParameters: {
+        'propertyId': serializeParam(propertyId, ParamType.String),
+        'isCounterOffer': serializeParam(true, ParamType.bool),
+        'previousOfferId': serializeParam(offerId, ParamType.String),
+      }.withoutNulls,
+    );
+  }
 
   NegotiationState get state {
     try {
@@ -514,7 +636,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
               width: double.infinity,
               height: 42,
               child: OutlinedButton(
-                onPressed: () {
+                onPressed: _isActioning ? null : () {
                   setState(() {
                     _isRejecting = true;
                   });
@@ -540,9 +662,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
               width: double.infinity,
               height: 42,
               child: OutlinedButton(
-                onPressed: () {
-                  // Contraoferta action
-                },
+                onPressed: _isActioning ? null : _counterOffer,
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF007376)),
                   shape: RoundedRectangleBorder(
@@ -564,9 +684,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
               width: double.infinity,
               height: 42,
               child: ElevatedButton(
-                onPressed: () {
-                  // Aceptar action
-                },
+                onPressed: _isActioning ? null : _acceptOffer,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF007376),
                   shape: RoundedRectangleBorder(
@@ -574,14 +692,16 @@ class _ProposalScreenState extends State<ProposalScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  "Aceptar",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                child: _isActioning 
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text(
+                    "Aceptar",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
               ),
             ),
           ] else ...[
@@ -684,6 +804,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
             border: Border.all(color: const Color(0xFFDFDFDF)),
           ),
           child: TextFormField(
+            controller: _rejectReasonController,
             maxLines: null,
             decoration: InputDecoration(
               hintText: "Escribe aqui...",
@@ -701,12 +822,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
           width: double.infinity,
           height: 42,
           child: ElevatedButton(
-            onPressed: () {
-              // Confirmar rechazo
-              setState(() {
-                _isRejecting = false;
-              });
-            },
+            onPressed: _isActioning ? null : _rejectOffer,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE44444),
               shape: RoundedRectangleBorder(
@@ -714,14 +830,16 @@ class _ProposalScreenState extends State<ProposalScreen> {
               ),
               elevation: 0,
             ),
-            child: const Text(
-              "Confirmar Rechazo",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+            child: _isActioning
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Text(
+                "Confirmar Rechazo",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
-            ),
           ),
         ),
         const SizedBox(height: 18),
@@ -947,36 +1065,82 @@ class _ProposalScreenState extends State<ProposalScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F5E9),
-              borderRadius: BorderRadius.circular(12),
+          const Text(
+            "Así avanzará tu proceso legal",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF00444B),
             ),
-            child: const Text(
-              "Como la compra se realizará a través de una hipoteca bancaria, el proceso legal será gestionado por el abogado asignado por el banco. DOVIA te informará una vez que hayan iniciado el trámite.",
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF004D4F),
-                height: 1.4,
-              ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            "Como la compra se realizará a través de una hipoteca bancaria, el proceso legal será gestionado por el abogado asignado por el banco.\n\nDOVIA enviará toda la documentación necesaria y te mantendrá informado en cada etapa.\n\nNuestro equipo de DOVIA HQ estará en contacto contigo para resolver dudas, coordinar documentos y asegurarse de que todo avance de manera segura, rápida y sin retrasos.",
+            style: TextStyle(
+              fontSize: 16,
+              color: Color(0xFF00444B),
+              height: 1.4,
             ),
           ),
           const SizedBox(height: 24),
           const Text(
-            "Siguientes pasos:",
+            "¿Qué sigue?",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF004D4F),
+              color: Color(0xFF00444B),
             ),
           ),
-          const SizedBox(height: 8),
-          _buildNextStepItem("Serás contactado por el banco para definir detalles."),
-          _buildNextStepItem("El propietario será contactado."),
-          _buildNextStepItem("El banco preparará documentación."),
-          _buildNextStepItem("Se compartirá documentación con ambos."),
-          _buildNextStepItem("Se establecerá lugar, fecha y hora para firma de contratos."),
+          const SizedBox(height: 16),
+          
+          const Text("Firma el acuerdo de reconocimiento de honorarios de DOVIA.", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF00444B))),
+          const SizedBox(height: 4),
+          _buildCustomBullet("Este documento aparecerá aquí mismo en la app para tu firma digital (se compartirá al banco)"),
+          const SizedBox(height: 16),
+
+          const Text("DOVIA comparte tu expediente al banco", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF00444B))),
+          const SizedBox(height: 4),
+          _buildCustomBullet("Verificamos toda la información y la enviamos al abogado del banco."),
+          const SizedBox(height: 16),
+
+          const Text("Revisión del banco", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF00444B))),
+          const SizedBox(height: 4),
+          _buildCustomBullet("El banco revisará la documentación y validará que todo esté en orden."),
+          const SizedBox(height: 16),
+
+          const Text("Contacto del abogado del banco", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF00444B))),
+          const SizedBox(height: 4),
+          _buildCustomBullet("Te llamará para continuar con el proceso hipotecario y coordinar la cita de firma."),
+          const SizedBox(height: 16),
+
+          const Text("Firma con el banco y entrega del enganche.", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF00444B))),
+          const SizedBox(height: 4),
+          _buildCustomBullet("Al momento de la firma del contrato hipotecario, el banco solicitará el enganche."),
+          _buildCustomBullet("En ese mismo momento se debe cancelar el fee DOVIA"),
+          const SizedBox(height: 16),
+
+          const Text("Acompañamiento DOVIA", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF00444B))),
+          const SizedBox(height: 4),
+          _buildCustomBullet("Supervisamos todo el proceso para que la compra sea clara, segura y sin complicaciones."),
+          const SizedBox(height: 32),
+
+          const Text(
+            "Avances",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF00444B),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            "Aquí Dovia desplegar avances sobre procesos y documento para firmar",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF00444B),
+            ),
+          ),
           const SizedBox(height: 24),
           _buildDocumentItem(
             "Documento a firmar",
@@ -1687,6 +1851,24 @@ class _ProposalScreenState extends State<ProposalScreen> {
             child: Text(
               text,
               style: const TextStyle(fontSize: 12, color: Color(0xFF004D4F)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCustomBullet(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("• ", style: TextStyle(fontSize: 16, color: Color(0xFF00444B))),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF00444B), height: 1.3),
             ),
           ),
         ],
