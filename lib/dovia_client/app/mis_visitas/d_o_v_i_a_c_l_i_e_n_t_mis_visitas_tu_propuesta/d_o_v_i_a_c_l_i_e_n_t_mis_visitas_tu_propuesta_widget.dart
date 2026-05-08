@@ -113,6 +113,10 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Tu propuesta',
+                        showMap: false,
+                        showCurrency: false,
+                        showLogo: false,
+                        hideActions: true,
                       ),
                     ),
                     Padding(

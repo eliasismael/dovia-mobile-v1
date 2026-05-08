@@ -4,7 +4,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -52,7 +51,6 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
   static const Color _primary = Color(0xFF007376);
   static const Color _primaryDark = Color(0xFF00444B);
   static const Color _errorRed = Color(0xFFD32F2F);
-  static const Color _successGreen = Color(0xFF2E7D32);
 
   // Form state
   late String _selectedCurrency;
@@ -61,6 +59,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
   final _bankCtrl = TextEditingController();
   final _downPaymentCtrl = TextEditingController();
   bool _isSending = false;
+  bool _sent = false;
 
   @override
   void initState() {
@@ -153,28 +152,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
 
     switch (result) {
       case Success():
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text('Contraoferta enviada exitosamente.'),
-          backgroundColor: _successGreen,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ));
-
-        // Navegar a la sección de Acuerdo, paso 2 (Estructuración de acuerdo)
-        context.pushNamed(
-          DOVIACLIENTMisPropiedadesAcuerdoWidget.routeName,
-          queryParameters: {
-            'negociationStep': serializeParam(2.0, ParamType.double),
-            'paymentMethod': serializeParam(
-              widget.paymentMethod ?? 'contado',
-              ParamType.String,
-            ),
-            'offerId': serializeParam(
-              widget.offerId,
-              ParamType.String,
-            ),
-          }.withoutNulls,
-        );
+        safeSetState(() => _sent = true);
       case Failure(:final message):
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Error: $message'),
@@ -199,7 +177,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               wrapWithModel(model: _model.cornerGradientBackgroundModel, updateCallback: () => safeSetState(() {}), child: const CornerGradientBackgroundWidget()),
               Column(
                 children: [
-                  wrapWithModel(model: _model.dOVIASHAREDHeaderModel, updateCallback: () => safeSetState(() {}), child: DOVIASHAREDHeaderWidget(title: 'Contraoferta', hideActions: true)),
+                  wrapWithModel(model: _model.dOVIASHAREDHeaderModel, updateCallback: () => safeSetState(() {}), child: const DOVIASHAREDHeaderWidget(title: 'Contraoferta', hideActions: true, showMap: false, showCurrency: false, showLogo: false)),
                   Expanded(child: _buildBody()),
                 ],
               ),
@@ -215,7 +193,55 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     );
   }
 
+  Widget _sentConfirmation() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: _primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle_outline_rounded, color: _primary, size: 44),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Contraoferta enviada',
+              style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: _primaryDark),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Tu contraoferta fue enviada al comprador. Te notificaremos cuando responda.',
+              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF666666), height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: _primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () => context.pop(),
+                child: Text('Volver', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBody() {
+    if (_sent) return _sentConfirmation();
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
       child: Column(

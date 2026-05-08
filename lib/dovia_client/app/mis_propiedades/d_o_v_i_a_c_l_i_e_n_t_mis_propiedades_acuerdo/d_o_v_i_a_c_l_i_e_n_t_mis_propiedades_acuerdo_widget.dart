@@ -1,4 +1,4 @@
-import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
+﻿import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -62,12 +62,16 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
   double get _computedStep {
     // return 3.5;
     if (_offerData != null) {
-      final status =
+      final pStatus =
           getJsonField(_offerData, r'''$.processStatus''')?.toString();
-      if (status == 'agreement_structuring') {
+      final oStatus =
+          getJsonField(_offerData, r'''$.offerStatus''')?.toString() ??
+          getJsonField(_offerData, r'''$.status''')?.toString();
+
+      if (pStatus == 'agreement_structuring' || oStatus == 'accepted') {
         return widget.paymentMethod == 'hipoteca' ? 3.0 : 2.0;
       }
-      if (status == 'contract_signing') {
+      if (pStatus == 'contract_signing') {
         final contractSigned =
             getJsonField(_offerData, r'''$.contractSigned''');
         if (contractSigned == true || contractSigned == 'true') {
@@ -75,7 +79,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
         }
         return 3.0;
       }
-      if (status == 'completed') return 4.0;
+      if (pStatus == 'completed') return 4.0;
     }
     if (widget.negociationStep == 2.0 && widget.paymentMethod == 'hipoteca') {
       return 3.0;
@@ -2834,219 +2838,135 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                       if (widget.paymentMethod == 'hipoteca') {
                                         return Column(
                                           mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Align(
-                                              alignment:
-                                                  const AlignmentDirectional(
-                                                      -1.0, 0.0),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsetsDirectional
-                                                        .fromSTEB(
-                                                        0.0, 20.0, 0.0, 0.0),
-                                                child: RichText(
-                                                  textScaler:
-                                                      MediaQuery.of(context)
-                                                          .textScaler,
-                                                  text: TextSpan(
-                                                    children: [
-                                                      TextSpan(
-                                                        text:
-                                                            'Así avanzará tu proceso legal\n\n',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  font:
-                                                                      GoogleFonts
-                                                                          .inter(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                                ),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            'Como la compra se realizará a través de una hipoteca bancaria, el proceso legal será gestionado por el abogado asignado por el banco.\n\nDOVIA enviará toda la documentación necesaria y te mantendrá informado en cada etapa.\n\nNuestro equipo de DOVIA HQ estará en contacto contigo para resolver dudas, coordinar documentos y asegurarse de que todo avance de manera segura, rápida y sin retrasos.\n\n',
-                                                        style: TextStyle(),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            '¿Qué sigue?\n\nFirma el acuerdo de reconocimiento de honorarios de DOVIA.\n\n',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            '- Este documento aparecerá aquí mismo en la app para tu firma digital (se compartirá al banco)\n\n',
-                                                        style: TextStyle(),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            'DOVIA comparte tu expediente al banco\n\n',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            '- Verificamos toda la información y la enviamos al abogado del banco.\n\n',
-                                                        style: TextStyle(),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            'Contacto del abogado del banco\n\n',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            '- Te llamará para continuar con el proceso hipotecario y coordinar la cita de firma.\n\n',
-                                                        style: TextStyle(),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            'Firma con el banco y entrega del enganche.\n\n',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            '- Al momento de la firma del contrato hipotecario, el banco solicitará el enganche.\n- En ese mismo momento se debe cancelar el fee DOVIA\n\n',
-                                                        style: TextStyle(),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            'Acompañamiento DOVIA\n\n',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            '- Supervisamos todo el proceso para que la compra sea clara, segura y sin complicaciones.',
-                                                        style: TextStyle(),
-                                                      )
-                                                    ],
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .publicSans(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .normal,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Align(
-                                              alignment:
-                                                  const AlignmentDirectional(
-                                                      -1.0, 0.0),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsetsDirectional
-                                                        .fromSTEB(
-                                                        0.0, 20.0, 0.0, 0.0),
-                                                child: Text(
-                                                  'Avances',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
-                                                ),
-                                              ),
-                                            ),
+                                            // â”€â”€ "Así avanzará tu proceso legal" rich text block â”€â”€
                                             Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                      0.0, 8.0, 0.0, 0.0),
-                                              child: Text(
-                                                'Aquí Dovia desplegar avances sobre procesos y documento para firmar',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          font:
-                                                              GoogleFonts.inter(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
+                                              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                                              child: RichText(
+                                                text: TextSpan(
+                                                  style: TextStyle(
+                                                    fontFamily: GoogleFonts.publicSans().fontFamily,
+                                                    fontSize: 16.0,
+                                                    color: FlutterFlowTheme.of(context).primaryText,
+                                                    height: 1.5,
+                                                  ),
+                                                  children: const [
+                                                    TextSpan(
+                                                      text: 'Así avanzará tu proceso legal',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(text: '\n\n'),
+                                                    TextSpan(
+                                                      text: 'Como la compra se realizará a través de una hipoteca bancaria, el proceso legal será gestionado por el abogado asignado por el banco.',
+                                                    ),
+                                                    TextSpan(text: '\n\n'),
+                                                    TextSpan(
+                                                      text: 'DOVIA enviará toda la documentación necesaria y te mantendrá informado en cada etapa.',
+                                                    ),
+                                                    TextSpan(text: '\n\n'),
+                                                    TextSpan(
+                                                      text: 'Nuestro equipo de DOVIA HQ estará en contacto contigo para resolver dudas, coordinar documentos y asegurarse de que todo avance de manera segura, rápida y sin retrasos.',
+                                                    ),
+                                                    TextSpan(text: '\n\n'),
+                                                    TextSpan(
+                                                      text: '¿Qué sigue?\n',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(
+                                                      text: 'Firma el acuerdo de reconocimiento de honorarios de DOVIA.\n',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(
+                                                      text: '   • Este documento aparecerá aquí mismo en la app para tu firma digital (se compartirá al banco)\n\n',
+                                                    ),
+                                                    TextSpan(
+                                                      text: 'DOVIA comparte tu expediente al banco\n',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(
+                                                      text: '   • Verificamos toda la información y la enviamos al abogado del banco.\n\n',
+                                                    ),
+                                                    TextSpan(
+                                                      text: 'Revisión del banco\n',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(
+                                                      text: '   • El banco revisará la documentación y validará que todo esté en orden.\n\n',
+                                                    ),
+                                                    TextSpan(
+                                                      text: 'Contacto del abogado del banco\n',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(
+                                                      text: '   • Te llamará para continuar con el proceso hipotecario y coordinar la cita de firma.\n\n',
+                                                    ),
+                                                    TextSpan(
+                                                      text: 'Firma con el banco y entrega del enganche.\n',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(
+                                                      text: '   • Al momento de la firma del contrato hipotecario, el banco solicitará el enganche.\n',
+                                                    ),
+                                                    TextSpan(
+                                                      text: '   • En ese mismo momento se debe cancelar el fee DOVIA\n\n',
+                                                    ),
+                                                    TextSpan(
+                                                      text: 'Acompañamiento DOVIA\n',
+                                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    TextSpan(
+                                                      text: '   • Supervisamos todo el proceso para que la compra sea clara, segura y sin complicaciones.',
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
+                                            // â”€â”€ "Avances" section â”€â”€
+                                            Align(
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      -1.0, 0.0),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
+                                                        0.0, 20.0, 0.0, 0.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Avances',
+                                                      style: FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .override(
+                                                            font: GoogleFonts.publicSans(
+                                                              fontWeight: FontWeight.bold,
+                                                            ),
+                                                            letterSpacing: 0.32,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(height: 4.0),
+                                                    Text(
+                                                      'Aquí Dovia desplegar avances sobre procesos y documento para firmar',
+                                                      style: FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodySmall
+                                                          .override(
+                                                            font: GoogleFonts.publicSans(
+                                                              fontWeight: FontWeight.w600,
+                                                            ),
+                                                            fontWeight: FontWeight.w600,
+                                                            letterSpacing: 0.0,
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+
                                             Padding(
                                               padding:
                                                   const EdgeInsetsDirectional
@@ -3238,7 +3158,14 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                               ?.unfocus();
                                                                         },
                                                                         child:
-                                                                            const SubirArchivoWidget(),
+                                                                                                                                               SubirArchivoWidget(
+                                                                 processId: getJsonField(
+                                                                       _offerData,
+                                                                       r'''$.legalProcessId''',
+                                                                     )?.toString(),
+                                                                 authToken:
+                                                                     currentAuthenticationToken,
+                                                               ),
                                                                       ),
                                                                     );
                                                                   },
@@ -6306,6 +6233,10 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                       ),
                                     ),
                                   );
+                                }
+                                
+                                if (widget.paymentMethod == 'hipoteca') {
+                                  return const SizedBox.shrink();
                                 }
 
                                 final profile = getJsonField(

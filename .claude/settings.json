@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(flutter analyze:*)",
-      "mcp__claude_ai_Figma__get_design_context"
+      "mcp__claude_ai_Figma__get_design_context",
+      "WebFetch(domain:www.figma.com)",
+      "Bash(dart analyze *)"
     ]
   }
 }

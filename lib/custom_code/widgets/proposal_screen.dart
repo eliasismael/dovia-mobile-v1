@@ -42,6 +42,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
 
   String? _selectedLegalAssociateId;
   bool _isSelectingAssociate = false;
+  bool _isRejecting = false;
 
   NegotiationState get state {
     try {
@@ -49,20 +50,22 @@ class _ProposalScreenState extends State<ProposalScreen> {
         final pStatus =
             widget.offerData['processStatus']?.toString().toLowerCase();
         if (pStatus == 'agreement_structuring')
-          return NegotiationState.structuring;
+          return paymentMethod == PaymentMethod.hipoteca ? NegotiationState.signing : NegotiationState.structuring;
         if (pStatus == 'contract_signing') return NegotiationState.signing;
         if (pStatus == 'completed') return NegotiationState.completed;
 
         final oStatus =
             widget.offerData['offerStatus']?.toString().toLowerCase() ??
                 widget.offerData['status']?.toString().toLowerCase();
-        if (oStatus == 'accepted') return NegotiationState.structuring;
+        if (oStatus == 'counter_offered' || oStatus == 'counter_offer_sent' || oStatus == 'countered')
+          return NegotiationState.negotiation;
+        if (oStatus == 'accepted') return paymentMethod == PaymentMethod.hipoteca ? NegotiationState.signing : NegotiationState.structuring;
       }
 
       final s = widget.stateString.toLowerCase();
-      if (s == 'accepted') return NegotiationState.structuring;
+      if (s == 'accepted') return paymentMethod == PaymentMethod.hipoteca ? NegotiationState.signing : NegotiationState.structuring;
       if (s == 'structuring' || s == 'agreement_structuring')
-        return NegotiationState.structuring;
+        return paymentMethod == PaymentMethod.hipoteca ? NegotiationState.signing : NegotiationState.structuring;
       if (s == 'signing' ||
           s == 'contract_signing' ||
           s == 'contract_upload' ||
@@ -76,12 +79,6 @@ class _ProposalScreenState extends State<ProposalScreen> {
       );
     } catch (_) {
       return NegotiationState.negotiation;
-    }
-
-    try {
-      return NegotiationState.signing;
-    } catch (e) {
-      return NegotiationState.signing;
     }
   }
 
@@ -170,7 +167,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
           _buildProcessStatus(),
           const SizedBox(height: 24),
           _buildStepContent(),
-          const SizedBox(height: 40),
+          const SizedBox(height: 180),
         ],
       ),
     );
@@ -185,16 +182,16 @@ class _ProposalScreenState extends State<ProposalScreen> {
       }
     }
 
-    // switch (state) {
-    //   case NegotiationState.negotiation:
-    //     return _buildNegotiationContent();
-    //   case NegotiationState.structuring:
-    //     return _buildStructuringContent();
-    //   case NegotiationState.signing:
-    return _buildSigningContent(isCompleted: false, isContractSigned: true);
-    //   case NegotiationState.completed:
-    //     return _buildSigningContent(isCompleted: true, isContractSigned: true);
-    // }
+    switch (state) {
+      case NegotiationState.negotiation:
+        return _buildNegotiationContent();
+      case NegotiationState.structuring:
+        return _buildStructuringContent();
+      case NegotiationState.signing:
+        return _buildSigningContent(isCompleted: false, isContractSigned: isContractSigned);
+      case NegotiationState.completed:
+        return _buildSigningContent(isCompleted: true, isContractSigned: true);
+    }
   }
 
   String _getPaymentLabel(PaymentMethod m) {
@@ -347,77 +344,421 @@ class _ProposalScreenState extends State<ProposalScreen> {
     );
   }
 
+  // ── Data helpers for negotiation view ─────────────────────────────────────
+
+  dynamic get _originalOfferData =>
+      widget.offerData?['originalOfferData'] ??
+      widget.offerData?['offerData'] ??
+      widget.offerData;
+
+  dynamic get _counterOfferData =>
+      widget.offerData?['counterOfferData'] ??
+      widget.offerData?['counterOffer'];
+
+  bool get _hasCounterOffer => _counterOfferData != null;
+
+  String _extractPaymentLabel(dynamic data) {
+    final raw = data?['paymentMethod']?.toString() ?? '';
+    final s = raw.toLowerCase();
+    if (s.contains('cash') || s.contains('contado')) return 'Contado';
+    if (s.contains('mortgage') || s.contains('hipoteca')) return 'Hipoteca';
+    if (s.contains('purchase_promise') || s.contains('promesa'))
+      return 'Promesa de compra';
+    return raw.isEmpty ? '—' : raw.replaceAll('_', ' ');
+  }
+
+  String _extractAmount(dynamic data) {
+    final val = data?['proposedAmount'];
+    if (val == null) return '—';
+    final num? amount = val is num ? val : num.tryParse(val.toString());
+    if (amount == null) return '—';
+    final currency = data?['currency']?.toString().toUpperCase() ?? 'USD';
+    final prefix = currency == 'USD' ? 'USD ' : '';
+    final formatted = amount.truncateToDouble() == amount
+        ? amount
+            .toInt()
+            .toString()
+            .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+$)'), (m) => '${m[1]},')
+        : amount.toStringAsFixed(2);
+    return '$prefix$formatted';
+  }
+
+  String _field(dynamic data, String key, {String fallback = '—'}) {
+    final v = data?[key]?.toString().trim();
+    return (v != null && v.isNotEmpty) ? v : fallback;
+  }
+
+  // ── Negotiation content (Step 1) ──────────────────────────────────────────
+
   Widget _buildNegotiationContent() {
-    bool hasOwnerResponded = false;
-    if (widget.offerData != null) {
-      final status = widget.offerData['offerStatus']?.toString();
-      hasOwnerResponded = status == 'counter_offer' ||
-          status == 'accepted' ||
-          status == 'rejected';
-    }
+    final orig = _originalOfferData;
+    final counter = _counterOfferData;
+
+    final origPayment = _extractPaymentLabel(orig);
+    final origAmount = _extractAmount(orig);
+    final origBank = _field(orig, 'bankName');
+    final origDown = _field(orig, 'downPaymentPercentage',
+        fallback: _field(orig, 'downPayment'));
+    final origConsiderations = _field(orig, 'considerations');
+    final origIsHipoteca = origPayment == 'Hipoteca';
+    final origCreditStatus = _field(orig, 'creditStatus');
+
+    final counterPayment = _extractPaymentLabel(counter);
+    final counterAmount = _extractAmount(counter);
+    final counterBank = _field(counter, 'bankName');
+    final counterDown = _field(counter, 'downPaymentPercentage',
+        fallback: _field(counter, 'downPayment'));
+    final counterConsiderations = _field(counter, 'considerations');
+    final counterIsHipoteca = counterPayment == 'Hipoteca';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Tu propuesta",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF004D4F),
-          ),
-        ),
-        const SizedBox(height: 16),
-        _buildField(
-          "Método de pago",
-          _getPaymentLabel(paymentMethod),
-          isEditable: true,
-        ),
-        if (paymentMethod == PaymentMethod.hipoteca)
-          _buildField("Banco", "x", isEditable: true),
-        _buildField("Propuesta económica", "x", isEditable: true),
-        if (paymentMethod == PaymentMethod.hipoteca) ...[
-          _buildField("Enganche", "%", isEditable: true),
-          _buildField("Estado del crédito", "x", isEditable: true),
-        ],
-        if (paymentMethod == PaymentMethod.promesa) ...[
-          _buildField("Reserva inicial", "x", isEditable: true),
-          _buildField("Pago final", "x", isEditable: true),
-        ],
-        _buildCurrencySelector(),
-        _buildField(
-          "Solicitud adicional",
-          "x\nx\nx",
-          isTextArea: true,
-          isEditable: true,
-        ),
-        const SizedBox(height: 32),
         const Center(
           child: Text(
-            "Propuesta del propietario",
+            'Tu propuesta',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF004D4F),
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF00444B),
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        _buildOwnerProposalFields(hasOwnerResponded),
-        const SizedBox(height: 24),
-        _buildActionButtons(hasOwnerResponded),
-        const SizedBox(height: 24),
+        const SizedBox(height: 18),
+        
+        // ── Tu propuesta Inputs ─────────────────────────────────────────────
+        Row(
+          children: [
+            Expanded(child: _buildInputBox("Método de pago", origPayment, bgColor: const Color(0xFFD9D7D7))),
+            const SizedBox(width: 17),
+            Expanded(child: _buildInputBox("Banco", origBank, bgColor: const Color(0xFFD9D7D7))),
+          ],
+        ),
+        _buildInputBox("Propuesta económica", origAmount, bgColor: const Color(0xFFD9D7D7)),
+        _buildInputBox("Enganche", origDown == '—' ? '—' : '$origDown%', bgColor: const Color(0xFFD9D7D7)),
+        _buildInputBox("Estado del crédito", origCreditStatus, bgColor: const Color(0xFFD9D7D7)),
+        
+        const Text(
+          "Moneda de pago",
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+            color: Color(0xFF00444B),
+            letterSpacing: 0.28,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          height: 42,
+          decoration: BoxDecoration(
+            color: const Color(0xFF70ACAD),
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: const Center(
+            child: Text(
+              "USD",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        _buildInputBox("Solicitud adicional", origConsiderations, isTextArea: true, bgColor: const Color(0xFFD9D7D7)),
+        
+        const SizedBox(height: 20),
+
+        // ── Propuesta del propietario ───────────────────────────────────────
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Color(0xFF007376), width: 1)),
+          ),
+          child: const Center(
+            child: Text(
+              'Propuesta del propietario',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF00444B),
+              ),
+            ),
+          ),
+        ),
+
+        if (_hasCounterOffer) ...[
+          Row(
+            children: [
+              Expanded(child: _buildInputBox("Método de pago", counterPayment, bgColor: const Color(0xFFFAFAFA))),
+              const SizedBox(width: 17),
+              Expanded(child: _buildInputBox("Banco", counterBank, bgColor: const Color(0xFFFAFAFA))),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(child: _buildInputBox("Propuesta económica", counterAmount, bgColor: const Color(0xFFFAFAFA))),
+              const SizedBox(width: 17),
+              Expanded(child: _buildInputBox("Enganche", counterDown == '—' ? '—' : '$counterDown%', bgColor: const Color(0xFFFAFAFA))),
+            ],
+          ),
+          _buildInputBox("Solicitud adicional", counterConsiderations, isTextArea: true, bgColor: const Color(0xFFFAFAFA)),
+
+          const SizedBox(height: 18),
+          if (!_isRejecting) ...[
+            // Buttons
+            SizedBox(
+              width: double.infinity,
+              height: 42,
+              child: OutlinedButton(
+                onPressed: () {
+                  setState(() {
+                    _isRejecting = true;
+                  });
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF007376)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: const Text(
+                  "Rechazar",
+                  style: TextStyle(
+                    color: Color(0xFF007376),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              height: 42,
+              child: OutlinedButton(
+                onPressed: () {
+                  // Contraoferta action
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF007376)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: const Text(
+                  "Contraoferta",
+                  style: TextStyle(
+                    color: Color(0xFF007376),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              height: 42,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Aceptar action
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF007376),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  "Aceptar",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 18),
+            _buildRejectReasonBox(),
+          ],
+        ] else ...[
+          Container(
+            width: double.infinity,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9F9F9),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFDFDFDF)),
+            ),
+            child: const Column(
+              children: [
+                Icon(Icons.hourglass_empty_rounded,
+                    color: Color(0xFF007376), size: 28),
+                SizedBox(height: 8),
+                Text(
+                  'Esperando respuesta del propietario...',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF888888),
+                      fontWeight: FontWeight.normal),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildInputBox(String label, String value, {bool isTextArea = false, Color bgColor = const Color(0xFFD9D7D7)}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+            color: Color(0xFF00444B),
+            letterSpacing: 0.28,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          height: isTextArea ? 104 : 42,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Align(
+            alignment: isTextArea ? Alignment.topLeft : Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                color: const Color(0xFF888888).withOpacity(0.5),
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                letterSpacing: 0.28,
+                height: isTextArea ? 1.5 : null,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+      ],
+    );
+  }
+          
+  Widget _buildRejectReasonBox() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         const Text(
           "¿Por qué rechazaste la oferta?",
           style: TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF004D4F),
+            fontWeight: FontWeight.normal,
+            color: Color(0xFF00444B),
+            letterSpacing: 0.28,
           ),
         ),
-        const SizedBox(height: 8),
-        _buildExpandingTextField("Escribe aquí..."),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          height: 104,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAFAFA),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFDFDFDF)),
+          ),
+          child: TextFormField(
+            maxLines: null,
+            decoration: InputDecoration(
+              hintText: "Escribe aqui...",
+              hintStyle: TextStyle(
+                color: const Color(0xFF888888).withOpacity(0.5),
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        SizedBox(
+          width: double.infinity,
+          height: 42,
+          child: ElevatedButton(
+            onPressed: () {
+              // Confirmar rechazo
+              setState(() {
+                _isRejecting = false;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE44444),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              "Confirmar Rechazo",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
       ],
+    );
+  }
+
+  Widget _negotiationRow(
+    String label,
+    String value, {
+    CrossAxisAlignment valueAlign = CrossAxisAlignment.end,
+    TextStyle? valueStyle,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF666666),
+                  fontWeight: FontWeight.w400)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: valueStyle ??
+                  const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF00444B),
+                      fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -602,6 +943,57 @@ class _ProposalScreenState extends State<ProposalScreen> {
 
   Widget _buildSigningContent(
       {required bool isCompleted, required bool isContractSigned}) {
+    if (paymentMethod == PaymentMethod.hipoteca) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              "Como la compra se realizará a través de una hipoteca bancaria, el proceso legal será gestionado por el abogado asignado por el banco. DOVIA te informará una vez que hayan iniciado el trámite.",
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF004D4F),
+                height: 1.4,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            "Siguientes pasos:",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF004D4F),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildNextStepItem("Serás contactado por el banco para definir detalles."),
+          _buildNextStepItem("El propietario será contactado."),
+          _buildNextStepItem("El banco preparará documentación."),
+          _buildNextStepItem("Se compartirá documentación con ambos."),
+          _buildNextStepItem("Se establecerá lugar, fecha y hora para firma de contratos."),
+          const SizedBox(height: 24),
+          _buildDocumentItem(
+            "Documento a firmar",
+            isCompleted: isCompleted,
+            status: isCompleted ? "done" : "upload_download",
+          ),
+          const SizedBox(height: 32),
+          _buildAceptarButton(
+             enabled: true,
+             onPressed: () {
+               // Enviar documentos subidos al backend
+             }
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1347,6 +1739,28 @@ class _ProposalScreenState extends State<ProposalScreen> {
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
                 ),
+              )
+            else if (status == "upload_download")
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFCCE3E4),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                    child: const Icon(Icons.download_outlined, color: Color(0xFF007376), size: 20),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFCCE3E4),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                    child: const Icon(Icons.upload_file, color: Color(0xFF007376), size: 20),
+                  ),
+                ],
               )
             else
               Container(

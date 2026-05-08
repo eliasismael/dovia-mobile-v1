@@ -287,6 +287,40 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     return raw == 'PENDING' || raw == 'ACTIVE' || raw == 'SENT' || raw == 'IN_NEGOTIATION';
   }
 
+  bool _isRejectedByOwner() {
+    final raw = _resolveField([r'''$.offerStatus''', r'''$.status''']).toUpperCase();
+    return raw == 'REJECTED' || raw == 'REJECTED_BY_OWNER';
+  }
+
+  bool _isCounterOfferSent() {
+    final raw = _resolveField([r'''$.offerStatus''', r'''$.status''']).toUpperCase();
+    return raw == 'COUNTER_OFFERED' || raw == 'COUNTER_OFFER_SENT' || raw == 'COUNTERED';
+  }
+
+  num? _resolveCounterOfferAmount() {
+    final raw = getJsonField(_offerData, r'''$.counterOfferData.proposedAmount''') ??
+        getJsonField(_offerData, r'''$.counterOffer.proposedAmount''') ??
+        getJsonField(_offerData, r'''$.activeCounterOffer.proposedAmount''') ??
+        getJsonField(_offerData, r'''$.counterOfferAmount''');
+    if (raw == null) return null;
+    return raw is num ? raw : num.tryParse(raw.toString());
+  }
+
+  String _resolveCounterOfferCurrency() {
+    return getJsonField(_offerData, r'''$.counterOfferData.currency''')?.toString() ??
+        getJsonField(_offerData, r'''$.counterOffer.currency''')?.toString() ??
+        _resolveField([r'''$.activeOfferData.currency''', r'''$.currency''']);
+  }
+
+  String? _rejectionReason() {
+    final v = getJsonField(_offerData, r'''$.rejectionReason''') ??
+        getJsonField(_offerData, r'''$.ownerRejectionReason''') ??
+        getJsonField(_offerData, r'''$.rejectReason''') ??
+        getJsonField(_offerData, r'''$.reason''');
+    final s = v?.toString().trim();
+    return (s != null && s.isNotEmpty) ? s : null;
+  }
+
   String _formatAmount(num? val) {
     if (val == null) return '—';
     if (val.truncateToDouble() == val) {
@@ -311,7 +345,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
               wrapWithModel(model: _model.cornerGradientBackgroundModel, updateCallback: () => safeSetState(() {}), child: const CornerGradientBackgroundWidget()),
               Column(
                 children: [
-                  wrapWithModel(model: _model.dOVIASHAREDHeaderModel, updateCallback: () => safeSetState(() {}), child: const DOVIASHAREDHeaderWidget(title: 'Propuesta', hideActions: true)),
+                  wrapWithModel(model: _model.dOVIASHAREDHeaderModel, updateCallback: () => safeSetState(() {}), child: const DOVIASHAREDHeaderWidget(title: 'Propuesta', hideActions: true, showMap: false, showCurrency: false, showLogo: false)),
                   Expanded(child: _buildBody()),
                 ],
               ),
@@ -364,11 +398,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Status badge ──────────────────────────────────────────────────
-          Row(children: [
-            Expanded(child: Text('Propuesta · ${_offerTypeLabel()}',
-                style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: _primaryDark))),
-            _statusBadge(),
-          ]),
+          Text('Propuesta · ${_offerTypeLabel()}',
+              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: _primaryDark)),
           const SizedBox(height: 20),
 
           // ── Método de pago (read-only) ────────────────────────────────────
@@ -406,22 +437,18 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
           _readOnlyTextArea(additionalRequest == '—' ? 'Sin solicitudes adicionales' : additionalRequest),
           const SizedBox(height: 32),
 
-          // ── Action buttons ────────────────────────────────────────────────
-          if (canAct) _actionButtons() else _statusMessage(),
+          // ── Action buttons / counter-offer state ─────────────────────────
+          if (_isCounterOfferSent()) _counterOfferSentCard(amount, currencySymbol)
+          else if (canAct) _actionButtons()
+          else _statusMessage(),
+
+          // ── Rejection reason (only when owner rejected) ───────────────────
+          if (_isRejectedByOwner()) ...[
+            const SizedBox(height: 24),
+            _rejectionReasonSection(),
+          ],
         ],
       ),
-    );
-  }
-
-  Widget _statusBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: _statusColor().withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _statusColor().withOpacity(0.35)),
-      ),
-      child: Text(_offerStatusLabel(), style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: _statusColor())),
     );
   }
 
@@ -559,6 +586,103 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         )),
       ]),
     ]);
+  }
+
+  Widget _counterOfferSentCard(num? originalAmount, String currencySymbol) {
+    final counterAmount = _resolveCounterOfferAmount();
+    final counterCurrency = _resolveCounterOfferCurrency();
+    final counterCurrencySymbol = counterCurrency == 'USD' ? 'USD ' : '';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Status banner
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: _primary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _primary.withOpacity(0.3)),
+          ),
+          child: Row(children: [
+            const Icon(Icons.check_circle_outline_rounded, color: _primary, size: 20),
+            const SizedBox(width: 10),
+            Expanded(child: Text(
+              'Ya enviaste una contraoferta al comprador.',
+              style: GoogleFonts.inter(fontSize: 14, color: _primary, fontWeight: FontWeight.w500),
+            )),
+          ]),
+        ),
+        const SizedBox(height: 16),
+        // Summary card
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFDFDFDF)),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(children: [
+                  Expanded(child: Text('Oferta recibida',
+                      style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF666666)))),
+                  Text(
+                    '$currencySymbol${_formatAmount(originalAmount)}',
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: _primaryDark),
+                  ),
+                ]),
+              ),
+              const Divider(height: 1, color: Color(0xFFEEEEEE)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(children: [
+                  Expanded(child: Text('Tu contraoferta',
+                      style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF666666)))),
+                  Text(
+                    counterAmount != null
+                        ? '$counterCurrencySymbol${_formatAmount(counterAmount)}'
+                        : '—',
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: _primary),
+                  ),
+                ]),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _rejectionReasonSection() {
+    final reason = _rejectionReason();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '¿Por qué rechazaste esta oferta?',
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: _primaryDark),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 80),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAFAFA),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            reason ?? 'Sin motivo especificado',
+            style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF888888)),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _statusMessage() {
