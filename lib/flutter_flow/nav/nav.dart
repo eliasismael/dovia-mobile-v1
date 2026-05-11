@@ -543,6 +543,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             considerations: params.getParam('considerations', ParamType.String),
             bankName: params.getParam('bankName', ParamType.String),
             downPayment: params.getParam('downPayment', ParamType.String),
+            initialReserve: params.getParam('initialReserve', ParamType.String),
+            finalPayment: params.getParam('finalPayment', ParamType.String),
+            promiseTimeMonths:
+                params.getParam('promiseTimeMonths', ParamType.String),
           ),
         ),
         FFRoute(

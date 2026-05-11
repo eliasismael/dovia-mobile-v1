@@ -24,9 +24,9 @@ class DOVIACLIENTMisPropiedadesContraofertarWidget extends StatefulWidget {
     this.considerations,
     this.bankName,
     this.downPayment,
-    this.reservationAmount,
+    this.initialReserve,
     this.finalPayment,
-    this.promiseTime,
+    this.promiseTimeMonths,
   }) : proposalType = proposalType ?? 'contado';
 
   final String proposalType;
@@ -37,9 +37,9 @@ class DOVIACLIENTMisPropiedadesContraofertarWidget extends StatefulWidget {
   final String? considerations;
   final String? bankName;
   final String? downPayment;
-  final String? reservationAmount;
+  final String? initialReserve;
   final String? finalPayment;
-  final String? promiseTime;
+  final String? promiseTimeMonths;
 
   static String routeName = 'DOVIA_CLIENT_MisPropiedades_Contraofertar';
   static String routePath = '/dOVIACLIENTMisPropiedadesContraofertar';
@@ -87,14 +87,14 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     if (widget.downPayment != null && widget.downPayment != '—') {
       _downPaymentCtrl.text = widget.downPayment!;
     }
-    if (widget.reservationAmount != null && widget.reservationAmount != '—') {
-      _reservationCtrl.text = widget.reservationAmount!;
+    if (widget.initialReserve != null && widget.initialReserve != '—') {
+      _reservationCtrl.text = widget.initialReserve!;
     }
     if (widget.finalPayment != null && widget.finalPayment != '—') {
       _finalPaymentCtrl.text = widget.finalPayment!;
     }
-    if (widget.promiseTime != null && widget.promiseTime != '—') {
-      _promiseTimeCtrl.text = widget.promiseTime!;
+    if (widget.promiseTimeMonths != null && widget.promiseTimeMonths != '—') {
+      _promiseTimeCtrl.text = widget.promiseTimeMonths!;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -163,7 +163,6 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
       },
       if ((widget.paymentMethod ?? '').toLowerCase() == 'purchase_promise' || (widget.paymentMethod ?? '').toLowerCase() == 'promesa') ...{
         'initialReserve': num.tryParse(_reservationCtrl.text.trim().replaceAll(',', '')) ?? 0,
-        'finalPayment': num.tryParse(_finalPaymentCtrl.text.trim().replaceAll(',', '')) ?? 0,
         'promiseTimeMonths': num.tryParse(_promiseTimeCtrl.text.trim()) ?? 0,
       }
     };
@@ -317,7 +316,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
             const SizedBox(height: 4),
             Text('La comisión Dovia se paga al recibir la reserva', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF888888))),
             const SizedBox(height: 8),
-            _readOnlyField(widget.reservationAmount == null || widget.reservationAmount == '—' ? 'No especificado' : '${widget.currency ?? 'USD'} ${widget.reservationAmount}', grayed: true),
+            _readOnlyField(widget.initialReserve == null || widget.initialReserve == '—' ? 'No especificado' : '${widget.currency ?? 'USD'} ${widget.initialReserve}', grayed: true),
             const SizedBox(height: 14),
             Row(children: [
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -329,7 +328,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 _fieldLabel('Tiempo de promesa'),
                 const SizedBox(height: 8),
-                _readOnlyField(widget.promiseTime == null || widget.promiseTime == '—' ? 'No especificado' : '${widget.promiseTime} meses', grayed: true),
+                _readOnlyField(widget.promiseTimeMonths == null || widget.promiseTimeMonths == '—' ? 'No especificado' : '${widget.promiseTimeMonths} meses', grayed: true),
               ])),
             ]),
           ],

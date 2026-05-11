@@ -593,9 +593,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                 'considerations': serializeParam(_resolveField([r'''$.activeOfferData.considerations''', r'''$.considerations''']), ParamType.String),
                 'bankName': serializeParam(bankName == '—' ? null : bankName, ParamType.String),
                 'downPayment': serializeParam(downPayment == '—' ? null : downPayment, ParamType.String),
-                'reservationAmount': serializeParam(reservationAmount == '—' ? null : reservationAmount, ParamType.String),
+                'initialReserve': serializeParam(reservationAmount == '—' ? null : reservationAmount, ParamType.String),
                 'finalPayment': serializeParam(finalPayment == '—' ? null : finalPayment, ParamType.String),
-                'promiseTime': serializeParam(promiseTime == '—' ? null : promiseTime, ParamType.String),
+                'promiseTimeMonths': serializeParam(promiseTime == '—' ? null : promiseTime, ParamType.String),
               }.withoutNulls,
             );
           },

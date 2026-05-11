@@ -609,9 +609,11 @@ class _ProposalScreenState extends State<ProposalScreen> {
     final origConsiderations = _field(orig, 'considerations');
     final origIsHipoteca = origPayment == 'Hipoteca';
     final origCreditStatus = _field(orig, 'creditStatus');
-    final origReservationAmount = _field(orig, 'reservationAmount');
+    final origReservationAmount = _field(orig, 'initialReserve',
+        fallback: _field(orig, 'reservationAmount'));
     final origFinalPayment = _field(orig, 'finalPayment');
-    final origPromiseTime = _field(orig, 'promiseTime');
+    final origPromiseTime = _field(orig, 'promiseTimeMonths',
+        fallback: _field(orig, 'promiseTime'));
 
     final counterPayment = _extractPaymentLabel(counter);
     final counterAmount = _extractAmount(counter);
@@ -620,9 +622,11 @@ class _ProposalScreenState extends State<ProposalScreen> {
         fallback: _field(counter, 'downPayment'));
     final counterConsiderations = _field(counter, 'considerations');
     final counterIsHipoteca = counterPayment == 'Hipoteca';
-    final counterReservationAmount = _field(counter, 'reservationAmount');
+    final counterReservationAmount = _field(counter, 'initialReserve',
+        fallback: _field(counter, 'reservationAmount'));
     final counterFinalPayment = _field(counter, 'finalPayment');
-    final counterPromiseTime = _field(counter, 'promiseTime');
+    final counterPromiseTime = _field(counter, 'promiseTimeMonths',
+        fallback: _field(counter, 'promiseTime'));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
