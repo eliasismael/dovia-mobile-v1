@@ -390,6 +390,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     final additionalRequest = _resolveField([r'''$.activeOfferData.considerations''', r'''$.offerData.considerations''', r'''$.considerations''']);
     final bankName = _resolveField([r'''$.activeOfferData.bankName''', r'''$.offerData.bankName''', r'''$.bankName''']);
     final downPayment = _resolveField([r'''$.activeOfferData.downPaymentPercentage''', r'''$.offerData.downPaymentPercentage''', r'''$.downPaymentPercentage''', r'''$.activeOfferData.downPayment''', r'''$.offerData.downPayment''', r'''$.downPayment''']);
+    final reservationAmount = _resolveField([r'''$.activeOfferData.initialReserve''', r'''$.activeOfferData.reservationAmount''', r'''$.initialReserve''', r'''$.reservationAmount''']);
+    final finalPayment = _resolveField([r'''$.activeOfferData.finalPayment''', r'''$.offerData.finalPayment''', r'''$.finalPayment''']);
+    final promiseTime = _resolveField([r'''$.activeOfferData.promiseTimeMonths''', r'''$.activeOfferData.promiseTime''', r'''$.promiseTimeMonths''', r'''$.promiseTime''']);
     final canAct = _canAct();
 
     return SingleChildScrollView(
@@ -420,6 +423,27 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                 _fieldLabel('Enganche'),
                 const SizedBox(height: 8),
                 _readOnlyField(downPayment == '—' ? 'No especificado' : '$downPayment%'),
+              ])),
+            ]),
+            const SizedBox(height: 20),
+          ] else if (_paymentMethodLabel() == 'Promesa de compra') ...[
+            _fieldLabel('Reserva'),
+            const SizedBox(height: 4),
+            Text('La comisión Dovia se paga al recibir la reserva', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF888888))),
+            const SizedBox(height: 8),
+            _readOnlyField(reservationAmount == '—' ? 'No especificado' : '$currencySymbol${_formatAmount(num.tryParse(reservationAmount))}'),
+            const SizedBox(height: 20),
+            Row(children: [
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Pago final'),
+                const SizedBox(height: 8),
+                _readOnlyField(finalPayment == '—' ? 'No especificado' : '$currencySymbol${_formatAmount(num.tryParse(finalPayment))}'),
+              ])),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Tiempo de promesa'),
+                const SizedBox(height: 8),
+                _readOnlyField(promiseTime == '—' ? 'No especificado' : '$promiseTime meses'),
               ])),
             ]),
             const SizedBox(height: 20),
@@ -533,6 +557,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
   Widget _actionButtons() {
     final bankName = _resolveField([r'''$.activeOfferData.bankName''', r'''$.offerData.bankName''', r'''$.bankName''']);
     final downPayment = _resolveField([r'''$.activeOfferData.downPaymentPercentage''', r'''$.offerData.downPaymentPercentage''', r'''$.downPaymentPercentage''', r'''$.activeOfferData.downPayment''', r'''$.offerData.downPayment''', r'''$.downPayment''']);
+    final reservationAmount = _resolveField([r'''$.activeOfferData.initialReserve''', r'''$.activeOfferData.reservationAmount''', r'''$.initialReserve''']);
+    final finalPayment = _resolveField([r'''$.activeOfferData.finalPayment''', r'''$.offerData.finalPayment''', r'''$.finalPayment''']);
+    final promiseTime = _resolveField([r'''$.activeOfferData.promiseTimeMonths''', r'''$.activeOfferData.promiseTime''', r'''$.promiseTimeMonths''']);
 
     return Column(children: [
       Row(children: [
@@ -566,6 +593,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                 'considerations': serializeParam(_resolveField([r'''$.activeOfferData.considerations''', r'''$.considerations''']), ParamType.String),
                 'bankName': serializeParam(bankName == '—' ? null : bankName, ParamType.String),
                 'downPayment': serializeParam(downPayment == '—' ? null : downPayment, ParamType.String),
+                'reservationAmount': serializeParam(reservationAmount == '—' ? null : reservationAmount, ParamType.String),
+                'finalPayment': serializeParam(finalPayment == '—' ? null : finalPayment, ParamType.String),
+                'promiseTime': serializeParam(promiseTime == '—' ? null : promiseTime, ParamType.String),
               }.withoutNulls,
             );
           },

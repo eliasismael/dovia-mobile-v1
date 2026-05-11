@@ -24,6 +24,9 @@ class DOVIACLIENTMisPropiedadesContraofertarWidget extends StatefulWidget {
     this.considerations,
     this.bankName,
     this.downPayment,
+    this.reservationAmount,
+    this.finalPayment,
+    this.promiseTime,
   }) : proposalType = proposalType ?? 'contado';
 
   final String proposalType;
@@ -34,6 +37,9 @@ class DOVIACLIENTMisPropiedadesContraofertarWidget extends StatefulWidget {
   final String? considerations;
   final String? bankName;
   final String? downPayment;
+  final String? reservationAmount;
+  final String? finalPayment;
+  final String? promiseTime;
 
   static String routeName = 'DOVIA_CLIENT_MisPropiedades_Contraofertar';
   static String routePath = '/dOVIACLIENTMisPropiedadesContraofertar';
@@ -58,6 +64,9 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
   final _considerationsCtrl = TextEditingController();
   final _bankCtrl = TextEditingController();
   final _downPaymentCtrl = TextEditingController();
+  final _reservationCtrl = TextEditingController();
+  final _finalPaymentCtrl = TextEditingController();
+  final _promiseTimeCtrl = TextEditingController();
   bool _isSending = false;
   bool _sent = false;
 
@@ -78,6 +87,15 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     if (widget.downPayment != null && widget.downPayment != '—') {
       _downPaymentCtrl.text = widget.downPayment!;
     }
+    if (widget.reservationAmount != null && widget.reservationAmount != '—') {
+      _reservationCtrl.text = widget.reservationAmount!;
+    }
+    if (widget.finalPayment != null && widget.finalPayment != '—') {
+      _finalPaymentCtrl.text = widget.finalPayment!;
+    }
+    if (widget.promiseTime != null && widget.promiseTime != '—') {
+      _promiseTimeCtrl.text = widget.promiseTime!;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -87,6 +105,9 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     _considerationsCtrl.dispose();
     _bankCtrl.dispose();
     _downPaymentCtrl.dispose();
+    _reservationCtrl.dispose();
+    _finalPaymentCtrl.dispose();
+    _promiseTimeCtrl.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -139,6 +160,11 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
       if ((widget.paymentMethod ?? '').toLowerCase() == 'mortgage' || (widget.paymentMethod ?? '').toLowerCase() == 'hipoteca') ...{
         'bankName': _bankCtrl.text.trim(),
         'downPaymentPercentage': num.tryParse(_downPaymentCtrl.text.trim()) ?? 0,
+      },
+      if ((widget.paymentMethod ?? '').toLowerCase() == 'purchase_promise' || (widget.paymentMethod ?? '').toLowerCase() == 'promesa') ...{
+        'initialReserve': num.tryParse(_reservationCtrl.text.trim().replaceAll(',', '')) ?? 0,
+        'finalPayment': num.tryParse(_finalPaymentCtrl.text.trim().replaceAll(',', '')) ?? 0,
+        'promiseTimeMonths': num.tryParse(_promiseTimeCtrl.text.trim()) ?? 0,
       }
     };
 
@@ -285,6 +311,27 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                 _readOnlyField(widget.downPayment == null || widget.downPayment == '—' ? 'No especificado' : '${widget.downPayment}%', grayed: true),
               ])),
             ]),
+          ] else if (_paymentMethodLabel(widget.paymentMethod) == 'Promesa de compra') ...[
+            const SizedBox(height: 14),
+            _fieldLabel('Reserva'),
+            const SizedBox(height: 4),
+            Text('La comisión Dovia se paga al recibir la reserva', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF888888))),
+            const SizedBox(height: 8),
+            _readOnlyField(widget.reservationAmount == null || widget.reservationAmount == '—' ? 'No especificado' : '${widget.currency ?? 'USD'} ${widget.reservationAmount}', grayed: true),
+            const SizedBox(height: 14),
+            Row(children: [
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Pago final'),
+                const SizedBox(height: 8),
+                _readOnlyField(widget.finalPayment == null || widget.finalPayment == '—' ? 'No especificado' : '${widget.currency ?? 'USD'} ${widget.finalPayment}', grayed: true),
+              ])),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Tiempo de promesa'),
+                const SizedBox(height: 8),
+                _readOnlyField(widget.promiseTime == null || widget.promiseTime == '—' ? 'No especificado' : '${widget.promiseTime} meses', grayed: true),
+              ])),
+            ]),
           ],
           // Fila 2: Moneda de pago (siempre visible)
           const SizedBox(height: 14),
@@ -387,6 +434,65 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       hintText: 'Ej. 20', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
+                      border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                    ),
+                    style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
+                  ),
+                ),
+              ])),
+            ]),
+            const SizedBox(height: 16),
+          ] else if (_paymentMethodLabel(widget.paymentMethod) == 'Promesa de compra') ...[
+            _fieldLabel('Reserva'),
+            const SizedBox(height: 4),
+            Text('La comisión Dovia se paga al recibir la reserva', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF888888))),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
+              child: TextField(
+                controller: _reservationCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))],
+                decoration: InputDecoration(
+                  hintText: 'Ej. 10,000', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
+                  border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                  prefixText: '$_selectedCurrency ', prefixStyle: GoogleFonts.inter(fontSize: 15, color: _primaryDark, fontWeight: FontWeight.w500),
+                ),
+                style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(children: [
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Pago final'),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
+                  child: TextField(
+                    controller: _finalPaymentCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))],
+                    decoration: InputDecoration(
+                      hintText: 'Ej. 140,000', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
+                      border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                      prefixText: '$_selectedCurrency ', prefixStyle: GoogleFonts.inter(fontSize: 15, color: _primaryDark, fontWeight: FontWeight.w500),
+                    ),
+                    style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
+                  ),
+                ),
+              ])),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _fieldLabel('Tiempo de promesa (meses)'),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
+                  child: TextField(
+                    controller: _promiseTimeCtrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: InputDecoration(
+                      hintText: 'Ej. 6', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
                       border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
                     ),
                     style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
