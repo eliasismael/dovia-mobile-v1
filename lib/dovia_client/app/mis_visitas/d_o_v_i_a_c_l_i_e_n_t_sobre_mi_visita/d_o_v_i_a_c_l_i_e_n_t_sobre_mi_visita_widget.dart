@@ -12,7 +12,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_users.dart';
+import '/backend/api_requests/api_properties.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_ofertar/d_o_v_i_a_c_l_i_e_n_t_ofertar_widget.dart';
+import '../../principal/agendar_cita/agendar_cita_widget.dart';
+import 'reschedule_visit_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita_model.dart';
 
@@ -59,7 +62,10 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
   String _advisorAvatarUrl = '';
   String _advisorPhone = '';
   String _advisorId = '';
+  String _advisorVehicle = '';
+  String _advisorLicensePlate = '';
   String _visitTime = '';
+  String _visitSubstatus = '';
   bool _advisorAssigned = false;
 
   @override
@@ -114,6 +120,28 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
         }
       }
 
+      // If coordinates not populated by visit details, fetch from property API
+      if (_lat == null && _lng == null && widget.propertyId != null && widget.propertyId!.isNotEmpty) {
+        final propRes = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
+          propertyId: widget.propertyId,
+        );
+        if (propRes.succeeded) {
+          final propData = getJsonField(propRes.jsonBody, r'$.data.data') ?? 
+                           getJsonField(propRes.jsonBody, r'$.data');
+          if (propData is Map) {
+            final geo = _deepValue(propData, ['location', 'geo', 'coordinates']);
+            if (geo is List && geo.length >= 2) {
+              _lat = (geo[1] as num?)?.toDouble();
+              _lng = (geo[0] as num?)?.toDouble();
+            }
+            if (_address.isEmpty) {
+              _address = _deepStr(propData, ['location', 'address', 'fullAddress']) ??
+                         _deepStr(propData, ['location', 'address', 'street']) ?? '';
+            }
+          }
+        }
+      }
+
       safeSetState(() {
         _propertyName = _str(property, 'name') ??
             _str(property, 'title') ??
@@ -136,6 +164,9 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
           _visitDate = _formatVisitDate(date, time);
           _visitTime = time;
         }
+
+        // Substatus for reschedule gating
+        _visitSubstatus = _str(visit, 'substatus') ?? '';
 
         _arrivalInstructions = _str(visit, 'instructions') ?? '';
         _entryInstructions =
@@ -178,6 +209,16 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
             _advisorPhone = '${phoneObj['countryCode'] ?? ''}${phoneObj['number'] ?? ''}'.trim();
           } else {
             _advisorPhone = _str(showingData, 'phone') ?? '';
+          }
+
+          // Vehicle info
+          final vehicleObj = showingData['vehicle'] ?? showingData['car'];
+          if (vehicleObj is Map) {
+            _advisorVehicle = '${vehicleObj['brand'] ?? ''} ${vehicleObj['model'] ?? ''}'.trim();
+            _advisorLicensePlate = _str(vehicleObj, 'plate') ?? _str(vehicleObj, 'licensePlate') ?? '';
+          } else {
+            _advisorVehicle = _str(showingData, 'vehicle') ?? '';
+            _advisorLicensePlate = _str(showingData, 'licensePlate') ?? '';
           }
         }
 
@@ -230,23 +271,33 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
   }
 
   Future<void> _openLocation() async {
-    Uri uri;
     if (_lat != null && _lng != null) {
-      uri = Uri.parse(
-          'https://maps.google.com/?q=$_lat,$_lng');
+      // Universal geo URI — opens in any maps app the user has
+      final geoUri = Uri.parse('geo:$_lat,$_lng?q=$_lat,$_lng');
+      if (await canLaunchUrl(geoUri)) {
+        await launchUrl(geoUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+      // Fallback: Google Maps deep link
+      final googleUri = Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$_lat,$_lng');
+      if (await canLaunchUrl(googleUri)) {
+        await launchUrl(googleUri, mode: LaunchMode.externalApplication);
+        return;
+      }
     } else if (_address.isNotEmpty) {
       final encoded = Uri.encodeComponent(_address);
-      uri = Uri.parse(
-          'https://maps.google.com/?q=$encoded');
-    } else {
-      return;
-    }
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir el mapa')),
-        );
+      final googleUri = Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$encoded');
+      if (await canLaunchUrl(googleUri)) {
+        await launchUrl(googleUri, mode: LaunchMode.externalApplication);
+        return;
       }
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el mapa')),
+      );
     }
   }
 
@@ -418,17 +469,20 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                             ),
 
                             // Property image card
-                            SizedBox(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 240.0,
-                              child: custom_widgets.DoviaClientHouseCard(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              child: SizedBox(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 240.0,
-                                imageUrl: _propertyImageUrl.isNotEmpty
-                                    ? _propertyImageUrl
-                                    : 'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
-                                onAddToFavorites: () async {},
-                                onRemoveFromFavorites: () async {},
+                                child: custom_widgets.DoviaClientHouseCard(
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  height: 240.0,
+                                  imageUrl: _propertyImageUrl.isNotEmpty
+                                      ? _propertyImageUrl
+                                      : 'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                  onAddToFavorites: () async {},
+                                  onRemoveFromFavorites: () async {},
+                                ),
                               ),
                             ),
 
@@ -467,7 +521,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                             // Advisor card
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 18.0, 0.0, 0.0),
+                                  0.0, 32.0, 0.0, 16.0),
                               child: wrapWithModel(
                                 model: _model.dHCLIENTProveedorCardModel,
                                 updateCallback: () => safeSetState(() {}),
@@ -480,6 +534,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                   advisorId: _advisorId,
                                   visitDate: _visitDate,
                                   visitTime: _visitTime,
+                                  vehicle: _advisorVehicle,
+                                  licensePlate: _advisorLicensePlate,
                                 ),
                               ),
                             ),
@@ -572,7 +628,24 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                   0.0, 18.0, 0.0, 0.0),
                               child: FFButtonWidget(
                                 onPressed: () {
-                                  // TODO: implement reagendar flow
+                                  showModalBottomSheet(
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    enableDrag: false,
+                                    context: context,
+                                    builder: (context) {
+                                      return Padding(
+                                        padding: MediaQuery.viewInsetsOf(context),
+                                        child: SizedBox(
+                                          height: MediaQuery.sizeOf(context).height * 0.9,
+                                          child: RescheduleVisitWidget(
+                                            visitId: widget.visitId ?? '',
+                                            visitSubstatus: _visitSubstatus,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
                                 },
                                 text: 'Reagendar visita',
                                 options: FFButtonOptions(

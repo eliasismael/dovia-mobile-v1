@@ -18,6 +18,8 @@ class DHCLIENTProveedorCardWidget extends StatefulWidget {
     this.visitDate,
     this.visitTime,
     this.about,
+    this.vehicle,
+    this.licensePlate,
   });
 
   final String? fullName;
@@ -29,6 +31,8 @@ class DHCLIENTProveedorCardWidget extends StatefulWidget {
   final String? visitDate;
   final String? visitTime;
   final String? about;
+  final String? vehicle;
+  final String? licensePlate;
 
   @override
   State<DHCLIENTProveedorCardWidget> createState() =>
@@ -261,6 +265,10 @@ class _DHCLIENTProveedorCardWidgetState
                 _detailRow('Programada', widget.visitDate!),
               if (widget.visitTime != null && widget.visitTime!.isNotEmpty)
                 _detailRow('Hora', widget.visitTime!),
+              if (widget.vehicle != null && widget.vehicle!.isNotEmpty)
+                _detailRow('Vehículo', widget.vehicle!),
+              if (widget.licensePlate != null && widget.licensePlate!.isNotEmpty)
+                _detailRow('Placa', widget.licensePlate!),
             ],
           ),
         ),

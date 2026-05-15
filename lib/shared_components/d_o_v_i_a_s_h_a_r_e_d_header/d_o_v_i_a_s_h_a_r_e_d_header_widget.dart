@@ -117,14 +117,32 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
               ].divide(const SizedBox(width: 8.0)),
             ),
           ),
-          RichText(
-            textScaler: MediaQuery.of(context).textScaler,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: widget.title,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: RichText(
+                textScaler: MediaQuery.of(context).textScaler,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: widget.title,
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600,
+                              fontStyle:
+                                  FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                            ),
+                            fontSize: 18.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w600,
+                            fontStyle:
+                                FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                            lineHeight: 1.4,
+                          ),
+                    )
+                  ],
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.publicSans(
+                        font: GoogleFonts.inter(
                           fontWeight: FontWeight.w600,
                           fontStyle:
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
@@ -136,24 +154,11 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                             FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                         lineHeight: 1.4,
                       ),
-                )
-              ],
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                    ),
-                    fontSize: 18.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w600,
-                    fontStyle:
-                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                    lineHeight: 1.4,
-                  ),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+              ),
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
           ),
           if (widget.hideActions)
             const SizedBox(width: 88.0)
