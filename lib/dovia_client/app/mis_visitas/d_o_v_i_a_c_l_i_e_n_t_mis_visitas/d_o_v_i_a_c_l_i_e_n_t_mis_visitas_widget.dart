@@ -6,9 +6,10 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/backend/api_requests/api_offers.dart';
+import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
 import '/auth/custom_auth/auth_util.dart';
-import 'package:intl/intl.dart';
+import '../d_o_v_i_a_c_l_i_e_n_t_visita_card/d_o_v_i_a_c_l_i_e_n_t_visita_card_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_model.dart';
 
@@ -29,10 +30,28 @@ class _DOVIACLIENTMisVisitasWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  late final Future<ApiCallResponse> _upcomingVisitsFuture;
+  late final Future<ApiCallResponse> _pastVisitsFuture;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DOVIACLIENTMisVisitasModel());
+
+    _upcomingVisitsFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
+      authToken: currentAuthenticationToken,
+      filter: 'upcoming',
+      status: 'SCHEDULED,IN_PROGRESS',
+      substatus: 'ASSIGNED',
+      page: '1',
+      limit: '10',
+    );
+
+    _pastVisitsFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
+      authToken: currentAuthenticationToken,
+      filter: 'past',
+      limit: '20',
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -40,8 +59,15 @@ class _DOVIACLIENTMisVisitasWidgetState
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
+  }
+
+  List<dynamic> _parseVisits(ApiCallResponse res) {
+    final items = getJsonField(res.jsonBody, r'$.data.items');
+    if (items is List) return items;
+    final data = getJsonField(res.jsonBody, r'$.data');
+    if (data is List) return data;
+    return [];
   }
 
   @override
@@ -80,13 +106,14 @@ class _DOVIACLIENTMisVisitasWidgetState
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
+                          // ── Tus próximas visitas ──────────────────────
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 53.0, 0.0, 0.0),
                               child: Text(
-                                'Tus próximas vistas',
+                                'Tus próximas visitas',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -99,36 +126,37 @@ class _DOVIACLIENTMisVisitasWidgetState
                                       fontSize: 17.0,
                                       letterSpacing: 0.33,
                                       fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
                                       lineHeight: 1.3,
                                     ),
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 15.0, 0.0, 0.0),
-                            child: Text(
-                              'No tienes visitas próximas.',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    letterSpacing: 0.0,
-                                  ),
-                            ),
+                          FutureBuilder<ApiCallResponse>(
+                            future: _upcomingVisitsFuture,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 20.0, 0.0, 0.0),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                );
+                              }
+                              final res = snapshot.data!;
+                              if (!res.succeeded) {
+                                return _emptyMessage(
+                                    'No tienes visitas próximas.');
+                              }
+                              final visits = _parseVisits(res);
+                              if (visits.isEmpty) {
+                                return _emptyMessage(
+                                    'No tienes visitas próximas.');
+                              }
+                              return _visitList(visits, status: 'Próxima');
+                            },
                           ),
+
+                          // ── Tus visitas anteriores ────────────────────
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
@@ -148,36 +176,37 @@ class _DOVIACLIENTMisVisitasWidgetState
                                       fontSize: 17.0,
                                       letterSpacing: 0.33,
                                       fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
                                       lineHeight: 1.3,
                                     ),
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 12.0, 0.0, 0.0),
-                            child: Text(
-                              'No tienes visitas anteriores.',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    letterSpacing: 0.0,
-                                  ),
-                            ),
+                          FutureBuilder<ApiCallResponse>(
+                            future: _pastVisitsFuture,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 12.0, 0.0, 0.0),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                );
+                              }
+                              final res = snapshot.data!;
+                              if (!res.succeeded) {
+                                return _emptyMessage(
+                                    'No tienes visitas anteriores.');
+                              }
+                              final visits = _parseVisits(res);
+                              if (visits.isEmpty) {
+                                return _emptyMessage(
+                                    'No tienes visitas anteriores.');
+                              }
+                              return _visitList(visits, status: 'Visitada');
+                            },
                           ),
+
+                          // ── Tus ofertas ───────────────────────────────
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
@@ -197,16 +226,14 @@ class _DOVIACLIENTMisVisitasWidgetState
                                       fontSize: 17.0,
                                       letterSpacing: 0.33,
                                       fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
                                       lineHeight: 1.3,
                                     ),
                               ),
                             ),
                           ),
                           FutureBuilder<ApiCallResponse>(
-                            future: DOVIAAPIOfferContextGroup.listMyOffersCall.call(
+                            future: DOVIAAPIOfferContextGroup.listMyOffersCall
+                                .call(
                               authToken: currentAuthenticationToken,
                               limit: '10',
                               page: '1',
@@ -214,27 +241,46 @@ class _DOVIACLIENTMisVisitasWidgetState
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
                                 return const Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                  child: Center(child: CircularProgressIndicator()),
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 20.0, 0.0, 0.0),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
                                 );
                               }
                               final res = snapshot.data!;
                               if (!res.succeeded) {
                                 return Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-                                  child: Text('Error cargando ofertas.', style: TextStyle(color: Colors.red)),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 12.0, 0.0, 0.0),
+                                  child: Text(
+                                    'Error cargando ofertas.',
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
                                 );
                               }
-                              final data = getJsonField(res.jsonBody, r'''$.data.items''') ?? getJsonField(res.jsonBody, r'''$.data''') ?? [];
-                              final offers = data is List ? data : (data is Map && data['items'] != null ? data['items'] as List : [data]);
-                              if (offers.isEmpty || (offers.length == 1 && offers[0] == null)) {
+                              final data = getJsonField(
+                                      res.jsonBody, r'''$.data.items''') ??
+                                  getJsonField(res.jsonBody, r'''$.data''') ??
+                                  [];
+                              final offers = data is List
+                                  ? data
+                                  : (data is Map && data['items'] != null
+                                      ? data['items'] as List
+                                      : [data]);
+                              if (offers.isEmpty ||
+                                  (offers.length == 1 &&
+                                      offers[0] == null)) {
                                 return Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 12.0, 0.0, 0.0),
                                   child: Text(
                                     'No tienes ofertas activas.',
-                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
                                           font: GoogleFonts.inter(),
-                                          color: FlutterFlowTheme.of(context).secondaryText,
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
                                         ),
                                   ),
                                 );
@@ -245,21 +291,53 @@ class _DOVIACLIENTMisVisitasWidgetState
                                 itemCount: offers.length,
                                 itemBuilder: (context, index) {
                                   final offer = offers[index];
-                                  final offerId = offer['id'] ?? offer['_id'] ?? offer['offerId'] ?? '';
-                                  final amountRaw = offer['offerData']?['proposedAmount'] ?? offer['proposedAmount'] ?? offer['amount'];
-                                  final double amountDouble = amountRaw is num ? amountRaw.toDouble() : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
-                                  final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0).format(amountDouble);
-                                  final currency = offer['offerData']?['currency']?.toString() ?? offer['currency']?.toString() ?? 'USD';
-                                  final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ?? offer['paymentMethod']?.toString() ?? '';
-                                  final processStatus = offer['processStatus']?.toString() ?? '';
-                                  final offerStatus = offer['offerStatus']?.toString() ?? offer['status']?.toString() ?? 'pending';
-                                  final status = processStatus.isNotEmpty ? processStatus : offerStatus;
-                                  
-                                  final property = offer['property'] ?? offer['propertyId'];
-                                  final propertyName = property is Map ? (property['title'] ?? property['name'] ?? 'Propiedad') : 'Propiedad';
+                                  final offerId = offer['id'] ??
+                                      offer['_id'] ??
+                                      offer['offerId'] ??
+                                      '';
+                                  final amountRaw =
+                                      offer['offerData']?['proposedAmount'] ??
+                                          offer['proposedAmount'] ??
+                                          offer['amount'];
+                                  final double amountDouble = amountRaw is num
+                                      ? amountRaw.toDouble()
+                                      : double.tryParse(
+                                              amountRaw?.toString() ?? '') ??
+                                          0.0;
+                                  final amountStr = NumberFormat.currency(
+                                          symbol: '', decimalDigits: 0)
+                                      .format(amountDouble);
+                                  final currency =
+                                      offer['offerData']?['currency']
+                                              ?.toString() ??
+                                          offer['currency']?.toString() ??
+                                          'USD';
+                                  final paymentMethod =
+                                      offer['offerData']?['paymentMethod']
+                                              ?.toString() ??
+                                          offer['paymentMethod']?.toString() ??
+                                          '';
+                                  final processStatus =
+                                      offer['processStatus']?.toString() ?? '';
+                                  final offerStatus =
+                                      offer['offerStatus']?.toString() ??
+                                          offer['status']?.toString() ??
+                                          'pending';
+                                  final status = processStatus.isNotEmpty
+                                      ? processStatus
+                                      : offerStatus;
+
+                                  final property = offer['property'] ??
+                                      offer['propertyId'];
+                                  final propertyName = property is Map
+                                      ? (property['title'] ??
+                                          property['name'] ??
+                                          'Propiedad')
+                                      : 'Propiedad';
 
                                   return Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 12.0, 0.0, 0.0),
                                     child: InkWell(
                                       onTap: () {
                                         context.pushNamed(
@@ -274,40 +352,73 @@ class _DOVIACLIENTMisVisitasWidgetState
                                       child: Container(
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context).secondaryBackground,
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryBackground,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                              color: FlutterFlowTheme.of(
+                                                      context)
+                                                  .alternate),
                                         ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Expanded(
                                                   child: Text(
                                                     propertyName,
-                                                    style: FlutterFlowTheme.of(context).bodyLarge.override(
-                                                      font: GoogleFonts.publicSans(fontWeight: FontWeight.bold),
-                                                      fontSize: 16.0,
-                                                    ),
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyLarge
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .publicSans(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                          fontSize: 16.0,
+                                                        ),
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                 ),
                                                 Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4),
                                                   decoration: BoxDecoration(
-                                                    color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
-                                                    borderRadius: BorderRadius.circular(8),
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .primary
+                                                        .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
                                                   ),
                                                   child: Text(
                                                     status.toUpperCase(),
-                                                    style: FlutterFlowTheme.of(context).bodySmall.override(
-                                                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                                                      color: FlutterFlowTheme.of(context).primary,
-                                                      fontSize: 10.0,
-                                                    ),
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodySmall
+                                                        .override(
+                                                          font:
+                                                              GoogleFonts.publicSans(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primary,
+                                                          fontSize: 10.0,
+                                                        ),
                                                   ),
                                                 ),
                                               ],
@@ -315,14 +426,28 @@ class _DOVIACLIENTMisVisitasWidgetState
                                             const SizedBox(height: 8),
                                             Row(
                                               children: [
-                                                Icon(Icons.local_offer_outlined, size: 16, color: FlutterFlowTheme.of(context).secondaryText),
+                                                Icon(
+                                                    Icons.local_offer_outlined,
+                                                    size: 16,
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .secondaryText),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   'Oferta: $currency \$ $amountStr',
-                                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w500),
-                                                    color: FlutterFlowTheme.of(context).primaryText,
-                                                  ),
+                                                  style:
+                                                      FlutterFlowTheme.of(context)
+                                                          .bodyMedium
+                                                          .override(
+                                                            font: GoogleFonts
+                                                                .publicSans(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500),
+                                                            color: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText,
+                                                          ),
                                                 ),
                                               ],
                                             ),
@@ -361,6 +486,69 @@ class _DOVIACLIENTMisVisitasWidgetState
           ),
         ),
       ),
+    );
+  }
+
+  Widget _emptyMessage(String text) {
+    return Padding(
+      padding:
+          const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Text(
+        text,
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.inter(
+                fontWeight:
+                    FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                fontStyle:
+                    FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+              ),
+              color: FlutterFlowTheme.of(context).secondaryText,
+              letterSpacing: 0.0,
+            ),
+      ),
+    );
+  }
+
+  Widget _visitList(List<dynamic> visits, {required String status}) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: visits.length,
+      itemBuilder: (ctx, i) {
+        final v = visits[i];
+        // API returns 'visitId' (not 'id') as per the /visits/me response
+        final visitId = v['visitId']?.toString() ??
+            v['id']?.toString() ??
+            v['_id']?.toString() ??
+            '';
+        final showingAgentId = v['showingAgentId']?.toString() ?? '';
+        final property = v['property'];
+        final propertyId = property is Map
+            ? (property['id']?.toString() ??
+                property['_id']?.toString() ??
+                '')
+            : (v['propertyId']?.toString() ?? '');
+        final slot = v['confirmedTimeSlot'];
+        final visitDate =
+            slot is Map ? slot['date']?.toString() ?? '' : '';
+        final images = property is Map ? property['images'] : null;
+        final imageUrl = (images is List && images.isNotEmpty)
+            ? images[0]['url']?.toString() ?? ''
+            : '';
+
+        return Padding(
+          padding:
+              const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+          child: DOVIACLIENTVisitaCardWidget(
+            visitId: visitId,
+            propertyId: propertyId,
+            visitDate: visitDate,
+            visitStatus: status,
+            imageUrl: imageUrl,
+            showingAgentId: showingAgentId,
+          ),
+        );
+      },
     );
   }
 }

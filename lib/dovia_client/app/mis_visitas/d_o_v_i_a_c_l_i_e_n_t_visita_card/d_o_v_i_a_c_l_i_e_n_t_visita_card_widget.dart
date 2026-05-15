@@ -1,6 +1,5 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,9 +10,19 @@ class DOVIACLIENTVisitaCardWidget extends StatefulWidget {
   const DOVIACLIENTVisitaCardWidget({
     super.key,
     required this.propertyId,
+    this.visitId,
+    this.visitDate,
+    this.visitStatus,
+    this.imageUrl,
+    this.showingAgentId,
   });
 
   final String? propertyId;
+  final String? visitId;
+  final String? visitDate;
+  final String? visitStatus;
+  final String? imageUrl;
+  final String? showingAgentId;
 
   @override
   State<DOVIACLIENTVisitaCardWidget> createState() =>
@@ -43,6 +52,15 @@ class _DOVIACLIENTVisitaCardWidgetState
     _model.maybeDispose();
 
     super.dispose();
+  }
+
+  String _formatDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    try {
+      final parts = raw.split('-');
+      if (parts.length == 3) return '${parts[2]}/${parts[1]}/${parts[0]}';
+    } catch (_) {}
+    return raw;
   }
 
   @override
@@ -89,12 +107,27 @@ class _DOVIACLIENTVisitaCardWidgetState
                             topLeft: Radius.circular(10.0),
                             topRight: Radius.circular(10.0),
                           ),
-                          child: Image.network(
-                            'https://picsum.photos/seed/874/600',
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: MediaQuery.sizeOf(context).height * 1.0,
-                            fit: BoxFit.cover,
-                          ),
+                          child: (widget.imageUrl != null &&
+                                  widget.imageUrl!.isNotEmpty)
+                              ? Image.network(
+                                  widget.imageUrl!,
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 1.0,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: Colors.grey.shade200,
+                                    child: const Icon(Icons.home_outlined,
+                                        color: Colors.grey),
+                                  ),
+                                )
+                              : Image.network(
+                                  'https://picsum.photos/seed/874/600',
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 1.0,
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       ),
                       Align(
@@ -127,7 +160,7 @@ class _DOVIACLIENTVisitaCardWidgetState
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   10.0, 0.0, 10.0, 0.0),
                               child: Text(
-                                'Ver ficha de propiedada',
+                                'Ver ficha de propiedad',
                                 textAlign: TextAlign.center,
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
@@ -166,7 +199,7 @@ class _DOVIACLIENTVisitaCardWidgetState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Visitada',
+                    widget.visitStatus ?? 'Próxima',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.publicSans(
                             fontWeight: FlutterFlowTheme.of(context)
@@ -186,7 +219,7 @@ class _DOVIACLIENTVisitaCardWidgetState
                         ),
                   ),
                   Text(
-                    'dd/mm/aaa',
+                    _formatDate(widget.visitDate),
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.publicSans(
                             fontWeight: FontWeight.w500,
@@ -208,10 +241,18 @@ class _DOVIACLIENTVisitaCardWidgetState
                     highlightColor: Colors.transparent,
                     onTap: () async {
                       context.pushNamed(
-                        DOVIACLIENTSobreMiVisitaWidget.routeName,
+                        'DOVIA_CLIENT_SobreMiVisita',
                         queryParameters: {
                           'propertyId': serializeParam(
                             widget.propertyId,
+                            ParamType.String,
+                          ),
+                          'visitId': serializeParam(
+                            widget.visitId,
+                            ParamType.String,
+                          ),
+                          'showingAgentId': serializeParam(
+                            widget.showingAgentId,
                             ParamType.String,
                           ),
                         }.withoutNulls,

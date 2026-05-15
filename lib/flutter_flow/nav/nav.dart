@@ -311,6 +311,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'propertyId',
               ParamType.String,
             ),
+            visitId: params.getParam(
+              'visitId',
+              ParamType.String,
+            ),
+            showingAgentId: params.getParam(
+              'showingAgentId',
+              ParamType.String,
+            ),
           ),
         ),
         FFRoute(

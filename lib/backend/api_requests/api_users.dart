@@ -91,6 +91,7 @@ class ListUsersByRoleCall {
 class GetUserByIDNEWCall {
   Future<ApiCallResponse> call({
     String? userId = '',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
@@ -98,7 +99,10 @@ class GetUserByIDNEWCall {
       callName: 'Get User by ID NEW',
       apiUrl: '$baseUrl/users/$userId',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
       params: {},
       returnBody: true,
       encodeBodyUtf8: false,
