@@ -33,10 +33,21 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
   bool _isSubmitting = false;
   String? _errorMessage;
 
-  /// Only PENDING or RESCHEDULE_REQUIRED allow the reschedule endpoint
+  /// Substatuses where the client CAN reschedule (submit new time slots)
+  /// Based on VisitSubstatus enum for CLIENT_VISIT:
+  /// - MISSING_INFO: owner hasn't confirmed a slot / requested a new date
+  /// - ASSIGNMENT_EXPIRED: no showing agent took the slot, needs new date
+  /// - NOT_COMPLETED_REPORTED: showing agent reported visit not completed
+  /// - PENDING / RESCHEDULE_REQUIRED: generic pending states
   bool get _canReschedule {
-    final sub = widget.visitSubstatus.toUpperCase();
-    return sub == 'PENDING' || sub == 'RESCHEDULE_REQUIRED';
+    const allowed = {
+      'MISSING_INFO',
+      'ASSIGNMENT_EXPIRED',
+      'NOT_COMPLETED_REPORTED',
+      'PENDING',
+      'RESCHEDULE_REQUIRED',
+    };
+    return allowed.contains(widget.visitSubstatus.toUpperCase());
   }
 
   bool get _canSubmit =>
