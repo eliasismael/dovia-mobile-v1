@@ -48,6 +48,19 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
 
   ApiCallResponse? _propertyData;
   List<String> _listingType = [];
+  String _propertyName = '';
+  String _propertyType = '';
+  String _address = '';
+  String _description = '';
+  String _price = '';
+  String _landArea = '';
+  String _constructionArea = '';
+  int _bedrooms = 0;
+  int _bathrooms = 0;
+  int _halfBathrooms = 0;
+  int _parkingSpots = 0;
+  int _floors = 0;
+  List<String> _carouselImages = [];
 
   @override
   void initState() {
@@ -83,9 +96,47 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
               ?.map((e) => e.toString())
               .toList() ??
           [];
+      final d = (getJsonField(response.jsonBody, r'''$.data.data''') ??
+                 getJsonField(response.jsonBody, r'''$.data''')) as Map?;
+
+      final nameRaw = d?['name'] ?? d?['title'];
+      final general = d?['features']?['general'] as Map?;
+      final locationAddr = d?['location']?['address'] as Map?;
+      final descRaw = d?['description']?['raw'] ?? d?['description'];
+      final priceVal = d?['price'] ?? d?['saleInfo']?['salePrice'];
+
+      // Flatten all room image arrays into a single ordered list
+      final imagesObj = d?['images'];
+      final imagesList = <String>[];
+      final mainImg = d?['image']?.toString() ?? '';
+      if (mainImg.isNotEmpty) imagesList.add(mainImg);
+      if (imagesObj is Map) {
+        for (final v in imagesObj.values) {
+          if (v is List) {
+            for (final url in v) {
+              final s = url?.toString() ?? '';
+              if (s.isNotEmpty && !imagesList.contains(s)) imagesList.add(s);
+            }
+          }
+        }
+      }
+
       safeSetState(() {
         _propertyData = response;
         _listingType = parsed;
+        _propertyName = nameRaw?.toString() ?? '';
+        _propertyType = d?['propertyType']?.toString() ?? '';
+        _address = locationAddr?['fullAddress']?.toString() ?? '';
+        _description = descRaw?.toString() ?? '';
+        _price = priceVal?.toString() ?? '';
+        _landArea = general?['landArea']?.toString() ?? '';
+        _constructionArea = general?['constructionArea']?.toString() ?? '';
+        _bedrooms = (general?['bedrooms'] as num?)?.toInt() ?? 0;
+        _bathrooms = (general?['bathrooms'] as num?)?.toInt() ?? 0;
+        _halfBathrooms = (general?['halfBathrooms'] as num?)?.toInt() ?? 0;
+        _parkingSpots = (general?['parkingSpots'] as num?)?.toInt() ?? 0;
+        _floors = (general?['floors'] as num?)?.toInt() ?? 0;
+        _carouselImages = imagesList;
       });
 
       final createdBy = getJsonField(response.jsonBody, r'''$.data.data.createdBy''')?.toString() ?? 
@@ -492,7 +543,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                               text: TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: 'Orchard house',
+                                    text: _propertyName.isNotEmpty ? _propertyName : 'Propiedad',
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
@@ -1297,7 +1348,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     text: TextSpan(
                                       children: [
                                         TextSpan(
-                                          text: 'Código A123B\n',
+                                          text: _propertyType.isNotEmpty ? '${_propertyType[0]}${_propertyType.substring(1).toLowerCase()}\n' : '',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1325,7 +1376,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                               ),
                                         ),
                                         TextSpan(
-                                          text: 'Tipo de vivienda\n',
+                                          text: _address.isNotEmpty ? '$_address\n' : '',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1346,7 +1397,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                               ),
                                         ),
                                         TextSpan(
-                                          text: 'Dirección\n',
+                                          text: '',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1374,8 +1425,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                               ),
                                         ),
                                         TextSpan(
-                                          text:
-                                              'Descripción sobre la propiedad',
+                                          text: _description,
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1448,7 +1498,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '\$',
+                                            _price.isNotEmpty ? '\$$_price' : '—',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1530,7 +1580,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            'XX',
+                                            _landArea.isNotEmpty ? _landArea : '—',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1612,7 +1662,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            'XX',
+                                            _constructionArea.isNotEmpty ? _constructionArea : '—',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1690,7 +1740,13 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       model:
                                           _model.propiedadCaracteristicasModel,
                                       updateCallback: () => safeSetState(() {}),
-                                      child: const PropiedadCaracteristicasWidget(),
+                                      child: PropiedadCaracteristicasWidget(
+                                        bedrooms: _bedrooms,
+                                        bathrooms: _bathrooms,
+                                        halfBathrooms: _halfBathrooms,
+                                        parkingSpots: _parkingSpots,
+                                        floors: _floors,
+                                      ),
                                     ),
                                   ),
                                   Container(

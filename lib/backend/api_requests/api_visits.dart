@@ -60,6 +60,9 @@ class DOVIAAPIVisitContextGroup {
       ShowingNotCompletedReportCall();
   static NotifyVisitReminderCall notifyVisitReminderCall =
       NotifyVisitReminderCall();
+  static GetOperativeListerVisitOverviewCall
+      getOperativeListerVisitOverviewCall =
+      GetOperativeListerVisitOverviewCall();
 }
 
 class CreateVisitRequestCall {
@@ -1032,6 +1035,31 @@ class NotifyVisitReminderCall {
       },
       params: {},
       bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetOperativeListerVisitOverviewCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? visitId = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Operative Lister Visit Overview',
+      apiUrl: '$baseUrl/visits/$visitId/operative-lister/overview',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

@@ -8,7 +8,20 @@ import 'propiedad_caracteristicas_model.dart';
 export 'propiedad_caracteristicas_model.dart';
 
 class PropiedadCaracteristicasWidget extends StatefulWidget {
-  const PropiedadCaracteristicasWidget({super.key});
+  const PropiedadCaracteristicasWidget({
+    super.key,
+    this.bedrooms = 0,
+    this.bathrooms = 0,
+    this.halfBathrooms = 0,
+    this.parkingSpots = 0,
+    this.floors = 0,
+  });
+
+  final int bedrooms;
+  final int bathrooms;
+  final int halfBathrooms;
+  final int parkingSpots;
+  final int floors;
 
   @override
   State<PropiedadCaracteristicasWidget> createState() =>
@@ -33,19 +46,24 @@ class _PropiedadCaracteristicasWidgetState
     _model.expandableExpandableController =
         ExpandableController(initialExpanded: false)
           ..addListener(() => safeSetState(() {}));
-    _model.textController1 ??= TextEditingController();
+    _model.textController1 ??= TextEditingController(
+        text: widget.bedrooms > 0 ? '${widget.bedrooms}' : '');
     _model.textFieldFocusNode1 ??= FocusNode();
 
-    _model.textController2 ??= TextEditingController();
+    _model.textController2 ??= TextEditingController(
+        text: widget.bathrooms > 0 ? '${widget.bathrooms}' : '');
     _model.textFieldFocusNode2 ??= FocusNode();
 
-    _model.textController3 ??= TextEditingController();
+    _model.textController3 ??= TextEditingController(
+        text: widget.halfBathrooms > 0 ? '${widget.halfBathrooms}' : '');
     _model.textFieldFocusNode3 ??= FocusNode();
 
-    _model.textController4 ??= TextEditingController();
+    _model.textController4 ??= TextEditingController(
+        text: widget.parkingSpots > 0 ? '${widget.parkingSpots}' : '');
     _model.textFieldFocusNode4 ??= FocusNode();
 
-    _model.textController5 ??= TextEditingController();
+    _model.textController5 ??= TextEditingController(
+        text: widget.floors > 0 ? '${widget.floors}' : '');
     _model.textFieldFocusNode5 ??= FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
@@ -1005,7 +1023,7 @@ class _PropiedadCaracteristicasWidgetState
                                   Align(
                                     alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
-                                      'Medio baños',
+                                      'Pisos',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
