@@ -197,7 +197,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
         );
       },
     ).then((_) {
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop(true);
     });
   }
 

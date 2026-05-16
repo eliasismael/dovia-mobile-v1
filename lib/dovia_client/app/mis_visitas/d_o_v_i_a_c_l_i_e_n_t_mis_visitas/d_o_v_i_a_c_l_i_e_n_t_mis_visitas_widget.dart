@@ -5,9 +5,8 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '/backend/api_requests/api_offers.dart';
+import '/backend/api_requests/api_properties.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
 import '/auth/custom_auth/auth_util.dart';
@@ -327,6 +326,7 @@ class _DOVIACLIENTMisVisitasWidgetState
         visitStatus: visitStatus,
         proposedTimeSlots: proposedSlots,
         cardType: cardType,
+        onRescheduleSuccess: _refreshPending,
       );
     }).toList();
 
@@ -342,7 +342,18 @@ class _DOVIACLIENTMisVisitasWidgetState
   }
 
   double _cardHeight(_CardType t) {
-    return 290;
+    return t == _CardType.completed ? 270 : 310;
+  }
+
+  void _refreshPending() {
+    safeSetState(() {
+      _pendingOwnerFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
+        authToken: currentAuthenticationToken,
+        status: 'PENDING',
+        page: '1',
+        limit: '20',
+      );
+    });
   }
 
   // ── Ofertas section ─────────────────────────────────────────────────────────
@@ -497,8 +508,8 @@ class _DOVIACLIENTMisVisitasWidgetState
 enum _CardType { reschedule, upcoming, completed }
 
 // ── Individual visit card widget ───────────────────────────────────────────
-class _VisitCard extends StatelessWidget {
-  const _VisitCard({
+class _VisitCard extends StatefulWidget {
+  _VisitCard({
     required this.visitId,
     required this.propertyId,
     required this.propertyName,
@@ -510,6 +521,7 @@ class _VisitCard extends StatelessWidget {
     this.visitSubstatus = '',
     this.visitStatus = '',
     this.proposedTimeSlots = const [],
+    this.onRescheduleSuccess,
   });
 
   final String visitId;
@@ -523,10 +535,54 @@ class _VisitCard extends StatelessWidget {
   final String visitStatus;
   final List<dynamic> proposedTimeSlots;
   final _CardType cardType;
+  final VoidCallback? onRescheduleSuccess;
+
+  // Session-level cache so the same property is fetched only once.
+  static final Map<String, String> _nameCache = {};
+
+  @override
+  State<_VisitCard> createState() => _VisitCardState();
+}
+
+class _VisitCardState extends State<_VisitCard> {
+  late String _displayName;
 
   static const Color primary = Color(0xFF007376);
   static const Color dark = Color(0xFF00444B);
   static const Color pillBg = Color(0xFFCCE3E4);
+
+  @override
+  void initState() {
+    super.initState();
+    final cached = _VisitCard._nameCache[widget.propertyId];
+    if (cached != null) {
+      _displayName = cached;
+    } else if (widget.propertyName.isNotEmpty && widget.propertyName != 'Propiedad') {
+      _displayName = widget.propertyName;
+      _VisitCard._nameCache[widget.propertyId] = _displayName;
+    } else {
+      _displayName = widget.propertyName;
+      if (widget.propertyId.isNotEmpty) _fetchPropertyName();
+    }
+  }
+
+  Future<void> _fetchPropertyName() async {
+    final res = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
+      propertyId: widget.propertyId,
+    );
+    if (!mounted || !res.succeeded) return;
+    final data = getJsonField(res.jsonBody, r'$.data.data') ??
+        getJsonField(res.jsonBody, r'$.data');
+    final name = (data is Map)
+        ? (data['name']?.toString() ?? data['title']?.toString() ?? '')
+        : '';
+    if (name.isNotEmpty) {
+      _VisitCard._nameCache[widget.propertyId] = name;
+      setState(() => _displayName = name);
+    }
+  }
+
+
 
   String _formatDate(String raw) {
     if (raw.isEmpty) return 'Sin fecha';
@@ -541,22 +597,19 @@ class _VisitCard extends StatelessWidget {
     ctx.pushNamed(
       'DOVIA_CLIENT_SobreMiVisita',
       queryParameters: {
-        'propertyId': serializeParam(propertyId, ParamType.String),
-        'visitId': serializeParam(visitId, ParamType.String),
-        'showingAgentId': serializeParam(showingAgentId, ParamType.String),
+        'propertyId': serializeParam(widget.propertyId, ParamType.String),
+        'visitId': serializeParam(widget.visitId, ParamType.String),
+        'showingAgentId': serializeParam(widget.showingAgentId, ParamType.String),
       }.withoutNulls,
     );
   }
 
-  // MISSING_INFO = owner aún no confirmó ningún slot → "Pendiente"
-  bool get isPending => visitStatus == 'PENDING' && visitSubstatus == 'MISSING_INFO';
-  // RESCHEDULE_REQUIRED = owner rechazó slots, cliente debe proponer nuevas fechas → "Reprogramar"
-  bool get isReschedule => visitSubstatus == 'RESCHEDULE_REQUIRED';
-  // ASSIGNED / READY_TO_ASSIGN_SHOWING = owner confirmó un slot → "Programada"
-  bool get isConfirmed => visitSubstatus == 'ASSIGNED' || visitSubstatus == 'READY_TO_ASSIGN_SHOWING';
+  bool get isPending => widget.visitStatus == 'PENDING' && widget.visitSubstatus == 'MISSING_INFO';
+  bool get isReschedule => widget.visitSubstatus == 'RESCHEDULE_REQUIRED';
+  bool get isConfirmed => widget.visitSubstatus == 'ASSIGNED' || widget.visitSubstatus == 'READY_TO_ASSIGN_SHOWING';
 
   String get _label {
-    if (cardType == _CardType.completed) return 'Completada';
+    if (widget.cardType == _CardType.completed) return 'Completada';
     if (isPending) return 'Pendiente';
     if (isReschedule) return 'Reprogramar';
     if (isConfirmed) return 'Programada';
@@ -564,26 +617,27 @@ class _VisitCard extends StatelessWidget {
   }
 
   Color get _labelColor {
-    if (cardType == _CardType.completed) return primary;
+    if (widget.cardType == _CardType.completed) return primary;
     if (isPending) return Colors.orange;
     if (isReschedule) return Colors.red;
     if (isConfirmed) return primary;
     return primary;
   }
 
-  void _onRescheduleTap(BuildContext ctx) {
-    showModalBottomSheet(
+  Future<void> _onRescheduleTap(BuildContext ctx) async {
+    final result = await showModalBottomSheet<bool>(
       context: ctx,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SizedBox(
         height: MediaQuery.of(ctx).size.height * 0.9,
         child: RescheduleVisitWidget(
-          visitId: visitId,
-          visitSubstatus: visitSubstatus,
+          visitId: widget.visitId,
+          visitSubstatus: widget.visitSubstatus,
         ),
       ),
     );
+    if (result == true) widget.onRescheduleSuccess?.call();
   }
 
   void _onCancelTap(BuildContext ctx) {
@@ -602,7 +656,7 @@ class _VisitCard extends StatelessWidget {
               Navigator.pop(dialogCtx);
               final res = await DOVIAAPIVisitContextGroup.cancelVisitCall.call(
                 authToken: currentAuthenticationToken,
-                visitId: visitId,
+                visitId: widget.visitId,
               );
               if (ctx.mounted) {
                 ScaffoldMessenger.of(ctx).showSnackBar(
@@ -640,17 +694,25 @@ class _VisitCard extends StatelessWidget {
             // ── Image ─────────────────────────────────────────────────
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: imageUrl.isNotEmpty
+              child: widget.imageUrl.isNotEmpty
                   ? Image.network(
-                      imageUrl,
+                      widget.imageUrl,
                       width: double.infinity,
-                      height: 110,
+                      height: 95,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _placeholder(),
                     )
                   : _placeholder(),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
+            // ── Property name ──────────────────────────────────────────
+            Text(
+              _displayName,
+              style: const TextStyle(fontFamily: 'Public Sans', fontSize: 13, fontWeight: FontWeight.w600, color: dark),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
             // ── Badge ─────────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -674,13 +736,13 @@ class _VisitCard extends StatelessWidget {
               )
             else ...[
               Text(
-                _formatDate(visitDate),
+                _formatDate(widget.visitDate),
                 style: const TextStyle(fontFamily: 'Public Sans', fontSize: 15, fontWeight: FontWeight.w500, color: dark),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (visitTime.isNotEmpty)
-                Text(visitTime, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.grey)),
+              if (widget.visitTime.isNotEmpty)
+                Text(widget.visitTime, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.grey)),
             ],
             const Spacer(),
             // ── Actions ───────────────────────────────────────────────
@@ -692,7 +754,7 @@ class _VisitCard extends StatelessWidget {
   }
 
   List<Widget> _pendingInfo() {
-    if (proposedTimeSlots.isEmpty) {
+    if (widget.proposedTimeSlots.isEmpty) {
       return [
         const Text(
           'Esperando confirmación del propietario',
@@ -701,23 +763,24 @@ class _VisitCard extends StatelessWidget {
         ),
       ];
     }
-    final first = proposedTimeSlots.first;
-    final date = first is Map ? (first['date']?.toString() ?? '') : '';
-    final time = first is Map ? (first['time']?.toString() ?? '') : '';
-    return [
-      Text(
-        _formatDate(date),
-        style: const TextStyle(fontFamily: 'Public Sans', fontSize: 15, fontWeight: FontWeight.w500, color: dark),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      if (time.isNotEmpty)
-        Text(time, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.grey)),
-    ];
+    return widget.proposedTimeSlots.take(3).toList().asMap().entries.map((e) {
+      final slot = e.value;
+      final date = slot is Map ? (slot['date']?.toString() ?? '') : '';
+      final time = slot is Map ? (slot['time']?.toString() ?? '') : '';
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 2),
+        child: Text(
+          '${e.key + 1}. ${_formatDate(date)} · $time',
+          style: const TextStyle(fontFamily: 'Public Sans', fontSize: 11, color: dark),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    }).toList();
   }
 
   List<Widget> _buildActions(BuildContext context) {
-    if (cardType == _CardType.completed) {
+    if (widget.cardType == _CardType.completed) {
       return [
         _pill(context, Icons.remove_red_eye_outlined, 'Ver detalle', onTap: () => _navigateToDetail(context)),
       ];
@@ -780,7 +843,7 @@ class _VisitCard extends StatelessWidget {
   Widget _placeholder() {
     return Container(
       width: double.infinity,
-      height: 110,
+      height: 95,
       decoration: const BoxDecoration(color: Color(0xFFEFEFEF)),
       child: const Icon(Icons.home_outlined, color: Colors.grey, size: 36),
     );
