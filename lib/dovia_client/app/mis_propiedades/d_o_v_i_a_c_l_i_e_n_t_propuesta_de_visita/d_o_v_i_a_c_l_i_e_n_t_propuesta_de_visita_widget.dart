@@ -35,8 +35,10 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = true;
+  bool _isSending = false;
   dynamic _visitData;
   List<dynamic> _proposedSlots = [];
+  String _visitSubstatus = '';
 
   static const Color _primary = Color(0xFF007376);
   static const Color _primaryDark = Color(0xFF00444B);
@@ -69,6 +71,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
         _visitData = data;
         final visitObj = data is Map ? data['visit'] as Map? : null;
         _proposedSlots = (visitObj?['proposedTimeSlots'] as List?) ?? [];
+        _visitSubstatus = visitObj?['substatus'] as String? ?? '';
         _isLoading = false;
       });
     } else {
@@ -85,26 +88,47 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
     }
   }
 
-  void _solicitarOtraFecha() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black45,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: PopupExitoWidget(
-          title: 'Solicitud enviada',
-          text: 'Se envió la solicitud de cambio de fecha al interesado.',
-          continueText: 'Aceptar',
-          onContinue: () {
-            FFAppState().addToRequestedDateChangesVisits(widget.visitId);
-            Navigator.pop(ctx);
-            context.pop(); // return to dashboard
-          },
-        ),
-      ),
+  Future<void> _solicitarOtraFecha() async {
+    if (_isSending) return;
+    safeSetState(() => _isSending = true);
+
+    final res = await DOVIAAPIVisitContextGroup.ownerRejectSlotsCall.call(
+      visitId: widget.visitId,
+      authToken: currentAuthenticationToken,
     );
+
+    if (!mounted) return;
+    safeSetState(() => _isSending = false);
+
+    if (res.succeeded) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        barrierColor: Colors.black45,
+        builder: (ctx) => Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: PopupExitoWidget(
+            title: 'Solicitud enviada',
+            text: 'Se envió la solicitud de cambio de fecha al interesado.',
+            continueText: 'Aceptar',
+            onContinue: () {
+              safeSetState(() => _visitSubstatus = 'RESCHEDULE_REQUIRED');
+              FFAppState().addToRequestedDateChangesVisits(widget.visitId);
+              Navigator.pop(ctx);
+              context.pop();
+            },
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error al enviar la solicitud. Intente nuevamente.'),
+          backgroundColor: Color(0xFFD32F2F),
+        ),
+      );
+    }
   }
 
   Future<void> _aceptarFecha() async {
@@ -187,9 +211,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (FFAppState()
-                                  .requestedDateChangesVisits
-                                  .contains(widget.visitId))
+                              if (_visitSubstatus == 'RESCHEDULE_REQUIRED')
                                 Container(
                                   padding: const EdgeInsets.all(16),
                                   margin: const EdgeInsets.only(bottom: 24),
@@ -395,12 +417,10 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                 ),
                               ],
                               const SizedBox(height: 32),
-                              if (!FFAppState()
-                                  .requestedDateChangesVisits
-                                  .contains(widget.visitId)) ...[
+                              if (_visitSubstatus != 'RESCHEDULE_REQUIRED') ...[
                                 // Botón Secundario: Solicitar otra fecha
                                 OutlinedButton(
-                                  onPressed: _solicitarOtraFecha,
+                                  onPressed: _isSending ? null : _solicitarOtraFecha,
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),

@@ -33,36 +33,28 @@ class _DOVIACLIENTMisVisitasWidgetState
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   // ── Section futures ────────────────────────────────────────────────────
-  // Reprogramadas: 3 separate calls because API may not support comma-separated substatus
-  Future<ApiCallResponse>? _rescheduleRequestedFuture;  // owner asked for new date
-  Future<ApiCallResponse>? _rescheduleRequiredFuture;   // reschedule required
-  Future<ApiCallResponse>? _rescheduledFuture;          // client sent new slots
+  Future<ApiCallResponse>? _pendingOwnerFuture;         // All PENDING visits (MISSING_INFO + RESCHEDULE_REQUIRED)
+  Future<ApiCallResponse>? _rescheduledFuture;          // NO_SHOW edge cases
 
   Future<ApiCallResponse>? _upcomingAssignedFuture;
   Future<ApiCallResponse>? _upcomingPendingFuture;
   Future<ApiCallResponse>? _completedFuture;
+  Future<ApiCallResponse>? _offersFuture;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DOVIACLIENTMisVisitasModel());
 
-    // ── REPROGRAMADAS ────────────────────────────────────────────────────
-    // MISSING_INFO = owner no confirmó slot / solicitó otro horario
-    _rescheduleRequestedFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
+    // All PENDING visits — classify by substatus in each visit's response body
+    _pendingOwnerFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
       authToken: currentAuthenticationToken,
-      substatus: 'MISSING_INFO',
+      status: 'PENDING',
       page: '1',
-      limit: '10',
+      limit: '20',
     );
-    // ASSIGNMENT_EXPIRED = expiró sin que ningún showing agent se asignara
-    _rescheduleRequiredFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
-      authToken: currentAuthenticationToken,
-      substatus: 'ASSIGNMENT_EXPIRED',
-      page: '1',
-      limit: '10',
-    );
-    // NOT_COMPLETED_REPORTED = showing reportó que no completó la visita
+
+    // NOT_COMPLETED_REPORTED = showing reportó que no completó la visita (edge case)
     _rescheduledFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
       authToken: currentAuthenticationToken,
       substatus: 'NOT_COMPLETED_REPORTED',
@@ -92,6 +84,13 @@ class _DOVIACLIENTMisVisitasWidgetState
       status: 'COMPLETED',
       page: '1',
       limit: '10',
+    );
+
+    // ── OFERTAS ───────────────────────────────────────────────────────────
+    _offersFuture = DOVIAAPIOfferContextGroup.listMyOffersCall.call(
+      authToken: currentAuthenticationToken,
+      limit: '10',
+      page: '1',
     );
 
 
@@ -148,88 +147,70 @@ class _DOVIACLIENTMisVisitasWidgetState
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          // ── 1. Visitas re-programadas ──────────────────
-                          _sectionHeader('Visitas re-programadas',
-                              topPadding: 40),
+                          // ── 1. Tus próximas visitas ────────────────────
                           FutureBuilder<List<ApiCallResponse>>(
                             future: Future.wait([
-                              _rescheduleRequestedFuture ?? Future.value(ApiCallResponse(null, {}, 0)),
-                              _rescheduleRequiredFuture  ?? Future.value(ApiCallResponse(null, {}, 0)),
-                              _rescheduledFuture         ?? Future.value(ApiCallResponse(null, {}, 0)),
+                              _pendingOwnerFuture     ?? Future.value(ApiCallResponse(null, {}, 0)),
+                              _upcomingAssignedFuture ?? Future.value(ApiCallResponse(null, {}, 0)),
+                              _upcomingPendingFuture  ?? Future.value(ApiCallResponse(null, {}, 0)),
+                              _rescheduledFuture      ?? Future.value(ApiCallResponse(null, {}, 0)),
                             ]),
                             builder: (context, snap) {
-                              if (!snap.hasData) return _loader();
-                              // Merge and deduplicate across all 3 substatus calls
-                              final seen = <String>{};
-                              final visits = <dynamic>[];
-                              for (final res in snap.data!) {
-                                for (final v in _parseVisits(res)) {
-                                  final id = v['visitId']?.toString() ?? v['id']?.toString() ?? '';
-                                  if (seen.add(id)) visits.add(v);
+                              final merged = <dynamic>[];
+                              if (snap.hasData) {
+                                final seen = <String>{};
+                                for (final res in snap.data!) {
+                                  for (final v in _parseVisits(res)) {
+                                    final id = v['visitId']?.toString() ?? v['id']?.toString() ?? '';
+                                    if (seen.add(id)) merged.add(v);
+                                  }
                                 }
                               }
-                              if (visits.isEmpty) {
-                                return _emptyMessage(
-                                    'No tienes visitas re-programadas.');
-                              }
-                              return _visitListHorizontal(
-                                visits,
-                                cardType: _CardType.reschedule,
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _sectionHeader(
+                                    'Tus próximas visitas',
+                                    () {
+                                      if (merged.isNotEmpty) {
+                                        Navigator.push(context, MaterialPageRoute(builder: (ctx) => _VerMasScreen(title: 'Tus próximas visitas', items: merged, cardType: _CardType.upcoming)));
+                                      }
+                                    },
+                                    topPadding: 40,
+                                  ),
+                                  if (!snap.hasData) _loader()
+                                  else if (merged.isEmpty) _emptyMessage('No tienes próximas visitas.')
+                                  else _visitListHorizontal(merged, cardType: _CardType.upcoming),
+                                ],
                               );
                             },
                           ),
 
-                          // ── 2. Tus próximas visitas ────────────────────
-                          _sectionHeader('Tus próximas visitas'),
-                          FutureBuilder<List<ApiCallResponse>>(
-                            future: (_upcomingAssignedFuture != null && _upcomingPendingFuture != null)
-                                ? Future.wait([_upcomingAssignedFuture!, _upcomingPendingFuture!])
-                                : Future.value(<ApiCallResponse>[]),
-                            builder: (context, snap) {
-                              if (!snap.hasData) return _loader();
-                              final d = snap.data!;
-                              final assigned = d.isNotEmpty ? _parseVisits(d[0]) : <dynamic>[];
-                              final pending = d.length > 1 ? _parseVisits(d[1]) : <dynamic>[];
-                              // Merge, deduplicate by visitId
-                              final seen = <String>{};
-                              final merged = <dynamic>[];
-                              for (final v in [...assigned, ...pending]) {
-                                final id = v['visitId']?.toString() ??
-                                    v['id']?.toString() ??
-                                    '';
-                                if (seen.add(id)) merged.add(v);
-                              }
-                              if (merged.isEmpty) {
-                                return _emptyMessage(
-                                    'No tienes próximas visitas.');
-                              }
-                              return _visitListHorizontal(
-                                merged,
-                                cardType: _CardType.upcoming,
-                              );
-                            },
-                          ),
-
-                          // ── 3. Visitas Completadas ─────────────────────
-                          _sectionHeader('Visitas Completadas'),
+                          // ── 2. Tus visitas anteriores (Completadas) ─────────────────────
                           FutureBuilder<ApiCallResponse>(
                             future: _completedFuture,
                             builder: (context, snap) {
-                              if (!snap.hasData) return _loader();
-                              final visits = _parseVisits(snap.data!);
-                              if (visits.isEmpty) {
-                                return _emptyMessage(
-                                    'No tienes visitas completadas.');
-                              }
-                              return _visitListHorizontal(
-                                visits,
-                                cardType: _CardType.completed,
+                              final visits = snap.hasData ? _parseVisits(snap.data!) : <dynamic>[];
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _sectionHeader(
+                                    'Tus visitas anteriores',
+                                    () {
+                                      if (visits.isNotEmpty) {
+                                        Navigator.push(context, MaterialPageRoute(builder: (ctx) => _VerMasScreen(title: 'Tus visitas anteriores', items: visits, cardType: _CardType.completed)));
+                                      }
+                                    },
+                                  ),
+                                  if (!snap.hasData) _loader()
+                                  else if (visits.isEmpty) _emptyMessage('No tienes visitas completadas.')
+                                  else _visitListHorizontal(visits, cardType: _CardType.completed),
+                                ],
                               );
                             },
                           ),
 
-                          // ── 4. Tus ofertas ─────────────────────────────
-                          _sectionHeader('Tus ofertas'),
+                          // ── 3. Tus ofertas ─────────────────────────────
                           _offersSection(),
                         ],
                       ),
@@ -261,7 +242,7 @@ class _DOVIACLIENTMisVisitasWidgetState
   }
 
   // ── Section header ────────────────────────────────────────────────────
-  Widget _sectionHeader(String title, {double topPadding = 24}) {
+  Widget _sectionHeader(String title, VoidCallback onVerMasTap, {double topPadding = 24}) {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(0.0, topPadding, 0.0, 12.0),
       child: Row(
@@ -276,6 +257,17 @@ class _DOVIACLIENTMisVisitasWidgetState
                   fontWeight: FontWeight.w600,
                   lineHeight: 1.3,
                 ),
+          ),
+          InkWell(
+            onTap: onVerMasTap,
+            child: Text(
+              'Ver más',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                    color: FlutterFlowTheme.of(context).primary,
+                    fontSize: 14.0,
+                  ),
+            ),
           ),
         ],
       ),
@@ -302,69 +294,61 @@ class _DOVIACLIENTMisVisitasWidgetState
     );
   }
 
-  // ── Horizontal scroll list of visit cards ────────────────────────────
+  // ── Horizontal scroll list ────────────────────────────
   Widget _visitListHorizontal(
     List<dynamic> visits, {
     required _CardType cardType,
   }) {
+    final cards = visits.map((v) {
+      final visitId = v['visitId']?.toString() ?? v['id']?.toString() ?? v['_id']?.toString() ?? '';
+      final showingAgentId = v['showingAgentId']?.toString() ?? '';
+      final property = v['property'];
+      final propertyId = property is Map ? (property['id']?.toString() ?? '') : (v['propertyId']?.toString() ?? '');
+      final slot = v['confirmedTimeSlot'];
+      final visitDate = slot is Map ? slot['date']?.toString() ?? '' : '';
+      final visitTime = slot is Map ? slot['time']?.toString() ?? '' : '';
+      final images = property is Map ? property['images'] : null;
+      final imageUrl = (images is List && images.isNotEmpty) ? images[0]['url']?.toString() ?? '' : '';
+      final propertyName = property is Map ? (property['name']?.toString() ?? property['title']?.toString() ?? 'Propiedad') : 'Propiedad';
+      final visitSubstatus = v['substatus']?.toString() ?? '';
+      final visitStatus = v['status']?.toString() ?? '';
+      final proposed = v['proposedTimeSlots'];
+      final proposedSlots = proposed is List ? proposed : <dynamic>[];
+
+      return _VisitCard(
+        visitId: visitId,
+        propertyId: propertyId,
+        propertyName: propertyName,
+        visitDate: visitDate,
+        visitTime: visitTime,
+        imageUrl: imageUrl,
+        showingAgentId: showingAgentId,
+        visitSubstatus: visitSubstatus,
+        visitStatus: visitStatus,
+        proposedTimeSlots: proposedSlots,
+        cardType: cardType,
+      );
+    }).toList();
+
     return SizedBox(
       height: _cardHeight(cardType),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: visits.length,
+        itemCount: cards.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (ctx, i) {
-          final v = visits[i];
-          final visitId = v['visitId']?.toString() ??
-              v['id']?.toString() ??
-              v['_id']?.toString() ??
-              '';
-          final showingAgentId = v['showingAgentId']?.toString() ?? '';
-          final property = v['property'];
-          final propertyId = property is Map
-              ? (property['id']?.toString() ?? '')
-              : (v['propertyId']?.toString() ?? '');
-          final slot = v['confirmedTimeSlot'];
-          final visitDate = slot is Map ? slot['date']?.toString() ?? '' : '';
-          final images = property is Map ? property['images'] : null;
-          final imageUrl = (images is List && images.isNotEmpty)
-              ? images[0]['url']?.toString() ?? ''
-              : '';
-          final propertyName = property is Map
-              ? (property['name']?.toString() ??
-                  property['title']?.toString() ??
-                  'Propiedad')
-              : 'Propiedad';
-          final visitSubstatus = v['substatus']?.toString() ?? '';
-
-          return _VisitCard(
-            visitId: visitId,
-            propertyId: propertyId,
-            propertyName: propertyName,
-            visitDate: visitDate,
-            imageUrl: imageUrl,
-            showingAgentId: showingAgentId,
-            visitSubstatus: visitSubstatus,
-            cardType: cardType,
-          );
-        },
+        itemBuilder: (ctx, i) => cards[i],
       ),
     );
   }
 
   double _cardHeight(_CardType t) {
-    // image 120 + padding 10*2 + label ~20 + date ~22 + spacing 12+4+14 + button 30 = ~242
-    return 260;
+    return 290;
   }
 
-  // ── Ofertas section (unchanged logic, kept intact) ────────────────────
+  // ── Ofertas section ─────────────────────────────────────────────────────────
   Widget _offersSection() {
     return FutureBuilder<ApiCallResponse>(
-      future: DOVIAAPIOfferContextGroup.listMyOffersCall.call(
-        authToken: currentAuthenticationToken,
-        limit: '10',
-        page: '1',
-      ),
+      future: _offersFuture,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return _loader();
         final res = snapshot.data!;
@@ -384,156 +368,127 @@ class _DOVIACLIENTMisVisitasWidgetState
             : (data is Map && data['items'] != null
                 ? data['items'] as List
                 : [data]);
-        if (offers.isEmpty ||
-            (offers.length == 1 && offers[0] == null)) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              'No tienes ofertas activas.',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(),
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                  ),
-            ),
-          );
-        }
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: offers.length,
-          itemBuilder: (context, index) {
-            final offer = offers[index];
-            final offerId = offer['id'] ??
-                offer['_id'] ??
-                offer['offerId'] ??
-                '';
-            final amountRaw = offer['offerData']?['proposedAmount'] ??
-                offer['proposedAmount'] ??
-                offer['amount'];
-            final double amountDouble = amountRaw is num
-                ? amountRaw.toDouble()
-                : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
-            final amountStr =
-                NumberFormat.currency(symbol: '', decimalDigits: 0)
-                    .format(amountDouble);
-            final currency =
-                offer['offerData']?['currency']?.toString() ??
-                    offer['currency']?.toString() ??
-                    'USD';
-            final paymentMethod =
-                offer['offerData']?['paymentMethod']?.toString() ??
-                    offer['paymentMethod']?.toString() ??
-                    '';
-            final processStatus =
-                offer['processStatus']?.toString() ?? '';
-            final offerStatus = offer['offerStatus']?.toString() ??
-                offer['status']?.toString() ??
-                'pending';
-            final status =
-                processStatus.isNotEmpty ? processStatus : offerStatus;
-            final property =
-                offer['property'] ?? offer['propertyId'];
-            final propertyName = property is Map
-                ? (property['title'] ?? property['name'] ?? 'Propiedad')
-                : 'Propiedad';
+        final offerCards = offers.map((offer) => _buildOfferCard(context, offer)).toList();
 
-            return Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-              child: InkWell(
-                onTap: () {
-                  context.pushNamed(
-                    'DOVIA_CLIENT_MisVisitas_TuPropuesta',
-                    queryParameters: {
-                      'offerId': offerId,
-                      'paymentMethod': paymentMethod,
-                      'propuestaState': status,
-                    },
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color:
-                        FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: FlutterFlowTheme.of(context).alternate),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              propertyName,
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyLarge
-                                  .override(
-                                    font: GoogleFonts.publicSans(
-                                        fontWeight: FontWeight.bold),
-                                    fontSize: 16.0,
-                                  ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .primary
-                                  .withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              status.toUpperCase(),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .override(
-                                    font: GoogleFonts.publicSans(
-                                        fontWeight: FontWeight.w600),
-                                    color: FlutterFlowTheme.of(context)
-                                        .primary,
-                                    fontSize: 10.0,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.local_offer_outlined,
-                              size: 16,
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryText),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Oferta: $currency \$ $amountStr',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w500),
-                                  color: FlutterFlowTheme.of(context)
-                                      .primaryText,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionHeader(
+              'Tus ofertas',
+              () {
+                if (offers.isNotEmpty) {
+                  Navigator.push(context, MaterialPageRoute(builder: (ctx) => _VerMasScreen(title: 'Tus ofertas', items: offers, cardType: _CardType.upcoming, isOffers: true)));
+                }
+              },
+            ),
+            if (offers.isEmpty || (offers.length == 1 && offers[0] == null))
+              _emptyMessage('No tienes ofertas activas.')
+            else
+              SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: offerCards.length,
+                  itemBuilder: (context, index) => offerCards[index],
                 ),
               ),
-            );
-          },
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildOfferCard(BuildContext context, dynamic offer, {bool isGrid = false}) {
+    final offerId = offer['id'] ?? offer['_id'] ?? offer['offerId'] ?? '';
+    final amountRaw = offer['offerData']?['proposedAmount'] ?? offer['proposedAmount'] ?? offer['amount'];
+    final double amountDouble = amountRaw is num ? amountRaw.toDouble() : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0).format(amountDouble);
+    final currency = offer['offerData']?['currency']?.toString() ?? offer['currency']?.toString() ?? 'USD';
+    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ?? offer['paymentMethod']?.toString() ?? '';
+    final processStatus = offer['processStatus']?.toString() ?? '';
+    final offerStatus = offer['offerStatus']?.toString() ?? offer['status']?.toString() ?? 'pending';
+    final status = processStatus.isNotEmpty ? processStatus : offerStatus;
+    final property = offer['property'] ?? offer['propertyId'];
+    final propertyName = property is Map ? (property['title'] ?? property['name'] ?? 'Propiedad') : 'Propiedad';
+
+    return Padding(
+      padding: isGrid ? EdgeInsets.zero : const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
+      child: InkWell(
+        onTap: () {
+          context.pushNamed(
+            'DOVIA_CLIENT_MisVisitas_TuPropuesta',
+            queryParameters: {
+              'offerId': offerId,
+              'paymentMethod': paymentMethod,
+              'propuestaState': status,
+            },
+          );
+        },
+        child: Container(
+          width: isGrid ? double.infinity : 250,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: FlutterFlowTheme.of(context).secondaryBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      propertyName,
+                      style: FlutterFlowTheme.of(context).bodyLarge.override(
+                            font: GoogleFonts.publicSans(fontWeight: FontWeight.bold),
+                            fontSize: 16.0,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      status.toUpperCase(),
+                      style: FlutterFlowTheme.of(context).bodySmall.override(
+                            font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                            color: FlutterFlowTheme.of(context).primary,
+                            fontSize: 10.0,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.local_offer_outlined, size: 16, color: FlutterFlowTheme.of(context).secondaryText),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Oferta: $currency \$ $amountStr',
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(fontWeight: FontWeight.w500),
+                            color: FlutterFlowTheme.of(context).primaryText,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -548,19 +503,25 @@ class _VisitCard extends StatelessWidget {
     required this.propertyId,
     required this.propertyName,
     required this.visitDate,
+    required this.visitTime,
     required this.imageUrl,
     required this.showingAgentId,
     required this.cardType,
     this.visitSubstatus = '',
+    this.visitStatus = '',
+    this.proposedTimeSlots = const [],
   });
 
   final String visitId;
   final String propertyId;
   final String propertyName;
   final String visitDate;
+  final String visitTime;
   final String imageUrl;
   final String showingAgentId;
   final String visitSubstatus;
+  final String visitStatus;
+  final List<dynamic> proposedTimeSlots;
   final _CardType cardType;
 
   static const Color primary = Color(0xFF007376);
@@ -587,49 +548,73 @@ class _VisitCard extends StatelessWidget {
     );
   }
 
+  // MISSING_INFO = owner aún no confirmó ningún slot → "Pendiente"
+  bool get isPending => visitStatus == 'PENDING' && visitSubstatus == 'MISSING_INFO';
+  // RESCHEDULE_REQUIRED = owner rechazó slots, cliente debe proponer nuevas fechas → "Reprogramar"
+  bool get isReschedule => visitSubstatus == 'RESCHEDULE_REQUIRED';
+  // ASSIGNED / READY_TO_ASSIGN_SHOWING = owner confirmó un slot → "Programada"
+  bool get isConfirmed => visitSubstatus == 'ASSIGNED' || visitSubstatus == 'READY_TO_ASSIGN_SHOWING';
+
   String get _label {
-    switch (cardType) {
-      case _CardType.reschedule:
-        return 'Re-programada';
-      case _CardType.upcoming:
-        return 'Programada';
-      case _CardType.completed:
-        return 'Completada';
-    }
+    if (cardType == _CardType.completed) return 'Completada';
+    if (isPending) return 'Pendiente';
+    if (isReschedule) return 'Reprogramar';
+    if (isConfirmed) return 'Programada';
+    return 'Visita';
   }
 
-  String get _btnLabel {
-    switch (cardType) {
-      case _CardType.reschedule:
-        return 'Re-Programar';
-      case _CardType.upcoming:
-        return 'Sobre mi visita';
-      case _CardType.completed:
-        return 'Calificar';
-    }
+  Color get _labelColor {
+    if (cardType == _CardType.completed) return primary;
+    if (isPending) return Colors.orange;
+    if (isReschedule) return Colors.red;
+    if (isConfirmed) return primary;
+    return primary;
   }
 
-  void _onBtnTap(BuildContext ctx) {
-    switch (cardType) {
-      case _CardType.reschedule:
-        showModalBottomSheet(
-          context: ctx,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => SizedBox(
-            height: MediaQuery.of(ctx).size.height * 0.9,
-            child: RescheduleVisitWidget(
-              visitId: visitId,
-              visitSubstatus: visitSubstatus,
-            ),
+  void _onRescheduleTap(BuildContext ctx) {
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SizedBox(
+        height: MediaQuery.of(ctx).size.height * 0.9,
+        child: RescheduleVisitWidget(
+          visitId: visitId,
+          visitSubstatus: visitSubstatus,
+        ),
+      ),
+    );
+  }
+
+  void _onCancelTap(BuildContext ctx) {
+    showDialog(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Cancelar visita'),
+        content: const Text('¿Estás seguro de que deseas cancelar esta visita?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Volver'),
           ),
-        );
-        break;
-      case _CardType.upcoming:
-      case _CardType.completed:
-        _navigateToDetail(ctx);
-        break;
-    }
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              final res = await DOVIAAPIVisitContextGroup.cancelVisitCall.call(
+                authToken: currentAuthenticationToken,
+                visitId: visitId,
+              );
+              if (ctx.mounted) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(content: Text(res.succeeded ? 'Visita cancelada' : 'Error al cancelar la visita')),
+                );
+              }
+            },
+            child: const Text('Sí, cancelar', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -652,77 +637,141 @@ class _VisitCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Full-width image ───────────────────────────────────────
+            // ── Image ─────────────────────────────────────────────────
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: imageUrl.isNotEmpty
                   ? Image.network(
                       imageUrl,
                       width: double.infinity,
-                      height: 120,
+                      height: 110,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _placeholder(),
                     )
                   : _placeholder(),
             ),
-            const SizedBox(height: 12),
-            // ── Label ─────────────────────────────────────────────────
-            Text(
-              _label,
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: primary,
+            const SizedBox(height: 10),
+            // ── Badge ─────────────────────────────────────────────────
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: _labelColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                _label,
+                style: TextStyle(fontFamily: 'Public Sans', fontSize: 11, fontWeight: FontWeight.w600, color: _labelColor),
               ),
             ),
             const SizedBox(height: 4),
-            // ── Date ──────────────────────────────────────────────────
-            Text(
-              _formatDate(visitDate),
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: dark,
+            // ── Date / info ───────────────────────────────────────────
+            if (isPending) ..._pendingInfo()
+            else if (isReschedule)
+              const Text(
+                'El propietario solicita nuevas fechas',
+                style: TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.red),
+                maxLines: 2,
+              )
+            else ...[
+              Text(
+                _formatDate(visitDate),
+                style: const TextStyle(fontFamily: 'Public Sans', fontSize: 15, fontWeight: FontWeight.w500, color: dark),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 14),
-            // ── Pill button ───────────────────────────────────────────
-            GestureDetector(
-              onTap: () => _onBtnTap(context),
-              child: Container(
-                width: double.infinity,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: pillBg,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.remove_red_eye_outlined,
-                      size: 18,
-                      color: primary,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      _btnLabel,
-                      style: const TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+              if (visitTime.isNotEmpty)
+                Text(visitTime, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.grey)),
+            ],
+            const Spacer(),
+            // ── Actions ───────────────────────────────────────────────
+            ..._buildActions(context),
           ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _pendingInfo() {
+    if (proposedTimeSlots.isEmpty) {
+      return [
+        const Text(
+          'Esperando confirmación del propietario',
+          style: TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.orange),
+          maxLines: 2,
+        ),
+      ];
+    }
+    final first = proposedTimeSlots.first;
+    final date = first is Map ? (first['date']?.toString() ?? '') : '';
+    final time = first is Map ? (first['time']?.toString() ?? '') : '';
+    return [
+      Text(
+        _formatDate(date),
+        style: const TextStyle(fontFamily: 'Public Sans', fontSize: 15, fontWeight: FontWeight.w500, color: dark),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      if (time.isNotEmpty)
+        Text(time, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.grey)),
+    ];
+  }
+
+  List<Widget> _buildActions(BuildContext context) {
+    if (cardType == _CardType.completed) {
+      return [
+        _pill(context, Icons.remove_red_eye_outlined, 'Ver detalle', onTap: () => _navigateToDetail(context)),
+      ];
+    }
+    if (isPending) {
+      return [
+        _cancelPill(context),
+      ];
+    }
+    if (isReschedule) {
+      return [
+        _pill(context, Icons.calendar_today, 'Agendar cita', onTap: () => _onRescheduleTap(context)),
+      ];
+    }
+    if (isConfirmed) {
+      return [
+        _pill(context, Icons.remove_red_eye_outlined, 'Sobre mi visita', onTap: () => _navigateToDetail(context)),
+        const SizedBox(height: 6),
+        _cancelPill(context),
+      ];
+    }
+    return [
+      _pill(context, Icons.remove_red_eye_outlined, 'Sobre mi visita', onTap: () => _navigateToDetail(context)),
+    ];
+  }
+
+  Widget _pill(BuildContext context, IconData icon, String label, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 30,
+        decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(99)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: primary),
+            const SizedBox(width: 5),
+            Text(label, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 13, fontWeight: FontWeight.w500, color: primary)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cancelPill(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _onCancelTap(context),
+      child: Container(
+        width: double.infinity,
+        height: 30,
+        decoration: BoxDecoration(border: Border.all(color: Colors.red.withOpacity(0.5)), borderRadius: BorderRadius.circular(99)),
+        child: const Center(
+          child: Text('Cancelar visita', style: TextStyle(fontFamily: 'Public Sans', fontSize: 13, fontWeight: FontWeight.w500, color: Colors.red)),
         ),
       ),
     );
@@ -731,12 +780,184 @@ class _VisitCard extends StatelessWidget {
   Widget _placeholder() {
     return Container(
       width: double.infinity,
-      height: 120,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFEFEF),
-        borderRadius: BorderRadius.circular(10),
-      ),
+      height: 110,
+      decoration: const BoxDecoration(color: Color(0xFFEFEFEF)),
       child: const Icon(Icons.home_outlined, color: Colors.grey, size: 36),
+    );
+  }
+}
+
+class _VerMasScreen extends StatelessWidget {
+  final String title;
+  final List<dynamic> items;
+  final _CardType cardType;
+  final bool isOffers;
+
+  const _VerMasScreen({
+    required this.title,
+    required this.items,
+    required this.cardType,
+    this.isOffers = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      appBar: AppBar(
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        iconTheme: IconThemeData(color: FlutterFlowTheme.of(context).primaryText),
+        title: Text(
+          title,
+          style: FlutterFlowTheme.of(context).headlineMedium.override(
+            font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+            color: FlutterFlowTheme.of(context).primaryText,
+            fontSize: 18.0,
+          ),
+        ),
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              mainAxisExtent: isOffers ? 110 : (cardType == _CardType.upcoming ? 290 : 260),
+            ),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              if (isOffers) {
+                // To reuse _buildOfferCard we'd need a reference or duplicate it.
+                // We'll duplicate the logic for _OfferCard since _buildOfferCard is inside the state class.
+                return _OfferCard(offer: items[index]);
+              }
+              final v = items[index];
+              final visitId = v['visitId']?.toString() ?? v['id']?.toString() ?? v['_id']?.toString() ?? '';
+              final showingAgentId = v['showingAgentId']?.toString() ?? '';
+              final property = v['property'];
+              final propertyId = property is Map ? (property['id']?.toString() ?? '') : (v['propertyId']?.toString() ?? '');
+              final slot = v['confirmedTimeSlot'];
+              final visitDate = slot is Map ? slot['date']?.toString() ?? '' : '';
+              final visitTime = slot is Map ? slot['time']?.toString() ?? '' : '';
+              final images = property is Map ? property['images'] : null;
+              final imageUrl = (images is List && images.isNotEmpty) ? images[0]['url']?.toString() ?? '' : '';
+              final propertyName = property is Map ? (property['name']?.toString() ?? property['title']?.toString() ?? 'Propiedad') : 'Propiedad';
+              final visitSubstatus = v['substatus']?.toString() ?? '';
+              final visitStatus = v['status']?.toString() ?? '';
+              final proposed = v['proposedTimeSlots'];
+              final proposedSlots = proposed is List ? proposed : <dynamic>[];
+
+              return _VisitCard(
+                visitId: visitId,
+                propertyId: propertyId,
+                propertyName: propertyName,
+                visitDate: visitDate,
+                visitTime: visitTime,
+                imageUrl: imageUrl,
+                showingAgentId: showingAgentId,
+                visitSubstatus: visitSubstatus,
+                visitStatus: visitStatus,
+                proposedTimeSlots: proposedSlots,
+                cardType: cardType,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OfferCard extends StatelessWidget {
+  final dynamic offer;
+  const _OfferCard({required this.offer});
+
+  @override
+  Widget build(BuildContext context) {
+    final offerId = offer['id'] ?? offer['_id'] ?? offer['offerId'] ?? '';
+    final amountRaw = offer['offerData']?['proposedAmount'] ?? offer['proposedAmount'] ?? offer['amount'];
+    final double amountDouble = amountRaw is num ? amountRaw.toDouble() : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0).format(amountDouble);
+    final currency = offer['offerData']?['currency']?.toString() ?? offer['currency']?.toString() ?? 'USD';
+    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ?? offer['paymentMethod']?.toString() ?? '';
+    final processStatus = offer['processStatus']?.toString() ?? '';
+    final offerStatus = offer['offerStatus']?.toString() ?? offer['status']?.toString() ?? 'pending';
+    final status = processStatus.isNotEmpty ? processStatus : offerStatus;
+    final property = offer['property'] ?? offer['propertyId'];
+    final propertyName = property is Map ? (property['title'] ?? property['name'] ?? 'Propiedad') : 'Propiedad';
+
+    return InkWell(
+      onTap: () {
+        context.pushNamed(
+          'DOVIA_CLIENT_MisVisitas_TuPropuesta',
+          queryParameters: {
+            'offerId': offerId,
+            'paymentMethod': paymentMethod,
+            'propuestaState': status,
+          },
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              propertyName,
+              style: FlutterFlowTheme.of(context).bodyLarge.override(
+                    font: GoogleFonts.publicSans(fontWeight: FontWeight.bold),
+                    fontSize: 14.0,
+                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                status.toUpperCase(),
+                style: FlutterFlowTheme.of(context).bodySmall.override(
+                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                      color: FlutterFlowTheme.of(context).primary,
+                      fontSize: 9.0,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.local_offer_outlined, size: 14, color: FlutterFlowTheme.of(context).secondaryText),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    '\$ $amountStr',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.publicSans(fontWeight: FontWeight.w500),
+                          color: FlutterFlowTheme.of(context).primaryText,
+                          fontSize: 12.0,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

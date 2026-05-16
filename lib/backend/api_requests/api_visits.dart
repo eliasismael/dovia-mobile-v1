@@ -46,6 +46,7 @@ class DOVIAAPIVisitContextGroup {
   static GetOwnerPropertyVisitsCall getOwnerPropertyVisitsCall =
       GetOwnerPropertyVisitsCall();
   static OwnerConfirmSlotCall ownerConfirmSlotCall = OwnerConfirmSlotCall();
+  static OwnerRejectSlotsCall ownerRejectSlotsCall = OwnerRejectSlotsCall();
   static GetShowingAgentUnassignedVisitsCall
       getShowingAgentUnassignedVisitsCall =
       GetShowingAgentUnassignedVisitsCall();
@@ -822,6 +823,32 @@ class OwnerConfirmSlotCall {
       },
       params: {},
       body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class OwnerRejectSlotsCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Owner Reject Slots',
+      apiUrl: '$baseUrl/visits/$visitId/request-reschedule',
+      callType: ApiCallType.PATCH,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
