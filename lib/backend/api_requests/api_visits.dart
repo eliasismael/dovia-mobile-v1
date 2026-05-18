@@ -1085,12 +1085,12 @@ class OperativeListerRescheduleRequestCall {
 
     final ffApiRequestBody = '''
 {
-  "reason": "${escapeStringForJson(reason)}"
+  "message": "${escapeStringForJson(reason)}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Operative Lister Reschedule Request',
-      apiUrl: '$baseUrl/visits/$visitId/operative-lister/request-reschedule',
-      callType: ApiCallType.POST,
+      apiUrl: '$baseUrl/visits/$visitId/request-reschedule',
+      callType: ApiCallType.PATCH,
       headers: {
         'Authorization': 'Bearer $authToken',
       },

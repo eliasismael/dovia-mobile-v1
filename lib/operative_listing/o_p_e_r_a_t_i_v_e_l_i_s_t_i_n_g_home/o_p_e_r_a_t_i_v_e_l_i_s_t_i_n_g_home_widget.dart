@@ -280,7 +280,7 @@ class _OPERATIVELISTINGHomeWidgetState
                                     _emptyMsg('No tienes próximas visitas.')
                                   else
                                     SizedBox(
-                                      height: 190,
+                                      height: 220,
                                       child: ListView.separated(
                                         scrollDirection: Axis.horizontal,
                                         itemCount: snap.data!.length,
@@ -451,19 +451,26 @@ class _OPERATIVELISTINGHomeWidgetState
 }
 
 // ── Upcoming visit card ────────────────────────────────────────────────────
-class _UpcomingCard extends StatelessWidget {
+class _UpcomingCard extends StatefulWidget {
   final _VisitCardData data;
   final VoidCallback onVoyEnCamino;
   final VoidCallback onCardTap;
-
-  static const Color _primary = Color(0xFF007376);
-  static const Color _dark = Color(0xFF00444B);
 
   const _UpcomingCard({
     required this.data,
     required this.onVoyEnCamino,
     required this.onCardTap,
   });
+
+  @override
+  State<_UpcomingCard> createState() => _UpcomingCardState();
+}
+
+class _UpcomingCardState extends State<_UpcomingCard> {
+  static const Color _primary = Color(0xFF007376);
+  static const Color _dark = Color(0xFF00444B);
+  
+  bool _isUnderReview = false;
 
   String _formatDate(String raw) {
     if (raw.isEmpty) return '';
@@ -482,15 +489,15 @@ class _UpcomingCard extends StatelessWidget {
   }
 
   Future<void> _openMaps(BuildContext ctx) async {
-    if (data.lat == null || data.lng == null) {
+    if (widget.data.lat == null || widget.data.lng == null) {
       ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(
             content: Text('Coordenadas no disponibles para esta propiedad')),
       );
       return;
     }
-    final lat = data.lat!;
-    final lng = data.lng!;
+    final lat = widget.data.lat!;
+    final lng = widget.data.lng!;
     final geoUri = Uri.parse('geo:$lat,$lng?q=$lat,$lng');
     if (await canLaunchUrl(geoUri)) {
       await launchUrl(geoUri, mode: LaunchMode.externalApplication);
@@ -501,10 +508,82 @@ class _UpcomingCard extends StatelessWidget {
     }
   }
 
+  void _showSuccess() {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: const BoxDecoration(
+                  color: _primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 38),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Se envio con exito',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: _dark,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Pronto se comunicaran contigo el Asocia HQ para reagendar la visita',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 13,
+                  color: Color(0xFF6B7280),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onReschedule() {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: _RescheduleReasonSheet(
+          visitId: widget.data.visitId,
+          onSuccess: () {
+            Navigator.of(context).pop();
+            _showSuccess();
+            setState(() {
+              _isUnderReview = true;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onCardTap,
+      onTap: widget.onCardTap,
       child: Container(
         width: 290,
         padding: const EdgeInsets.all(12),
@@ -524,7 +603,7 @@ class _UpcomingCard extends StatelessWidget {
         children: [
           // Property name
           Text(
-            data.propertyName.isNotEmpty ? data.propertyName : 'Propiedad',
+            widget.data.propertyName.isNotEmpty ? widget.data.propertyName : 'Propiedad',
             style: const TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 15,
@@ -535,10 +614,10 @@ class _UpcomingCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           // Address
-          if (data.address.isNotEmpty) ...[
+          if (widget.data.address.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              'Dirección: ${data.address}',
+              'Dirección: ${widget.data.address}',
               style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 12,
@@ -549,10 +628,10 @@ class _UpcomingCard extends StatelessWidget {
             ),
           ],
           // Owner name
-          if (data.ownerName.isNotEmpty) ...[
+          if (widget.data.ownerName.isNotEmpty) ...[
             const SizedBox(height: 2),
             Text(
-              data.ownerName,
+              widget.data.ownerName,
               style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 12,
@@ -563,10 +642,10 @@ class _UpcomingCard extends StatelessWidget {
             ),
           ],
           // Date
-          if (data.date.isNotEmpty) ...[
+          if (widget.data.date.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              'Fecha: ${_formatDate(data.date)}',
+              'Fecha: ${_formatDate(widget.data.date)}',
               style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 13,
@@ -575,10 +654,10 @@ class _UpcomingCard extends StatelessWidget {
             ),
           ],
           // Time
-          if (data.time.isNotEmpty) ...[
+          if (widget.data.time.isNotEmpty) ...[
             const SizedBox(height: 2),
             Text(
-              'Hora: ${data.time}',
+              'Hora: ${widget.data.time}',
               style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 13,
@@ -614,7 +693,7 @@ class _UpcomingCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: GestureDetector(
-                  onTap: onVoyEnCamino,
+                  onTap: widget.onVoyEnCamino,
                   child: Container(
                     height: 30,
                     decoration: BoxDecoration(
@@ -635,6 +714,50 @@ class _UpcomingCard extends StatelessWidget {
               ),
             ],
           ),
+          if (!_isUnderReview) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _onReschedule,
+              child: Container(
+                width: double.infinity,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: _primary, width: 1),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  'Re-agendar visita',
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 11,
+                    color: _primary,
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              height: 22,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3CD),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                'En revisión por HQ',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF856404),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
       ),
@@ -657,18 +780,27 @@ class _PendingCardState extends State<_PendingCard> {
   static const Color _dark = Color(0xFF00444B);
   static const Color _badgeBg = Color(0xFFF8D5D5);
   static const Color _badgeText = Color(0xFFBC0000);
+  
+  bool _isUnderReview = false;
 
   void _onReschedule() {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _RescheduleReasonSheet(
-        visitId: widget.data.visitId,
-        onSuccess: () {
-          Navigator.of(context).pop();
-          _showSuccess();
-        },
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: _RescheduleReasonSheet(
+          visitId: widget.data.visitId,
+          onSuccess: () {
+            Navigator.of(context).pop();
+            _showSuccess();
+            setState(() {
+              _isUnderReview = true;
+            });
+          },
+        ),
       ),
     );
   }
@@ -800,41 +932,43 @@ class _PendingCardState extends State<_PendingCard> {
                   width: double.infinity,
                   height: 22,
                   decoration: BoxDecoration(
-                    color: _badgeBg,
+                    color: _isUnderReview ? const Color(0xFFFFF3CD) : _badgeBg,
                     borderRadius: BorderRadius.circular(100),
                   ),
                   alignment: Alignment.center,
-                  child: const Text(
-                    'Falta información',
+                  child: Text(
+                    _isUnderReview ? 'En revisión por HQ' : 'Falta información',
                     style: TextStyle(
                       fontFamily: 'Public Sans',
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: _badgeText,
+                      color: _isUnderReview ? const Color(0xFF856404) : _badgeText,
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                GestureDetector(
-                  onTap: _onReschedule,
-                  child: Container(
-                    width: double.infinity,
-                    height: 26,
-                    decoration: BoxDecoration(
-                      color: _primary,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Re-agendar cita con HQ',
-                      style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 11,
-                        color: Colors.white,
+                if (!_isUnderReview) ...[
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: _onReschedule,
+                    child: Container(
+                      width: double.infinity,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: _primary,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Re-agendar cita con HQ',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 11,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -898,13 +1032,12 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.circular(20),
       ),
-      padding: EdgeInsets.fromLTRB(24, 28, 24, 24 + bottomInset),
+      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
