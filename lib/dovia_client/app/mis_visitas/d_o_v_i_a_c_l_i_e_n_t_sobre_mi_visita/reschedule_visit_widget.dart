@@ -32,6 +32,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
 
   bool _isSubmitting = false;
   String? _errorMessage;
+  bool _isRescheduleRequested = false;
 
   /// Substatuses where the client CAN reschedule (submit new time slots)
   /// Based on VisitSubstatus enum for CLIENT_VISIT:
@@ -211,9 +212,38 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
     return Container(
       color: lightGrey,
       child: SafeArea(
-        child: _canReschedule ? _buildForm() : _buildBlockedInfo(),
+        child: _canReschedule || _isRescheduleRequested ? _buildForm() : _buildBlockedInfo(),
       ),
     );
+  }
+
+  Future<void> _requestReschedule() async {
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    final res = await DOVIAAPIVisitContextGroup.ownerRejectSlotsCall.call(
+      visitId: widget.visitId,
+      authToken: currentAuthenticationToken,
+    );
+
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    if (!res.succeeded) {
+      final body = res.jsonBody;
+      final msg = body is Map
+          ? (body['message'] ?? 'Error al solicitar el reagendamiento.')
+          : 'Error al solicitar el reagendamiento.';
+      setState(() => _errorMessage = msg.toString());
+      return;
+    }
+
+    // On success, show the form immediately without a popup
+    setState(() {
+      _isRescheduleRequested = true;
+    });
   }
 
   // ─── Blocked state: visita ya confirmada/asignada ─────────────────────────
@@ -221,6 +251,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Close
@@ -236,16 +267,16 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
           // Icon
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F5F5),
+            decoration: const BoxDecoration(
+              color: Color(0xFFE8F5F5),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.event_busy_outlined, size: 40, color: primaryColor),
+            child: const Icon(Icons.event_repeat, size: 40, color: primaryColor),
           ),
           const SizedBox(height: 20),
 
           const Text(
-            'No es posible reagendar en este momento',
+            'Solicitar reagendamiento',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 20,
@@ -257,7 +288,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
           const SizedBox(height: 12),
 
           const Text(
-            'Tu visita ya está confirmada y tiene un asesor DOVIA asignado. Para solicitar un cambio de fecha, comunícate directamente con nuestro equipo.',
+            'Tu visita ya está confirmada. Si deseas reagendar, puedes enviar una solicitud para proponer nuevos horarios.',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 14,
@@ -266,42 +297,56 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 8),
-
-          const Text(
-            'Recuerda: cancela tu visita actual primero si deseas agendar una nueva fecha.',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFFAAAAAA),
-              height: 1.5,
+          
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF0F0),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFFFCDD2)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.error_outline, color: Color(0xFFD32F2F), size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(fontFamily: 'Public Sans', fontSize: 13, color: Color(0xFFD32F2F), height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
 
-          const Spacer(),
+          const SizedBox(height: 24),
 
-          // Contact DOVIA button
+          // Solicitar Reagendamiento button
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: ElevatedButton.icon(
-              onPressed: _openWhatsApp,
-              icon: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 18),
-              label: const Text(
-                'Contactar a DOVIA',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
+            child: ElevatedButton(
+              onPressed: _isSubmitting ? null : _requestReschedule,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 elevation: 0,
               ),
+              child: _isSubmitting
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text(
+                      'Solicitar reagendamiento',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 12),
@@ -314,7 +359,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               onPressed: () => Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: primaryColor),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               ),
               child: const Text(
                 'Volver',
@@ -335,11 +380,11 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
   // ─── Reschedule form ──────────────────────────────────────────────────────
   Widget _buildForm() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Align(
@@ -398,7 +443,6 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               ],
             ),
           ),
-        ),
 
         if (_errorMessage != null)
           Padding(
@@ -436,7 +480,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 disabledBackgroundColor: primaryColor.withOpacity(0.4),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 elevation: 0,
               ),
               child: _isSubmitting

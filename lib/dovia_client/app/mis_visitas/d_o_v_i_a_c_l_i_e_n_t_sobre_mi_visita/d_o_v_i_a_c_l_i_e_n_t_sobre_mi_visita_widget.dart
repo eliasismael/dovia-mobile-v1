@@ -636,12 +636,13 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                     builder: (context) {
                                       return Padding(
                                         padding: MediaQuery.viewInsetsOf(context),
-                                        child: SizedBox(
-                                          height: MediaQuery.sizeOf(context).height * 0.9,
-                                          child: RescheduleVisitWidget(
-                                            visitId: widget.visitId ?? '',
-                                            visitSubstatus: _visitSubstatus,
-                                          ),
+                                        child: Wrap(
+                                          children: [
+                                            RescheduleVisitWidget(
+                                              visitId: widget.visitId ?? '',
+                                              visitSubstatus: _visitSubstatus,
+                                            ),
+                                          ],
                                         ),
                                       );
                                     },
