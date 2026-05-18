@@ -102,7 +102,14 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
+                      final role = FFAppState().UserRole;
+                      if (role == 'OPERATIVE_LISTER') {
+                        context.pushNamed(
+                            OPERATIVELISTINGHomeWidget.routeName);
+                      } else {
+                        context.pushNamed(
+                            DOVIACLIENTHomePageWidget.routeName);
+                      }
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(0.0),

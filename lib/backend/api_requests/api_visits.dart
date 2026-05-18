@@ -63,6 +63,11 @@ class DOVIAAPIVisitContextGroup {
   static GetOperativeListerVisitOverviewCall
       getOperativeListerVisitOverviewCall =
       GetOperativeListerVisitOverviewCall();
+  static OperativeListerRescheduleRequestCall
+      operativeListerRescheduleRequestCall =
+      OperativeListerRescheduleRequestCall();
+  static OperativeListerOnMyWayCall operativeListerOnMyWayCall =
+      OperativeListerOnMyWayCall();
 }
 
 class CreateVisitRequestCall {
@@ -1060,6 +1065,64 @@ class GetOperativeListerVisitOverviewCall {
         'Authorization': 'Bearer $authToken',
       },
       params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class OperativeListerRescheduleRequestCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? visitId = '',
+    String? reason = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "reason": "${escapeStringForJson(reason)}"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Operative Lister Reschedule Request',
+      apiUrl: '$baseUrl/visits/$visitId/operative-lister/request-reschedule',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class OperativeListerOnMyWayCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? visitId = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Operative Lister On My Way',
+      apiUrl: '$baseUrl/visits/$visitId/on-my-way',
+      callType: ApiCallType.PATCH,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

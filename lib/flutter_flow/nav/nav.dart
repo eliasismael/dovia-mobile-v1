@@ -587,8 +587,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: OPERATIVELISTINGPrimeraVisitaWidget.routeName,
           path: OPERATIVELISTINGPrimeraVisitaWidget.routePath,
-          builder: (context, params) =>
-              const OPERATIVELISTINGPrimeraVisitaWidget(),
+          builder: (context, params) => OPERATIVELISTINGPrimeraVisitaWidget(
+            visitId: params.getParam('visitId', ParamType.String) ?? '',
+            isPrimeraVisita:
+                params.getParam('isPrimeraVisita', ParamType.bool) ?? true,
+            propertyName:
+                params.getParam('propertyName', ParamType.String) ?? '',
+          ),
         ),
         FFRoute(
           name: OPERATIVELISTINGProfileWidget.routeName,

@@ -11,9 +11,11 @@ class OPERATIVELISTINGHeaderWidget extends StatefulWidget {
   const OPERATIVELISTINGHeaderWidget({
     super.key,
     required this.titleText,
+    this.onLocationTap,
   });
 
   final String? titleText;
+  final VoidCallback? onLocationTap;
 
   @override
   State<OPERATIVELISTINGHeaderWidget> createState() =>
@@ -152,8 +154,12 @@ class _OPERATIVELISTINGHeaderWidgetState
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () async {
-                    context.pushNamed(
-                        OPERATIVELISTINGPrimeraVisitaWidget.routeName);
+                    if (widget.onLocationTap != null) {
+                      widget.onLocationTap!();
+                    } else {
+                      context.pushNamed(
+                          OPERATIVELISTINGPrimeraVisitaWidget.routeName);
+                    }
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
