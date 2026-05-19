@@ -68,6 +68,8 @@ class DOVIAAPIVisitContextGroup {
       OperativeListerRescheduleRequestCall();
   static OperativeListerOnMyWayCall operativeListerOnMyWayCall =
       OperativeListerOnMyWayCall();
+  static OperativeListerArrivedCall operativeListerArrivedCall =
+      OperativeListerArrivedCall();
 }
 
 class CreateVisitRequestCall {
@@ -1117,6 +1119,32 @@ class OperativeListerOnMyWayCall {
     return ApiManager.instance.makeApiCall(
       callName: 'Operative Lister On My Way',
       apiUrl: '$baseUrl/visits/$visitId/on-my-way',
+      callType: ApiCallType.PATCH,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class OperativeListerArrivedCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? visitId = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Operative Lister Arrived',
+      apiUrl: '$baseUrl/visits/$visitId/arrived',
       callType: ApiCallType.PATCH,
       headers: {
         'Authorization': 'Bearer $authToken',

@@ -10,6 +10,7 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
 
@@ -54,6 +55,10 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
   bool _loading = true;
   bool _onMyWayLoading = false;
   bool _onMyWaySent = false;
+  bool _arrivedLoading = false;
+  bool _arrivedSent = false;
+  String _visitDate = '';
+  String _visitTime = '';
 
   @override
   void initState() {
@@ -133,6 +138,14 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
       }
     }
 
+    String visitDate = '';
+    String visitTime = '';
+    final slot = data['confirmedSlot'];
+    if (slot is Map) {
+      visitDate = slot['date']?.toString() ?? '';
+      visitTime = slot['time']?.toString() ?? '';
+    }
+
     safeSetState(() {
       _ownerName = ownerName;
       _ownerAvatarUrl = ownerAvatarUrl;
@@ -142,6 +155,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
       _description = description;
       _lat = lat;
       _lng = lng;
+      _visitDate = visitDate;
+      _visitTime = visitTime;
       _loading = false;
     });
   }
@@ -188,6 +203,55 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
         ),
       ),
     );
+  }
+
+  bool get _isChecklistEnabled {
+    if (_visitDate.isEmpty || _visitTime.isEmpty) return false;
+    try {
+      final d = _visitDate.split('-');
+      final t = _visitTime.split(':');
+      if (d.length < 3 || t.length < 2) return false;
+      final visitDt = DateTime(
+        int.parse(d[0]), int.parse(d[1]), int.parse(d[2]),
+        int.parse(t[0]), int.parse(t[1]),
+      );
+      // Unlock 15 min before the scheduled time
+      return DateTime.now().isAfter(visitDt.subtract(const Duration(minutes: 15)));
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _arrived() async {
+    if (_arrivedSent || _arrivedLoading) return;
+    safeSetState(() => _arrivedLoading = true);
+
+    final res = await DOVIAAPIVisitContextGroup.operativeListerArrivedCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: widget.visitId,
+    );
+
+    if (!mounted) return;
+    safeSetState(() {
+      _arrivedLoading = false;
+      if (res.succeeded) _arrivedSent = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          res.succeeded
+              ? '¡Llegada notificada al propietario!'
+              : 'Error al notificar la llegada',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _callPhone() async {
+    if (_ownerPhone.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: _ownerPhone.replaceAll(' ', ''));
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
   String get _title {
@@ -404,64 +468,69 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                         ),
                                         const SizedBox(height: 16),
                                         // Hablar con Dovia HQ box
-                                        Container(
-                                          width: MediaQuery.sizeOf(context)
-                                                  .width *
-                                              0.7,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .accent1,
-                                            borderRadius:
-                                                BorderRadius.circular(16.0),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 14, horizontal: 20),
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                'Hablar con Dovia HQ',
-                                                style: FlutterFlowTheme.of(
-                                                        context)
-                                                    .bodyMedium
-                                                    .override(
-                                                      font:
-                                                          GoogleFonts.publicSans(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600),
-                                                      color: _primary,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                              ),
-                                              if (_ownerPhone.isNotEmpty) ...[
-                                                const SizedBox(height: 8),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    const Icon(
-                                                        Icons.phone_outlined,
-                                                        size: 18,
-                                                        color:
-                                                            Color(0xFF007376)),
-                                                    const SizedBox(width: 6),
-                                                    Text(
-                                                      _ownerPhone,
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodySmall
-                                                              .override(
-                                                                font: GoogleFonts
-                                                                    .publicSans(),
-                                                                color: _primary,
-                                                              ),
-                                                    ),
-                                                  ],
+                                        GestureDetector(
+                                          onTap: _ownerPhone.isNotEmpty
+                                              ? _callPhone
+                                              : null,
+                                          child: Container(
+                                            width: MediaQuery.sizeOf(context)
+                                                    .width *
+                                                0.7,
+                                            decoration: BoxDecoration(
+                                              color: FlutterFlowTheme.of(context)
+                                                  .accent1,
+                                              borderRadius:
+                                                  BorderRadius.circular(16.0),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 14, horizontal: 20),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  'Hablar con Dovia HQ',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font:
+                                                            GoogleFonts.publicSans(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                        color: _primary,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                 ),
+                                                if (_ownerPhone.isNotEmpty) ...[
+                                                  const SizedBox(height: 8),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.center,
+                                                    children: [
+                                                      const Icon(
+                                                          Icons.phone_outlined,
+                                                          size: 18,
+                                                          color:
+                                                              Color(0xFF007376)),
+                                                      const SizedBox(width: 6),
+                                                      Text(
+                                                        _ownerPhone,
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodySmall
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .publicSans(),
+                                                                  color: _primary,
+                                                                ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
                                               ],
-                                            ],
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -628,21 +697,98 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                   padding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 12.0, 0.0, 0.0),
-                                  child: Row(
+                                  child: Column(
                                     children: [
-                                      Expanded(
-                                        child: FFButtonWidget(
-                                          onPressed: (_onMyWayLoading || _onMyWaySent)
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: FFButtonWidget(
+                                              onPressed: (_onMyWayLoading || _onMyWaySent)
+                                                  ? null
+                                                  : _onMyWay,
+                                              text: _onMyWaySent
+                                                  ? '¡En camino!'
+                                                  : 'Enviar mi ubicación y notificar',
+                                              showLoadingIndicator:
+                                                  _onMyWayLoading,
+                                              options: FFButtonOptions(
+                                                height: 44.0,
+                                                color: _onMyWaySent
+                                                    ? const Color(0xFF007376)
+                                                    : Colors.transparent,
+                                                textStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .publicSans(),
+                                                          color: _onMyWaySent
+                                                              ? Colors.white
+                                                              : FlutterFlowTheme
+                                                                  .of(context)
+                                                                  .primaryText,
+                                                        ),
+                                                elevation: 0.0,
+                                                borderSide: BorderSide(
+                                                  color: _onMyWaySent
+                                                      ? const Color(0xFF007376)
+                                                      : FlutterFlowTheme.of(
+                                                              context)
+                                                          .primaryText,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(24.0),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: FFButtonWidget(
+                                              onPressed: _isChecklistEnabled
+                                                  ? () => context.pushNamed(
+                                                      OPERATIVELISTINGChecklistWidget.routeName)
+                                                  : null,
+                                              text: 'Checklist',
+                                              options: FFButtonOptions(
+                                                height: 44.0,
+                                                color: _isChecklistEnabled
+                                                    ? _primary
+                                                    : const Color(0xFFB0BEC5),
+                                                disabledColor:
+                                                    const Color(0xFFB0BEC5),
+                                                disabledTextColor:
+                                                    Colors.white,
+                                                textStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .publicSans(),
+                                                          color: Colors.white,
+                                                        ),
+                                                elevation: 0.0,
+                                                borderRadius:
+                                                    BorderRadius.circular(24.0),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      // "Notificar que llegué" — visible solo cuando el checklist está habilitado
+                                      if (_isChecklistEnabled) ...[
+                                        const SizedBox(height: 10),
+                                        FFButtonWidget(
+                                          onPressed: (_arrivedLoading || _arrivedSent)
                                               ? null
-                                              : _onMyWay,
-                                          text: _onMyWaySent
-                                              ? '¡En camino!'
-                                              : 'Enviar mi ubicación y notificar',
-                                          showLoadingIndicator:
-                                              _onMyWayLoading,
+                                              : _arrived,
+                                          text: _arrivedSent
+                                              ? '¡Llegada notificada!'
+                                              : 'Notificar que llegué',
+                                          showLoadingIndicator: _arrivedLoading,
                                           options: FFButtonOptions(
+                                            width: double.infinity,
                                             height: 44.0,
-                                            color: _onMyWaySent
+                                            color: _arrivedSent
                                                 ? const Color(0xFF007376)
                                                 : Colors.transparent,
                                             textStyle:
@@ -651,47 +797,21 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                     .override(
                                                       font: GoogleFonts
                                                           .publicSans(),
-                                                      color: _onMyWaySent
+                                                      color: _arrivedSent
                                                           ? Colors.white
-                                                          : FlutterFlowTheme
-                                                              .of(context)
-                                                              .primaryText,
+                                                          : _primary,
                                                     ),
                                             elevation: 0.0,
                                             borderSide: BorderSide(
-                                              color: _onMyWaySent
+                                              color: _arrivedSent
                                                   ? const Color(0xFF007376)
-                                                  : FlutterFlowTheme.of(
-                                                          context)
-                                                      .primaryText,
+                                                  : _primary,
                                             ),
                                             borderRadius:
                                                 BorderRadius.circular(24.0),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: FFButtonWidget(
-                                          onPressed: () {},
-                                          text: 'Checklist',
-                                          options: FFButtonOptions(
-                                            height: 44.0,
-                                            color: _primary,
-                                            textStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .override(
-                                                      font: GoogleFonts
-                                                          .publicSans(),
-                                                      color: Colors.white,
-                                                    ),
-                                            elevation: 0.0,
-                                            borderRadius:
-                                                BorderRadius.circular(24.0),
-                                          ),
-                                        ),
-                                      ),
+                                      ],
                                     ],
                                   ),
                                 ),
