@@ -4,7 +4,11 @@
       "Bash(flutter analyze:*)",
       "mcp__claude_ai_Figma__get_design_context",
       "WebFetch(domain:www.figma.com)",
-      "Bash(dart analyze *)"
+      "Bash(dart analyze *)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/backend-from-repo/backend/docs/contexts/metrics/**)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/backend-from-repo/backend/docs/contexts/legal-process/**)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/backend-from-repo/backend/docs/contexts/visit/**)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/backend-from-repo/backend/docs/contexts/recruitment/**)"
     ]
   }
 }
