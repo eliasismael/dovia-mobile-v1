@@ -728,7 +728,7 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                 ),
                 alignment: Alignment.center,
                 child: const Text(
-                  'Re-agendar visita',
+                  'Reportar con HQ',
                   style: TextStyle(
                     fontFamily: 'Public Sans',
                     fontSize: 11,
@@ -959,7 +959,7 @@ class _PendingCardState extends State<_PendingCard> {
                       ),
                       alignment: Alignment.center,
                       child: const Text(
-                        'Re-agendar cita con HQ',
+                        'Reportar con HQ',
                         style: TextStyle(
                           fontFamily: 'Public Sans',
                           fontSize: 11,
@@ -1043,7 +1043,7 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Cuéntanos por qué tienes que\nRe-agendar la visita',
+            'Cuéntanos por qué tienes que\nreportar la visita',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 16,
@@ -1097,7 +1097,7 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
                       ),
                     )
                   : const Text(
-                      'Enviar solicitud',
+                      'Enviar reporte',
                       style: TextStyle(
                         fontFamily: 'Public Sans',
                         fontSize: 15,
