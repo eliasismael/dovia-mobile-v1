@@ -80,24 +80,21 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
   }
 
   Future<void> _openCalendar() async {
-    final DateTime? picked = await showDatePicker(
+    final DateTime? picked = await showDialog<DateTime>(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: aqua,
-              onPrimary: Colors.white,
-              onSurface: textColor,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF4F4F4),
+              borderRadius: BorderRadius.circular(16),
             ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: aqua),
-            ),
+            child: _CustomCalendarPicker(initialDate: _selectedDate),
           ),
-          child: child!,
         );
       },
     );
@@ -235,6 +232,163 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CustomCalendarPicker extends StatefulWidget {
+  final DateTime initialDate;
+  const _CustomCalendarPicker({required this.initialDate});
+
+  @override
+  State<_CustomCalendarPicker> createState() => _CustomCalendarPickerState();
+}
+
+class _CustomCalendarPickerState extends State<_CustomCalendarPicker> {
+  late DateTime _currentMonth;
+  late DateTime _selectedDate;
+
+  static const Color aqua = Color(0xFF007376);
+  static const Color textColor = Color(0xFF00444B);
+
+  static const List<String> _spanishMonths = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate;
+    _currentMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
+  }
+
+  void _previousMonth() {
+    setState(() {
+      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1, 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 1);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int daysInMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
+    int firstWeekday = DateTime(_currentMonth.year, _currentMonth.month, 1).weekday; // 1 = Monday
+    
+    final weekdays = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left, color: textColor),
+              onPressed: _previousMonth,
+            ),
+            Text(
+              '${_spanishMonths[_currentMonth.month - 1]} ${_currentMonth.year}',
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right, color: textColor),
+              onPressed: _nextMonth,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Weekdays
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: weekdays.map((w) => Expanded(
+            child: Text(
+              w,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF5A5A5A),
+              ),
+            ),
+          )).toList(),
+        ),
+        const SizedBox(height: 12),
+        // Grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: 42, // 6 rows * 7 days
+          itemBuilder: (context, index) {
+            int day;
+            bool isCurrentMonth = true;
+            bool isSelected = false;
+            bool isToday = false;
+
+            if (index < firstWeekday - 1) {
+              isCurrentMonth = false;
+              int daysInPrevMonth = DateTime(_currentMonth.year, _currentMonth.month, 0).day;
+              day = daysInPrevMonth - (firstWeekday - 1 - index) + 1;
+            } else if (index >= firstWeekday - 1 + daysInMonth) {
+              isCurrentMonth = false;
+              day = index - (firstWeekday - 1 + daysInMonth) + 1;
+            } else {
+              day = index - (firstWeekday - 1) + 1;
+              isSelected = _selectedDate.year == _currentMonth.year &&
+                           _selectedDate.month == _currentMonth.month &&
+                           _selectedDate.day == day;
+              isToday = DateTime.now().year == _currentMonth.year &&
+                        DateTime.now().month == _currentMonth.month &&
+                        DateTime.now().day == day;
+            }
+
+            return GestureDetector(
+              onTap: () {
+                if (!isCurrentMonth) return;
+                final selected = DateTime(_currentMonth.year, _currentMonth.month, day);
+                Navigator.of(context).pop(selected);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isCurrentMonth
+                      ? (isSelected ? aqua : Colors.white)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$day',
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isCurrentMonth
+                        ? (isSelected ? Colors.white : textColor)
+                        : const Color(0xFFC4C4C4),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

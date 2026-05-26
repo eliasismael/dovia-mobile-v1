@@ -20,11 +20,13 @@ class OPERATIVELISTINGPrimeraVisitaWidget extends StatefulWidget {
     this.visitId = '',
     this.isPrimeraVisita = true,
     this.propertyName = '',
+    this.isReadOnly = false,
   });
 
   final String visitId;
   final bool isPrimeraVisita;
   final String propertyName;
+  final bool isReadOnly;
 
   static String routeName = 'OPERATIVE_LISTING_PrimeraVisita';
   static String routePath = '/oPERATIVELISTINGPrimeraVisita';
@@ -675,8 +677,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                   ),
                                 ),
 
-                                // ── Hint text ────────────────────────────
-                                Padding(
+                                if (!widget.isReadOnly) ...[
+                                  // ── Hint text ────────────────────────────
+                                  Padding(
                                   padding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 16.0, 0.0, 0.0),
@@ -816,7 +819,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                   ),
                                 ),
                               ],
-                            ),
+                            ],
+                          ),
                     ),
                   ],
                 ),

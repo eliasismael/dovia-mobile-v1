@@ -593,6 +593,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 params.getParam('isPrimeraVisita', ParamType.bool) ?? true,
             propertyName:
                 params.getParam('propertyName', ParamType.String) ?? '',
+            isReadOnly: params.getParam('isReadOnly', ParamType.bool) ?? false,
           ),
         ),
         FFRoute(
