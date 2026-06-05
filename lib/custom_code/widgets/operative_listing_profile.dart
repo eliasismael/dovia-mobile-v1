@@ -24,12 +24,21 @@ class OperativeListingProfile extends StatefulWidget {
   /// Called when the user taps "Cerrar sesión".
   final Future Function()? onSignOut;
 
+  final Future Function()? onTermsAndConditions;
+  final Future Function()? onSupport;
+  final Future Function()? onLogout;
+  final Future Function()? onSaveInfo;
+
   const OperativeListingProfile({
     super.key,
     this.width,
     this.height,
     this.onDeleteAccount,
     this.onSignOut,
+    this.onTermsAndConditions,
+    this.onSupport,
+    this.onLogout,
+    this.onSaveInfo,
   });
 
   @override
@@ -55,6 +64,13 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   bool _datosPersonalesExpanded = true;
   bool _gananciasExpanded = false;
   bool _documentacionExpanded = false;
+
+  // Notification toggles
+  bool _notifDailyListing = false;
+  bool _notifRecomendaciones = false;
+  bool _notifTips = false;
+  bool _notifNovedades = false;
+  bool _notifInformeSemanal = false;
 
   // Password controllers
   final _currentPasswordController = TextEditingController();
@@ -117,7 +133,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
         ),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -146,7 +163,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
                 const SizedBox(height: 16),
               ],
             ] else ...[
-              _buildNotificacionesPlaceholder(),
+              _buildNotificacionesTab(),
             ],
           ],
         ),
@@ -185,7 +202,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
       child: GestureDetector(
         onTap: () => setState(() => _selectedTab = index),
         child: Container(
-          height: 44,
+          height: 46,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isSelected ? tabActiveBg : Colors.transparent,
@@ -195,11 +213,12 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
             label,
             style: TextStyle(
               fontFamily: 'Public Sans',
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.normal,
               color: isSelected ? aqua : inputPlaceholder,
             ),
             textAlign: TextAlign.center,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -368,13 +387,9 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
             ],
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(child: _readonlyField('Edad', ageStr)),
-              const SizedBox(width: 14),
-              Expanded(child: _readonlyField('Correo', email)),
-            ],
-          ),
+          _readonlyField('Edad', ageStr),
+          const SizedBox(height: 14),
+          _readonlyField('Correo', email),
           const SizedBox(height: 14),
           _readonlyField('Teléfono', phone.isEmpty ? '—' : phone),
           const SizedBox(height: 14),
@@ -477,21 +492,13 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           ),
           if (_gananciasExpanded) ...[
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _readonlyField('Ya ganaste', earnedStr),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: _readonlyFieldWithIcon(
-                    'Calificaciones (estrellas)',
-                    starsStr,
-                    const Icon(Icons.star_rounded,
-                        size: 18, color: Color(0xFFFFC107)),
-                  ),
-                ),
-              ],
+            _readonlyField('Ya ganaste', earnedStr),
+            const SizedBox(height: 14),
+            _readonlyFieldWithIcon(
+              'Calificaciones (estrellas)',
+              starsStr,
+              const Icon(Icons.star_rounded,
+                  size: 18, color: Color(0xFFFFC107)),
             ),
             const SizedBox(height: 10),
             const Text(
@@ -696,53 +703,49 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           const SizedBox(height: 10),
           Container(height: 1, color: borderColor),
           const SizedBox(height: 20),
-          Row(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Ver términos y condiciones',
-                      style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.normal,
-                        color: textPrimary,
-                        letterSpacing: 0.32,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildOutlinedButton(
-                      label: 'Términos y condiciones',
-                      onTap: _openTermsModal,
-                    ),
-                  ],
+              const Text(
+                'Ver términos y condiciones',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: textPrimary,
+                  letterSpacing: 0.32,
                 ),
               ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Ayuda o soporte',
-                      style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.normal,
-                        color: textPrimary,
-                        letterSpacing: 0.32,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildOutlinedButton(
-                      label: 'Soporte',
-                      onTap: _openSupportChat,
-                    ),
-                  ],
+              const SizedBox(height: 12),
+              _buildOutlinedButton(
+                label: 'Términos y condiciones',
+                onTap: () async {
+                  if (widget.onTermsAndConditions != null) {
+                    await widget.onTermsAndConditions!.call();
+                  }
+                  _openTermsModal();
+                },
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Ayuda o soporte',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: textPrimary,
+                  letterSpacing: 0.32,
                 ),
+              ),
+              const SizedBox(height: 12),
+              _buildOutlinedButton(
+                label: 'Soporte',
+                onTap: () async {
+                  if (widget.onSupport != null) {
+                    await widget.onSupport!.call();
+                  }
+                  _openSupportChat();
+                },
               ),
             ],
           ),
@@ -789,7 +792,13 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           const SizedBox(height: 12),
           _buildOutlinedButton(
             label: 'Cerrar sesión',
-            onTap: () async => await widget.onSignOut?.call(),
+            onTap: () async {
+              if (widget.onLogout != null) {
+                await widget.onLogout!.call();
+              } else if (widget.onSignOut != null) {
+                await widget.onSignOut!.call();
+              }
+            },
           ),
           const SizedBox(height: 20),
           const Text(
@@ -809,25 +818,113 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     );
   }
 
-  // ─── Notificaciones Placeholder ───────────────────────────────────────────────
+  // ─── Notificaciones Tab ───────────────────────────────────────────────────────
 
-  Widget _buildNotificacionesPlaceholder() {
+  Widget _buildNotificacionesTab() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
-        'Configuración de notificaciones próximamente',
-        style: TextStyle(
-          fontFamily: 'Public Sans',
-          fontSize: 16,
-          color: inputPlaceholder,
-        ),
-        textAlign: TextAlign.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Notificaciones',
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: aqua,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(height: 1, color: borderColor),
+          const SizedBox(height: 16),
+          _buildNotificationSwitch(
+            title: 'Daily listing',
+            subtitle: 'Recibe notificaciones cuando publiquemos nuevas propiedades que pueden interesarte',
+            value: _notifDailyListing,
+            onChanged: (val) => setState(() => _notifDailyListing = val),
+          ),
+          const SizedBox(height: 16),
+          _buildNotificationSwitch(
+            title: 'Recomendaciones',
+            subtitle: 'Recibe notificaciones cuando encontremos propiedades que se ajusten a tus búsquedas recientes.',
+            value: _notifRecomendaciones,
+            onChanged: (val) => setState(() => _notifRecomendaciones = val),
+          ),
+          const SizedBox(height: 16),
+          _buildNotificationSwitch(
+            title: 'Tips',
+            subtitle: 'Recibe notificaciones con tips semanales',
+            value: _notifTips,
+            onChanged: (val) => setState(() => _notifTips = val),
+          ),
+          const SizedBox(height: 16),
+          _buildNotificationSwitch(
+            title: 'Novedades',
+            subtitle: 'Recibe notificaciones sobre novedades en Dovia',
+            value: _notifNovedades,
+            onChanged: (val) => setState(() => _notifNovedades = val),
+          ),
+          const SizedBox(height: 16),
+          _buildNotificationSwitch(
+            title: 'Informe semanal',
+            subtitle: 'Recibe un informe semanal sobre la interacción que tuvo tu propiedad.',
+            value: _notifInformeSemanal,
+            onChanged: (val) => setState(() => _notifInformeSemanal = val),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildNotificationSwitch({
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 13,
+                  color: inputPlaceholder,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 16),
+        Switch.adaptive(
+          value: value,
+          onChanged: onChanged,
+          activeColor: Colors.white,
+          activeTrackColor: aqua,
+        ),
+      ],
     );
   }
 
