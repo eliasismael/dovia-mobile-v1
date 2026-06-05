@@ -2,6 +2,9 @@
 // Imports other custom widgets
 // Imports custom functions
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '/app_state.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -22,10 +25,10 @@ class OperativeListingCheckList extends StatefulWidget {
 
   @override
   State<OperativeListingCheckList> createState() =>
-      _OperativeListingCheckListState();
+      OperativeListingCheckListState();
 }
 
-class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
+class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   static const Color primaryColor = Color(0xFF007376);
   static const Color textColor = Color(0xFF00444B);
   static const Color inputBackground = Color(0xFFFAFAFA);
@@ -47,6 +50,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   final _consideracionesController = TextEditingController();
   final _instruccionesController = TextEditingController();
   final _complejoController = TextEditingController();
+  final _danosDescripcionController = TextEditingController();
 
   // ==================== DROPDOWN VALUES ====================
   String? _tipoVivienda;
@@ -97,6 +101,9 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
     'Cocina para eventos': false,
   };
 
+  // ==================== CHECKBOX STATE: SERVICIOS ====================
+  final Map<String, bool> _servicios = {};
+
   // ==================== STAR RATINGS ====================
   final Map<String, int> _starRatings = {
     'Caminabilidad': 0,
@@ -117,8 +124,187 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
     'Movilidad': 0,
   };
 
+  // ==================== VALIDATION & KEYS ====================
+  final GlobalKey _keyDatosGenerales = GlobalKey();
+  final GlobalKey _keyCaracteristicas = GlobalKey();
+  final GlobalKey _keyAmenidades = GlobalKey();
+  final GlobalKey _keyCriterios = GlobalKey();
+  final GlobalKey _keyInfoHq = GlobalKey();
+  final GlobalKey _keyAdicionales = GlobalKey();
+
+  bool _errorTipoVivienda = false;
+  bool _errorDireccion = false;
+  bool _errorHabitaciones = false;
+  bool _errorCriterios = false;
+  bool _errorDanos = false;
+
+  bool validateForm() {
+    setState(() {
+      _errorTipoVivienda = _tipoVivienda == null;
+      _errorDireccion = _direccion == null;
+      _errorHabitaciones = _habitaciones == null;
+      _errorCriterios = _selectedCriteria.length < 3;
+      _errorDanos = _hasDanos == 'Si' && _danosDescripcionController.text.trim().isEmpty;
+    });
+
+    if (_errorTipoVivienda || _errorDireccion) {
+      if (!_datosGeneralesExpanded) setState(() => _datosGeneralesExpanded = true);
+      Scrollable.ensureVisible(_keyDatosGenerales.currentContext!, duration: const Duration(milliseconds: 300));
+      return false;
+    }
+    if (_errorHabitaciones) {
+      if (!_caracteristicasExpanded) setState(() => _caracteristicasExpanded = true);
+      Scrollable.ensureVisible(_keyCaracteristicas.currentContext!, duration: const Duration(milliseconds: 300));
+      return false;
+    }
+    if (_errorCriterios) {
+      if (!_criteriosExpanded) setState(() => _criteriosExpanded = true);
+      Scrollable.ensureVisible(_keyCriterios.currentContext!, duration: const Duration(milliseconds: 300));
+      return false;
+    }
+    if (_errorDanos) {
+      if (!_infoHqExpanded) setState(() => _infoHqExpanded = true);
+      Scrollable.ensureVisible(_keyInfoHq.currentContext!, duration: const Duration(milliseconds: 300));
+      return false;
+    }
+
+    return true;
+  }
+
+  Map<String, dynamic> getFormData() {
+    return {
+      'tipoVivienda': _tipoVivienda,
+      'direccion': _direccion,
+      'descripcion': _descripcionController.text,
+      'caracteristicas': {
+        'habitaciones': _habitaciones,
+        'banos': _banos,
+        'parqueo': _parqueo,
+        'pisos': _pisos,
+        'mediosBanos': _mediosBanos,
+        ..._generalCharacteristics,
+      },
+      'otrasCaracteristicas': _otherCharacteristics,
+      'amenidades': {
+        'propiedad': _propiedadAmenities,
+        'comunes': _areasComunes,
+      },
+      'starRatings': _starRatings,
+      'infoHq': {
+        'servicios': _servicios,
+        'hasDanos': _hasDanos,
+        'danosDescripcion': _danosDescripcionController.text,
+      },
+      'adicionales': {
+        'dudas': _dudasController.text,
+        'consideraciones': _consideracionesController.text,
+        'instrucciones': _instruccionesController.text,
+        'complejo': _complejoController.text,
+      },
+    };
+  }
+
   // Selected criteria (max 3)
   final Set<String> _selectedCriteria = {};
+
+  late SharedPreferences _prefs;
+  String get _draftKey => 'checklist_draft_${FFAppState().lastActiveVisitId}';
+  bool _isInit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+    
+    _descripcionController.addListener(_saveState);
+    _dudasController.addListener(_saveState);
+    _consideracionesController.addListener(_saveState);
+    _instruccionesController.addListener(_saveState);
+    _complejoController.addListener(_saveState);
+    _danosDescripcionController.addListener(_saveState);
+  }
+
+  Future<void> _loadState() async {
+    _prefs = await SharedPreferences.getInstance();
+    final draftJson = _prefs.getString(_draftKey);
+    if (draftJson != null) {
+      try {
+        final Map<String, dynamic> data = jsonDecode(draftJson);
+        super.setState(() {
+          _tipoVivienda = data['tipoVivienda'];
+          _direccion = data['direccion'];
+          _habitaciones = data['habitaciones'];
+          _banos = data['banos'];
+          _parqueo = data['parqueo'];
+          _pisos = data['pisos'];
+          _mediosBanos = data['mediosBanos'];
+          _hasDanos = data['hasDanos'];
+          
+          if (data['descripcion'] != null) _descripcionController.text = data['descripcion'];
+          if (data['dudas'] != null) _dudasController.text = data['dudas'];
+          if (data['consideraciones'] != null) _consideracionesController.text = data['consideraciones'];
+          if (data['instrucciones'] != null) _instruccionesController.text = data['instrucciones'];
+          if (data['complejo'] != null) _complejoController.text = data['complejo'];
+          if (data['danosDescripcion'] != null) _danosDescripcionController.text = data['danosDescripcion'];
+
+          if (data['generalCharacteristics'] != null) _updateMapFromJson(_generalCharacteristics, data['generalCharacteristics']);
+          if (data['otherCharacteristics'] != null) _updateMapFromJson(_otherCharacteristics, data['otherCharacteristics']);
+          if (data['propiedadAmenities'] != null) _updateMapFromJson(_propiedadAmenities, data['propiedadAmenities']);
+          if (data['areasComunes'] != null) _updateMapFromJson(_areasComunes, data['areasComunes']);
+          if (data['servicios'] != null) _updateMapFromJson(_servicios, data['servicios']);
+          if (data['starRatings'] != null) {
+            Map<String, dynamic> ratings = data['starRatings'];
+            ratings.forEach((key, value) {
+              _starRatings[key] = value as int;
+              if (value > 0) _selectedCriteria.add(key);
+            });
+          }
+        });
+      } catch (e) {
+        print('Error loading checklist draft: $e');
+      }
+    }
+    _isInit = true;
+  }
+  
+  void _updateMapFromJson(Map<String, bool> target, Map<String, dynamic> source) {
+    source.forEach((key, value) {
+      target[key] = value as bool;
+    });
+  }
+
+  void _saveState() {
+    if (!_isInit) return;
+    final Map<String, dynamic> data = {
+      'tipoVivienda': _tipoVivienda,
+      'direccion': _direccion,
+      'habitaciones': _habitaciones,
+      'banos': _banos,
+      'parqueo': _parqueo,
+      'pisos': _pisos,
+      'mediosBanos': _mediosBanos,
+      'hasDanos': _hasDanos,
+      'descripcion': _descripcionController.text,
+      'dudas': _dudasController.text,
+      'consideraciones': _consideracionesController.text,
+      'instrucciones': _instruccionesController.text,
+      'complejo': _complejoController.text,
+      'danosDescripcion': _danosDescripcionController.text,
+      'generalCharacteristics': _generalCharacteristics,
+      'otherCharacteristics': _otherCharacteristics,
+      'propiedadAmenities': _propiedadAmenities,
+      'areasComunes': _areasComunes,
+      'servicios': _servicios,
+      'starRatings': _starRatings,
+    };
+    _prefs.setString(_draftKey, jsonEncode(data));
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    _saveState();
+  }
 
   @override
   void dispose() {
@@ -127,6 +313,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
     _consideracionesController.dispose();
     _instruccionesController.dispose();
     _complejoController.dispose();
+    _danosDescripcionController.dispose();
     super.dispose();
   }
 
@@ -134,40 +321,36 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: widget.width ?? double.infinity,
-      // height: widget.height,
-      // color: Colors.white,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ========== SECTION 1: DATOS GENERALES ==========
-              _buildDatosGeneralesSection(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ========== SECTION 1: DATOS GENERALES ==========
+            _buildDatosGeneralesSection(),
 
-              // ========== SECTION 2: CARACTERÍSTICAS ==========
-              _buildCaracteristicasSection(),
+            // ========== SECTION 2: CARACTERÍSTICAS ==========
+            _buildCaracteristicasSection(),
 
-              // ========== SECTION 3: AMENIDADES ==========
-              _buildAmenidadesSection(),
+            // ========== SECTION 3: AMENIDADES ==========
+            _buildAmenidadesSection(),
 
-              // ========== SECTION 4: CRITERIOS DE CALIFICACIÓN ==========
-              _buildCriteriosSection(),
+            // ========== SECTION 4: CRITERIOS DE CALIFICACIÓN ==========
+            _buildCriteriosSection(),
 
-              // ========== SECTION 5: INFORMACIÓN PARA HQ ==========
-              _buildInfoHqSection(),
+            // ========== SECTION 5: INFORMACIÓN PARA HQ ==========
+            _buildInfoHqSection(),
 
-              // ========== SECTION 6: ADICIONALES ==========
-              _buildAdicionalesSection(),
+            // ========== SECTION 6: ADICIONALES ==========
+            _buildAdicionalesSection(),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              // ========== ALERT ==========
-              // _buildAlert(),
+            // ========== ALERT ==========
+            // _buildAlert(),
 
-              const SizedBox(height: 24),
-            ],
-          ),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );
@@ -176,6 +359,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   // ==================== SECTION 1: DATOS GENERALES ====================
   Widget _buildDatosGeneralesSection() {
     return Column(
+      key: _keyDatosGenerales,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
@@ -195,6 +379,8 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
                   'Tipo de vivienda',
                   _tipoVivienda,
                   (val) => setState(() => _tipoVivienda = val),
+                  options: const ['Casa', 'Apartamento', 'Duplex', 'Penthouse', 'Terreno', 'Otro'],
+                  hasError: _errorTipoVivienda,
                 ),
               ),
               const SizedBox(width: 11),
@@ -203,6 +389,13 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
                   'Dirección',
                   _direccion,
                   (val) => setState(() => _direccion = val),
+                  options: const [
+                    'Av. Reforma 10-00, Z. 9',
+                    'Bulevar Vista Hermosa 12-45, Z. 15',
+                    '10a Calle A 5-67, Z. 14',
+                    'Ruta 4 3-21, Z. 4'
+                  ],
+                  hasError: _errorDireccion,
                 ),
               ),
             ],
@@ -223,6 +416,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   // ==================== SECTION 2: CARACTERÍSTICAS ====================
   Widget _buildCaracteristicasSection() {
     return Column(
+      key: _keyCaracteristicas,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
@@ -234,7 +428,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
         if (_caracteristicasExpanded) ...[
           const SizedBox(height: 12),
           // Características generales header with "Añadir" button
-          _buildSubSectionHeaderWithAdd('Características generales'),
+          _buildSubSectionHeaderWithAdd('Características generales', _generalCharacteristics),
           const SizedBox(height: 12),
           // Habitaciones + Baños
           _buildDoubleDropdownRow(
@@ -244,6 +438,9 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
             _banos,
             (v) => setState(() => _habitaciones = v),
             (v) => setState(() => _banos = v),
+            options1: const ['1', '2', '3', '4', '5+'],
+            options2: const ['1', '2', '3', '4', '5+'],
+            hasError1: _errorHabitaciones,
           ),
           const SizedBox(height: 12),
           // Parqueo + Pisos
@@ -254,6 +451,8 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
             _pisos,
             (v) => setState(() => _parqueo = v),
             (v) => setState(() => _pisos = v),
+            options1: const ['0', '1', '2', '3', '4+'],
+            options2: const ['1', '2', '3', '4+'],
           ),
           const SizedBox(height: 12),
           // Medios baños (single)
@@ -261,13 +460,14 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
             'Medios baños',
             _mediosBanos,
             (v) => setState(() => _mediosBanos = v),
+            options: const ['0', '1', '2', '3+'],
           ),
           const SizedBox(height: 11),
           // Checkboxes for general characteristics
           _buildCheckboxGroup(_generalCharacteristics),
           const SizedBox(height: 16),
           // Otras características header with "Añadir" button
-          _buildSubSectionHeaderWithAdd('Otras características'),
+          _buildSubSectionHeaderWithAdd('Otras características', _otherCharacteristics),
           const SizedBox(height: 11),
           // Checkboxes for other characteristics
           _buildCheckboxGroup(_otherCharacteristics),
@@ -280,6 +480,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   // ==================== SECTION 3: AMENIDADES ====================
   Widget _buildAmenidadesSection() {
     return Column(
+      key: _keyAmenidades,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
@@ -290,12 +491,12 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
         if (_amenidadesExpanded) ...[
           const SizedBox(height: 12),
           // Propiedad header with "Añadir"
-          _buildSubSectionHeaderWithAdd('Propiedad'),
+          _buildSubSectionHeaderWithAdd('Propiedad', _propiedadAmenities),
           const SizedBox(height: 11),
           _buildCheckboxGroup(_propiedadAmenities),
           const SizedBox(height: 16),
           // Áreas comunes header with "Añadir"
-          _buildSubSectionHeaderWithAdd('Áreas comunes'),
+          _buildSubSectionHeaderWithAdd('Áreas comunes', _areasComunes),
           const SizedBox(height: 11),
           _buildCheckboxGroup(_areasComunes),
           const SizedBox(height: 10),
@@ -307,6 +508,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   // ==================== SECTION 4: CRITERIOS DE CALIFICACIÓN ====================
   Widget _buildCriteriosSection() {
     return Column(
+      key: _keyCriterios,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
@@ -317,6 +519,12 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
         ),
         if (_criteriosExpanded) ...[
           const SizedBox(height: 12),
+          if (_errorCriterios)
+            const Text(
+              '¡Debes seleccionar al menos 3 criterios!',
+              style: TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          const SizedBox(height: 6),
           // Description input area
           _buildTextAreaField(
             '',
@@ -361,8 +569,15 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
           ),
           const SizedBox(height: 16),
           // Star rating items
-          ..._starRatings.entries.map(
-            (entry) => _buildStarRatingItem(entry.key, entry.value),
+          Center(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 16,
+              runSpacing: 16,
+              children: _starRatings.entries.map(
+                (entry) => _buildStarRatingItem(entry.key, entry.value),
+              ).toList(),
+            ),
           ),
           const SizedBox(height: 10),
         ],
@@ -373,6 +588,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   // ==================== SECTION 5: INFORMACIÓN PARA HQ ====================
   Widget _buildInfoHqSection() {
     return Column(
+      key: _keyInfoHq,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
@@ -396,7 +612,9 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
           ),
           const SizedBox(height: 12),
           GestureDetector(
-            onTap: widget.onAddServicio,
+            onTap: () {
+              _showAddCustomItemDialog('Servicios', _servicios);
+            },
             child: Container(
               width: double.infinity,
               height: 42,
@@ -419,6 +637,8 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
             ),
           ),
           const SizedBox(height: 17),
+          _buildCheckboxGroup(_servicios),
+          const SizedBox(height: 17),
           // Hay daños en la propiedad
           _buildDropdownFieldWithArrow(
             'Hay daños en la propiedad',
@@ -427,6 +647,15 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
             options: ['Si', 'No'],
             placeholder: 'Si/No',
           ),
+          if (_hasDanos == 'Si') ...[
+            const SizedBox(height: 12),
+            _buildTextAreaField(
+              'Describe los daños',
+              _danosDescripcionController,
+              placeholder: 'Escribe aquí...',
+              hasError: _errorDanos,
+            ),
+          ],
           const SizedBox(height: 10),
         ],
       ],
@@ -436,6 +665,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   // ==================== SECTION 6: ADICIONALES ====================
   Widget _buildAdicionalesSection() {
     return Column(
+      key: _keyAdicionales,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
@@ -522,7 +752,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   }
 
   // ==================== REUSABLE: SUBSECTION HEADER WITH "AÑADIR" ====================
-  Widget _buildSubSectionHeaderWithAdd(String title) {
+  Widget _buildSubSectionHeaderWithAdd(String title, Map<String, bool> targetMap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -537,7 +767,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
         ),
         GestureDetector(
           onTap: () {
-            // Add action
+            _showAddCustomItemDialog(title, targetMap);
           },
           child: Container(
             height: 30,
@@ -568,12 +798,187 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
     );
   }
 
+  void _showAddCustomItemDialog(String sectionName, Map<String, bool> targetMap) {
+    String titleText = '';
+    String hintText = 'Escribe aquí...';
+
+    if (sectionName == 'Características generales') {
+      titleText = 'Añade una característica general a la propiedad';
+    } else if (sectionName == 'Otras características') {
+      titleText = 'Añade otra característica a la propiedad';
+    } else if (sectionName == 'Propiedad') {
+      titleText = 'Añade una amenity a la propiedad';
+    } else if (sectionName == 'Áreas comunes') {
+      titleText = 'Añade un área común a la propiedad';
+    } else if (sectionName == 'Servicios') {
+      titleText = 'Agregar un servicio a la propiedad';
+    } else {
+      titleText = 'Agregar a la propiedad';
+    }
+
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  titleText,
+                  style: const TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFAFAFA),
+                    borderRadius: BorderRadius.circular(17),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: TextField(
+                    controller: controller,
+                    style: const TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 20,
+                      color: textColor,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: hintText,
+                      hintStyle: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 20,
+                        color: placeholderColor.withValues(alpha: 0.5),
+                      ),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 44),
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      if (controller.text.trim().isNotEmpty) {
+                        setState(() {
+                          targetMap[controller.text.trim()] = true;
+                        });
+                        Navigator.pop(context);
+                        _showSuccessPopup();
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Agregar',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  void _showSuccessPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          // Check if still mounted to avoid popping something else
+          if (mounted && Navigator.of(dialogContext).canPop()) {
+            Navigator.of(dialogContext).pop();
+          }
+        });
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 50),
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 60, 20, 40),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Se agregó con éxito',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 100,
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 50,
+                  weight: 700,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    );
+  }
+
   // ==================== REUSABLE: DROPDOWN FIELD ====================
   Widget _buildDropdownField(
     String label,
     String? value,
-    ValueChanged<String?> onChanged,
-  ) {
+    ValueChanged<String?> onChanged, {
+    required List<String> options,
+    bool hasError = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -587,21 +992,47 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          height: 42,
-          decoration: BoxDecoration(
-            color: inputBackground,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 13),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            value ?? 'x',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: placeholderColor.withValues(alpha: 0.5),
+        PopupMenuButton<String>(
+          onSelected: onChanged,
+          itemBuilder: (context) {
+            return options.map((String choice) {
+              return PopupMenuItem<String>(
+                value: choice,
+                child: Text(choice),
+              );
+            }).toList();
+          },
+          child: Container(
+            height: 42,
+            decoration: BoxDecoration(
+              color: inputBackground,
+              borderRadius: BorderRadius.circular(10),
+              border: hasError ? Border.all(color: Colors.red, width: 1.5) : null,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 13),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    value ?? 'Selecciona',
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: value != null ? textColor : placeholderColor.withValues(alpha: 0.5),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 14,
+                  color: placeholderColor,
+                ),
+              ],
             ),
           ),
         ),
@@ -616,8 +1047,12 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
     String? value1,
     String? value2,
     ValueChanged<String?> onChanged1,
-    ValueChanged<String?> onChanged2,
-  ) {
+    ValueChanged<String?> onChanged2, {
+    required List<String> options1,
+    required List<String> options2,
+    bool hasError1 = false,
+    bool hasError2 = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -652,11 +1087,11 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
         Row(
           children: [
             Expanded(
-              child: _buildSmallDropdown(value1, onChanged1),
+              child: _buildSmallDropdown(value1, onChanged1, options: options1, hasError: hasError1),
             ),
             const SizedBox(width: 17),
             Expanded(
-              child: _buildSmallDropdown(value2, onChanged2),
+              child: _buildSmallDropdown(value2, onChanged2, options: options2, hasError: hasError2),
             ),
           ],
         ),
@@ -668,8 +1103,10 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   Widget _buildSingleDropdownRow(
     String label,
     String? value,
-    ValueChanged<String?> onChanged,
-  ) {
+    ValueChanged<String?> onChanged, {
+    required List<String> options,
+    bool hasError = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -686,7 +1123,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
         Row(
           children: [
             Expanded(
-              child: _buildSmallDropdown(value, onChanged),
+              child: _buildSmallDropdown(value, onChanged, options: options, hasError: hasError),
             ),
           ],
         ),
@@ -695,32 +1132,49 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
   }
 
   // ==================== REUSABLE: SMALL DROPDOWN ====================
-  Widget _buildSmallDropdown(String? value, ValueChanged<String?> onChanged) {
-    return Container(
-      height: 42,
-      decoration: BoxDecoration(
-        color: inputBackground,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 13),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            value ?? 'x',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: placeholderColor.withValues(alpha: 0.5),
+  Widget _buildSmallDropdown(
+    String? value, 
+    ValueChanged<String?> onChanged, {
+    required List<String> options,
+    bool hasError = false,
+  }) {
+    return PopupMenuButton<String>(
+      onSelected: onChanged,
+      itemBuilder: (context) {
+        return options.map((String choice) {
+          return PopupMenuItem<String>(
+            value: choice,
+            child: Text(choice),
+          );
+        }).toList();
+      },
+      child: Container(
+        height: 42,
+        decoration: BoxDecoration(
+          color: inputBackground,
+          borderRadius: BorderRadius.circular(10),
+          border: hasError ? Border.all(color: Colors.red, width: 1.5) : null,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 13),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              value ?? 'x',
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: value != null ? textColor : placeholderColor.withValues(alpha: 0.5),
+              ),
             ),
-          ),
-          const Icon(
-            Icons.keyboard_arrow_down,
-            size: 10,
-            color: placeholderColor,
-          ),
-        ],
+            const Icon(
+              Icons.keyboard_arrow_down,
+              size: 10,
+              color: placeholderColor,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -744,39 +1198,50 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
             fontWeight: FontWeight.w400,
             color: textColor,
             letterSpacing: 0.28,
-            height: 49.849 / 14,
           ),
         ),
-        Container(
-          height: 50,
-          decoration: BoxDecoration(
-            color: inputBackground,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                value ?? placeholder,
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: placeholderColor.withValues(alpha: 0.5),
-                  letterSpacing: 0.28,
-                  height: 49.849 / 14,
+        const SizedBox(height: 12),
+        PopupMenuButton<String>(
+          onSelected: onChanged,
+          itemBuilder: (context) {
+            return (options ?? []).map((String choice) {
+              return PopupMenuItem<String>(
+                value: choice,
+                child: Text(choice),
+              );
+            }).toList();
+          },
+          child: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: inputBackground,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value ?? placeholder,
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: value != null ? textColor : placeholderColor.withValues(alpha: 0.5),
+                    letterSpacing: 0.28,
+                    height: 49.849 / 14,
+                  ),
                 ),
-              ),
-              Transform.rotate(
-                angle: -1.5708,
-                child: const Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 24,
-                  color: placeholderColor,
+                Transform.rotate(
+                  angle: -1.5708,
+                  child: const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 24,
+                    color: placeholderColor,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -790,6 +1255,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
     String placeholder = '',
     bool showLabel = true,
     double labelFontSize = 16,
+    bool hasError = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -812,6 +1278,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
           decoration: BoxDecoration(
             color: inputBackground,
             borderRadius: BorderRadius.circular(10),
+            border: hasError ? Border.all(color: Colors.red, width: 1.5) : null,
           ),
           child: TextField(
             controller: controller,
@@ -901,9 +1368,18 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
 
   // ==================== REUSABLE: STAR RATING ITEM ====================
   Widget _buildStarRatingItem(String label, int rating) {
+    final bool isSelected = rating > 0;
     return Container(
+      width: (MediaQuery.of(context).size.width - 32 - 16) / 2,
       height: 171,
-      margin: const EdgeInsets.only(bottom: 23),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected ? primaryColor : borderColor,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -911,13 +1387,13 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
           Container(
             width: 54,
             height: 54,
-            decoration: const BoxDecoration(
-              color: addButtonBg,
+            decoration: BoxDecoration(
+              color: isSelected ? primaryColor : addButtonBg,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.star_outline_rounded,
-              color: primaryColor,
+              color: isSelected ? Colors.white : primaryColor,
               size: 27,
             ),
           ),
@@ -925,6 +1401,7 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
           // Label
           Text(
             label,
+            textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 16,
@@ -943,11 +1420,22 @@ class _OperativeListingCheckListState extends State<OperativeListingCheckList> {
                   if (_selectedCriteria.length < 3 ||
                       _selectedCriteria.contains(label)) {
                     setState(() {
-                      _starRatings[label] = index + 1;
-                      if (index + 1 > 0) {
-                        _selectedCriteria.add(label);
+                      if (_starRatings[label] == index + 1) {
+                        // Toggle off
+                        _starRatings[label] = 0;
+                        _selectedCriteria.remove(label);
+                      } else {
+                        _starRatings[label] = index + 1;
+                        if (index + 1 > 0) {
+                          _selectedCriteria.add(label);
+                        }
                       }
                     });
+                  } else {
+                    // Maximum of 3 reached
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Ya has seleccionado el máximo de 3 criterios.')),
+                    );
                   }
                 },
                 child: Padding(

@@ -68,6 +68,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
     _model = createModel(context, () => OPERATIVELISTINGPrimeraVisitaModel());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.visitId.isNotEmpty) {
+        FFAppState().lastActiveVisitId = widget.visitId;
         _loadOverview();
       } else {
         safeSetState(() => _loading = false);
