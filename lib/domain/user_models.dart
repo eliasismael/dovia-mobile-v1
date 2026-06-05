@@ -20,6 +20,12 @@ class UserProfile {
   final double? latitude;
   final double? longitude;
 
+  // Uploaded document URLs (from GET /users/me)
+  final String? identificationDocumentUrl;
+  final String? criminalRecordUrl;
+  final String? policeRecordUrl;
+  final String? utilityBillUrl;
+
   const UserProfile({
     required this.uid,
     this.email,
@@ -35,6 +41,10 @@ class UserProfile {
     this.nationality,
     this.latitude,
     this.longitude,
+    this.identificationDocumentUrl,
+    this.criminalRecordUrl,
+    this.policeRecordUrl,
+    this.utilityBillUrl,
   });
 
   String get displayName {
@@ -113,6 +123,11 @@ class UserProfile {
       nationality: nationality,
       latitude: latitude,
       longitude: longitude,
+      identificationDocumentUrl: _nonEmpty(data['identificationDocumentUrl']) ??
+          _nonEmpty(data['identificationUrl']),
+      criminalRecordUrl: _nonEmpty(data['criminalRecordUrl']),
+      policeRecordUrl: _nonEmpty(data['policeRecordUrl']),
+      utilityBillUrl: _nonEmpty(data['utilityBillUrl']),
     );
   }
 

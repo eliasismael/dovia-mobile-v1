@@ -21,6 +21,8 @@ class DOVIAAPIUserContextGroup {
       UploadProfilePictureCall();
   static UpdateUserProfileCall updateUserProfileCall = UpdateUserProfileCall();
   static AdminVerifyUserCall adminVerifyUserCall = AdminVerifyUserCall();
+  static GetPerformanceSummaryCall getPerformanceSummaryCall =
+      GetPerformanceSummaryCall();
 }
 
 class GetAuthenticatedUserProfileCall {
@@ -144,19 +146,22 @@ class UploadUserDocumentCall {
   Future<ApiCallResponse> call({
     String? userId = '',
     String? documentType = '',
+    String? authToken = '',
+    FFUploadedFile? file,
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
-{}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Upload User Document',
       apiUrl: '$baseUrl/users/$userId/documents/$documentType',
       callType: ApiCallType.POST,
-      headers: {},
-      params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.JSON,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
@@ -165,6 +170,15 @@ class UploadUserDocumentCall {
       alwaysAllowBody: false,
     );
   }
+
+  String? storageKey(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.storageKey''',
+      ));
+  String? url(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.url''',
+      ));
 }
 
 class UploadProfilePictureCall {
@@ -262,6 +276,37 @@ class AdminVerifyUserCall {
       alwaysAllowBody: false,
     );
   }
+}
+
+class GetPerformanceSummaryCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Performance Summary',
+      apiUrl: '$baseUrl/users/me/performance-summary',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  double? averageStars(dynamic response) =>
+      castToType<double>(getJsonField(response, r'''$.data.averageStars''')) ??
+      castToType<double>(getJsonField(response, r'''$.averageStars'''));
+  double? totalEarned(dynamic response) =>
+      castToType<double>(getJsonField(response, r'''$.data.totalEarned''')) ??
+      castToType<double>(getJsonField(response, r'''$.totalEarned'''));
 }
 
 /// End DOVIA API - User Context Group Code
