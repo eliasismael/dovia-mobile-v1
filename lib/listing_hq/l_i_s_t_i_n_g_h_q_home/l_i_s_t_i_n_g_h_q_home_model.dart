@@ -15,6 +15,9 @@ class LISTINGHQHomeModel extends FlutterFlowModel<LISTINGHQHomeWidget> {
   // Model for LISTING_HQ_Navbar component.
   late LISTINGHQNavbarModel lISTINGHQNavbarModel;
 
+  bool isRechazadasExpanded = false;
+  bool isCorreccionesExpanded = false;
+
   @override
   void initState(BuildContext context) {
     cornerGradientBackgroundModel =
