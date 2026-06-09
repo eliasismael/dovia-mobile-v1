@@ -6,6 +6,7 @@ import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dar
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_documentos/l_i_s_t_i_n_g_h_q_documentos_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedades/l_i_s_t_i_n_g_h_q_propiedades_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_propiedad_rechazada_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_i_s_t_i_n_g_h_q_home_model.dart';
@@ -41,7 +42,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     super.dispose();
   }
 
-  Widget _buildSectionHeader(String title, String routeToPush, {bool isExpanded = false, VoidCallback? onToggle}) {
+  Widget _buildSectionHeader(String title, String routeToPush,
+      {bool isExpanded = false, VoidCallback? onToggle}) {
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(0.0, 32.0, 0.0, 12.0),
       child: Row(
@@ -61,15 +63,19 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
             ),
           ),
           FFButtonWidget(
-            onPressed: onToggle ?? () {
-              if (routeToPush.isNotEmpty) {
-                context.pushNamed(routeToPush);
-              }
-            },
-            text: onToggle != null ? (isExpanded ? 'Ver menos' : 'Ver todo') : 'Ver todo',
+            onPressed: onToggle ??
+                () {
+                  if (routeToPush.isNotEmpty) {
+                    context.pushNamed(routeToPush);
+                  }
+                },
+            text: onToggle != null
+                ? (isExpanded ? 'Ver menos' : 'Ver todo')
+                : 'Ver todo',
             options: FFButtonOptions(
               height: 30.0,
-              padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
               color: FlutterFlowTheme.of(context).accent1,
               textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                     font: GoogleFonts.publicSans(),
@@ -151,7 +157,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: GoogleFonts.inter(),
                         fontSize: 12.0,
-                       ),
+                      ),
                 ),
                 Container(
                   decoration: BoxDecoration(
@@ -159,7 +165,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                     borderRadius: BorderRadius.circular(24.0),
                   ),
                   child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(10.0, 2.0, 10.0, 2.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        10.0, 2.0, 10.0, 2.0),
                     child: Text(
                       statusText,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -211,97 +218,102 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     );
   }
 
-  Widget _buildLargeCard(String title, String ownerName) {
+  Widget _buildLargeCard(String title, String ownerName, {VoidCallback? onPressed}) {
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 15.0),
-      child: Container(
-        width: MediaQuery.sizeOf(context).width * 1.0,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 4.0,
-              color: Color(0x1A000000),
-              offset: Offset(0.0, 2.0),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Container(
-                width: 100.0,
-                height: 100.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: Image.asset(
-                    'assets/images/casa_card_sobreMiVisita.png',
-                    width: 100.0,
-                    height: 100.0,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10.0),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            fontSize: 16.0,
-                          ),
-                    ),
-                    const SizedBox(height: 4.0),
-                    Text(
-                      'Dirección: xxx',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(),
-                            fontSize: 12.0,
-                          ),
-                    ),
-                    const SizedBox(height: 4.0),
-                    Text(
-                      ownerName,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(),
-                            fontSize: 12.0,
-                          ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    FFButtonWidget(
-                      onPressed: () {
-                        print('Button pressed ...');
-                      },
-                      text: 'Falta información',
-                      options: FFButtonOptions(
-                        height: 30.0,
-                        color: FlutterFlowTheme.of(context).error,
-                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                              font: GoogleFonts.publicSans(),
-                              color: Colors.white,
-                              fontSize: 13.0,
-                            ),
-                        elevation: 0.0,
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                    ),
-                  ],
-                ),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12.0),
+        child: Container(
+          width: MediaQuery.sizeOf(context).width * 1.0,
+          decoration: BoxDecoration(
+            color: FlutterFlowTheme.of(context).secondaryBackground,
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 4.0,
+                color: Color(0x1A000000),
+                offset: Offset(0.0, 2.0),
               ),
             ],
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  width: 100.0,
+                  height: 100.0,
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.asset(
+                      'assets/images/casa_card_sobreMiVisita.png',
+                      width: 100.0,
+                      height: 100.0,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              fontSize: 16.0,
+                            ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        'Dirección: xxx',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(),
+                              fontSize: 12.0,
+                            ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        ownerName,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(),
+                              fontSize: 12.0,
+                            ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      FFButtonWidget(
+                        onPressed: onPressed ?? () {
+                          print('Button pressed ...');
+                        },
+                        text: 'Falta información',
+                        options: FFButtonOptions(
+                          height: 30.0,
+                          color: FlutterFlowTheme.of(context).error,
+                          textStyle:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    font: GoogleFonts.publicSans(),
+                                    color: Colors.white,
+                                    fontSize: 13.0,
+                                  ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -339,7 +351,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 80.0), // Padding bottom for navbar
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 80.0), // Padding bottom for navbar
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -422,13 +435,14 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                             isExpanded: _model.isRechazadasExpanded,
                             onToggle: () {
                               setState(() {
-                                _model.isRechazadasExpanded = !_model.isRechazadasExpanded;
+                                _model.isRechazadasExpanded =
+                                    !_model.isRechazadasExpanded;
                               });
                             },
                           ),
                           Column(
                             children: [
-                              _buildLargeCard('Orchad House', 'Nombre del propietario'),
+                              _buildLargeCard('Orchad House', 'Nombre del propietario', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadRechazadaWidget()))),
                               AnimatedSize(
                                 duration: const Duration(milliseconds: 250),
                                 curve: Curves.easeInOut,
@@ -436,8 +450,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                     ? Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          _buildLargeCard('Orchad House 2', 'Nombre del propietario 2'),
-                                          _buildLargeCard('Orchad House 3', 'Nombre del propietario 3'),
+                                          _buildLargeCard('Orchad House 2',
+                                              'Nombre del propietario 2', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadRechazadaWidget()))),
+                                          _buildLargeCard('Orchad House 3',
+                                              'Nombre del propietario 3'),
                                         ],
                                       )
                                     : const SizedBox.shrink(),
@@ -452,13 +468,15 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                             isExpanded: _model.isCorreccionesExpanded,
                             onToggle: () {
                               setState(() {
-                                _model.isCorreccionesExpanded = !_model.isCorreccionesExpanded;
+                                _model.isCorreccionesExpanded =
+                                    !_model.isCorreccionesExpanded;
                               });
                             },
                           ),
                           Column(
                             children: [
-                              _buildLargeCard('Orchad House', 'Nombre del propietario'),
+                              _buildLargeCard(
+                                  'Orchad House', 'Nombre del propietario'),
                               AnimatedSize(
                                 duration: const Duration(milliseconds: 250),
                                 curve: Curves.easeInOut,
@@ -466,8 +484,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                     ? Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          _buildLargeCard('Orchad House 2', 'Nombre del propietario 2'),
-                                          _buildLargeCard('Orchad House 3', 'Nombre del propietario 3'),
+                                          _buildLargeCard('Orchad House 2',
+                                              'Nombre del propietario 2'),
+                                          _buildLargeCard('Orchad House 3',
+                                              'Nombre del propietario 3'),
                                         ],
                                       )
                                     : const SizedBox.shrink(),
@@ -481,7 +501,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                 ),
               ),
               Align(
-                alignment: const AlignmentDirectional(0.0, 1.0), // Fix alignment to bottom
+                alignment: const AlignmentDirectional(
+                    0.0, 1.0), // Fix alignment to bottom
                 child: wrapWithModel(
                   model: _model.lISTINGHQNavbarModel,
                   updateCallback: () => safeSetState(() {}),

@@ -677,6 +677,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const LISTINGHQPropiedadWidget(),
         ),
         FFRoute(
+          name: LISTINGHQPropiedadRechazadaWidget.routeName,
+          path: LISTINGHQPropiedadRechazadaWidget.routePath,
+          builder: (context, params) => const LISTINGHQPropiedadRechazadaWidget(),
+        ),
+        FFRoute(
           name: LISTINGHQDocumentos2Widget.routeName,
           path: LISTINGHQDocumentos2Widget.routePath,
           builder: (context, params) => LISTINGHQDocumentos2Widget(

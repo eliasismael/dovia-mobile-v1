@@ -164,6 +164,8 @@ export '/listing_hq/l_i_s_t_i_n_g_h_q_documentos_2/l_i_s_t_i_n_g_h_q_documentos2
     show LISTINGHQDocumentos2Widget;
 export '/listing_hq/l_i_s_t_i_n_g_h_q_documentos_3/l_i_s_t_i_n_g_h_q_documentos3_widget.dart'
     show LISTINGHQDocumentos3Widget;
+export '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_propiedad_rechazada_widget.dart'
+    show LISTINGHQPropiedadRechazadaWidget;
 export '/showing/s_h_o_w_i_n_g_home/s_h_o_w_i_n_g_home_widget.dart'
     show SHOWINGHomeWidget;
 export '/showing/s_h_o_w_i_n_g_visita_del_dia/s_h_o_w_i_n_g_visita_del_dia_widget.dart'
