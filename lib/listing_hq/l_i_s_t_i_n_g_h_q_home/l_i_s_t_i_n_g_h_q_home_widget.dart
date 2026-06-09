@@ -8,6 +8,7 @@ import '/listing_hq/l_i_s_t_i_n_g_h_q_documentos/l_i_s_t_i_n_g_h_q_documentos_wi
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedades/l_i_s_t_i_n_g_h_q_propiedades_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_propiedad_rechazada_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_i_s_t_i_n_g_h_q_home_model.dart';
 export 'l_i_s_t_i_n_g_h_q_home_model.dart';
@@ -348,6 +349,57 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                       updateCallback: () => safeSetState(() {}),
                       child: const LISTINGHQHeaderWidget(
                         titleText: 'Home',
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          context.pushNamed('LISTING_HQ_BusquedaPropiedad');
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: 64.0,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(0.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/search.svg',
+                                    width: 24.0,
+                                    height: 24.0,
+                                    fit: BoxFit.none,
+                                    colorFilter: ColorFilter.mode(
+                                      FlutterFlowTheme.of(context).primaryText,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 20.0),
+                                Text(
+                                  'Búsqueda con IA',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.publicSans(),
+                                        color: const Color(0xFF888888),
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     Padding(
