@@ -136,6 +136,8 @@ export '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_profile/o_p_e_r_a_t_i
     show OPERATIVELISTINGProfileWidget;
 export '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_widget.dart'
     show OPERATIVELISTINGChecklistWidget;
+export '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_form/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_form_widget.dart'
+    show OPERATIVELISTINGChecklistFormWidget;
 export '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_agenda/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_agenda_widget.dart'
     show OPERATIVELISTINGAgendaWidget;
 export '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_notifications/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_notifications_widget.dart'

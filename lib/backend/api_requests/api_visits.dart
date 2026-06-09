@@ -70,6 +70,7 @@ class DOVIAAPIVisitContextGroup {
       OperativeListerOnMyWayCall();
   static OperativeListerArrivedCall operativeListerArrivedCall =
       OperativeListerArrivedCall();
+  static SendVisitMessageCall sendVisitMessageCall = SendVisitMessageCall();
 }
 
 class CreateVisitRequestCall {
@@ -1150,6 +1151,38 @@ class OperativeListerArrivedCall {
         'Authorization': 'Bearer $authToken',
       },
       params: {},
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class SendVisitMessageCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+    String? message = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "message": "${escapeStringForJson(message)}"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Send Visit Message',
+      apiUrl: '$baseUrl/visits/$visitId/messages',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

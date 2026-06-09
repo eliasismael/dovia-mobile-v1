@@ -607,6 +607,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const OPERATIVELISTINGChecklistWidget(),
         ),
         FFRoute(
+          name: OPERATIVELISTINGChecklistFormWidget.routeName,
+          path: OPERATIVELISTINGChecklistFormWidget.routePath,
+          builder: (context, params) => OPERATIVELISTINGChecklistFormWidget(
+            visitId: params.getParam('visitId', ParamType.String) ?? '',
+          ),
+        ),
+        FFRoute(
           name: OPERATIVELISTINGAgendaWidget.routeName,
           path: OPERATIVELISTINGAgendaWidget.routePath,
           builder: (context, params) => const OPERATIVELISTINGAgendaWidget(),
