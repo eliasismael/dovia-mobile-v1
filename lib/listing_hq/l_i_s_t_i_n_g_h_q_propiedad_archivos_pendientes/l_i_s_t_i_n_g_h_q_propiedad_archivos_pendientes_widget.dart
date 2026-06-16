@@ -1,9 +1,13 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/uploaded_file.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
+import '/shared_components/popup_subir_documento/popup_subir_documento_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_visor_pdf/l_i_s_t_i_n_g_h_q_visor_pdf_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -93,13 +97,18 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                         FlutterFlowTheme.of(context).alternate,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/IconoVolverAtras.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: SvgPicture.asset(
+                                        'assets/images/IconoVolverAtras.svg',
+                                        width: 200.0,
+                                        height: 200.0,
+                                        fit: BoxFit.none,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -241,10 +250,34 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Container(
+                                InkWell(
+                                  onTap: () async {
+                                    if (_model.uploadedContrato != null) {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => LISTINGHQVisorPdfWidget(documentName: 'Contrato', uploadedFile: _model.uploadedContrato)));
+                                    } else {
+                                      final result = await showDialog<FFUploadedFile>(
+                                        context: context,
+                                        builder: (dialogContext) {
+                                          return Dialog(
+                                            elevation: 0,
+                                            insetPadding: EdgeInsets.zero,
+                                            backgroundColor: Colors.transparent,
+                                            alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                            child: const PopupSubirDocumentoWidget(documentName: 'Contrato'),
+                                          );
+                                        },
+                                      );
+                                      if (result != null) {
+                                        setState(() {
+                                          _model.uploadedContrato = result;
+                                        });
+                                      }
+                                    }
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Container(
                                       width: 150.0,
                                       height: 150.0,
                                       decoration: BoxDecoration(
@@ -325,7 +358,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 12.0, 0.0, 0.0),
                                       child: LinearPercentIndicator(
-                                        percent: 0.5,
+                                        percent: _model.uploadedContrato != null ? 1.0 : 0.5,
                                         width: 120.0,
                                         lineHeight: 12.0,
                                         animation: true,
@@ -342,10 +375,35 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                     ),
                                   ],
                                 ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Container(
+                                ),
+                                InkWell(
+                                  onTap: () async {
+                                    if (_model.uploadedDocumento != null) {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => LISTINGHQVisorPdfWidget(documentName: 'Deposito a cuenta Dovia', uploadedFile: _model.uploadedDocumento)));
+                                    } else {
+                                      final result = await showDialog<FFUploadedFile>(
+                                        context: context,
+                                        builder: (dialogContext) {
+                                          return Dialog(
+                                            elevation: 0,
+                                            insetPadding: EdgeInsets.zero,
+                                            backgroundColor: Colors.transparent,
+                                            alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                            child: const PopupSubirDocumentoWidget(documentName: 'Deposito a cuenta Dovia'),
+                                          );
+                                        },
+                                      );
+                                      if (result != null) {
+                                        setState(() {
+                                          _model.uploadedDocumento = result;
+                                        });
+                                      }
+                                    }
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Container(
                                       width: 150.0,
                                       height: 150.0,
                                       decoration: BoxDecoration(
@@ -353,6 +411,10 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                             .primaryText,
                                         borderRadius:
                                             BorderRadius.circular(24.0),
+                                        border: Border.all(
+                                          color: _model.uploadedDocumento != null ? Colors.transparent : FlutterFlowTheme.of(context).error,
+                                          width: 2.0,
+                                        ),
                                       ),
                                       child: Align(
                                         alignment: const AlignmentDirectional(
@@ -395,7 +457,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 12.0, 0.0, 0.0),
                                       child: Text(
-                                        'Documento',
+                                        'Deposito a cuenta Dovia',
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
@@ -426,7 +488,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 12.0, 0.0, 0.0),
                                       child: LinearPercentIndicator(
-                                        percent: 0.5,
+                                        percent: _model.uploadedDocumento != null ? 1.0 : 0.5,
                                         width: 120.0,
                                         lineHeight: 12.0,
                                         animation: true,
@@ -443,10 +505,66 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                     ),
                                   ],
                                 ),
+                                ),
                               ],
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 100.0),
+                      child: FFButtonWidget(
+                        onPressed: () async {
+                          String docToUpload = 'Contrato';
+                          if (_model.uploadedContrato != null && _model.uploadedDocumento == null) {
+                            docToUpload = 'Deposito a cuenta Dovia';
+                          } else if (_model.uploadedContrato != null && _model.uploadedDocumento != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Todos los documentos han sido subidos.')),
+                            );
+                            return;
+                          }
+
+                          final result = await showDialog<FFUploadedFile>(
+                            context: context,
+                            builder: (dialogContext) {
+                              return Dialog(
+                                elevation: 0,
+                                insetPadding: EdgeInsets.zero,
+                                backgroundColor: Colors.transparent,
+                                alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                child: PopupSubirDocumentoWidget(documentName: docToUpload),
+                              );
+                            },
+                          );
+
+                          if (result != null) {
+                            setState(() {
+                              if (docToUpload == 'Contrato') {
+                                _model.uploadedContrato = result;
+                              } else {
+                                _model.uploadedDocumento = result;
+                              }
+                            });
+                          }
+                        },
+                        text: 'Subir documentacion de la propiedad',
+                        options: FFButtonOptions(
+                          width: double.infinity,
+                          height: 48.0,
+                          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                          color: FlutterFlowTheme.of(context).primary,
+                          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                color: Colors.white,
+                              ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
                       ),
                     ),
                   ],

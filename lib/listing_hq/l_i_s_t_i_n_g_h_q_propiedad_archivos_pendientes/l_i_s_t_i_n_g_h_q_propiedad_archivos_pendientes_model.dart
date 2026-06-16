@@ -1,4 +1,5 @@
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/uploaded_file.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
@@ -14,6 +15,9 @@ class LISTINGHQPropiedadArchivosPendientesModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for LISTING_HQ_Navbar component.
   late LISTINGHQNavbarModel lISTINGHQNavbarModel;
+
+  FFUploadedFile? uploadedContrato;
+  FFUploadedFile? uploadedDocumento;
 
   @override
   void initState(BuildContext context) {

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 class LISTINGHQDocumentosModel
     extends FlutterFlowModel<LISTINGHQDocumentosWidget> {
   ///  State fields for stateful widgets in this page.
+  String activeTab = 'Todos los documentos';
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;

@@ -111,6 +111,7 @@ dependencies:
 
   rxdart: any
   http_parser: any
+  syncfusion_flutter_pdfviewer: ^33.2.12
 dependency_overrides:
   http: 1.4.0
   intl: 0.20.2

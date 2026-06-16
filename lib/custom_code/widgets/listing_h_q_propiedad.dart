@@ -1,6 +1,12 @@
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import '/app_state.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -134,7 +140,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   final Set<String> _selectedCriteria = {};
 
   // ==================== IMAGE UPLOAD SECTIONS ====================
-  final List<String> _imageSections = [
+  List<String> _imageSections = [
     'Habitaciones',
     'Sala',
     'Comedor',
@@ -143,6 +149,130 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     'Plano',
     'Recorrido 360',
   ];
+
+  // Image state
+  final Map<String, List<XFile>> _images = {};
+  final ImagePicker _picker = ImagePicker();
+
+  late SharedPreferences _prefs;
+  String get _draftKey => 'checklist_draft_${FFAppState().lastActiveVisitId}';
+  bool _isInit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+  }
+
+  Future<void> _loadState() async {
+    _prefs = await SharedPreferences.getInstance();
+    final draftJson = _prefs.getString(_draftKey);
+    if (draftJson != null) {
+      try {
+        final Map<String, dynamic> data = jsonDecode(draftJson);
+        setState(() {
+          _tipoVivienda = data['tipoVivienda'];
+          _direccion = data['direccion'];
+          _habitaciones = data['habitaciones'];
+          _banos = data['banos'];
+          _parqueo = data['parqueo'];
+          _pisos = data['pisos'];
+          _mediosBanos = data['mediosBanos'];
+          _hasDanos = data['hasDanos'];
+          
+          if (data['descripcion'] != null) _descripcionController.text = data['descripcion'];
+          if (data['dudas'] != null) _dudasController.text = data['dudas'];
+          if (data['consideraciones'] != null) _consideracionesController.text = data['consideraciones'];
+          if (data['instrucciones'] != null) _instruccionesController.text = data['instrucciones'];
+          if (data['complejo'] != null) _complejoController.text = data['complejo'];
+
+          if (data['generalCharacteristics'] != null) _updateMapFromJson(_generalCharacteristics, data['generalCharacteristics']);
+          if (data['otherCharacteristics'] != null) _updateMapFromJson(_otherCharacteristics, data['otherCharacteristics']);
+          if (data['propiedadAmenities'] != null) _updateMapFromJson(_propiedadAmenities, data['propiedadAmenities']);
+          if (data['areasComunes'] != null) _updateMapFromJson(_areasComunes, data['areasComunes']);
+          if (data['servicios'] != null) _updateMapFromJson(_servicios, data['servicios']);
+          if (data['starRatings'] != null) {
+            Map<String, dynamic> ratings = data['starRatings'];
+            ratings.forEach((key, value) {
+              _starRatings[key] = value as int;
+              if (value > 0) _selectedCriteria.add(key);
+            });
+          }
+        });
+      } catch (e) {
+        print('Error loading checklist draft: $e');
+      }
+    }
+    _isInit = true;
+  }
+  
+  void _updateMapFromJson(Map<String, bool> target, Map<String, dynamic> source) {
+    source.forEach((key, value) {
+      target[key] = value as bool;
+    });
+  }
+
+  void _saveState() {
+    if (!_isInit) return;
+    final Map<String, dynamic> data = {
+      'tipoVivienda': _tipoVivienda,
+      'direccion': _direccion,
+      'habitaciones': _habitaciones,
+      'banos': _banos,
+      'parqueo': _parqueo,
+      'pisos': _pisos,
+      'mediosBanos': _mediosBanos,
+      'hasDanos': _hasDanos,
+      'descripcion': _descripcionController.text,
+      'dudas': _dudasController.text,
+      'consideraciones': _consideracionesController.text,
+      'instrucciones': _instruccionesController.text,
+      'complejo': _complejoController.text,
+      'generalCharacteristics': _generalCharacteristics,
+      'otherCharacteristics': _otherCharacteristics,
+      'propiedadAmenities': _propiedadAmenities,
+      'areasComunes': _areasComunes,
+      'servicios': _servicios,
+      'starRatings': _starRatings,
+    };
+    _prefs.setString(_draftKey, jsonEncode(data));
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    _saveState();
+  }
+
+  bool validateForm() {
+    bool hasError = false;
+    
+    final requiredSections = ['Habitaciones', 'Sala', 'Comedor', 'Cocina'];
+    for (final section in requiredSections) {
+      if (_images[section] == null || _images[section]!.isEmpty) {
+        hasError = true;
+      }
+    }
+    
+    if (_tipoVivienda == null || _direccion == null || _habitaciones == null) {
+      hasError = true;
+    }
+
+    if (_selectedCriteria.length < 3) {
+       hasError = true;
+    }
+    
+    if (hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor completa todos los campos obligatorios y sube las fotos requeridas.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
 
   @override
   void dispose() {
@@ -155,7 +285,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   }
 
   // ==================== DATA COLLECTION ====================
-  void _handleAction(VoidCallback? actionCallback) {
+  void _handleAction(VoidCallback? actionCallback, {bool isPublish = false}) {
+    if (isPublish) {
+      if (!validateForm()) return;
+    }
     final data = {
       'tipoVivienda': _tipoVivienda,
       'direccion': _direccion,
@@ -198,14 +331,12 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   Widget build(BuildContext context) {
     return Container(
       width: widget.width ?? double.infinity,
-      height: widget.height,
       color: Colors.white,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               // ========== ALERT BANNER ==========
               _buildAlertBanner(),
               const SizedBox(height: 18),
@@ -255,8 +386,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   // ==================== ALERT BANNER ====================
@@ -334,7 +464,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         if (_caracteristicasExpanded) ...[
           const SizedBox(height: 12),
           // Características generales header with "Añadir" button
-          _buildSubSectionHeaderWithAdd('Características generales'),
+          _buildSubSectionHeaderWithAdd(
+            'Características generales',
+            () => _showAddDialog(
+              'Agrega una característica general adicional',
+              _generalCharacteristics,
+            ),
+          ),
           const SizedBox(height: 12),
           // Habitaciones + Baños
           _buildDoubleDropdownRow(
@@ -367,7 +503,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           _buildCheckboxGroup(_generalCharacteristics),
           const SizedBox(height: 16),
           // Otras características header with "Añadir" button
-          _buildSubSectionHeaderWithAdd('Otras características'),
+          _buildSubSectionHeaderWithAdd(
+            'Otras características',
+            () => _showAddDialog(
+              'Agrega otra característica adicional',
+              _otherCharacteristics,
+            ),
+          ),
           const SizedBox(height: 11),
           // Checkboxes for other characteristics
           _buildCheckboxGroup(_otherCharacteristics),
@@ -390,12 +532,24 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         if (_amenidadesExpanded) ...[
           const SizedBox(height: 12),
           // Propiedad header with "Añadir"
-          _buildSubSectionHeaderWithAdd('Propiedad'),
+          _buildSubSectionHeaderWithAdd(
+            'Propiedad',
+            () => _showAddDialog(
+              'Agrega una amenidad de propiedad adicional',
+              _propiedadAmenities,
+            ),
+          ),
           const SizedBox(height: 11),
           _buildCheckboxGroup(_propiedadAmenities),
           const SizedBox(height: 16),
           // Áreas comunes header with "Añadir"
-          _buildSubSectionHeaderWithAdd('Áreas comunes'),
+          _buildSubSectionHeaderWithAdd(
+            'Áreas comunes',
+            () => _showAddDialog(
+              'Agrega una amenidad de área común adicional',
+              _areasComunes,
+            ),
+          ),
           const SizedBox(height: 11),
           _buildCheckboxGroup(_areasComunes),
           const SizedBox(height: 10),
@@ -476,7 +630,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         if (_infoHqExpanded) ...[
           const SizedBox(height: 17),
           // Servicios header with "Añadir" button
-          _buildSubSectionHeaderWithAdd('Servicios '),
+          _buildSubSectionHeaderWithAdd(
+            'Servicios ',
+            () => _showAddDialog(
+              'Agrega un servicio adicional',
+              _servicios,
+            ),
+          ),
           const SizedBox(height: 12),
           // Servicios checkboxes in grid layout (2 per row)
           _buildCheckboxGridGroup(_servicios),
@@ -560,7 +720,36 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         const SizedBox(height: 12),
         // "Añadir área adicional" button
         GestureDetector(
-          onTap: widget.onAddAreaAdicional,
+          onTap: () async {
+            String newArea = '';
+            final added = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Añadir área adicional'),
+                content: TextField(
+                  onChanged: (v) => newArea = v,
+                  decoration: const InputDecoration(hintText: 'Ej: Jardín trasero'),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Añadir'),
+                  ),
+                ],
+              ),
+            );
+            if (added == true && newArea.trim().isNotEmpty) {
+              setState(() {
+                if (!_imageSections.contains(newArea.trim())) {
+                  _imageSections.add(newArea.trim());
+                }
+              });
+            }
+          },
           child: Container(
             width: double.infinity,
             height: 30,
@@ -597,6 +786,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   // ==================== IMAGE UPLOAD SECTION ====================
   Widget _buildImageUploadSection(String label) {
+    final imagesForSection = _images[label] ?? [];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -612,8 +803,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         ),
         const SizedBox(height: 12),
         GestureDetector(
-          onTap: () {
-            // Trigger image picker
+          onTap: () async {
+            final List<XFile>? selectedImages = await _picker.pickMultiImage();
+            if (selectedImages != null && selectedImages.isNotEmpty) {
+              setState(() {
+                _images[label] = [...imagesForSection, ...selectedImages];
+              });
+            }
           },
           child: Container(
             width: double.infinity,
@@ -631,6 +827,50 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             ),
           ),
         ),
+        if (imagesForSection.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 80,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: imagesForSection.length,
+              itemBuilder: (context, index) {
+                final file = imagesForSection[index];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: kIsWeb
+                            ? Image.network(file.path, height: 80, width: 80, fit: BoxFit.cover)
+                            : Image.file(File(file.path), height: 80, width: 80, fit: BoxFit.cover),
+                      ),
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _images[label]?.removeAt(index);
+                            });
+                          },
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
       ],
     );
@@ -643,7 +883,11 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         // Guardar button (outline)
         Expanded(
           child: GestureDetector(
-            onTap: () => _handleAction(widget.onGuardar),
+            onTap: () {
+              _saveState();
+              _handleAction(widget.onGuardar);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Borrador guardado')));
+            },
             child: Container(
               height: 42,
               decoration: BoxDecoration(
@@ -668,7 +912,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         // Publicar button (filled)
         Expanded(
           child: GestureDetector(
-            onTap: () => _handleAction(widget.onPublicar),
+            onTap: () => _handleAction(widget.onPublicar, isPublish: true),
             child: Container(
               height: 42,
               decoration: BoxDecoration(
@@ -737,7 +981,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   }
 
   // ==================== REUSABLE: SUBSECTION HEADER WITH "AÑADIR" ====================
-  Widget _buildSubSectionHeaderWithAdd(String title) {
+  Widget _buildSubSectionHeaderWithAdd(String title, VoidCallback onAddTap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -751,9 +995,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           ),
         ),
         GestureDetector(
-          onTap: () {
-            // Add action
-          },
+          onTap: onAddTap,
           child: Container(
             height: 30,
             width: 91,
@@ -781,6 +1023,107 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         ),
       ],
     );
+  }
+
+  // ==================== REUSABLE: DYNAMIC ADD DIALOG ====================
+  Future<void> _showAddDialog(String displayTitle, Map<String, bool> targetMap) async {
+    String newValue = '';
+    final added = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  displayTitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFAFAFA),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE9EFF2), width: 1),
+                  ),
+                  child: TextField(
+                    autofocus: true,
+                    onChanged: (v) => newValue = v,
+                    style: const TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 14,
+                      color: textColor,
+                    ),
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      border: InputBorder.none,
+                      hintText: 'Escribe aquí...',
+                      hintStyle: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 14,
+                        color: placeholderColor,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(dialogContext, true);
+                  },
+                  child: Container(
+                    width: 150,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Agregar',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (added == true && newValue.trim().isNotEmpty) {
+      setState(() {
+        targetMap[newValue.trim()] = true;
+      });
+    }
   }
 
   // ==================== REUSABLE: DROPDOWN FIELD ====================

@@ -76,10 +76,74 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).primaryBackground,
+                                borderRadius: BorderRadius.circular(12.0),
+                                border: Border.all(
+                                  color: FlutterFlowTheme.of(context).alternate,
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(4.0, 4.0, 4.0, 4.0),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: ['Pendiente', 'Revision legal', 'Todos los documentos'].map((tab) {
+                                      final isActive = _model.activeTab == tab;
+                                      return Padding(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 4.0, 0.0),
+                                        child: InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            setState(() {
+                                              _model.activeTab = tab;
+                                            });
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsetsDirectional.fromSTEB(16.0, 10.0, 16.0, 10.0),
+                                            decoration: BoxDecoration(
+                                              color: isActive ? FlutterFlowTheme.of(context).secondaryBackground : Colors.transparent,
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              boxShadow: isActive ? const [
+                                                BoxShadow(
+                                                  blurRadius: 4.0,
+                                                  color: Color(0x0D000000),
+                                                  offset: Offset(0.0, 2.0),
+                                                )
+                                              ] : [],
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                tab,
+                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                  font: GoogleFonts.inter(),
+                                                  color: isActive ? FlutterFlowTheme.of(context).primaryText : FlutterFlowTheme.of(context).secondaryText,
+                                                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Text(
-                              'Documentos',
+                              'Documentos de propiedades',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
@@ -129,7 +193,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Container(
                                         width: 100.0,
@@ -151,15 +215,11 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        width:
-                                            MediaQuery.sizeOf(context).width *
-                                                0.6,
-                                        height:
-                                            MediaQuery.sizeOf(context).height *
-                                                0.1,
-                                        decoration: const BoxDecoration(),
-                                        child: IntrinsicWidth(
+                                      Expanded(
+                                        child: SizedBox(
+                                          height:
+                                              MediaQuery.sizeOf(context).height *
+                                                  0.1,
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             mainAxisAlignment:
@@ -320,8 +380,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color: const Color(
-                                                            0xFFFFD78D),
+                                                        color: const Color(0xFFFFDCCB),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
@@ -332,7 +391,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                                 .fromSTEB(16.0,
                                                                 2.0, 16.0, 2.0),
                                                         child: Text(
-                                                          'Publicada',
+                                                          'Pendiente',
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium
@@ -408,7 +467,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Container(
                                         width: 100.0,
@@ -430,15 +489,11 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        width:
-                                            MediaQuery.sizeOf(context).width *
-                                                0.6,
-                                        height:
-                                            MediaQuery.sizeOf(context).height *
-                                                0.1,
-                                        decoration: const BoxDecoration(),
-                                        child: IntrinsicWidth(
+                                      Expanded(
+                                        child: SizedBox(
+                                          height:
+                                              MediaQuery.sizeOf(context).height *
+                                                  0.1,
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             mainAxisAlignment:
@@ -599,8 +654,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color: const Color(
-                                                            0xFFFFD78D),
+                                                        color: const Color(0xFFFFDCCB),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
@@ -611,7 +665,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                                 .fromSTEB(16.0,
                                                                 2.0, 16.0, 2.0),
                                                         child: Text(
-                                                          'Publicada',
+                                                          'Pendiente',
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium
@@ -687,7 +741,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   padding: const EdgeInsetsDirectional.fromSTEB(
                                       10.0, 10.0, 10.0, 10.0),
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Container(
                                         width: 100.0,
@@ -709,15 +763,11 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        width:
-                                            MediaQuery.sizeOf(context).width *
-                                                0.6,
-                                        height:
-                                            MediaQuery.sizeOf(context).height *
-                                                0.1,
-                                        decoration: const BoxDecoration(),
-                                        child: IntrinsicWidth(
+                                      Expanded(
+                                        child: SizedBox(
+                                          height:
+                                              MediaQuery.sizeOf(context).height *
+                                                  0.1,
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             mainAxisAlignment:
@@ -878,8 +928,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                     ),
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                        color: const Color(
-                                                            0xFFFFD78D),
+                                                        color: const Color(0x3370ACAD),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(24.0),
@@ -890,7 +939,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                                 .fromSTEB(16.0,
                                                                 2.0, 16.0, 2.0),
                                                         child: Text(
-                                                          'Publicada',
+                                                          'Aceptada',
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium
@@ -906,8 +955,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                                       .bodyMedium
                                                                       .fontStyle,
                                                                 ),
-                                                                color: Colors
-                                                                    .orange,
+                                                                color: const Color(0xFF007376),
                                                                 fontSize: 12.0,
                                                                 letterSpacing:
                                                                     0.0,

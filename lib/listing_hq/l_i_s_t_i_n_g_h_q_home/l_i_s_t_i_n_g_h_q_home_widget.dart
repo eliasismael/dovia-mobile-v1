@@ -7,6 +7,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/listing_hq/l_i_s_t_i_n_g_h_q_documentos/l_i_s_t_i_n_g_h_q_documentos_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedades/l_i_s_t_i_n_g_h_q_propiedades_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_propiedad_rechazada_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -99,6 +100,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     required Color statusBgColor,
     required Color statusTextColor,
     required String buttonText,
+    VoidCallback? onPressed,
   }) {
     return Container(
       width: 250.0,
@@ -181,7 +183,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
               ],
             ),
             FFButtonWidget(
-              onPressed: () {
+              onPressed: onPressed ?? () {
                 print('Button pressed ...');
               },
               text: buttonText,
@@ -421,6 +423,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               statusBgColor: const Color(0xFFF4D476),
                               statusTextColor: const Color(0xFFF99F58),
                               buttonText: 'Revisar ahora',
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadArchivosPendientesWidget(title: 'Propiedad A'))),
                             ),
                             _buildCarouselCard(
                               address: 'xxx',
@@ -429,6 +432,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               statusBgColor: const Color(0xFFF4D476),
                               statusTextColor: const Color(0xFFF99F58),
                               buttonText: 'Revisar ahora',
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadArchivosPendientesWidget(title: 'Propiedad B'))),
                             ),
                           ]),
 
@@ -469,6 +473,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               statusBgColor: const Color(0xFFF4D476),
                               statusTextColor: const Color(0xFFF99F58),
                               buttonText: 'Revisar checklist',
+                              onPressed: () => context.pushNamed('LISTING_HQ_Propiedad'),
                             ),
                             _buildCarouselCard(
                               address: 'xxx',
@@ -477,6 +482,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               statusBgColor: const Color(0xFFF4D476),
                               statusTextColor: const Color(0xFFF99F58),
                               buttonText: 'Revisar checklist',
+                              onPressed: () => context.pushNamed('LISTING_HQ_Propiedad'),
                             ),
                           ]),
 
@@ -528,7 +534,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                           Column(
                             children: [
                               _buildLargeCard(
-                                  'Orchad House', 'Nombre del propietario'),
+                                  'Orchad House', 'Nombre del propietario', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadArchivosPendientesWidget(title: 'Orchad House')))),
                               AnimatedSize(
                                 duration: const Duration(milliseconds: 250),
                                 curve: Curves.easeInOut,
@@ -537,9 +543,9 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           _buildLargeCard('Orchad House 2',
-                                              'Nombre del propietario 2'),
+                                              'Nombre del propietario 2', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadArchivosPendientesWidget(title: 'Orchad House 2')))),
                                           _buildLargeCard('Orchad House 3',
-                                              'Nombre del propietario 3'),
+                                              'Nombre del propietario 3', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadArchivosPendientesWidget(title: 'Orchad House 3')))),
                                         ],
                                       )
                                     : const SizedBox.shrink(),

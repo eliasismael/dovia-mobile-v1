@@ -74,66 +74,37 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            SizedBox(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: MediaQuery.sizeOf(context).height * 1.0,
-                              child: custom_widgets.ListingHQPropiedad(
-                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: MediaQuery.sizeOf(context).height * 1.0,
-                                onGuardar: () async {},
-                                onAddServicio: () async {},
-                              ),
-                            ),
-                            Builder(
-                              builder: (context) => Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 20.0, 0.0, 0.0),
-                                child: wrapWithModel(
-                                  model: _model.primaryButtonModel,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: PrimaryButtonWidget(
-                                    text: 'Publicar y notificar al propietario',
-                                    onTap: () async {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (dialogContext) {
-                                          return Dialog(
-                                            elevation: 0,
-                                            insetPadding: EdgeInsets.zero,
-                                            backgroundColor: Colors.transparent,
-                                            alignment:
-                                                const AlignmentDirectional(
-                                                        0.0, 0.0)
-                                                    .resolve(Directionality.of(
-                                                        context)),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                FocusScope.of(dialogContext)
-                                                    .unfocus();
-                                                FocusManager
-                                                    .instance.primaryFocus
-                                                    ?.unfocus();
-                                              },
-                                              child: const PopupExitoWidget(
-                                                title: 'Se publicó con éxito',
-                                                text:
-                                                    'La información de la propiedad se ha publicado con éxito. Se le notificará al propietario.',
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
+                      child: custom_widgets.ListingHQPropiedad(
+                        width: MediaQuery.sizeOf(context).width * 1.0,
+                        onGuardar: () async {},
+                        onPublicar: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (dialogContext) {
+                              return Dialog(
+                                elevation: 0,
+                                insetPadding: EdgeInsets.zero,
+                                backgroundColor: Colors.transparent,
+                                alignment: const AlignmentDirectional(0.0, 0.0)
+                                    .resolve(Directionality.of(context)),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    FocusScope.of(dialogContext).unfocus();
+                                    FocusManager.instance.primaryFocus?.unfocus();
+                                  },
+                                  child: const PopupExitoWidget(
+                                    title: 'Se publicó con éxito',
+                                    text: 'La información de la propiedad se ha publicado con éxito. Se le notificará al propietario.',
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
+                              );
+                            },
+                          );
+                          if (context.mounted) {
+                            context.goNamed('LISTING_HQ_Home');
+                          }
+                        },
+                        onAddServicio: () async {},
                       ),
                     ),
                   ],
