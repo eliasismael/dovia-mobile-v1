@@ -13,7 +13,19 @@ import 'd_h_c_l_i_e_n_t_calificar_model.dart';
 export 'd_h_c_l_i_e_n_t_calificar_model.dart';
 
 class DHCLIENTCalificarWidget extends StatefulWidget {
-  const DHCLIENTCalificarWidget({super.key});
+  const DHCLIENTCalificarWidget({
+    super.key,
+    this.visitId,
+    this.offerId,
+    this.targetRole = 'SHOWING_AGENT',
+  });
+
+  /// Para POST /associate-feedback/visits/{visitId}/ratings
+  final String? visitId;
+  /// Para POST /associate-feedback/offers/{offerId}/ratings — tiene prioridad sobre visitId.
+  final String? offerId;
+  /// SHOWING_AGENT | LISTER_HQ | OPERATIVE_LISTER | LEGAL_ASSOCIATE | LEGAL_OFFICER
+  final String targetRole;
 
   static String routeName = 'DH_CLIENT_Calificar';
   static String routePath = '/dHCLIENTCalificar';
@@ -386,6 +398,14 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                               0.0, 20.0, 0.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
+                              if (widget.offerId != null) {
+                                // TODO: POST /associate-feedback/offers/${widget.offerId}/ratings
+                                // body: { "targetRole": "${widget.targetRole}", "stars": ${_model.ratingBarValue ?? 3.0} }
+                              } else if (widget.visitId != null) {
+                                // TODO: POST /associate-feedback/visits/${widget.visitId}/ratings
+                                // body: { "targetRole": "${widget.targetRole}", "stars": ${_model.ratingBarValue ?? 3.0} }
+                              }
+                              if (!mounted) return;
                               await showModalBottomSheet(
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,

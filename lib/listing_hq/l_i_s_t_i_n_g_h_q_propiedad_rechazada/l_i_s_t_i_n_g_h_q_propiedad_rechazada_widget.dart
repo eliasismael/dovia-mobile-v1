@@ -11,7 +11,17 @@ import 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
 
 class LISTINGHQPropiedadRechazadaWidget extends StatefulWidget {
-  const LISTINGHQPropiedadRechazadaWidget({super.key});
+  const LISTINGHQPropiedadRechazadaWidget({
+    super.key,
+    required this.processId,
+    this.propertyName = 'Orchad House',
+  });
+
+  /// ID del proceso legal — necesario para:
+  /// PUT /legal-processes/{processId}/documents/{documentId}/upload
+  /// POST /legal-processes/{processId}/lister-hq/resubmit-to-hq-review
+  final String processId;
+  final String propertyName;
 
   static String routeName = 'LISTING_HQ_PropiedadRechazada';
   static String routePath = '/lISTINGHQPropiedadRechazada';
@@ -50,7 +60,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
       multiFile: false,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
-    if (selectedFiles != null && selectedFiles.isNotEmpty) {
+    if (selectedFiles != null && selectedFiles.isNotEmpty && mounted) {
       setState(() {
         _documents.add({
           'id': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -64,17 +74,22 @@ class _LISTINGHQPropiedadRechazadaWidgetState
     }
   }
 
+  /// Reemplaza el archivo de un documento rechazado.
+  /// API: PUT /legal-processes/{processId}/documents/{documentId}/upload
   Future<void> _handleReuploadDoc(int index) async {
+    final documentId = _documents[index]['id'] as String;
     final selectedFiles = await selectFiles(
       multiFile: false,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
-    if (selectedFiles != null && selectedFiles.isNotEmpty) {
+    if (selectedFiles != null && selectedFiles.isNotEmpty && mounted) {
+      // TODO: call PUT /legal-processes/${widget.processId}/documents/$documentId/upload
+      // with the selected file as multipart/form-data
       setState(() {
-        _documents[index]['name'] = selectedFiles.first.originalFilename ?? 'Documento Actualizado';
+        _documents[index]['name'] = selectedFiles.first.originalFilename;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Documento reemplazado correctamente.')),
+        SnackBar(content: Text('Documento $documentId reemplazado.')),
       );
     }
   }
@@ -280,7 +295,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Orchad House',
+                                widget.propertyName,
                                 style: FlutterFlowTheme.of(context).bodyLarge.override(
                                       font: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18.0),
                                     ),
@@ -409,11 +424,12 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: FFButtonWidget(
-                        onPressed: () {
+                        onPressed: () async {
+                          // TODO: POST /legal-processes/${widget.processId}/lister-hq/resubmit-to-hq-review
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Caso enviado a Revisión Legal HQ exitosamente.')),
                           );
-                          context.pop();
+                          if (mounted) context.pop();
                         },
                         text: 'Enviar a Revision Legal HQ',
                         options: FFButtonOptions(

@@ -13,7 +13,19 @@ import 'd_h_c_l_i_e_n_t_reportar_problema_model.dart';
 export 'd_h_c_l_i_e_n_t_reportar_problema_model.dart';
 
 class DHCLIENTReportarProblemaWidget extends StatefulWidget {
-  const DHCLIENTReportarProblemaWidget({super.key});
+  const DHCLIENTReportarProblemaWidget({
+    super.key,
+    this.visitId,
+    this.offerId,
+    this.targetRole = 'SHOWING_AGENT',
+  });
+
+  /// Para POST /associate-feedback/visits/{visitId}/reports
+  final String? visitId;
+  /// Para POST /associate-feedback/offers/{offerId}/reports — tiene prioridad sobre visitId.
+  final String? offerId;
+  /// SHOWING_AGENT | LISTER_HQ | OPERATIVE_LISTER | LEGAL_ASSOCIATE | LEGAL_OFFICER
+  final String targetRole;
 
   static String routeName = 'DH_CLIENT_ReportarProblema';
   static String routePath = '/dHCLIENTReportarProblema';
@@ -282,6 +294,21 @@ class _DHCLIENTReportarProblemaWidgetState
                                 0.0, 150.0, 0.0, 0.0),
                             child: FFButtonWidget(
                               onPressed: () async {
+                                final message = _model.textController?.text.trim() ?? '';
+                                if (message.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Por favor describe el problema.')),
+                                  );
+                                  return;
+                                }
+                                if (widget.offerId != null) {
+                                  // TODO: POST /associate-feedback/offers/${widget.offerId}/reports
+                                  // body: { "targetRole": "${widget.targetRole}", "message": "$message" }
+                                } else if (widget.visitId != null) {
+                                  // TODO: POST /associate-feedback/visits/${widget.visitId}/reports
+                                  // body: { "targetRole": "${widget.targetRole}", "message": "$message" }
+                                }
+                                if (!mounted) return;
                                 await showModalBottomSheet(
                                   isScrollControlled: true,
                                   backgroundColor: Colors.transparent,

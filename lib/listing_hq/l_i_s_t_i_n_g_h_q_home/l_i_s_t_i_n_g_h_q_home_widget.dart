@@ -8,6 +8,7 @@ import '/listing_hq/l_i_s_t_i_n_g_h_q_documentos/l_i_s_t_i_n_g_h_q_documentos_wi
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedades/l_i_s_t_i_n_g_h_q_propiedades_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_propiedad_rechazada_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_widget.dart';
+import '/shared_components/popup_asignar_operative/popup_asignar_operative_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -449,6 +450,24 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               statusBgColor: const Color(0xFFF4D476),
                               statusTextColor: const Color(0xFFF99F58),
                               buttonText: 'Asignar',
+                              onPressed: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (dialogContext) => Dialog(
+                                    elevation: 0,
+                                    insetPadding: EdgeInsets.zero,
+                                    backgroundColor: Colors.transparent,
+                                    alignment: const AlignmentDirectional(
+                                            0.0, 0.0)
+                                        .resolve(
+                                            Directionality.of(context)),
+                                    child: const PopupAsignarOperativeWidget(
+                                      visitId: 'visit-stub-1',
+                                      propertyAddress: 'Dirección: xxx',
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                             _buildCarouselCard(
                               address: 'xxx',
@@ -457,6 +476,24 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               statusBgColor: const Color(0xFFFFBCBC),
                               statusTextColor: const Color(0xFFF52100),
                               buttonText: 'Asignar de nuevo',
+                              onPressed: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (dialogContext) => Dialog(
+                                    elevation: 0,
+                                    insetPadding: EdgeInsets.zero,
+                                    backgroundColor: Colors.transparent,
+                                    alignment: const AlignmentDirectional(
+                                            0.0, 0.0)
+                                        .resolve(
+                                            Directionality.of(context)),
+                                    child: const PopupAsignarOperativeWidget(
+                                      visitId: 'visit-stub-2',
+                                      propertyAddress: 'Dirección: xxx',
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ]),
 
@@ -500,7 +537,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                           ),
                           Column(
                             children: [
-                              _buildLargeCard('Orchad House', 'Nombre del propietario', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadRechazadaWidget()))),
+                              _buildLargeCard('Orchad House', 'Nombre del propietario', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadRechazadaWidget(processId: 'process-stub-1')))),
                               AnimatedSize(
                                 duration: const Duration(milliseconds: 250),
                                 curve: Curves.easeInOut,
@@ -509,7 +546,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           _buildLargeCard('Orchad House 2',
-                                              'Nombre del propietario 2', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadRechazadaWidget()))),
+                                              'Nombre del propietario 2', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LISTINGHQPropiedadRechazadaWidget(processId: 'process-stub-1')))),
                                           _buildLargeCard('Orchad House 3',
                                               'Nombre del propietario 3'),
                                         ],
