@@ -1,10 +1,15 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_auth.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/index.dart';
 import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
 import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
+import '/repositories/user_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'l_e_g_a_l_h_q_ajustes_model.dart';
 export 'l_e_g_a_l_h_q_ajustes_model.dart';
 
@@ -83,7 +88,20 @@ class _LEGALHQAjustesWidgetState extends State<LEGALHQAjustesWidget> {
                                 height: MediaQuery.sizeOf(context).height * 1.0,
                                 onTermsAndConditions: () async {},
                                 onSupport: () async {},
-                                onLogout: () async {},
+                                onLogout: () async {
+                                  final router = GoRouter.of(context);
+                                  context.read<UserRepository>().clear();
+                                  await DOVIAAPIAuthContextGroup.logoutAllCall
+                                      .call(idToken: authManager.authenticationToken);
+                                  router.prepareAuthEvent();
+                                  await authManager.signOut();
+                                  router.clearRedirectLocation();
+                                  if (mounted) {
+                                    // ignore: use_build_context_synchronously
+                                    context.goNamedAuth(
+                                        QueEsDoviaWidget.routeName, mounted);
+                                  }
+                                },
                                 onDeleteAccount: () async {},
                                 onSaveInfo: () async {},
                               ),

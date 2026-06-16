@@ -23,6 +23,8 @@ class DOVIAAPIUserContextGroup {
   static AdminVerifyUserCall adminVerifyUserCall = AdminVerifyUserCall();
   static GetPerformanceSummaryCall getPerformanceSummaryCall =
       GetPerformanceSummaryCall();
+  static DeactivateMyAccountCall deactivateMyAccountCall =
+      DeactivateMyAccountCall();
 }
 
 class GetAuthenticatedUserProfileCall {
@@ -54,7 +56,27 @@ class GetAuthenticatedUserProfileCall {
       ));
   bool? isUserActive(dynamic response) => castToType<bool>(getJsonField(
         response,
+        r'''$.data.active''',
+      ));
+  bool? isVerified(dynamic response) => castToType<bool>(getJsonField(
+        response,
         r'''$.data.verified''',
+      ));
+  String? userId(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.id''',
+      ));
+  String? avatar(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.avatar''',
+      ));
+  String? name(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.fullName.name''',
+      ));
+  String? lastname(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.fullName.lastname''',
       ));
 }
 
@@ -119,16 +141,26 @@ class GetUserByIDNEWCall {
 class UpdateUserPreferencesNEWCall {
   Future<ApiCallResponse> call({
     String? userId = '',
+    String? authToken = '',
+    String? propertyType,
+    String? acquisitionModality,
+    String? description,
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
-{}''';
+    final ffApiRequestBody = '''
+{
+  ${propertyType != null ? '"propertyType": "${escapeStringForJson(propertyType)}",' : '"propertyType": null,'}
+  ${acquisitionModality != null ? '"acquisitionModality": "${escapeStringForJson(acquisitionModality)}",' : '"acquisitionModality": null,'}
+  ${description != null ? '"description": "${escapeStringForJson(description)}"' : '"description": null'}
+}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update User Preferences NEW',
       apiUrl: '$baseUrl/users/$userId/preferences',
       callType: ApiCallType.PUT,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -220,6 +252,7 @@ class UpdateUserProfileCall {
     String? phoneCountryCode,
     String? phoneNumber,
     String? address,
+    String? workArea,
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
@@ -230,7 +263,9 @@ class UpdateUserProfileCall {
   ${gender != null ? '"gender": "${escapeStringForJson(gender)}",' : ''}
   ${nationality != null ? '"nationality": "${escapeStringForJson(nationality)}",' : ''}
   ${(phoneCountryCode != null && phoneNumber != null) ? '"phone": { "countryCode": "${escapeStringForJson(phoneCountryCode)}", "number": "${escapeStringForJson(phoneNumber)}" },' : ''}
-  ${address != null ? '"address": "${escapeStringForJson(address)}"' : '"_placeholder": null'}
+  ${address != null ? '"address": "${escapeStringForJson(address)}",' : ''}
+  ${workArea != null ? '"workArea": $workArea,' : ''}
+  "_placeholder": null
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Update User Profile',
@@ -307,6 +342,46 @@ class GetPerformanceSummaryCall {
   double? totalEarned(dynamic response) =>
       castToType<double>(getJsonField(response, r'''$.data.totalEarned''')) ??
       castToType<double>(getJsonField(response, r'''$.totalEarned'''));
+}
+
+class DeactivateMyAccountCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? reason,
+  }) async {
+    final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = reason != null && reason.isNotEmpty
+        ? '{ "reason": "${escapeStringForJson(reason)}" }'
+        : '{}';
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Deactivate My Account',
+      apiUrl: '$baseUrl/users/me/deactivation',
+      callType: ApiCallType.PATCH,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  bool? active(dynamic response) => castToType<bool>(getJsonField(
+        response,
+        r'''$.data.active''',
+      ));
+  String? message(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.message''',
+      ));
 }
 
 /// End DOVIA API - User Context Group Code

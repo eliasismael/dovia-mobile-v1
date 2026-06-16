@@ -1,4 +1,4 @@
-import 'dart:convert';
+import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
 import 'api_helpers.dart';
 
@@ -43,6 +43,8 @@ class DOVIAAPIOfferContextGroup {
       MakeCounterOfferRENTCall();
   static CreateCounterOfferCall createCounterOfferCall =
       CreateCounterOfferCall();
+  static UploadDoviAgreementCall uploadDoviAgreementCall =
+      UploadDoviAgreementCall();
 }
 
 class CreateOfferPURCHASEPurchasePromiseCall {
@@ -199,13 +201,11 @@ class AcceptOfferCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
     String? authToken = '',
+    String? acceptedBy = 'OWNER',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
-{
-  "acceptedBy": "OWNER"
-}''';
+    final ffApiRequestBody = '{ "acceptedBy": "${escapeStringForJson(acceptedBy)}" }';
     return ApiManager.instance.makeApiCall(
       callName: 'Accept Offer',
       apiUrl: '$baseUrl/offers/$offerId/accept',
@@ -231,15 +231,16 @@ class RejectOfferCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
     String? authToken = '',
-    String? reason = '',
+    String? rejectedBy = 'OWNER',
+    String? reason,
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  "rejectedBy": "OWNER",
-  "reason": "${reason?.isNotEmpty == true ? reason : 'Price does not meet expectations'}"
-}''';
+    final reasonField = (reason != null && reason.isNotEmpty)
+        ? ', "reason": "${escapeStringForJson(reason)}"'
+        : '';
+    final ffApiRequestBody =
+        '{ "rejectedBy": "${escapeStringForJson(rejectedBy)}"$reasonField }';
     return ApiManager.instance.makeApiCall(
       callName: 'Reject Offer',
       apiUrl: '$baseUrl/offers/$offerId/reject',
@@ -296,22 +297,30 @@ class SelectLegalAssociateCall {
 class SubmitBankAgentDataCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
+    String? authToken = '',
+    String? bank = '',
+    String? firstName = '',
+    String? lastName = '',
+    String? phone = '',
+    String? email = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
+    final ffApiRequestBody = '''
 {
-  "banco": "Banco de Bogotá",
-  "nombre": "María",
-  "apellido": "González",
-  "telefono": "+57 300 1234567",
-  "email": "maria.gonzalez@bancobogota.com"
+  "bank": "${escapeStringForJson(bank)}",
+  "firstName": "${escapeStringForJson(firstName)}",
+  "lastName": "${escapeStringForJson(lastName)}",
+  "phone": "${escapeStringForJson(phone)}",
+  "email": "${escapeStringForJson(email)}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Submit Bank Agent Data',
       apiUrl: '$baseUrl/offers/$offerId/bank-agent-data',
       callType: ApiCallType.POST,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -733,6 +742,38 @@ class CreateCounterOfferCall {
       alwaysAllowBody: false,
     );
   }
+}
+
+class UploadDoviAgreementCall {
+  Future<ApiCallResponse> call({
+    String? offerId = '',
+    String? authToken = '',
+    FFUploadedFile? file,
+  }) async {
+    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Upload Dovia Agreement',
+      apiUrl: '$baseUrl/offers/$offerId/dovia-agreement',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  String? doviaAgreementDocumentUrl(dynamic response) =>
+      castToType<String>(getJsonField(response, r'''$.data.doviaAgreementDocumentUrl'''));
 }
 
 /// End DOVIA API - Offer Context Group Code

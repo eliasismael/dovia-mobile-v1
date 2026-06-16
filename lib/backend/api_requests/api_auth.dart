@@ -21,6 +21,7 @@ class DOVIAAPIAuthContextGroup {
       ConfirmForgotPasswordNEWCall();
   static RefreshTokenNEWCall refreshTokenNEWCall = RefreshTokenNEWCall();
   static SelectRoleCall selectRoleCall = SelectRoleCall();
+  static LogoutAllCall logoutAllCall = LogoutAllCall();
 }
 
 class SignUpStepNEWCall {
@@ -259,6 +260,32 @@ class SignInNEWCall {
         response,
         r'''$.data.idToken''',
       ));
+  bool? isProfileComplete(dynamic response) => castToType<bool>(getJsonField(
+        response,
+        r'''$.data.isProfileComplete''',
+      ));
+  bool? isRoleSelected(dynamic response) => castToType<bool>(getJsonField(
+        response,
+        r'''$.data.isRoleSelected''',
+      ));
+  bool? verified(dynamic response) => castToType<bool>(getJsonField(
+        response,
+        r'''$.data.verified''',
+      ));
+  bool? isIdentificationDocumentUploaded(dynamic response) =>
+      castToType<bool>(getJsonField(
+        response,
+        r'''$.data.isIdentificationDocumentUploaded''',
+      ));
+  bool? isAssociateProfileComplete(dynamic response) =>
+      castToType<bool>(getJsonField(
+        response,
+        r'''$.data.isAssociateProfileComplete''',
+      ));
+  String? userId(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.userId''',
+      ));
 }
 
 class ForgotPasswordNEWCall {
@@ -413,6 +440,32 @@ class SelectRoleCall {
   String? idToken(dynamic response) =>
       castToType<String>(getJsonField(response, r'''$.data.idToken''')) ??
       castToType<String>(getJsonField(response, r'''$.data.tokens.idToken'''));
+}
+
+class LogoutAllCall {
+  Future<ApiCallResponse> call({
+    String? idToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIAuthContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Logout All Sessions',
+      apiUrl: '$baseUrl/auth/logout-all',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $idToken',
+      },
+      params: {},
+      body: '',
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
 }
 
 /// End DOVIA API - Auth Context Group Code
