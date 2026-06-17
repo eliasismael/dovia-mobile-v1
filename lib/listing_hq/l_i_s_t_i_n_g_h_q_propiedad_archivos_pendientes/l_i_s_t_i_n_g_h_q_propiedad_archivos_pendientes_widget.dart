@@ -18,9 +18,11 @@ class LISTINGHQPropiedadArchivosPendientesWidget extends StatefulWidget {
   const LISTINGHQPropiedadArchivosPendientesWidget({
     super.key,
     required this.title,
+    this.visitId,
   });
 
   final String? title;
+  final String? visitId;
 
   static String routeName = 'LISTING_HQ_PropiedadArchivosPendientes';
   static String routePath = '/lISTINGHQPropiedadArchivosPendientes';
