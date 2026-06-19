@@ -244,3 +244,5 @@ export '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_propuesta_de_vis
     show DOVIACLIENTPropuestaDeVisitaWidget;
 export '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_visita_aceptada/d_o_v_i_a_c_l_i_e_n_t_visita_aceptada_widget.dart'
     show DOVIACLIENTVisitaAceptadaWidget;
+export '/listing_hq/l_i_s_t_i_n_g_h_q_review_operative_notes/l_i_s_t_i_n_g_h_q_review_operative_notes_widget.dart'
+    show LISTINGHQReviewOperativeNotesWidget;
