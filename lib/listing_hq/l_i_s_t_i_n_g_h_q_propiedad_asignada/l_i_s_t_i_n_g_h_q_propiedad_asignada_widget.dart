@@ -8,6 +8,11 @@ import '/shared_components/primary_button/primary_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/repositories/visits_repository.dart';
+import '/core/result.dart';
+import '/shared_components/popup_exito/popup_exito_widget.dart';
+import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
 
@@ -25,7 +30,10 @@ class LISTINGHQPropiedadAsignadaWidget extends StatefulWidget {
 class _LISTINGHQPropiedadAsignadaWidgetState
     extends State<LISTINGHQPropiedadAsignadaWidget> {
   late LISTINGHQPropiedadAsignadaModel _model;
-  bool _isListerAssigned = true;
+  bool _isListerAssigned = false;
+  Map<String, dynamic>? _selectedOperative;
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -226,15 +234,15 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                     padding:
                                         const EdgeInsetsDirectional.fromSTEB(
                                             10.0, 10.0, 10.0, 10.0),
-                                    child: _isListerAssigned
+                                    child: _selectedOperative != null
                                         ? Column(
                                             mainAxisSize: MainAxisSize.max,
                                             children: [
                                               ClipRRect(
                                                 borderRadius:
                                                     BorderRadius.circular(8.0),
-                                                child: Image.asset(
-                                                  'assets/images/nahid_photo.png',
+                                                child: Image.network(
+                                                  _selectedOperative!['photoUrl'] ?? 'https://i.pravatar.cc/150',
                                                   width: 120.0,
                                                   height: 120.0,
                                                   fit: BoxFit.cover,
@@ -304,7 +312,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                                     const EdgeInsetsDirectional
                                                         .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                                 child: Text(
-                                                  'Nombre Apellido',
+                                                  _selectedOperative!['name'] ?? 'Nombre Apellido',
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
@@ -390,11 +398,31 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                               ),
                                             ],
                                           )
-                                        : InkWell(
-                                            onTap: () {
-                                              print('Open assign popup');
-                                            },
-                                            child: Column(
+                                          : InkWell(
+                                              onTap: () async {
+                                                await showDialog(
+                                                  context: context,
+                                                  builder: (dialogContext) {
+                                                    return Dialog(
+                                                      backgroundColor: Colors.transparent,
+                                                      insetPadding: const EdgeInsets.all(24),
+                                                      child: custom_widgets.ListingHQMatchmakingSelectorWidget(
+                                                        propertyId: 'mock_property_id',
+                                                        onClose: () => Navigator.of(dialogContext).pop(),
+                                                        onOperativeSelected: (operative, date, time) {
+                                                          Navigator.of(dialogContext).pop();
+                                                          setState(() {
+                                                            _selectedOperative = operative;
+                                                            _selectedDate = date;
+                                                            _selectedTime = time;
+                                                          });
+                                                        },
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              child: Column(
                                               mainAxisSize: MainAxisSize.max,
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
@@ -718,14 +746,39 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                               model: _model.primaryButtonModel,
                               updateCallback: () => safeSetState(() {}),
                               child: PrimaryButtonWidget(
-                                text: _isListerAssigned ? 'Organizar información de la propiedad' : 'Continuar con la reprogramación',
+                                text: _isListerAssigned 
+                                    ? 'Organizar información de la propiedad' 
+                                    : (_selectedOperative != null ? 'Confirmar visita y notificar' : 'Continuar con la reprogramación'),
                                 onTap: () async {
                                   if (_isListerAssigned) {
                                     setState(() {
                                       _isListerAssigned = false;
                                     });
-                                  } else {
-                                    // Continuar
+                                  } else if (_selectedOperative != null) {
+                                    final repo = context.read<VisitsRepository>();
+                                    final res = await repo.assignVisit(
+                                      propertyId: 'mock_prop_id',
+                                      operativeId: _selectedOperative!['id'],
+                                      date: _selectedDate!,
+                                      time: _selectedTime!,
+                                    );
+                                    if (res.isSuccess) {
+                                      if (context.mounted) {
+                                        await showDialog(
+                                          context: context,
+                                          builder: (ctx) => const Dialog(
+                                            backgroundColor: Colors.transparent,
+                                            child: PopupExitoWidget(
+                                              title: '¡Visita Asignada!',
+                                              text: 'La visita ha sido confirmada y se enviaron las notificaciones.',
+                                            ),
+                                          ),
+                                        );
+                                        if (context.mounted) {
+                                          context.goNamed('LISTING_HQ_Home');
+                                        }
+                                      }
+                                    }
                                   }
                                 },
                               ),

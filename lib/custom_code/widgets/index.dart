@@ -1,4 +1,5 @@
 export 'interactive_map.dart' show InteractiveMap;
+export 'listing_hq_matchmaking_selector.dart' show ListingHQMatchmakingSelectorWidget;
 export 'dovia_services_widget.dart' show DoviaServicesWidget;
 export 'dovia_client_house_card.dart' show DoviaClientHouseCard;
 export 'rental_offer_widget.dart' show RentalOfferWidget;

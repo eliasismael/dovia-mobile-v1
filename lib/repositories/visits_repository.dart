@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '/app_state.dart';
 import '/auth/custom_auth/auth_util.dart';
@@ -234,5 +235,51 @@ class VisitsRepository extends ChangeNotifier {
     _myVisits = [];
     _error = null;
     notifyListeners();
+  }
+
+  // =========================================================================
+  // MOCKS FOR LISTING HQ MATCHMAKING
+  // =========================================================================
+
+  /// Mocks fetching available Operative Listers for a specific date and time.
+  Future<Result<List<Map<String, dynamic>>>> getAvailableOperatives(DateTime date, TimeOfDay time) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+    
+    // Return a mocked list of operatives
+    return Success([
+      {
+        'id': 'op_1',
+        'name': 'Juan Pérez',
+        'photoUrl': 'https://i.pravatar.cc/150?u=juan',
+        'rating': 4.8,
+      },
+      {
+        'id': 'op_2',
+        'name': 'María López',
+        'photoUrl': 'https://i.pravatar.cc/150?u=maria',
+        'rating': 4.9,
+      },
+      {
+        'id': 'op_3',
+        'name': 'Carlos Ramírez',
+        'photoUrl': 'https://i.pravatar.cc/150?u=carlos',
+        'rating': 4.5,
+      },
+    ]);
+  }
+
+  /// Mocks assigning a visit to a specific Operative Lister.
+  Future<Result<void>> assignVisit({
+    required String propertyId,
+    required String operativeId,
+    required DateTime date,
+    required TimeOfDay time,
+  }) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+    
+    // Simulate successful assignment
+    return const Success(null);
   }
 }
