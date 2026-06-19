@@ -20,6 +20,7 @@ class ListingHQPropiedad extends StatefulWidget {
   final VoidCallback? onAddServicio;
   final VoidCallback? onAddAreaAdicional;
   final Function(Map<String, dynamic>)? onSave;
+  final Map<String, dynamic>? initialData;
 
   const ListingHQPropiedad({
     super.key,
@@ -30,6 +31,7 @@ class ListingHQPropiedad extends StatefulWidget {
     this.onAddServicio,
     this.onAddAreaAdicional,
     this.onSave,
+    this.initialData,
   });
 
   @override
@@ -202,8 +204,78 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       } catch (e) {
         print('Error loading checklist draft: $e');
       }
+    } else if (widget.initialData != null) {
+      _populateFromInitialData(widget.initialData!);
     }
     _isInit = true;
+  }
+  
+  void _populateFromInitialData(Map<String, dynamic> data) {
+    final prop = data['property'] is Map ? data['property'] as Map : {};
+    final checklist = data['checklist'] is Map ? data['checklist'] as Map : data;
+    
+    setState(() {
+      _tipoVivienda = prop['type']?.toString() ?? checklist['tipoVivienda'];
+      
+      if (prop['location'] != null && prop['location']['address'] != null) {
+        _direccion = prop['location']['address']['fullAddress']?.toString() ?? 
+                     prop['location']['address']['street']?.toString();
+      } else {
+        _direccion = checklist['direccion'];
+      }
+      
+      if (prop['description'] != null) _descripcionController.text = prop['description'];
+      else if (checklist['descripcion'] != null) _descripcionController.text = checklist['descripcion'];
+      
+      final chars = prop['characteristics'] is Map ? prop['characteristics'] as Map : (checklist['caracteristicas'] is Map ? checklist['caracteristicas'] as Map : {});
+      _habitaciones = chars['bedrooms']?.toString() ?? chars['habitaciones']?.toString();
+      _banos = chars['bathrooms']?.toString() ?? chars['banos']?.toString();
+      _parqueo = chars['parking']?.toString() ?? chars['parqueo']?.toString();
+      _pisos = chars['floors']?.toString() ?? chars['pisos']?.toString();
+      _mediosBanos = chars['halfBathrooms']?.toString() ?? chars['mediosBanos']?.toString();
+      
+      _generalCharacteristics.keys.forEach((k) {
+        if (chars[k] == true || chars[k.toLowerCase()] == true) _generalCharacteristics[k] = true;
+      });
+      
+      final otherChars = prop['otherCharacteristics'] is Map ? prop['otherCharacteristics'] as Map : (checklist['otrasCaracteristicas'] is Map ? checklist['otrasCaracteristicas'] as Map : {});
+      _otherCharacteristics.keys.forEach((k) {
+        if (otherChars[k] == true) _otherCharacteristics[k] = true;
+      });
+
+      final amenities = prop['amenities'] is Map ? prop['amenities'] as Map : (checklist['amenidades'] is Map ? checklist['amenidades'] as Map : {});
+      final propAm = amenities['property'] is Map ? amenities['property'] as Map : amenities;
+      _propiedadAmenities.keys.forEach((k) {
+        if (propAm[k] == true) _propiedadAmenities[k] = true;
+      });
+      
+      final comAm = amenities['common'] is Map ? amenities['common'] as Map : (amenities['comunes'] is Map ? amenities['comunes'] as Map : {});
+      _areasComunes.keys.forEach((k) {
+        if (comAm[k] == true) _areasComunes[k] = true;
+      });
+
+      final ratings = prop['urbanCriteria'] is Map ? prop['urbanCriteria'] as Map : (checklist['urbanCriteria'] is Map ? checklist['urbanCriteria'] as Map : {});
+      ratings.forEach((key, value) {
+        if (_starRatings.containsKey(key)) {
+          final val = int.tryParse(value.toString()) ?? 0;
+          _starRatings[key] = val;
+          if (val > 0) _selectedCriteria.add(key.toString());
+        }
+      });
+      
+      final info = checklist['infoHq'] is Map ? checklist['infoHq'] as Map : {};
+      final servs = info['servicios'] is Map ? info['servicios'] as Map : {};
+      _servicios.keys.forEach((k) {
+        if (servs[k] == true) _servicios[k] = true;
+      });
+      _hasDanos = info['hasDanos'];
+      
+      final adds = checklist['adicionales'] is Map ? checklist['adicionales'] as Map : {};
+      if (adds['dudas'] != null) _dudasController.text = adds['dudas'];
+      if (adds['consideraciones'] != null) _consideracionesController.text = adds['consideraciones'];
+      if (adds['instrucciones'] != null) _instruccionesController.text = adds['instrucciones'];
+      if (adds['complejo'] != null) _complejoController.text = adds['complejo'];
+    });
   }
   
   void _updateMapFromJson(Map<String, bool> target, Map<String, dynamic> source) {
