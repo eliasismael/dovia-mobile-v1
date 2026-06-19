@@ -25,6 +25,7 @@ class LISTINGHQPropiedadAsignadaWidget extends StatefulWidget {
 class _LISTINGHQPropiedadAsignadaWidgetState
     extends State<LISTINGHQPropiedadAsignadaWidget> {
   late LISTINGHQPropiedadAsignadaModel _model;
+  bool _isListerAssigned = true;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -225,69 +226,101 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                     padding:
                                         const EdgeInsetsDirectional.fromSTEB(
                                             10.0, 10.0, 10.0, 10.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: Image.asset(
-                                            'assets/images/nahid_photo.png',
-                                            width: 120.0,
-                                            height: 120.0,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .accent1,
-                                              borderRadius:
-                                                  BorderRadius.circular(24.0),
-                                            ),
-                                            alignment:
-                                                const AlignmentDirectional(
-                                                    0.0, 0.0),
-                                            child: Align(
-                                              alignment:
-                                                  const AlignmentDirectional(
-                                                      0.0, -1.0),
-                                              child: Padding(
+                                    child: _isListerAssigned
+                                        ? Column(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                child: Image.asset(
+                                                  'assets/images/nahid_photo.png',
+                                                  width: 120.0,
+                                                  height: 120.0,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                              Padding(
                                                 padding:
                                                     const EdgeInsetsDirectional
-                                                        .fromSTEB(
-                                                        0.0, 4.0, 0.0, 4.0),
+                                                        .fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .accent1,
+                                                    borderRadius:
+                                                        BorderRadius.circular(24.0),
+                                                  ),
+                                                  alignment:
+                                                      const AlignmentDirectional(
+                                                          0.0, 0.0),
+                                                  child: Align(
+                                                    alignment:
+                                                        const AlignmentDirectional(
+                                                            0.0, -1.0),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                              0.0, 4.0, 0.0, 4.0),
+                                                      child: Text(
+                                                        'Información Operative\nListing Associate',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .publicSans(
+                                                                fontWeight:
+                                                                    FlutterFlowTheme.of(context)
+                                                                        .bodyMedium
+                                                                        .fontWeight,
+                                                                fontStyle:
+                                                                    FlutterFlowTheme.of(context)
+                                                                        .bodyMedium
+                                                                        .fontStyle,
+                                                              ),
+                                                              fontSize: 12.0,
+                                                              letterSpacing: 0.0,
+                                                              fontWeight:
+                                                                  FlutterFlowTheme.of(context)
+                                                                      .bodyMedium
+                                                                      .fontWeight,
+                                                              fontStyle:
+                                                                  FlutterFlowTheme.of(context)
+                                                                      .bodyMedium
+                                                                      .fontStyle,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                                 child: Text(
-                                                  'Información Operative\nListing Associate',
-                                                  textAlign: TextAlign.center,
+                                                  'Nombre Apellido',
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium
                                                       .override(
-                                                        font: GoogleFonts
-                                                            .publicSans(
+                                                        font: GoogleFonts.inter(
                                                           fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
+                                                              FontWeight.w600,
                                                           fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
+                                                              FlutterFlowTheme.of(context)
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                        fontSize: 12.0,
+                                                        fontSize: 16.0,
                                                         letterSpacing: 0.0,
                                                         fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontWeight,
+                                                            FontWeight.w600,
                                                         fontStyle:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -296,99 +329,114 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                                                       ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
-                                          child: Text(
-                                            'Nombre Apellido',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight: FontWeight.w600,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                                child: FFButtonWidget(
+                                                  onPressed: () {
+                                                    print('Button pressed ...');
+                                                  },
+                                                  text: 'Listing',
+                                                  options: FFButtonOptions(
+                                                    width: MediaQuery.sizeOf(
                                                                 context)
-                                                            .bodyMedium
-                                                            .fontStyle,
+                                                            .width *
+                                                        1.0,
+                                                    height: 20.0,
+                                                    padding:
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            16.0, 0.0, 16.0, 0.0),
+                                                    iconPadding:
+                                                        const EdgeInsetsDirectional
+                                                            .fromSTEB(
+                                                            0.0, 0.0, 0.0, 0.0),
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .primary,
+                                                    textStyle: FlutterFlowTheme.of(
+                                                            context)
+                                                        .titleSmall
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .publicSans(
+                                                            fontWeight:
+                                                                FlutterFlowTheme.of(context)
+                                                                    .titleSmall
+                                                                    .fontWeight,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(context)
+                                                                    .titleSmall
+                                                                    .fontStyle,
+                                                          ),
+                                                          color: Colors.white,
+                                                          fontSize: 12.0,
+                                                          letterSpacing: 0.0,
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(context)
+                                                                  .titleSmall
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(context)
+                                                                  .titleSmall
+                                                                  .fontStyle,
+                                                        ),
+                                                    elevation: 0.0,
+                                                    borderRadius:
+                                                        BorderRadius.circular(8.0),
                                                   ),
-                                                  fontSize: 16.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
                                                 ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
-                                          child: FFButtonWidget(
-                                            onPressed: () {
-                                              print('Button pressed ...');
+                                              ),
+                                            ],
+                                          )
+                                        : InkWell(
+                                            onTap: () {
+                                              print('Open assign popup');
                                             },
-                                            text: 'Listing',
-                                            options: FFButtonOptions(
-                                              width: MediaQuery.sizeOf(context)
-                                                      .width *
-                                                  1.0,
-                                              height: 20.0,
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                      16.0, 0.0, 16.0, 0.0),
-                                              iconPadding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                      0.0, 0.0, 0.0, 0.0),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                              textStyle: FlutterFlowTheme.of(
-                                                      context)
-                                                  .titleSmall
-                                                  .override(
-                                                    font:
-                                                        GoogleFonts.publicSans(
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .titleSmall
-                                                              .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .titleSmall
-                                                              .fontStyle,
-                                                    ),
-                                                    color: Colors.white,
-                                                    fontSize: 12.0,
-                                                    letterSpacing: 0.0,
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .titleSmall
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .titleSmall
-                                                            .fontStyle,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  width: 60.0,
+                                                  height: 60.0,
+                                                  decoration: BoxDecoration(
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .accent1,
+                                                    shape: BoxShape.circle,
                                                   ),
-                                              elevation: 0.0,
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
+                                                  child: Icon(
+                                                    Icons.add,
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .primary,
+                                                    size: 30.0,
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                                      0.0, 12.0, 0.0, 0.0),
+                                                  child: Text(
+                                                    'Asignar Operative\nListing Associate',
+                                                    textAlign: TextAlign.center,
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          font: GoogleFonts.publicSans(
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                          fontSize: 12.0,
+                                                        ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
                                 ),
                               ],
@@ -608,6 +656,61 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                               ],
                             ),
                           ),
+                          if (_isListerAssigned)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 20.0, 0.0, 0.0),
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context).accent4,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 16.0, 16.0, 16.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Historial de reagendamiento',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              font: GoogleFonts.inter(
+                                                fontWeight: FontWeight.w600,
+                                                color: FlutterFlowTheme.of(context).error,
+                                              ),
+                                              fontSize: 14.0,
+                                            ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 8.0, 0.0, 0.0),
+                                        child: Text(
+                                          'Fecha de Asignaciones Anteriores:\n12 Oct 2026, 10:00 AM\nMotivo: El propietario tuvo una emergencia personal.',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.inter(
+                                                  fontWeight: FontWeight.w400,
+                                                  color: FlutterFlowTheme.of(context).primaryText,
+                                                ),
+                                                fontSize: 12.0,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
@@ -615,8 +718,16 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                               model: _model.primaryButtonModel,
                               updateCallback: () => safeSetState(() {}),
                               child: PrimaryButtonWidget(
-                                text: 'Organizar información de la propiedad',
-                                onTap: () async {},
+                                text: _isListerAssigned ? 'Organizar información de la propiedad' : 'Continuar con la reprogramación',
+                                onTap: () async {
+                                  if (_isListerAssigned) {
+                                    setState(() {
+                                      _isListerAssigned = false;
+                                    });
+                                  } else {
+                                    // Continuar
+                                  }
+                                },
                               ),
                             ),
                           ),
