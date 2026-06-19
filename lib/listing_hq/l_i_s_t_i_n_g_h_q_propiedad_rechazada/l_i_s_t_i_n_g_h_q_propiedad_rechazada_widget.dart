@@ -4,6 +4,8 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/flutter_flow/upload_data.dart';
+import '/backend/api_requests/api_legal_process.dart';
+import '/auth/custom_auth/auth_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -36,16 +38,47 @@ class _LISTINGHQPropiedadRechazadaWidgetState
   late LISTINGHQPropiedadRechazadaModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Mock document list
-  List<Map<String, dynamic>> _documents = [
-    {'id': '1', 'name': 'Contrato', 'progress': 1.0},
-    {'id': '2', 'name': 'Documento', 'progress': 1.0},
-  ];
+  bool _isLoading = true;
+  String _rejectionNote = '';
+  List<dynamic> _remoteDocuments = [];
+  Map<String, dynamic>? _ownerData;
+  Map<String, dynamic>? _legalData;
+
+  Future<void> _fetchProcessData() async {
+    try {
+      final response =
+          await DOVIAAPILegalProcessContextGroup.getLegalProcessByIDCall.call(
+        processId: widget.processId,
+        authToken: currentAuthenticationToken,
+      );
+      if (response.succeeded) {
+        final body = response.jsonBody;
+        if (mounted) {
+          setState(() {
+            _rejectionNote = body['rejectionNote'] ??
+                body['note'] ??
+                body['hqReviewNote'] ??
+                'No hay nota de rechazo especificada.';
+            final docs = body['documents'] as List? ?? [];
+            _remoteDocuments = docs;
+            _ownerData = body['owner'];
+            _legalData = body['legalAssociate'] ?? body['legalOfficer'];
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => LISTINGHQPropiedadRechazadaModel());
+    _fetchProcessData();
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -61,40 +94,65 @@ class _LISTINGHQPropiedadRechazadaWidgetState
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
     if (selectedFiles != null && selectedFiles.isNotEmpty && mounted) {
-      setState(() {
-        _documents.add({
-          'id': DateTime.now().millisecondsSinceEpoch.toString(),
-          'name': selectedFiles.first.originalFilename ?? 'Nuevo Documento',
-          'progress': 1.0,
-        });
-      });
+      final file = selectedFiles.first;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Documento cargado correctamente.')),
+        const SnackBar(content: Text('Subiendo nuevo documento...')),
       );
+      final response = await DOVIAAPILegalProcessContextGroup
+          .createLegalProcessDocumentCall
+          .call(
+        processId: widget.processId,
+        authToken: currentAuthenticationToken,
+        file: file,
+      );
+      if (response.succeeded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Documento cargado correctamente.')),
+        );
+        _fetchProcessData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al cargar documento.')),
+        );
+      }
     }
   }
 
   /// Reemplaza el archivo de un documento rechazado.
   /// API: PUT /legal-processes/{processId}/documents/{documentId}/upload
   Future<void> _handleReuploadDoc(int index) async {
-    final documentId = _documents[index]['id'] as String;
+    final documentId = _remoteDocuments[index]['id']?.toString() ?? '';
     final selectedFiles = await selectFiles(
       multiFile: false,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
     if (selectedFiles != null && selectedFiles.isNotEmpty && mounted) {
-      // TODO: call PUT /legal-processes/${widget.processId}/documents/$documentId/upload
-      // with the selected file as multipart/form-data
-      setState(() {
-        _documents[index]['name'] = selectedFiles.first.originalFilename;
-      });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Documento $documentId reemplazado.')),
+        const SnackBar(content: Text('Reemplazando documento...')),
       );
+      final response = await DOVIAAPILegalProcessContextGroup
+          .uploadLegalProcessDocumentCall
+          .call(
+        processId: widget.processId,
+        documentId: documentId,
+        authToken: currentAuthenticationToken,
+        file: selectedFiles.first,
+      );
+      if (response.succeeded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Documento reemplazado exitosamente.')),
+        );
+        _fetchProcessData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al reemplazar el documento.')),
+        );
+      }
     }
   }
 
-  Widget _buildDocCard(Map<String, dynamic> doc, int index) {
+  Widget _buildDocCard(dynamic doc, int index) {
+    final docName = doc['title'] ?? doc['name'] ?? doc['type'] ?? 'Documento';
     return Container(
       width: 160.0,
       margin: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
@@ -129,15 +187,17 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                     child: Text(
                       'PDF',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                            font:
+                                GoogleFonts.inter(fontWeight: FontWeight.bold),
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
                           ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 12.0),
                 Text(
-                  doc['name'],
+                  docName,
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -147,7 +207,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                 ),
                 const SizedBox(height: 12.0),
                 LinearPercentIndicator(
-                  percent: doc['progress'],
+                  percent: 1.0,
                   lineHeight: 8.0,
                   animation: true,
                   progressColor: FlutterFlowTheme.of(context).primary,
@@ -165,9 +225,11 @@ class _LISTINGHQPropiedadRechazadaWidgetState
               icon: const Icon(Icons.more_vert, size: 20),
               onSelected: (value) {
                 if (value == 'eliminar') {
-                  setState(() {
-                    _documents.removeAt(index);
-                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Función de eliminar no implementada completamente en backend.')),
+                  );
                 } else if (value == 'resubir') {
                   _handleReuploadDoc(index);
                 }
@@ -189,7 +251,8 @@ class _LISTINGHQPropiedadRechazadaWidgetState
     );
   }
 
-  Widget _buildContactCard({required String role, required String name, required String phone}) {
+  Widget _buildContactCard(
+      {required String role, required String name, required String phone}) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -223,7 +286,8 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                 Text(
                   name,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16.0),
+                        font: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600, fontSize: 16.0),
                       ),
                 ),
               ],
@@ -274,7 +338,8 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                 children: [
                   // Header
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 20.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 30.0, 20.0, 20.0),
                     child: Row(
                       children: [
                         InkWell(
@@ -283,7 +348,8 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                             width: 40.0,
                             height: 40.0,
                             decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.chevron_left, size: 24.0),
@@ -296,14 +362,22 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                             children: [
                               Text(
                                 widget.propertyName,
-                                style: FlutterFlowTheme.of(context).bodyLarge.override(
-                                      font: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18.0),
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyLarge
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 18.0),
                                     ),
                               ),
                               Text(
                                 'Rechazada por Legal',
-                                style: FlutterFlowTheme.of(context).bodySmall.override(
-                                      font: GoogleFonts.inter(color: FlutterFlowTheme.of(context).error),
+                                style: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                          color: FlutterFlowTheme.of(context)
+                                              .error),
                                     ),
                               ),
                             ],
@@ -315,106 +389,152 @@ class _LISTINGHQPropiedadRechazadaWidgetState
 
                   // Scrollable Body
                   Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Documentos subidos
-                          Text(
-                            'Documentos cargados',
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                  font: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16.0),
+                    child: _isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                                color: FlutterFlowTheme.of(context).primary))
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0, vertical: 10.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Documentos subidos
+                                Text(
+                                  'Documentos cargados',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16.0),
+                                      ),
                                 ),
-                          ),
-                          const SizedBox(height: 15.0),
-                          SizedBox(
-                            height: 160.0,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: _documents.length,
-                              itemBuilder: (context, index) {
-                                return _buildDocCard(_documents[index], index);
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 20.0),
-
-                          // Subir nuevo
-                          FFButtonWidget(
-                            onPressed: _handleUploadNewDoc,
-                            text: 'Subir nuevo documentacion de la propiedad',
-                            icon: const Icon(Icons.upload_file, size: 15),
-                            options: FFButtonOptions(
-                              width: double.infinity,
-                              height: 50.0,
-                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                                    color: FlutterFlowTheme.of(context).primaryText,
-                                    fontSize: 14.0,
+                                const SizedBox(height: 15.0),
+                                SizedBox(
+                                  height: 160.0,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: _remoteDocuments.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildDocCard(
+                                          _remoteDocuments[index], index);
+                                    },
                                   ),
-                              borderSide: BorderSide(
-                                color: FlutterFlowTheme.of(context).primary,
-                                width: 1.0,
-                              ),
-                              elevation: 0.0,
-                              borderRadius: BorderRadius.circular(24.0),
-                            ),
-                          ),
-                          const SizedBox(height: 30.0),
-
-                          // Feedback Legal
-                          Text(
-                            'Nota de Dovia Legal',
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                  font: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16.0),
                                 ),
-                          ),
-                          const SizedBox(height: 10.0),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(15.0),
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(color: FlutterFlowTheme.of(context).error.withValues(alpha: 0.5)),
-                            ),
-                            child: Text(
-                              'La propiedad fue rechazada porque las escrituras adjuntas no están notarizadas correctamente. Por favor, solicite el documento original actualizado al propietario.',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(),
+                                const SizedBox(height: 20.0),
+
+                                // Subir nuevo
+                                FFButtonWidget(
+                                  onPressed: _handleUploadNewDoc,
+                                  text:
+                                      'Subir nuevo documentacion de la propiedad',
+                                  icon: const Icon(Icons.upload_file, size: 15),
+                                  options: FFButtonOptions(
+                                    width: double.infinity,
+                                    height: 50.0,
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .override(
+                                          font: GoogleFonts.publicSans(
+                                              fontWeight: FontWeight.w600),
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          fontSize: 14.0,
+                                        ),
+                                    borderSide: BorderSide(
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      width: 1.0,
+                                    ),
+                                    elevation: 0.0,
+                                    borderRadius: BorderRadius.circular(24.0),
                                   ),
+                                ),
+                                const SizedBox(height: 30.0),
+
+                                // Feedback Legal
+                                Text(
+                                  'Nota de Dovia Legal',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16.0),
+                                      ),
+                                ),
+                                const SizedBox(height: 10.0),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(15.0),
+                                  decoration: BoxDecoration(
+                                    color: FlutterFlowTheme.of(context)
+                                        .error
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    border: Border.all(
+                                        color: FlutterFlowTheme.of(context)
+                                            .error
+                                            .withValues(alpha: 0.5)),
+                                  ),
+                                  child: Text(
+                                    _rejectionNote,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(),
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(height: 30.0),
+
+                                // Contactos
+                                Text(
+                                  'Involucrados',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16.0),
+                                      ),
+                                ),
+                                const SizedBox(height: 10.0),
+                                _buildContactCard(
+                                  role: 'Dovia Legal',
+                                  name: _legalData != null
+                                      ? "${_legalData!['firstName'] ?? ''} ${_legalData!['lastName'] ?? ''}"
+                                      : 'Abogado Dovia',
+                                  phone: _legalData != null
+                                      ? (_legalData!['phone'] ??
+                                          _legalData!['phoneNumber'] ??
+                                          '+0000000000')
+                                      : '+0000000000',
+                                ),
+                                _buildContactCard(
+                                  role: 'Datos del propietario',
+                                  name: _ownerData != null
+                                      ? "${_ownerData!['firstName'] ?? ''} ${_ownerData!['lastName'] ?? ''}"
+                                      : 'María García',
+                                  phone: _ownerData != null
+                                      ? (_ownerData!['phone'] ??
+                                          _ownerData!['phoneNumber'] ??
+                                          '+0000000000')
+                                      : '+0000000000',
+                                ),
+                                const SizedBox(
+                                    height:
+                                        100.0), // Padding for navbar and bottom button
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 30.0),
-
-                          // Contactos
-                          Text(
-                            'Involucrados',
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                  font: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16.0),
-                                ),
-                          ),
-                          const SizedBox(height: 10.0),
-                          _buildContactCard(
-                            role: 'Dovia Legal',
-                            name: 'Abogado Dovia',
-                            phone: '+1234567890',
-                          ),
-                          _buildContactCard(
-                            role: 'Datos del propietario',
-                            name: 'María García',
-                            phone: '+0987654321',
-                          ),
-                          const SizedBox(height: 100.0), // Padding for navbar and bottom button
-                        ],
-                      ),
-                    ),
                   ),
                 ],
               ),
-              
+
               // Bottom Buttons & Navbar
               Align(
                 alignment: Alignment.bottomCenter,
@@ -425,21 +545,38 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: FFButtonWidget(
                         onPressed: () async {
-                          // TODO: POST /legal-processes/${widget.processId}/lister-hq/resubmit-to-hq-review
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Caso enviado a Revisión Legal HQ exitosamente.')),
+                          final response =
+                              await DOVIAAPILegalProcessContextGroup
+                                  .resubmitToHQReviewCall
+                                  .call(
+                            processId: widget.processId,
+                            authToken: currentAuthenticationToken,
                           );
-                          if (mounted) context.pop();
+                          if (response.succeeded) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Caso enviado a Revisión Legal HQ exitosamente.')),
+                            );
+                            if (mounted) context.pop();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Error al enviar el caso.')),
+                            );
+                          }
                         },
                         text: 'Enviar a Revision Legal HQ',
                         options: FFButtonOptions(
                           width: double.infinity,
                           height: 50.0,
                           color: FlutterFlowTheme.of(context).primary,
-                          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                                color: Colors.white,
-                              ),
+                          textStyle:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
+                                    color: Colors.white,
+                                  ),
                           elevation: 2.0,
                           borderRadius: BorderRadius.circular(24.0),
                         ),
