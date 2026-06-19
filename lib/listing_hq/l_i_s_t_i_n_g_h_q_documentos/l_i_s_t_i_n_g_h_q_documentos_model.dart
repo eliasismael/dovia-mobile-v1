@@ -2,15 +2,18 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/index.dart';
 import 'l_i_s_t_i_n_g_h_q_documentos_widget.dart'
     show LISTINGHQDocumentosWidget;
 import 'package:flutter/material.dart';
 
 class LISTINGHQDocumentosModel
     extends FlutterFlowModel<LISTINGHQDocumentosWidget> {
-  ///  State fields for stateful widgets in this page.
   String activeTab = 'Todos los documentos';
+
+  // State field(s) for TextField widget.
+  FocusNode? textFieldFocusNode;
+  TextEditingController? textController;
+  String? Function(BuildContext, String?)? textControllerValidator;
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
@@ -32,5 +35,8 @@ class LISTINGHQDocumentosModel
     cornerGradientBackgroundModel.dispose();
     lISTINGHQHeaderModel.dispose();
     lISTINGHQNavbarModel.dispose();
+
+    textFieldFocusNode?.dispose();
+    textController?.dispose();
   }
 }
