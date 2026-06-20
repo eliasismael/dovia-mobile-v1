@@ -2,7 +2,6 @@ import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/principal/todas_las_fotos/todas_las_fotos_widget.dart';
 import '/dovia_client/app/principal/agendar_cita/agendar_cita_widget.dart';
 import '/components/porpiedades_amenidades_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '/components/propiedad_caracteristicas_widget.dart';
 import '/components/propiedades_sobre_el_sector_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
@@ -22,6 +21,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '/repositories/visits_repository.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
+import 'recorrido_360_modal.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
 
 class DOVIACLIENTPropiedadSeleccionadaNewWidget extends StatefulWidget {
@@ -204,6 +204,13 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     );
   }
 
+  bool get _has360Url {
+    final body = _propertyData?.jsonBody;
+    if (body == null) return false;
+    final url = DOVIAAPIPropertyContextGroup.getPropertyByIDCall.video360Url(body);
+    return url != null && url.isNotEmpty;
+  }
+
   void _show360() async {
     _trackInteraction();
     final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
@@ -211,11 +218,32 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     final url = body != null ? api.video360Url(body) : null;
 
     if (url != null && url.isNotEmpty) {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-        return;
-      }
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: 'Cerrar',
+        barrierColor: Colors.black.withOpacity(0.7),
+        transitionDuration: const Duration(milliseconds: 300),
+        pageBuilder: (context, anim1, anim2) {
+          return BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            child: Recorrido360Modal(url: url),
+          );
+        },
+        transitionBuilder: (context, anim1, anim2, child) {
+          return FadeTransition(
+            opacity: anim1,
+            child: ScaleTransition(
+              scale: CurvedAnimation(
+                parent: anim1,
+                curve: Curves.easeOutBack,
+              ),
+              child: child,
+            ),
+          );
+        },
+      );
+      return;
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -811,40 +839,47 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         InkWell(
-                                          splashColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: _show360,
-                                          child: Container(
-                                            width: 40.0,
-                                            height: 40.0,
-                                            decoration: const BoxDecoration(
-                                              color: Color(0xFFF7F7F7),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  blurRadius: 10.0,
-                                                  color: Color(0x33000000),
-                                                  offset: Offset(
-                                                    0.0,
-                                                    2.0,
-                                                  ),
-                                                )
-                                              ],
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: SvgPicture.asset(
-                                                'assets/images/360-view.svg',
-                                                width: 200.0,
-                                                height: 200.0,
-                                                fit: BoxFit.none,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
+                                           splashColor: Colors.transparent,
+                                           focusColor: Colors.transparent,
+                                           hoverColor: Colors.transparent,
+                                           highlightColor: Colors.transparent,
+                                           onTap: _has360Url ? _show360 : null,
+                                           child: Container(
+                                             width: 40.0,
+                                             height: 40.0,
+                                             decoration: BoxDecoration(
+                                               color: _has360Url
+                                                   ? const Color(0xFFF7F7F7)
+                                                   : const Color(0xFFE0E0E0),
+                                               boxShadow: _has360Url
+                                                   ? const [
+                                                       BoxShadow(
+                                                         blurRadius: 10.0,
+                                                         color: Color(0x33000000),
+                                                         offset: Offset(
+                                                           0.0,
+                                                           2.0,
+                                                         ),
+                                                       )
+                                                     ]
+                                                   : null,
+                                               shape: BoxShape.circle,
+                                             ),
+                                             child: ClipRRect(
+                                               borderRadius:
+                                                   BorderRadius.circular(8.0),
+                                               child: Opacity(
+                                                 opacity: _has360Url ? 1.0 : 0.4,
+                                                 child: SvgPicture.asset(
+                                                   'assets/images/360-view.svg',
+                                                   width: 200.0,
+                                                   height: 200.0,
+                                                   fit: BoxFit.none,
+                                                 ),
+                                               ),
+                                             ),
+                                           ),
+                                         ),
                                         InkWell(
                                           splashColor: Colors.transparent,
                                           focusColor: Colors.transparent,
