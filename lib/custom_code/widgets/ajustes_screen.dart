@@ -17,7 +17,7 @@ class AjustesScreen extends StatefulWidget {
   final double? width;
   final double? height;
   final Future Function()? onCancelSubscription;
-  final Future Function()? onDeleteAccount;
+  final Future Function(String? reason)? onDeleteAccount;
   final Future Function()? onSignOut;
 
   const AjustesScreen({
@@ -665,8 +665,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
           title: '¿Por qué abandonas DOVIA?',
           controller: _deleteReasonCtrl,
           onConfirm: () async {
-            await widget.onDeleteAccount?.call();
-            // Typically calls onSignOut too
+            final reason = _deleteReasonCtrl.text.trim();
+            await widget.onDeleteAccount?.call(reason.isEmpty ? null : reason);
           },
         );
       },

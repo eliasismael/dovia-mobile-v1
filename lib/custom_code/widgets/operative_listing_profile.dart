@@ -19,7 +19,7 @@ class OperativeListingProfile extends StatefulWidget {
   final double? height;
 
   /// Called after the user confirms the delete-account flow (confirm + reason).
-  final Future Function()? onDeleteAccount;
+  final Future Function(String? reason)? onDeleteAccount;
 
   /// Called when the user taps "Cerrar sesión".
   final Future Function()? onSignOut;
@@ -1036,10 +1036,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   }
 
   void _openTermsModal() {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => const _TermsModal(),
     );
   }
@@ -1068,208 +1066,48 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   // ─── Delete account flow (2 pop-ups) ──────────────────────────────────────────
 
   void _showDeleteAccountFlow() {
-    _showConfirmBottomSheet(
-      title: '¿Estás seguro de que quieres eliminar tu cuenta?',
-      subtitle: 'Esta acción es permanente y perderás todos tus datos.',
-      confirmLabel: 'Eliminar permanentemente',
-      onConfirm: () {
-        _showReasonBottomSheet(
-          title: '¿Por qué quieres eliminar tu cuenta?',
-          controller: _deleteReasonController,
-          onConfirm: () async {
-            await widget.onDeleteAccount?.call();
-          },
-        );
-      },
-    );
-  }
-
-  void _showConfirmBottomSheet({
-    required String title,
-    required String subtitle,
-    required String confirmLabel,
-    required VoidCallback onConfirm,
-  }) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      builder: (context) => Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.4,
-          ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _sheetHandle(),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  color: inputPlaceholder,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: aqua),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                        child: const Text('Cancelar',
-                            style: TextStyle(
-                                fontFamily: 'Public Sans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: textPrimary)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          onConfirm();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: deleteRed,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(confirmLabel,
-                            style: const TextStyle(
-                                fontFamily: 'Public Sans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      builder: (context) => _DeleteConfirmDialog(
+        onConfirm: () {
+          Navigator.pop(context);
+          _showReasonDialog();
+        },
       ),
     );
   }
 
-  void _showReasonBottomSheet({
-    required String title,
-    required TextEditingController controller,
-    required VoidCallback onConfirm,
-  }) {
-    showModalBottomSheet(
+  void _showReasonDialog() {
+    showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      builder: (context) => Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _sheetHandle(),
-              const SizedBox(height: 24),
-              Text(title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textPrimary)),
-              const SizedBox(height: 20),
-              TextField(
-                controller: controller,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: 'Escribe tu motivo aquí...',
-                  hintStyle: const TextStyle(
-                      fontSize: 14, color: inputPlaceholder),
-                  filled: true,
-                  fillColor: backgroundGray,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    onConfirm();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: aqua,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24)),
-                    elevation: 0,
-                  ),
-                  child: const Text('Confirmar',
-                      style: TextStyle(
-                          fontFamily: 'Public Sans',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white)),
-                ),
-              ),
-            ],
-          ),
-        ),
+      builder: (context) => _DeleteReasonDialog(
+        controller: _deleteReasonController,
+        onConfirm: () async {
+          Navigator.pop(context);
+          if (widget.onDeleteAccount != null) {
+            final reason = _deleteReasonController.text.trim();
+            await widget.onDeleteAccount!.call(reason.isEmpty ? null : reason);
+          }
+          if (mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const _DeleteSuccessDialog(),
+            );
+            Future.delayed(const Duration(seconds: 3), () {
+              if (mounted) {
+                if (widget.onLogout != null) {
+                  widget.onLogout!.call();
+                } else if (widget.onSignOut != null) {
+                  widget.onSignOut!.call();
+                }
+              }
+            });
+          }
+        },
       ),
     );
   }
-
-  Widget _sheetHandle() => Container(
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-            color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
-      );
 
   // ─── Shared Builders ──────────────────────────────────────────────────────────
 
@@ -1581,149 +1419,344 @@ class _PasswordFieldState extends State<_PasswordField> {
 
 // ─── Terms & Conditions Modal ──────────────────────────────────────────────────
 
-class _TermsModal extends StatefulWidget {
+class _TermsModal extends StatelessWidget {
   const _TermsModal();
 
   @override
-  State<_TermsModal> createState() => _TermsModalState();
-}
-
-class _TermsModalState extends State<_TermsModal> {
-  final ScrollController _scroll = ScrollController();
-  bool _canAccept = false;
-
-  static const Color _aqua = Color(0xFF007376);
-
-  @override
-  void initState() {
-    super.initState();
-    _scroll.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 32) {
-      if (!_canAccept) setState(() => _canAccept = true);
-    }
-  }
-
-  @override
-  void dispose() {
-    _scroll.removeListener(_onScroll);
-    _scroll.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.92,
-      minChildSize: 0.6,
-      maxChildSize: 0.95,
-      builder: (_, sheetCtrl) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20),
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
         ),
-        padding: const EdgeInsets.all(20),
-        child: Column(children: [
-          Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2))),
-          const Text('Términos y Condiciones',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF00444B))),
-          const SizedBox(height: 16),
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _scroll,
-              child: const Text(
-                _termsText,
-                style: TextStyle(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Términos y condiciones',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00444B),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(Icons.close, color: Color(0xFF00444B), size: 24),
+                  ),
+                ],
+              ),
+            ),
+            const Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Text(
+                  _termsText,
+                  style: TextStyle(
                     fontFamily: 'Public Sans',
                     fontSize: 13,
-                    color: Color(0xFF444444),
-                    height: 1.7),
+                    color: Color(0xFF007376),
+                    fontWeight: FontWeight.w600,
+                    height: 1.5,
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          if (!_canAccept)
-            const Text(
-              'Desplázate hasta el final para aceptar',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 12,
-                  color: Color(0xFF888888)),
-            ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            height: 46,
-            child: ElevatedButton(
-              onPressed: _canAccept ? () => Navigator.of(context).pop() : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _aqua,
-                disabledBackgroundColor: _aqua.withValues(alpha: 0.3),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
-                elevation: 0,
-              ),
-              child: const Text('Aceptar y cerrar',
-                  style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ]),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
   static const String _termsText = '''
-TÉRMINOS Y CONDICIONES DE USO – DOVIA
+1. ¿QUÉ ES DOVIA?
+• DOVIA es una plataforma digital que permite: publicar propiedades, coordinar visitas,
+• recibir y gestionar ofertas, facilitar procesos de venta y renta de inmuebles.
+• DOVIA no es propietaria de los inmuebles, no es agente inmobiliario tradicional, DOVIA
+no representa legalmente a ninguna de las partes, DOVIA actúa únicamente como
+plataforma de facilitación tecnológica.
 
-Última actualización: enero 2025
+2. RESPONSABILIDAD DEL USUARIO
+• Cada usuario es responsable de la información que publica, las decisiones que toma,
+los acuerdos que celebra.
+• DOVIA no garantiza, cierres de venta o renta, precios, comportamiento de otros
+usuarios, resultados de negociaciones.
 
-1. ACEPTACIÓN DE LOS TÉRMINOS
-Al acceder y usar la plataforma DOVIA ("la Plataforma"), el usuario acepta estos Términos y Condiciones en su totalidad. Si no está de acuerdo, debe abstenerse de usar la Plataforma.
+3. PUBLICACIÓN DE PROPIEDADES
+• Al publicar una propiedad en DOVIA, el propietario declara que, es el legítimo
+propietario o cuenta con autorización expresa, la información proporcionada es veraz y
+actualizada.
+• DOVIA no se hace responsable por información falsa, incompleta o engañosa
+proporcionada por los usuarios.
 
-2. DESCRIPCIÓN DEL SERVICIO
-DOVIA es una plataforma digital que facilita la publicación, búsqueda y negociación de bienes inmuebles entre propietarios y compradores/arrendatarios, con asistencia de asesores inmobiliarios certificados ("Showings").
+4. ACUERDOS FUERA DE DOVIA (CLÁUSULA CRÍTICA)
+• Si un propietario, comprador, arrendatario o interesado negocia, agenda visitas,
+intercambia datos, realiza pagos, firma contratos, utiliza abogados o notarios, FUERA
+DE LA APLICACIÓN DOVIA, acepta expresamente que:
+o DOVIA no se hace responsable de ningún problema, estafa, incumplimiento,
+daño, pérdida económica o conflicto legal derivado de dichos acuerdos.
+o Esto incluye contratos privados, escrituras, pagos en efectivo o transferencias
+externas, acuerdos verbales.
 
-3. REGISTRO Y CUENTA
-El usuario debe proporcionar información veraz y actualizada. Es responsable de mantener la confidencialidad de sus credenciales de acceso. DOVIA se reserva el derecho de suspender cuentas con información falsa o actividad fraudulenta.
+5. VISITAS, CITAS Y SEGURIDAD
+• DOVIA realiza verificaciones básicas de usuarios, sin garantizar identidad real,
+conducta, intenciones.
+• Si un usuario decide reunirse, permitir visitas, coordinar citas, fuera de la app, lo hace
+bajo su propio riesgo, y acepta que DOVIA no es responsable de robos, estafas, daños
+físicos o amenazas.
 
-4. ROL DE ASOCIADO OPERATIVO
-El Asociado de Operative Listing se compromete a realizar las visitas y levantamientos asignados con diligencia, cargar la documentación requerida y mantener su perfil operativo actualizado dentro de la Plataforma.
+6. COMISIONES Y OBLIGACIONES DEL PROPIETARIO
+• DOVIA obtiene sus ingresos mediante comisiones cobradas al propietario cuando una
+operación de venta o renta se origina, gestiona o facilita a través de la app.
+• Al publicar una propiedad, el propietario acepta que todo contacto, visita u oferta
+generada a partir de DOVIA se considera originada por la Plataforma.
+• La comisión de DOVIA es exigible si la operación se concreta, aunque el cierre final se
+realice fuera de la app.
 
-5. USO ACEPTABLE
-El usuario se compromete a no publicar información falsa sobre inmuebles, no usar la plataforma para actividades ilegales, y no interferir con el funcionamiento técnico del sistema.
-
-6. PRIVACIDAD Y DATOS
-DOVIA recopila y procesa datos personales conforme a su Política de Privacidad. Los datos son utilizados exclusivamente para prestar el servicio y mejorar la experiencia del usuario.
-
-7. PROPIEDAD INTELECTUAL
-Todo el contenido de la Plataforma —incluyendo logos, diseños y software— es propiedad exclusiva de DOVIA o sus licenciantes y está protegido por las leyes de propiedad intelectual.
-
-8. LIMITACIÓN DE RESPONSABILIDAD
-DOVIA actúa como intermediario y no se hace responsable de las transacciones celebradas entre usuarios, ni de la veracidad de la información publicada por terceros.
-
-9. MODIFICACIONES
-DOVIA puede modificar estos Términos en cualquier momento. Los cambios sustanciales serán notificados a los usuarios con al menos 15 días de anticipación.
-
-10. LEGISLACIÓN APLICABLE
-Estos Términos se rigen por las leyes aplicables. Cualquier disputa será resuelta ante los tribunales competentes.
-
-Al usar la Plataforma confirmas haber leído, entendido y aceptado la totalidad de estos Términos y Condiciones.
+Evasión de comisiones
+• Si el propietario retira la propiedad, negocia directamente con un interesado, utiliza
+abogados. notarios o intermediarios externos. firma contratos fuera de DOVIA. con el
+propósito de evitar el pago de la comisión, DOVIA se reserva el derecho de tomar acciones.
 ''';
+}
+
+class _DeleteConfirmDialog extends StatelessWidget {
+  final VoidCallback onConfirm;
+  const _DeleteConfirmDialog({required this.onConfirm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              '¿Estás seguro que quieres eliminar\ntu cuenta?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00444B),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF007376), width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: const Text('Cancelar',
+                          style: TextStyle(
+                              fontFamily: 'Public Sans',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF007376))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: onConfirm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF0000),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text('Eliminar cuenta',
+                          style: TextStyle(
+                              fontFamily: 'Public Sans',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteReasonDialog extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback onConfirm;
+  const _DeleteReasonDialog({required this.controller, required this.onConfirm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Cuéntanos por qué deseas eliminar\ntu cuenta',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00444B),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextField(
+                controller: controller,
+                maxLines: 4,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 14,
+                  color: Color(0xFF00444B),
+                ),
+                decoration: const InputDecoration(
+                  hintText: 'Escribe aquí....',
+                  hintStyle: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 14,
+                    color: Color(0xFF888888),
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: onConfirm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF007376),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('Enviar',
+                    style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteSuccessDialog extends StatelessWidget {
+  const _DeleteSuccessDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 40),
+            padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  'Se eliminó con éxito',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF00444B),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Tu cuenta se ha eliminado con éxito.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 16,
+                    color: Color(0xFF888888),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                color: Color(0xFF007376),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                color: Colors.white,
+                size: 48,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

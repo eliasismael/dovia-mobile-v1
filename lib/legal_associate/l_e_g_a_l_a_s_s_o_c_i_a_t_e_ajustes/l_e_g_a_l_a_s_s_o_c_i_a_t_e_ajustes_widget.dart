@@ -1,5 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_auth.dart';
+import '/backend/api_requests/api_users.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
@@ -102,7 +103,14 @@ class _LEGALASSOCIATEAjustesWidgetState
                                       QueEsDoviaWidget.routeName, mounted);
                                 }
                               },
-                              onDeleteAccount: () async {},
+                              onDeleteAccount: (reason) async {
+                                await DOVIAAPIUserContextGroup
+                                    .deactivateMyAccountCall
+                                    .call(
+                                  authToken: authManager.authenticationToken,
+                                  reason: reason,
+                                );
+                              },
                               onSaveInfo: () async {},
                             ),
                           ),

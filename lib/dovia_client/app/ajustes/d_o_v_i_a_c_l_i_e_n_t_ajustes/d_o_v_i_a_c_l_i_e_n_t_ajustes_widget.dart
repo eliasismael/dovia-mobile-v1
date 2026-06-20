@@ -1,5 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
-import '/dovia_client/app/ajustes/delete_account_1/delete_account1_widget.dart';
+import '/backend/api_requests/api_users.dart';
 import '/dovia_client/app/ajustes/opciones_de_notificaciones/opciones_de_notificaciones_widget.dart';
 import '/dovia_client/app/ajustes/unsuscribe_modal_1/unsuscribe_modal1_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
@@ -146,22 +146,15 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                         ),
                                       ).then((value) => safeSetState(() {}));
                                     },
-                                    onDeleteAccount: () async {
-                                      await showModalBottomSheet(
-                                        isScrollControlled: true,
-                                        backgroundColor: Colors.transparent,
-                                        context: context,
-                                        builder: (context) => Align(
-                                          alignment: Alignment.bottomCenter,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                                            ),
-                                            child: const DeleteAccount1Widget(),
-                                          ),
-                                        ),
-                                      ).then((value) => safeSetState(() {}));
+                                    onDeleteAccount: (reason) async {
+                                      await DOVIAAPIUserContextGroup
+                                          .deactivateMyAccountCall
+                                          .call(
+                                        authToken:
+                                            authManager.authenticationToken,
+                                        reason: reason,
+                                      );
+                                      await _signOut();
                                     },
                                     onSignOut: () async {
                                       await _signOut();

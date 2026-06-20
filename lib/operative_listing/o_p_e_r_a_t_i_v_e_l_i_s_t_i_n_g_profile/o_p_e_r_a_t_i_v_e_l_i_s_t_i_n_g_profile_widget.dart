@@ -1,4 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_users.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_header/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_header_widget.dart';
@@ -100,11 +101,13 @@ class _OPERATIVELISTINGProfileWidgetState
                               onSignOut: () async {
                                 await _signOut();
                               },
-                              onDeleteAccount: () async {
-                                // No dedicated delete-account endpoint is
-                                // available yet; process the operative baja by
-                                // ending the session and returning to login.
-                                await _signOut();
+                              onDeleteAccount: (reason) async {
+                                await DOVIAAPIUserContextGroup
+                                    .deactivateMyAccountCall
+                                    .call(
+                                  authToken: authManager.authenticationToken,
+                                  reason: reason,
+                                );
                               },
                             ),
                           ),

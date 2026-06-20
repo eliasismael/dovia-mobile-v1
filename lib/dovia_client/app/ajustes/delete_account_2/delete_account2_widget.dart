@@ -1,3 +1,5 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_users.dart';
 import '/dovia_client/app/ajustes/delette_account_3/delette_account3_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -170,25 +172,32 @@ class _DeleteAccount2WidgetState extends State<DeleteAccount2Widget> {
               hoverColor: Colors.transparent,
               highlightColor: Colors.transparent,
               onTap: () async {
-                await showModalBottomSheet(
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  enableDrag: false,
-                  context: context,
-                  builder: (context) => Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                      ),
-                      child: Padding(
-                        padding: MediaQuery.viewInsetsOf(context),
-                        child: const DeletteAccount3Widget(),
+                final reason = _model.textController?.text.trim();
+                await DOVIAAPIUserContextGroup.deactivateMyAccountCall.call(
+                  authToken: authManager.authenticationToken,
+                  reason: (reason != null && reason.isNotEmpty) ? reason : null,
+                );
+                if (context.mounted) {
+                  await showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    enableDrag: false,
+                    context: context,
+                    builder: (context) => Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: FlutterFlowTheme.of(context).secondaryBackground,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                        ),
+                        child: Padding(
+                          padding: MediaQuery.viewInsetsOf(context),
+                          child: const DeletteAccount3Widget(),
+                        ),
                       ),
                     ),
-                  ),
-                ).then((value) => safeSetState(() {}));
+                  ).then((value) => safeSetState(() {}));
+                }
               },
               child: wrapWithModel(
                 model: _model.primaryButtonModel,
