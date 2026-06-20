@@ -310,31 +310,21 @@ class _ListingHQMatchmakingSelectorWidgetState
                                             child: Row(
                                               children: [
                                                 CircleAvatar(
-                                                  backgroundImage: NetworkImage(operative['photoUrl']),
+                                                  backgroundImage: operative['photoUrl'] != null
+                                                      ? NetworkImage(operative['photoUrl'] as String)
+                                                      : null,
+                                                  child: operative['photoUrl'] == null
+                                                      ? const Icon(Icons.person)
+                                                      : null,
                                                 ),
                                                 const SizedBox(width: 12),
                                                 Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        operative['name'],
-                                                        style: colorScheme.bodyMedium.override(
-                                                          fontFamily: 'Public Sans',
-                                                          fontWeight: FontWeight.w600,
-                                                        ),
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          const Icon(Icons.star, size: 14, color: Colors.amber),
-                                                          const SizedBox(width: 4),
-                                                          Text(
-                                                            operative['rating'].toString(),
-                                                            style: colorScheme.bodySmall,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
+                                                  child: Text(
+                                                    operative['name'] as String? ?? '',
+                                                    style: colorScheme.bodyMedium.override(
+                                                      fontFamily: 'Public Sans',
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
                                                   ),
                                                 ),
                                                 if (isSelected)

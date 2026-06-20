@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '/app_state.dart';
 import '/auth/custom_auth/auth_util.dart';
@@ -241,45 +242,31 @@ class VisitsRepository extends ChangeNotifier {
   // MOCKS FOR LISTING HQ MATCHMAKING
   // =========================================================================
 
-  /// Mocks fetching available Operative Listers for a specific date and time.
+  /// Fetches available Operative Listers for a specific date and time slot.
   Future<Result<List<Map<String, dynamic>>>> getAvailableOperatives(DateTime date, TimeOfDay time) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // Return a mocked list of operatives
-    return Success([
-      {
-        'id': 'op_1',
-        'name': 'Juan Pérez',
-        'photoUrl': 'https://i.pravatar.cc/150?u=juan',
-        'rating': 4.8,
-      },
-      {
-        'id': 'op_2',
-        'name': 'María López',
-        'photoUrl': 'https://i.pravatar.cc/150?u=maria',
-        'rating': 4.9,
-      },
-      {
-        'id': 'op_3',
-        'name': 'Carlos Ramírez',
-        'photoUrl': 'https://i.pravatar.cc/150?u=carlos',
-        'rating': 4.5,
-      },
-    ]);
-  }
+    final token = currentAuthenticationToken ?? '';
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    final timeStr = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
-  /// Mocks assigning a visit to a specific Operative Lister.
-  Future<Result<void>> assignVisit({
-    required String propertyId,
-    required String operativeId,
-    required DateTime date,
-    required TimeOfDay time,
-  }) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // Simulate successful assignment
-    return const Success(null);
+    final response = await DOVIAAPIVisitContextGroup.getAvailableOperativeListersCall.call(
+      authToken: token,
+      date: dateStr,
+      time: timeStr,
+    );
+
+    if (!response.succeeded) {
+      return Failure('No se pudieron cargar los operative listers', statusCode: response.statusCode);
+    }
+
+    final rawList = (response.jsonBody?['operativeListers'] as List? ?? [])
+        .cast<Map<String, dynamic>>();
+
+    final operatives = rawList.map((o) => {
+      'id': o['id'] as String? ?? '',
+      'name': o['fullName'] as String? ?? '',
+      'photoUrl': o['avatar'] as String?,
+    }).toList();
+
+    return Success(operatives);
   }
 }

@@ -71,6 +71,24 @@ class DOVIAAPIVisitContextGroup {
   static OperativeListerArrivedCall operativeListerArrivedCall =
       OperativeListerArrivedCall();
   static SendVisitMessageCall sendVisitMessageCall = SendVisitMessageCall();
+  static GetAvailableOperativeListersCall getAvailableOperativeListersCall =
+      GetAvailableOperativeListersCall();
+  static GetShowingAgentScheduleCall getShowingAgentScheduleCall =
+      GetShowingAgentScheduleCall();
+  static GetVisitActivityLogCall getVisitActivityLogCall =
+      GetVisitActivityLogCall();
+  static PresignShowingReportEvidenceCall presignShowingReportEvidenceCall =
+      PresignShowingReportEvidenceCall();
+  static ConfirmShowingReportEvidenceCall confirmShowingReportEvidenceCall =
+      ConfirmShowingReportEvidenceCall();
+  static SubmitShowingReportCall submitShowingReportCall =
+      SubmitShowingReportCall();
+  static RequestVisitChangesCall requestVisitChangesCall =
+      RequestVisitChangesCall();
+  static GetListerHqVisitOverviewCall getListerHqVisitOverviewCall =
+      GetListerHqVisitOverviewCall();
+  static GetShowingVisitOverviewCall getShowingVisitOverviewCall =
+      GetShowingVisitOverviewCall();
 }
 
 class CreateVisitRequestCall {
@@ -1184,6 +1202,292 @@ class SendVisitMessageCall {
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetAvailableOperativeListersCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? date = '',
+    String? time = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Available Operative Listers',
+      apiUrl: '$baseUrl/visits/operative-listers/available',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'date': date,
+        'time': time,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetShowingAgentScheduleCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    int? year,
+    int? month,
+    int? day,
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Showing Agent Schedule',
+      apiUrl: '$baseUrl/visits/showing/schedule',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'year': year,
+        'month': month,
+        'day': day,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetVisitActivityLogCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+    String? page = '',
+    String? limit = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Visit Activity Log',
+      apiUrl: '$baseUrl/visits/$visitId/activity-log',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class PresignShowingReportEvidenceCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+    dynamic uploads,
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "uploads": ${serializeJson(uploads, true)}
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Presign Showing Report Evidence',
+      apiUrl: '$baseUrl/visits/$visitId/showing/report/evidence/presign',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ConfirmShowingReportEvidenceCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+    dynamic uploads,
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "uploads": ${serializeJson(uploads, true)}
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Confirm Showing Report Evidence',
+      apiUrl: '$baseUrl/visits/$visitId/showing/report/evidence/confirm',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class SubmitShowingReportCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+    String? showingVisitKind = '',
+    String? showingVisitDuration = '',
+    String? additionalAttendees = '',
+    String? propertyCondition = '',
+    String? clientInterestLevel = '',
+    int? overallRating,
+    String? mainReason = '',
+    String? nextStep = '',
+    String? comments = '',
+    bool? confirmationAccepted = true,
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "showingVisitKind": "${escapeStringForJson(showingVisitKind)}",
+  "showingVisitDuration": "${escapeStringForJson(showingVisitDuration)}",
+  "additionalAttendees": "${escapeStringForJson(additionalAttendees)}",
+  "propertyCondition": "${escapeStringForJson(propertyCondition)}",
+  "clientInterestLevel": "${escapeStringForJson(clientInterestLevel)}",
+  "overallRating": $overallRating,
+  "mainReason": "${escapeStringForJson(mainReason)}",
+  "nextStep": "${escapeStringForJson(nextStep)}",
+  "comments": "${escapeStringForJson(comments)}",
+  "confirmationAccepted": $confirmationAccepted
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Submit Showing Report',
+      apiUrl: '$baseUrl/visits/$visitId/showing/report',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class RequestVisitChangesCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+    String? message = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "message": "${escapeStringForJson(message)}"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Request Visit Changes',
+      apiUrl: '$baseUrl/visits/$visitId/request-changes',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetListerHqVisitOverviewCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Lister HQ Visit Overview',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/overview',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetShowingVisitOverviewCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Showing Visit Overview',
+      apiUrl: '$baseUrl/visits/$visitId/showing/overview',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
