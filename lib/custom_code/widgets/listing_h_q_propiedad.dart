@@ -275,6 +275,24 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       if (adds['consideraciones'] != null) _consideracionesController.text = adds['consideraciones'];
       if (adds['instrucciones'] != null) _instruccionesController.text = adds['instrucciones'];
       if (adds['complejo'] != null) _complejoController.text = adds['complejo'];
+
+      // Populate existing images from backend
+      final propImages = prop['images'];
+      if (propImages is Map) {
+        propImages.forEach((category, urls) {
+          if (urls is List) {
+            final String sectionKey = _getSectionKeyFromCategory(category.toString());
+            _images[sectionKey] = urls.map((url) => XFile(url.toString())).toList();
+            if (!_imageSections.contains(sectionKey)) {
+              _imageSections.add(sectionKey);
+            }
+          }
+        });
+      }
+      final video360 = prop['video360Url']?.toString() ?? checklist['video360Url']?.toString() ?? prop['video360']?.toString();
+      if (video360 != null && video360.isNotEmpty) {
+        _images['Recorrido 360'] = [XFile(video360)];
+      }
     });
   }
   
@@ -356,8 +374,35 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     super.dispose();
   }
 
+  String _getSectionKeyFromCategory(String category) {
+    switch (category.toLowerCase()) {
+      case 'habitacion':
+      case 'habitaciones':
+        return 'Habitaciones';
+      case 'sala':
+        return 'Sala';
+      case 'comedor':
+        return 'Comedor';
+      case 'cocina':
+        return 'Cocina';
+      case 'otras':
+      case 'otraszonas':
+      case 'otras_zonas':
+        return 'Otras zonas';
+      case 'plano':
+      case 'planos':
+        return 'Plano';
+      case 'recorrido360':
+      case 'video360':
+        return 'Recorrido 360';
+      default:
+        if (category.isEmpty) return category;
+        return category[0].toUpperCase() + category.substring(1);
+    }
+  }
+
   // ==================== DATA COLLECTION ====================
-  void _handleAction(VoidCallback? actionCallback, {bool isPublish = false}) {
+  Future<void> _handleAction(VoidCallback? actionCallback, {bool isPublish = false}) async {
     if (isPublish) {
       if (!validateForm()) return;
     }
@@ -389,10 +434,14 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         'instrucciones': _instruccionesController.text,
         'complejo': _complejoController.text,
       },
+      'images': _images,
     };
 
     if (widget.onSave != null) {
-      widget.onSave!(data);
+      final res = widget.onSave!(data);
+      if (res is Future) {
+        await res;
+      }
     }
     if (actionCallback != null) {
       actionCallback();
@@ -914,7 +963,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: kIsWeb
+                        child: (kIsWeb || file.path.startsWith('http') || file.path.startsWith('https'))
                             ? Image.network(file.path, height: 80, width: 80, fit: BoxFit.cover)
                             : Image.file(File(file.path), height: 80, width: 80, fit: BoxFit.cover),
                       ),
@@ -955,10 +1004,18 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         // Guardar button (outline)
         Expanded(
           child: GestureDetector(
-            onTap: () {
+            onTap: () async {
               _saveState();
-              _handleAction(widget.onGuardar);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Borrador guardado')));
+              try {
+                await _handleAction(widget.onGuardar);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error al guardar: ${e.toString().replaceAll('Exception: ', '')}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
             child: Container(
               height: 42,
@@ -984,7 +1041,18 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         // Publicar button (filled)
         Expanded(
           child: GestureDetector(
-            onTap: () => _handleAction(widget.onPublicar, isPublish: true),
+            onTap: () async {
+              try {
+                await _handleAction(widget.onPublicar, isPublish: true);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error al publicar: ${e.toString().replaceAll('Exception: ', '')}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
             child: Container(
               height: 42,
               decoration: BoxDecoration(

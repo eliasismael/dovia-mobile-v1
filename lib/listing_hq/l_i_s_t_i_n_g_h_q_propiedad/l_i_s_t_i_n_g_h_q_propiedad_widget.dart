@@ -4,12 +4,16 @@ import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dar
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
-import '/shared_components/primary_button/primary_button_widget.dart';
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_visits.dart';
+import '/backend/api_requests/api_properties.dart';
+import '/backend/api_requests/api_manager.dart';
+import 'l_i_s_t_i_n_g_h_q_propiedad_model.dart';
+import 'package:http/http.dart' as http;
+import 'package:mime_type/mime_type.dart';
+import 'package:image_picker/image_picker.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
-import '/app_state.dart';
-import '/backend/api_requests/api_visits.dart';
-import 'l_i_s_t_i_n_g_h_q_propiedad_model.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_model.dart';
 
 class LISTINGHQPropiedadWidget extends StatefulWidget {
@@ -46,7 +50,7 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
   Future<Map<String, dynamic>?> _fetchInitialData() async {
     final response = await DOVIAAPIVisitContextGroup.getVisitDetailsCall.call(
       visitId: widget.visitId,
-      authToken: FFAppState().authenticationToken,
+      authToken: currentAuthenticationToken ?? '',
     );
     if (response.succeeded) {
       return getJsonField(response.jsonBody, r'$.data') as Map<String, dynamic>?;
@@ -121,7 +125,7 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                           if (widget.visitId != null) {
                             final res = await DOVIAAPIVisitContextGroup.publishPropertyAfterVisitCall.call(
                               visitId: widget.visitId,
-                              authToken: FFAppState().authenticationToken,
+                              authToken: currentAuthenticationToken ?? '',
                             );
                             if (!res.succeeded) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -162,15 +166,183 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                             context.goNamed('LISTING_HQ_Home');
                           }
                         },
-                        onAddServicio: () async {},
+                        onSave: (data) async {
+                          final token = currentAuthenticationToken ?? '';
+                          final property = initialData?['property'] is Map ? initialData!['property'] as Map : {};
+                          final String? propertyId = property['id']?.toString() ?? property['_id']?.toString() ?? initialData?['propertyId']?.toString();
+                          if (propertyId == null || propertyId.isEmpty) {
+                            throw Exception('No se pudo encontrar el ID de la propiedad.');
+                          }
+
+                          // Process and upload images
+                          final rawImages = data['images'] as Map<dynamic, dynamic>?;
+                          final Map<String, List<String>> finalizedImages = {};
+                          String? finalVideo360Url;
+
+                          if (rawImages != null) {
+                            for (final entry in rawImages.entries) {
+                              final sectionName = entry.key.toString();
+                              final files = entry.value as List<dynamic>? ?? [];
+                              final List<String> sectionUrls = [];
+
+                              final List<XFile> localFiles = [];
+                              for (final dynamic fileObj in files) {
+                                if (fileObj is XFile) {
+                                  if (fileObj.path.startsWith('http://') || fileObj.path.startsWith('https://')) {
+                                    sectionUrls.add(fileObj.path);
+                                  } else {
+                                    localFiles.add(fileObj);
+                                  }
+                                }
+                              }
+
+                              if (localFiles.isNotEmpty) {
+                                final List<Map<String, String>> uploadsPayload = localFiles.map((file) {
+                                  final String contentType = mime(file.path) ?? 'image/jpeg';
+                                  return {
+                                    'fileName': file.name,
+                                    'contentType': contentType,
+                                  };
+                                }).toList();
+
+                                final presignRes = await DOVIAAPIPropertyContextGroup.presignPropertyImagesCall.call(
+                                  propertyId: propertyId,
+                                  authToken: token,
+                                  uploads: uploadsPayload,
+                                );
+
+                                if (!presignRes.succeeded) {
+                                  throw Exception('Error al obtener URLs firmadas: ${presignRes.jsonBody}');
+                                }
+
+                                final responseData = getJsonField(presignRes.jsonBody, r'$.data') as Map<String, dynamic>?;
+                                final presignList = responseData?['uploads'] as List?;
+                                if (presignList == null || presignList.isEmpty) {
+                                  throw Exception('No se devolvieron URLs firmadas.');
+                                }
+
+                                final List<Map<String, String>> confirmPayload = [];
+                                for (int i = 0; i < localFiles.length; i++) {
+                                  final localFile = localFiles[i];
+                                  final presignItem = presignList[i] as Map<String, dynamic>;
+                                  final uploadUrl = presignItem['url']?.toString();
+                                  final s3Key = presignItem['key']?.toString();
+                                  final publicUrl = presignItem['publicUrl']?.toString() ?? presignItem['s3Url']?.toString();
+
+                                  if (uploadUrl == null || s3Key == null) {
+                                    throw Exception('Falta URL de subida o key.');
+                                  }
+
+                                  final bytes = await localFile.readAsBytes();
+                                  final contentType = mime(localFile.path) ?? 'image/jpeg';
+
+                                  final s3PutRes = await http.put(
+                                    Uri.parse(uploadUrl),
+                                    headers: {'Content-Type': contentType},
+                                    body: bytes,
+                                  );
+
+                                  if (s3PutRes.statusCode < 200 || s3PutRes.statusCode >= 300) {
+                                    throw Exception('Fallo al subir a S3: ${s3PutRes.statusCode}');
+                                  }
+
+                                  confirmPayload.add({'key': s3Key});
+                                  
+                                  final String imageUrl = publicUrl ?? 'https://dovia-prod-assets.s3.amazonaws.com/$s3Key';
+                                  sectionUrls.add(imageUrl);
+                                }
+
+                                final confirmRes = await DOVIAAPIPropertyContextGroup.confirmPropertyImagesCall.call(
+                                  propertyId: propertyId,
+                                  authToken: token,
+                                  uploads: confirmPayload,
+                                );
+
+                                if (!confirmRes.succeeded) {
+                                  throw Exception('Error al confirmar imágenes: ${confirmRes.jsonBody}');
+                                }
+                              }
+
+                              if (sectionName == 'Recorrido 360') {
+                                if (sectionUrls.isNotEmpty) {
+                                  finalVideo360Url = sectionUrls.first;
+                                }
+                              } else {
+                                String categoryKey;
+                                switch (sectionName) {
+                                  case 'Habitaciones':
+                                    categoryKey = 'habitacion';
+                                    break;
+                                  case 'Sala':
+                                    categoryKey = 'sala';
+                                    break;
+                                  case 'Comedor':
+                                    categoryKey = 'comedor';
+                                    break;
+                                  case 'Cocina':
+                                    categoryKey = 'cocina';
+                                    break;
+                                  case 'Otras zonas':
+                                    categoryKey = 'otras';
+                                    break;
+                                  case 'Plano':
+                                    categoryKey = 'plano';
+                                    break;
+                                  default:
+                                    categoryKey = sectionName.toLowerCase().replaceAll(' ', '_');
+                                }
+                                finalizedImages[categoryKey] = sectionUrls;
+                              }
+                            }
+                          }
+
+                          final Map<String, dynamic> patchPayload = {
+                            'tipoVivienda': data['tipoVivienda'],
+                            'direccion': data['direccion'],
+                            'descripcion': data['descripcion'],
+                            'caracteristicas': data['caracteristicas'],
+                            'otrasCaracteristicas': data['otrasCaracteristicas'],
+                            'amenidades': data['amenidades'],
+                            'starRatings': data['urbanCriteria'],
+                            'infoHq': data['infoHq'],
+                            'adicionales': data['adicionales'],
+                            'images': finalizedImages,
+                          };
+
+                          if (finalVideo360Url != null) {
+                            patchPayload['video360Url'] = finalVideo360Url;
+                          }
+
+                          final patchRes = await ApiManager.instance.makeApiCall(
+                            callName: 'PATCH Property Details',
+                            apiUrl: '${DOVIAAPIPropertyContextGroup.getBaseUrl()}/properties/$propertyId',
+                            callType: ApiCallType.PATCH,
+                            headers: {
+                              'Authorization': 'Bearer $token',
+                              'Content-Type': 'application/json',
+                            },
+                            params: {},
+                            body: jsonEncode(patchPayload),
+                            bodyType: BodyType.JSON,
+                            returnBody: true,
+                            encodeBodyUtf8: false,
+                            decodeUtf8: false,
+                            cache: false,
+                            isStreamingApi: false,
+                            alwaysAllowBody: false,
+                          );
+
+                          if (!patchRes.succeeded) {
+                            throw Exception('Error al guardar datos: ${patchRes.jsonBody}');
+                          }
+                        },
                       ),
-                    ),
                     );
                   },
                 ),
               ],
-                ),
-              ),
+            ),
+          ),
               Align(
                 alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
