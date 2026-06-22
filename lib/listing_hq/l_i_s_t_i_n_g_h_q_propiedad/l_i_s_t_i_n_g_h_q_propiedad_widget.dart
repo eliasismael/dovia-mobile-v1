@@ -48,14 +48,49 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
   }
 
   Future<Map<String, dynamic>?> _fetchInitialData() async {
+    final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIVisitContextGroup.getVisitDetailsCall.call(
       visitId: widget.visitId,
-      authToken: currentAuthenticationToken ?? '',
+      authToken: token,
     );
-    if (response.succeeded) {
-      return getJsonField(response.jsonBody, r'$.data') as Map<String, dynamic>?;
+    if (!response.succeeded) return null;
+
+    final data = getJsonField(response.jsonBody, r'$.data') as Map<String, dynamic>?;
+    if (data == null) return null;
+
+    // The property embedded in the visit details is a trimmed summary (no
+    // `features`, `infoHQ` or full `images`). Fetch the full backoffice
+    // property so the checklist can pre-fill rooms, characteristics, etc.
+    final summaryProp = data['property'] is Map ? data['property'] as Map : null;
+    final String? propertyId = summaryProp?['id']?.toString() ??
+        summaryProp?['_id']?.toString() ??
+        data['propertyId']?.toString();
+
+    if (propertyId != null && propertyId.isNotEmpty) {
+      final propRes =
+          await DOVIAAPIPropertyContextGroup.getPropertyBackofficeCall.call(
+        propertyId: propertyId,
+        authToken: token,
+      );
+      if (propRes.succeeded) {
+        final raw = getJsonField(propRes.jsonBody, r'$.data');
+        Map<String, dynamic>? fullProp;
+        if (raw is Map && raw['data'] is Map) {
+          fullProp = Map<String, dynamic>.from(raw['data'] as Map);
+        } else if (raw is Map) {
+          fullProp = Map<String, dynamic>.from(raw);
+        }
+        if (fullProp != null && fullProp.isNotEmpty) {
+          // Merge: keep summary fields, overlay the full backoffice data.
+          data['property'] = {
+            if (summaryProp != null) ...summaryProp,
+            ...fullProp,
+          };
+        }
+      }
     }
-    return null;
+
+    return data;
   }
 
   @override

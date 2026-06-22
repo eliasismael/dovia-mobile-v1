@@ -487,70 +487,75 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     );
   }
 
-  Widget _buildLargeCard(String title, String ownerName, String address, {VoidCallback? onPressed}) {
+  Widget _buildLargeCard(
+    String title,
+    String ownerName,
+    String address, {
+    VoidCallback? onPressed,
+    String buttonText = 'Ver más',
+  }) {
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 15.0),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12.0),
-        child: Container(
-          width: MediaQuery.sizeOf(context).width * 1.0,
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 4.0,
-                color: Color(0x1A000000),
-                offset: Offset(0.0, 2.0),
-              ),
-            ],
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  width: 100.0,
-                  height: 100.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Image.asset(
-                      'assets/images/casa_card_sobreMiVisita.png',
-                      width: 100.0,
-                      height: 100.0,
-                      fit: BoxFit.cover,
-                    ),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          boxShadow: const [
+            BoxShadow(
+              blurRadius: 4.0,
+              color: Color(0x1A000000),
+              offset: Offset(0.0, 2.0),
+            ),
+          ],
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 100.0,
+                height: 100.0,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: Image.asset(
+                    'assets/images/casa_card_sobreMiVisita.png',
+                    width: 100.0,
+                    height: 100.0,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(width: 10.0),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title.isNotEmpty ? title : 'Propiedad',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              fontSize: 16.0,
+              ),
+              const SizedBox(width: 10.0),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title.isNotEmpty ? title : 'Propiedad',
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
                             ),
-                      ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        address.isNotEmpty ? 'Dirección: $address' : 'Dirección: N/A',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(),
-                              fontSize: 12.0,
-                            ),
-                      ),
+                            fontSize: 16.0,
+                          ),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      address.isNotEmpty ? 'Dirección: $address' : 'Dirección: N/A',
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.inter(),
+                            fontSize: 12.0,
+                          ),
+                    ),
+                    if (ownerName.isNotEmpty) ...[
                       const SizedBox(height: 4.0),
                       Text(
                         ownerName,
@@ -559,30 +564,47 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               fontSize: 12.0,
                             ),
                       ),
-                      const SizedBox(height: 8.0),
-                      FFButtonWidget(
-                        onPressed: onPressed ?? () {
-                          print('Button pressed ...');
-                        },
-                        text: 'Ver más',
-                        options: FFButtonOptions(
-                          height: 30.0,
-                          color: FlutterFlowTheme.of(context).primary,
-                          textStyle:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.publicSans(),
-                                    color: Colors.white,
-                                    fontSize: 13.0,
-                                  ),
-                          elevation: 0.0,
-                          borderRadius: BorderRadius.circular(24.0),
+                    ],
+                    const SizedBox(height: 8.0),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0x33FF5963),
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(10.0, 4.0, 10.0, 4.0),
+                        child: Text(
+                          'Falta información',
+                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                font: GoogleFonts.inter(),
+                                color: const Color(0xFFFF5963),
+                                fontSize: 12.0,
+                              ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    FFButtonWidget(
+                      onPressed: onPressed ?? () {},
+                      text: buttonText,
+                      options: FFButtonOptions(
+                        width: double.infinity,
+                        height: 30.0,
+                        color: FlutterFlowTheme.of(context).primary,
+                        textStyle:
+                            FlutterFlowTheme.of(context).titleSmall.override(
+                                  font: GoogleFonts.publicSans(),
+                                  color: Colors.white,
+                                  fontSize: 13.0,
+                                ),
+                        elevation: 0.0,
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -832,6 +854,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                       first.title,
                                       first.ownerName,
                                       first.address,
+                                      buttonText: 'Actualizar Documentacion Legal',
                                       onPressed: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -849,6 +872,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                 e.title,
                                                 e.ownerName,
                                                 e.address,
+                                                buttonText: 'Actualizar Documentacion Legal',
                                                 onPressed: () => Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -896,6 +920,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                       first.title,
                                       first.ownerName,
                                       first.address,
+                                      buttonText: 'Contactar con Propietario',
                                       onPressed: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -913,6 +938,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                                 e.title,
                                                 e.ownerName,
                                                 e.address,
+                                                buttonText: 'Contactar con Propietario',
                                                 onPressed: () => Navigator.push(
                                                   context,
                                                   MaterialPageRoute(

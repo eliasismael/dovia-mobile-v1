@@ -168,140 +168,217 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   Future<void> _loadState() async {
     _prefs = await SharedPreferences.getInstance();
+
+    // 1. Seed the form from server data first — this is the source of truth
+    //    for the pre-filled property data.
+    if (widget.initialData != null) {
+      _populateFromInitialData(widget.initialData!);
+    }
+
+    // 2. Overlay any saved draft ON TOP, but only with values that ADD
+    //    information. A stale/empty draft must never blank out the data we
+    //    just pre-filled from the server (this was the cause of the checklist
+    //    showing empty after a restart).
     final draftJson = _prefs.getString(_draftKey);
     if (draftJson != null) {
       try {
         final Map<String, dynamic> data = jsonDecode(draftJson);
+        bool hasText(dynamic v) => v is String && v.isNotEmpty;
         setState(() {
-          _tipoVivienda = data['tipoVivienda'];
-          _direccion = data['direccion'];
-          _habitaciones = data['habitaciones'];
-          _banos = data['banos'];
-          _parqueo = data['parqueo'];
-          _pisos = data['pisos'];
-          _mediosBanos = data['mediosBanos'];
-          _hasDanos = data['hasDanos'];
-          
-          if (data['descripcion'] != null) _descripcionController.text = data['descripcion'];
-          if (data['dudas'] != null) _dudasController.text = data['dudas'];
-          if (data['consideraciones'] != null) _consideracionesController.text = data['consideraciones'];
-          if (data['instrucciones'] != null) _instruccionesController.text = data['instrucciones'];
-          if (data['complejo'] != null) _complejoController.text = data['complejo'];
+          if (hasText(data['tipoVivienda'])) _tipoVivienda = data['tipoVivienda'];
+          if (hasText(data['direccion'])) _direccion = data['direccion'];
+          if (hasText(data['habitaciones'])) _habitaciones = data['habitaciones'];
+          if (hasText(data['banos'])) _banos = data['banos'];
+          if (hasText(data['parqueo'])) _parqueo = data['parqueo'];
+          if (hasText(data['pisos'])) _pisos = data['pisos'];
+          if (hasText(data['mediosBanos'])) _mediosBanos = data['mediosBanos'];
+          if (hasText(data['hasDanos'])) _hasDanos = data['hasDanos'];
 
-          if (data['generalCharacteristics'] != null) _updateMapFromJson(_generalCharacteristics, data['generalCharacteristics']);
-          if (data['otherCharacteristics'] != null) _updateMapFromJson(_otherCharacteristics, data['otherCharacteristics']);
-          if (data['propiedadAmenities'] != null) _updateMapFromJson(_propiedadAmenities, data['propiedadAmenities']);
-          if (data['areasComunes'] != null) _updateMapFromJson(_areasComunes, data['areasComunes']);
-          if (data['servicios'] != null) _updateMapFromJson(_servicios, data['servicios']);
-          if (data['starRatings'] != null) {
-            Map<String, dynamic> ratings = data['starRatings'];
-            ratings.forEach((key, value) {
-              _starRatings[key] = value as int;
-              if (value > 0) _selectedCriteria.add(key);
+          if (hasText(data['descripcion'])) _descripcionController.text = data['descripcion'];
+          if (hasText(data['dudas'])) _dudasController.text = data['dudas'];
+          if (hasText(data['consideraciones'])) _consideracionesController.text = data['consideraciones'];
+          if (hasText(data['instrucciones'])) _instruccionesController.text = data['instrucciones'];
+          if (hasText(data['complejo'])) _complejoController.text = data['complejo'];
+
+          _overlayTrueKeys(_generalCharacteristics, data['generalCharacteristics']);
+          _overlayTrueKeys(_otherCharacteristics, data['otherCharacteristics']);
+          _overlayTrueKeys(_propiedadAmenities, data['propiedadAmenities']);
+          _overlayTrueKeys(_areasComunes, data['areasComunes']);
+          _overlayTrueKeys(_servicios, data['servicios']);
+
+          if (data['starRatings'] is Map) {
+            (data['starRatings'] as Map).forEach((key, value) {
+              final v = value is num ? value.toInt() : 0;
+              if (v > 0) {
+                _starRatings[key.toString()] = v;
+                _selectedCriteria.add(key.toString());
+              }
             });
           }
         });
       } catch (e) {
         print('Error loading checklist draft: $e');
       }
-    } else if (widget.initialData != null) {
-      _populateFromInitialData(widget.initialData!);
     }
     _isInit = true;
   }
+
+  /// Applies only the `true` entries of [source] onto [target], so a draft
+  /// can add selections but never wipe ones pre-filled from the server.
+  void _overlayTrueKeys(Map<String, bool> target, dynamic source) {
+    if (source is Map) {
+      source.forEach((key, value) {
+        if (value == true) target[key.toString()] = true;
+      });
+    }
+  }
   
   void _populateFromInitialData(Map<String, dynamic> data) {
-    final prop = data['property'] is Map ? data['property'] as Map : {};
-    final checklist = data['checklist'] is Map ? data['checklist'] as Map : data;
-    
+    // The property object can live in a few places depending on what the
+    // /visits/{id}/details endpoint returns. Search the common shapes.
+    Map prop = {};
+    if (data['property'] is Map) {
+      prop = data['property'] as Map;
+    } else if (data['features'] is Map || data['propertyType'] != null) {
+      // `data` itself is the property.
+      prop = data;
+    } else if (data['visit'] is Map && (data['visit'] as Map)['property'] is Map) {
+      prop = (data['visit'] as Map)['property'] as Map;
+    }
+    print('[checklist] initialData keys: ${data.keys.toList()}');
+    print('[checklist] resolved property keys: ${prop.keys.toList()}');
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+    Map sub(Map m, String key) => m[key] is Map ? m[key] as Map : {};
+    bool getBool(Map m, String key) => m[key] == true;
+
     setState(() {
-      _tipoVivienda = prop['type']?.toString() ?? checklist['tipoVivienda'];
-      
-      if (prop['location'] != null && prop['location']['address'] != null) {
-        _direccion = prop['location']['address']['fullAddress']?.toString() ?? 
-                     prop['location']['address']['street']?.toString();
-      } else {
-        _direccion = checklist['direccion'];
-      }
-      
-      if (prop['description'] != null) _descripcionController.text = prop['description'];
-      else if (checklist['descripcion'] != null) _descripcionController.text = checklist['descripcion'];
-      
-      final chars = prop['characteristics'] is Map ? prop['characteristics'] as Map : (checklist['caracteristicas'] is Map ? checklist['caracteristicas'] as Map : {});
-      _habitaciones = chars['bedrooms']?.toString() ?? chars['habitaciones']?.toString();
-      _banos = chars['bathrooms']?.toString() ?? chars['banos']?.toString();
-      _parqueo = chars['parking']?.toString() ?? chars['parqueo']?.toString();
-      _pisos = chars['floors']?.toString() ?? chars['pisos']?.toString();
-      _mediosBanos = chars['halfBathrooms']?.toString() ?? chars['mediosBanos']?.toString();
-      
-      _generalCharacteristics.keys.forEach((k) {
-        if (chars[k] == true || chars[k.toLowerCase()] == true) _generalCharacteristics[k] = true;
-      });
-      
-      final otherChars = prop['otherCharacteristics'] is Map ? prop['otherCharacteristics'] as Map : (checklist['otrasCaracteristicas'] is Map ? checklist['otrasCaracteristicas'] as Map : {});
-      _otherCharacteristics.keys.forEach((k) {
-        if (otherChars[k] == true) _otherCharacteristics[k] = true;
-      });
+      // ── Tipo de vivienda ──────────────────────────────────────────────────
+      _tipoVivienda = prop['propertyType']?.toString() ?? prop['type']?.toString();
 
-      final amenities = prop['amenities'] is Map ? prop['amenities'] as Map : (checklist['amenidades'] is Map ? checklist['amenidades'] as Map : {});
-      final propAm = amenities['property'] is Map ? amenities['property'] as Map : amenities;
-      _propiedadAmenities.keys.forEach((k) {
-        if (propAm[k] == true) _propiedadAmenities[k] = true;
-      });
-      
-      final comAm = amenities['common'] is Map ? amenities['common'] as Map : (amenities['comunes'] is Map ? amenities['comunes'] as Map : {});
-      _areasComunes.keys.forEach((k) {
-        if (comAm[k] == true) _areasComunes[k] = true;
-      });
+      // ── Dirección (read-only, from property location) ─────────────────────
+      final addr = sub(sub(prop, 'location'), 'address');
+      _direccion = addr['fullAddress']?.toString() ?? addr['street']?.toString();
 
-      final ratings = prop['urbanCriteria'] is Map ? prop['urbanCriteria'] as Map : (checklist['urbanCriteria'] is Map ? checklist['urbanCriteria'] as Map : {});
-      ratings.forEach((key, value) {
-        if (_starRatings.containsKey(key)) {
-          final val = int.tryParse(value.toString()) ?? 0;
-          _starRatings[key] = val;
-          if (val > 0) _selectedCriteria.add(key.toString());
+      // ── Descripción ───────────────────────────────────────────────────────
+      final desc = prop['description'];
+      final descText = desc is Map
+          ? (desc['raw']?.toString() ?? '')
+          : (desc?.toString() ?? '');
+      if (descText.isNotEmpty) _descripcionController.text = descText;
+
+      // ── Características numéricas ─────────────────────────────────────────
+      final gen = sub(sub(prop, 'features'), 'general');
+      _habitaciones = (gen['bedrooms'] ?? gen['habitaciones'])?.toString();
+      _banos        = (gen['bathrooms'] ?? gen['banos'])?.toString();
+      _parqueo      = (gen['parkingSpots'] ?? gen['parking'] ?? gen['parqueo'])?.toString();
+      _pisos        = (gen['floors'] ?? gen['pisos'])?.toString();
+      _mediosBanos  = (gen['halfBathrooms'] ?? gen['mediosBanos'])?.toString();
+
+      // ── Características generales (checkboxes) ────────────────────────────
+      final spaces = sub(sub(prop, 'features'), 'spaces');
+      _generalCharacteristics['Sala']                  = getBool(spaces, 'livingRoom');
+      _generalCharacteristics['Comedor']               = getBool(spaces, 'diningRoom');
+      _generalCharacteristics['Lavandería']            = getBool(spaces, 'laundryArea');
+      _generalCharacteristics['Cuarto de servicio']    = getBool(spaces, 'serviceRoom');
+      _generalCharacteristics['Amueblado']             = getBool(spaces, 'furnished');
+      _generalCharacteristics['Cuota de mantenimiento'] =
+          spaces['maintenanceFee'] != null && spaces['maintenanceFee'] != 0;
+      _generalCharacteristics['Cocina']                = getBool(spaces, 'kitchen');
+
+      // ── Otras características ─────────────────────────────────────────────
+      final others = sub(sub(prop, 'features'), 'others');
+      _otherCharacteristics['Pet Frendly']             = getBool(others, 'petFriendly');
+      _otherCharacteristics['Permitido para Airbnb']   = getBool(others, 'allowedForAirbnb');
+      _otherCharacteristics['Permitido subarrendar']   = getBool(others, 'allowedToSublet');
+
+      // ── Amenidades de la propiedad ────────────────────────────────────────
+      final amenProp = sub(sub(sub(prop, 'features'), 'amenities'), 'property');
+      _propiedadAmenities['A/C']                       = getBool(amenProp, 'airConditioning');
+      _propiedadAmenities['Jardín']                    = getBool(amenProp, 'garden');
+      _propiedadAmenities['Área de churrasquera']      = getBool(amenProp, 'bbqArea');
+      _propiedadAmenities['Cocina con isla']           = getBool(amenProp, 'islandKitchen');
+      _propiedadAmenities['Sala de exterior']          = getBool(amenProp, 'outdoorLivingRoom');
+      _propiedadAmenities['Tina']                      = getBool(amenProp, 'bathtub');
+
+      // ── Áreas comunes ─────────────────────────────────────────────────────
+      final amenCommon = sub(sub(sub(prop, 'features'), 'amenities'), 'commonAreas');
+      _areasComunes['Piscina']             = getBool(amenCommon, 'pool');
+      _areasComunes['Parque de juegos']    = getBool(amenCommon, 'playground');
+      _areasComunes['Gimnasio']            = getBool(amenCommon, 'gym');
+      _areasComunes['Coworking']           = getBool(amenCommon, 'coworking');
+      _areasComunes['Salón de eventos']    = getBool(amenCommon, 'eventHall');
+      _areasComunes['Yoga Deck']           = getBool(amenCommon, 'yogaDeck');
+      _areasComunes['Cocina para eventos'] = getBool(amenCommon, 'eventKitchen');
+
+      // ── Criterios de calificación (star ratings) ──────────────────────────
+      final hood = sub(sub(prop, 'features'), 'neighborhood');
+      void setRating(String label, dynamic raw) {
+        if (raw == null) return;
+        final val = (raw is num ? raw : num.tryParse(raw.toString()) ?? 0)
+            .round()
+            .clamp(0, 5);
+        if (val > 0) {
+          _starRatings[label] = val;
+          _selectedCriteria.add(label);
         }
-      });
-      
-      final info = checklist['infoHq'] is Map ? checklist['infoHq'] as Map : {};
-      final servs = info['servicios'] is Map ? info['servicios'] as Map : {};
-      _servicios.keys.forEach((k) {
-        if (servs[k] == true) _servicios[k] = true;
-      });
-      _hasDanos = info['hasDanos'];
-      
-      final adds = checklist['adicionales'] is Map ? checklist['adicionales'] as Map : {};
-      if (adds['dudas'] != null) _dudasController.text = adds['dudas'];
-      if (adds['consideraciones'] != null) _consideracionesController.text = adds['consideraciones'];
-      if (adds['instrucciones'] != null) _instruccionesController.text = adds['instrucciones'];
-      if (adds['complejo'] != null) _complejoController.text = adds['complejo'];
+      }
+      setRating('Caminabilidad',          hood['walkable']);
+      setRating('Áreas verdes',           hood['greenAreas']);
+      setRating('Comercio y servicios',   hood['commerceAndServices']);
+      setRating('Centros corporativos',   hood['corporateCenters']);
+      setRating('Tranquilidad y silencio', hood['tranquilityAndSilence']);
+      setRating('Recreación',             hood['recreation']);
+      setRating('Servicios esenciales',   hood['essentialServices']);
+      setRating('Colegios',               hood['schools']);
+      setRating('Conectividad vial',      hood['roadConnectivity']);
+      setRating('Seguridad',              hood['security']);
+      setRating('Zona turística',         hood['touristArea']);
+      setRating('Gastronomía',            hood['gastronomy']);
+      setRating('Vida urbana',            hood['urbanLife']);
+      setRating('Universidades',          hood['universities']);
+      setRating('Salud y hospitales',     hood['healthAndHospitals']);
+      setRating('Movilidad',              hood['mobility']);
 
-      // Populate existing images from backend
+      // ── Información para HQ ───────────────────────────────────────────────
+      final infoHQ = prop['infoHQ'] is Map
+          ? prop['infoHQ'] as Map
+          : (prop['infoHq'] is Map ? prop['infoHq'] as Map : {});
+      final services = sub(infoHQ, 'services');
+      _servicios['Gas']   = getBool(services, 'gas');
+      _servicios['Agua']  = getBool(services, 'agua');
+      _servicios['Luz']   = getBool(services, 'luz');
+
+      final hasDmg = infoHQ['hasDamages'];
+      if (hasDmg != null) _hasDanos = hasDmg == true ? 'Si' : 'No';
+
+      final q = infoHQ['questions']?.toString() ?? '';
+      if (q.isNotEmpty) _dudasController.text = q;
+      final c = infoHQ['teachingConsiderations']?.toString() ?? '';
+      if (c.isNotEmpty) _consideracionesController.text = c;
+      final i = infoHQ['visitorInstructions']?.toString() ?? '';
+      if (i.isNotEmpty) _instruccionesController.text = i;
+      final cn = infoHQ['complexNotes']?.toString() ?? '';
+      if (cn.isNotEmpty) _complejoController.text = cn;
+
+      // ── Imágenes existentes ───────────────────────────────────────────────
       final propImages = prop['images'];
       if (propImages is Map) {
         propImages.forEach((category, urls) {
           if (urls is List) {
-            final String sectionKey = _getSectionKeyFromCategory(category.toString());
-            _images[sectionKey] = urls.map((url) => XFile(url.toString())).toList();
-            if (!_imageSections.contains(sectionKey)) {
-              _imageSections.add(sectionKey);
-            }
+            final key = _getSectionKeyFromCategory(category.toString());
+            _images[key] = urls.map((u) => XFile(u.toString())).toList();
+            if (!_imageSections.contains(key)) _imageSections.add(key);
           }
         });
       }
-      final video360 = prop['video360Url']?.toString() ?? checklist['video360Url']?.toString() ?? prop['video360']?.toString();
+      final video360 = prop['video360Url']?.toString() ?? prop['video360']?.toString();
       if (video360 != null && video360.isNotEmpty) {
         _images['Recorrido 360'] = [XFile(video360)];
       }
     });
   }
   
-  void _updateMapFromJson(Map<String, bool> target, Map<String, dynamic> source) {
-    source.forEach((key, value) {
-      target[key] = value as bool;
-    });
-  }
-
   void _saveState() {
     if (!_isInit) return;
     final Map<String, dynamic> data = {
@@ -550,14 +627,11 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             'Tipo de vivienda',
             _tipoVivienda,
             (val) => setState(() => _tipoVivienda = val),
+            options: ['Casa', 'Apartamento', 'Condominio', 'Local', 'Bodega', 'Otro'],
           ),
           const SizedBox(height: 11),
-          // Dirección
-          _buildDropdownField(
-            'Dirección',
-            _direccion,
-            (val) => setState(() => _direccion = val),
-          ),
+          // Dirección (read-only, comes from property)
+          _buildReadOnlyField('Dirección', _direccion ?? 'N/A'),
           const SizedBox(height: 12),
           // Descripción sobre la propiedad (text area)
           _buildTextAreaField(
@@ -964,7 +1038,29 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: (kIsWeb || file.path.startsWith('http') || file.path.startsWith('https'))
-                            ? Image.network(file.path, height: 80, width: 80, fit: BoxFit.cover)
+                            ? Image.network(
+                                file.path,
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) return child;
+                                  return _imagePlaceholder(
+                                    const Center(
+                                      child: SizedBox(
+                                        height: 18,
+                                        width: 18,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _imagePlaceholder(
+                                  const Icon(Icons.broken_image_outlined,
+                                      size: 24, color: Color(0xFF9E9E9E)),
+                                ),
+                              )
                             : Image.file(File(file.path), height: 80, width: 80, fit: BoxFit.cover),
                       ),
                       Positioned(
@@ -994,6 +1090,15 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         ],
         const SizedBox(height: 12),
       ],
+    );
+  }
+
+  Widget _imagePlaceholder(Widget child) {
+    return Container(
+      height: 80,
+      width: 80,
+      color: const Color(0xFFF0F0F0),
+      child: child,
     );
   }
 
@@ -1266,12 +1371,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     }
   }
 
-  // ==================== REUSABLE: DROPDOWN FIELD ====================
-  Widget _buildDropdownField(
-    String label,
-    String? value,
-    ValueChanged<String?> onChanged,
-  ) {
+  // ==================== REUSABLE: READ-ONLY FIELD ====================
+  Widget _buildReadOnlyField(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1294,12 +1395,70 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           padding: const EdgeInsets.symmetric(horizontal: 13),
           alignment: Alignment.centerLeft,
           child: Text(
-            value ?? 'x',
+            value,
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: placeholderColor.withValues(alpha: 0.5),
+              color: placeholderColor.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==================== REUSABLE: DROPDOWN FIELD ====================
+  Widget _buildDropdownField(
+    String label,
+    String? value,
+    ValueChanged<String?> onChanged, {
+    List<String>? options,
+  }) {
+    final List<String> items = options ??
+        ['Casa', 'Apartamento', 'Condominio', 'Local', 'Bodega', 'Otro'];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: textColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          height: 35,
+          decoration: BoxDecoration(
+            color: inputBackground,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 13),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: (value != null && items.contains(value)) ? value : null,
+              hint: Text(
+                value ?? 'Seleccionar',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 12,
+                  color: placeholderColor.withValues(alpha: 0.5),
+                ),
+              ),
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down, size: 16, color: placeholderColor),
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 12,
+                color: textColor,
+              ),
+              onChanged: onChanged,
+              items: items
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
             ),
           ),
         ),
@@ -1388,6 +1547,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   // ==================== REUSABLE: SMALL DROPDOWN ====================
   Widget _buildSmallDropdown(String? value, ValueChanged<String?> onChanged) {
+    final List<String> items =
+        List.generate(11, (i) => i.toString()); // 0–10
     return Container(
       height: 36,
       decoration: BoxDecoration(
@@ -1395,24 +1556,29 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 13),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            value ?? 'x',
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: (value != null && items.contains(value)) ? value : null,
+          hint: Text(
+            value ?? '-',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 12,
-              fontWeight: FontWeight.w400,
               color: placeholderColor.withValues(alpha: 0.5),
             ),
           ),
-          const Icon(
-            Icons.keyboard_arrow_down,
-            size: 10,
-            color: placeholderColor,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down, size: 10, color: placeholderColor),
+          style: const TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 12,
+            color: textColor,
           ),
-        ],
+          onChanged: onChanged,
+          items: items
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
+        ),
       ),
     );
   }
@@ -1423,8 +1589,9 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     String? value,
     ValueChanged<String?> onChanged, {
     List<String>? options,
-    String placeholder = 'x',
+    String placeholder = 'Seleccionar',
   }) {
+    final List<String> items = options ?? [];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1436,7 +1603,6 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             fontWeight: FontWeight.w400,
             color: textColor,
             letterSpacing: 0.28,
-            height: 49.849 / 14,
           ),
         ),
         Container(
@@ -1446,29 +1612,30 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             borderRadius: BorderRadius.circular(10),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: (value != null && items.contains(value)) ? value : null,
+              hint: Text(
                 value ?? placeholder,
                 style: TextStyle(
                   fontFamily: 'Public Sans',
                   fontSize: 14,
-                  fontWeight: FontWeight.w400,
                   color: placeholderColor.withValues(alpha: 0.5),
                   letterSpacing: 0.28,
-                  height: 49.849 / 14,
                 ),
               ),
-              Transform.rotate(
-                angle: -1.5708,
-                child: const Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 24,
-                  color: placeholderColor,
-                ),
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: placeholderColor),
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                color: textColor,
               ),
-            ],
+              onChanged: onChanged,
+              items: items
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+            ),
           ),
         ),
       ],

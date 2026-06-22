@@ -476,9 +476,9 @@ class GetListerHqVisitDocumentsCall {
         'Authorization': 'Bearer $authToken',
       },
       params: {
-        'status': status,
-        'page': page,
-        'limit': limit,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
       },
       returnBody: true,
       encodeBodyUtf8: false,
