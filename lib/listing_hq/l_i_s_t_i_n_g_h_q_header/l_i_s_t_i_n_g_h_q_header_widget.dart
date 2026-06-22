@@ -84,13 +84,22 @@ class _LISTINGHQHeaderWidgetState extends State<LISTINGHQHeaderWidget> {
                     ),
                   ),
                 ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(0.0),
-                  child: SvgPicture.asset(
-                    'assets/images/D-verde.svg',
-                    width: 28.0,
-                    height: 36.0,
-                    fit: BoxFit.cover,
+                InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () async {
+                    context.pushNamed(LISTINGHQHomeWidget.routeName);
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: SvgPicture.asset(
+                      'assets/images/D-verde.svg',
+                      width: 28.0,
+                      height: 36.0,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ].divide(const SizedBox(width: 8.0)),

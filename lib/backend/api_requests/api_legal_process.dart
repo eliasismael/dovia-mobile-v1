@@ -12,6 +12,8 @@ class DOVIAAPILegalProcessContextGroup {
       ListLegalProcessesAssociateCall();
   static ListLegalProcessesHQCall listLegalProcessesHQCall =
       ListLegalProcessesHQCall();
+  static ListLegalProcessesListerHQCall listLegalProcessesListerHQCall =
+      ListLegalProcessesListerHQCall();
   static GetLegalProcessByIDCall getLegalProcessByIDCall =
       GetLegalProcessByIDCall();
   static StartLegalProcessCall startLegalProcessCall = StartLegalProcessCall();
@@ -40,6 +42,8 @@ class DOVIAAPILegalProcessContextGroup {
   static SubmitToHQReviewCall submitToHQReviewCall = SubmitToHQReviewCall();
   static ResubmitToHQReviewCall resubmitToHQReviewCall =
       ResubmitToHQReviewCall();
+  static ResubmitToHQReviewListerHQCall resubmitToHQReviewListerHQCall =
+      ResubmitToHQReviewListerHQCall();
   static HQReviewDocumentCall hqReviewDocumentCall = HQReviewDocumentCall();
 }
 
@@ -104,6 +108,40 @@ class ListLegalProcessesHQCall {
         if (limit != null && limit.isNotEmpty) 'limit': limit,
         if (status != null && status.isNotEmpty) 'status': status,
         if (category != null && category.isNotEmpty) 'category': category,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// GET /legal-processes/lister-hq
+/// Roles: LISTING_HQ
+class ListLegalProcessesListerHQCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? page = '',
+    String? limit = '',
+    String? status = '',
+  }) async {
+    final baseUrl = DOVIAAPILegalProcessContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'List Legal Processes (Lister HQ)',
+      apiUrl: '$baseUrl/legal-processes/lister-hq',
+      callType: ApiCallType.GET,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
+        if (status != null && status.isNotEmpty) 'status': status,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -660,6 +698,35 @@ class HQReviewDocumentCall {
       },
       params: {},
       body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// POST /legal-processes/{processId}/lister-hq/resubmit-to-hq-review
+/// Roles: LISTING_HQ
+class ResubmitToHQReviewListerHQCall {
+  Future<ApiCallResponse> call({
+    String? processId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPILegalProcessContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Resubmit to HQ Review (Lister HQ)',
+      apiUrl: '$baseUrl/legal-processes/$processId/lister-hq/resubmit-to-hq-review',
+      callType: ApiCallType.POST,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {},
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

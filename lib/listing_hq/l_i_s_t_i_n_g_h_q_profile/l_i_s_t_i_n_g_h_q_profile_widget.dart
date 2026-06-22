@@ -4,7 +4,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_auth.dart';
 import '/backend/api_requests/api_users.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
-import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/repositories/user_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
@@ -124,9 +124,9 @@ class _LISTINGHQProfileWidgetState extends State<LISTINGHQProfileWidget> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     wrapWithModel(
-                      model: _model.oPERATIVELISTINGNavbarModel,
+                      model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const OPERATIVELISTINGNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

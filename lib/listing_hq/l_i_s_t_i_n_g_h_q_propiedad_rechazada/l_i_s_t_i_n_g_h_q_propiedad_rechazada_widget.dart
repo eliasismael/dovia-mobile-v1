@@ -553,7 +553,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                         onPressed: () async {
                           final response =
                               await DOVIAAPILegalProcessContextGroup
-                                  .resubmitToHQReviewCall
+                                  .resubmitToHQReviewListerHQCall
                                   .call(
                             processId: widget.processId,
                             authToken: currentAuthenticationToken,

@@ -221,7 +221,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     required String status,
   }) async {
     final token = currentAuthenticationToken ?? '';
-    final res = await DOVIAAPILegalProcessContextGroup.listLegalProcessesHQCall.call(
+    final res = await DOVIAAPILegalProcessContextGroup.listLegalProcessesListerHQCall.call(
       authToken: token,
       status: status,
       page: '1',
