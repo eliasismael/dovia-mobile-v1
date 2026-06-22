@@ -93,6 +93,40 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
     return data;
   }
 
+  // Maps a UI section name to a backend `zone` slug matching `^[a-z0-9][a-z0-9-_]{0,39}$`.
+  String _zoneForSection(String sectionName) {
+    switch (sectionName) {
+      case 'Habitaciones':
+        return 'habitacion';
+      case 'Sala':
+        return 'sala';
+      case 'Comedor':
+        return 'comedor';
+      case 'Cocina':
+        return 'cocina';
+      case 'Otras zonas':
+        return 'otras';
+      case 'Plano':
+        return 'plano';
+      default:
+        return _slugifyZone(sectionName);
+    }
+  }
+
+  String _slugifyZone(String input) {
+    var s = input.toLowerCase().trim();
+    const from = 'áàäâãéèëêíìïîóòöôõúùüûñç';
+    const to = 'aaaaaeeeeiiiiooooouuuunc';
+    for (int i = 0; i < from.length; i++) {
+      s = s.replaceAll(from[i], to[i]);
+    }
+    s = s.replaceAll(RegExp(r'[^a-z0-9]+'), '-');
+    s = s.replaceAll(RegExp(r'^-+|-+$'), '');
+    if (s.isEmpty) s = 'zona';
+    if (s.length > 40) s = s.substring(0, 40);
+    return s;
+  }
+
   @override
   void dispose() {
     _model.dispose();
@@ -220,6 +254,11 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                               final files = entry.value as List<dynamic>? ?? [];
                               final List<String> sectionUrls = [];
 
+                              final bool isVideo = sectionName == 'Recorrido 360';
+                              final String zone = isVideo
+                                  ? 'recorrido-360'
+                                  : _zoneForSection(sectionName);
+
                               final List<XFile> localFiles = [];
                               for (final dynamic fileObj in files) {
                                 if (fileObj is XFile) {
@@ -232,13 +271,22 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                               }
 
                               if (localFiles.isNotEmpty) {
-                                final List<Map<String, String>> uploadsPayload = localFiles.map((file) {
-                                  final String contentType = mime(file.path) ?? 'image/jpeg';
-                                  return {
+                                // New presign contract: zone, fileName, mimeType, sizeBytes.
+                                final List<Map<String, dynamic>> uploadsPayload = [];
+                                final List<String> mimeTypes = [];
+                                for (final file in localFiles) {
+                                  final int sizeBytes = await file.length();
+                                  String mimeType =
+                                      mime(file.path) ?? mime(file.name) ?? 'image/jpeg';
+                                  if (mimeType == 'image/jpg') mimeType = 'image/jpeg';
+                                  mimeTypes.add(mimeType);
+                                  uploadsPayload.add({
+                                    'zone': zone,
                                     'fileName': file.name,
-                                    'contentType': contentType,
-                                  };
-                                }).toList();
+                                    'mimeType': mimeType,
+                                    'sizeBytes': sizeBytes,
+                                  });
+                                }
 
                                 final presignRes = await DOVIAAPIPropertyContextGroup.presignPropertyImagesCall.call(
                                   propertyId: propertyId,
@@ -250,30 +298,50 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                   throw Exception('Error al obtener URLs firmadas: ${presignRes.jsonBody}');
                                 }
 
-                                final responseData = getJsonField(presignRes.jsonBody, r'$.data') as Map<String, dynamic>?;
-                                final presignList = responseData?['uploads'] as List?;
+                                // Response: { data: { propertyId, items: [...] } } (con o sin envoltura `data`).
+                                final dataField = getJsonField(presignRes.jsonBody, r'$.data');
+                                final Map respMap = dataField is Map
+                                    ? dataField
+                                    : (presignRes.jsonBody is Map
+                                        ? presignRes.jsonBody as Map
+                                        : {});
+                                final presignList =
+                                    (respMap['items'] ?? respMap['uploads']) as List?;
                                 if (presignList == null || presignList.isEmpty) {
                                   throw Exception('No se devolvieron URLs firmadas.');
                                 }
 
-                                final List<Map<String, String>> confirmPayload = [];
+                                final List<Map<String, dynamic>> confirmPayload = [];
                                 for (int i = 0; i < localFiles.length; i++) {
                                   final localFile = localFiles[i];
                                   final presignItem = presignList[i] as Map<String, dynamic>;
-                                  final uploadUrl = presignItem['url']?.toString();
-                                  final s3Key = presignItem['key']?.toString();
-                                  final publicUrl = presignItem['publicUrl']?.toString() ?? presignItem['s3Url']?.toString();
+                                  final uploadUrl =
+                                      (presignItem['uploadUrl'] ?? presignItem['url'])?.toString();
+                                  final storageKey =
+                                      (presignItem['storageKey'] ?? presignItem['key'])?.toString();
+                                  final publicUrl = (presignItem['publicUrl'] ??
+                                          presignItem['s3Url'])
+                                      ?.toString();
+                                  final requiredHeaders = presignItem['requiredHeaders'];
 
-                                  if (uploadUrl == null || s3Key == null) {
-                                    throw Exception('Falta URL de subida o key.');
+                                  if (uploadUrl == null || storageKey == null) {
+                                    throw Exception('Falta URL de subida o storageKey.');
                                   }
 
                                   final bytes = await localFile.readAsBytes();
-                                  final contentType = mime(localFile.path) ?? 'image/jpeg';
+
+                                  // Usar exactamente los headers que pide el presign.
+                                  final Map<String, String> putHeaders = {};
+                                  if (requiredHeaders is Map) {
+                                    requiredHeaders.forEach(
+                                        (k, v) => putHeaders[k.toString()] = v.toString());
+                                  }
+                                  putHeaders.putIfAbsent(
+                                      'Content-Type', () => mimeTypes[i]);
 
                                   final s3PutRes = await http.put(
                                     Uri.parse(uploadUrl),
-                                    headers: {'Content-Type': contentType},
+                                    headers: putHeaders,
                                     body: bytes,
                                   );
 
@@ -281,9 +349,10 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                     throw Exception('Fallo al subir a S3: ${s3PutRes.statusCode}');
                                   }
 
-                                  confirmPayload.add({'key': s3Key});
-                                  
-                                  final String imageUrl = publicUrl ?? 'https://dovia-prod-assets.s3.amazonaws.com/$s3Key';
+                                  confirmPayload.add({'storageKey': storageKey, 'zone': zone});
+
+                                  final String imageUrl = publicUrl ??
+                                      'https://dovia-media-dev.s3.us-east-2.amazonaws.com/$storageKey';
                                   sectionUrls.add(imageUrl);
                                 }
 
@@ -298,35 +367,12 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                 }
                               }
 
-                              if (sectionName == 'Recorrido 360') {
+                              if (isVideo) {
                                 if (sectionUrls.isNotEmpty) {
                                   finalVideo360Url = sectionUrls.first;
                                 }
                               } else {
-                                String categoryKey;
-                                switch (sectionName) {
-                                  case 'Habitaciones':
-                                    categoryKey = 'habitacion';
-                                    break;
-                                  case 'Sala':
-                                    categoryKey = 'sala';
-                                    break;
-                                  case 'Comedor':
-                                    categoryKey = 'comedor';
-                                    break;
-                                  case 'Cocina':
-                                    categoryKey = 'cocina';
-                                    break;
-                                  case 'Otras zonas':
-                                    categoryKey = 'otras';
-                                    break;
-                                  case 'Plano':
-                                    categoryKey = 'plano';
-                                    break;
-                                  default:
-                                    categoryKey = sectionName.toLowerCase().replaceAll(' ', '_');
-                                }
-                                finalizedImages[categoryKey] = sectionUrls;
+                                finalizedImages[zone] = sectionUrls;
                               }
                             }
                           }

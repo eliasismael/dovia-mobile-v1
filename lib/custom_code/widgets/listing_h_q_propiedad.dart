@@ -245,8 +245,6 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     } else if (data['visit'] is Map && (data['visit'] as Map)['property'] is Map) {
       prop = (data['visit'] as Map)['property'] as Map;
     }
-    print('[checklist] initialData keys: ${data.keys.toList()}');
-    print('[checklist] resolved property keys: ${prop.keys.toList()}');
 
     // ── helpers ──────────────────────────────────────────────────────────────
     Map sub(Map m, String key) => m[key] is Map ? m[key] as Map : {};
@@ -254,7 +252,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
     setState(() {
       // ── Tipo de vivienda ──────────────────────────────────────────────────
-      _tipoVivienda = prop['propertyType']?.toString() ?? prop['type']?.toString();
+      _tipoVivienda =
+          _propertyTypeToLabel(prop['propertyType'] ?? prop['type']);
 
       // ── Dirección (read-only, from property location) ─────────────────────
       final addr = sub(sub(prop, 'location'), 'address');
@@ -285,12 +284,14 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       _generalCharacteristics['Cuota de mantenimiento'] =
           spaces['maintenanceFee'] != null && spaces['maintenanceFee'] != 0;
       _generalCharacteristics['Cocina']                = getBool(spaces, 'kitchen');
+      _mergeAdditional(_generalCharacteristics, spaces);
 
       // ── Otras características ─────────────────────────────────────────────
       final others = sub(sub(prop, 'features'), 'others');
       _otherCharacteristics['Pet Frendly']             = getBool(others, 'petFriendly');
       _otherCharacteristics['Permitido para Airbnb']   = getBool(others, 'allowedForAirbnb');
       _otherCharacteristics['Permitido subarrendar']   = getBool(others, 'allowedToSublet');
+      _mergeAdditional(_otherCharacteristics, others);
 
       // ── Amenidades de la propiedad ────────────────────────────────────────
       final amenProp = sub(sub(sub(prop, 'features'), 'amenities'), 'property');
@@ -300,6 +301,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       _propiedadAmenities['Cocina con isla']           = getBool(amenProp, 'islandKitchen');
       _propiedadAmenities['Sala de exterior']          = getBool(amenProp, 'outdoorLivingRoom');
       _propiedadAmenities['Tina']                      = getBool(amenProp, 'bathtub');
+      _mergeAdditional(_propiedadAmenities, amenProp);
 
       // ── Áreas comunes ─────────────────────────────────────────────────────
       final amenCommon = sub(sub(sub(prop, 'features'), 'amenities'), 'commonAreas');
@@ -310,6 +312,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       _areasComunes['Salón de eventos']    = getBool(amenCommon, 'eventHall');
       _areasComunes['Yoga Deck']           = getBool(amenCommon, 'yogaDeck');
       _areasComunes['Cocina para eventos'] = getBool(amenCommon, 'eventKitchen');
+      _mergeAdditional(_areasComunes, amenCommon);
 
       // ── Criterios de calificación (star ratings) ──────────────────────────
       final hood = sub(sub(prop, 'features'), 'neighborhood');
@@ -345,9 +348,17 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           ? prop['infoHQ'] as Map
           : (prop['infoHq'] is Map ? prop['infoHq'] as Map : {});
       final services = sub(infoHQ, 'services');
-      _servicios['Gas']   = getBool(services, 'gas');
-      _servicios['Agua']  = getBool(services, 'agua');
-      _servicios['Luz']   = getBool(services, 'luz');
+      const serviceLabels = {
+        'gas': 'Gas',
+        'agua': 'Agua',
+        'luz': 'Luz',
+        'internet': 'Internet',
+      };
+      services.forEach((k, v) {
+        if (k == null) return;
+        final label = serviceLabels[k.toString().toLowerCase()] ?? _cap(k.toString());
+        _servicios[label] = v == true;
+      });
 
       final hasDmg = infoHQ['hasDamages'];
       if (hasDmg != null) _hasDanos = hasDmg == true ? 'Si' : 'No';
@@ -478,13 +489,54 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     }
   }
 
+  String _cap(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
+  // Backend propertyType enum <-> Spanish dropdown label.
+  static const Map<String, String> _propertyTypeLabels = {
+    'HOUSE': 'Casa',
+    'APARTMENT': 'Apartamento',
+    'CONDO': 'Condominio',
+    'CONDOMINIUM': 'Condominio',
+    'COMMERCIAL': 'Local',
+    'STORE': 'Local',
+    'LOCAL': 'Local',
+    'WAREHOUSE': 'Bodega',
+    'OTHER': 'Otro',
+  };
+
+  String? _propertyTypeToLabel(dynamic raw) {
+    if (raw == null) return null;
+    final key = raw.toString().toUpperCase();
+    return _propertyTypeLabels[key] ?? raw.toString();
+  }
+
+  String? _labelToPropertyType(String? label) {
+    if (label == null) return null;
+    for (final e in _propertyTypeLabels.entries) {
+      if (e.value == label) return e.key;
+    }
+    return label;
+  }
+
+  // Merges a feature group's `additionalProperties` (custom bool flags) into
+  // the corresponding checkbox map so nothing the Operative sent is lost.
+  void _mergeAdditional(Map<String, bool> target, Map group) {
+    final extra = group['additionalProperties'];
+    if (extra is Map) {
+      extra.forEach((k, v) {
+        if (k != null) target[_cap(k.toString())] = v == true;
+      });
+    }
+  }
+
   // ==================== DATA COLLECTION ====================
   Future<void> _handleAction(VoidCallback? actionCallback, {bool isPublish = false}) async {
     if (isPublish) {
       if (!validateForm()) return;
     }
     final data = {
-      'tipoVivienda': _tipoVivienda,
+      'tipoVivienda': _labelToPropertyType(_tipoVivienda),
       'direccion': _direccion,
       'descripcion': _descripcionController.text,
       'caracteristicas': {
@@ -1895,15 +1947,20 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             children: List.generate(5, (index) {
               return GestureDetector(
                 onTap: () {
-                  if (_selectedCriteria.length < 3 ||
-                      _selectedCriteria.contains(label)) {
-                    setState(() {
+                  setState(() {
+                    // Tapping the same star again clears the rating (allows
+                    // HQ to remove a star level), otherwise sets it.
+                    if (_starRatings[label] == index + 1) {
+                      _starRatings[label] = index;
+                    } else {
                       _starRatings[label] = index + 1;
-                      if (index + 1 > 0) {
-                        _selectedCriteria.add(label);
-                      }
-                    });
-                  }
+                    }
+                    if (_starRatings[label]! > 0) {
+                      _selectedCriteria.add(label);
+                    } else {
+                      _selectedCriteria.remove(label);
+                    }
+                  });
                 },
                 child: Padding(
                   padding: EdgeInsets.only(
