@@ -103,7 +103,10 @@ class _LISTINGHQPropiedadRechazadaWidgetState
           .call(
         processId: widget.processId,
         authToken: currentAuthenticationToken,
-        file: file,
+        file: FFUploadedFile(
+          name: file.originalFilename,
+          bytes: file.bytes,
+        ),
       );
       if (response.succeeded) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -136,7 +139,10 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         processId: widget.processId,
         documentId: documentId,
         authToken: currentAuthenticationToken,
-        file: selectedFiles.first,
+        file: FFUploadedFile(
+          name: selectedFiles.first.originalFilename,
+          bytes: selectedFiles.first.bytes,
+        ),
       );
       if (response.succeeded) {
         ScaffoldMessenger.of(context).showSnackBar(

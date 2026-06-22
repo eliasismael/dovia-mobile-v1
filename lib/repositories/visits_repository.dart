@@ -269,4 +269,50 @@ class VisitsRepository extends ChangeNotifier {
 
     return Success(operatives);
   }
+
+  /// Assigns an operative lister to a visit.
+  Future<Result<void>> assignVisit({
+    required String propertyId,
+    required String operativeId,
+    required DateTime date,
+    required TimeOfDay time,
+  }) async {
+    final token = currentAuthenticationToken ?? '';
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    final timeStr = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+    // Try to find a visit for this property in current cached visits
+    String visitId = '';
+    for (final v in _myVisits) {
+      if (v.propertyId == propertyId) {
+        visitId = v.id;
+        break;
+      }
+    }
+
+    // Fallback if not found in cache (e.g. testing with mock_prop_id)
+    if (visitId.isEmpty) {
+      visitId = propertyId;
+    }
+
+    final response = await DOVIAAPIVisitContextGroup.assignOperativeListerCall.call(
+      visitId: visitId,
+      authToken: token,
+      operativeListerId: operativeId,
+      date: dateStr,
+      startTime: timeStr,
+    );
+
+    if (!response.succeeded) {
+      return Failure(
+        'No se pudo asignar el operative lister',
+        statusCode: response.statusCode,
+      );
+    }
+
+    // Invalidate cache
+    _myVisits = [];
+    notifyListeners();
+    return const Success(null);
+  }
 }

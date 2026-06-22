@@ -55,10 +55,9 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
   void initState() {
     super.initState();
     _isFavorite = widget.isFavorite ?? false;
-    // Only sync from API if the parent doesn't already know it's a favorite.
-    // If isFavorite is true, trust the parent — calling the API risks
-    // overwriting the correct state with a stale/incorrect response.
-    if (!_isFavorite) {
+    // Only sync from API for CLIENT users — agents/HQ don't have favorites.
+    // If isFavorite is already true, trust the parent to avoid overwriting.
+    if (!_isFavorite && FFAppState().UserRole == 'CLIENT') {
       _syncFavoriteStatusFromApi();
     }
   }
@@ -74,8 +73,8 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
 
     if (widget.propertyId != oldWidget.propertyId ||
         widget.authToken != oldWidget.authToken) {
-      // Same logic: only sync from API if the parent says it's not a favorite.
-      if (!(widget.isFavorite ?? false)) {
+      // Same logic: only sync from API if CLIENT and parent says not a favorite.
+      if (!(widget.isFavorite ?? false) && FFAppState().UserRole == 'CLIENT') {
         _syncFavoriteStatusFromApi();
       }
     }

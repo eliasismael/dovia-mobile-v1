@@ -1,5 +1,5 @@
 import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 import 'package:flutter/material.dart';
 
 class Recorrido360View extends StatefulWidget {
@@ -18,8 +18,7 @@ class _Recorrido360ViewWebState extends State<Recorrido360View> {
     super.initState();
     _viewId = 'recorrido-360-${widget.url.hashCode}';
     
-    // ignore: undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(_viewId, (int viewId) {
+    ui_web.platformViewRegistry.registerViewFactory(_viewId, (int viewId) {
       final iframe = html.IFrameElement()
         ..src = widget.url
         ..style.border = 'none'
