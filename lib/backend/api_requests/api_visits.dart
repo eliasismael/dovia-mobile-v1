@@ -32,12 +32,16 @@ class DOVIAAPIVisitContextGroup {
       GetAdminOperativeListingVisitsCall();
   static AdminAssignListerHqCall adminAssignListerHqCall =
       AdminAssignListerHqCall();
-  static UploadListerHqChecklistDocumentCall
-      uploadListerHqChecklistDocumentCall =
-      UploadListerHqChecklistDocumentCall();
+  static UploadVisitDocumentCall
+      uploadVisitDocumentCall =
+      UploadVisitDocumentCall();
   static ReviewChecklistDocumentsCall reviewChecklistDocumentsCall =
       ReviewChecklistDocumentsCall();
-  static LegalApprovalCall legalApprovalCall = LegalApprovalCall();
+  static ReviewListerHqDocumentCall reviewListerHqDocumentCall =
+      ReviewListerHqDocumentCall();
+  static UploadDocumentCall uploadDocumentCall = UploadDocumentCall();
+  static CreateCustomVisitDocumentCall createCustomVisitDocumentCall =
+      CreateCustomVisitDocumentCall();
   static AssignOperativeListerCall assignOperativeListerCall =
       AssignOperativeListerCall();
   static MarkVisitedCall markVisitedCall = MarkVisitedCall();
@@ -615,19 +619,19 @@ class AdminAssignListerHqCall {
   }
 }
 
-class UploadListerHqChecklistDocumentCall {
+class UploadVisitDocumentCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
-    String? checklistType = '',
+    String? documentId = '',
     String? authToken = '',
     FFUploadedFile? file,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
     return ApiManager.instance.makeApiCall(
-      callName: 'Upload Lister HQ Checklist Document',
-      apiUrl: '$baseUrl/visits/$visitId/lister-hq/documents/$checklistType',
-      callType: ApiCallType.POST,
+      callName: 'Upload Visit Document',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/documents/$documentId/upload',
+      callType: ApiCallType.PUT,
       headers: {
         'Authorization': 'Bearer $authToken',
       },
@@ -677,22 +681,90 @@ class ReviewChecklistDocumentsCall {
   }
 }
 
-class LegalApprovalCall {
+class ReviewListerHqDocumentCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
+    String? documentId = '',
     String? authToken = '',
+    String? status = '',
+    String? note = '',
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
+    final ffApiRequestBody = '''
+{
+  "status": "${escapeStringForJson(status)}",
+  "note": "${escapeStringForJson(note)}"
+}''';
     return ApiManager.instance.makeApiCall(
-      callName: 'Legal Approval',
-      apiUrl: '$baseUrl/visits/$visitId/legal-approval',
-      callType: ApiCallType.POST,
+      callName: 'Review Lister HQ Document',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/documents/$documentId/review',
+      callType: ApiCallType.PUT,
       headers: {
         'Authorization': 'Bearer $authToken',
       },
       params: {},
+      body: ffApiRequestBody,
       bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class UploadDocumentCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? documentId = '',
+    String? authToken = '',
+    FFUploadedFile? file,
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Upload Document',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/documents/$documentId/upload',
+      callType: ApiCallType.PUT,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class CreateCustomVisitDocumentCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? authToken = '',
+    FFUploadedFile? file,
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Create Custom Visit Document',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/documents',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

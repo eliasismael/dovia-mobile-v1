@@ -139,8 +139,7 @@ class _PopupRechazarDocumentoWidgetState extends State<PopupRechazarDocumentoWid
                   padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
                   child: FFButtonWidget(
                     onPressed: () async {
-                      Navigator.pop(context);
-                      context.goNamed('LISTING_HQ_Home');
+                      Navigator.pop(context, _model.commentTextController.text);
                     },
                     text: 'Confirmar y rechazar documento',
                     options: FFButtonOptions(

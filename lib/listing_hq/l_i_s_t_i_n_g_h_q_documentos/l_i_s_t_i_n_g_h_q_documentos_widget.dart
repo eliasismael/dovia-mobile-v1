@@ -55,7 +55,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
   /// Empty string means "no filter" (all documents).
   static const Map<String, String> _tabStatusMap = {
     'Pendiente': 'pending',
-    'Revision legal': 'IN_PROGRESS',
+    'Revision legal': 'in_legal_review', // TODO: backend will define this
     'Todos los documentos': '',
   };
 
@@ -711,7 +711,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
         hoverColor: Colors.transparent,
         highlightColor: Colors.transparent,
         onTap: () async {
-          Navigator.push(
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => LISTINGHQPropiedadArchivosPendientesWidget(
@@ -720,6 +720,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
               ),
             ),
           );
+          setState(() {
+            _docsFuture = _fetchDocuments();
+          });
         },
         child: Container(
           width: MediaQuery.sizeOf(context).width * 1.0,

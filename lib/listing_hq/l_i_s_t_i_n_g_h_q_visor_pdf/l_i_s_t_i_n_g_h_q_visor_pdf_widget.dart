@@ -1,3 +1,5 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_visits.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -184,7 +186,7 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                 Expanded(
                                   child: FFButtonWidget(
                                     onPressed: () async {
-                                      await showDialog(
+                                      final note = await showDialog<String>(
                                         context: context,
                                         builder: (dialogContext) {
                                           return Dialog(
@@ -196,6 +198,27 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                           );
                                         },
                                       );
+                                      if (note != null && note.isNotEmpty) {
+                                        final token = currentAuthenticationToken ?? '';
+                                        final res = await DOVIAAPIVisitContextGroup.reviewListerHqDocumentCall.call(
+                                          visitId: widget.visitId ?? '',
+                                          documentId: widget.documentId,
+                                          authToken: token,
+                                          status: 'rejected',
+                                          note: note,
+                                        );
+                                        if (res.succeeded) {
+                                          if (context.mounted) {
+                                            context.goNamed('LISTING_HQ_Home');
+                                          }
+                                        } else {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Error al rechazar el documento')),
+                                            );
+                                          }
+                                        }
+                                      }
                                     },
                                     text: 'Rechazar documento',
                                     options: FFButtonOptions(
@@ -220,37 +243,12 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                 const SizedBox(width: 12.0),
                                 Expanded(
                                   child: FFButtonWidget(
-                                    onPressed: () async {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (dialogContext) {
-                                          return Dialog(
-                                            elevation: 0,
-                                            insetPadding: EdgeInsets.zero,
-                                            backgroundColor: Colors.transparent,
-                                            alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                FocusScope.of(dialogContext).unfocus();
-                                                FocusManager.instance.primaryFocus?.unfocus();
-                                              },
-                                              child: const PopupExitoWidget(
-                                                title: 'Se envió con éxito al Equipo Legal',
-                                                text: 'El documento se ha enviado al equipo de legal para que lo revisen.',
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                      if (context.mounted) {
-                                        context.goNamed('LISTING_HQ_Home');
-                                      }
-                                    },
+                                    onPressed: null,
                                     text: 'Aceptar y enviar a Dovia Legal',
                                     options: FFButtonOptions(
                                       height: 48.0,
                                       padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                      color: FlutterFlowTheme.of(context).primary,
+                                      color: FlutterFlowTheme.of(context).alternate,
                                       textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                                             font: GoogleFonts.inter(
                                               fontWeight: FontWeight.w600,

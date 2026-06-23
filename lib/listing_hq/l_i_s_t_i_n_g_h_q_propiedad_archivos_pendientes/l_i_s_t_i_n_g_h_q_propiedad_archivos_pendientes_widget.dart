@@ -1,3 +1,5 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_visits.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/uploaded_file.dart';
@@ -38,13 +40,63 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Future<List<dynamic>>? _docsFuture;
+
   @override
   void initState() {
     super.initState();
     _model =
         createModel(context, () => LISTINGHQPropiedadArchivosPendientesModel());
 
+    _docsFuture = _fetchDocs();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  Future<List<dynamic>> _fetchDocs() async {
+    final token = currentAuthenticationToken ?? '';
+    final res = await DOVIAAPIVisitContextGroup.getVisitDetailsCall.call(
+      visitId: widget.visitId ?? '',
+      authToken: token,
+    );
+    if (!res.succeeded) return [];
+    
+    final data = getJsonField(res.jsonBody, r'$.data');
+    if (data is Map) {
+      // The visit details DTO nests the checklist under `visit`. Fall back to
+      // the top level in case the response is unwrapped.
+      final visit = data['visit'];
+      final checklist =
+          (visit is Map ? visit['documentChecklist'] : null) ??
+              data['documentChecklist'];
+      final docs =
+          (visit is Map ? visit['documents'] : null) ?? data['documents'];
+
+      List combined = [];
+      if (checklist is List) combined.addAll(checklist);
+      if (docs is List) {
+        for (var doc in docs) {
+          if (doc is! Map) continue;
+          // Avoid duplicates if they share the same ID
+          final cId = doc['id']?.toString() ?? doc['documentId']?.toString();
+          if (cId != null && cId.isNotEmpty) {
+            final exists = combined.any((c) {
+              final existingId = c is Map
+                  ? (c['id']?.toString() ?? c['documentId']?.toString())
+                  : null;
+              return existingId == cId;
+            });
+            if (!exists) {
+              combined.add(doc);
+            }
+          } else {
+            combined.add(doc);
+          }
+        }
+      }
+      return combined;
+    }
+    return [];
   }
 
   @override
@@ -248,267 +300,120 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                InkWell(
-                                  onTap: () async {
-                                    if (_model.uploadedContrato != null) {
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => LISTINGHQVisorPdfWidget(documentName: 'Contrato', uploadedFile: _model.uploadedContrato)));
-                                    } else {
-                                      final result = await showDialog<FFUploadedFile>(
-                                        context: context,
-                                        builder: (dialogContext) {
-                                          return Dialog(
-                                            elevation: 0,
-                                            insetPadding: EdgeInsets.zero,
-                                            backgroundColor: Colors.transparent,
-                                            alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                            child: const PopupSubirDocumentoWidget(documentName: 'Contrato'),
-                                          );
-                                        },
-                                      );
-                                      if (result != null) {
-                                        setState(() {
-                                          _model.uploadedContrato = result;
-                                        });
-                                      }
-                                    }
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Container(
-                                      width: 150.0,
-                                      height: 150.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        borderRadius:
-                                            BorderRadius.circular(24.0),
-                                      ),
-                                      child: Align(
-                                        alignment: const AlignmentDirectional(
-                                            0.0, 0.0),
-                                        child: Text(
-                                          'PDF',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .tertiary,
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 12.0, 0.0, 0.0),
-                                      child: Text(
-                                        'Contrato',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
+                            child: FutureBuilder<List<dynamic>>(
+                              future: _docsFuture,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 40.0),
+                                    child: Center(child: CircularProgressIndicator()),
+                                  );
+                                }
+                                final docs = snapshot.data ?? [];
+                                if (docs.isEmpty) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 40.0),
+                                    child: Center(child: Text('No hay documentos')),
+                                  );
+                                }
+                                return Wrap(
+                                  spacing: 16.0,
+                                  runSpacing: 16.0,
+                                  alignment: WrapAlignment.center,
+                                  children: docs.map((doc) {
+                                    final docMap = doc as Map;
+                                    final docName = docMap['name']?.toString() ?? docMap['label']?.toString() ?? docMap['type']?.toString() ?? 'Documento';
+                                    final docId = docMap['id']?.toString() ?? docMap['documentId']?.toString() ?? '';
+                                    final fileUrl = docMap['fileUrl']?.toString() ?? docMap['url']?.toString() ?? '';
+                                    final hasFile = fileUrl.isNotEmpty;
+                                    final isRejected = docMap['status']?.toString().toLowerCase() == 'rejected';
+
+                                    return InkWell(
+                                      onTap: () async {
+                                        if (hasFile) {
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => LISTINGHQVisorPdfWidget(documentName: docName, documentUrl: fileUrl, documentId: docId, visitId: widget.visitId)));
+                                        } else {
+                                          final result = await showDialog<FFUploadedFile>(
+                                            context: context,
+                                            builder: (dialogContext) => Dialog(
+                                              elevation: 0,
+                                              insetPadding: EdgeInsets.zero,
+                                              backgroundColor: Colors.transparent,
+                                              alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                              child: PopupSubirDocumentoWidget(documentName: docName),
                                             ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 12.0, 0.0, 0.0),
-                                      child: LinearPercentIndicator(
-                                        percent: _model.uploadedContrato != null ? 1.0 : 0.5,
-                                        width: 120.0,
-                                        lineHeight: 12.0,
-                                        animation: true,
-                                        animateFromLastPercent: true,
-                                        progressColor:
-                                            FlutterFlowTheme.of(context)
-                                                .primary,
-                                        backgroundColor:
-                                            FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                        barRadius: const Radius.circular(50.0),
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                ),
-                                InkWell(
-                                  onTap: () async {
-                                    if (_model.uploadedDocumento != null) {
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => LISTINGHQVisorPdfWidget(documentName: 'Deposito a cuenta Dovia', uploadedFile: _model.uploadedDocumento)));
-                                    } else {
-                                      final result = await showDialog<FFUploadedFile>(
-                                        context: context,
-                                        builder: (dialogContext) {
-                                          return Dialog(
-                                            elevation: 0,
-                                            insetPadding: EdgeInsets.zero,
-                                            backgroundColor: Colors.transparent,
-                                            alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                            child: const PopupSubirDocumentoWidget(documentName: 'Deposito a cuenta Dovia'),
                                           );
-                                        },
-                                      );
-                                      if (result != null) {
-                                        setState(() {
-                                          _model.uploadedDocumento = result;
-                                        });
-                                      }
-                                    }
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Container(
-                                      width: 150.0,
-                                      height: 150.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        borderRadius:
-                                            BorderRadius.circular(24.0),
-                                        border: Border.all(
-                                          color: _model.uploadedDocumento != null ? Colors.transparent : FlutterFlowTheme.of(context).error,
-                                          width: 2.0,
-                                        ),
-                                      ),
-                                      child: Align(
-                                        alignment: const AlignmentDirectional(
-                                            0.0, 0.0),
-                                        child: Text(
-                                          'PDF',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .tertiary,
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
+                                          if (result != null && (result.bytes?.isNotEmpty ?? false)) {
+                                            final token = currentAuthenticationToken ?? '';
+                                            final res = await DOVIAAPIVisitContextGroup.uploadDocumentCall.call(
+                                              visitId: widget.visitId ?? '',
+                                              documentId: docId,
+                                              authToken: token,
+                                              file: result,
+                                            );
+                                            if (res.succeeded) {
+                                              setState(() {
+                                                _docsFuture = _fetchDocs();
+                                              });
+                                            } else {
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Error al subir el documento')),
+                                                );
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 150.0,
+                                            height: 150.0,
+                                            decoration: BoxDecoration(
+                                              color: isRejected ? const Color(0xFFFFE4E4) : FlutterFlowTheme.of(context).primaryText,
+                                              borderRadius: BorderRadius.circular(24.0),
+                                              border: Border.all(
+                                                color: isRejected ? FlutterFlowTheme.of(context).error : (hasFile ? Colors.transparent : FlutterFlowTheme.of(context).error),
+                                                width: 2.0,
                                               ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 12.0, 0.0, 0.0),
-                                      child: Text(
-                                        'Deposito a cuenta Dovia',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
                                             ),
+                                            child: Align(
+                                              alignment: const AlignmentDirectional(0.0, 0.0),
+                                              child: Text(
+                                                'PDF',
+                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                      font: GoogleFonts.inter(
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                      color: isRejected ? FlutterFlowTheme.of(context).error : FlutterFlowTheme.of(context).tertiary,
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                            child: SizedBox(
+                                              width: 150.0,
+                                              child: Text(
+                                                docName,
+                                                textAlign: TextAlign.center,
+                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                      font: GoogleFonts.inter(
+                                                        color: isRejected ? FlutterFlowTheme.of(context).error : FlutterFlowTheme.of(context).primaryText,
+                                                        fontWeight: isRejected ? FontWeight.bold : FontWeight.normal,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 12.0, 0.0, 0.0),
-                                      child: LinearPercentIndicator(
-                                        percent: _model.uploadedDocumento != null ? 1.0 : 0.5,
-                                        width: 120.0,
-                                        lineHeight: 12.0,
-                                        animation: true,
-                                        animateFromLastPercent: true,
-                                        progressColor:
-                                            FlutterFlowTheme.of(context)
-                                                .primary,
-                                        backgroundColor:
-                                            FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                        barRadius: const Radius.circular(50.0),
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                ),
-                              ],
+                                    );
+                                  }).toList(),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -518,16 +423,6 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                       padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 100.0),
                       child: FFButtonWidget(
                         onPressed: () async {
-                          String docToUpload = 'Contrato';
-                          if (_model.uploadedContrato != null && _model.uploadedDocumento == null) {
-                            docToUpload = 'Deposito a cuenta Dovia';
-                          } else if (_model.uploadedContrato != null && _model.uploadedDocumento != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Todos los documentos han sido subidos.')),
-                            );
-                            return;
-                          }
-
                           final result = await showDialog<FFUploadedFile>(
                             context: context,
                             builder: (dialogContext) {
@@ -536,19 +431,29 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                 insetPadding: EdgeInsets.zero,
                                 backgroundColor: Colors.transparent,
                                 alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                child: PopupSubirDocumentoWidget(documentName: docToUpload),
+                                child: const PopupSubirDocumentoWidget(documentName: 'Nuevo Documento'),
                               );
                             },
                           );
 
-                          if (result != null) {
-                            setState(() {
-                              if (docToUpload == 'Contrato') {
-                                _model.uploadedContrato = result;
-                              } else {
-                                _model.uploadedDocumento = result;
+                          if (result != null && (result.bytes?.isNotEmpty ?? false)) {
+                            final token = currentAuthenticationToken ?? '';
+                            final res = await DOVIAAPIVisitContextGroup.createCustomVisitDocumentCall.call(
+                              visitId: widget.visitId ?? '',
+                              authToken: token,
+                              file: result,
+                            );
+                            if (res.succeeded) {
+                              setState(() {
+                                _docsFuture = _fetchDocs();
+                              });
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Error al crear el documento')),
+                                );
                               }
-                            });
+                            }
                           }
                         },
                         text: 'Subir documentacion de la propiedad',
