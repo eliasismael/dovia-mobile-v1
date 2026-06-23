@@ -60,15 +60,14 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
       authToken: token,
     );
     if (!res.succeeded) return [];
-    
+
     final data = getJsonField(res.jsonBody, r'$.data');
     if (data is Map) {
       // The visit details DTO nests the checklist under `visit`. Fall back to
       // the top level in case the response is unwrapped.
       final visit = data['visit'];
-      final checklist =
-          (visit is Map ? visit['documentChecklist'] : null) ??
-              data['documentChecklist'];
+      final checklist = (visit is Map ? visit['documentChecklist'] : null) ??
+          data['documentChecklist'];
       final docs =
           (visit is Map ? visit['documents'] : null) ?? data['documents'];
 
@@ -303,17 +302,22 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                             child: FutureBuilder<List<dynamic>>(
                               future: _docsFuture,
                               builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
                                   return const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 40.0),
-                                    child: Center(child: CircularProgressIndicator()),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 40.0),
+                                    child: Center(
+                                        child: CircularProgressIndicator()),
                                   );
                                 }
                                 final docs = snapshot.data ?? [];
                                 if (docs.isEmpty) {
                                   return const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 40.0),
-                                    child: Center(child: Text('No hay documentos')),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 40.0),
+                                    child: Center(
+                                        child: Text('No hay documentos')),
                                   );
                                 }
                                 return Wrap(
@@ -322,30 +326,80 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                   alignment: WrapAlignment.center,
                                   children: docs.map((doc) {
                                     final docMap = doc as Map;
-                                    final docName = docMap['name']?.toString() ?? docMap['label']?.toString() ?? docMap['type']?.toString() ?? 'Documento';
-                                    final docId = docMap['id']?.toString() ?? docMap['documentId']?.toString() ?? '';
-                                    final fileUrl = docMap['fileUrl']?.toString() ?? docMap['url']?.toString() ?? '';
+                                    final docName =
+                                        docMap['name']?.toString() ??
+                                            docMap['label']?.toString() ??
+                                            docMap['type']?.toString() ??
+                                            'Documento';
+                                    final String docId =
+                                        docMap['id']?.toString() ??
+                                            docMap['documentId']?.toString() ??
+                                            docMap['type']?.toString() ??
+                                            '';
+                                    final fileUrl =
+                                        docMap['fileUrl']?.toString() ??
+                                            docMap['url']?.toString() ??
+                                            '';
+                                    final storageKey =
+                                        docMap['storageKey']?.toString() ?? '';
                                     final hasFile = fileUrl.isNotEmpty;
-                                    final isRejected = docMap['status']?.toString().toLowerCase() == 'rejected';
+                                    final isRejected = docMap['status']
+                                            ?.toString()
+                                            .toLowerCase() ==
+                                        'rejected';
+                                    final isPdfDoc = fileUrl
+                                            .toLowerCase()
+                                            .contains('.pdf') ||
+                                        fileUrl
+                                            .toLowerCase()
+                                            .contains('/pdf') ||
+                                        storageKey
+                                            .toLowerCase()
+                                            .contains('.pdf');
 
                                     return InkWell(
                                       onTap: () async {
                                         if (hasFile) {
-                                          Navigator.push(context, MaterialPageRoute(builder: (context) => LISTINGHQVisorPdfWidget(documentName: docName, documentUrl: fileUrl, documentId: docId, visitId: widget.visitId)));
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      LISTINGHQVisorPdfWidget(
+                                                          documentName: docName,
+                                                          documentUrl: fileUrl,
+                                                          documentId: docId,
+                                                          visitId:
+                                                              widget.visitId,
+                                                          isPdf: isPdfDoc)));
                                         } else {
-                                          final result = await showDialog<FFUploadedFile>(
+                                          final result =
+                                              await showDialog<FFUploadedFile>(
                                             context: context,
                                             builder: (dialogContext) => Dialog(
                                               elevation: 0,
                                               insetPadding: EdgeInsets.zero,
-                                              backgroundColor: Colors.transparent,
-                                              alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                              child: PopupSubirDocumentoWidget(documentName: docName),
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                          0.0, 0.0)
+                                                      .resolve(
+                                                          Directionality.of(
+                                                              context)),
+                                              child: PopupSubirDocumentoWidget(
+                                                  documentName: docName),
                                             ),
                                           );
-                                          if (result != null && (result.bytes?.isNotEmpty ?? false)) {
-                                            final token = currentAuthenticationToken ?? '';
-                                            final res = await DOVIAAPIVisitContextGroup.uploadDocumentCall.call(
+                                          if (result != null &&
+                                              (result.bytes?.isNotEmpty ??
+                                                  false)) {
+                                            final token =
+                                                currentAuthenticationToken ??
+                                                    '';
+                                            final res =
+                                                await DOVIAAPIVisitContextGroup
+                                                    .uploadDocumentCall
+                                                    .call(
                                               visitId: widget.visitId ?? '',
                                               documentId: docId,
                                               authToken: token,
@@ -357,8 +411,11 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                               });
                                             } else {
                                               if (context.mounted) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(content: Text('Error al subir el documento')),
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                      content: Text(
+                                                          'Error al subir el documento')),
                                                 );
                                               }
                                             }
@@ -372,37 +429,73 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                             width: 150.0,
                                             height: 150.0,
                                             decoration: BoxDecoration(
-                                              color: isRejected ? const Color(0xFFFFE4E4) : FlutterFlowTheme.of(context).primaryText,
-                                              borderRadius: BorderRadius.circular(24.0),
+                                              color: isRejected
+                                                  ? const Color(0xFFFFE4E4)
+                                                  : FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                              borderRadius:
+                                                  BorderRadius.circular(24.0),
                                               border: Border.all(
-                                                color: isRejected ? FlutterFlowTheme.of(context).error : (hasFile ? Colors.transparent : FlutterFlowTheme.of(context).error),
+                                                color: isRejected
+                                                    ? FlutterFlowTheme.of(
+                                                            context)
+                                                        .error
+                                                    : (hasFile
+                                                        ? Colors.transparent
+                                                        : FlutterFlowTheme.of(
+                                                                context)
+                                                            .error),
                                                 width: 2.0,
                                               ),
                                             ),
                                             child: Align(
-                                              alignment: const AlignmentDirectional(0.0, 0.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      0.0, 0.0),
                                               child: Text(
                                                 'PDF',
-                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                style: FlutterFlowTheme.of(
+                                                        context)
+                                                    .bodyMedium
+                                                    .override(
                                                       font: GoogleFonts.inter(
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
-                                                      color: isRejected ? FlutterFlowTheme.of(context).error : FlutterFlowTheme.of(context).tertiary,
+                                                      color: isRejected
+                                                          ? FlutterFlowTheme.of(
+                                                                  context)
+                                                              .error
+                                                          : FlutterFlowTheme.of(
+                                                                  context)
+                                                              .tertiary,
                                                     ),
                                               ),
                                             ),
                                           ),
                                           Padding(
-                                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: SizedBox(
                                               width: 150.0,
                                               child: Text(
                                                 docName,
                                                 textAlign: TextAlign.center,
-                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                style: FlutterFlowTheme.of(
+                                                        context)
+                                                    .bodyMedium
+                                                    .override(
                                                       font: GoogleFonts.inter(
-                                                        color: isRejected ? FlutterFlowTheme.of(context).error : FlutterFlowTheme.of(context).primaryText,
-                                                        fontWeight: isRejected ? FontWeight.bold : FontWeight.normal,
+                                                        color: isRejected
+                                                            ? FlutterFlowTheme
+                                                                    .of(context)
+                                                                .error
+                                                            : FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText,
+                                                        fontWeight: isRejected
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal,
                                                       ),
                                                     ),
                                               ),
@@ -420,7 +513,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 40.0, 20.0, 100.0),
                       child: FFButtonWidget(
                         onPressed: () async {
                           final result = await showDialog<FFUploadedFile>(
@@ -430,15 +524,20 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                 elevation: 0,
                                 insetPadding: EdgeInsets.zero,
                                 backgroundColor: Colors.transparent,
-                                alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                child: const PopupSubirDocumentoWidget(documentName: 'Nuevo Documento'),
+                                alignment: const AlignmentDirectional(0.0, 0.0)
+                                    .resolve(Directionality.of(context)),
+                                child: const PopupSubirDocumentoWidget(
+                                    documentName: 'Nuevo Documento'),
                               );
                             },
                           );
 
-                          if (result != null && (result.bytes?.isNotEmpty ?? false)) {
+                          if (result != null &&
+                              (result.bytes?.isNotEmpty ?? false)) {
                             final token = currentAuthenticationToken ?? '';
-                            final res = await DOVIAAPIVisitContextGroup.createCustomVisitDocumentCall.call(
+                            final res = await DOVIAAPIVisitContextGroup
+                                .createCustomVisitDocumentCall
+                                .call(
                               visitId: widget.visitId ?? '',
                               authToken: token,
                               file: result,
@@ -450,7 +549,9 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                             } else {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Error al crear el documento')),
+                                  const SnackBar(
+                                      content:
+                                          Text('Error al crear el documento')),
                                 );
                               }
                             }
@@ -460,15 +561,18 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                         options: FFButtonOptions(
                           width: double.infinity,
                           height: 48.0,
-                          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                          iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 0.0),
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 0.0),
                           color: FlutterFlowTheme.of(context).primary,
-                          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                font: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                color: Colors.white,
-                              ),
+                          textStyle:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    color: Colors.white,
+                                  ),
                           elevation: 0.0,
                           borderRadius: BorderRadius.circular(24.0),
                         ),

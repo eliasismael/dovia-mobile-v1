@@ -23,6 +23,7 @@ class LISTINGHQVisorPdfWidget extends StatefulWidget {
     this.documentUrl,
     this.visitId,
     this.documentId,
+    this.isPdf,
   });
 
   final String documentName;
@@ -34,6 +35,7 @@ class LISTINGHQVisorPdfWidget extends StatefulWidget {
   final String? visitId;
   /// ID del documento dentro del checklist de la visita.
   final String? documentId;
+  final bool? isPdf;
 
   static String routeName = 'LISTING_HQ_VisorPdf';
   static String routePath = '/lISTINGHQVisorPdf';
@@ -66,8 +68,8 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
     final file = widget.uploadedFile;
 
     if (url != null && url.isNotEmpty) {
-      final isPdf = url.toLowerCase().contains('.pdf') ||
-          url.toLowerCase().contains('/pdf');
+      final isPdf = widget.isPdf ?? (url.toLowerCase().contains('.pdf') ||
+          url.toLowerCase().contains('/pdf'));
       if (isPdf) {
         return SfPdfViewer.network(url);
       }
@@ -243,12 +245,54 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                 const SizedBox(width: 12.0),
                                 Expanded(
                                   child: FFButtonWidget(
-                                    onPressed: null,
+                                    onPressed: () async {
+                                      final token = currentAuthenticationToken ?? '';
+                                      final res = await DOVIAAPIVisitContextGroup.reviewListerHqDocumentCall.call(
+                                        visitId: widget.visitId ?? '',
+                                        documentId: widget.documentId,
+                                        authToken: token,
+                                        status: 'approved',
+                                      );
+                                      if (res.succeeded) {
+                                        if (context.mounted) {
+                                          await showDialog(
+                                            context: context,
+                                            builder: (dialogContext) {
+                                              return Dialog(
+                                                elevation: 0,
+                                                insetPadding: EdgeInsets.zero,
+                                                backgroundColor: Colors.transparent,
+                                                alignment: const AlignmentDirectional(0.0, 0.0)
+                                                    .resolve(Directionality.of(context)),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.pop(dialogContext);
+                                                  },
+                                                  child: const PopupExitoWidget(
+                                                    title: 'Se envió con éxito al Equipo Legal',
+                                                    text: 'El documento se ha enviado al equipo de legal para que lo revisen.',
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                          if (context.mounted) {
+                                            context.goNamed('LISTING_HQ_Home');
+                                          }
+                                        }
+                                      } else {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Error al aprobar el documento')),
+                                          );
+                                        }
+                                      }
+                                    },
                                     text: 'Aceptar y enviar a Dovia Legal',
                                     options: FFButtonOptions(
                                       height: 48.0,
                                       padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                      color: FlutterFlowTheme.of(context).alternate,
+                                      color: FlutterFlowTheme.of(context).primary,
                                       textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                                             font: GoogleFonts.inter(
                                               fontWeight: FontWeight.w600,
