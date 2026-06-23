@@ -11,7 +11,7 @@ import '/listing_hq/l_i_s_t_i_n_g_h_q_documentos/l_i_s_t_i_n_g_h_q_documentos_wi
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedades/l_i_s_t_i_n_g_h_q_propiedades_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_propiedad_rechazada_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_widget.dart';
-import '/shared_components/popup_asignar_operative/popup_asignar_operative_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_asignada/l_i_s_t_i_n_g_h_q_propiedad_asignada_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -758,37 +758,13 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                     statusBgColor: e.statusBgColor,
                                     statusTextColor: e.statusTextColor,
                                     buttonText: 'Asignar',
-                                    onPressed: () async {
-                                      final assigned = await showDialog<bool>(
-                                        context: context,
-                                        builder: (dialogContext) => Dialog(
-                                          elevation: 0,
-                                          insetPadding: EdgeInsets.zero,
-                                          backgroundColor: Colors.transparent,
-                                          alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                          child: PopupAsignarOperativeWidget(
-                                            visitId: e.id,
-                                            propertyAddress: e.address,
-                                          ),
-                                        ),
-                                      );
-                                      if (assigned != true || !context.mounted) {
-                                        return;
-                                      }
-                                      setState(() {
-                                        _assignFuture = _fetchHqCards(
-                                          substatus: _kAssignSubstatus,
-                                          defaultTag: 'Programar',
-                                          defaultStatus: 'Reciente',
-                                        );
-                                      });
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'Operative Listing asignado correctamente.'),
-                                        ),
-                                      );
-                                    },
+                                    onPressed: () => context.pushNamed(
+                                      LISTINGHQPropiedadAsignadaWidget.routeName,
+                                      queryParameters: {
+                                        'visitId': serializeParam(
+                                            e.id, ParamType.String),
+                                      }.withoutNulls,
+                                    ),
                                   )).toList(),
                                 );
                               },

@@ -670,8 +670,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: LISTINGHQPropiedadAsignadaWidget.routeName,
           path: LISTINGHQPropiedadAsignadaWidget.routePath,
-          builder: (context, params) =>
-              const LISTINGHQPropiedadAsignadaWidget(),
+          builder: (context, params) => LISTINGHQPropiedadAsignadaWidget(
+            visitId: params.getParam(
+              'visitId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: LISTINGHQDocumentosWidget.routeName,

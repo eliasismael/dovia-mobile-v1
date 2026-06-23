@@ -3,7 +3,16 @@
     "allow": [
       "mcp__de22ec06-bf07-439a-9ac3-fb1e7e5779fb__clickup_get_folder",
       "mcp__de22ec06-bf07-439a-9ac3-fb1e7e5779fb__clickup_get_list",
-      "mcp__de22ec06-bf07-439a-9ac3-fb1e7e5779fb__clickup_get_custom_fields"
+      "mcp__de22ec06-bf07-439a-9ac3-fb1e7e5779fb__clickup_get_custom_fields",
+      "mcp__claude_ai_Figma__get_screenshot",
+      "Read(//c/tmp/**)",
+      "Bash(curl -s -o fig_2500.png \"https://www.figma.com/api/mcp/asset/f73c80aa-96b0-4832-a9ae-0f1a4f2deab5\")",
+      "Bash(curl -s -o fig_2545.png \"https://www.figma.com/api/mcp/asset/a2280574-1359-447a-9a87-de1bcb4cf44f\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o fig1.png \"https://www.figma.com/api/mcp/asset/66d273d2-9893-4d3b-9dec-da5a539c7dbd\")",
+      "Bash(curl -s -o fig2.png \"https://www.figma.com/api/mcp/asset/070ccb8b-3d3c-4ea3-8ed0-72504a14dd18\")",
+      "Read(//c/Users/Elías/**)",
+      "Bash(curl -s -o /tmp/fig3.png \"https://www.figma.com/api/mcp/asset/fb86cd76-0976-4fd2-b22e-47032e9c89f6\")"
     ]
   }
 }

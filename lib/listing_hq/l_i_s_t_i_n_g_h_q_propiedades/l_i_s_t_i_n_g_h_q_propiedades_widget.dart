@@ -5,8 +5,8 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_asignada/l_i_s_t_i_n_g_h_q_propiedad_asignada_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/shared_components/popup_asignar_operative/popup_asignar_operative_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedades_model.dart';
@@ -421,26 +421,13 @@ class _LISTINGHQPropiedadesWidgetState
                                     statusBgColor: e.statusBgColor,
                                     statusTextColor: e.statusTextColor,
                                     buttonText: 'Asignar Operative Listing',
-                                    onPressed: () async {
-                                      final assigned = await showDialog<bool>(
-                                        context: context,
-                                        builder: (dialogContext) => Dialog(
-                                          elevation: 0,
-                                          insetPadding: EdgeInsets.zero,
-                                          backgroundColor: Colors.transparent,
-                                          alignment: const AlignmentDirectional(0.0, 0.0)
-                                              .resolve(Directionality.of(context)),
-                                          child: PopupAsignarOperativeWidget(
-                                            visitId: e.id,
-                                            propertyAddress: e.address,
-                                          ),
-                                        ),
-                                      );
-                                      if (assigned != true || !context.mounted) return;
-                                      setState(() {
-                                        _initFutures();
-                                      });
-                                    },
+                                    onPressed: () => context.pushNamed(
+                                      LISTINGHQPropiedadAsignadaWidget.routeName,
+                                      queryParameters: {
+                                        'visitId': serializeParam(
+                                            e.id, ParamType.String),
+                                      }.withoutNulls,
+                                    ),
                                     onEyePressed: () => context.pushNamed(
                                       'LISTING_HQ_Propiedad',
                                       queryParameters: {
