@@ -10,7 +10,22 @@ import 'propiedades_sobre_el_sector_model.dart';
 export 'propiedades_sobre_el_sector_model.dart';
 
 class PropiedadesSobreElSectorWidget extends StatefulWidget {
-  const PropiedadesSobreElSectorWidget({super.key});
+  const PropiedadesSobreElSectorWidget({
+    super.key,
+    this.description = '',
+    this.caminableRating = 5.0,
+    this.comercialRating = 5.0,
+    this.verdesRating = 5.0,
+    this.lat = 14.3,
+    this.lng = -90.5,
+  });
+
+  final String description;
+  final double caminableRating;
+  final double comercialRating;
+  final double verdesRating;
+  final double lat;
+  final double lng;
 
   @override
   State<PropiedadesSobreElSectorWidget> createState() =>
@@ -35,10 +50,18 @@ class _PropiedadesSobreElSectorWidgetState
     _model.expandableExpandableController =
         ExpandableController(initialExpanded: false)
           ..addListener(() => safeSetState(() {}));
-    _model.textController ??= TextEditingController();
+    _model.textController ??= TextEditingController(text: widget.description);
     _model.textFieldFocusNode ??= FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  @override
+  void didUpdateWidget(PropiedadesSobreElSectorWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.description != widget.description) {
+      _model.textController?.text = widget.description;
+    }
   }
 
   @override
@@ -110,8 +133,8 @@ class _PropiedadesSobreElSectorWidgetState
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 200.0,
                           accessToken: FFAppConstants.MapboxAccessToken,
-                          startLat: 14.3,
-                          startLng: -90.5,
+                          startLat: widget.lat,
+                          startLng: widget.lng,
                         ),
                       ),
                       Padding(
@@ -253,21 +276,22 @@ class _PropiedadesSobreElSectorWidgetState
                                   ),
                                 ),
                                 RatingBar.builder(
-                                  onRatingUpdate: (newValue) => safeSetState(
-                                      () => _model.ratingBarValue1 = newValue),
-                                  itemBuilder: (context, index) => Icon(
-                                    Icons.star_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                  ),
-                                  direction: Axis.horizontal,
-                                  initialRating: _model.ratingBarValue1 ??= 5.0,
-                                  unratedColor:
-                                      FlutterFlowTheme.of(context).accent1,
-                                  itemCount: 5,
-                                  itemSize: 24.0,
-                                  glowColor:
-                                      FlutterFlowTheme.of(context).primary,
-                                ),
+                                   onRatingUpdate: (newValue) => safeSetState(
+                                       () => _model.ratingBarValue1 = newValue),
+                                   itemBuilder: (context, index) => Icon(
+                                     Icons.star_rounded,
+                                     color: FlutterFlowTheme.of(context).primary,
+                                   ),
+                                   direction: Axis.horizontal,
+                                   initialRating: widget.caminableRating,
+                                   ignoreGestures: true,
+                                   unratedColor:
+                                       FlutterFlowTheme.of(context).accent1,
+                                   itemCount: 5,
+                                   itemSize: 24.0,
+                                   glowColor:
+                                       FlutterFlowTheme.of(context).primary,
+                                 ),
                                 Text(
                                   'Caminable',
                                   style: FlutterFlowTheme.of(context)
@@ -324,45 +348,46 @@ class _PropiedadesSobreElSectorWidgetState
                                   ),
                                 ),
                                 RatingBar.builder(
-                                  onRatingUpdate: (newValue) => safeSetState(
-                                      () => _model.ratingBarValue2 = newValue),
-                                  itemBuilder: (context, index) => Icon(
-                                    Icons.star_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                  ),
-                                  direction: Axis.horizontal,
-                                  initialRating: _model.ratingBarValue2 ??= 5.0,
-                                  unratedColor:
-                                      FlutterFlowTheme.of(context).accent1,
-                                  itemCount: 5,
-                                  itemSize: 24.0,
-                                  glowColor:
-                                      FlutterFlowTheme.of(context).primary,
-                                ),
-                                Text(
-                                  'Caminable',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
+                                   onRatingUpdate: (newValue) => safeSetState(
+                                       () => _model.ratingBarValue2 = newValue),
+                                   itemBuilder: (context, index) => Icon(
+                                     Icons.star_rounded,
+                                     color: FlutterFlowTheme.of(context).primary,
+                                   ),
+                                   direction: Axis.horizontal,
+                                   initialRating: widget.comercialRating,
+                                   ignoreGestures: true,
+                                   unratedColor:
+                                       FlutterFlowTheme.of(context).accent1,
+                                   itemCount: 5,
+                                   itemSize: 24.0,
+                                   glowColor:
+                                       FlutterFlowTheme.of(context).primary,
+                                 ),
+                                 Text(
+                                   'Centros comerciales cerca',
+                                   style: FlutterFlowTheme.of(context)
+                                       .bodyMedium
+                                       .override(
+                                         font: GoogleFonts.inter(
+                                           fontWeight:
+                                               FlutterFlowTheme.of(context)
+                                                   .bodyMedium
+                                                   .fontWeight,
+                                           fontStyle:
+                                               FlutterFlowTheme.of(context)
+                                                   .bodyMedium
+                                                   .fontStyle,
+                                         ),
+                                         letterSpacing: 0.0,
+                                         fontWeight: FlutterFlowTheme.of(context)
+                                             .bodyMedium
+                                             .fontWeight,
+                                         fontStyle: FlutterFlowTheme.of(context)
+                                             .bodyMedium
+                                             .fontStyle,
+                                       ),
+                                 ),
                               ],
                             ),
                           ),
@@ -402,7 +427,8 @@ class _PropiedadesSobreElSectorWidgetState
                                     color: FlutterFlowTheme.of(context).primary,
                                   ),
                                   direction: Axis.horizontal,
-                                  initialRating: _model.ratingBarValue3 ??= 5.0,
+                                  initialRating: widget.verdesRating,
+                                  ignoreGestures: true,
                                   unratedColor:
                                       FlutterFlowTheme.of(context).accent1,
                                   itemCount: 5,

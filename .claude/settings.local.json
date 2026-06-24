@@ -12,7 +12,13 @@
       "Bash(curl -s -o fig1.png \"https://www.figma.com/api/mcp/asset/66d273d2-9893-4d3b-9dec-da5a539c7dbd\")",
       "Bash(curl -s -o fig2.png \"https://www.figma.com/api/mcp/asset/070ccb8b-3d3c-4ea3-8ed0-72504a14dd18\")",
       "Read(//c/Users/Elías/**)",
-      "Bash(curl -s -o /tmp/fig3.png \"https://www.figma.com/api/mcp/asset/fb86cd76-0976-4fd2-b22e-47032e9c89f6\")"
+      "Bash(curl -s -o /tmp/fig3.png \"https://www.figma.com/api/mcp/asset/fb86cd76-0976-4fd2-b22e-47032e9c89f6\")",
+      "PowerShell(flutter analyze lib/showing/s_h_o_w_i_n_g_registro_de_visita lib/showing/s_h_o_w_i_n_g_registro_de_visita_2 lib/showing/s_h_o_w_i_n_g_report_popup lib/showing/s_h_o_w_i_n_g_visit_registered_popup)",
+      "PowerShell($base = \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; flutter analyze \"$base\\\\lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita\" \"$base\\\\lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita_2\" \"$base\\\\lib\\\\showing\\\\s_h_o_w_i_n_g_report_popup\" \"$base\\\\lib\\\\showing\\\\s_h_o_w_i_n_g_visit_registered_popup\")",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; flutter analyze lib > \"$env:TEMP\\\\analyze_out.txt\" 2>&1; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; dart analyze lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita_2 lib\\\\showing\\\\s_h_o_w_i_n_g_report_popup lib\\\\showing\\\\s_h_o_w_i_n_g_visit_registered_popup; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; dart analyze lib\\\\showing\\\\s_h_o_w_i_n_g_home lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita lib\\\\backend\\\\api_requests\\\\api_visits.dart; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; dart analyze lib\\\\showing lib\\\\custom_code\\\\widgets\\\\showing_registro_visita_datos.dart lib\\\\backend\\\\api_requests\\\\api_visits.dart lib\\\\flutter_flow\\\\nav\\\\nav.dart; \"EXIT=$LASTEXITCODE\")"
     ]
   }
 }

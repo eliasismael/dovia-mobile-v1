@@ -1,7 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
+import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -593,9 +593,9 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     wrapWithModel(
-                      model: _model.lISTINGHQNavbarModel,
+                      model: _model.sHOWINGNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const LISTINGHQNavbarWidget(),
+                      child: const SHOWINGNavbarWidget(),
                     ),
                   ],
                 ),
@@ -607,3 +607,4 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
     );
   }
 }
+

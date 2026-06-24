@@ -1,5 +1,5 @@
 import '/flutter_flow/flutter_flow_util.dart';
-import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
+import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
@@ -17,8 +17,8 @@ class SHOWINGPropiedadAMostrarModel
   late SHOWINGHeaderModel sHOWINGHeaderModel;
   // Model for PrimaryButton component.
   late PrimaryButtonModel primaryButtonModel;
-  // Model for LISTING_HQ_Navbar component.
-  late LISTINGHQNavbarModel lISTINGHQNavbarModel;
+  // Model for SHOWING_Navbar component.
+  late SHOWINGNavbarModel sHOWINGNavbarModel;
 
   @override
   void initState(BuildContext context) {
@@ -26,7 +26,7 @@ class SHOWINGPropiedadAMostrarModel
         createModel(context, () => CornerGradientBackgroundModel());
     sHOWINGHeaderModel = createModel(context, () => SHOWINGHeaderModel());
     primaryButtonModel = createModel(context, () => PrimaryButtonModel());
-    lISTINGHQNavbarModel = createModel(context, () => LISTINGHQNavbarModel());
+    sHOWINGNavbarModel = createModel(context, () => SHOWINGNavbarModel());
   }
 
   @override
@@ -34,6 +34,7 @@ class SHOWINGPropiedadAMostrarModel
     cornerGradientBackgroundModel.dispose();
     sHOWINGHeaderModel.dispose();
     primaryButtonModel.dispose();
-    lISTINGHQNavbarModel.dispose();
+    sHOWINGNavbarModel.dispose();
   }
 }
+

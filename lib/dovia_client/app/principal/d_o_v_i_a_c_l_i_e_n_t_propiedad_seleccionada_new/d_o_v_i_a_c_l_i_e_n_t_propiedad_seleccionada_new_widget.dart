@@ -28,9 +28,11 @@ class DOVIACLIENTPropiedadSeleccionadaNewWidget extends StatefulWidget {
   const DOVIACLIENTPropiedadSeleccionadaNewWidget({
     super.key,
     required this.propertyId,
+    this.isReadOnly = false,
   });
 
   final String? propertyId;
+  final bool isReadOnly;
 
   static String routeName = 'DOVIA_CLIENT_PropiedadSeleccionadaNew';
   static String routePath = '/propiedad';
@@ -61,6 +63,13 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   int _parkingSpots = 0;
   int _floors = 0;
   List<String> _carouselImages = [];
+  Map<String, dynamic>? _amenitiesData;
+  double _lat = 14.3;
+  double _lng = -90.5;
+  String _sectorDescription = '';
+  double _caminableRating = 5.0;
+  double _comercialRating = 5.0;
+  double _verdesRating = 5.0;
 
   @override
   void initState() {
@@ -137,6 +146,26 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         _parkingSpots = (general?['parkingSpots'] as num?)?.toInt() ?? 0;
         _floors = (general?['floors'] as num?)?.toInt() ?? 0;
         _carouselImages = imagesList;
+
+        final loc = d?['location'] as Map?;
+        final geo = loc?['geo'] as Map?;
+        final coords = geo?['coordinates'] as List?;
+        _lng = coords != null && coords.isNotEmpty ? (coords[0] as num).toDouble() : -90.5;
+        _lat = coords != null && coords.length >= 2 ? (coords[1] as num).toDouble() : 14.3;
+
+        _amenitiesData = (d?['features']?['amenities'] as Map?)?.cast<String, dynamic>();
+
+        final hood = d?['features']?['neighborhood'] as Map?;
+        _sectorDescription = hood?['description']?.toString() ?? loc?['neighborhoodDescription']?.toString() ?? '';
+        
+        double parseRating(dynamic v) {
+          if (v == null) return 5.0;
+          return (v is num ? v : double.tryParse(v.toString()) ?? 5.0).toDouble();
+        }
+
+        _caminableRating = parseRating(hood?['walkable']);
+        _comercialRating = parseRating(hood?['commerceAndServices']);
+        _verdesRating = parseRating(hood?['greenAreas']);
       });
 
       final createdBy = getJsonField(response.jsonBody, r'''$.data.data.createdBy''')?.toString() ?? 
@@ -1213,6 +1242,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                 ),
                               ),
                             ),
+                            if (!widget.isReadOnly)
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
@@ -1788,7 +1818,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     child: wrapWithModel(
                                       model: _model.porpiedadesAmenidadesModel,
                                       updateCallback: () => safeSetState(() {}),
-                                      child: const PorpiedadesAmenidadesWidget(),
+                                      child: PorpiedadesAmenidadesWidget(
+                                        amenities: _amenitiesData,
+                                      ),
                                     ),
                                   ),
                                   Container(
@@ -1796,7 +1828,14 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       model:
                                           _model.propiedadesSobreElSectorModel,
                                       updateCallback: () => safeSetState(() {}),
-                                      child: const PropiedadesSobreElSectorWidget(),
+                                      child: PropiedadesSobreElSectorWidget(
+                                        description: _sectorDescription,
+                                        caminableRating: _caminableRating,
+                                        comercialRating: _comercialRating,
+                                        verdesRating: _verdesRating,
+                                        lat: _lat,
+                                        lng: _lng,
+                                      ),
                                     ),
                                   ),
                                 ],

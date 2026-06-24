@@ -1,8 +1,11 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_visits.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
+import '/showing/s_h_o_w_i_n_g_visit_registered_popup/s_h_o_w_i_n_g_visit_registered_popup_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,7 +13,9 @@ import 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
 export 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
 
 class SHOWINGRegistroDeVisita2Widget extends StatefulWidget {
-  const SHOWINGRegistroDeVisita2Widget({super.key});
+  const SHOWINGRegistroDeVisita2Widget({super.key, this.visitId});
+
+  final String? visitId;
 
   static String routeName = 'SHOWING_RegistroDeVisita_2';
   static String routePath = '/sHOWINGRegistroDeVisita2';
@@ -39,6 +44,57 @@ class _SHOWINGRegistroDeVisita2WidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  // Submit the showing visit report (POST /visits/{visitId}/showing/report).
+  Future<void> _submitReport(Map<String, dynamic> data) async {
+    final visitId = widget.visitId ?? '';
+    if (visitId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se encontró la visita a registrar.')),
+      );
+      return;
+    }
+
+    final res = await DOVIAAPIVisitContextGroup.submitShowingReportCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: visitId,
+      showingVisitKind: data['showingVisitKind'] as String?,
+      showingVisitDuration: data['showingVisitDuration'] as String?,
+      additionalAttendees: data['additionalAttendees'] as String?,
+      propertyCondition: data['propertyCondition'] as String?,
+      clientInterestLevel: data['clientInterestLevel'] as String?,
+      overallRating: data['overallRating'] as int?,
+      mainReason: data['mainReason'] as String?,
+      nextStep: data['nextStep'] as String?,
+      comments: data['comments'] as String? ?? '',
+      confirmationAccepted: data['confirmationAccepted'] as bool? ?? false,
+    );
+    if (!mounted) return;
+
+    if (res.succeeded) {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return Dialog(
+            elevation: 0,
+            insetPadding: EdgeInsets.zero,
+            backgroundColor: Colors.transparent,
+            alignment: const AlignmentDirectional(0.0, 0.0)
+                .resolve(Directionality.of(context)),
+            child: const SHOWINGVisitRegisteredPopupWidget(),
+          );
+        },
+      );
+      if (mounted) context.safePop();
+    } else {
+      final msg = res.statusCode == 409
+          ? 'El reporte de esta visita ya fue enviado.'
+          : 'No se pudo registrar la visita. Inténtalo de nuevo.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg)),
+      );
+    }
   }
 
   @override
@@ -257,8 +313,9 @@ class _SHOWINGRegistroDeVisita2WidgetState
                             child: custom_widgets.ShowingRegistroVisitaDatos(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: MediaQuery.sizeOf(context).height * 1.0,
+                              onSave: (data) =>
+                                  _submitReport(data as Map<String, dynamic>),
                               onFinalizarRegistro: () async {},
-                              onSave: () async {},
                             ),
                           ),
                         ],

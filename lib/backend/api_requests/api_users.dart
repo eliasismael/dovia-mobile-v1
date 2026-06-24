@@ -144,6 +144,7 @@ class UpdateUserPreferencesNEWCall {
     String? authToken = '',
     String? propertyType,
     String? acquisitionModality,
+    String? coordinates,
     String? description,
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
@@ -152,6 +153,7 @@ class UpdateUserPreferencesNEWCall {
 {
   ${propertyType != null ? '"propertyType": "${escapeStringForJson(propertyType)}",' : '"propertyType": null,'}
   ${acquisitionModality != null ? '"acquisitionModality": "${escapeStringForJson(acquisitionModality)}",' : '"acquisitionModality": null,'}
+  ${coordinates != null ? '"coordinates": $coordinates,' : '"coordinates": null,'}
   ${description != null ? '"description": "${escapeStringForJson(description)}"' : '"description": null'}
 }''';
     return ApiManager.instance.makeApiCall(

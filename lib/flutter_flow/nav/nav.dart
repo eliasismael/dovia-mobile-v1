@@ -756,7 +756,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SHOWINGPropiedadAMostrarWidget.routeName,
           path: SHOWINGPropiedadAMostrarWidget.routePath,
-          builder: (context, params) => const SHOWINGPropiedadAMostrarWidget(),
+          builder: (context, params) => SHOWINGPropiedadAMostrarWidget(
+            visitId: params.getParam(
+              'visitId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: SHOWINGRegistroDeVisitaWidget.routeName,
@@ -766,7 +771,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SHOWINGRegistroDeVisita2Widget.routeName,
           path: SHOWINGRegistroDeVisita2Widget.routePath,
-          builder: (context, params) => const SHOWINGRegistroDeVisita2Widget(),
+          builder: (context, params) => SHOWINGRegistroDeVisita2Widget(
+            visitId: params.getParam('visitId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: BienvenidaWidget.routeName,
@@ -905,6 +912,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'propertyId',
               ParamType.String,
             ),
+            isReadOnly: params.getParam(
+                  'isReadOnly',
+                  ParamType.bool,
+                ) ??
+                false,
           ),
         ),
         FFRoute(

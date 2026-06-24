@@ -1,5 +1,5 @@
 import '/flutter_flow/flutter_flow_util.dart';
-import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
+import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
 import 's_h_o_w_i_n_g_visita_del_dia_widget.dart'
@@ -12,19 +12,20 @@ class SHOWINGVisitaDelDiaModel
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
-  // Model for LISTING_HQ_Navbar component.
-  late LISTINGHQNavbarModel lISTINGHQNavbarModel;
+  // Model for SHOWING_Navbar component.
+  late SHOWINGNavbarModel sHOWINGNavbarModel;
 
   @override
   void initState(BuildContext context) {
     cornerGradientBackgroundModel =
         createModel(context, () => CornerGradientBackgroundModel());
-    lISTINGHQNavbarModel = createModel(context, () => LISTINGHQNavbarModel());
+    sHOWINGNavbarModel = createModel(context, () => SHOWINGNavbarModel());
   }
 
   @override
   void dispose() {
     cornerGradientBackgroundModel.dispose();
-    lISTINGHQNavbarModel.dispose();
+    sHOWINGNavbarModel.dispose();
   }
 }
+

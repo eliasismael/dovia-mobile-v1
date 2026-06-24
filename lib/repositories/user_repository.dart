@@ -166,6 +166,113 @@ class UserRepository extends ChangeNotifier {
     return const Success(true);
   }
 
+  /// Updates the user profile fields.
+  Future<Result<bool>> updateProfile({
+    String? name,
+    String? lastname,
+    String? gender,
+    String? nationality,
+    String? phoneCountryCode,
+    String? phoneNumber,
+    String? address,
+    String? workArea,
+  }) async {
+    final userId = _profile?.uid ?? currentUserUid;
+    if (userId.isEmpty) {
+      return const Failure('No se pudo identificar al usuario');
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIUserContextGroup.updateUserProfileCall.call(
+      userId: userId,
+      authToken: token,
+      name: name,
+      lastname: lastname,
+      gender: gender,
+      nationality: nationality,
+      phoneCountryCode: phoneCountryCode,
+      phoneNumber: phoneNumber,
+      address: address,
+      workArea: workArea,
+    );
+
+    _isLoading = false;
+
+    if (!response.succeeded) {
+      _error = 'Error al actualizar el perfil';
+      notifyListeners();
+      return Failure(_error!, statusCode: response.statusCode);
+    }
+
+    await loadProfile(forceRefresh: true);
+    notifyListeners();
+    return const Success(true);
+  }
+
+  /// Updates user preferences.
+  Future<Result<bool>> updatePreferences({
+    String? propertyType,
+    String? acquisitionModality,
+    String? coordinates,
+    String? description,
+  }) async {
+    final userId = _profile?.uid ?? currentUserUid;
+    if (userId.isEmpty) {
+      return const Failure('No se pudo identificar al usuario');
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIUserContextGroup.updateUserPreferencesNEWCall.call(
+      userId: userId,
+      authToken: token,
+      propertyType: propertyType,
+      acquisitionModality: acquisitionModality,
+      coordinates: coordinates,
+      description: description,
+    );
+
+    _isLoading = false;
+
+    if (!response.succeeded) {
+      _error = 'Error al actualizar preferencias';
+      notifyListeners();
+      return Failure(_error!, statusCode: response.statusCode);
+    }
+
+    await loadProfile(forceRefresh: true);
+    notifyListeners();
+    return const Success(true);
+  }
+
+  /// Deactivates the user's account.
+  Future<Result<bool>> deactivateAccount({String? reason}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIUserContextGroup.deactivateMyAccountCall.call(
+      authToken: token,
+      reason: reason,
+    );
+
+    _isLoading = false;
+
+    if (!response.succeeded) {
+      _error = 'Error al desactivar la cuenta';
+      notifyListeners();
+      return Failure(_error!, statusCode: response.statusCode);
+    }
+
+    clear();
+    return const Success(true);
+  }
+
   /// Clears the cached profile (call on logout).
   void clear() {
     _profile = null;

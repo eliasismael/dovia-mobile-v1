@@ -99,7 +99,9 @@ class _SHOWINGToNavegationAppWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: SecondaryButtonWidget(
                         text: 'Cancelar',
-                        onTap: () async {},
+                        onTap: () async {
+                          Navigator.pop(context, false);
+                        },
                       ),
                     ),
                   ),
@@ -111,7 +113,9 @@ class _SHOWINGToNavegationAppWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: PrimaryButtonWidget(
                         text: 'Continuar',
-                        onTap: () async {},
+                        onTap: () async {
+                          Navigator.pop(context, true);
+                        },
                       ),
                     ),
                   ),

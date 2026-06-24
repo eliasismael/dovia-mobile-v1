@@ -5,18 +5,34 @@ import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
+/// A selectable option: visible [label] mapped to the API [value] (enum).
+typedef _Opt = ({String label, String value});
+
 class ShowingRegistroVisitaDatos extends StatefulWidget {
   final double? width;
   final double? height;
 
+  // Optional prefilled display data
+  final String? propertyName;
+  final String? clientName;
+  final String? dateText;
+  final String? timeText;
+
   // Callbacks
   final VoidCallback? onFinalizarRegistro;
+
+  /// Called with the API-ready payload when the form passes validation.
+  /// Keys match POST /visits/{visitId}/showing/report fields.
   final Function? onSave;
 
   const ShowingRegistroVisitaDatos({
     super.key,
     this.width,
     this.height,
+    this.propertyName,
+    this.clientName,
+    this.dateText,
+    this.timeText,
     this.onFinalizarRegistro,
     this.onSave,
   });
@@ -32,37 +48,66 @@ class _ShowingRegistroVisitaDatosState
   static const Color primaryColor = Color(0xFF007376);
   static const Color textColor = Color(0xFF00444B);
   static const Color inputBackground = Color(0xFFFAFAFA);
-  static const Color borderColor = Color(0xFFE5E7EB);
   static const Color inputBorderColor = Color(0x1A000000);
   static const Color greyTextColor = Color(0xFF99A1AF);
   static const Color confirmBg = Color(0x3370ACAD);
 
-  // ==================== FORM STATE ====================
-  // Datos básicos
-  String?
-      _selectedVisitType; // Primera visita, Segunda visita, Visita de seguimiento
-  String? _selectedDuration; // < 15 min, 15–30 min, +30 min
+  // ==================== OPTION SETS (label → API enum) ====================
+  static const List<_Opt> _kindOpts = [
+    (label: 'Presencial', value: 'IN_PERSON'),
+    (label: 'Virtual', value: 'VIRTUAL'),
+  ];
+  static const List<_Opt> _durationOpts = [
+    (label: '< 15 min', value: 'LESS_THAN_15_MIN'),
+    (label: '15–30 min', value: 'BETWEEN_15_AND_30_MIN'),
+    (label: '30–60 min', value: 'BETWEEN_30_AND_60_MIN'),
+    (label: '+60 min', value: 'MORE_THAN_60_MIN'),
+  ];
+  static const List<_Opt> _attendeesOpts = [
+    (label: 'No', value: 'NONE'),
+    (label: 'Pareja', value: 'PARTNER'),
+    (label: 'Familiar', value: 'FAMILY'),
+    (label: 'Asesor financiero', value: 'FINANCIAL_ADVISOR'),
+    (label: 'Otro', value: 'OTHER'),
+  ];
+  static const List<_Opt> _conditionOpts = [
+    (label: 'Excelente', value: 'EXCELLENT'),
+    (label: 'Bueno', value: 'GOOD'),
+    (label: 'Regular', value: 'FAIR'),
+    (label: 'Malo', value: 'POOR'),
+  ];
+  static const List<_Opt> _interestOpts = [
+    (label: 'Muy interesado', value: 'VERY_INTERESTED'),
+    (label: 'Interesado', value: 'INTERESTED'),
+    (label: 'Neutral', value: 'NEUTRAL'),
+    (label: 'No interesado', value: 'NOT_INTERESTED'),
+  ];
+  static const List<_Opt> _reasonOpts = [
+    (label: 'Precio', value: 'PRICE'),
+    (label: 'Ubicación', value: 'LOCATION'),
+    (label: 'Tamaño', value: 'SIZE'),
+    (label: 'Estado del inmueble', value: 'CONDITION'),
+    (label: 'Características', value: 'FEATURES'),
+    (label: 'Otro', value: 'OTHER'),
+  ];
+  static const List<_Opt> _nextStepOpts = [
+    (label: 'Hacer oferta', value: 'MAKE_OFFER'),
+    (label: 'Agendar segunda visita', value: 'SCHEDULE_SECOND_VISIT'),
+    (label: 'Lo está pensando', value: 'CONSIDERING'),
+    (label: 'No le interesa', value: 'NOT_INTERESTED'),
+  ];
 
-  // Asistentes
-  String? _selectedAttendees; // No, Pareja, Familiar, Otro
+  // ==================== FORM STATE (stores API enum values) ====================
+  String? _kind;
+  String? _duration;
+  String? _attendees;
+  int _overallRating = 0;
+  String? _propertyCondition;
+  String? _interest;
+  String? _mainReason;
+  String? _nextStep;
 
-  // Estado del inmueble
-  int _generalConditionRating = 0;
-  String? _selectedCondition; // Limpio, Requiere mantenimiento, En obra
-  String? _matchesPublished; // Sí, No
-
-  // Reacción del cliente
-  String? _selectedInterest; // Alto, Medio, Bajo
-  String?
-      _selectedReason; // Precio, Ubicación, Tamaño, Estado del inmueble, Otro
-
-  // Próximo paso
-  String? _selectedNextStep;
-
-  // Evidencia
   final _commentController = TextEditingController();
-
-  // Confirmación
   bool _confirmed = false;
 
   @override
@@ -71,25 +116,44 @@ class _ShowingRegistroVisitaDatosState
     super.dispose();
   }
 
+  bool get _isValid =>
+      _kind != null &&
+      _duration != null &&
+      _attendees != null &&
+      _overallRating > 0 &&
+      _propertyCondition != null &&
+      _interest != null &&
+      _mainReason != null &&
+      _nextStep != null &&
+      _confirmed;
+
   void _handleSubmit() {
-    final data = {
-      'visitType': _selectedVisitType,
-      'duration': _selectedDuration,
-      'attendees': _selectedAttendees,
-      'generalCondition': _generalConditionRating,
-      'condition': _selectedCondition,
-      'matchesPublished': _matchesPublished,
-      'interest': _selectedInterest,
-      'reason': _selectedReason,
-      'nextStep': _selectedNextStep,
-      'comment': _commentController.text,
-      'confirmed': _confirmed,
+    if (!_isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Completa todos los campos y acepta la confirmación antes de finalizar.'),
+        ),
+      );
+      return;
+    }
+
+    final data = <String, dynamic>{
+      'showingVisitKind': _kind,
+      'showingVisitDuration': _duration,
+      'additionalAttendees': _attendees,
+      'propertyCondition': _propertyCondition,
+      'clientInterestLevel': _interest,
+      'overallRating': _overallRating,
+      'mainReason': _mainReason,
+      'nextStep': _nextStep,
+      'comments': _commentController.text,
+      'confirmationAccepted': _confirmed,
     };
 
     if (widget.onSave != null) {
       widget.onSave!(data);
-    }
-    if (widget.onFinalizarRegistro != null) {
+    } else if (widget.onFinalizarRegistro != null) {
       widget.onFinalizarRegistro!();
     }
   }
@@ -123,31 +187,18 @@ class _ShowingRegistroVisitaDatosState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ========== SECTION 1: DATOS BÁSICOS DE LA VISITA ==========
               _buildSection1DatosBasicos(),
               const SizedBox(height: 32),
-
-              // ========== SECTION 2: ASISTENTES A LA VISITA ==========
               _buildSection2Asistentes(),
               const SizedBox(height: 32),
-
-              // ========== SECTION 3: ESTADO DEL INMUEBLE ==========
               _buildSection3EstadoInmueble(),
               const SizedBox(height: 32),
-
-              // ========== SECTION 4: REACCIÓN DEL CLIENTE ==========
               _buildSection4ReaccionCliente(),
               const SizedBox(height: 32),
-
-              // ========== SECTION 5: PRÓXIMO PASO ==========
               _buildSection5ProximoPaso(),
               const SizedBox(height: 32),
-
-              // ========== SECTION 6: EVIDENCIA (OPCIONAL) ==========
               _buildSection6Evidencia(),
               const SizedBox(height: 32),
-
-              // ========== SECTION 7: CONFIRMACIÓN ==========
               _buildSection7Confirmacion(),
               const SizedBox(height: 24),
             ],
@@ -157,14 +208,12 @@ class _ShowingRegistroVisitaDatosState
     );
   }
 
-  // ==================== SECTION HEADING ====================
+  // ==================== SHARED PIECES ====================
   Widget _buildSectionHeading(String title) {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: primaryColor, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: primaryColor, width: 1)),
       ),
       padding: const EdgeInsets.only(bottom: 9),
       child: Text(
@@ -181,24 +230,23 @@ class _ShowingRegistroVisitaDatosState
     );
   }
 
-  // ==================== FIELD LABEL ====================
   Widget _buildFieldLabel(String label, {String? suffix}) {
-    if (suffix != null) {
-      return SizedBox(
-        height: 20,
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: textColor,
-                height: 20 / 14,
-                letterSpacing: -0.15,
-              ),
+    return SizedBox(
+      height: 20,
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: textColor,
+              height: 20 / 14,
+              letterSpacing: -0.15,
             ),
+          ),
+          if (suffix != null) ...[
             const SizedBox(width: 4),
             Text(
               suffix,
@@ -212,26 +260,11 @@ class _ShowingRegistroVisitaDatosState
               ),
             ),
           ],
-        ),
-      );
-    }
-    return SizedBox(
-      height: 20,
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'Public Sans',
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: textColor,
-          height: 20 / 14,
-          letterSpacing: -0.15,
-        ),
+        ],
       ),
     );
   }
 
-  // ==================== TEXT INPUT (PREFILLED / READ-ONLY STYLE) ====================
   Widget _buildPrefilledInput(String value) {
     return Container(
       height: 42,
@@ -245,6 +278,8 @@ class _ShowingRegistroVisitaDatosState
       alignment: Alignment.centerLeft,
       child: Text(
         value,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(
           fontFamily: 'Public Sans',
           fontSize: 16,
@@ -257,7 +292,6 @@ class _ShowingRegistroVisitaDatosState
     );
   }
 
-  // ==================== DATE/TIME PICKER FIELD ====================
   Widget _buildDateTimeField(String value) {
     return Container(
       height: 42,
@@ -282,18 +316,20 @@ class _ShowingRegistroVisitaDatosState
     );
   }
 
-  // ==================== SELECTABLE OPTION CHIP (FULL WIDTH) ====================
-  Widget _buildSelectableOption({
+  Widget _optionBox({
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
     double height = 46,
+    bool expand = true,
   }) {
-    return GestureDetector(
+    final box = GestureDetector(
       onTap: onTap,
       child: Container(
         height: height,
-        width: double.infinity,
+        width: expand ? double.infinity : null,
+        padding:
+            expand ? null : const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color:
               isSelected ? primaryColor.withValues(alpha: 0.1) : Colors.white,
@@ -306,43 +342,7 @@ class _ShowingRegistroVisitaDatosState
         alignment: Alignment.center,
         child: Text(
           label,
-          style: const TextStyle(
-            fontFamily: 'Public Sans',
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: textColor,
-            height: 20 / 14,
-            letterSpacing: -0.15,
-          ),
           textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  // ==================== SELECTABLE OPTION CHIP (INLINE/FLEXIBLE) ====================
-  Widget _buildInlineSelectableOption({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    double height = 38,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color:
-              isSelected ? primaryColor.withValues(alpha: 0.1) : Colors.white,
-          border: Border.all(
-            color: isSelected ? primaryColor : inputBorderColor,
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
           style: TextStyle(
             fontFamily: 'Public Sans',
             fontSize: 14,
@@ -351,27 +351,71 @@ class _ShowingRegistroVisitaDatosState
             height: 20 / 14,
             letterSpacing: -0.15,
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
+    return box;
   }
 
-  // ==================== SECTION 1: DATOS BÁSICOS DE LA VISITA ====================
+  /// Vertical list of full-width options.
+  Widget _optionsVertical(
+    List<_Opt> opts,
+    String? selected,
+    ValueChanged<String> onChanged, {
+    double height = 46,
+  }) {
+    return Column(
+      children: [
+        for (int i = 0; i < opts.length; i++)
+          Padding(
+            padding: EdgeInsets.only(bottom: i < opts.length - 1 ? 12 : 0),
+            child: _optionBox(
+              label: opts[i].label,
+              isSelected: selected == opts[i].value,
+              onTap: () => setState(() => onChanged(opts[i].value)),
+              height: height,
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Row of equal-width options (2–4 per row).
+  Widget _optionsInline(
+    List<_Opt> opts,
+    String? selected,
+    ValueChanged<String> onChanged, {
+    double height = 46,
+  }) {
+    return Row(
+      children: [
+        for (int i = 0; i < opts.length; i++)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: i < opts.length - 1 ? 12 : 0),
+              child: _optionBox(
+                label: opts[i].label,
+                isSelected: selected == opts[i].value,
+                onTap: () => setState(() => onChanged(opts[i].value)),
+                height: height,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ==================== SECTION 1 ====================
   Widget _buildSection1DatosBasicos() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeading('Datos básicos de la visita'),
         const SizedBox(height: 16),
-
-        // Propiedad (prellenada)
         _buildFieldLabel('Propiedad', suffix: '(prellenada)'),
         const SizedBox(height: 8),
-        _buildPrefilledInput('Datos de la propiedad'),
+        _buildPrefilledInput(widget.propertyName ?? 'Datos de la propiedad'),
         const SizedBox(height: 16),
-
-        // Fecha + Hora row
         Row(
           children: [
             Expanded(
@@ -380,7 +424,7 @@ class _ShowingRegistroVisitaDatosState
                 children: [
                   _buildFieldLabel('Fecha'),
                   const SizedBox(height: 8),
-                  _buildDateTimeField('22/11/2025'),
+                  _buildDateTimeField(widget.dateText ?? '—'),
                 ],
               ),
             ),
@@ -391,130 +435,65 @@ class _ShowingRegistroVisitaDatosState
                 children: [
                   _buildFieldLabel('Hora'),
                   const SizedBox(height: 8),
-                  _buildDateTimeField('8:00AM'),
+                  _buildDateTimeField(widget.timeText ?? '—'),
                 ],
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-
-        // Visit type options (vertical, full-width)
-        ..._buildVisitTypeOptions(),
+        _buildFieldLabel('Modalidad de la visita'),
+        const SizedBox(height: 8),
+        _optionsInline(
+            _kindOpts, _kind, (v) => _kind = v, height: 46),
+        const SizedBox(height: 16),
+        _buildFieldLabel('Duración'),
+        const SizedBox(height: 8),
+        // 4 duration options split into two rows of two.
+        _optionsInline(
+            _durationOpts.sublist(0, 2), _duration, (v) => _duration = v),
         const SizedBox(height: 12),
-
-        // Duration options (horizontal, 3 columns)
-        _buildDurationOptions(),
+        _optionsInline(
+            _durationOpts.sublist(2, 4), _duration, (v) => _duration = v),
       ],
     );
   }
 
-  List<Widget> _buildVisitTypeOptions() {
-    final visitTypes = [
-      'Primera visita',
-      'Segunda visita',
-      'Visita de seguimiento'
-    ];
-    return visitTypes.map((type) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _buildSelectableOption(
-          label: type,
-          isSelected: _selectedVisitType == type,
-          onTap: () => setState(() => _selectedVisitType = type),
-        ),
-      );
-    }).toList();
-  }
-
-  Widget _buildDurationOptions() {
-    final durations = ['< 15 min', '15–30 min', '+30 min'];
-    return Row(
-      children: durations.asMap().entries.map((entry) {
-        final index = entry.key;
-        final duration = entry.value;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: index < 2 ? 12 : 0),
-            child: _buildInlineSelectableOption(
-              label: duration,
-              isSelected: _selectedDuration == duration,
-              onTap: () => setState(() => _selectedDuration = duration),
-              height: 46,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ==================== SECTION 2: ASISTENTES A LA VISITA ====================
+  // ==================== SECTION 2 ====================
   Widget _buildSection2Asistentes() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeading('Asistentes a la visita'),
         const SizedBox(height: 16),
-
-        // Cliente (prellenado)
         _buildFieldLabel('Cliente', suffix: '(prellenado)'),
         const SizedBox(height: 8),
-        _buildPrefilledInput('Juan Pérez'),
+        _buildPrefilledInput(widget.clientName ?? 'Cliente'),
         const SizedBox(height: 16),
-
-        // ¿Asistieron más personas?
         _buildFieldLabel('¿Asistieron más personas?'),
         const SizedBox(height: 8),
-        _buildAttendeeOptions(),
+        _optionsVertical(
+            _attendeesOpts, _attendees, (v) => _attendees = v, height: 42),
       ],
     );
   }
 
-  Widget _buildAttendeeOptions() {
-    final options = ['No', 'Pareja', 'Familiar', 'Otro'];
-    return Row(
-      children: options.asMap().entries.map((entry) {
-        final index = entry.key;
-        final option = entry.value;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: index < 3 ? 8 : 0),
-            child: _buildInlineSelectableOption(
-              label: option,
-              isSelected: _selectedAttendees == option,
-              onTap: () => setState(() => _selectedAttendees = option),
-              height: 38,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ==================== SECTION 3: ESTADO DEL INMUEBLE ====================
+  // ==================== SECTION 3 ====================
   Widget _buildSection3EstadoInmueble() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeading('Estado del inmueble'),
         const SizedBox(height: 16),
-
-        // Estado general - star rating
         _buildFieldLabel('Estado general'),
         const SizedBox(height: 8),
         _buildStarRating(),
         const SizedBox(height: 16),
-
-        // Condiciones
         _buildFieldLabel('Condiciones'),
         const SizedBox(height: 8),
-        _buildConditionOptions(),
-        const SizedBox(height: 16),
-
-        // ¿Coincide con lo publicado?
-        _buildFieldLabel('¿Coincide con lo publicado?'),
-        const SizedBox(height: 8),
-        _buildMatchesPublishedOptions(),
+        _optionsVertical(_conditionOpts, _propertyCondition,
+            (v) => _propertyCondition = v,
+            height: 42),
       ],
     );
   }
@@ -523,19 +502,15 @@ class _ShowingRegistroVisitaDatosState
     return Row(
       children: List.generate(5, (index) {
         return GestureDetector(
-          onTap: () {
-            setState(() {
-              _generalConditionRating = index + 1;
-            });
-          },
+          onTap: () => setState(() => _overallRating = index + 1),
           child: Padding(
             padding: EdgeInsets.only(right: index < 4 ? 8 : 0),
             child: Icon(
-              index < _generalConditionRating
+              index < _overallRating
                   ? Icons.star_rounded
                   : Icons.star_outline_rounded,
               size: 32,
-              color: index < _generalConditionRating
+              color: index < _overallRating
                   ? const Color(0xFFFFC107)
                   : const Color(0xFFD1D5DB),
             ),
@@ -545,175 +520,43 @@ class _ShowingRegistroVisitaDatosState
     );
   }
 
-  Widget _buildConditionOptions() {
-    final conditions = ['Limpio', 'Requiere mantenimiento', 'En obra'];
-    return Column(
-      children: conditions.map((condition) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: _buildSelectableOption(
-            label: condition,
-            isSelected: _selectedCondition == condition,
-            onTap: () => setState(() => _selectedCondition = condition),
-            height: 38,
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildMatchesPublishedOptions() {
-    final options = ['Sí', 'No'];
-    return Row(
-      children: options.asMap().entries.map((entry) {
-        final index = entry.key;
-        final option = entry.value;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: index < 1 ? 12 : 0),
-            child: _buildSelectableOption(
-              label: option,
-              isSelected: _matchesPublished == option,
-              onTap: () => setState(() => _matchesPublished = option),
-              height: 50,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ==================== SECTION 4: REACCIÓN DEL CLIENTE ====================
+  // ==================== SECTION 4 ====================
   Widget _buildSection4ReaccionCliente() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeading('Reacción del cliente'),
         const SizedBox(height: 16),
-
-        // Interés del cliente
         _buildFieldLabel('Interés del cliente'),
         const SizedBox(height: 8),
-        _buildInterestOptions(),
+        _optionsVertical(
+            _interestOpts, _interest, (v) => _interest = v, height: 42),
         const SizedBox(height: 16),
-
-        // Motivo principal
         _buildFieldLabel('Motivo principal'),
         const SizedBox(height: 8),
-        _buildReasonOptions(),
+        _buildReasonWrap(),
       ],
     );
   }
 
-  Widget _buildInterestOptions() {
-    final interests = [
-      {'label': 'Alto', 'icon': Icons.trending_up},
-      {'label': 'Medio', 'icon': Icons.trending_flat},
-      {'label': 'Bajo', 'icon': Icons.trending_down},
-    ];
-    return Row(
-      children: interests.asMap().entries.map((entry) {
-        final index = entry.key;
-        final interest = entry.value;
-        final label = interest['label'] as String;
-        final icon = interest['icon'] as IconData;
-        final isSelected = _selectedInterest == label;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: index < 2 ? 12 : 0),
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedInterest = label),
-              child: Container(
-                height: 80,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? primaryColor.withValues(alpha: 0.1)
-                      : Colors.white,
-                  border: Border.all(
-                    color: isSelected ? primaryColor : borderColor,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      icon,
-                      size: 24,
-                      color: isSelected ? primaryColor : textColor,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: textColor,
-                        height: 20 / 14,
-                        letterSpacing: -0.15,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildReasonOptions() {
-    final reasons = [
-      'Precio',
-      'Ubicación',
-      'Tamaño',
-      'Estado del inmueble',
-      'Otro'
-    ];
+  Widget _buildReasonWrap() {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: reasons.map((reason) {
-        final isSelected = _selectedReason == reason;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedReason = reason),
-          child: Container(
-            width: double.infinity,
-            height: 38,
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? primaryColor.withValues(alpha: 0.1)
-                  : Colors.white,
-              border: Border.all(
-                color: isSelected ? primaryColor : inputBorderColor,
-                width: isSelected ? 2 : 1,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              reason,
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: textColor,
-                height: 20 / 14,
-                letterSpacing: -0.15,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+      children: _reasonOpts.map((opt) {
+        final isSelected = _mainReason == opt.value;
+        return _optionBox(
+          label: opt.label,
+          isSelected: isSelected,
+          onTap: () => setState(() => _mainReason = opt.value),
+          height: 38,
+          expand: false,
         );
       }).toList(),
     );
   }
 
-  // ==================== SECTION 5: PRÓXIMO PASO ====================
+  // ==================== SECTION 5 ====================
   Widget _buildSection5ProximoPaso() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -722,105 +565,22 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
         _buildFieldLabel('¿Qué sigue?'),
         const SizedBox(height: 8),
-        _buildNextStepOptions(),
+        _optionsVertical(
+            _nextStepOpts, _nextStep, (v) => _nextStep = v, height: 46),
       ],
     );
   }
 
-  Widget _buildNextStepOptions() {
-    final steps = [
-      'Solicitar documentos',
-      'Agendar segunda visita',
-      'Enviar propuesta',
-      'Interesado, lo pensará',
-      'Quiere ver otras opciones',
-      'No continúa',
-    ];
-    return Column(
-      children: steps.asMap().entries.map((entry) {
-        final index = entry.key;
-        final step = entry.value;
-        final isSelected = _selectedNextStep == step;
-        return Padding(
-          padding: EdgeInsets.only(bottom: index < steps.length - 1 ? 12 : 0),
-          child: GestureDetector(
-            onTap: () => setState(() => _selectedNextStep = step),
-            child: Container(
-              width: double.infinity,
-              height: 46,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? primaryColor.withValues(alpha: 0.1)
-                    : Colors.white,
-                border: Border.all(
-                  color: isSelected ? primaryColor : borderColor,
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                step,
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: textColor,
-                  height: 20 / 14,
-                  letterSpacing: -0.15,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ==================== SECTION 6: EVIDENCIA (OPCIONAL) ====================
+  // ==================== SECTION 6 ====================
   Widget _buildSection6Evidencia() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeading('Evidencia (opcional)'),
         const SizedBox(height: 16),
-
-        // Fotos
         const Row(
           children: [
-            Icon(
-              Icons.camera_alt_outlined,
-              size: 16,
-              color: textColor,
-            ),
-            SizedBox(width: 4),
-            Text(
-              'Fotos',
-              style: TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: textColor,
-                height: 20 / 14,
-                letterSpacing: -0.15,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 11),
-        // File upload placeholder
-        const SizedBox(height: 20),
-        const SizedBox(height: 16),
-
-        // Comentario
-        const Row(
-          children: [
-            Icon(
-              Icons.chat_bubble_outline,
-              size: 16,
-              color: textColor,
-            ),
+            Icon(Icons.chat_bubble_outline, size: 16, color: textColor),
             SizedBox(width: 4),
             Text(
               'Comentario',
@@ -863,10 +623,8 @@ class _ShowingRegistroVisitaDatosState
                 height: 24 / 16,
                 letterSpacing: -0.31,
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               border: InputBorder.none,
             ),
           ),
@@ -875,15 +633,13 @@ class _ShowingRegistroVisitaDatosState
     );
   }
 
-  // ==================== SECTION 7: CONFIRMACIÓN ====================
+  // ==================== SECTION 7 ====================
   Widget _buildSection7Confirmacion() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeading('Confirmación'),
         const SizedBox(height: 16),
-
-        // Confirmation checkbox
         GestureDetector(
           onTap: () => setState(() => _confirmed = !_confirmed),
           child: Container(
@@ -932,16 +688,13 @@ class _ShowingRegistroVisitaDatosState
           ),
         ),
         const SizedBox(height: 16),
-
-        // Submit button
         GestureDetector(
           onTap: _handleSubmit,
           child: Container(
             width: double.infinity,
             height: 56,
             decoration: BoxDecoration(
-              color: primaryColor,
-              border: Border.all(color: primaryColor, width: 1),
+              color: _isValid ? primaryColor : primaryColor.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(25),
             ),
             alignment: Alignment.center,
