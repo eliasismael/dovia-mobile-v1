@@ -24,6 +24,8 @@ class DOVIAAPIOfferContextGroup {
   static SubmitBankAgentDataCall submitBankAgentDataCall =
       SubmitBankAgentDataCall();
   static ListMyOffersCall listMyOffersCall = ListMyOffersCall();
+  static ListAcceptedOffersCall listAcceptedOffersCall =
+      ListAcceptedOffersCall();
   static ListOffersOnMyPropertiesCall listOffersOnMyPropertiesCall =
       ListOffersOnMyPropertiesCall();
   static CreateOfferRENTIndividualCall createOfferRENTIndividualCall =
@@ -107,6 +109,10 @@ class ListOffersByPropertyCall {
     String? limit = '',
     String? offerStatus = '',
     String? processStatus = '',
+    String? lastOfferBy = '',
+    String? pendingResponseBy = '',
+    String? counterOfferState = '',
+    String? rejectedBy = '',
     String? propertyId = '',
     String? authToken = '',
   }) async {
@@ -125,6 +131,13 @@ class ListOffersByPropertyCall {
         'limit': limit,
         'offerStatus': offerStatus,
         'processStatus': processStatus,
+        if (lastOfferBy != null && lastOfferBy.isNotEmpty)
+          'lastOfferBy': lastOfferBy,
+        if (pendingResponseBy != null && pendingResponseBy.isNotEmpty)
+          'pendingResponseBy': pendingResponseBy,
+        if (counterOfferState != null && counterOfferState.isNotEmpty)
+          'counterOfferState': counterOfferState,
+        if (rejectedBy != null && rejectedBy.isNotEmpty) 'rejectedBy': rejectedBy,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -341,6 +354,10 @@ class ListMyOffersCall {
     String? offerType = '',
     String? offerStatus = '',
     String? processStatus = '',
+    String? lastOfferBy = '',
+    String? pendingResponseBy = '',
+    String? counterOfferState = '',
+    String? rejectedBy = '',
     String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
@@ -359,6 +376,45 @@ class ListMyOffersCall {
         'offerType': offerType,
         'offerStatus': offerStatus,
         'processStatus': processStatus,
+        if (lastOfferBy != null && lastOfferBy.isNotEmpty)
+          'lastOfferBy': lastOfferBy,
+        if (pendingResponseBy != null && pendingResponseBy.isNotEmpty)
+          'pendingResponseBy': pendingResponseBy,
+        if (counterOfferState != null && counterOfferState.isNotEmpty)
+          'counterOfferState': counterOfferState,
+        if (rejectedBy != null && rejectedBy.isNotEmpty) 'rejectedBy': rejectedBy,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ListAcceptedOffersCall {
+  Future<ApiCallResponse> call({
+    String? filter = '',
+    String? page = '',
+    String? limit = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'List Accepted Offers',
+      apiUrl: '$baseUrl/offers/accepted',
+      callType: ApiCallType.GET,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        if (filter != null && filter.isNotEmpty) 'filter': filter,
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -377,6 +433,10 @@ class ListOffersOnMyPropertiesCall {
     String? offerType = '',
     String? offerStatus = '',
     String? processStatus = '',
+    String? lastOfferBy = '',
+    String? pendingResponseBy = '',
+    String? counterOfferState = '',
+    String? rejectedBy = '',
     String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
@@ -395,6 +455,13 @@ class ListOffersOnMyPropertiesCall {
         'offerType': offerType,
         'offerStatus': offerStatus,
         'processStatus': processStatus,
+        if (lastOfferBy != null && lastOfferBy.isNotEmpty)
+          'lastOfferBy': lastOfferBy,
+        if (pendingResponseBy != null && pendingResponseBy.isNotEmpty)
+          'pendingResponseBy': pendingResponseBy,
+        if (counterOfferState != null && counterOfferState.isNotEmpty)
+          'counterOfferState': counterOfferState,
+        if (rejectedBy != null && rejectedBy.isNotEmpty) 'rejectedBy': rejectedBy,
       },
       returnBody: true,
       encodeBodyUtf8: false,

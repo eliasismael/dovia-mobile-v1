@@ -755,7 +755,13 @@ class UpdatePropertyCall {
   Future<ApiCallResponse> call({
     String? propertyId = '',
     String? authToken = '',
+    String? name,
+    String? description,
     List<String>? listingType,
+    String? propertyType,
+    dynamic location,
+    dynamic legalInfo,
+    dynamic ownership,
     double? salePrice,
     double? maintenanceFee,
     double? singlePropertyTax,
@@ -764,21 +770,31 @@ class UpdatePropertyCall {
     String? othersRent,
     String? allowedUses,
     String? availableFrom,
+    dynamic features,
+    dynamic infoHQ,
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
     final Map<String, dynamic> body = {};
 
+    if (name != null) body['name'] = name;
+    if (description != null) body['description'] = description;
+    if (propertyType != null) body['propertyType'] = propertyType;
+    if (location != null) body['location'] = location;
+    if (legalInfo != null) body['legalInfo'] = legalInfo;
+    if (ownership != null) body['ownership'] = ownership;
+    if (features != null) body['features'] = features;
+    if (infoHQ != null) body['infoHQ'] = infoHQ;
+
     if (listingType != null && listingType.isNotEmpty) {
       body['listingType'] = listingType;
     }
 
-    final bool hasSale = listingType?.contains('SALE') == true;
-    final bool hasRent = listingType?.contains('RENT') == true;
+    final bool hasSale = listingType?.contains('SALE') == true || salePrice != null || maintenanceFee != null || singlePropertyTax != null;
+    final bool hasRent = listingType?.contains('RENT') == true || monthlyRent != null || minimumTimeRent != null || othersRent != null || allowedUses != null || availableFrom != null;
 
     if (hasSale) {
       final Map<String, dynamic> saleInfo = {};
-      // amountToReceive is computed server-side — not accepted in PATCH
       if (salePrice != null) saleInfo['salePrice'] = salePrice;
       if (maintenanceFee != null) saleInfo['maintenanceFee'] = maintenanceFee;
       if (singlePropertyTax != null) saleInfo['singlePropertyTax'] = singlePropertyTax;

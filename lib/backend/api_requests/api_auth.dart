@@ -22,6 +22,7 @@ class DOVIAAPIAuthContextGroup {
   static RefreshTokenNEWCall refreshTokenNEWCall = RefreshTokenNEWCall();
   static SelectRoleCall selectRoleCall = SelectRoleCall();
   static LogoutAllCall logoutAllCall = LogoutAllCall();
+  static ChangePasswordCall changePasswordCall = ChangePasswordCall();
 }
 
 class SignUpStepNEWCall {
@@ -457,6 +458,43 @@ class LogoutAllCall {
       },
       params: {},
       body: '',
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ChangePasswordCall {
+  Future<ApiCallResponse> call({
+    String? currentPassword = '',
+    String? newPassword = '',
+    String? confirmPassword = '',
+    String? idToken = '',
+    String? accessToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIAuthContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "currentPassword": "${escapeStringForJson(currentPassword)}",
+  "newPassword": "${escapeStringForJson(newPassword)}",
+  "confirmPassword": "${escapeStringForJson(confirmPassword)}"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Change Password',
+      apiUrl: '$baseUrl/auth/change-password',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $idToken',
+        'x-access-token': accessToken ?? '',
+      },
+      params: {},
+      body: ffApiRequestBody,
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

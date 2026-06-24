@@ -428,6 +428,7 @@ class UpdateFavoriteFolderNameCall {
   Future<ApiCallResponse> call({
     String? folderId = '',
     String? udatedFolderName = 'Nuevo nombre de carpeta',
+    String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIFavoriteContextGroup.getBaseUrl();
 
@@ -439,7 +440,9 @@ class UpdateFavoriteFolderNameCall {
       callName: 'Update Favorite Folder Name',
       apiUrl: '$baseUrl/favorites/folders/$folderId',
       callType: ApiCallType.PATCH,
-      headers: {},
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,

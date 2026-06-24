@@ -251,15 +251,87 @@ class FavoritesRepository extends ChangeNotifier {
         .call(propertyId: propertyId, authToken: token);
 
     if (response.succeeded) {
-      final folderIds = (response.jsonBody?['data']?['folderIds'] as List?)
-          ?.cast<String>() ?? [];
-      if (folderIds.isNotEmpty) {
+      final isFavorited = response.jsonBody?['data']?['isFavorited'] as bool? ?? false;
+      if (isFavorited) {
         _favoritedIds.add(propertyId);
       } else {
         _favoritedIds.remove(propertyId);
       }
       notifyListeners();
     }
+  }
+
+  /// Updates a folder's name.
+  Future<Result<void>> updateFolderName(String folderId, String newName) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIFavoriteContextGroup.updateFavoriteFolderNameCall
+        .call(folderId: folderId, udatedFolderName: newName, authToken: token);
+
+    if (!response.succeeded) {
+      return Failure(
+        'No se pudo actualizar el nombre de la carpeta',
+        statusCode: response.statusCode,
+      );
+    }
+    // Update local cache
+    final index = _folders.indexWhere((f) => f.id == folderId);
+    if (index != -1) {
+      // Assuming FavoriteFolder has a copyWith method or we just reload.
+      // Easiest is to reload:
+      await loadFolders();
+    }
+    return const Success(null);
+  }
+
+  /// Gets properties inside a specific folder.
+  Future<Result<List<dynamic>>> getFavoritesInFolder(String folderId, {int page = 1, int limit = 20}) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIFavoriteContextGroup.getFavoritesInFolderCall
+        .call(folderId: folderId, page: page.toString(), limit: limit.toString(), authToken: token);
+
+    if (!response.succeeded) {
+      return Failure(
+        'Error al cargar favoritos de la carpeta',
+        statusCode: response.statusCode,
+      );
+    }
+    
+    final rawData = (response.jsonBody?['data']?['favorites'] as List? ?? []);
+    return Success(rawData);
+  }
+
+  /// Removes a property from a specific folder.
+  Future<Result<void>> removeFavoriteFromFolder(String folderId, String propertyId) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIFavoriteContextGroup.removeFavoriteFromFolderCall
+        .call(folderId: folderId, propertyId: propertyId, authToken: token);
+
+    if (!response.succeeded) {
+      return Failure(
+        'No se pudo eliminar de la carpeta',
+        statusCode: response.statusCode,
+      );
+    }
+    // Refresh global favorite status just in case it was completely removed
+    await refreshFavoriteStatus(propertyId);
+    return const Success(null);
+  }
+
+  /// Adds a property to a specific folder.
+  Future<Result<void>> addFavoriteToFolder(String folderId, String propertyId) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIFavoriteContextGroup.addFavoriteToFolderCall
+        .call(folderId: folderId, propertyId: propertyId, authToken: token);
+
+    if (!response.succeeded) {
+      return Failure(
+        'No se pudo agregar a la carpeta',
+        statusCode: response.statusCode,
+      );
+    }
+    _favoritedIds.add(propertyId);
+    notifyListeners();
+    return const Success(null);
   }
 
   /// Clears all cached state (call on logout).

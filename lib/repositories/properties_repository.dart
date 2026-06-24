@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/core/result.dart';
 import '/domain/property_models.dart';
@@ -135,6 +136,143 @@ class PropertiesRepository extends ChangeNotifier {
           _homeProperties[index].copyWith(isFavorite: isFavorite);
       notifyListeners();
     }
+  }
+
+  // ── Extended Actions ────────────────────────────────────────────────────────
+
+  /// Fetches paginated properties created by the current user.
+  Future<Result<List<dynamic>>> getMyProperties({
+    String? page,
+    String? limit,
+    String? status,
+  }) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall.call(
+      page: page,
+      limit: limit,
+      status: status,
+      authToken: token,
+    );
+
+    if (!response.succeeded) {
+      return Failure('Error al cargar mis propiedades', statusCode: response.statusCode);
+    }
+    final rawData = (response.jsonBody?['data'] as List? ?? []);
+    return Success(rawData);
+  }
+
+  /// Lists all public properties with filters and pagination.
+  Future<Result<List<dynamic>>> listProperties({
+    String? page,
+    String? limit,
+    String? propertyType,
+    String? minPrice,
+    String? maxPrice,
+    String? location,
+  }) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIPropertyContextGroup.listPropertiesCall.call(
+      page: page,
+      limit: limit,
+      propertyType: propertyType,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      location: location,
+      authToken: token,
+    );
+
+    if (!response.succeeded) {
+      return Failure('Error al listar propiedades', statusCode: response.statusCode);
+    }
+    final rawData = (response.jsonBody?['data'] as List? ?? []);
+    return Success(rawData);
+  }
+
+  /// Gets the publishable zones.
+  Future<Result<List<dynamic>>> getPublishableZones() async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIPropertyContextGroup.getPublishableZonesCall.call(
+      authToken: token,
+    );
+
+    if (!response.succeeded) {
+      return Failure('Error al cargar zonas de publicación', statusCode: response.statusCode);
+    }
+    return Success(response.jsonBody as List? ?? []);
+  }
+
+  /// Changes the status of a property.
+  Future<Result<bool>> changePropertyStatus(String propertyId, String status, {String? note}) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
+      propertyId: propertyId,
+      status: status,
+      note: note,
+      authToken: token,
+    );
+
+    if (!response.succeeded) {
+      return Failure('Error al cambiar el estado de la propiedad', statusCode: response.statusCode);
+    }
+    // Optionally remove from cache if status is DELETED
+    if (status == 'DELETED' || status == 'ARCHIVED') {
+      _detailCache.remove(propertyId);
+      _homeProperties.removeWhere((p) => p.id == propertyId);
+      _mapMarkers.removeWhere((p) => p.id == propertyId);
+      notifyListeners();
+    }
+    return const Success(true);
+  }
+
+  /// Updates a property.
+  Future<Result<bool>> updateProperty({
+    required String propertyId,
+    String? name,
+    String? description,
+    List<String>? listingType,
+    String? propertyType,
+    dynamic location,
+    dynamic legalInfo,
+    dynamic ownership,
+    double? salePrice,
+    double? maintenanceFee,
+    double? singlePropertyTax,
+    double? monthlyRent,
+    int? minimumTimeRent,
+    String? othersRent,
+    String? allowedUses,
+    String? availableFrom,
+    dynamic features,
+    dynamic infoHQ,
+  }) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIPropertyContextGroup.updatePropertyCall.call(
+      propertyId: propertyId,
+      authToken: token,
+      name: name,
+      description: description,
+      listingType: listingType,
+      propertyType: propertyType,
+      location: location,
+      legalInfo: legalInfo,
+      ownership: ownership,
+      salePrice: salePrice,
+      maintenanceFee: maintenanceFee,
+      singlePropertyTax: singlePropertyTax,
+      monthlyRent: monthlyRent,
+      minimumTimeRent: minimumTimeRent,
+      othersRent: othersRent,
+      allowedUses: allowedUses,
+      availableFrom: availableFrom,
+      features: features,
+      infoHQ: infoHQ,
+    );
+
+    if (!response.succeeded) {
+      return Failure('Error al actualizar propiedad', statusCode: response.statusCode);
+    }
+    _detailCache.remove(propertyId);
+    return const Success(true);
   }
 
   /// Invalidates all caches (e.g. after logout or a major state change).
