@@ -50,38 +50,28 @@ class _ListingHqReviewNotesState extends State<ListingHqReviewNotes> {
     return Container(
       width: widget.width ?? double.infinity,
       height: widget.height,
-      color: Colors.white,
+      color: const Color(0xFFFBFBFB), // Matches Figma background
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Operative Note Section
           const Text(
-            'Información para HQ',
+            'Datos del Operative Listing',
             style: TextStyle(
               fontFamily: 'Public Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 20,
               color: textColor,
             ),
           ),
           const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFAFAFA),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor),
-            ),
-            child: Text(
-              widget.operativeNote ?? 'Sin notas adicionales.',
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 14,
-                color: textColor,
-                height: 1.5,
-              ),
+          Text(
+            'Nota de Operative:\n${widget.operativeNote ?? 'Sin notas adicionales.'}',
+            style: const TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 20,
+              color: textColor,
+              height: 1.2,
             ),
           ),
           const SizedBox(height: 24),
@@ -98,6 +88,17 @@ class _ListingHqReviewNotesState extends State<ListingHqReviewNotes> {
                 const SnackBar(content: Text('Abriendo chat interno...')),
               );
             },
+          ),
+          const SizedBox(height: 32),
+
+          // Owner Data Section
+          const Text(
+            'Datos del propietario:',
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 20,
+              color: textColor,
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -117,77 +118,100 @@ class _ListingHqReviewNotesState extends State<ListingHqReviewNotes> {
           
           const Spacer(), // Push bottom buttons to the bottom
 
-          // Resolution Actions
+          // Resolution Actions Text
           const Text(
-            'Finalizar proceso de checklist o solicitar una nueva visita...',
-            textAlign: TextAlign.center,
+            'Finalizar proceso de checklist o solicitar una nueva visita, comunicarse con el propietario y coordinar',
             style: TextStyle(
               fontFamily: 'Public Sans',
-              fontSize: 14,
+              fontSize: 20,
               color: textColor,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           
-          // Checklist Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () async {
-                if (widget.onChecklistPressed != null) {
-                  await widget.onChecklistPressed!();
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Checklist',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          
-          // Reassign Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: OutlinedButton(
-              onPressed: () async {
-                if (widget.onReassignPressed != null) {
-                  await widget.onReassignPressed!();
-                }
-              },
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: primaryColor, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                backgroundColor: Colors.white,
-              ),
-              child: const Text(
-                'Re asignar Operative Listing',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: primaryColor,
-                ),
-              ),
-            ),
+          // Buttons Row
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 600) {
+                return Row(
+                  children: [
+                    Expanded(child: _buildChecklistButton()),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildReassignButton()),
+                  ],
+                );
+              } else {
+                return Column(
+                  children: [
+                    _buildChecklistButton(),
+                    const SizedBox(height: 12),
+                    _buildReassignButton(),
+                  ],
+                );
+              }
+            }
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildChecklistButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 42,
+      child: ElevatedButton(
+        onPressed: () async {
+          if (widget.onChecklistPressed != null) {
+            await widget.onChecklistPressed!();
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          'Checklist',
+          style: TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReassignButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 42,
+      child: ElevatedButton(
+        onPressed: () async {
+          if (widget.onReassignPressed != null) {
+            await widget.onReassignPressed!();
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          'Re asignar Operative Listing',
+          style: TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
@@ -200,82 +224,70 @@ class _ListingHqReviewNotesState extends State<ListingHqReviewNotes> {
     required VoidCallback onTapIcon,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(5.5),
+        border: Border.all(color: primaryColor, width: 0.5),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar placeholder
+          // Role Pill
           Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Color(0xFFE9EFF2),
-              shape: BoxShape.circle,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0x3370ACAD), // rgba(112, 172, 173, 0.2)
+              borderRadius: BorderRadius.circular(65),
             ),
-            child: Center(
-              child: Text(
-                '${name.isNotEmpty ? name[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
-                style: const TextStyle(
-                  color: primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
+            child: Text(
+              role,
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 16,
+                color: textColor,
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+          const SizedBox(height: 12),
+          // Name and Icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const SizedBox(width: 32), // Balance for icon
+              Expanded(
+                child: Text(
                   '$name $lastName',
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: 'Public Sans',
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                     color: textColor,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  role,
-                  style: const TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 12,
-                    color: Color(0xFF888888),
+              ),
+              GestureDetector(
+                onTap: onTapIcon,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.circular(48),
+                  ),
+                  child: const Icon(
+                    Icons.chat_bubble_outline, // Equivalent to the multi-bubble
+                    color: Colors.white,
+                    size: 18,
                   ),
                 ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: onTapIcon,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Color(0xFFE9EFF2),
-                shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: primaryColor,
-                size: 20,
-              ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+
