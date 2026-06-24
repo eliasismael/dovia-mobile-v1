@@ -345,8 +345,15 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             cardBuilder: (v) => _buildVisitCard(
                               visit: v,
                               showStatus: true,
-                              buttonText: 'Registrar visita',
-                              onPressed: () => _openForm(v.visitId),
+                              buttonText: 'Detalles',
+                              onPressed: () {
+                                context.pushNamed(
+                                  'SHOWING_PropiedadAMostrar',
+                                  queryParameters: {
+                                    'visitId': serializeParam(v.visitId, ParamType.String),
+                                  }.withoutNulls,
+                                );
+                              },
                             ),
                           ),
 
@@ -363,8 +370,15 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             cardBuilder: (v) => _buildVisitCard(
                               visit: v,
                               showStatus: false,
-                              buttonText: 'Registrar visita',
-                              onPressed: () => _openForm(v.visitId),
+                              buttonText: 'Ver ficha',
+                              onPressed: () {
+                                context.pushNamed(
+                                  'SHOWING_PropiedadAMostrar',
+                                  queryParameters: {
+                                    'visitId': serializeParam(v.visitId, ParamType.String),
+                                  }.withoutNulls,
+                                );
+                              },
                             ),
                           ),
                         ],

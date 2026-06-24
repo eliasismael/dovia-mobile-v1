@@ -706,6 +706,39 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                         ),
                                       ),
                                     ),
+                                    if (_isPrivacyGated)
+                                      Padding(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 20.0, 0.0, 0.0),
+                                        child: Container(
+                                          width: MediaQuery.sizeOf(context).width * 1.0,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFE8F5F5), // Light green background
+                                            borderRadius: BorderRadius.circular(8.0),
+                                            border: Border.all(
+                                              color: FlutterFlowTheme.of(context).primary,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                                12.0, 12.0, 12.0, 12.0),
+                                            child: Text(
+                                              'Se mostrará la información más detallada al iniciar ruta o 2 horas antes de la cita.',
+                                              textAlign: TextAlign.center,
+                                              style: FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .override(
+                                                    font: GoogleFonts.inter(
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                    color: FlutterFlowTheme.of(context).primary,
+                                                    fontSize: 14.0,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     Padding(
                                       padding: const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 20.0, 0.0, 0.0),
@@ -1120,8 +1153,9 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                           ],
                                         ),
                                       ),
-                                    Align(
-                                      alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    if (!_isPrivacyGated)
+                                      Align(
+                                        alignment: const AlignmentDirectional(-1.0, 0.0),
                                       child: Padding(
                                         padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 12.0, 0.0, 0.0),
