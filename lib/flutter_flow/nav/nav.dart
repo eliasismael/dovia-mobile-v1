@@ -764,6 +764,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: SHOWINGAgendaWidget.routeName,
+          path: SHOWINGAgendaWidget.routePath,
+          builder: (context, params) => const SHOWINGAgendaWidget(),
+        ),
+        FFRoute(
           name: SHOWINGRegistroDeVisitaWidget.routeName,
           path: SHOWINGRegistroDeVisitaWidget.routePath,
           builder: (context, params) => const SHOWINGRegistroDeVisitaWidget(),

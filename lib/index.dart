@@ -174,6 +174,8 @@ export '/showing/s_h_o_w_i_n_g_visita_del_dia/s_h_o_w_i_n_g_visita_del_dia_widge
     show SHOWINGVisitaDelDiaWidget;
 export '/showing/s_h_o_w_i_n_g_notifications/s_h_o_w_i_n_g_notifications_widget.dart'
     show SHOWINGNotificationsWidget;
+export '/showing/s_h_o_w_i_n_g_agenda/s_h_o_w_i_n_g_agenda_widget.dart'
+    show SHOWINGAgendaWidget;
 export '/showing/s_h_o_w_i_n_g_profile/s_h_o_w_i_n_g_profile_widget.dart'
     show SHOWINGProfileWidget;
 export '/showing/s_h_o_w_i_n_g_propiedades_a_mostrar/s_h_o_w_i_n_g_propiedades_a_mostrar_widget.dart'

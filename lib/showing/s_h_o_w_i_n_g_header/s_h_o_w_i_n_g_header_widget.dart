@@ -151,7 +151,7 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () async {
-                    context.pushNamed(SHOWINGVisitaDelDiaWidget.routeName);
+                    context.pushNamed(SHOWINGAgendaWidget.routeName);
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
