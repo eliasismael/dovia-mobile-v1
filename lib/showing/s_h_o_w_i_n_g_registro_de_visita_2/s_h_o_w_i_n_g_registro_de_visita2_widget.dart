@@ -6,6 +6,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_visit_registered_popup/s_h_o_w_i_n_g_visit_registered_popup_widget.dart';
+import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -51,6 +52,48 @@ class _SHOWINGRegistroDeVisita2WidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _onCancelVisit() async {
+    final message = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: const SHOWINGReportPopupWidget(),
+        );
+      },
+    );
+    if (message == null || message.trim().isEmpty) return;
+
+    final visitId = widget.visitId ?? '';
+    final res = await DOVIAAPIVisitContextGroup.showingReportProblemCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: visitId,
+      message: message.trim(),
+    );
+    if (!mounted) return;
+
+    if (res.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Visita cancelada.',
+            style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).secondary,
+        ),
+      );
+      context.safePop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo reportar el problema.')),
+      );
+    }
   }
 
   // Submit the showing visit report (POST /visits/{visitId}/showing/report).
@@ -301,6 +344,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                   clientName: ownerName,
                                   dateText: dateText,
                                   timeText: timeText,
+                                  onCancelVisit: () => _onCancelVisit(),
                                   onSave: (data) =>
                                       _submitReport(data as Map<String, dynamic>),
                                   onFinalizarRegistro: () async {},

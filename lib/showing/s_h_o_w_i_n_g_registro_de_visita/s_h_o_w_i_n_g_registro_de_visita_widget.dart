@@ -85,13 +85,13 @@ class _SHOWINGRegistroDeVisitaWidgetState
   static const Color aqua = Color(0xFF007376);
   static const Color reportRed = Color(0xFFC90A0A);
 
-  Future<Map<String, List<_ScheduleVisit>>>? _scheduleFuture;
+  Future<List<_ScheduleVisit>>? _scheduleFuture;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => SHOWINGRegistroDeVisitaModel());
-    _scheduleFuture = _fetchSchedule();
+    _scheduleFuture = _fetchPastVisits();
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -101,26 +101,72 @@ class _SHOWINGRegistroDeVisitaWidgetState
     super.dispose();
   }
 
-  // ── Fetch the current month's schedule, grouped by date (yyyy-MM-dd) ──────
-  Future<Map<String, List<_ScheduleVisit>>> _fetchSchedule() async {
+  // ── Fetch assigned past visits ──────────────────────────────────────────────────
+  Future<List<_ScheduleVisit>> _fetchPastVisits() async {
     final token = currentAuthenticationToken ?? '';
-    final now = DateTime.now();
-    final res = await DOVIAAPIVisitContextGroup.getShowingAgentScheduleCall.call(
+    final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
-      year: now.year,
-      month: now.month,
+      filter: 'past',
+      page: '1',
+      limit: '50',
     );
-    if (!res.succeeded) return {};
+    if (!res.succeeded) return [];
 
-    final schedule = getJsonField(res.jsonBody, r'$.schedule');
-    final out = <String, List<_ScheduleVisit>>{};
-    if (schedule is Map) {
-      schedule.forEach((key, value) {
-        final dateKey = key.toString();
-        final items = value is List ? value : <dynamic>[];
-        out[dateKey] =
-            items.map((e) => _ScheduleVisit.fromJson(e, dateKey)).toList();
-      });
+    final raw = getJsonField(res.jsonBody, r'$.data');
+    final visits = raw is List ? raw : <dynamic>[];
+
+    final ovFutures = visits.map((v) {
+      final id = v is Map ? v['visitId']?.toString() ?? '' : '';
+      return DOVIAAPIVisitContextGroup.getShowingVisitOverviewCall
+          .call(authToken: token, visitId: id);
+    }).toList();
+    final overviews = await Future.wait(ovFutures);
+
+    final out = <_ScheduleVisit>[];
+    for (int i = 0; i < visits.length; i++) {
+      final v = visits[i];
+      final ov = overviews[i];
+      if (!ov.succeeded) continue;
+      
+      final data = getJsonField(ov.jsonBody, r'$.data');
+      if (data is! Map) continue;
+      
+      String title = '';
+      String address = '';
+      String ownerName = '';
+      String image = '';
+      String dateStr = '';
+      String timeStr = '';
+      
+      final prop = data['property'];
+      if (prop is Map) {
+        title = prop['name']?.toString() ?? '';
+        image = prop['image']?.toString() ?? '';
+        final location = prop['location'];
+        if (location is Map) {
+            address = location['address']?.toString() ?? '';
+        }
+      }
+      final owner = data['ownerProfile'];
+      if (owner is Map) {
+        ownerName = owner['fullName']?.toString() ?? '';
+      }
+      final slot = data['confirmedTimeSlot'];
+      if (slot is Map) {
+          dateStr = slot['date']?.toString() ?? '';
+          timeStr = slot['time']?.toString() ?? '';
+      }
+      
+      out.add(_ScheduleVisit(
+        visitId: v is Map ? v['visitId']?.toString() ?? '' : '',
+        title: title,
+        address: address,
+        ownerName: ownerName,
+        date: dateStr,
+        time: timeStr,
+        imageUrl: image,
+        substatus: v is Map ? v['substatus']?.toString() ?? '' : '',
+      ));
     }
     return out;
   }
@@ -186,7 +232,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
           backgroundColor: FlutterFlowTheme.of(context).secondary,
         ),
       );
-      safeSetState(() => _scheduleFuture = _fetchSchedule());
+      safeSetState(() => _scheduleFuture = _fetchPastVisits());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No se pudo enviar el reporte.')),
@@ -233,7 +279,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                         children: [
                           _buildSearchBar(),
                           const SizedBox(height: 24.0),
-                          FutureBuilder<Map<String, List<_ScheduleVisit>>>(
+                          FutureBuilder<List<_ScheduleVisit>>(
                             future: _scheduleFuture,
                             builder: (context, snap) {
                               if (!snap.hasData) {
@@ -273,13 +319,13 @@ class _SHOWINGRegistroDeVisitaWidgetState
     );
   }
 
-  // ── Build date blocks (today/future) + "Visitas Vencidas" (past) ─────────
-  Widget _buildSections(Map<String, List<_ScheduleVisit>> schedule) {
-    if (schedule.isEmpty) {
+  // ── Build date blocks ("Hoy" - En Plazo) + "Visitas Vencidas" (past 24h) ─────────
+  Widget _buildSections(List<_ScheduleVisit> visits) {
+    if (visits.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Text(
-          'No tienes visitas asignadas este mes.',
+          'No tienes visitas pendientes de registro.',
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.publicSans(),
                 color: FlutterFlowTheme.of(context).secondaryText,
@@ -288,26 +334,43 @@ class _SHOWINGRegistroDeVisitaWidgetState
       );
     }
 
-    final today = _todayStr();
-    final dates = schedule.keys.toList()..sort();
-    final future = dates.where((d) => d.compareTo(today) >= 0).toList();
-    final past = dates.where((d) => d.compareTo(today) < 0).toList();
+    final now = DateTime.now();
+    final enPlazo = <_ScheduleVisit>[];
+    final vencidas = <_ScheduleVisit>[];
 
-    // Overdue = past visits still actionable (exclude cancelled)
-    final overdue = <_ScheduleVisit>[];
-    for (final d in past) {
-      for (final v in schedule[d]!) {
-        if (v.substatus != 'CANCELLED') overdue.add(v);
+    for (final v in visits) {
+      if (v.substatus == 'CANCELLED') continue;
+      
+      DateTime visitDt;
+      try {
+        final dateParts = v.date.split('-');
+        final timeParts = v.time.split(':');
+        visitDt = DateTime(
+          int.parse(dateParts[0]), 
+          int.parse(dateParts[1]), 
+          int.parse(dateParts[2]), 
+          int.parse(timeParts[0]), 
+          int.parse(timeParts[1])
+        );
+      } catch (_) {
+        continue;
+      }
+      
+      // Regla de Backend (24 Horas)
+      final diff = now.difference(visitDt);
+      if (diff.inHours <= 24) {
+        enPlazo.add(v);
+      } else {
+        vencidas.add(v);
       }
     }
 
     final children = <Widget>[];
-    for (final d in future) {
-      final isToday = d == today;
-      children.add(_buildSectionTitle(
-          isToday ? 'Hoy ${_formatDate(d)}' : _formatDate(d)));
+    
+    if (enPlazo.isNotEmpty) {
+      children.add(_buildSectionTitle('Hoy ${_formatDate(_todayStr())}'));
       children.add(const SizedBox(height: 14.0));
-      for (final v in schedule[d]!) {
+      for (final v in enPlazo) {
         children.add(Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 14.0),
           child: _buildVisitCard(visit: v, isOverdue: false),
@@ -316,15 +379,28 @@ class _SHOWINGRegistroDeVisitaWidgetState
       children.add(const SizedBox(height: 10.0));
     }
 
-    if (overdue.isNotEmpty) {
+    if (vencidas.isNotEmpty) {
       children.add(_buildSectionTitle('Visitas Vencidas'));
       children.add(const SizedBox(height: 14.0));
-      for (final v in overdue) {
+      for (final v in vencidas) {
         children.add(Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 14.0),
           child: _buildVisitCard(visit: v, isOverdue: true),
         ));
       }
+    }
+
+    if (children.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Text(
+          'No tienes visitas pendientes de registro.',
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.publicSans(),
+                color: FlutterFlowTheme.of(context).secondaryText,
+              ),
+        ),
+      );
     }
 
     return Column(

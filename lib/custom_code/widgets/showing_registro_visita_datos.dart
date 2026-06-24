@@ -20,6 +20,7 @@ class ShowingRegistroVisitaDatos extends StatefulWidget {
 
   // Callbacks
   final VoidCallback? onFinalizarRegistro;
+  final VoidCallback? onCancelVisit;
 
   /// Called with the API-ready payload when the form passes validation.
   /// Keys match POST /visits/{visitId}/showing/report fields.
@@ -35,6 +36,7 @@ class ShowingRegistroVisitaDatos extends StatefulWidget {
     this.timeText,
     this.onFinalizarRegistro,
     this.onSave,
+    this.onCancelVisit,
   });
 
   @override
@@ -209,23 +211,31 @@ class _ShowingRegistroVisitaDatosState
   }
 
   // ==================== SHARED PIECES ====================
-  Widget _buildSectionHeading(String title) {
+  Widget _buildSectionHeading(String title, {Widget? trailing}) {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryColor, width: 1)),
       ),
       padding: const EdgeInsets.only(bottom: 9),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontFamily: 'Public Sans',
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-          color: textColor,
-          height: 28 / 18,
-          letterSpacing: -0.44,
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: textColor,
+                height: 28 / 18,
+                letterSpacing: -0.44,
+              ),
+            ),
+          ),
+          if (trailing != null) trailing,
+        ],
       ),
     );
   }
@@ -410,7 +420,32 @@ class _ShowingRegistroVisitaDatosState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeading('Datos básicos de la visita'),
+        _buildSectionHeading(
+          'Datos básicos de la visita',
+          trailing: widget.onCancelVisit != null
+              ? InkWell(
+                  onTap: widget.onCancelVisit,
+                  child: Container(
+                    height: 26,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFC90A0A)),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'No se realizo',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFC90A0A),
+                      ),
+                    ),
+                  ),
+                )
+              : null,
+        ),
         const SizedBox(height: 16),
         _buildFieldLabel('Propiedad', suffix: '(prellenada)'),
         const SizedBox(height: 8),
