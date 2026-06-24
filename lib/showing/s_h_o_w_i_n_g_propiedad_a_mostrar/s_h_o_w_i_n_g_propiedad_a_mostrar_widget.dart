@@ -5,6 +5,7 @@ import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
+import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -288,6 +289,49 @@ class _SHOWINGPropiedadAMostrarWidgetState
       return difference > 120;
     } catch (_) {
       return true;
+    }
+  }
+
+  Future<void> _onReport() async {
+    final message = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: const SHOWINGReportPopupWidget(),
+        );
+      },
+    );
+    if (message == null || message.trim().isEmpty) return;
+
+    final res = await DOVIAAPIVisitContextGroup.showingReportProblemCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: widget.visitId,
+      message: message.trim(),
+    );
+    if (!mounted) return;
+
+    if (res.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Reporte enviado. Visita cancelada.',
+            style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).secondary,
+        ),
+      );
+      if (mounted) {
+        context.pop();
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo enviar el reporte.')),
+      );
     }
   }
 
@@ -1221,6 +1265,39 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                               );
                                             }
                                           },
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 16.0, 0.0, 20.0),
+                                      child: FFButtonWidget(
+                                        onPressed: _onReport,
+                                        text: 'Tuve un problema',
+                                        options: FFButtonOptions(
+                                          width: MediaQuery.sizeOf(context).width * 1.0,
+                                          height: 48.0,
+                                          padding: const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
+                                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
+                                          color: Colors.transparent,
+                                          textStyle: FlutterFlowTheme.of(context)
+                                              .titleSmall
+                                              .override(
+                                                font: GoogleFonts.publicSans(
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                                color: const Color(0xFFC90A0A),
+                                                fontSize: 16.0,
+                                                letterSpacing: 0.0,
+                                              ),
+                                          elevation: 0.0,
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFFC90A0A),
+                                            width: 1.0,
+                                          ),
+                                          borderRadius: BorderRadius.circular(24.0),
                                         ),
                                       ),
                                     ),

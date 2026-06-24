@@ -60,9 +60,10 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
 
   static const Color _primary = Color(0xFF007376);
 
-  // Unassigned (self-assignable), assigned-today, assigned-upcoming
+  // Unassigned (self-assignable), assigned-today (upcoming/past), assigned-upcoming
   Future<List<_ShowingVisit>>? _acceptableFuture;
-  Future<List<_ShowingVisit>>? _todayFuture;
+  Future<List<_ShowingVisit>>? _upcomingTodayFuture;
+  Future<List<_ShowingVisit>>? _pastTodayFuture;
   Future<List<_ShowingVisit>>? _acceptedFuture;
 
   @override
@@ -75,7 +76,29 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
 
   void _loadAll() {
     _acceptableFuture = _fetchUnassigned();
-    _todayFuture = _fetchAssigned(today: 'true');
+    final todayAll = _fetchAssigned(today: 'true');
+    _upcomingTodayFuture = todayAll.then((list) {
+      final now = DateTime.now();
+      return list.where((v) {
+        if (v.time.isEmpty) return true; // keep if no time to be safe
+        try {
+          final t = v.time.split(':');
+          final visitDt = DateTime(now.year, now.month, now.day, int.parse(t[0]), int.parse(t[1]));
+          return !visitDt.isBefore(now);
+        } catch (_) { return true; }
+      }).toList();
+    });
+    _pastTodayFuture = todayAll.then((list) {
+      final now = DateTime.now();
+      return list.where((v) {
+        if (v.time.isEmpty) return false;
+        try {
+          final t = v.time.split(':');
+          final visitDt = DateTime(now.year, now.month, now.day, int.parse(t[0]), int.parse(t[1]));
+          return visitDt.isBefore(now);
+        } catch (_) { return false; }
+      }).toList();
+    });
     _acceptedFuture = _fetchAssigned(filter: 'upcoming');
   }
 
@@ -339,7 +362,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 SHOWINGRegistroDeVisitaWidget.routeName),
                           ),
                           _horizontalList(
-                            future: _todayFuture,
+                            future: _upcomingTodayFuture,
                             emptyMsg: 'No tienes visitas para hoy.',
                             height: 190,
                             cardBuilder: (v) => _buildVisitCard(
@@ -357,7 +380,32 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             ),
                           ),
 
-                          // 3. Visitas aceptadas (assigned upcoming)
+                          // 3. Registro de visita (past today visits)
+                          _sectionTitleWithAction(
+                            'Registro de visita',
+                            onVerTodo: () => context.pushNamed(
+                                SHOWINGRegistroDeVisitaWidget.routeName),
+                          ),
+                          _horizontalList(
+                            future: _pastTodayFuture,
+                            emptyMsg: 'No tienes visitas pendientes de registro.',
+                            height: 190,
+                            cardBuilder: (v) => _buildVisitCard(
+                              visit: v,
+                              showStatus: false,
+                              buttonText: 'Registrar visita',
+                              onPressed: () {
+                                context.pushNamed(
+                                  'SHOWING_RegistroDeVisita_2',
+                                  queryParameters: {
+                                    'visitId': serializeParam(v.visitId, ParamType.String),
+                                  }.withoutNulls,
+                                );
+                              },
+                            ),
+                          ),
+
+                          // 4. Visitas aceptadas (assigned upcoming)
                           _sectionTitleWithAction(
                             'Visitas aceptadas',
                             onVerTodo: () => context.pushNamed(

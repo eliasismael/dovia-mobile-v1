@@ -31,11 +31,18 @@ class _SHOWINGRegistroDeVisita2WidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Future<ApiCallResponse>? _overviewFuture;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => SHOWINGRegistroDeVisita2Model());
-
+    if (widget.visitId != null && widget.visitId!.isNotEmpty) {
+      _overviewFuture = DOVIAAPIVisitContextGroup.getShowingVisitOverviewCall.call(
+        authToken: currentAuthenticationToken,
+        visitId: widget.visitId,
+      );
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -130,195 +137,178 @@ class _SHOWINGRegistroDeVisita2WidgetState
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 40.0, 20.0, 100.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 0.0),
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Padding(
+                      child: FutureBuilder<ApiCallResponse>(
+                        future: _overviewFuture,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          final res = snapshot.data!;
+                          if (!res.succeeded) {
+                            return const Center(child: Text('Error al cargar la información de la visita.'));
+                          }
+
+                          final data = getJsonField(res.jsonBody, r'$.data');
+                          String title = 'Propiedad';
+                          String propertyType = 'Tipo';
+                          String price = '';
+                          String specs = '';
+                          String imageUrl = '';
+                          String ownerName = 'Cliente';
+                          String dateText = '';
+                          String timeText = '';
+
+                          if (data is Map) {
+                            final prop = data['property'];
+                            if (prop is Map) {
+                              title = prop['name']?.toString() ?? 'Propiedad';
+                              propertyType = prop['propertyType']?.toString() ?? 'Tipo';
+                              price = prop['price']?.toString() ?? '';
+                              imageUrl = prop['image']?.toString() ?? '';
+                              final buildSize = prop['buildSize']?.toString() ?? '-';
+                              final bedrooms = prop['bedrooms']?.toString() ?? '-';
+                              final bathrooms = prop['bathrooms']?.toString() ?? '-';
+                              specs = '$buildSize M2  $bedrooms Habitaciones  $bathrooms Baños\n';
+                            }
+                            final owner = data['ownerProfile'];
+                            if (owner is Map) {
+                              ownerName = owner['fullName']?.toString() ?? 'Cliente';
+                            }
+                            final slot = data['confirmedTimeSlot'];
+                            if (slot is Map) {
+                              dateText = slot['date']?.toString() ?? '';
+                              timeText = slot['time']?.toString() ?? '';
+                            }
+                          }
+
+                          return Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                    10.0, 10.0, 10.0, 10.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Container(
-                                      width: MediaQuery.sizeOf(context).width *
-                                          1.0,
-                                      height: 150.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                        child: Image.asset(
-                                          'assets/images/casa_card_sobreMiVisita.png',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 20.0, 0.0, 0.0),
-                                      child: Container(
-                                        width:
-                                            MediaQuery.sizeOf(context).width *
-                                                1.0,
-                                        decoration: const BoxDecoration(),
-                                        child: IntrinsicWidth(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Align(
-                                                alignment:
-                                                    const AlignmentDirectional(
-                                                        -1.0, 0.0),
-                                                child: RichText(
-                                                  textScaler:
-                                                      MediaQuery.of(context)
-                                                          .textScaler,
-                                                  text: TextSpan(
-                                                    children: [
-                                                      TextSpan(
-                                                        text: 'Orchad House\n',
-                                                        style: FlutterFlowTheme
-                                                                .of(context)
-                                                            .bodyMedium
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .inter(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                              ),
-                                                              fontSize: 16.0,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                            ),
-                                                      ),
-                                                      TextSpan(
-                                                        text: 'Tipo\n',
-                                                        style: FlutterFlowTheme
-                                                                .of(context)
-                                                            .bodyMedium
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .inter(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .normal,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                              ),
-                                                              fontSize: 12.0,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .normal,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                            ),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            'Rp. 2.500.000.000 / Year\n',
-                                                        style: TextStyle(),
-                                                      ),
-                                                      const TextSpan(
-                                                        text:
-                                                            'M2 M2 Habitaciones Baños\n',
-                                                        style: TextStyle(),
-                                                      )
-                                                    ],
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .publicSans(
-                                                            fontWeight:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontWeight,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                          ),
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                          lineHeight: 1.5,
-                                                        ),
+                                    0.0, 20.0, 0.0, 0.0),
+                                child: Container(
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  decoration: BoxDecoration(
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
+                                        10.0, 10.0, 10.0, 10.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.sizeOf(context).width * 1.0,
+                                          height: 150.0,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            child: imageUrl.isNotEmpty
+                                                ? Image.network(
+                                                    imageUrl,
+                                                    width: 200.0,
+                                                    height: 200.0,
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Image.asset(
+                                                    'assets/images/casa_card_sobreMiVisita.png',
+                                                    width: 200.0,
+                                                    height: 200.0,
+                                                    fit: BoxFit.cover,
                                                   ),
-                                                ),
-                                              ),
-                                            ],
                                           ),
                                         ),
-                                      ),
+                                        Padding(
+                                          padding: const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 20.0, 0.0, 0.0),
+                                          child: Container(
+                                            width: MediaQuery.sizeOf(context).width * 1.0,
+                                            decoration: const BoxDecoration(),
+                                            child: IntrinsicWidth(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Align(
+                                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                                    child: RichText(
+                                                      textScaler: MediaQuery.of(context).textScaler,
+                                                      text: TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: '$title\n',
+                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                              font: GoogleFonts.inter(
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                              fontSize: 16.0,
+                                                              fontWeight: FontWeight.w500,
+                                                            ),
+                                                          ),
+                                                          TextSpan(
+                                                            text: '$propertyType\n',
+                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                              font: GoogleFonts.inter(
+                                                                fontWeight: FontWeight.normal,
+                                                              ),
+                                                              fontSize: 12.0,
+                                                              fontWeight: FontWeight.normal,
+                                                            ),
+                                                          ),
+                                                          TextSpan(
+                                                            text: '\$$price\n',
+                                                          ),
+                                                          TextSpan(
+                                                            text: specs,
+                                                          )
+                                                        ],
+                                                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                          font: GoogleFonts.publicSans(
+                                                            fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                          ),
+                                                          lineHeight: 1.5,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: MediaQuery.sizeOf(context).height * 1.0,
-                            child: custom_widgets.ShowingRegistroVisitaDatos(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: MediaQuery.sizeOf(context).height * 1.0,
-                              onSave: (data) =>
-                                  _submitReport(data as Map<String, dynamic>),
-                              onFinalizarRegistro: () async {},
-                            ),
-                          ),
-                        ],
+                              SizedBox(
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                height: MediaQuery.sizeOf(context).height * 1.0,
+                                child: custom_widgets.ShowingRegistroVisitaDatos(
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  height: MediaQuery.sizeOf(context).height * 1.0,
+                                  propertyName: title,
+                                  clientName: ownerName,
+                                  dateText: dateText,
+                                  timeText: timeText,
+                                  onSave: (data) =>
+                                      _submitReport(data as Map<String, dynamic>),
+                                  onFinalizarRegistro: () async {},
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ],
