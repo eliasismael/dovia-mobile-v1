@@ -39,6 +39,8 @@ class DOVIAAPIVisitContextGroup {
       ReviewChecklistDocumentsCall();
   static ReviewListerHqDocumentCall reviewListerHqDocumentCall =
       ReviewListerHqDocumentCall();
+  static DeleteVisitDocumentCall deleteVisitDocumentCall =
+      DeleteVisitDocumentCall();
   static UploadDocumentCall uploadDocumentCall = UploadDocumentCall();
   static CreateCustomVisitDocumentCall createCustomVisitDocumentCall =
       CreateCustomVisitDocumentCall();
@@ -74,6 +76,8 @@ class DOVIAAPIVisitContextGroup {
       OperativeListerOnMyWayCall();
   static OperativeListerArrivedCall operativeListerArrivedCall =
       OperativeListerArrivedCall();
+  static UpdateVisitLocationCall updateVisitLocationCall =
+      UpdateVisitLocationCall();
   static SendVisitMessageCall sendVisitMessageCall = SendVisitMessageCall();
   static GetAvailableOperativeListersCall getAvailableOperativeListersCall =
       GetAvailableOperativeListersCall();
@@ -169,13 +173,23 @@ class CreateOperativeListingVisitCall {
     String? propertyId = '',
     String? authToken = '',
     dynamic ranges,
+    String? instructions,
   }) async {
     final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
 
-    String ffApiRequestBody = '''
+    String ffApiRequestBody = '';
+    if (instructions != null && instructions.isNotEmpty) {
+      ffApiRequestBody = '''
+{
+  "proposedAvailabilityRanges": ${serializeJson(ranges, true)},
+  "instructions": "${escapeStringForJson(instructions)}"
+}''';
+    } else {
+      ffApiRequestBody = '''
 {
   "proposedAvailabilityRanges": ${serializeJson(ranges, true)}
 }''';
+    }
     return ApiManager.instance.makeApiCall(
       callName: 'Create Operative Listing Visit',
       apiUrl: '$baseUrl/visits/properties/$propertyId/operative-listing-visits',
@@ -716,6 +730,33 @@ class ReviewListerHqDocumentCall {
   }
 }
 
+class DeleteVisitDocumentCall {
+  Future<ApiCallResponse> call({
+    String? visitId = '',
+    String? documentId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Delete Visit Document',
+      apiUrl: '$baseUrl/visits/$visitId/lister-hq/documents/$documentId',
+      callType: ApiCallType.DELETE,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
 class UploadDocumentCall {
   Future<ApiCallResponse> call({
     String? visitId = '',
@@ -1241,6 +1282,40 @@ class OperativeListerArrivedCall {
         'Authorization': 'Bearer $authToken',
       },
       params: {},
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class UpdateVisitLocationCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? visitId = '',
+    double? lat,
+    double? lng,
+  }) async {
+    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
+
+    final ffApiRequestBody = '''
+{
+  "lat": $lat,
+  "lng": $lng
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'Update Visit Location',
+      apiUrl: '$baseUrl/visits/$visitId/location',
+      callType: ApiCallType.PATCH,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: ffApiRequestBody,
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
