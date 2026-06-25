@@ -65,6 +65,8 @@ class _LISTINGHQPropiedadAsignadaWidgetState
 
   // Lister nuevo elegido para asignar.
   Map<String, dynamic>? _selectedOperative;
+  Map<String, dynamic>? _initialLister;
+  bool _isReassigning = false;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   bool _submitting = false;
@@ -171,6 +173,16 @@ class _LISTINGHQPropiedadAsignadaWidgetState
             .where((s) => s.isNotEmpty)
             .join('\n');
       }
+    }
+
+    final listerData = data['lister'];
+    if (listerData is Map) {
+      _initialLister = {
+        'id': listerData['id'],
+        'name': '${listerData['firstName'] ?? listerData['name'] ?? ''} ${listerData['lastName'] ?? ''}'.trim(),
+        'photoUrl': listerData['avatar'] ?? listerData['photoUrl'],
+      };
+      _selectedOperative = _initialLister;
     }
 
     // Historial de reagendamiento desde el overview (mensajes del flujo).
@@ -467,19 +479,49 @@ class _LISTINGHQPropiedadAsignadaWidgetState
               ),
             ),
           ],
+          const SizedBox(height: 12.0),
+          Text('Documentos', style: _sectionTitleStyle()),
+          const SizedBox(height: 4.0),
+          Row(
+            children: [
+              Icon(Icons.description, color: FlutterFlowTheme.of(context).primary, size: 16),
+              const SizedBox(width: 4),
+              Text('Acuerdo firmado', style: _subTextStyle().copyWith(color: FlutterFlowTheme.of(context).primary)),
+              const SizedBox(width: 16),
+              Icon(Icons.verified_user, color: FlutterFlowTheme.of(context).primary, size: 16),
+              const SizedBox(width: 4),
+              Text('Certificación', style: _subTextStyle().copyWith(color: FlutterFlowTheme.of(context).primary)),
+            ],
+          ),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
             child: wrapWithModel(
               model: _model.primaryButtonModel,
               updateCallback: () => safeSetState(() {}),
-              child: PrimaryButtonWidget(
-                text: _submitting
-                    ? 'Confirmando...'
-                    : 'Confirmar visita y notificar',
-                onTap: () async {
-                  if (!_submitting) await _confirmAssignment();
-                },
-              ),
+              child: _initialLister != null && !_isReassigning 
+                ? PrimaryButtonWidget(
+                    text: 'Organizar información de la propiedad',
+                    onTap: () async {
+                      safeSetState(() {
+                        _selectedOperative = null;
+                        _isReassigning = true;
+                      });
+                    },
+                  )
+                : PrimaryButtonWidget(
+                    text: _submitting
+                        ? 'Confirmando...'
+                        : 'Confirmar visita y notificar',
+                    onTap: () async {
+                      if (!_submitting && _selectedOperative != null) {
+                        await _confirmAssignment();
+                      } else if (_selectedOperative == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Debe seleccionar un Operative Lister primero.')),
+                        );
+                      }
+                    },
+                  ),
             ),
           ),
           const SizedBox(height: 100.0),
