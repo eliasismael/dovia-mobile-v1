@@ -222,87 +222,127 @@ class _ListingHQMatchmakingSelectorWidgetState
           const Divider(height: 1),
           // Contenido en una sola columna (mobile: una cosa debajo de otra).
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Contexto: fechas propuestas por el propietario + teléfono.
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colorScheme.accent1.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: colorScheme.accent1),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isDesktop = constraints.maxWidth > 700;
+
+                final leftPanel = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Contexto: fechas propuestas por el propietario + teléfono.
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.accent1.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colorScheme.accent1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Fecha ingresada por el propietario',
+                            style: colorScheme.bodyMedium.override(
+                              fontFamily: 'Public Sans',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ..._buildProposedSlots(),
+                          if (widget.ownerPhone != null &&
+                              widget.ownerPhone!.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            _buildProposedRow(
+                              Icons.phone,
+                              'Propietario: ${widget.ownerPhone}',
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                    child: Column(
+                    const SizedBox(height: 24),
+
+                    // Selección manual de fecha y hora.
+                    Text(
+                      'Selecciona la fecha y hora final',
+                      style: colorScheme.titleMedium.override(
+                        fontFamily: 'Public Sans',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildPickerButton(
+                      icon: Icons.calendar_today,
+                      label: _selectedDate != null
+                          ? DateFormat('dd MMM, yyyy').format(_selectedDate!)
+                          : 'Seleccionar día',
+                      onTap: _pickDate,
+                      colorScheme: colorScheme,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildPickerButton(
+                      icon: Icons.access_time,
+                      label: _selectedTime != null
+                          ? _selectedTime!.format(context)
+                          : 'Seleccionar hora',
+                      onTap: _pickTime,
+                      colorScheme: colorScheme,
+                    ),
+                  ],
+                );
+
+                final rightPanel = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Operative Listers disponibles para esa fecha/hora.
+                    Text(
+                      'Operative Listing disponibles',
+                      style: colorScheme.titleMedium.override(
+                        fontFamily: 'Public Sans',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildOperativesSection(colorScheme),
+                  ],
+                );
+
+                if (isDesktop) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Fecha ingresada por el propietario',
-                          style: colorScheme.bodyMedium.override(
-                            fontFamily: 'Public Sans',
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Expanded(
+                          flex: 5,
+                          child: SingleChildScrollView(child: leftPanel),
                         ),
-                        const SizedBox(height: 8),
-                        ..._buildProposedSlots(),
-                        if (widget.ownerPhone != null &&
-                            widget.ownerPhone!.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          _buildProposedRow(
-                            Icons.phone,
-                            'Propietario: ${widget.ownerPhone}',
-                          ),
-                        ],
+                        const SizedBox(width: 32),
+                        Expanded(
+                          flex: 7,
+                          child: SingleChildScrollView(child: rightPanel),
+                        ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                  );
+                }
 
-                  // Selección manual de fecha y hora.
-                  Text(
-                    'Selecciona la fecha y hora final',
-                    style: colorScheme.titleMedium.override(
-                      fontFamily: 'Public Sans',
-                      fontWeight: FontWeight.w600,
-                    ),
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      leftPanel,
+                      const SizedBox(height: 24),
+                      rightPanel,
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  _buildPickerButton(
-                    icon: Icons.calendar_today,
-                    label: _selectedDate != null
-                        ? DateFormat('dd MMM, yyyy').format(_selectedDate!)
-                        : 'Seleccionar día',
-                    onTap: _pickDate,
-                    colorScheme: colorScheme,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildPickerButton(
-                    icon: Icons.access_time,
-                    label: _selectedTime != null
-                        ? _selectedTime!.format(context)
-                        : 'Seleccionar hora',
-                    onTap: _pickTime,
-                    colorScheme: colorScheme,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Operative Listers disponibles para esa fecha/hora.
-                  Text(
-                    'Operative Listing disponibles',
-                    style: colorScheme.titleMedium.override(
-                      fontFamily: 'Public Sans',
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildOperativesSection(colorScheme),
-                ],
-              ),
+                );
+              },
             ),
           ),
+
 
           // Botón de acción fijo en la parte inferior.
           SafeArea(

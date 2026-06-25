@@ -410,14 +410,30 @@ class _LISTINGHQPropiedadAsignadaWidgetState
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildOwnerCard(cardWidth),
-                _buildListerCard(cardWidth),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth > 700) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildOwnerCard(cardWidth),
+                      _buildListerCard(cardWidth),
+                    ],
+                  );
+                } else {
+                  return Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildOwnerCard(constraints.maxWidth),
+                      const SizedBox(height: 16.0),
+                      _buildListerCard(constraints.maxWidth),
+                    ],
+                  );
+                }
+              }
             ),
           ),
           const SizedBox(height: 20.0),
