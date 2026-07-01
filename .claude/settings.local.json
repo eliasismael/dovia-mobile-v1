@@ -18,7 +18,10 @@
       "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; flutter analyze lib > \"$env:TEMP\\\\analyze_out.txt\" 2>&1; \"EXIT=$LASTEXITCODE\")",
       "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; dart analyze lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita_2 lib\\\\showing\\\\s_h_o_w_i_n_g_report_popup lib\\\\showing\\\\s_h_o_w_i_n_g_visit_registered_popup; \"EXIT=$LASTEXITCODE\")",
       "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; dart analyze lib\\\\showing\\\\s_h_o_w_i_n_g_home lib\\\\showing\\\\s_h_o_w_i_n_g_registro_de_visita lib\\\\backend\\\\api_requests\\\\api_visits.dart; \"EXIT=$LASTEXITCODE\")",
-      "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; dart analyze lib\\\\showing lib\\\\custom_code\\\\widgets\\\\showing_registro_visita_datos.dart lib\\\\backend\\\\api_requests\\\\api_visits.dart lib\\\\flutter_flow\\\\nav\\\\nav.dart; \"EXIT=$LASTEXITCODE\")"
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Elías\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\"; dart analyze lib\\\\showing lib\\\\custom_code\\\\widgets\\\\showing_registro_visita_datos.dart lib\\\\backend\\\\api_requests\\\\api_visits.dart lib\\\\flutter_flow\\\\nav\\\\nav.dart; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell(flutter analyze lib/showing/s_h_o_w_i_n_g_propiedad_detalle lib/showing/s_h_o_w_i_n_g_propiedad_a_mostrar lib/flutter_flow/nav/nav.dart lib/index.dart)",
+      "PowerShell(flutter analyze > \"$env:TEMP\\\\dovia_analyze.txt\" 2>&1; Write-Output \"EXITCODE: $LASTEXITCODE\")",
+      "PowerShell(dart analyze lib\\\\showing\\\\s_h_o_w_i_n_g_propiedad_detalle lib\\\\showing\\\\s_h_o_w_i_n_g_propiedad_a_mostrar lib\\\\flutter_flow\\\\nav 2>&1)"
     ]
   }
 }

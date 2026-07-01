@@ -11,6 +11,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
+import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import 'dart:ui';
 import '/index.dart';
 import '/auth/custom_auth/auth_util.dart';
@@ -62,6 +63,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   int _halfBathrooms = 0;
   int _parkingSpots = 0;
   int _floors = 0;
+  String _propertyCode = '';
   List<String> _carouselImages = [];
   Map<String, dynamic>? _amenitiesData;
   double _lat = 14.3;
@@ -146,6 +148,12 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         _parkingSpots = (general?['parkingSpots'] as num?)?.toInt() ?? 0;
         _floors = (general?['floors'] as num?)?.toInt() ?? 0;
         _carouselImages = imagesList;
+        _propertyCode = d?['code']?.toString() ?? d?['internalCode']?.toString() ?? d?['folio']?.toString() ?? '';
+        if (_propertyCode.isEmpty && widget.propertyId != null) {
+          _propertyCode = widget.propertyId!.length > 5 
+              ? widget.propertyId!.substring(widget.propertyId!.length - 5).toUpperCase() 
+              : widget.propertyId!.toUpperCase();
+        }
 
         final loc = d?['location'] as Map?;
         final geo = loc?['geo'] as Map?;
@@ -526,164 +534,260 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                 child: const CornerGradientBackgroundWidget(),
               ),
               Align(
-                alignment: const AlignmentDirectional(0.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, -1.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            20.0, 42.0, 20.0, 0.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              decoration: const BoxDecoration(),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      context.safePop();
-                                    },
-                                    child: Container(
-                                      width: 35.0,
-                                      height: 35.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/IconoVolverAtras.svg',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.none,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      context.pushNamed(
-                                          DOVIACLIENTHomePageWidget.routeName);
-                                    },
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(0.0),
-                                      child: SvgPicture.asset(
-                                        'assets/images/D-verde.svg',
-                                        width: 28.0,
-                                        height: 36.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ].divide(const SizedBox(width: 8.0)),
-                              ),
-                            ),
-                            RichText(
-                              textScaler: MediaQuery.of(context).textScaler,
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: _propertyName.isNotEmpty ? _propertyName : 'Propiedad',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.publicSans(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          fontSize: 18.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.4,
-                                        ),
-                                  )
-                                ],
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 18.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                      lineHeight: 1.4,
-                                    ),
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                            ),
-                            Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
+                      if (widget.isReadOnly)
+                        wrapWithModel(
+                          model: _model.sHOWINGHeaderModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: SHOWINGHeaderWidget(
+                            title: _propertyName.isNotEmpty
+                                ? _propertyName
+                                : 'Propiedades a mostrar',
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              20.0, 42.0, 20.0, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                decoration: const BoxDecoration(),
+                                child: Row(
                                   mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      width: 40.0,
-                                      height: 40.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        shape: BoxShape.circle,
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        context.safePop();
+                                      },
+                                      child: Container(
+                                        width: 35.0,
+                                        height: 35.0,
+                                        decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .alternate,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: SvgPicture.asset(
+                                            'assets/images/IconoVolverAtras.svg',
+                                            width: 200.0,
+                                            height: 200.0,
+                                            fit: BoxFit.none,
+                                          ),
+                                        ),
                                       ),
+                                    ),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        context.pushNamed(
+                                            DOVIACLIENTHomePageWidget.routeName);
+                                      },
                                       child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
+                                        borderRadius: BorderRadius.circular(0.0),
                                         child: SvgPicture.asset(
-                                          'assets/images/IconoDoviaHomeClienteMensajes.svg',
-                                          width: 8.0,
-                                          height: 8.0,
-                                          fit: BoxFit.none,
+                                          'assets/images/D-verde.svg',
+                                          width: 28.0,
+                                          height: 36.0,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
                                     ),
                                   ].divide(const SizedBox(width: 8.0)),
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              RichText(
+                                textScaler: MediaQuery.of(context).textScaler,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: _propertyName.isNotEmpty ? _propertyName : 'Propiedad',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts.publicSans(
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .fontStyle,
+                                            ),
+                                            fontSize: 18.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                            lineHeight: 1.4,
+                                          ),
+                                    )
+                                  ],
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight: FontWeight.w600,
+                                          fontStyle: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .fontStyle,
+                                        ),
+                                        fontSize: 18.0,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FontWeight.w600,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                        lineHeight: 1.4,
+                                      ),
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Container(
+                                        width: 40.0,
+                                        height: 40.0,
+                                        decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryBackground,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: SvgPicture.asset(
+                                            'assets/images/IconoDoviaHomeClienteMensajes.svg',
+                                            width: 8.0,
+                                            height: 8.0,
+                                            fit: BoxFit.none,
+                                          ),
+                                        ),
+                                      ),
+                                    ].divide(const SizedBox(width: 8.0)),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 0.0, 20.0, 100.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
+                            if (widget.isReadOnly)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    if (_propertyCode.isNotEmpty)
+                                      Text(
+                                        'Código $_propertyCode',
+                                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                          font: GoogleFonts.publicSans(
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                          ),
+                                          fontSize: 14.0,
+                                          color: FlutterFlowTheme.of(context).primary,
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox.shrink(),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                    Container(
+                                      width: 32.0,
+                                      height: 32.0,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF7F7F7),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            blurRadius: 10.0,
+                                            color: Color(0x33000000),
+                                            offset: Offset(0.0, 2.0),
+                                          )
+                                        ],
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: InkWell(
+                                        onTap: _trackInteraction,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(6.0),
+                                            child: SvgPicture.asset(
+                                              'assets/images/download.svg',
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Container(
+                                      width: 32.0,
+                                      height: 32.0,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF7F7F7),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            blurRadius: 10.0,
+                                            color: Color(0x33000000),
+                                            offset: Offset(0.0, 2.0),
+                                          )
+                                        ],
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: InkWell(
+                                        onTap: _trackInteraction,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(6.0),
+                                            child: SvgPicture.asset(
+                                              'assets/images/share-android.svg',
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 40.0, 0.0, 0.0),
@@ -984,10 +1088,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       ].divide(const SizedBox(width: 8.0)),
                                     ),
                                   ),
-                                  Container(
-                                    decoration: const BoxDecoration(),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
+                                  if (!widget.isReadOnly)
+                                    Container(
+                                      decoration: const BoxDecoration(),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Container(
@@ -1062,8 +1167,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                 ],
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
+                            if (!widget.isReadOnly)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 22.0, 0.0, 0.0),
                               child: Container(
                                 width: MediaQuery.sizeOf(context).width * 1.0,

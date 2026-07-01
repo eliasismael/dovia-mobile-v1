@@ -11,6 +11,7 @@ import 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_widget.dart'
     show DOVIACLIENTPropiedadSeleccionadaNewWidget;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 
 class DOVIACLIENTPropiedadSeleccionadaNewModel
     extends FlutterFlowModel<DOVIACLIENTPropiedadSeleccionadaNewWidget> {
@@ -38,6 +39,8 @@ class DOVIACLIENTPropiedadSeleccionadaNewModel
   late PropiedadesSobreElSectorModel propiedadesSobreElSectorModel;
   // Model for DOVIA_CLIENT_Navbar component.
   late DOVIACLIENTNavbarModel dOVIACLIENTNavbarModel;
+  // Model for SHOWING_Header component.
+  late SHOWINGHeaderModel sHOWINGHeaderModel;
 
   @override
   void initState(BuildContext context) {
@@ -53,6 +56,7 @@ class DOVIACLIENTPropiedadSeleccionadaNewModel
         createModel(context, () => PropiedadesSobreElSectorModel());
     dOVIACLIENTNavbarModel =
         createModel(context, () => DOVIACLIENTNavbarModel());
+    sHOWINGHeaderModel = createModel(context, () => SHOWINGHeaderModel());
   }
 
   @override
@@ -64,5 +68,6 @@ class DOVIACLIENTPropiedadSeleccionadaNewModel
     porpiedadesAmenidadesModel.dispose();
     propiedadesSobreElSectorModel.dispose();
     dOVIACLIENTNavbarModel.dispose();
+    sHOWINGHeaderModel.dispose();
   }
 }

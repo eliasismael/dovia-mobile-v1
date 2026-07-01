@@ -332,14 +332,11 @@ class _SHOWINGPropiedadesAMostrarWidgetState
               ),
               child: _cardImage(visit.imageUrl),
             ),
-            Container(
-              width: MediaQuery.sizeOf(context).width * 0.6,
-              decoration: const BoxDecoration(),
-              child: IntrinsicWidth(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     Align(
                       alignment: const AlignmentDirectional(-1.0, 0.0),
                       child: RichText(
@@ -434,7 +431,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                           text: 'Iniciar ruta',
                           options: FFButtonOptions(
                             height: 30.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                             iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                             color: const Color(0x00007376),
                             textStyle: FlutterFlowTheme.of(context).titleSmall.override(
@@ -468,7 +465,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                           text: 'Detalles',
                           options: FFButtonOptions(
                             height: 30.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                             iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                             color: FlutterFlowTheme.of(context).primary,
                             textStyle: FlutterFlowTheme.of(context).titleSmall.override(
@@ -491,7 +488,6 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                   ],
                 ),
               ),
-            ),
           ].divide(const SizedBox(width: 10.0)),
         ),
       ),

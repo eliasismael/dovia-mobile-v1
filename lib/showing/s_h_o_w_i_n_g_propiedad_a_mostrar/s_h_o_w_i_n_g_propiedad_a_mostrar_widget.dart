@@ -13,7 +13,8 @@ import 's_h_o_w_i_n_g_propiedad_a_mostrar_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
-import '/dovia_client/app/principal/d_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new/d_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_widget.dart';
+import '/backend/api_requests/api_properties.dart';
+import '/showing/s_h_o_w_i_n_g_propiedad_detalle/s_h_o_w_i_n_g_propiedad_detalle_widget.dart';
 export 's_h_o_w_i_n_g_propiedad_a_mostrar_model.dart';
 
 class SHOWINGPropiedadAMostrarWidget extends StatefulWidget {
@@ -218,8 +219,40 @@ class _SHOWINGPropiedadAMostrarWidgetState
       visitDate = slot['date']?.toString() ?? '';
       visitTime = slot['time']?.toString() ?? '';
     }
-
+    
     final propertyId = prop?['id']?.toString() ?? prop?['_id']?.toString() ?? data['propertyId']?.toString();
+    
+    if (propertyId != null && propertyId.isNotEmpty) {
+      final propRes = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(propertyId: propertyId);
+      if (propRes.succeeded) {
+        final d = getJsonField(propRes.jsonBody, r'$.data.data');
+        if (d is Map) {
+          if (propertyName.isEmpty) propertyName = d['name']?.toString() ?? d['title']?.toString() ?? '';
+          if (propertyImage.isEmpty) propertyImage = d['image']?.toString() ?? '';
+          
+          final locAddr = _deepMap(d, ['location', 'address']);
+          if (address.isEmpty) {
+             address = locAddr?['fullAddress']?.toString() ?? locAddr?['street']?.toString() ?? '';
+          }
+          final coords = _deepValue(d, ['location', 'geo', 'coordinates']);
+          if (coords is List && coords.length >= 2) {
+             lng = (coords[0] as num?)?.toDouble() ?? lng;
+             lat = (coords[1] as num?)?.toDouble() ?? lat;
+          }
+          final general = d['features']?['general'] as Map?;
+          if (general != null) {
+            bedrooms = (general['bedrooms'] as num?)?.toInt() ?? bedrooms;
+            bathrooms = (general['bathrooms'] as num?)?.toInt() ?? bathrooms;
+            constructionArea = general['constructionArea']?.toString() ?? constructionArea;
+            landArea = general['landArea']?.toString() ?? landArea;
+          }
+          final lt = d['listingType'];
+          if (propertyType.isEmpty) {
+            propertyType = (lt is List && lt.isNotEmpty) ? lt[0].toString() : d['propertyType']?.toString() ?? '';
+          }
+        }
+      }
+    }
 
     safeSetState(() {
       _propertyName = propertyName;
@@ -459,14 +492,18 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                             onPressed: () {
                                               if (_propertyId != null && _propertyId!.isNotEmpty) {
                                                 context.pushNamed(
-                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget.routeName,
+                                                  SHOWINGPropiedadDetalleWidget.routeName,
                                                   queryParameters: {
                                                     'propertyId': serializeParam(_propertyId, ParamType.String),
-                                                    'isReadOnly': serializeParam(true, ParamType.bool),
                                                   }.withoutNulls,
                                                 );
                                               }
                                             },
+                                            icon: Icon(
+                                              Icons.remove_red_eye_outlined,
+                                              color: FlutterFlowTheme.of(context).primaryText,
+                                              size: 15.0,
+                                            ),
                                             text: 'Ver más',
                                             options: FFButtonOptions(
                                               height: 30.0,

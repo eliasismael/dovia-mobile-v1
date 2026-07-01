@@ -68,7 +68,7 @@ class _SHOWINGNavbarWidgetState extends State<SHOWINGNavbarWidget> {
               hoverColor: Colors.transparent,
               highlightColor: Colors.transparent,
               onTap: () async {
-                context.pushNamed(SHOWINGHomeWidget.routeName);
+                context.pushNamed(SHOWINGAgendaWidget.routeName);
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(0.0),
@@ -86,7 +86,7 @@ class _SHOWINGNavbarWidgetState extends State<SHOWINGNavbarWidget> {
               hoverColor: Colors.transparent,
               highlightColor: Colors.transparent,
               onTap: () async {
-                context.pushNamed(SHOWINGAgendaWidget.routeName);
+                context.pushNamed(SHOWINGPropiedadesAMostrarWidget.routeName);
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(0.0),

@@ -764,6 +764,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: SHOWINGPropiedadDetalleWidget.routeName,
+          path: SHOWINGPropiedadDetalleWidget.routePath,
+          builder: (context, params) => SHOWINGPropiedadDetalleWidget(
+            propertyId: params.getParam(
+              'propertyId',
+              ParamType.String,
+            ),
+          ),
+        ),
+        FFRoute(
           name: SHOWINGAgendaWidget.routeName,
           path: SHOWINGAgendaWidget.routePath,
           builder: (context, params) => const SHOWINGAgendaWidget(),

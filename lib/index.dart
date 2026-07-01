@@ -182,6 +182,8 @@ export '/showing/s_h_o_w_i_n_g_propiedades_a_mostrar/s_h_o_w_i_n_g_propiedades_a
     show SHOWINGPropiedadesAMostrarWidget;
 export '/showing/s_h_o_w_i_n_g_propiedad_a_mostrar/s_h_o_w_i_n_g_propiedad_a_mostrar_widget.dart'
     show SHOWINGPropiedadAMostrarWidget;
+export '/showing/s_h_o_w_i_n_g_propiedad_detalle/s_h_o_w_i_n_g_propiedad_detalle_widget.dart'
+    show SHOWINGPropiedadDetalleWidget;
 export '/showing/s_h_o_w_i_n_g_registro_de_visita/s_h_o_w_i_n_g_registro_de_visita_widget.dart'
     show SHOWINGRegistroDeVisitaWidget;
 export '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart'
@@ -248,3 +250,5 @@ export '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_visita_aceptada/
     show DOVIACLIENTVisitaAceptadaWidget;
 export '/listing_hq/l_i_s_t_i_n_g_h_q_review_operative_notes/l_i_s_t_i_n_g_h_q_review_operative_notes_widget.dart'
     show LISTINGHQReviewOperativeNotesWidget;
+export '/showing/s_h_o_w_i_n_g_propiedades_a_mostrar/s_h_o_w_i_n_g_propiedades_a_mostrar_widget.dart'
+    show SHOWINGPropiedadesAMostrarWidget;
