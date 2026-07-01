@@ -42,89 +42,98 @@ class _SHOWINGToNavegationAppWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.sizeOf(context).width * 1.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 40.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              'Te llevaremos a tu app de navegación',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                    ),
-                    fontSize: 16.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w600,
-                    fontStyle:
-                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                  ),
+    return Material(
+      color: Colors.transparent,
+      child: Align(
+        alignment: const AlignmentDirectional(0.0, 0.0),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+          child: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 350.0,
             ),
-            Text(
-              'Para llegar a la dirección de tu próxima visita, abriremos una app de navegación instalada en tu dispositivo.',
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
-                      fontWeight:
-                          FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                    ),
-                    letterSpacing: 0.0,
-                    fontWeight:
-                        FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                    fontStyle:
-                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                  ),
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              borderRadius: BorderRadius.circular(16.0),
             ),
-            Container(
-              width: MediaQuery.sizeOf(context).width * 1.0,
-              decoration: const BoxDecoration(),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.4,
-                    decoration: const BoxDecoration(),
-                    child: wrapWithModel(
-                      model: _model.secondaryButtonModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: SecondaryButtonWidget(
-                        text: 'Cancelar',
-                        onTap: () async {
-                          Navigator.pop(context, false);
-                        },
+            child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Te llevaremos a tu app de navegación',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontStyle:
+                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                        ),
+                        fontSize: 16.0,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.w600,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                       ),
-                    ),
-                  ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.4,
-                    decoration: const BoxDecoration(),
-                    child: wrapWithModel(
-                      model: _model.primaryButtonModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: PrimaryButtonWidget(
-                        text: 'Continuar',
-                        onTap: () async {
-                          Navigator.pop(context, true);
-                        },
+                ),
+                Text(
+                  'Para llegar a la dirección de tu próxima visita, abriremos una app de navegación instalada en tu dispositivo.',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.inter(
+                          fontWeight:
+                              FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                          fontStyle:
+                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                        ),
+                        letterSpacing: 0.0,
+                        fontWeight:
+                            FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                       ),
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: wrapWithModel(
+                          model: _model.secondaryButtonModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: SecondaryButtonWidget(
+                            text: 'Cancelar',
+                            onTap: () async {
+                              Navigator.pop(context, false);
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: wrapWithModel(
+                          model: _model.primaryButtonModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: PrimaryButtonWidget(
+                            text: 'Continuar',
+                            onTap: () async {
+                              Navigator.pop(context, true);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ].divide(const SizedBox(height: 8.0)),
             ),
-          ].divide(const SizedBox(height: 8.0)),
+          ),
         ),
       ),
-    );
+    ),
+  );
   }
 }

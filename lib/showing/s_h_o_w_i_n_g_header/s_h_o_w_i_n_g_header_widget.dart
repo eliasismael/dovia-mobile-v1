@@ -85,13 +85,22 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                     ),
                   ),
                 ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(0.0),
-                  child: SvgPicture.asset(
-                    'assets/images/D-verde.svg',
-                    width: 28.0,
-                    height: 36.0,
-                    fit: BoxFit.cover,
+                InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () async {
+                    context.pushNamed(SHOWINGHomeWidget.routeName);
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0.0),
+                    child: SvgPicture.asset(
+                      'assets/images/D-verde.svg',
+                      width: 28.0,
+                      height: 36.0,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ].divide(const SizedBox(width: 8.0)),
@@ -164,8 +173,14 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                   ),
                 ),
               ),
-              Builder(
-                builder: (context) => InkWell(
+              Container(
+                width: 40.0,
+                height: 40.0,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  shape: BoxShape.circle,
+                ),
+                child: InkWell(
                   splashColor: Colors.transparent,
                   focusColor: Colors.transparent,
                   hoverColor: Colors.transparent,
@@ -185,47 +200,13 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                       },
                     );
                   },
-                  child: Container(
-                    width: 40.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondaryBackground,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Builder(
-                      builder: (context) => InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          await showDialog(
-                            context: context,
-                            builder: (dialogContext) {
-                              return Dialog(
-                                elevation: 0,
-                                insetPadding: EdgeInsets.zero,
-                                backgroundColor: Colors.transparent,
-                                alignment: const AlignmentDirectional(0.0, 0.0)
-                                    .resolve(Directionality.of(context)),
-                                child: SizedBox(
-                                  width: MediaQuery.sizeOf(context).width * 0.8,
-                                  child: const SHOWINGToNavegationAppWidget(),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: SvgPicture.asset(
-                            'assets/images/Vector23.svg',
-                            width: 8.0,
-                            height: 8.0,
-                            fit: BoxFit.none,
-                          ),
-                        ),
-                      ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: SvgPicture.asset(
+                      'assets/images/Vector23.svg',
+                      width: 8.0,
+                      height: 8.0,
+                      fit: BoxFit.none,
                     ),
                   ),
                 ),

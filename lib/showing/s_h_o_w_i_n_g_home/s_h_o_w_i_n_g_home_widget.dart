@@ -99,7 +99,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         } catch (_) { return false; }
       }).toList();
     });
-    _acceptedFuture = _fetchAssigned(filter: 'upcoming');
+    _acceptedFuture = _fetchAssigned(filter: 'upcoming').then((list) {
+      final now = DateTime.now();
+      final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      return list.where((v) => v.date != todayStr).toList();
+    });
   }
 
   @override
@@ -351,7 +355,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           _horizontalList(
                             future: _acceptableFuture,
                             emptyMsg: 'No hay visitas disponibles por ahora.',
-                            height: 200,
+                            height: 220,
                             cardBuilder: (v) => _buildOpportunityCard(v),
                           ),
 
@@ -364,7 +368,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           _horizontalList(
                             future: _upcomingTodayFuture,
                             emptyMsg: 'No tienes visitas para hoy.',
-                            height: 190,
+                            height: 220,
                             cardBuilder: (v) => _buildVisitCard(
                               visit: v,
                               showStatus: true,
@@ -389,7 +393,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           _horizontalList(
                             future: _pastTodayFuture,
                             emptyMsg: 'No tienes visitas pendientes de registro.',
-                            height: 190,
+                            height: 220,
                             cardBuilder: (v) => _buildVisitCard(
                               visit: v,
                               showStatus: false,
@@ -414,7 +418,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           _horizontalList(
                             future: _acceptedFuture,
                             emptyMsg: 'No tienes visitas aceptadas.',
-                            height: 190,
+                            height: 220,
                             cardBuilder: (v) => _buildVisitCard(
                               visit: v,
                               showStatus: false,
@@ -623,6 +627,13 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                         ),
                   ),
                   const SizedBox(height: 4.0),
+                  Text(
+                    'Monto:',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.inter(fontSize: 12.0),
+                          color: _primary,
+                        ),
+                  ),
                   if (v.address.isNotEmpty)
                     Text(
                       'Dirección: ${v.address}',
@@ -649,6 +660,15 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             color: _primary,
                           ),
                     ),
+                  Text(
+                    v.ownerName.isNotEmpty ? 'Propietario: ${v.ownerName}' : 'Propietario:',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.inter(fontSize: 12.0),
+                          color: _primary,
+                        ),
+                  ),
                   const SizedBox(height: 12.0),
                   FFButtonWidget(
                     onPressed: () => _onAccept(v.visitId),
@@ -716,11 +736,26 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                         ),
                   ),
                   const SizedBox(height: 4.0),
+                  Text(
+                    'Monto:',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.inter(fontSize: 12.0),
+                          color: _primary,
+                        ),
+                  ),
                   if (visit.address.isNotEmpty)
                     Text(
                       'Dirección: ${visit.address}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.inter(fontSize: 12.0),
+                            color: _primary,
+                          ),
+                    ),
+                  if (visit.date.isNotEmpty)
+                    Text(
+                      'Fecha: ${_formatDate(visit.date)}',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(fontSize: 12.0),
                             color: _primary,
@@ -734,14 +769,15 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             color: _primary,
                           ),
                     ),
-                  if (visit.ownerName.isNotEmpty)
-                    Text(
-                      visit.ownerName,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
-                            color: _primary,
-                          ),
-                    ),
+                  Text(
+                    visit.ownerName.isNotEmpty ? 'Propietario: ${visit.ownerName}' : 'Propietario:',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.inter(fontSize: 12.0),
+                          color: _primary,
+                        ),
+                  ),
                   if (showStatus && visit.substatus.isNotEmpty) ...[
                     const SizedBox(height: 8.0),
                     Row(
@@ -766,10 +802,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       width: double.infinity,
                       height: 30.0,
                       color: _primary,
-                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.inter(
-                                color: Colors.white, fontSize: 14.0),
-                          ),
+                      textStyle: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                      ),
                       elevation: 0.0,
                       borderRadius: BorderRadius.circular(24.0),
                     ),
