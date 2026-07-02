@@ -46,6 +46,10 @@ class FFAppState extends ChangeNotifier {
     _safeInit(() {
       _lastActiveVisitId = prefs.getString('ff_lastActiveVisitId') ?? _lastActiveVisitId;
     });
+    _safeInit(() {
+      _routeStartedVisits =
+          prefs.getStringList('ff_routeStartedVisits') ?? _routeStartedVisits;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -117,6 +121,25 @@ class FFAppState extends ChangeNotifier {
   set lastActiveVisitId(String value) {
     _lastActiveVisitId = value;
     prefs.setString('ff_lastActiveVisitId', value);
+  }
+
+  /// Visit IDs whose route the agent has already started ("en camino").
+  /// Used to unlock the private contact info before the 2h window.
+  List<String> _routeStartedVisits = [];
+  List<String> get routeStartedVisits => _routeStartedVisits;
+  set routeStartedVisits(List<String> value) {
+    _routeStartedVisits = value;
+    prefs.setStringList('ff_routeStartedVisits', value);
+  }
+
+  void addToRouteStartedVisits(String value) {
+    _routeStartedVisits.add(value);
+    prefs.setStringList('ff_routeStartedVisits', _routeStartedVisits);
+  }
+
+  void removeFromRouteStartedVisits(String value) {
+    _routeStartedVisits.remove(value);
+    prefs.setStringList('ff_routeStartedVisits', _routeStartedVisits);
   }
 }
 

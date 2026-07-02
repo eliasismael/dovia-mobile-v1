@@ -541,17 +541,78 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
             ),
           );
         }
-        return SizedBox(
-          height: height,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: snap.data!.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (ctx, i) => cardBuilder(snap.data![i]),
-          ),
+        // Agrupar las visitas por fecha: cada bloque tiene un subtítulo con la
+        // fecha y debajo un carrusel horizontal con las visitas de ese día.
+        final grouped = _groupByDate(snap.data!);
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: grouped.entries.map((entry) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      0.0, 4.0, 0.0, 10.0),
+                  child: Text(
+                    _formatDateHeader(entry.key),
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w600,
+                          color: _primary,
+                        ),
+                  ),
+                ),
+                SizedBox(
+                  height: height,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: entry.value.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (ctx, i) => cardBuilder(entry.value[i]),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+              ],
+            );
+          }).toList(),
         );
       },
     );
+  }
+
+  // Agrupa las visitas por fecha (yyyy-MM-dd) y las ordena cronológicamente;
+  // dentro de cada día las ordena por hora. "Sin fecha" queda al final.
+  Map<String, List<_ShowingVisit>> _groupByDate(List<_ShowingVisit> visits) {
+    final grouped = <String, List<_ShowingVisit>>{};
+    for (final v in visits) {
+      final date = v.date.isNotEmpty ? v.date : 'Sin fecha';
+      grouped.putIfAbsent(date, () => []).add(v);
+    }
+    final sortedKeys = grouped.keys.toList()
+      ..sort((a, b) {
+        if (a == 'Sin fecha') return 1;
+        if (b == 'Sin fecha') return -1;
+        return a.compareTo(b);
+      });
+    final out = <String, List<_ShowingVisit>>{};
+    for (final k in sortedKeys) {
+      final list = grouped[k]!..sort((a, b) => a.time.compareTo(b.time));
+      out[k] = list;
+    }
+    return out;
+  }
+
+  // "Hoy 22 de enero de 2026" si es la fecha de hoy, si no "22 de enero de 2026".
+  String _formatDateHeader(String raw) {
+    if (raw.isEmpty || raw == 'Sin fecha') return 'Sin fecha';
+    final now = DateTime.now();
+    final todayStr =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final formatted = _formatDate(raw);
+    return raw == todayStr ? 'Hoy $formatted' : formatted;
   }
 
   String _formatDate(String raw) {

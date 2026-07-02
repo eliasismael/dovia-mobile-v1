@@ -6,6 +6,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
+import '/showing/s_h_o_w_i_n_g_to_navegation_app/s_h_o_w_i_n_g_to_navegation_app_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -79,6 +80,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
 
   bool _arrivedLoading = false;
   bool _arrivedSent = false;
+  bool _routeLoading = false;
 
   @override
   void initState() {
@@ -308,7 +310,22 @@ class _SHOWINGPropiedadAMostrarWidgetState
     return cur;
   }
 
+  /// True once the agent has started the route for this visit ("en camino").
+  /// Read live from persisted app state so it survives navigation/reentry.
+  /// Guarded so a stale app-state singleton (dev hot-reload) can't crash build.
+  bool get _routeStarted {
+    final id = widget.visitId;
+    if (id == null || id.isEmpty) return false;
+    try {
+      return FFAppState().routeStartedVisits.contains(id);
+    } catch (_) {
+      return false;
+    }
+  }
+
   bool get _isPrivacyGated {
+    // Starting the route unlocks the private info regardless of the time window.
+    if (_routeStarted) return false;
     if (_visitDate.isEmpty || _visitTime.isEmpty) return true;
     try {
       final d = _visitDate.split('-');
@@ -323,6 +340,61 @@ class _SHOWINGPropiedadAMostrarWidgetState
     } catch (_) {
       return true;
     }
+  }
+
+  Future<void> _startRoute() async {
+    if (_routeLoading) return;
+    if (widget.visitId == null || widget.visitId!.isEmpty) return;
+
+    if (_lat == null || _lng == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text('No hay coordenadas disponibles para esta propiedad.')),
+      );
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: const SHOWINGToNavegationAppWidget(),
+        );
+      },
+    );
+    if (confirm != true) return;
+
+    safeSetState(() => _routeLoading = true);
+
+    // Mark route as started LOCALLY only (unlocks contact info). We intentionally
+    // do NOT call the backend on-my-way here: changing the visit status removes it
+    // from the "hoy"/"upcoming" lists (which only return pending visits).
+    if (!_routeStarted) {
+      try {
+        FFAppState().addToRouteStartedVisits(widget.visitId!);
+      } catch (_) {}
+    }
+
+    // Open the maps app to the property.
+    final googleMapsUrl = Uri.parse(
+        "https://www.google.com/maps/search/?api=1&query=$_lat,$_lng");
+    final appleMapsUrl = Uri.parse("https://maps.apple.com/?q=$_lat,$_lng");
+    try {
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(appleMapsUrl)) {
+        await launchUrl(appleMapsUrl, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+
+    if (!mounted) return;
+    safeSetState(() => _routeLoading = false);
   }
 
   Future<void> _onReport() async {
@@ -835,18 +907,62 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                         ),
                                       ),
                                     ),
+                                    if (!_routeStarted && _isPrivacyGated)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsetsDirectional.fromSTEB(
+                                                0.0, 20.0, 0.0, 0.0),
+                                        child: FFButtonWidget(
+                                          onPressed:
+                                              _routeLoading ? null : _startRoute,
+                                          text: _routeLoading
+                                              ? 'Iniciando...'
+                                              : 'Iniciar ruta',
+                                          icon: const Icon(
+                                            Icons.navigation_outlined,
+                                            size: 18.0,
+                                          ),
+                                          options: FFButtonOptions(
+                                            width:
+                                                MediaQuery.sizeOf(context).width *
+                                                    1.0,
+                                            height: 48.0,
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                            iconPadding:
+                                                const EdgeInsetsDirectional
+                                                    .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                            textStyle: FlutterFlowTheme.of(context)
+                                                .titleSmall
+                                                .override(
+                                                  font: GoogleFonts.publicSans(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                  color: Colors.white,
+                                                  fontSize: 16.0,
+                                                  letterSpacing: 0.0,
+                                                ),
+                                            elevation: 0.0,
+                                            borderRadius:
+                                                BorderRadius.circular(24.0),
+                                          ),
+                                        ),
+                                      ),
                                     if (!_isPrivacyGated)
                                       Padding(
                                         padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
-                                        child: Row(
+                                        child: IntrinsicHeight(
+                                          child: Row(
                                           mainAxisSize: MainAxisSize.max,
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
                                           children: [
                                             Container(
                                               width:
                                                   MediaQuery.sizeOf(context).width * 0.42,
-                                              height: 300.0,
                                               decoration: BoxDecoration(
                                                 color: FlutterFlowTheme.of(context)
                                                     .secondaryBackground,
@@ -861,7 +977,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                     const EdgeInsetsDirectional.fromSTEB(
                                                         10.0, 10.0, 10.0, 10.0),
                                                 child: Column(
-                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisSize: MainAxisSize.min,
                                                   children: [
                                                     ClipRRect(
                                                       borderRadius:
@@ -1040,7 +1156,6 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                             Container(
                                               width:
                                                   MediaQuery.sizeOf(context).width * 0.42,
-                                              height: 300.0,
                                               decoration: BoxDecoration(
                                                 color: FlutterFlowTheme.of(context)
                                                     .secondaryBackground,
@@ -1055,7 +1170,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                     const EdgeInsetsDirectional.fromSTEB(
                                                         10.0, 10.0, 10.0, 10.0),
                                                 child: Column(
-                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisSize: MainAxisSize.min,
                                                   children: [
                                                     ClipRRect(
                                                       borderRadius:
@@ -1232,40 +1347,10 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                               ),
                                             ),
                                           ],
+                                          ),
                                         ),
                                       ),
                                     if (!_isPrivacyGated)
-                                      Align(
-                                        alignment: const AlignmentDirectional(-1.0, 0.0),
-                                      child: Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
-                                        child: Text(
-                                          'Ya llegué al punto',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.publicSans(
-                                                  fontWeight: FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                                  fontStyle: FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                                ),
-                                                color: FlutterFlowTheme.of(context)
-                                                    .secondaryText,
-                                                letterSpacing: 0.0,
-                                                fontWeight: FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                                fontStyle: FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
                                     Padding(
                                       padding: const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 20.0, 0.0, 0.0),

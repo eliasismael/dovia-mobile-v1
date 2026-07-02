@@ -288,7 +288,17 @@ class _SHOWINGPropiedadesAMostrarWidgetState
     );
     
     if (confirm != true) return;
-    
+
+    // Marca la ruta como iniciada ("en camino") SOLO localmente: desbloquea la
+    // info de contacto en la pantalla de detalles. No se notifica al backend para
+    // no cambiar el estado de la visita (eso la sacaría de "hoy"/"upcoming").
+    try {
+      if (v.visitId.isNotEmpty &&
+          !FFAppState().routeStartedVisits.contains(v.visitId)) {
+        FFAppState().addToRouteStartedVisits(v.visitId);
+      }
+    } catch (_) {}
+
     final googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}");
     final appleMapsUrl = Uri.parse("https://maps.apple.com/?q=${v.lat},${v.lng}");
     
