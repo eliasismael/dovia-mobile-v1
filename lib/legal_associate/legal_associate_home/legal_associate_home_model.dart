@@ -2,7 +2,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/shared_components/texto_y_boton/texto_y_boton_widget.dart';
 import 'legal_associate_home_widget.dart' show LegalAssociateHomeWidget;
 import 'package:flutter/material.dart';
 
@@ -14,8 +13,6 @@ class LegalAssociateHomeModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for LegalAssociate_Header component.
   late LegalAssociateHeaderModel legalAssociateHeaderModel;
-  // Model for TextoYBoton component.
-  late TextoYBotonModel textoYBotonModel;
   // Model for LEGAL_ASSOCAITE_Navbar component.
   late LEGALASSOCAITENavbarModel lEGALASSOCAITENavbarModel;
 
@@ -25,7 +22,6 @@ class LegalAssociateHomeModel
         createModel(context, () => CornerGradientBackgroundModel());
     legalAssociateHeaderModel =
         createModel(context, () => LegalAssociateHeaderModel());
-    textoYBotonModel = createModel(context, () => TextoYBotonModel());
     lEGALASSOCAITENavbarModel =
         createModel(context, () => LEGALASSOCAITENavbarModel());
   }
@@ -34,7 +30,6 @@ class LegalAssociateHomeModel
   void dispose() {
     cornerGradientBackgroundModel.dispose();
     legalAssociateHeaderModel.dispose();
-    textoYBotonModel.dispose();
     lEGALASSOCAITENavbarModel.dispose();
   }
 }
