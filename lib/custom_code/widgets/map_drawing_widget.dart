@@ -125,7 +125,8 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
     if (_isSinglePoint &&
         widget.initialLatitude != 0 &&
         widget.initialLongitude != 0) {
-      _selectedPoint = ll.LatLng(widget.initialLatitude, widget.initialLongitude);
+      _selectedPoint =
+          ll.LatLng(widget.initialLatitude, widget.initialLongitude);
     }
   }
 

@@ -108,8 +108,8 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  _buildTab(context, 'Perfil y seguridad',
-                                      'perfil'),
+                                  _buildTab(
+                                      context, 'Perfil y seguridad', 'perfil'),
                                   _buildTab(context, 'Notificaciones',
                                       'notificaciones'),
                                 ],
@@ -122,12 +122,11 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                             builder: (context) {
                               if (_model.selectedSection == 'perfil') {
                                 return SizedBox(
-                                  width:
-                                      MediaQuery.sizeOf(context).width * 1.0,
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
                                   // Let AjustesScreen size itself naturally
                                   child: custom_widgets.AjustesScreen(
-                                    width: MediaQuery.sizeOf(context).width *
-                                        1.0,
+                                    width:
+                                        MediaQuery.sizeOf(context).width * 1.0,
                                     height: null,
                                     onCancelSubscription: () async {
                                       await showModalBottomSheet(
@@ -138,10 +137,15 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                           alignment: Alignment.bottomCenter,
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
+                                              borderRadius:
+                                                  const BorderRadius.vertical(
+                                                      top: Radius.circular(24)),
                                             ),
-                                            child: const UnsuscribeModal1Widget(),
+                                            child:
+                                                const UnsuscribeModal1Widget(),
                                           ),
                                         ),
                                       ).then((value) => safeSetState(() {}));
@@ -163,11 +167,9 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                 );
                               } else {
                                 return wrapWithModel(
-                                  model:
-                                      _model.opcionesDeNotificacionesModel,
+                                  model: _model.opcionesDeNotificacionesModel,
                                   updateCallback: () => safeSetState(() {}),
-                                  child:
-                                      const OpcionesDeNotificacionesWidget(),
+                                  child: const OpcionesDeNotificacionesWidget(),
                                 );
                               }
                             },
@@ -252,8 +254,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                   letterSpacing: 0.0,
                   fontWeight:
                       FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                  fontStyle:
-                      FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                 ),
           ),
         ),

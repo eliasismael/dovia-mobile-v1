@@ -91,7 +91,8 @@ class _PropiedadesSobreElSectorWidgetState
               child: Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                   child: Text(
                     'Sobre el sector',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -121,7 +122,8 @@ class _PropiedadesSobreElSectorWidgetState
                 color: FlutterFlowTheme.of(context).tertiary,
               ),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 20.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    20.0, 12.0, 20.0, 20.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -138,8 +140,8 @@ class _PropiedadesSobreElSectorWidgetState
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 12.0, 0.0, 0.0),
                         child: SizedBox(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           child: TextFormField(
@@ -250,8 +252,8 @@ class _PropiedadesSobreElSectorWidgetState
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 125.0,
@@ -276,22 +278,22 @@ class _PropiedadesSobreElSectorWidgetState
                                   ),
                                 ),
                                 RatingBar.builder(
-                                   onRatingUpdate: (newValue) => safeSetState(
-                                       () => _model.ratingBarValue1 = newValue),
-                                   itemBuilder: (context, index) => Icon(
-                                     Icons.star_rounded,
-                                     color: FlutterFlowTheme.of(context).primary,
-                                   ),
-                                   direction: Axis.horizontal,
-                                   initialRating: widget.caminableRating,
-                                   ignoreGestures: true,
-                                   unratedColor:
-                                       FlutterFlowTheme.of(context).accent1,
-                                   itemCount: 5,
-                                   itemSize: 24.0,
-                                   glowColor:
-                                       FlutterFlowTheme.of(context).primary,
-                                 ),
+                                  onRatingUpdate: (newValue) => safeSetState(
+                                      () => _model.ratingBarValue1 = newValue),
+                                  itemBuilder: (context, index) => Icon(
+                                    Icons.star_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                  ),
+                                  direction: Axis.horizontal,
+                                  initialRating: widget.caminableRating,
+                                  ignoreGestures: true,
+                                  unratedColor:
+                                      FlutterFlowTheme.of(context).accent1,
+                                  itemCount: 5,
+                                  itemSize: 24.0,
+                                  glowColor:
+                                      FlutterFlowTheme.of(context).primary,
+                                ),
                                 Text(
                                   'Caminable',
                                   style: FlutterFlowTheme.of(context)
@@ -322,8 +324,8 @@ class _PropiedadesSobreElSectorWidgetState
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 125.0,
@@ -348,54 +350,54 @@ class _PropiedadesSobreElSectorWidgetState
                                   ),
                                 ),
                                 RatingBar.builder(
-                                   onRatingUpdate: (newValue) => safeSetState(
-                                       () => _model.ratingBarValue2 = newValue),
-                                   itemBuilder: (context, index) => Icon(
-                                     Icons.star_rounded,
-                                     color: FlutterFlowTheme.of(context).primary,
-                                   ),
-                                   direction: Axis.horizontal,
-                                   initialRating: widget.comercialRating,
-                                   ignoreGestures: true,
-                                   unratedColor:
-                                       FlutterFlowTheme.of(context).accent1,
-                                   itemCount: 5,
-                                   itemSize: 24.0,
-                                   glowColor:
-                                       FlutterFlowTheme.of(context).primary,
-                                 ),
-                                 Text(
-                                   'Centros comerciales cerca',
-                                   style: FlutterFlowTheme.of(context)
-                                       .bodyMedium
-                                       .override(
-                                         font: GoogleFonts.inter(
-                                           fontWeight:
-                                               FlutterFlowTheme.of(context)
-                                                   .bodyMedium
-                                                   .fontWeight,
-                                           fontStyle:
-                                               FlutterFlowTheme.of(context)
-                                                   .bodyMedium
-                                                   .fontStyle,
-                                         ),
-                                         letterSpacing: 0.0,
-                                         fontWeight: FlutterFlowTheme.of(context)
-                                             .bodyMedium
-                                             .fontWeight,
-                                         fontStyle: FlutterFlowTheme.of(context)
-                                             .bodyMedium
-                                             .fontStyle,
-                                       ),
-                                 ),
+                                  onRatingUpdate: (newValue) => safeSetState(
+                                      () => _model.ratingBarValue2 = newValue),
+                                  itemBuilder: (context, index) => Icon(
+                                    Icons.star_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                  ),
+                                  direction: Axis.horizontal,
+                                  initialRating: widget.comercialRating,
+                                  ignoreGestures: true,
+                                  unratedColor:
+                                      FlutterFlowTheme.of(context).accent1,
+                                  itemCount: 5,
+                                  itemSize: 24.0,
+                                  glowColor:
+                                      FlutterFlowTheme.of(context).primary,
+                                ),
+                                Text(
+                                  'Centros comerciales cerca',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                ),
                               ],
                             ),
                           ),
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 125.0,

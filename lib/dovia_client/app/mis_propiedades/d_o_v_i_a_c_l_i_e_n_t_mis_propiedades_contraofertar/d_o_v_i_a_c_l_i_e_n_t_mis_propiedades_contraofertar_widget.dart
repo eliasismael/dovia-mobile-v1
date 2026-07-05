@@ -73,7 +73,8 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => DOVIACLIENTMisPropiedadesContraofertarModel());
+    _model = createModel(
+        context, () => DOVIACLIENTMisPropiedadesContraofertarModel());
     _selectedCurrency = widget.currency ?? 'USD';
     if (widget.initialAmount != null && widget.initialAmount != '—') {
       _amountCtrl.text = widget.initialAmount!;
@@ -114,10 +115,14 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
 
   String _paymentMethodLabel(String? raw) {
     switch ((raw ?? '').toLowerCase()) {
-      case 'cash': return 'Contado';
-      case 'mortgage': return 'Hipoteca';
-      case 'purchase_promise': return 'Promesa de compra';
-      default: return (raw ?? '').replaceAll('_', ' ');
+      case 'cash':
+        return 'Contado';
+      case 'mortgage':
+        return 'Hipoteca';
+      case 'purchase_promise':
+        return 'Promesa de compra';
+      default:
+        return (raw ?? '').replaceAll('_', ' ');
     }
   }
 
@@ -126,7 +131,8 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     if (amountText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Por favor ingresa un monto para la contraoferta.'),
-        backgroundColor: _errorRed, behavior: SnackBarBehavior.floating,
+        backgroundColor: _errorRed,
+        behavior: SnackBarBehavior.floating,
       ));
       return;
     }
@@ -134,7 +140,8 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Ingresa un monto válido.'),
-        backgroundColor: _errorRed, behavior: SnackBarBehavior.floating,
+        backgroundColor: _errorRed,
+        behavior: SnackBarBehavior.floating,
       ));
       return;
     }
@@ -142,7 +149,8 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     if (widget.offerId == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Error: No se encontró el ID de la oferta.'),
-        backgroundColor: _errorRed, behavior: SnackBarBehavior.floating,
+        backgroundColor: _errorRed,
+        behavior: SnackBarBehavior.floating,
       ));
       return;
     }
@@ -150,19 +158,23 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
     safeSetState(() => _isSending = true);
 
     final repo = context.read<OffersRepository>();
-    
+
     // Construct the counterOfferData map
     final counterOfferData = {
       'paymentMethod': widget.paymentMethod ?? 'cash',
       'proposedAmount': amount,
       'currency': _selectedCurrency,
       'considerations': _considerationsCtrl.text.trim(),
-      if ((widget.paymentMethod ?? '').toLowerCase() == 'mortgage' || (widget.paymentMethod ?? '').toLowerCase() == 'hipoteca') ...{
+      if ((widget.paymentMethod ?? '').toLowerCase() == 'mortgage' ||
+          (widget.paymentMethod ?? '').toLowerCase() == 'hipoteca') ...{
         'bankName': _bankCtrl.text.trim(),
-        'downPaymentPercentage': num.tryParse(_downPaymentCtrl.text.trim()) ?? 0,
+        'downPaymentPercentage':
+            num.tryParse(_downPaymentCtrl.text.trim()) ?? 0,
       },
-      if ((widget.paymentMethod ?? '').toLowerCase() == 'purchase_promise' || (widget.paymentMethod ?? '').toLowerCase() == 'promesa') ...{
-        'initialReserve': num.tryParse(_reservationCtrl.text.trim().replaceAll(',', '')) ?? 0,
+      if ((widget.paymentMethod ?? '').toLowerCase() == 'purchase_promise' ||
+          (widget.paymentMethod ?? '').toLowerCase() == 'promesa') ...{
+        'initialReserve':
+            num.tryParse(_reservationCtrl.text.trim().replaceAll(',', '')) ?? 0,
         'promiseTimeMonths': num.tryParse(_promiseTimeCtrl.text.trim()) ?? 0,
       }
     };
@@ -183,7 +195,8 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
           content: Text('Error: $message'),
           backgroundColor: _errorRed,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ));
     }
   }
@@ -199,18 +212,36 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
           top: true,
           child: Stack(
             children: [
-              wrapWithModel(model: _model.cornerGradientBackgroundModel, updateCallback: () => safeSetState(() {}), child: const CornerGradientBackgroundWidget()),
+              wrapWithModel(
+                  model: _model.cornerGradientBackgroundModel,
+                  updateCallback: () => safeSetState(() {}),
+                  child: const CornerGradientBackgroundWidget()),
               Column(
                 children: [
-                  wrapWithModel(model: _model.dOVIASHAREDHeaderModel, updateCallback: () => safeSetState(() {}), child: const DOVIASHAREDHeaderWidget(title: 'Contraoferta', hideActions: true, showMap: false, showCurrency: false, showLogo: false)),
+                  wrapWithModel(
+                      model: _model.dOVIASHAREDHeaderModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: const DOVIASHAREDHeaderWidget(
+                          title: 'Contraoferta',
+                          hideActions: true,
+                          showMap: false,
+                          showCurrency: false,
+                          showLogo: false)),
                   Expanded(child: _buildBody()),
                 ],
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: wrapWithModel(model: _model.dOVIACLIENTNavbarModel, updateCallback: () => safeSetState(() {}), child: const DOVIACLIENTNavbarWidget()),
+                child: wrapWithModel(
+                    model: _model.dOVIACLIENTNavbarModel,
+                    updateCallback: () => safeSetState(() {}),
+                    child: const DOVIACLIENTNavbarWidget()),
               ),
-              const Align(alignment: Alignment.bottomRight, child: Padding(padding: EdgeInsets.only(right: 16, bottom: 80), child: FixedDoviaIconWidget())),
+              const Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                      padding: EdgeInsets.only(right: 16, bottom: 80),
+                      child: FixedDoviaIconWidget())),
             ],
           ),
         ),
@@ -232,18 +263,23 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                 color: _primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle_outline_rounded, color: _primary, size: 44),
+              child: const Icon(Icons.check_circle_outline_rounded,
+                  color: _primary, size: 44),
             ),
             const SizedBox(height: 24),
             Text(
               'Contraoferta enviada',
-              style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: _primaryDark),
+              style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: _primaryDark),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Tu contraoferta fue enviada al comprador. Te notificaremos cuando responda.',
-              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF666666), height: 1.5),
+              style: GoogleFonts.inter(
+                  fontSize: 14, color: const Color(0xFF666666), height: 1.5),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -252,11 +288,16 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: _primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 onPressed: () => context.pop(),
-                child: Text('Volver', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                child: Text('Volver',
+                    style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
               ),
             ),
           ],
@@ -274,62 +315,107 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
         children: [
           // ── BLOQUE SUPERIOR: Oferta inicial (solo lectura) ─────────────────
           Text('Oferta inicial',
-              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: _primary)),
+              style: GoogleFonts.inter(
+                  fontSize: 16, fontWeight: FontWeight.w700, color: _primary)),
           const SizedBox(height: 14),
           // Fila 1: Método de pago + Propuesta económica
           Row(children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _fieldLabel('Método de pago'),
-              const SizedBox(height: 8),
-              _readOnlyField(_paymentMethodLabel(widget.paymentMethod), grayed: true),
-            ])),
+            Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  _fieldLabel('Método de pago'),
+                  const SizedBox(height: 8),
+                  _readOnlyField(_paymentMethodLabel(widget.paymentMethod),
+                      grayed: true),
+                ])),
             const SizedBox(width: 14),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _fieldLabel('Propuesta económica'),
-              const SizedBox(height: 8),
-              _readOnlyField(
-                widget.initialAmount != null && widget.initialAmount != '—'
-                    ? '${widget.currency ?? 'USD'} ${widget.initialAmount}'
-                    : '—',
-                grayed: true,
-              ),
-            ])),
+            Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  _fieldLabel('Propuesta económica'),
+                  const SizedBox(height: 8),
+                  _readOnlyField(
+                    widget.initialAmount != null && widget.initialAmount != '—'
+                        ? '${widget.currency ?? 'USD'} ${widget.initialAmount}'
+                        : '—',
+                    grayed: true,
+                  ),
+                ])),
           ]),
           if (_paymentMethodLabel(widget.paymentMethod) == 'Hipoteca') ...[
             const SizedBox(height: 14),
             Row(children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Banco'),
-                const SizedBox(height: 8),
-                _readOnlyField(widget.bankName == null || widget.bankName == '—' ? 'No especificado' : widget.bankName!, grayed: true),
-              ])),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Banco'),
+                    const SizedBox(height: 8),
+                    _readOnlyField(
+                        widget.bankName == null || widget.bankName == '—'
+                            ? 'No especificado'
+                            : widget.bankName!,
+                        grayed: true),
+                  ])),
               const SizedBox(width: 14),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Enganche'),
-                const SizedBox(height: 8),
-                _readOnlyField(widget.downPayment == null || widget.downPayment == '—' ? 'No especificado' : '${widget.downPayment}%', grayed: true),
-              ])),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Enganche'),
+                    const SizedBox(height: 8),
+                    _readOnlyField(
+                        widget.downPayment == null || widget.downPayment == '—'
+                            ? 'No especificado'
+                            : '${widget.downPayment}%',
+                        grayed: true),
+                  ])),
             ]),
-          ] else if (_paymentMethodLabel(widget.paymentMethod) == 'Promesa de compra') ...[
+          ] else if (_paymentMethodLabel(widget.paymentMethod) ==
+              'Promesa de compra') ...[
             const SizedBox(height: 14),
             _fieldLabel('Reserva'),
             const SizedBox(height: 4),
-            Text('La comisión Dovia se paga al recibir la reserva', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF888888))),
+            Text('La comisión Dovia se paga al recibir la reserva',
+                style: GoogleFonts.inter(
+                    fontSize: 12, color: const Color(0xFF888888))),
             const SizedBox(height: 8),
-            _readOnlyField(widget.initialReserve == null || widget.initialReserve == '—' ? 'No especificado' : '${widget.currency ?? 'USD'} ${widget.initialReserve}', grayed: true),
+            _readOnlyField(
+                widget.initialReserve == null || widget.initialReserve == '—'
+                    ? 'No especificado'
+                    : '${widget.currency ?? 'USD'} ${widget.initialReserve}',
+                grayed: true),
             const SizedBox(height: 14),
             Row(children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Pago final'),
-                const SizedBox(height: 8),
-                _readOnlyField(widget.finalPayment == null || widget.finalPayment == '—' ? 'No especificado' : '${widget.currency ?? 'USD'} ${widget.finalPayment}', grayed: true),
-              ])),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Pago final'),
+                    const SizedBox(height: 8),
+                    _readOnlyField(
+                        widget.finalPayment == null ||
+                                widget.finalPayment == '—'
+                            ? 'No especificado'
+                            : '${widget.currency ?? 'USD'} ${widget.finalPayment}',
+                        grayed: true),
+                  ])),
               const SizedBox(width: 14),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Tiempo de promesa'),
-                const SizedBox(height: 8),
-                _readOnlyField(widget.promiseTimeMonths == null || widget.promiseTimeMonths == '—' ? 'No especificado' : '${widget.promiseTimeMonths} meses', grayed: true),
-              ])),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Tiempo de promesa'),
+                    const SizedBox(height: 8),
+                    _readOnlyField(
+                        widget.promiseTimeMonths == null ||
+                                widget.promiseTimeMonths == '—'
+                            ? 'No especificado'
+                            : '${widget.promiseTimeMonths} meses',
+                        grayed: true),
+                  ])),
             ]),
           ],
           // Fila 2: Moneda de pago (siempre visible)
@@ -342,7 +428,9 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
           _fieldLabel('Solicitud adicional'),
           const SizedBox(height: 8),
           _readOnlyTextArea(
-            (widget.considerations == null || widget.considerations == '—' || widget.considerations!.isEmpty)
+            (widget.considerations == null ||
+                    widget.considerations == '—' ||
+                    widget.considerations!.isEmpty)
                 ? 'Sin solicitudes adicionales'
                 : widget.considerations!,
             grayed: true,
@@ -355,16 +443,22 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
 
           // ── BLOQUE INFERIOR: Contraoferta editable ─────────────────────────
           Text('Tu propuesta',
-              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: _primaryDark)),
+              style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: _primaryDark)),
           const SizedBox(height: 14),
 
           // Método de pago (bloqueado, mismo que el original)
           Row(children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _fieldLabel('Método de pago'),
-              const SizedBox(height: 8),
-              _readOnlyField(_paymentMethodLabel(widget.paymentMethod)),
-            ])),
+            Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  _fieldLabel('Método de pago'),
+                  const SizedBox(height: 8),
+                  _readOnlyField(_paymentMethodLabel(widget.paymentMethod)),
+                ])),
           ]),
           const SizedBox(height: 16),
 
@@ -389,15 +483,23 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
             ),
             child: TextField(
               controller: _amountCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))],
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))
+              ],
               decoration: InputDecoration(
                 hintText: 'Ej. 150,000',
-                hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
+                hintStyle: GoogleFonts.inter(
+                    color: const Color(0xFF888888), fontSize: 15),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
                 prefixText: '$_selectedCurrency ',
-                prefixStyle: GoogleFonts.inter(fontSize: 15, color: _primaryDark, fontWeight: FontWeight.w500),
+                prefixStyle: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: _primaryDark,
+                    fontWeight: FontWeight.w500),
               ),
               style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
             ),
@@ -406,98 +508,170 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
 
           if (_paymentMethodLabel(widget.paymentMethod) == 'Hipoteca') ...[
             Row(children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Banco'),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
-                  child: TextField(
-                    controller: _bankCtrl,
-                    decoration: InputDecoration(
-                      hintText: 'Ej. Banco Industrial', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
-                      border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Banco'),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFFAFAFA),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFDFDFDF))),
+                      child: TextField(
+                        controller: _bankCtrl,
+                        decoration: InputDecoration(
+                          hintText: 'Ej. Banco Industrial',
+                          hintStyle: GoogleFonts.inter(
+                              color: const Color(0xFF888888), fontSize: 15),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 13),
+                        ),
+                        style: GoogleFonts.inter(
+                            fontSize: 15, color: _primaryDark),
+                      ),
                     ),
-                    style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
-                  ),
-                ),
-              ])),
+                  ])),
               const SizedBox(width: 14),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Enganche (%)'),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
-                  child: TextField(
-                    controller: _downPaymentCtrl,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      hintText: 'Ej. 20', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
-                      border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Enganche (%)'),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFFAFAFA),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFDFDFDF))),
+                      child: TextField(
+                        controller: _downPaymentCtrl,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        decoration: InputDecoration(
+                          hintText: 'Ej. 20',
+                          hintStyle: GoogleFonts.inter(
+                              color: const Color(0xFF888888), fontSize: 15),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 13),
+                        ),
+                        style: GoogleFonts.inter(
+                            fontSize: 15, color: _primaryDark),
+                      ),
                     ),
-                    style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
-                  ),
-                ),
-              ])),
+                  ])),
             ]),
             const SizedBox(height: 16),
-          ] else if (_paymentMethodLabel(widget.paymentMethod) == 'Promesa de compra') ...[
+          ] else if (_paymentMethodLabel(widget.paymentMethod) ==
+              'Promesa de compra') ...[
             _fieldLabel('Reserva'),
             const SizedBox(height: 4),
-            Text('La comisión Dovia se paga al recibir la reserva', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF888888))),
+            Text('La comisión Dovia se paga al recibir la reserva',
+                style: GoogleFonts.inter(
+                    fontSize: 12, color: const Color(0xFF888888))),
             const SizedBox(height: 8),
             Container(
-              decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFFAFAFA),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFDFDFDF))),
               child: TextField(
                 controller: _reservationCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))],
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))
+                ],
                 decoration: InputDecoration(
-                  hintText: 'Ej. 10,000', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
-                  border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-                  prefixText: '$_selectedCurrency ', prefixStyle: GoogleFonts.inter(fontSize: 15, color: _primaryDark, fontWeight: FontWeight.w500),
+                  hintText: 'Ej. 10,000',
+                  hintStyle: GoogleFonts.inter(
+                      color: const Color(0xFF888888), fontSize: 15),
+                  border: InputBorder.none,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                  prefixText: '$_selectedCurrency ',
+                  prefixStyle: GoogleFonts.inter(
+                      fontSize: 15,
+                      color: _primaryDark,
+                      fontWeight: FontWeight.w500),
                 ),
                 style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
               ),
             ),
             const SizedBox(height: 16),
             Row(children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Pago final'),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
-                  child: TextField(
-                    controller: _finalPaymentCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))],
-                    decoration: InputDecoration(
-                      hintText: 'Ej. 140,000', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
-                      border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-                      prefixText: '$_selectedCurrency ', prefixStyle: GoogleFonts.inter(fontSize: 15, color: _primaryDark, fontWeight: FontWeight.w500),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Pago final'),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFFAFAFA),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFDFDFDF))),
+                      child: TextField(
+                        controller: _finalPaymentCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))
+                        ],
+                        decoration: InputDecoration(
+                          hintText: 'Ej. 140,000',
+                          hintStyle: GoogleFonts.inter(
+                              color: const Color(0xFF888888), fontSize: 15),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 13),
+                          prefixText: '$_selectedCurrency ',
+                          prefixStyle: GoogleFonts.inter(
+                              fontSize: 15,
+                              color: _primaryDark,
+                              fontWeight: FontWeight.w500),
+                        ),
+                        style: GoogleFonts.inter(
+                            fontSize: 15, color: _primaryDark),
+                      ),
                     ),
-                    style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
-                  ),
-                ),
-              ])),
+                  ])),
               const SizedBox(width: 14),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _fieldLabel('Tiempo de promesa (meses)'),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(color: const Color(0xFFFAFAFA), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFDFDFDF))),
-                  child: TextField(
-                    controller: _promiseTimeCtrl,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      hintText: 'Ej. 6', hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 15),
-                      border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    _fieldLabel('Tiempo de promesa (meses)'),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFFAFAFA),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFDFDFDF))),
+                      child: TextField(
+                        controller: _promiseTimeCtrl,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        decoration: InputDecoration(
+                          hintText: 'Ej. 6',
+                          hintStyle: GoogleFonts.inter(
+                              color: const Color(0xFF888888), fontSize: 15),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 13),
+                        ),
+                        style: GoogleFonts.inter(
+                            fontSize: 15, color: _primaryDark),
+                      ),
                     ),
-                    style: GoogleFonts.inter(fontSize: 15, color: _primaryDark),
-                  ),
-                ),
-              ])),
+                  ])),
             ]),
             const SizedBox(height: 16),
           ],
@@ -517,7 +691,8 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               maxLines: 4,
               decoration: InputDecoration(
                 hintText: 'Escribe tus condiciones adicionales...',
-                hintStyle: GoogleFonts.inter(color: const Color(0xFF888888), fontSize: 14),
+                hintStyle: GoogleFonts.inter(
+                    color: const Color(0xFF888888), fontSize: 14),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(15),
               ),
@@ -532,13 +707,22 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
             child: FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: _primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               onPressed: _isSending ? null : _sendCounteroffer,
               child: _isSending
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text('Aceptar y enviar', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : Text('Aceptar y enviar',
+                      style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white)),
             ),
           ),
         ],
@@ -547,28 +731,33 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
   }
 
   Widget _fieldLabel(String text) => Text(text,
-      style: GoogleFonts.inter(fontSize: 16, color: _primaryDark, fontWeight: FontWeight.w400));
+      style: GoogleFonts.inter(
+          fontSize: 16, color: _primaryDark, fontWeight: FontWeight.w400));
 
   Widget _readOnlyField(String value, {bool grayed = false}) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
-    decoration: BoxDecoration(
-      color: grayed ? const Color(0xFFD9D7D7) : const Color(0xFFFAFAFA),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Text(value, style: GoogleFonts.inter(fontSize: 15, color: const Color(0xFF888888))),
-  );
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
+        decoration: BoxDecoration(
+          color: grayed ? const Color(0xFFD9D7D7) : const Color(0xFFFAFAFA),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(value,
+            style: GoogleFonts.inter(
+                fontSize: 15, color: const Color(0xFF888888))),
+      );
 
   Widget _readOnlyTextArea(String value, {bool grayed = false}) => Container(
-    width: double.infinity,
-    constraints: const BoxConstraints(minHeight: 60),
-    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
-    decoration: BoxDecoration(
-      color: grayed ? const Color(0xFFD9D7D7) : const Color(0xFFFAFAFA),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Text(value, style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF888888))),
-  );
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 60),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
+        decoration: BoxDecoration(
+          color: grayed ? const Color(0xFFD9D7D7) : const Color(0xFFFAFAFA),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(value,
+            style: GoogleFonts.inter(
+                fontSize: 14, color: const Color(0xFF888888))),
+      );
 
   Widget _currencyButton(String currency) {
     final isSelected = _selectedCurrency == currency;
@@ -586,7 +775,8 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
           child: Text(
             currency == 'GTQ' ? 'Quetzales' : 'USD',
             style: GoogleFonts.inter(
-              fontSize: 15, fontWeight: FontWeight.w600,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
               color: isSelected ? Colors.white : _primary,
             ),
           ),

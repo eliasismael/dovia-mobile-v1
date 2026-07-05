@@ -6,6 +6,7 @@ import '/shared_components/popup_exito/popup_exito_widget.dart';
 
 class RescheduleVisitWidget extends StatefulWidget {
   final String visitId;
+
   /// Pass the current visit substatus so the widget knows if rescheduling is allowed.
   /// Allowed: 'PENDING', 'RESCHEDULE_REQUIRED'. Otherwise shows info panel.
   final String visitSubstatus;
@@ -115,8 +116,18 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
 
   String _displayDate(DateTime d) {
     const months = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre'
     ];
     return '${d.day} de ${months[d.month - 1]}, ${d.year}';
   }
@@ -133,10 +144,13 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
     final slot1 = '${_fmtDate(_dates[0]!)} ${_fmtTime(_times[0]!)}';
     final slot2 = '${_fmtDate(_dates[1]!)} ${_fmtTime(_times[1]!)}';
     final hasSlot3 = _dates[2] != null && _times[2] != null;
-    final slot3 = hasSlot3 ? '${_fmtDate(_dates[2]!)} ${_fmtTime(_times[2]!)}' : null;
+    final slot3 =
+        hasSlot3 ? '${_fmtDate(_dates[2]!)} ${_fmtTime(_times[2]!)}' : null;
 
-    if (slot1 == slot2 || (slot3 != null && (slot3 == slot1 || slot3 == slot2))) {
-      setState(() => _errorMessage = 'Las opciones de fecha y hora deben ser distintas entre sí.');
+    if (slot1 == slot2 ||
+        (slot3 != null && (slot3 == slot1 || slot3 == slot2))) {
+      setState(() => _errorMessage =
+          'Las opciones de fecha y hora deben ser distintas entre sí.');
       return;
     }
 
@@ -189,7 +203,8 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
                   height: 340,
                   child: PopupExitoWidget(
                     title: '¡Solicitud enviada!',
-                    text: 'Tu solicitud de reagendamiento fue enviada con éxito. Recibirás confirmación de tu nueva visita.',
+                    text:
+                        'Tu solicitud de reagendamiento fue enviada con éxito. Recibirás confirmación de tu nueva visita.',
                   ),
                 ),
               ),
@@ -212,7 +227,9 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
     return Container(
       color: lightGrey,
       child: SafeArea(
-        child: _canReschedule || _isRescheduleRequested ? _buildForm() : _buildBlockedInfo(),
+        child: _canReschedule || _isRescheduleRequested
+            ? _buildForm()
+            : _buildBlockedInfo(),
       ),
     );
   }
@@ -271,7 +288,8 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               color: Color(0xFFE8F5F5),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.event_repeat, size: 40, color: primaryColor),
+            child:
+                const Icon(Icons.event_repeat, size: 40, color: primaryColor),
           ),
           const SizedBox(height: 20),
 
@@ -297,7 +315,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               height: 1.6,
             ),
           ),
-          
+
           if (_errorMessage != null) ...[
             const SizedBox(height: 12),
             Container(
@@ -310,12 +328,17 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.error_outline, color: Color(0xFFD32F2F), size: 18),
+                  const Icon(Icons.error_outline,
+                      color: Color(0xFFD32F2F), size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: const TextStyle(fontFamily: 'Public Sans', fontSize: 13, color: Color(0xFFD32F2F), height: 1.4),
+                      style: const TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 13,
+                          color: Color(0xFFD32F2F),
+                          height: 1.4),
                     ),
                   ),
                 ],
@@ -333,11 +356,16 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               onPressed: _isSubmitting ? null : _requestReschedule,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)),
                 elevation: 0,
               ),
               child: _isSubmitting
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2))
                   : const Text(
                       'Solicitar reagendamiento',
                       style: TextStyle(
@@ -359,7 +387,8 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               onPressed: () => Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: primaryColor),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)),
               ),
               child: const Text(
                 'Volver',
@@ -385,65 +414,67 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
         SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: Icon(Icons.close, size: 24, color: darkTextColor),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Icon(Icons.close, size: 24, color: darkTextColor),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Reagendar visita',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: darkTextColor,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Selecciona hasta 3 nuevas fechas y horas de preferencia en orden prioritario:',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: darkTextColor,
+                  height: 1.36,
+                ),
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                text: const TextSpan(
+                  style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 14,
+                      color: darkTextColor),
+                  children: [
+                    TextSpan(text: 'Selecciona '),
+                    TextSpan(
+                      text: '2 fechas obligatorias',
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                  ),
+                    TextSpan(text: ' y una opcional'),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Reagendar visita',
-                  style: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: darkTextColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Selecciona hasta 3 nuevas fechas y horas de preferencia en orden prioritario:',
-                  style: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: darkTextColor,
-                    height: 1.36,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                RichText(
-                  text: const TextSpan(
-                    style: TextStyle(fontFamily: 'Public Sans', fontSize: 14, color: darkTextColor),
-                    children: [
-                      TextSpan(text: 'Selecciona '),
-                      TextSpan(
-                        text: '2 fechas obligatorias',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      TextSpan(text: ' y una opcional'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _buildSlot(0, isRequired: true),
-                const SizedBox(height: 16),
-                _buildSlot(1, isRequired: true),
-                const SizedBox(height: 16),
-                _buildSlot(2, isRequired: false),
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24),
+              _buildSlot(0, isRequired: true),
+              const SizedBox(height: 16),
+              _buildSlot(1, isRequired: true),
+              const SizedBox(height: 16),
+              _buildSlot(2, isRequired: false),
+              const SizedBox(height: 24),
+            ],
           ),
-
+        ),
         if (_errorMessage != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -457,19 +488,23 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.error_outline, color: Color(0xFFD32F2F), size: 18),
+                  const Icon(Icons.error_outline,
+                      color: Color(0xFFD32F2F), size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: const TextStyle(fontFamily: 'Public Sans', fontSize: 13, color: Color(0xFFD32F2F), height: 1.4),
+                      style: const TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 13,
+                          color: Color(0xFFD32F2F),
+                          height: 1.4),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
         Padding(
           padding: const EdgeInsets.all(16),
           child: SizedBox(
@@ -480,14 +515,23 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 disabledBackgroundColor: primaryColor.withOpacity(0.4),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)),
                 elevation: 0,
               ),
               child: _isSubmitting
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2))
                   : const Text(
                       'Confirmar reagendamiento',
-                      style: TextStyle(fontFamily: 'Public Sans', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                      style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white),
                     ),
             ),
           ),
@@ -501,12 +545,19 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2))
+        ],
       ),
       child: Column(
         children: [
           _buildRow(
-            label: _dates[index] != null ? _displayDate(_dates[index]!) : 'Selecciona la fecha',
+            label: _dates[index] != null
+                ? _displayDate(_dates[index]!)
+                : 'Selecciona la fecha',
             isRequired: isRequired,
             hasValue: _dates[index] != null,
             icon: Icons.calendar_today_outlined,
@@ -514,7 +565,9 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
           ),
           const Divider(height: 1, color: borderColor),
           _buildRow(
-            label: _times[index] != null ? _displayTime(_times[index]!) : 'Selecciona la hora',
+            label: _times[index] != null
+                ? _displayTime(_times[index]!)
+                : 'Selecciona la hora',
             isRequired: isRequired,
             hasValue: _times[index] != null,
             icon: Icons.access_time_outlined,
@@ -544,11 +597,20 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(fontFamily: 'Public Sans', fontSize: 14, fontWeight: FontWeight.w600, color: hasValue ? darkTextColor : mediumGrey),
+                style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: hasValue ? darkTextColor : mediumGrey),
               ),
             ),
             if (isRequired)
-              const Text('*', style: TextStyle(fontFamily: 'Public Sans', fontSize: 16, fontWeight: FontWeight.w700, color: Colors.red)),
+              const Text('*',
+                  style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.red)),
             const SizedBox(width: 4),
             const Icon(Icons.chevron_right, size: 22, color: mediumGrey),
           ],

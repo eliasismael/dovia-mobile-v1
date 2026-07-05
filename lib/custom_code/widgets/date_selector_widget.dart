@@ -252,8 +252,18 @@ class _CustomCalendarPickerState extends State<_CustomCalendarPicker> {
   static const Color textColor = Color(0xFF00444B);
 
   static const List<String> _spanishMonths = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
   ];
 
   @override
@@ -277,9 +287,11 @@ class _CustomCalendarPickerState extends State<_CustomCalendarPicker> {
 
   @override
   Widget build(BuildContext context) {
-    int daysInMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
-    int firstWeekday = DateTime(_currentMonth.year, _currentMonth.month, 1).weekday; // 1 = Monday
-    
+    int daysInMonth =
+        DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
+    int firstWeekday = DateTime(_currentMonth.year, _currentMonth.month, 1)
+        .weekday; // 1 = Monday
+
     final weekdays = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
 
     return Column(
@@ -312,18 +324,20 @@ class _CustomCalendarPickerState extends State<_CustomCalendarPicker> {
         // Weekdays
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: weekdays.map((w) => Expanded(
-            child: Text(
-              w,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF5A5A5A),
-              ),
-            ),
-          )).toList(),
+          children: weekdays
+              .map((w) => Expanded(
+                    child: Text(
+                      w,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF5A5A5A),
+                      ),
+                    ),
+                  ))
+              .toList(),
         ),
         const SizedBox(height: 12),
         // Grid
@@ -344,7 +358,8 @@ class _CustomCalendarPickerState extends State<_CustomCalendarPicker> {
 
             if (index < firstWeekday - 1) {
               isCurrentMonth = false;
-              int daysInPrevMonth = DateTime(_currentMonth.year, _currentMonth.month, 0).day;
+              int daysInPrevMonth =
+                  DateTime(_currentMonth.year, _currentMonth.month, 0).day;
               day = daysInPrevMonth - (firstWeekday - 1 - index) + 1;
             } else if (index >= firstWeekday - 1 + daysInMonth) {
               isCurrentMonth = false;
@@ -352,17 +367,18 @@ class _CustomCalendarPickerState extends State<_CustomCalendarPicker> {
             } else {
               day = index - (firstWeekday - 1) + 1;
               isSelected = _selectedDate.year == _currentMonth.year &&
-                           _selectedDate.month == _currentMonth.month &&
-                           _selectedDate.day == day;
+                  _selectedDate.month == _currentMonth.month &&
+                  _selectedDate.day == day;
               isToday = DateTime.now().year == _currentMonth.year &&
-                        DateTime.now().month == _currentMonth.month &&
-                        DateTime.now().day == day;
+                  DateTime.now().month == _currentMonth.month &&
+                  DateTime.now().day == day;
             }
 
             return GestureDetector(
               onTap: () {
                 if (!isCurrentMonth) return;
-                final selected = DateTime(_currentMonth.year, _currentMonth.month, day);
+                final selected =
+                    DateTime(_currentMonth.year, _currentMonth.month, day);
                 Navigator.of(context).pop(selected);
               },
               child: Container(
@@ -378,7 +394,8 @@ class _CustomCalendarPickerState extends State<_CustomCalendarPicker> {
                   style: TextStyle(
                     fontFamily: 'Public Sans',
                     fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                     color: isCurrentMonth
                         ? (isSelected ? Colors.white : textColor)
                         : const Color(0xFFC4C4C4),

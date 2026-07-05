@@ -59,8 +59,8 @@ class _QuieresSerAsociadoWidgetState extends State<QuieresSerAsociadoWidget> {
                 alignment: const AlignmentDirectional(0.0, 1.0),
                 child: Builder(
                   builder: (context) => Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 40.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 0.0, 40.0),
                     child: InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
@@ -137,7 +137,8 @@ class _QuieresSerAsociadoWidgetState extends State<QuieresSerAsociadoWidget> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                 child: wrapWithModel(
                   model: _model.secondaryButtonModel2,
                   updateCallback: () => safeSetState(() {}),

@@ -124,8 +124,7 @@ class _DHCLIENTProveedorCardWidgetState
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.inter(
                   fontWeight: FontWeight.w500,
-                  fontStyle:
-                      FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                 ),
                 color: FlutterFlowTheme.of(context).secondaryText,
                 letterSpacing: 0.0,
@@ -267,7 +266,8 @@ class _DHCLIENTProveedorCardWidgetState
                 _detailRow('Hora', widget.visitTime!),
               if (widget.vehicle != null && widget.vehicle!.isNotEmpty)
                 _detailRow('Vehículo', widget.vehicle!),
-              if (widget.licensePlate != null && widget.licensePlate!.isNotEmpty)
+              if (widget.licensePlate != null &&
+                  widget.licensePlate!.isNotEmpty)
                 _detailRow('Placa', widget.licensePlate!),
             ],
           ),

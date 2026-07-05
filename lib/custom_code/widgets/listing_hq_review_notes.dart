@@ -111,11 +111,12 @@ class _ListingHqReviewNotesState extends State<ListingHqReviewNotes> {
             onTapIcon: () {
               // Open WhatsApp / external communication
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Abriendo comunicación con propietario...')),
+                const SnackBar(
+                    content: Text('Abriendo comunicación con propietario...')),
               );
             },
           ),
-          
+
           const Spacer(), // Push bottom buttons to the bottom
 
           // Resolution Actions Text
@@ -128,29 +129,27 @@ class _ListingHqReviewNotesState extends State<ListingHqReviewNotes> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Buttons Row
-          LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth > 600) {
-                return Row(
-                  children: [
-                    Expanded(child: _buildChecklistButton()),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildReassignButton()),
-                  ],
-                );
-              } else {
-                return Column(
-                  children: [
-                    _buildChecklistButton(),
-                    const SizedBox(height: 12),
-                    _buildReassignButton(),
-                  ],
-                );
-              }
+          LayoutBuilder(builder: (context, constraints) {
+            if (constraints.maxWidth > 600) {
+              return Row(
+                children: [
+                  Expanded(child: _buildChecklistButton()),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildReassignButton()),
+                ],
+              );
+            } else {
+              return Column(
+                children: [
+                  _buildChecklistButton(),
+                  const SizedBox(height: 12),
+                  _buildReassignButton(),
+                ],
+              );
             }
-          ),
+          }),
         ],
       ),
     );
@@ -290,4 +289,3 @@ class _ListingHqReviewNotesState extends State<ListingHqReviewNotes> {
     );
   }
 }
-

@@ -607,4 +607,3 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
     );
   }
 }
-

@@ -144,27 +144,34 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
       _errorDireccion = _direccion == null;
       _errorHabitaciones = _habitaciones == null;
       _errorCriterios = _selectedCriteria.length < 3;
-      _errorDanos = _hasDanos == 'Si' && _danosDescripcionController.text.trim().isEmpty;
+      _errorDanos =
+          _hasDanos == 'Si' && _danosDescripcionController.text.trim().isEmpty;
     });
 
     if (_errorTipoVivienda || _errorDireccion) {
-      if (!_datosGeneralesExpanded) setState(() => _datosGeneralesExpanded = true);
-      Scrollable.ensureVisible(_keyDatosGenerales.currentContext!, duration: const Duration(milliseconds: 300));
+      if (!_datosGeneralesExpanded)
+        setState(() => _datosGeneralesExpanded = true);
+      Scrollable.ensureVisible(_keyDatosGenerales.currentContext!,
+          duration: const Duration(milliseconds: 300));
       return false;
     }
     if (_errorHabitaciones) {
-      if (!_caracteristicasExpanded) setState(() => _caracteristicasExpanded = true);
-      Scrollable.ensureVisible(_keyCaracteristicas.currentContext!, duration: const Duration(milliseconds: 300));
+      if (!_caracteristicasExpanded)
+        setState(() => _caracteristicasExpanded = true);
+      Scrollable.ensureVisible(_keyCaracteristicas.currentContext!,
+          duration: const Duration(milliseconds: 300));
       return false;
     }
     if (_errorCriterios) {
       if (!_criteriosExpanded) setState(() => _criteriosExpanded = true);
-      Scrollable.ensureVisible(_keyCriterios.currentContext!, duration: const Duration(milliseconds: 300));
+      Scrollable.ensureVisible(_keyCriterios.currentContext!,
+          duration: const Duration(milliseconds: 300));
       return false;
     }
     if (_errorDanos) {
       if (!_infoHqExpanded) setState(() => _infoHqExpanded = true);
-      Scrollable.ensureVisible(_keyInfoHq.currentContext!, duration: const Duration(milliseconds: 300));
+      Scrollable.ensureVisible(_keyInfoHq.currentContext!,
+          duration: const Duration(milliseconds: 300));
       return false;
     }
 
@@ -215,7 +222,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   void initState() {
     super.initState();
     _loadState();
-    
+
     _descripcionController.addListener(_saveState);
     _dudasController.addListener(_saveState);
     _consideracionesController.addListener(_saveState);
@@ -239,19 +246,31 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
           _pisos = data['pisos'];
           _mediosBanos = data['mediosBanos'];
           _hasDanos = data['hasDanos'];
-          
-          if (data['descripcion'] != null) _descripcionController.text = data['descripcion'];
-          if (data['dudas'] != null) _dudasController.text = data['dudas'];
-          if (data['consideraciones'] != null) _consideracionesController.text = data['consideraciones'];
-          if (data['instrucciones'] != null) _instruccionesController.text = data['instrucciones'];
-          if (data['complejo'] != null) _complejoController.text = data['complejo'];
-          if (data['danosDescripcion'] != null) _danosDescripcionController.text = data['danosDescripcion'];
 
-          if (data['generalCharacteristics'] != null) _updateMapFromJson(_generalCharacteristics, data['generalCharacteristics']);
-          if (data['otherCharacteristics'] != null) _updateMapFromJson(_otherCharacteristics, data['otherCharacteristics']);
-          if (data['propiedadAmenities'] != null) _updateMapFromJson(_propiedadAmenities, data['propiedadAmenities']);
-          if (data['areasComunes'] != null) _updateMapFromJson(_areasComunes, data['areasComunes']);
-          if (data['servicios'] != null) _updateMapFromJson(_servicios, data['servicios']);
+          if (data['descripcion'] != null)
+            _descripcionController.text = data['descripcion'];
+          if (data['dudas'] != null) _dudasController.text = data['dudas'];
+          if (data['consideraciones'] != null)
+            _consideracionesController.text = data['consideraciones'];
+          if (data['instrucciones'] != null)
+            _instruccionesController.text = data['instrucciones'];
+          if (data['complejo'] != null)
+            _complejoController.text = data['complejo'];
+          if (data['danosDescripcion'] != null)
+            _danosDescripcionController.text = data['danosDescripcion'];
+
+          if (data['generalCharacteristics'] != null)
+            _updateMapFromJson(
+                _generalCharacteristics, data['generalCharacteristics']);
+          if (data['otherCharacteristics'] != null)
+            _updateMapFromJson(
+                _otherCharacteristics, data['otherCharacteristics']);
+          if (data['propiedadAmenities'] != null)
+            _updateMapFromJson(_propiedadAmenities, data['propiedadAmenities']);
+          if (data['areasComunes'] != null)
+            _updateMapFromJson(_areasComunes, data['areasComunes']);
+          if (data['servicios'] != null)
+            _updateMapFromJson(_servicios, data['servicios']);
           if (data['starRatings'] != null) {
             Map<String, dynamic> ratings = data['starRatings'];
             ratings.forEach((key, value) {
@@ -266,8 +285,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     }
     _isInit = true;
   }
-  
-  void _updateMapFromJson(Map<String, bool> target, Map<String, dynamic> source) {
+
+  void _updateMapFromJson(
+      Map<String, bool> target, Map<String, dynamic> source) {
     source.forEach((key, value) {
       target[key] = value as bool;
     });
@@ -379,7 +399,14 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
                   'Tipo de vivienda',
                   _tipoVivienda,
                   (val) => setState(() => _tipoVivienda = val),
-                  options: const ['Casa', 'Apartamento', 'Duplex', 'Penthouse', 'Terreno', 'Otro'],
+                  options: const [
+                    'Casa',
+                    'Apartamento',
+                    'Duplex',
+                    'Penthouse',
+                    'Terreno',
+                    'Otro'
+                  ],
                   hasError: _errorTipoVivienda,
                 ),
               ),
@@ -428,7 +455,8 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
         if (_caracteristicasExpanded) ...[
           const SizedBox(height: 12),
           // Características generales header with "Añadir" button
-          _buildSubSectionHeaderWithAdd('Características generales', _generalCharacteristics),
+          _buildSubSectionHeaderWithAdd(
+              'Características generales', _generalCharacteristics),
           const SizedBox(height: 12),
           // Habitaciones + Baños
           _buildDoubleDropdownRow(
@@ -467,7 +495,8 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
           _buildCheckboxGroup(_generalCharacteristics),
           const SizedBox(height: 16),
           // Otras características header with "Añadir" button
-          _buildSubSectionHeaderWithAdd('Otras características', _otherCharacteristics),
+          _buildSubSectionHeaderWithAdd(
+              'Otras características', _otherCharacteristics),
           const SizedBox(height: 11),
           // Checkboxes for other characteristics
           _buildCheckboxGroup(_otherCharacteristics),
@@ -574,9 +603,11 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
               alignment: WrapAlignment.center,
               spacing: 16,
               runSpacing: 16,
-              children: _starRatings.entries.map(
-                (entry) => _buildStarRatingItem(entry.key, entry.value),
-              ).toList(),
+              children: _starRatings.entries
+                  .map(
+                    (entry) => _buildStarRatingItem(entry.key, entry.value),
+                  )
+                  .toList(),
             ),
           ),
           const SizedBox(height: 10),
@@ -752,7 +783,8 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   }
 
   // ==================== REUSABLE: SUBSECTION HEADER WITH "AÑADIR" ====================
-  Widget _buildSubSectionHeaderWithAdd(String title, Map<String, bool> targetMap) {
+  Widget _buildSubSectionHeaderWithAdd(
+      String title, Map<String, bool> targetMap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -798,7 +830,8 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     );
   }
 
-  void _showAddCustomItemDialog(String sectionName, Map<String, bool> targetMap) {
+  void _showAddCustomItemDialog(
+      String sectionName, Map<String, bool> targetMap) {
     String titleText = '';
     String hintText = 'Escribe aquí...';
 
@@ -818,157 +851,155 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
 
     final controller = TextEditingController();
     showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  titleText,
-                  style: const TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w400,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFAFAFA),
-                    borderRadius: BorderRadius.circular(17),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  child: TextField(
-                    controller: controller,
+        context: context,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titleText,
                     style: const TextStyle(
                       fontFamily: 'Public Sans',
                       fontSize: 20,
+                      fontWeight: FontWeight.w400,
                       color: textColor,
                     ),
-                    decoration: InputDecoration(
-                      hintText: hintText,
-                      hintStyle: TextStyle(
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFAFAFA),
+                      borderRadius: BorderRadius.circular(17),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    child: TextField(
+                      controller: controller,
+                      style: const TextStyle(
                         fontFamily: 'Public Sans',
                         fontSize: 20,
-                        color: placeholderColor.withValues(alpha: 0.5),
+                        color: textColor,
                       ),
-                      border: InputBorder.none,
+                      decoration: InputDecoration(
+                        hintText: hintText,
+                        hintStyle: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 20,
+                          color: placeholderColor.withValues(alpha: 0.5),
+                        ),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 44),
-                Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (controller.text.trim().isNotEmpty) {
-                        setState(() {
-                          targetMap[controller.text.trim()] = true;
-                        });
-                        Navigator.pop(context);
-                        _showSuccessPopup();
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Agregar',
-                        style: TextStyle(
-                          fontFamily: 'Public Sans',
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                  const SizedBox(height: 44),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (controller.text.trim().isNotEmpty) {
+                          setState(() {
+                            targetMap[controller.text.trim()] = true;
+                          });
+                          Navigator.pop(context);
+                          _showSuccessPopup();
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Agregar',
+                          style: TextStyle(
+                            fontFamily: 'Public Sans',
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      }
-    );
+          );
+        });
   }
 
   void _showSuccessPopup() {
     showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          // Check if still mounted to avoid popping something else
-          if (mounted && Navigator.of(dialogContext).canPop()) {
-            Navigator.of(dialogContext).pop();
-          }
-        });
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 50),
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 60, 20, 40),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Se agregó con éxito',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) {
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            // Check if still mounted to avoid popping something else
+            if (mounted && Navigator.of(dialogContext).canPop()) {
+              Navigator.of(dialogContext).pop();
+            }
+          });
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 50),
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(20, 60, 20, 40),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Se agregó con éxito',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  color: primaryColor,
-                  shape: BoxShape.circle,
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: const BoxDecoration(
+                    color: primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 50,
+                    weight: 700,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 50,
-                  weight: 700,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-    );
+              ],
+            ),
+          );
+        });
   }
 
   // ==================== REUSABLE: DROPDOWN FIELD ====================
@@ -1007,7 +1038,8 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
             decoration: BoxDecoration(
               color: inputBackground,
               borderRadius: BorderRadius.circular(10),
-              border: hasError ? Border.all(color: Colors.red, width: 1.5) : null,
+              border:
+                  hasError ? Border.all(color: Colors.red, width: 1.5) : null,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 13),
             alignment: Alignment.centerLeft,
@@ -1021,7 +1053,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
                       fontFamily: 'Public Sans',
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: value != null ? textColor : placeholderColor.withValues(alpha: 0.5),
+                      color: value != null
+                          ? textColor
+                          : placeholderColor.withValues(alpha: 0.5),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1087,11 +1121,13 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
         Row(
           children: [
             Expanded(
-              child: _buildSmallDropdown(value1, onChanged1, options: options1, hasError: hasError1),
+              child: _buildSmallDropdown(value1, onChanged1,
+                  options: options1, hasError: hasError1),
             ),
             const SizedBox(width: 17),
             Expanded(
-              child: _buildSmallDropdown(value2, onChanged2, options: options2, hasError: hasError2),
+              child: _buildSmallDropdown(value2, onChanged2,
+                  options: options2, hasError: hasError2),
             ),
           ],
         ),
@@ -1123,7 +1159,8 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
         Row(
           children: [
             Expanded(
-              child: _buildSmallDropdown(value, onChanged, options: options, hasError: hasError),
+              child: _buildSmallDropdown(value, onChanged,
+                  options: options, hasError: hasError),
             ),
           ],
         ),
@@ -1133,7 +1170,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
 
   // ==================== REUSABLE: SMALL DROPDOWN ====================
   Widget _buildSmallDropdown(
-    String? value, 
+    String? value,
     ValueChanged<String?> onChanged, {
     required List<String> options,
     bool hasError = false,
@@ -1165,7 +1202,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
                 fontFamily: 'Public Sans',
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
-                color: value != null ? textColor : placeholderColor.withValues(alpha: 0.5),
+                color: value != null
+                    ? textColor
+                    : placeholderColor.withValues(alpha: 0.5),
               ),
             ),
             const Icon(
@@ -1227,7 +1266,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
                     fontFamily: 'Public Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: value != null ? textColor : placeholderColor.withValues(alpha: 0.5),
+                    color: value != null
+                        ? textColor
+                        : placeholderColor.withValues(alpha: 0.5),
                     letterSpacing: 0.28,
                     height: 49.849 / 14,
                   ),
@@ -1434,7 +1475,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
                   } else {
                     // Maximum of 3 reached
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Ya has seleccionado el máximo de 3 criterios.')),
+                      const SnackBar(
+                          content: Text(
+                              'Ya has seleccionado el máximo de 3 criterios.')),
                     );
                   }
                 },

@@ -18,8 +18,8 @@ class _VisitCardData {
   final String propertyName;
   final String address;
   final String ownerName;
-  final String date;   // "2026-05-19"
-  final String time;   // "10:00"
+  final String date; // "2026-05-19"
+  final String time; // "10:00"
   final double? lat;
   final double? lng;
 
@@ -86,12 +86,12 @@ class _OPERATIVELISTINGHomeWidgetState
   }
 
   // ── Fetch list then enrich each visit with its overview ─────────────────
-  Future<List<_VisitCardData>> _fetchEnriched({required String substatus}) async {
+  Future<List<_VisitCardData>> _fetchEnriched(
+      {required String substatus}) async {
     final token = currentAuthenticationToken ?? '';
 
-    final listRes = await DOVIAAPIVisitContextGroup
-        .getOperativeListerVisitsCall
-        .call(
+    final listRes =
+        await DOVIAAPIVisitContextGroup.getOperativeListerVisitsCall.call(
       authToken: token,
       substatus: substatus,
       page: '1',
@@ -117,8 +117,7 @@ class _OPERATIVELISTINGHomeWidgetState
     // Parallel overview calls
     final overviewFutures = visits.map((v) {
       final id = v is Map ? v['id']?.toString() ?? '' : '';
-      return DOVIAAPIVisitContextGroup
-          .getOperativeListerVisitOverviewCall
+      return DOVIAAPIVisitContextGroup.getOperativeListerVisitOverviewCall
           .call(authToken: token, visitId: id);
     }).toList();
 
@@ -146,11 +145,12 @@ class _OPERATIVELISTINGHomeWidgetState
         if (data is Map) {
           final prop = data['property'];
           if (prop is Map) {
-            propertyName = prop['name']?.toString() ??
-                prop['title']?.toString() ?? '';
+            propertyName =
+                prop['name']?.toString() ?? prop['title']?.toString() ?? '';
             final locAddr = _deepMap(prop, ['location', 'address']);
             address = locAddr?['fullAddress']?.toString() ??
-                locAddr?['street']?.toString() ?? '';
+                locAddr?['street']?.toString() ??
+                '';
             final coords = _deepValue(prop, ['location', 'geo', 'coordinates']);
             if (coords is List && coords.length >= 2) {
               lng = (coords[0] as num?)?.toDouble();
@@ -305,7 +305,8 @@ class _OPERATIVELISTINGHomeWidgetState
                                                     ParamType.String),
                                               }.withoutNulls,
                                             ),
-                                            onVoyEnCamino: () => context.pushNamed(
+                                            onVoyEnCamino: () =>
+                                                context.pushNamed(
                                               OPERATIVELISTINGPrimeraVisitaWidget
                                                   .routeName,
                                               queryParameters: {
@@ -469,7 +470,7 @@ class _UpcomingCard extends StatefulWidget {
 class _UpcomingCardState extends State<_UpcomingCard> {
   static const Color _primary = Color(0xFF007376);
   static const Color _dark = Color(0xFF00444B);
-  
+
   bool _isUnderReview = false;
 
   String _formatDate(String raw) {
@@ -478,8 +479,19 @@ class _UpcomingCardState extends State<_UpcomingCard> {
       final parts = raw.split('-');
       if (parts.length == 3) {
         const months = [
-          '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-          'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+          '',
+          'enero',
+          'febrero',
+          'marzo',
+          'abril',
+          'mayo',
+          'junio',
+          'julio',
+          'agosto',
+          'septiembre',
+          'octubre',
+          'noviembre',
+          'diciembre'
         ];
         final m = int.tryParse(parts[1]) ?? 0;
         return '${parts[2]} de ${months[m]} de ${parts[0]}';
@@ -598,168 +610,170 @@ class _UpcomingCardState extends State<_UpcomingCard> {
             ),
           ],
         ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Property name
-          Text(
-            widget.data.propertyName.isNotEmpty ? widget.data.propertyName : 'Propiedad',
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: _dark,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          // Address
-          if (widget.data.address.isNotEmpty) ...[
-            const SizedBox(height: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Property name
             Text(
-              'Dirección: ${widget.data.address}',
+              widget.data.propertyName.isNotEmpty
+                  ? widget.data.propertyName
+                  : 'Propiedad',
               style: const TextStyle(
                 fontFamily: 'Public Sans',
-                fontSize: 12,
-                color: _primary,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: _dark,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ],
-          // Owner name
-          if (widget.data.ownerName.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              widget.data.ownerName,
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 12,
-                color: _primary,
+            // Address
+            if (widget.data.address.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Dirección: ${widget.data.address}',
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 12,
+                  color: _primary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          // Date
-          if (widget.data.date.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Fecha: ${_formatDate(widget.data.date)}',
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 13,
-                color: _dark,
+            ],
+            // Owner name
+            if (widget.data.ownerName.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                widget.data.ownerName,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 12,
+                  color: _primary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
-          // Time
-          if (widget.data.time.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              'Hora: ${widget.data.time}',
-              style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 13,
-                color: _dark,
+            ],
+            // Date
+            if (widget.data.date.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Fecha: ${_formatDate(widget.data.date)}',
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 13,
+                  color: _dark,
+                ),
               ),
-            ),
-          ],
-          const Spacer(),
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => _openMaps(context),
-                  child: Container(
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF70ACAD).withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Ubicación',
-                      style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 12,
-                        color: _dark,
+            ],
+            // Time
+            if (widget.data.time.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                'Hora: ${widget.data.time}',
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 13,
+                  color: _dark,
+                ),
+              ),
+            ],
+            const Spacer(),
+            // Action buttons
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _openMaps(context),
+                    child: Container(
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF70ACAD).withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Ubicación',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 12,
+                          color: _dark,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: GestureDetector(
-                  onTap: widget.onVoyEnCamino,
-                  child: Container(
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: _primary,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Voy en camino',
-                      style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 12,
-                        color: Colors.white,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: widget.onVoyEnCamino,
+                    child: Container(
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: _primary,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Voy en camino',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 12,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
+                  ),
+                ),
+              ],
+            ),
+            if (!_isUnderReview) ...[
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: _onReschedule,
+                child: Container(
+                  width: double.infinity,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: _primary, width: 1),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Reportar con HQ',
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 11,
+                      color: _primary,
+                    ),
+                  ),
+                ),
+              ),
+            ] else ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3CD),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  'En revisión por HQ',
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF856404),
                   ),
                 ),
               ),
             ],
-          ),
-          if (!_isUnderReview) ...[
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _onReschedule,
-              child: Container(
-                width: double.infinity,
-                height: 26,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: _primary, width: 1),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'Reportar con HQ',
-                  style: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 11,
-                    color: _primary,
-                  ),
-                ),
-              ),
-            ),
-          ] else ...[
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              height: 22,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF3CD),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'En revisión por HQ',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF856404),
-                ),
-              ),
-            ),
           ],
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -780,7 +794,7 @@ class _PendingCardState extends State<_PendingCard> {
   static const Color _dark = Color(0xFF00444B);
   static const Color _badgeBg = Color(0xFFF8D5D5);
   static const Color _badgeText = Color(0xFFBC0000);
-  
+
   bool _isUnderReview = false;
 
   void _onReschedule() {
@@ -880,7 +894,8 @@ class _PendingCardState extends State<_PendingCard> {
               color: const Color(0xFFEFEFEF),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.home_outlined, color: Colors.grey, size: 28),
+            child:
+                const Icon(Icons.home_outlined, color: Colors.grey, size: 28),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -942,7 +957,8 @@ class _PendingCardState extends State<_PendingCard> {
                       fontFamily: 'Public Sans',
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: _isUnderReview ? const Color(0xFF856404) : _badgeText,
+                      color:
+                          _isUnderReview ? const Color(0xFF856404) : _badgeText,
                     ),
                   ),
                 ),

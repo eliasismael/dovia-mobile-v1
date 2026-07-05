@@ -82,7 +82,8 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
               type: widget.listingType,
               price: widget.price?.toString(),
               onAddToFavorites: () async {
-                await DOVIAAPIFavoriteContextGroup.addPropertyToFavoritesCall.call(
+                await DOVIAAPIFavoriteContextGroup.addPropertyToFavoritesCall
+                    .call(
                   authToken: currentAuthenticationToken,
                   propertyId: widget.propertyId,
                   folderId: '',

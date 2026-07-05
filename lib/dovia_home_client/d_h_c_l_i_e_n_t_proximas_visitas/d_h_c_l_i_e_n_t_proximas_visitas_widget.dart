@@ -80,7 +80,8 @@ class _DHCLIENTProximasVisitasWidgetState
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -108,8 +109,8 @@ class _DHCLIENTProximasVisitasWidgetState
                           ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 15.0, 0.0, 0.0),
                       child: Text(
                         'Lunes, 10 de Noviembre',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(

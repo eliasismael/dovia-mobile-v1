@@ -66,13 +66,15 @@ class VisitsRepository extends ChangeNotifier {
     String dateThree = '0000-00-00',
     String hourThree = '00:00',
   }) async {
-    debugPrint('[VisitsRepo] Creating visit request. Current FFAppState.UserRole: ${FFAppState().UserRole}');
+    debugPrint(
+        '[VisitsRepo] Creating visit request. Current FFAppState.UserRole: ${FFAppState().UserRole}');
     if (FFAppState().UserRole != 'CLIENT') {
       debugPrint('[VisitsRepo] REJECTED: Not a CLIENT');
       return const Failure('Solo usuarios CLIENT pueden solicitar visitas.');
     }
     final token = currentAuthenticationToken ?? '';
-    debugPrint('[VisitsRepo] Using token: ${token.isNotEmpty ? "PRESENT (starts with ${token.substring(0, 10)})" : "EMPTY"}');
+    debugPrint(
+        '[VisitsRepo] Using token: ${token.isNotEmpty ? "PRESENT (starts with ${token.substring(0, 10)})" : "EMPTY"}');
     final response =
         await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
       propertyId: propertyId,
@@ -86,14 +88,19 @@ class VisitsRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
-      if (response.statusCode == 400 || response.statusCode == 401 || response.statusCode == 403) {
-        // Try healing the session silently with a token refresh. 
-        final refreshRes = await DOVIAAPIAuthContextGroup.refreshTokenNEWCall.call(
+      if (response.statusCode == 400 ||
+          response.statusCode == 401 ||
+          response.statusCode == 403) {
+        // Try healing the session silently with a token refresh.
+        final refreshRes =
+            await DOVIAAPIAuthContextGroup.refreshTokenNEWCall.call(
           refreshToken: currentAuthRefreshToken,
         );
         if (refreshRes.succeeded) {
-          final newToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall.idToken(refreshRes.jsonBody);
-          final newRefreshToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall.refreshTokenResponse(refreshRes.jsonBody);
+          final newToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall
+              .idToken(refreshRes.jsonBody);
+          final newRefreshToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall
+              .refreshTokenResponse(refreshRes.jsonBody);
           if (newToken != null && newToken.isNotEmpty) {
             authManager.updateAuthUserData(
               authenticationToken: newToken,
@@ -101,9 +108,10 @@ class VisitsRepository extends ChangeNotifier {
               tokenExpiration: currentAuthTokenExpiration,
               authUid: currentUserUid,
             );
-            
+
             // Retry the request with the fresh token
-            final retryResponse = await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
+            final retryResponse =
+                await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
               propertyId: propertyId,
               authToken: newToken,
               dateOne: dateOne,
@@ -113,7 +121,7 @@ class VisitsRepository extends ChangeNotifier {
               dateThree: dateThree,
               hourThree: hourThree,
             );
-            
+
             if (retryResponse.succeeded) {
               _myVisits = [];
               notifyListeners();
@@ -243,29 +251,35 @@ class VisitsRepository extends ChangeNotifier {
   // =========================================================================
 
   /// Fetches available Operative Listers for a specific date and time slot.
-  Future<Result<List<Map<String, dynamic>>>> getAvailableOperatives(DateTime date, TimeOfDay time) async {
+  Future<Result<List<Map<String, dynamic>>>> getAvailableOperatives(
+      DateTime date, TimeOfDay time) async {
     final token = currentAuthenticationToken ?? '';
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
-    final timeStr = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
-    final response = await DOVIAAPIVisitContextGroup.getAvailableOperativeListersCall.call(
+    final response =
+        await DOVIAAPIVisitContextGroup.getAvailableOperativeListersCall.call(
       authToken: token,
       date: dateStr,
       time: timeStr,
     );
 
     if (!response.succeeded) {
-      return Failure('No se pudieron cargar los operative listers', statusCode: response.statusCode);
+      return Failure('No se pudieron cargar los operative listers',
+          statusCode: response.statusCode);
     }
 
     final rawList = (response.jsonBody?['operativeListers'] as List? ?? [])
         .cast<Map<String, dynamic>>();
 
-    final operatives = rawList.map((o) => {
-      'id': o['id'] as String? ?? '',
-      'name': o['fullName'] as String? ?? '',
-      'photoUrl': o['avatar'] as String?,
-    }).toList();
+    final operatives = rawList
+        .map((o) => {
+              'id': o['id'] as String? ?? '',
+              'name': o['fullName'] as String? ?? '',
+              'photoUrl': o['avatar'] as String?,
+            })
+        .toList();
 
     return Success(operatives);
   }
@@ -279,7 +293,8 @@ class VisitsRepository extends ChangeNotifier {
   }) async {
     final token = currentAuthenticationToken ?? '';
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
-    final timeStr = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
     // Try to find a visit for this property in current cached visits
     String visitId = '';
@@ -295,7 +310,8 @@ class VisitsRepository extends ChangeNotifier {
       visitId = propertyId;
     }
 
-    final response = await DOVIAAPIVisitContextGroup.assignOperativeListerCall.call(
+    final response =
+        await DOVIAAPIVisitContextGroup.assignOperativeListerCall.call(
       visitId: visitId,
       authToken: token,
       operativeListerId: operativeId,

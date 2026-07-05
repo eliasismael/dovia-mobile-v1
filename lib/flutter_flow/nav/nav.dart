@@ -697,9 +697,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: LISTINGHQPropiedadRechazadaWidget.routePath,
           builder: (context, params) => LISTINGHQPropiedadRechazadaWidget(
             processId: params.getParam(
-              'processId',
-              ParamType.String,
-            ) ??
+                  'processId',
+                  ParamType.String,
+                ) ??
                 '',
           ),
         ),

@@ -54,8 +54,8 @@ class _UnsuscribeModal3WidgetState extends State<UnsuscribeModal3Widget> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(42.0, 71.0, 42.0, 34.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      42.0, 71.0, 42.0, 34.0),
                   child: Text(
                     'Se canceló con éxito',
                     textAlign: TextAlign.center,

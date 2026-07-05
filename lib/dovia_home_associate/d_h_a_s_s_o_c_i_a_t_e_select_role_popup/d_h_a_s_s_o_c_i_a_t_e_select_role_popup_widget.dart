@@ -98,7 +98,8 @@ class _DHASSOCIATESelectRolePopupWidgetState
               ],
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
               child: Text(
                 'Cada rol en Dovia tiene funciones diferentes. Elige el que corresponde a tu actividad:',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -116,7 +117,8 @@ class _DHASSOCIATESelectRolePopupWidgetState
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
               child: RichText(
                 textScaler: MediaQuery.of(context).textScaler,
                 text: TextSpan(
@@ -235,7 +237,8 @@ class _DHASSOCIATESelectRolePopupWidgetState
             Align(
               alignment: const AlignmentDirectional(1.0, 0.0),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 6.67, 0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () {
                     print('Button pressed ...');
@@ -246,8 +249,8 @@ class _DHASSOCIATESelectRolePopupWidgetState
                     height: 24.0,
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         11.43, 5.71, 11.43, 5.71),
-                    iconPadding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).primary,
                     textStyle: FlutterFlowTheme.of(context).bodySmall.override(
                           font: GoogleFonts.inter(

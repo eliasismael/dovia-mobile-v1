@@ -17,7 +17,7 @@ class _Recorrido360ViewWebState extends State<Recorrido360View> {
   void initState() {
     super.initState();
     _viewId = 'recorrido-360-${widget.url.hashCode}';
-    
+
     ui_web.platformViewRegistry.registerViewFactory(_viewId, (int viewId) {
       final iframe = html.IFrameElement()
         ..src = widget.url

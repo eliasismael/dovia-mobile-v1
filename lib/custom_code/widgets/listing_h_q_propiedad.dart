@@ -185,22 +185,29 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         final Map<String, dynamic> data = jsonDecode(draftJson);
         bool hasText(dynamic v) => v is String && v.isNotEmpty;
         setState(() {
-          if (hasText(data['tipoVivienda'])) _tipoVivienda = data['tipoVivienda'];
+          if (hasText(data['tipoVivienda']))
+            _tipoVivienda = data['tipoVivienda'];
           if (hasText(data['direccion'])) _direccion = data['direccion'];
-          if (hasText(data['habitaciones'])) _habitaciones = data['habitaciones'];
+          if (hasText(data['habitaciones']))
+            _habitaciones = data['habitaciones'];
           if (hasText(data['banos'])) _banos = data['banos'];
           if (hasText(data['parqueo'])) _parqueo = data['parqueo'];
           if (hasText(data['pisos'])) _pisos = data['pisos'];
           if (hasText(data['mediosBanos'])) _mediosBanos = data['mediosBanos'];
           if (hasText(data['hasDanos'])) _hasDanos = data['hasDanos'];
 
-          if (hasText(data['descripcion'])) _descripcionController.text = data['descripcion'];
+          if (hasText(data['descripcion']))
+            _descripcionController.text = data['descripcion'];
           if (hasText(data['dudas'])) _dudasController.text = data['dudas'];
-          if (hasText(data['consideraciones'])) _consideracionesController.text = data['consideraciones'];
-          if (hasText(data['instrucciones'])) _instruccionesController.text = data['instrucciones'];
-          if (hasText(data['complejo'])) _complejoController.text = data['complejo'];
+          if (hasText(data['consideraciones']))
+            _consideracionesController.text = data['consideraciones'];
+          if (hasText(data['instrucciones']))
+            _instruccionesController.text = data['instrucciones'];
+          if (hasText(data['complejo']))
+            _complejoController.text = data['complejo'];
 
-          _overlayTrueKeys(_generalCharacteristics, data['generalCharacteristics']);
+          _overlayTrueKeys(
+              _generalCharacteristics, data['generalCharacteristics']);
           _overlayTrueKeys(_otherCharacteristics, data['otherCharacteristics']);
           _overlayTrueKeys(_propiedadAmenities, data['propiedadAmenities']);
           _overlayTrueKeys(_areasComunes, data['areasComunes']);
@@ -232,7 +239,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       });
     }
   }
-  
+
   void _populateFromInitialData(Map<String, dynamic> data) {
     // The property object can live in a few places depending on what the
     // /visits/{id}/details endpoint returns. Search the common shapes.
@@ -242,7 +249,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     } else if (data['features'] is Map || data['propertyType'] != null) {
       // `data` itself is the property.
       prop = data;
-    } else if (data['visit'] is Map && (data['visit'] as Map)['property'] is Map) {
+    } else if (data['visit'] is Map &&
+        (data['visit'] as Map)['property'] is Map) {
       prop = (data['visit'] as Map)['property'] as Map;
     }
 
@@ -257,7 +265,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
       // ── Dirección (read-only, from property location) ─────────────────────
       final addr = sub(sub(prop, 'location'), 'address');
-      _direccion = addr['fullAddress']?.toString() ?? addr['street']?.toString();
+      _direccion =
+          addr['fullAddress']?.toString() ?? addr['street']?.toString();
 
       // ── Descripción ───────────────────────────────────────────────────────
       final desc = prop['description'];
@@ -269,49 +278,58 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       // ── Características numéricas ─────────────────────────────────────────
       final gen = sub(sub(prop, 'features'), 'general');
       _habitaciones = (gen['bedrooms'] ?? gen['habitaciones'])?.toString();
-      _banos        = (gen['bathrooms'] ?? gen['banos'])?.toString();
-      _parqueo      = (gen['parkingSpots'] ?? gen['parking'] ?? gen['parqueo'])?.toString();
-      _pisos        = (gen['floors'] ?? gen['pisos'])?.toString();
-      _mediosBanos  = (gen['halfBathrooms'] ?? gen['mediosBanos'])?.toString();
+      _banos = (gen['bathrooms'] ?? gen['banos'])?.toString();
+      _parqueo =
+          (gen['parkingSpots'] ?? gen['parking'] ?? gen['parqueo'])?.toString();
+      _pisos = (gen['floors'] ?? gen['pisos'])?.toString();
+      _mediosBanos = (gen['halfBathrooms'] ?? gen['mediosBanos'])?.toString();
 
       // ── Características generales (checkboxes) ────────────────────────────
       final spaces = sub(sub(prop, 'features'), 'spaces');
-      _generalCharacteristics['Sala']                  = getBool(spaces, 'livingRoom');
-      _generalCharacteristics['Comedor']               = getBool(spaces, 'diningRoom');
-      _generalCharacteristics['Lavandería']            = getBool(spaces, 'laundryArea');
-      _generalCharacteristics['Cuarto de servicio']    = getBool(spaces, 'serviceRoom');
-      _generalCharacteristics['Amueblado']             = getBool(spaces, 'furnished');
+      _generalCharacteristics['Sala'] = getBool(spaces, 'livingRoom');
+      _generalCharacteristics['Comedor'] = getBool(spaces, 'diningRoom');
+      _generalCharacteristics['Lavandería'] = getBool(spaces, 'laundryArea');
+      _generalCharacteristics['Cuarto de servicio'] =
+          getBool(spaces, 'serviceRoom');
+      _generalCharacteristics['Amueblado'] = getBool(spaces, 'furnished');
       _generalCharacteristics['Cuota de mantenimiento'] =
           spaces['maintenanceFee'] != null && spaces['maintenanceFee'] != 0;
-      _generalCharacteristics['Cocina']                = getBool(spaces, 'kitchen');
+      _generalCharacteristics['Cocina'] = getBool(spaces, 'kitchen');
       _mergeAdditional(_generalCharacteristics, spaces);
 
       // ── Otras características ─────────────────────────────────────────────
       final others = sub(sub(prop, 'features'), 'others');
-      _otherCharacteristics['Pet Frendly']             = getBool(others, 'petFriendly');
-      _otherCharacteristics['Permitido para Airbnb']   = getBool(others, 'allowedForAirbnb');
-      _otherCharacteristics['Permitido subarrendar']   = getBool(others, 'allowedToSublet');
+      _otherCharacteristics['Pet Frendly'] = getBool(others, 'petFriendly');
+      _otherCharacteristics['Permitido para Airbnb'] =
+          getBool(others, 'allowedForAirbnb');
+      _otherCharacteristics['Permitido subarrendar'] =
+          getBool(others, 'allowedToSublet');
       _mergeAdditional(_otherCharacteristics, others);
 
       // ── Amenidades de la propiedad ────────────────────────────────────────
       final amenProp = sub(sub(sub(prop, 'features'), 'amenities'), 'property');
-      _propiedadAmenities['A/C']                       = getBool(amenProp, 'airConditioning');
-      _propiedadAmenities['Jardín']                    = getBool(amenProp, 'garden');
-      _propiedadAmenities['Área de churrasquera']      = getBool(amenProp, 'bbqArea');
-      _propiedadAmenities['Cocina con isla']           = getBool(amenProp, 'islandKitchen');
-      _propiedadAmenities['Sala de exterior']          = getBool(amenProp, 'outdoorLivingRoom');
-      _propiedadAmenities['Tina']                      = getBool(amenProp, 'bathtub');
+      _propiedadAmenities['A/C'] = getBool(amenProp, 'airConditioning');
+      _propiedadAmenities['Jardín'] = getBool(amenProp, 'garden');
+      _propiedadAmenities['Área de churrasquera'] =
+          getBool(amenProp, 'bbqArea');
+      _propiedadAmenities['Cocina con isla'] =
+          getBool(amenProp, 'islandKitchen');
+      _propiedadAmenities['Sala de exterior'] =
+          getBool(amenProp, 'outdoorLivingRoom');
+      _propiedadAmenities['Tina'] = getBool(amenProp, 'bathtub');
       _mergeAdditional(_propiedadAmenities, amenProp);
 
       // ── Áreas comunes ─────────────────────────────────────────────────────
-      final amenCommon = sub(sub(sub(prop, 'features'), 'amenities'), 'commonAreas');
-      _areasComunes['Piscina']             = getBool(amenCommon, 'pool');
-      _areasComunes['Parque de juegos']    = getBool(amenCommon, 'playground');
-      _areasComunes['Gimnasio']            = getBool(amenCommon, 'gym');
-      _areasComunes['Coworking']           = getBool(amenCommon, 'coworking');
-      _areasComunes['Salón de eventos']    = getBool(amenCommon, 'eventHall');
-      _areasComunes['Yoga Deck']           = getBool(amenCommon, 'yogaDeck');
-      _areasComunes['Cocina para eventos'] = getBool(amenCommon, 'eventKitchen');
+      final amenCommon =
+          sub(sub(sub(prop, 'features'), 'amenities'), 'commonAreas');
+      _areasComunes['Piscina'] = getBool(amenCommon, 'pool');
+      _areasComunes['Parque de juegos'] = getBool(amenCommon, 'playground');
+      _areasComunes['Gimnasio'] = getBool(amenCommon, 'gym');
+      _areasComunes['Coworking'] = getBool(amenCommon, 'coworking');
+      _areasComunes['Salón de eventos'] = getBool(amenCommon, 'eventHall');
+      _areasComunes['Yoga Deck'] = getBool(amenCommon, 'yogaDeck');
+      _areasComunes['Cocina para eventos'] =
+          getBool(amenCommon, 'eventKitchen');
       _mergeAdditional(_areasComunes, amenCommon);
 
       // ── Criterios de calificación (star ratings) ──────────────────────────
@@ -326,22 +344,23 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           _selectedCriteria.add(label);
         }
       }
-      setRating('Caminabilidad',          hood['walkable']);
-      setRating('Áreas verdes',           hood['greenAreas']);
-      setRating('Comercio y servicios',   hood['commerceAndServices']);
-      setRating('Centros corporativos',   hood['corporateCenters']);
+
+      setRating('Caminabilidad', hood['walkable']);
+      setRating('Áreas verdes', hood['greenAreas']);
+      setRating('Comercio y servicios', hood['commerceAndServices']);
+      setRating('Centros corporativos', hood['corporateCenters']);
       setRating('Tranquilidad y silencio', hood['tranquilityAndSilence']);
-      setRating('Recreación',             hood['recreation']);
-      setRating('Servicios esenciales',   hood['essentialServices']);
-      setRating('Colegios',               hood['schools']);
-      setRating('Conectividad vial',      hood['roadConnectivity']);
-      setRating('Seguridad',              hood['security']);
-      setRating('Zona turística',         hood['touristArea']);
-      setRating('Gastronomía',            hood['gastronomy']);
-      setRating('Vida urbana',            hood['urbanLife']);
-      setRating('Universidades',          hood['universities']);
-      setRating('Salud y hospitales',     hood['healthAndHospitals']);
-      setRating('Movilidad',              hood['mobility']);
+      setRating('Recreación', hood['recreation']);
+      setRating('Servicios esenciales', hood['essentialServices']);
+      setRating('Colegios', hood['schools']);
+      setRating('Conectividad vial', hood['roadConnectivity']);
+      setRating('Seguridad', hood['security']);
+      setRating('Zona turística', hood['touristArea']);
+      setRating('Gastronomía', hood['gastronomy']);
+      setRating('Vida urbana', hood['urbanLife']);
+      setRating('Universidades', hood['universities']);
+      setRating('Salud y hospitales', hood['healthAndHospitals']);
+      setRating('Movilidad', hood['mobility']);
 
       // ── Información para HQ ───────────────────────────────────────────────
       final infoHQ = prop['infoHQ'] is Map
@@ -356,7 +375,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       };
       services.forEach((k, v) {
         if (k == null) return;
-        final label = serviceLabels[k.toString().toLowerCase()] ?? _cap(k.toString());
+        final label =
+            serviceLabels[k.toString().toLowerCase()] ?? _cap(k.toString());
         _servicios[label] = v == true;
       });
 
@@ -383,13 +403,14 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           }
         });
       }
-      final video360 = prop['video360Url']?.toString() ?? prop['video360']?.toString();
+      final video360 =
+          prop['video360Url']?.toString() ?? prop['video360']?.toString();
       if (video360 != null && video360.isNotEmpty) {
         _images['Recorrido 360'] = [XFile(video360)];
       }
     });
   }
-  
+
   void _saveState() {
     if (!_isInit) return;
     final Map<String, dynamic> data = {
@@ -424,26 +445,27 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   bool validateForm() {
     bool hasError = false;
-    
+
     final requiredSections = ['Habitaciones', 'Sala', 'Comedor', 'Cocina'];
     for (final section in requiredSections) {
       if (_images[section] == null || _images[section]!.isEmpty) {
         hasError = true;
       }
     }
-    
+
     if (_tipoVivienda == null || _direccion == null || _habitaciones == null) {
       hasError = true;
     }
 
     if (_selectedCriteria.length < 3) {
-       hasError = true;
+      hasError = true;
     }
-    
+
     if (hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor completa todos los campos obligatorios y sube las fotos requeridas.'),
+          content: Text(
+              'Por favor completa todos los campos obligatorios y sube las fotos requeridas.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -489,8 +511,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     }
   }
 
-  String _cap(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+  String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
   // Backend propertyType enum <-> Spanish dropdown label.
   static const Map<String, String> _propertyTypeLabels = {
@@ -531,7 +552,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   }
 
   // ==================== DATA COLLECTION ====================
-  Future<void> _handleAction(VoidCallback? actionCallback, {bool isPublish = false}) async {
+  Future<void> _handleAction(VoidCallback? actionCallback,
+      {bool isPublish = false}) async {
     if (isPublish) {
       if (!validateForm()) return;
     }
@@ -587,56 +609,56 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              // ========== ALERT BANNER ==========
-              _buildAlertBanner(),
-              const SizedBox(height: 18),
+            // ========== ALERT BANNER ==========
+            _buildAlertBanner(),
+            const SizedBox(height: 18),
 
-              // ========== TITLE ==========
-              const Text(
-                'Revisa y organiza la información sobre la vivienda',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                  height: 22 / 16,
-                ),
+            // ========== TITLE ==========
+            const Text(
+              'Revisa y organiza la información sobre la vivienda',
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+                height: 22 / 16,
               ),
-              const SizedBox(height: 18),
+            ),
+            const SizedBox(height: 18),
 
-              // ========== SECTION 1: DATOS GENERALES ==========
-              _buildDatosGeneralesSection(),
+            // ========== SECTION 1: DATOS GENERALES ==========
+            _buildDatosGeneralesSection(),
 
-              // ========== SECTION 2: CARACTERÍSTICAS ==========
-              _buildCaracteristicasSection(),
+            // ========== SECTION 2: CARACTERÍSTICAS ==========
+            _buildCaracteristicasSection(),
 
-              // ========== SECTION 3: AMENIDADES ==========
-              _buildAmenidadesSection(),
+            // ========== SECTION 3: AMENIDADES ==========
+            _buildAmenidadesSection(),
 
-              // ========== SECTION 4: CRITERIOS DE CALIFICACIÓN ==========
-              _buildCriteriosSection(),
+            // ========== SECTION 4: CRITERIOS DE CALIFICACIÓN ==========
+            _buildCriteriosSection(),
 
-              // ========== SECTION 5: INFORMACIÓN PARA HQ ==========
-              _buildInfoHqSection(),
+            // ========== SECTION 5: INFORMACIÓN PARA HQ ==========
+            _buildInfoHqSection(),
 
-              // ========== SECTION 6: ADICIONALES ==========
-              _buildAdicionalesSection(),
+            // ========== SECTION 6: ADICIONALES ==========
+            _buildAdicionalesSection(),
 
-              const SizedBox(height: 18),
+            const SizedBox(height: 18),
 
-              // ========== SECTION 7: IMAGES ==========
-              _buildImagesSection(),
+            // ========== SECTION 7: IMAGES ==========
+            _buildImagesSection(),
 
-              const SizedBox(height: 18),
+            const SizedBox(height: 18),
 
-              // ========== ACTION BUTTONS ==========
-              _buildActionButtons(),
+            // ========== ACTION BUTTONS ==========
+            _buildActionButtons(),
 
-              const SizedBox(height: 24),
-            ],
-          ),
+            const SizedBox(height: 24),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   // ==================== ALERT BANNER ====================
@@ -679,7 +701,14 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             'Tipo de vivienda',
             _tipoVivienda,
             (val) => setState(() => _tipoVivienda = val),
-            options: ['Casa', 'Apartamento', 'Condominio', 'Local', 'Bodega', 'Otro'],
+            options: [
+              'Casa',
+              'Apartamento',
+              'Condominio',
+              'Local',
+              'Bodega',
+              'Otro'
+            ],
           ),
           const SizedBox(height: 11),
           // Dirección (read-only, comes from property)
@@ -975,7 +1004,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                 title: const Text('Añadir área adicional'),
                 content: TextField(
                   onChanged: (v) => newArea = v,
-                  decoration: const InputDecoration(hintText: 'Ej: Jardín trasero'),
+                  decoration:
+                      const InputDecoration(hintText: 'Ej: Jardín trasero'),
                 ),
                 actions: [
                   TextButton(
@@ -1089,7 +1119,9 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: (kIsWeb || file.path.startsWith('http') || file.path.startsWith('https'))
+                        child: (kIsWeb ||
+                                file.path.startsWith('http') ||
+                                file.path.startsWith('https'))
                             ? Image.network(
                                 file.path,
                                 height: 80,
@@ -1102,7 +1134,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                                       child: SizedBox(
                                         height: 18,
                                         width: 18,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
                                       ),
                                     ),
                                   );
@@ -1113,7 +1146,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                                       size: 24, color: Color(0xFF9E9E9E)),
                                 ),
                               )
-                            : Image.file(File(file.path), height: 80, width: 80, fit: BoxFit.cover),
+                            : Image.file(File(file.path),
+                                height: 80, width: 80, fit: BoxFit.cover),
                       ),
                       Positioned(
                         top: 4,
@@ -1129,7 +1163,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                               color: Colors.black54,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, size: 16, color: Colors.white),
+                            child: const Icon(Icons.close,
+                                size: 16, color: Colors.white),
                           ),
                         ),
                       ),
@@ -1168,7 +1203,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Error al guardar: ${e.toString().replaceAll('Exception: ', '')}'),
+                    content: Text(
+                        'Error al guardar: ${e.toString().replaceAll('Exception: ', '')}'),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -1204,7 +1240,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Error al publicar: ${e.toString().replaceAll('Exception: ', '')}'),
+                    content: Text(
+                        'Error al publicar: ${e.toString().replaceAll('Exception: ', '')}'),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -1323,7 +1360,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   }
 
   // ==================== REUSABLE: DYNAMIC ADD DIALOG ====================
-  Future<void> _showAddDialog(String displayTitle, Map<String, bool> targetMap) async {
+  Future<void> _showAddDialog(
+      String displayTitle, Map<String, bool> targetMap) async {
     String newValue = '';
     final added = await showDialog<bool>(
       context: context,
@@ -1363,7 +1401,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFFAFAFA),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE9EFF2), width: 1),
+                    border:
+                        Border.all(color: const Color(0xFFE9EFF2), width: 1),
                   ),
                   child: TextField(
                     autofocus: true,
@@ -1374,7 +1413,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                       color: textColor,
                     ),
                     decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       border: InputBorder.none,
                       hintText: 'Escribe aquí...',
                       hintStyle: TextStyle(
@@ -1501,7 +1541,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                 ),
               ),
               isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down, size: 16, color: placeholderColor),
+              icon: const Icon(Icons.keyboard_arrow_down,
+                  size: 16, color: placeholderColor),
               style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 12,
@@ -1599,8 +1640,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   // ==================== REUSABLE: SMALL DROPDOWN ====================
   Widget _buildSmallDropdown(String? value, ValueChanged<String?> onChanged) {
-    final List<String> items =
-        List.generate(11, (i) => i.toString()); // 0–10
+    final List<String> items = List.generate(11, (i) => i.toString()); // 0–10
     return Container(
       height: 36,
       decoration: BoxDecoration(
@@ -1620,7 +1660,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             ),
           ),
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, size: 10, color: placeholderColor),
+          icon: const Icon(Icons.keyboard_arrow_down,
+              size: 10, color: placeholderColor),
           style: const TextStyle(
             fontFamily: 'Public Sans',
             fontSize: 12,
@@ -1677,7 +1718,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                 ),
               ),
               isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down, size: 24, color: placeholderColor),
+              icon: const Icon(Icons.keyboard_arrow_down,
+                  size: 24, color: placeholderColor),
               style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 14,

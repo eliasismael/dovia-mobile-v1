@@ -69,7 +69,9 @@ class _DOVIACLIENTMisPropiedadesVisita2WidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(showMap: false, showCurrency: false,
+                      child: const DOVIASHAREDHeaderWidget(
+                        showMap: false,
+                        showCurrency: false,
                         title: 'Visita',
                       ),
                     ),

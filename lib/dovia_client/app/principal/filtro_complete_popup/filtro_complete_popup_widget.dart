@@ -142,7 +142,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 decoration: BoxDecoration(
@@ -176,8 +177,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 10.0, 0.0, 0.0),
                       child: FlutterFlowDropDown<String>(
                         controller: _model.dropDownValueController1 ??=
                             FormFieldController<String>(null),
@@ -229,7 +230,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 decoration: BoxDecoration(
@@ -263,8 +265,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 10.0, 0.0, 0.0),
                       child: FlutterFlowDropDown<String>(
                         controller: _model.dropDownValueController2 ??=
                             FormFieldController<String>(null),
@@ -316,7 +318,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 decoration: BoxDecoration(
@@ -350,8 +353,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 10.0, 0.0, 0.0),
                       child: FlutterFlowDropDown<String>(
                         controller: _model.dropDownValueController3 ??=
                             FormFieldController<String>(null),
@@ -405,7 +408,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
             Align(
               alignment: const AlignmentDirectional(-1.0, 0.0),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                 child: Text(
                   'Área de construcción',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -426,7 +430,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -721,7 +726,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
             Align(
               alignment: const AlignmentDirectional(-1.0, 0.0),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                 child: Text(
                   'Precio',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -742,7 +748,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1035,7 +1042,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Text(
                 'Describe que otras características son importantes para ti',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -1055,7 +1063,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: SizedBox(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 child: TextFormField(
@@ -1134,8 +1143,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                     ),
                     filled: true,
                     fillColor: FlutterFlowTheme.of(context).secondaryBackground,
-                    contentPadding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 0.0, 40.0),
+                    contentPadding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 40.0, 0.0, 40.0),
                   ),
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: GoogleFonts.inter(
@@ -1160,7 +1169,8 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

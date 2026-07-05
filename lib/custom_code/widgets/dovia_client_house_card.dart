@@ -90,9 +90,8 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
       return;
     }
 
-    final response = await DOVIAAPIFavoriteContextGroup
-        .checkIfPropertyIsFavoritedCall
-        .call(
+    final response =
+        await DOVIAAPIFavoriteContextGroup.checkIfPropertyIsFavoritedCall.call(
       propertyId: propertyId,
       authToken: authToken,
     );
@@ -110,9 +109,9 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                     .toString() ==
                 '1' ||
             (DOVIAAPIFavoriteContextGroup.checkIfPropertyIsFavoritedCall
-                        .foledersStoredIn(response.jsonBody)
-                        ?.isNotEmpty ??
-                    false);
+                    .foledersStoredIn(response.jsonBody)
+                    ?.isNotEmpty ??
+                false);
 
     if (_isFavorite != isFavoriteFromApi) {
       setState(() {
@@ -255,7 +254,9 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(
-                  (widget.name == null || widget.name!.isEmpty) ? "Propiedad sin nombre" : widget.name!,
+                  (widget.name == null || widget.name!.isEmpty)
+                      ? "Propiedad sin nombre"
+                      : widget.name!,
                   style: GoogleFonts.publicSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -281,10 +282,8 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildSpecItem(
-                        "${widget.constructionArea ?? 0} M2"),
-                    _buildSpecItem(
-                        "${widget.landArea?.toInt() ?? 0} M2"),
+                    _buildSpecItem("${widget.constructionArea ?? 0} M2"),
+                    _buildSpecItem("${widget.landArea?.toInt() ?? 0} M2"),
                     _buildSpecItem("${widget.bedrooms ?? 0} Hab."),
                     _buildSpecItem("${widget.bathrooms ?? 0} Baños"),
                   ],

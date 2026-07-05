@@ -840,7 +840,8 @@ class ResubmitToHQReviewListerHQCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Resubmit to HQ Review (Lister HQ)',
-      apiUrl: '$baseUrl/legal-processes/$processId/lister-hq/resubmit-to-hq-review',
+      apiUrl:
+          '$baseUrl/legal-processes/$processId/lister-hq/resubmit-to-hq-review',
       callType: ApiCallType.POST,
       headers: {
         if (authToken != null && authToken.isNotEmpty)

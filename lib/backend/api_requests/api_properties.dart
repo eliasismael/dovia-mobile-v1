@@ -1,4 +1,3 @@
-
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
 import 'api_helpers.dart';
@@ -131,10 +130,7 @@ class CreatePropertyBasicSALEAndRENTCall {
       "listingType": ["SALE", "RENT"],
       "name": name,
       "address": address,
-      "geoLocation": {
-        "longitude": longitude,
-        "latitude": latitude
-      },
+      "geoLocation": {"longitude": longitude, "latitude": latitude},
       "saleInfo": {
         if (salePrice != null) "salePrice": salePrice,
         if (maintenanceFee != null) "maintenanceFee": maintenanceFee,
@@ -145,14 +141,17 @@ class CreatePropertyBasicSALEAndRENTCall {
         "rentalConditions": {
           if (minimumTimeRent != null) "minimumTime": minimumTimeRent,
           if (allowedUses?.isNotEmpty == true) "allowedUses": allowedUses,
-          if (prohibitedUses?.isNotEmpty == true) "prohibitedUses": prohibitedUses,
+          if (prohibitedUses?.isNotEmpty == true)
+            "prohibitedUses": prohibitedUses,
           if (availableFrom?.isNotEmpty == true) "availableFrom": availableFrom,
           if (othersRent?.isNotEmpty == true) "others": othersRent
         }
       },
     };
 
-    if (finca?.isNotEmpty == true || follio?.isNotEmpty == true || libro?.isNotEmpty == true) {
+    if (finca?.isNotEmpty == true ||
+        follio?.isNotEmpty == true ||
+        libro?.isNotEmpty == true) {
       bodyRaw["legalInfo"] = {
         if (finca?.isNotEmpty == true) "finca": finca,
         if (follio?.isNotEmpty == true) "folio": follio,
@@ -160,9 +159,10 @@ class CreatePropertyBasicSALEAndRENTCall {
       };
     }
 
-    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
-        ? legalRepresentative
-        : companyName;
+    final effectiveLegalRep =
+        (legalRepresentative != null && legalRepresentative.isNotEmpty)
+            ? legalRepresentative
+            : companyName;
 
     if (isCompanyOwned == true) {
       bodyRaw["ownership"] = {
@@ -224,23 +224,23 @@ class CreatePropertyBasicRENTCall {
       "listingType": ["RENT"],
       "name": name,
       "address": address,
-      "geoLocation": {
-        "longitude": longitude,
-        "latitude": latitude
-      },
+      "geoLocation": {"longitude": longitude, "latitude": latitude},
       "rentInfo": {
         if (monthlyRent != null) "monthlyRent": monthlyRent,
         "rentalConditions": {
           if (minimumTimeRent != null) "minimumTime": minimumTimeRent,
           if (allowedUses?.isNotEmpty == true) "allowedUses": allowedUses,
-          if (prohibitedUses?.isNotEmpty == true) "prohibitedUses": prohibitedUses,
+          if (prohibitedUses?.isNotEmpty == true)
+            "prohibitedUses": prohibitedUses,
           if (availableFrom?.isNotEmpty == true) "availableFrom": availableFrom,
           if (othersRent?.isNotEmpty == true) "others": othersRent
         }
       },
     };
 
-    if (finca?.isNotEmpty == true || follio?.isNotEmpty == true || libro?.isNotEmpty == true) {
+    if (finca?.isNotEmpty == true ||
+        follio?.isNotEmpty == true ||
+        libro?.isNotEmpty == true) {
       bodyRaw["legalInfo"] = {
         if (finca?.isNotEmpty == true) "finca": finca,
         if (follio?.isNotEmpty == true) "folio": follio,
@@ -248,9 +248,10 @@ class CreatePropertyBasicRENTCall {
       };
     }
 
-    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
-        ? legalRepresentative
-        : companyName;
+    final effectiveLegalRep =
+        (legalRepresentative != null && legalRepresentative.isNotEmpty)
+            ? legalRepresentative
+            : companyName;
 
     if (isCompanyOwned == true) {
       bodyRaw["ownership"] = {
@@ -314,10 +315,7 @@ class CreatePropertyBasicSALECall {
       "listingType": ["SALE"],
       "name": name,
       "address": address,
-      "geoLocation": {
-        "longitude": longitude,
-        "latitude": latitude
-      },
+      "geoLocation": {"longitude": longitude, "latitude": latitude},
       "saleInfo": {
         if (salePrice != null) "salePrice": salePrice,
         if (maintenanceFee != null) "maintenanceFee": maintenanceFee,
@@ -325,7 +323,9 @@ class CreatePropertyBasicSALECall {
       },
     };
 
-    if (finca?.isNotEmpty == true || follio?.isNotEmpty == true || libro?.isNotEmpty == true) {
+    if (finca?.isNotEmpty == true ||
+        follio?.isNotEmpty == true ||
+        libro?.isNotEmpty == true) {
       bodyRaw["legalInfo"] = {
         if (finca?.isNotEmpty == true) "finca": finca,
         if (follio?.isNotEmpty == true) "folio": follio,
@@ -333,9 +333,10 @@ class CreatePropertyBasicSALECall {
       };
     }
 
-    final effectiveLegalRep = (legalRepresentative != null && legalRepresentative.isNotEmpty)
-        ? legalRepresentative
-        : companyName;
+    final effectiveLegalRep =
+        (legalRepresentative != null && legalRepresentative.isNotEmpty)
+            ? legalRepresentative
+            : companyName;
 
     if (isCompanyOwned == true) {
       bodyRaw["ownership"] = {
@@ -790,14 +791,23 @@ class UpdatePropertyCall {
       body['listingType'] = listingType;
     }
 
-    final bool hasSale = listingType?.contains('SALE') == true || salePrice != null || maintenanceFee != null || singlePropertyTax != null;
-    final bool hasRent = listingType?.contains('RENT') == true || monthlyRent != null || minimumTimeRent != null || othersRent != null || allowedUses != null || availableFrom != null;
+    final bool hasSale = listingType?.contains('SALE') == true ||
+        salePrice != null ||
+        maintenanceFee != null ||
+        singlePropertyTax != null;
+    final bool hasRent = listingType?.contains('RENT') == true ||
+        monthlyRent != null ||
+        minimumTimeRent != null ||
+        othersRent != null ||
+        allowedUses != null ||
+        availableFrom != null;
 
     if (hasSale) {
       final Map<String, dynamic> saleInfo = {};
       if (salePrice != null) saleInfo['salePrice'] = salePrice;
       if (maintenanceFee != null) saleInfo['maintenanceFee'] = maintenanceFee;
-      if (singlePropertyTax != null) saleInfo['singlePropertyTax'] = singlePropertyTax;
+      if (singlePropertyTax != null)
+        saleInfo['singlePropertyTax'] = singlePropertyTax;
       if (saleInfo.isNotEmpty) body['saleInfo'] = saleInfo;
     }
 
@@ -807,8 +817,10 @@ class UpdatePropertyCall {
       final Map<String, dynamic> conditions = {};
       if (minimumTimeRent != null) conditions['minimumTime'] = minimumTimeRent;
       if (othersRent?.isNotEmpty == true) conditions['others'] = othersRent;
-      if (allowedUses?.isNotEmpty == true) conditions['allowedUses'] = allowedUses;
-      if (availableFrom?.isNotEmpty == true) conditions['availableFrom'] = availableFrom;
+      if (allowedUses?.isNotEmpty == true)
+        conditions['allowedUses'] = allowedUses;
+      if (availableFrom?.isNotEmpty == true)
+        conditions['availableFrom'] = availableFrom;
       if (conditions.isNotEmpty) rentInfo['rentalConditions'] = conditions;
       if (rentInfo.isNotEmpty) body['rentInfo'] = rentInfo;
     }

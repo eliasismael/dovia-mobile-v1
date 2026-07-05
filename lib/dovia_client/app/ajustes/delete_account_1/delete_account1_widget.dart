@@ -79,10 +79,10 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
                   options: FFButtonOptions(
                     width: 120.0,
                     height: 40.0,
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                    iconPadding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        16.0, 0.0, 16.0, 0.0),
+                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).tertiary,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           font: GoogleFonts.publicSans(
@@ -118,8 +118,10 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
                           alignment: Alignment.bottomCenter,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24)),
                             ),
                             child: Padding(
                               padding: MediaQuery.viewInsetsOf(context),
@@ -132,10 +134,10 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
                     text: 'Eliminar cuenta',
                     options: FFButtonOptions(
                       height: 40.0,
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                      iconPadding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          16.0, 0.0, 16.0, 0.0),
+                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
                       color: const Color(0xFFE57373),
                       textStyle:
                           FlutterFlowTheme.of(context).titleSmall.override(

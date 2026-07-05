@@ -102,13 +102,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     if (mounted) {
       final listingTypeRaw =
           getJsonField(response.jsonBody, r'''$.data.data.listingType''') ??
-          getJsonField(response.jsonBody, r'''$.data.listingType''');
-      final parsed = (listingTypeRaw as List?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [];
+              getJsonField(response.jsonBody, r'''$.data.listingType''');
+      final parsed =
+          (listingTypeRaw as List?)?.map((e) => e.toString()).toList() ?? [];
       final d = (getJsonField(response.jsonBody, r'''$.data.data''') ??
-                 getJsonField(response.jsonBody, r'''$.data''')) as Map?;
+          getJsonField(response.jsonBody, r'''$.data''')) as Map?;
 
       final nameRaw = d?['name'] ?? d?['title'];
       final general = d?['features']?['general'] as Map?;
@@ -148,27 +146,40 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         _parkingSpots = (general?['parkingSpots'] as num?)?.toInt() ?? 0;
         _floors = (general?['floors'] as num?)?.toInt() ?? 0;
         _carouselImages = imagesList;
-        _propertyCode = d?['code']?.toString() ?? d?['internalCode']?.toString() ?? d?['folio']?.toString() ?? '';
+        _propertyCode = d?['code']?.toString() ??
+            d?['internalCode']?.toString() ??
+            d?['folio']?.toString() ??
+            '';
         if (_propertyCode.isEmpty && widget.propertyId != null) {
-          _propertyCode = widget.propertyId!.length > 5 
-              ? widget.propertyId!.substring(widget.propertyId!.length - 5).toUpperCase() 
+          _propertyCode = widget.propertyId!.length > 5
+              ? widget.propertyId!
+                  .substring(widget.propertyId!.length - 5)
+                  .toUpperCase()
               : widget.propertyId!.toUpperCase();
         }
 
         final loc = d?['location'] as Map?;
         final geo = loc?['geo'] as Map?;
         final coords = geo?['coordinates'] as List?;
-        _lng = coords != null && coords.isNotEmpty ? (coords[0] as num).toDouble() : -90.5;
-        _lat = coords != null && coords.length >= 2 ? (coords[1] as num).toDouble() : 14.3;
+        _lng = coords != null && coords.isNotEmpty
+            ? (coords[0] as num).toDouble()
+            : -90.5;
+        _lat = coords != null && coords.length >= 2
+            ? (coords[1] as num).toDouble()
+            : 14.3;
 
-        _amenitiesData = (d?['features']?['amenities'] as Map?)?.cast<String, dynamic>();
+        _amenitiesData =
+            (d?['features']?['amenities'] as Map?)?.cast<String, dynamic>();
 
         final hood = d?['features']?['neighborhood'] as Map?;
-        _sectorDescription = hood?['description']?.toString() ?? loc?['neighborhoodDescription']?.toString() ?? '';
-        
+        _sectorDescription = hood?['description']?.toString() ??
+            loc?['neighborhoodDescription']?.toString() ??
+            '';
+
         double parseRating(dynamic v) {
           if (v == null) return 5.0;
-          return (v is num ? v : double.tryParse(v.toString()) ?? 5.0).toDouble();
+          return (v is num ? v : double.tryParse(v.toString()) ?? 5.0)
+              .toDouble();
         }
 
         _caminableRating = parseRating(hood?['walkable']);
@@ -176,9 +187,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         _verdesRating = parseRating(hood?['greenAreas']);
       });
 
-      final createdBy = getJsonField(response.jsonBody, r'''$.data.data.createdBy''')?.toString() ?? 
-                        getJsonField(response.jsonBody, r'''$.data.createdBy''')?.toString();
-      
+      final createdBy = getJsonField(
+                  response.jsonBody, r'''$.data.data.createdBy''')
+              ?.toString() ??
+          getJsonField(response.jsonBody, r'''$.data.createdBy''')?.toString();
+
       if (createdBy != currentUserUid) {
         DOVIAAPIMetricsContextGroup.trackPropertyViewCall.call(
           propertyId: widget.propertyId,
@@ -190,8 +203,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
 
   void _trackInteraction() {
     if (widget.propertyId == null || widget.propertyId!.isEmpty) return;
-    final createdBy = getJsonField(_propertyData?.jsonBody, r'''$.data.data.createdBy''')?.toString() ?? 
-                      getJsonField(_propertyData?.jsonBody, r'''$.data.createdBy''')?.toString();
+    final createdBy =
+        getJsonField(_propertyData?.jsonBody, r'''$.data.data.createdBy''')
+                ?.toString() ??
+            getJsonField(_propertyData?.jsonBody, r'''$.data.createdBy''')
+                ?.toString();
     if (createdBy != currentUserUid) {
       DOVIAAPIMetricsContextGroup.trackPropertyInteractionCall.call(
         propertyId: widget.propertyId,
@@ -244,7 +260,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   bool get _has360Url {
     final body = _propertyData?.jsonBody;
     if (body == null) return false;
-    final url = DOVIAAPIPropertyContextGroup.getPropertyByIDCall.video360Url(body);
+    final url =
+        DOVIAAPIPropertyContextGroup.getPropertyByIDCall.video360Url(body);
     return url != null && url.isNotEmpty;
   }
 
@@ -335,18 +352,29 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         items = body;
       } else {
         items = getJsonField(body, r'''$.data.items''') as List? ??
-                getJsonField(body, r'''$.data''') as List? ??
-                getJsonField(body, r'''$.items''') as List? ?? 
-                [];
+            getJsonField(body, r'''$.data''') as List? ??
+            getJsonField(body, r'''$.items''') as List? ??
+            [];
       }
-      
+
       final activeOffers = items.where((item) {
-        final status1 = getJsonField(item, r'''$.status''')?.toString().toUpperCase() ?? '';
-        final status2 = getJsonField(item, r'''$.offerStatus''')?.toString().toUpperCase() ?? '';
-        final status3 = getJsonField(item, r'''$.processStatus''')?.toString().toUpperCase() ?? '';
-        
-        final isCancelled = (status1 == 'CANCELLED' || status2 == 'CANCELLED' || status3 == 'CANCELLED');
-        final isRejected = (status1 == 'REJECTED' || status2 == 'REJECTED' || status3 == 'REJECTED');
+        final status1 =
+            getJsonField(item, r'''$.status''')?.toString().toUpperCase() ?? '';
+        final status2 = getJsonField(item, r'''$.offerStatus''')
+                ?.toString()
+                .toUpperCase() ??
+            '';
+        final status3 = getJsonField(item, r'''$.processStatus''')
+                ?.toString()
+                .toUpperCase() ??
+            '';
+
+        final isCancelled = (status1 == 'CANCELLED' ||
+            status2 == 'CANCELLED' ||
+            status3 == 'CANCELLED');
+        final isRejected = (status1 == 'REJECTED' ||
+            status2 == 'REJECTED' ||
+            status3 == 'REJECTED');
 
         final itemStr = item.toString();
         final wid = widget.propertyId ?? 'UNKNOWN_ID';
@@ -357,9 +385,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
 
       bool blockOffers = false;
       if (hasSale && hasRent) {
-         if (activeOffers.length >= 2) blockOffers = true;
+        if (activeOffers.length >= 2) blockOffers = true;
       } else {
-         if (activeOffers.isNotEmpty) blockOffers = true;
+        if (activeOffers.isNotEmpty) blockOffers = true;
       }
 
       if (blockOffers) {
@@ -417,9 +445,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.inter(
                         fontWeight: FontWeight.bold,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .fontStyle,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                       ),
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -432,12 +459,10 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                 textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.inter(
-                        fontWeight: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .fontWeight,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .fontStyle,
+                        fontWeight:
+                            FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                       ),
                       color: FlutterFlowTheme.of(context).secondaryText,
                       letterSpacing: 0,
@@ -477,7 +502,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
-                        context.pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
+                        context
+                            .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: FlutterFlowTheme.of(context).primary,
@@ -599,10 +625,12 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       highlightColor: Colors.transparent,
                                       onTap: () async {
                                         context.pushNamed(
-                                            DOVIACLIENTHomePageWidget.routeName);
+                                            DOVIACLIENTHomePageWidget
+                                                .routeName);
                                       },
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(0.0),
+                                        borderRadius:
+                                            BorderRadius.circular(0.0),
                                         child: SvgPicture.asset(
                                           'assets/images/D-verde.svg',
                                           width: 28.0,
@@ -619,7 +647,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: _propertyName.isNotEmpty ? _propertyName : 'Propiedad',
+                                      text: _propertyName.isNotEmpty
+                                          ? _propertyName
+                                          : 'Propiedad',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -646,9 +676,10 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       .override(
                                         font: GoogleFonts.inter(
                                           fontWeight: FontWeight.w600,
-                                          fontStyle: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .fontStyle,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
                                         ),
                                         fontSize: 18.0,
                                         letterSpacing: 0.0,
@@ -705,89 +736,102 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                           children: [
                             if (widget.isReadOnly)
                               Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 12.0, 0.0, 0.0),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     if (_propertyCode.isNotEmpty)
                                       Text(
                                         'Código $_propertyCode',
-                                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                          font: GoogleFonts.publicSans(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                          ),
-                                          fontSize: 14.0,
-                                          color: FlutterFlowTheme.of(context).primary,
-                                        ),
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              font: GoogleFonts.publicSans(
+                                                fontWeight: FontWeight.w600,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                              ),
+                                              fontSize: 14.0,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                            ),
                                       )
                                     else
                                       const SizedBox.shrink(),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                    Container(
-                                      width: 32.0,
-                                      height: 32.0,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF7F7F7),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            blurRadius: 10.0,
-                                            color: Color(0x33000000),
-                                            offset: Offset(0.0, 2.0),
-                                          )
-                                        ],
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: InkWell(
-                                        onTap: _trackInteraction,
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(8.0),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(6.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/download.svg',
-                                              fit: BoxFit.contain,
+                                        Container(
+                                          width: 32.0,
+                                          height: 32.0,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFF7F7F7),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                blurRadius: 10.0,
+                                                color: Color(0x33000000),
+                                                offset: Offset(0.0, 2.0),
+                                              )
+                                            ],
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: InkWell(
+                                            onTap: _trackInteraction,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6.0),
+                                                child: SvgPicture.asset(
+                                                  'assets/images/download.svg',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8.0),
-                                    Container(
-                                      width: 32.0,
-                                      height: 32.0,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF7F7F7),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            blurRadius: 10.0,
-                                            color: Color(0x33000000),
-                                            offset: Offset(0.0, 2.0),
-                                          )
-                                        ],
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: InkWell(
-                                        onTap: _trackInteraction,
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(8.0),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(6.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/share-android.svg',
-                                              fit: BoxFit.contain,
+                                        const SizedBox(width: 8.0),
+                                        Container(
+                                          width: 32.0,
+                                          height: 32.0,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFF7F7F7),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                blurRadius: 10.0,
+                                                color: Color(0x33000000),
+                                                offset: Offset(0.0, 2.0),
+                                              )
+                                            ],
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: InkWell(
+                                            onTap: _trackInteraction,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6.0),
+                                                child: SvgPicture.asset(
+                                                  'assets/images/share-android.svg',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 40.0, 0.0, 0.0),
@@ -804,7 +848,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     onTap: () async {
                                       await _model.carouselController
                                           ?.previousPage(
-                                        duration: const Duration(milliseconds: 300),
+                                        duration:
+                                            const Duration(milliseconds: 300),
                                         curve: Curves.ease,
                                       );
                                     },
@@ -931,7 +976,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     highlightColor: Colors.transparent,
                                     onTap: () async {
                                       await _model.carouselController?.nextPage(
-                                        duration: const Duration(milliseconds: 300),
+                                        duration:
+                                            const Duration(milliseconds: 300),
                                         curve: Curves.ease,
                                       );
                                     },
@@ -972,47 +1018,48 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         InkWell(
-                                           splashColor: Colors.transparent,
-                                           focusColor: Colors.transparent,
-                                           hoverColor: Colors.transparent,
-                                           highlightColor: Colors.transparent,
-                                           onTap: _has360Url ? _show360 : null,
-                                           child: Container(
-                                             width: 40.0,
-                                             height: 40.0,
-                                             decoration: BoxDecoration(
-                                               color: _has360Url
-                                                   ? const Color(0xFFF7F7F7)
-                                                   : const Color(0xFFE0E0E0),
-                                               boxShadow: _has360Url
-                                                   ? const [
-                                                       BoxShadow(
-                                                         blurRadius: 10.0,
-                                                         color: Color(0x33000000),
-                                                         offset: Offset(
-                                                           0.0,
-                                                           2.0,
-                                                         ),
-                                                       )
-                                                     ]
-                                                   : null,
-                                               shape: BoxShape.circle,
-                                             ),
-                                             child: ClipRRect(
-                                               borderRadius:
-                                                   BorderRadius.circular(8.0),
-                                               child: Opacity(
-                                                 opacity: _has360Url ? 1.0 : 0.4,
-                                                 child: SvgPicture.asset(
-                                                   'assets/images/360-view.svg',
-                                                   width: 200.0,
-                                                   height: 200.0,
-                                                   fit: BoxFit.none,
-                                                 ),
-                                               ),
-                                             ),
-                                           ),
-                                         ),
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: _has360Url ? _show360 : null,
+                                          child: Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: BoxDecoration(
+                                              color: _has360Url
+                                                  ? const Color(0xFFF7F7F7)
+                                                  : const Color(0xFFE0E0E0),
+                                              boxShadow: _has360Url
+                                                  ? const [
+                                                      BoxShadow(
+                                                        blurRadius: 10.0,
+                                                        color:
+                                                            Color(0x33000000),
+                                                        offset: Offset(
+                                                          0.0,
+                                                          2.0,
+                                                        ),
+                                                      )
+                                                    ]
+                                                  : null,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: Opacity(
+                                                opacity: _has360Url ? 1.0 : 0.4,
+                                                child: SvgPicture.asset(
+                                                  'assets/images/360-view.svg',
+                                                  width: 200.0,
+                                                  height: 200.0,
+                                                  fit: BoxFit.none,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                         InkWell(
                                           splashColor: Colors.transparent,
                                           focusColor: Colors.transparent,
@@ -1093,144 +1140,172 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       decoration: const BoxDecoration(),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          width: 40.0,
-                                          height: 40.0,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFF7F7F7),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 10.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(
-                                                  0.0,
-                                                  2.0,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFFF7F7F7),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  blurRadius: 10.0,
+                                                  color: Color(0x33000000),
+                                                  offset: Offset(
+                                                    0.0,
+                                                    2.0,
+                                                  ),
+                                                )
+                                              ],
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: InkWell(
+                                              onTap: () async {
+                                                _trackInteraction();
+                                              },
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                child: SvgPicture.asset(
+                                                  'assets/images/download.svg',
+                                                  width: 200.0,
+                                                  height: 200.0,
+                                                  fit: BoxFit.none,
                                                 ),
-                                              )
-                                            ],
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: InkWell(
-                                            onTap: () async {
-                                              _trackInteraction();
-                                            },
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: SvgPicture.asset(
-                                                'assets/images/download.svg',
-                                                width: 200.0,
-                                                height: 200.0,
-                                                fit: BoxFit.none,
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        Container(
-                                          width: 40.0,
-                                          height: 40.0,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFF7F7F7),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 10.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(
-                                                  0.0,
-                                                  2.0,
+                                          Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFFF7F7F7),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  blurRadius: 10.0,
+                                                  color: Color(0x33000000),
+                                                  offset: Offset(
+                                                    0.0,
+                                                    2.0,
+                                                  ),
+                                                )
+                                              ],
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: InkWell(
+                                              onTap: () async {
+                                                _trackInteraction();
+                                              },
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                child: SvgPicture.asset(
+                                                  'assets/images/share-android.svg',
+                                                  width: 200.0,
+                                                  height: 200.0,
+                                                  fit: BoxFit.none,
                                                 ),
-                                              )
-                                            ],
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: InkWell(
-                                            onTap: () async {
-                                              _trackInteraction();
-                                            },
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: SvgPicture.asset(
-                                                'assets/images/share-android.svg',
-                                                width: 200.0,
-                                                height: 200.0,
-                                                fit: BoxFit.none,
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ].divide(const SizedBox(width: 8.0)),
+                                        ].divide(const SizedBox(width: 8.0)),
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
                             if (!widget.isReadOnly)
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 22.0, 0.0, 0.0),
-                              child: Container(
-                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      blurRadius: 4.0,
-                                      color: Color(0x33000000),
-                                      offset: Offset(
-                                        0.0,
-                                        2.0,
-                                      ),
-                                    )
-                                  ],
-                                  borderRadius: BorderRadius.circular(100.0),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      10.0, 10.0, 10.0, 10.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 10.0, 0.0, 10.0),
-                                        child: InkWell(
-                                          splashColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: () async {
-                                            _model.ventaORenta = 'venta';
-                                            safeSetState(() {});
-                                          },
-                                          child: Container(
-                                            width: 144.0,
-                                            height: 44.0,
-                                            decoration: BoxDecoration(
-                                              color: _model.ventaORenta ==
-                                                      'venta'
-                                                  ? FlutterFlowTheme.of(context)
-                                                      .accent1
-                                                  : FlutterFlowTheme.of(context)
-                                                      .tertiary,
-                                              borderRadius:
-                                                  BorderRadius.circular(100.0),
-                                            ),
-                                            child: Align(
-                                              alignment: const AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Text(
-                                                'Venta',
-                                                style: FlutterFlowTheme.of(
-                                                        context)
-                                                    .bodyMedium
-                                                    .override(
-                                                      font: GoogleFonts.inter(
+                                    0.0, 22.0, 0.0, 0.0),
+                                child: Container(
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  decoration: BoxDecoration(
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        blurRadius: 4.0,
+                                        color: Color(0x33000000),
+                                        offset: Offset(
+                                          0.0,
+                                          2.0,
+                                        ),
+                                      )
+                                    ],
+                                    borderRadius: BorderRadius.circular(100.0),
+                                  ),
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            10.0, 10.0, 10.0, 10.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                          child: InkWell(
+                                            splashColor: Colors.transparent,
+                                            focusColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            onTap: () async {
+                                              _model.ventaORenta = 'venta';
+                                              safeSetState(() {});
+                                            },
+                                            child: Container(
+                                              width: 144.0,
+                                              height: 44.0,
+                                              decoration: BoxDecoration(
+                                                color: _model.ventaORenta ==
+                                                        'venta'
+                                                    ? FlutterFlowTheme.of(
+                                                            context)
+                                                        .accent1
+                                                    : FlutterFlowTheme.of(
+                                                            context)
+                                                        .tertiary,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        100.0),
+                                              ),
+                                              child: Align(
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 0.0),
+                                                child: Text(
+                                                  'Venta',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        color: _model
+                                                                    .ventaORenta ==
+                                                                'venta'
+                                                            ? FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText
+                                                            : FlutterFlowTheme
+                                                                    .of(context)
+                                                                .secondaryText,
+                                                        fontSize: 14.0,
+                                                        letterSpacing: 0.0,
                                                         fontWeight:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -1242,69 +1317,73 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                                 .bodyMedium
                                                                 .fontStyle,
                                                       ),
-                                                      color: _model
-                                                                  .ventaORenta ==
-                                                              'venta'
-                                                          ? FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primaryText
-                                                          : FlutterFlowTheme.of(
-                                                                  context)
-                                                              .secondaryText,
-                                                      fontSize: 14.0,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .fontStyle,
-                                                    ),
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 10.0, 0.0, 10.0),
-                                        child: InkWell(
-                                          splashColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: () async {
-                                            _model.ventaORenta = 'renta';
-                                            safeSetState(() {});
-                                          },
-                                          child: Container(
-                                            width: 144.0,
-                                            height: 44.0,
-                                            decoration: BoxDecoration(
-                                              color: _model.ventaORenta ==
-                                                      'renta'
-                                                  ? FlutterFlowTheme.of(context)
-                                                      .accent1
-                                                  : FlutterFlowTheme.of(context)
-                                                      .tertiary,
-                                              borderRadius:
-                                                  BorderRadius.circular(100.0),
-                                            ),
-                                            child: Align(
-                                              alignment: const AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Text(
-                                                'Renta',
-                                                textAlign: TextAlign.center,
-                                                style: FlutterFlowTheme.of(
-                                                        context)
-                                                    .bodyMedium
-                                                    .override(
-                                                      font: GoogleFonts.inter(
+                                        Padding(
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                          child: InkWell(
+                                            splashColor: Colors.transparent,
+                                            focusColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            onTap: () async {
+                                              _model.ventaORenta = 'renta';
+                                              safeSetState(() {});
+                                            },
+                                            child: Container(
+                                              width: 144.0,
+                                              height: 44.0,
+                                              decoration: BoxDecoration(
+                                                color: _model.ventaORenta ==
+                                                        'renta'
+                                                    ? FlutterFlowTheme.of(
+                                                            context)
+                                                        .accent1
+                                                    : FlutterFlowTheme.of(
+                                                            context)
+                                                        .tertiary,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        100.0),
+                                              ),
+                                              child: Align(
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                        0.0, 0.0),
+                                                child: Text(
+                                                  'Renta',
+                                                  textAlign: TextAlign.center,
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        color: _model
+                                                                    .ventaORenta ==
+                                                                'renta'
+                                                            ? FlutterFlowTheme
+                                                                    .of(context)
+                                                                .primaryText
+                                                            : FlutterFlowTheme
+                                                                    .of(context)
+                                                                .secondaryText,
+                                                        fontSize: 14.0,
+                                                        letterSpacing: 0.0,
                                                         fontWeight:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -1316,127 +1395,36 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                                 .bodyMedium
                                                                 .fontStyle,
                                                       ),
-                                                      color: _model
-                                                                  .ventaORenta ==
-                                                              'renta'
-                                                          ? FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primaryText
-                                                          : FlutterFlowTheme.of(
-                                                                  context)
-                                                              .secondaryText,
-                                                      fontSize: 14.0,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .fontStyle,
-                                                    ),
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ].divide(const SizedBox(width: 20.0)),
+                                      ].divide(const SizedBox(width: 20.0)),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
                             if (!widget.isReadOnly)
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 20.0, 0.0, 0.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      decoration: const BoxDecoration(),
-                                      child: Builder(
-                                        builder: (context) => wrapWithModel(
-                                          model: _model.primaryButtonModel,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: PrimaryButtonWidget(
-                                            text: 'Agendar cita',
-                                            onTap: () async {
-                                              if (FFAppState().UserRole ==
-                                                  'VISITOR') {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            const VisitorRestrictionPopupWidget(),
-                                                      ),
-                                                    );
-                                                  },
-                                                );
-                                              } else {
-                                                final repo = context
-                                                    .read<VisitsRepository>();
-                                                final hasPending = await repo
-                                                    .hasActiveVisitForProperty(
-                                                        widget.propertyId ?? '');
-
-                                                if (hasPending) {
-                                                  // Show pending visit modal directly — skip the scheduling form
-                                                  await showDialog(
-                                                    context: context,
-                                                    barrierColor: Colors.black
-                                                        .withOpacity(0.5),
-                                                    builder: (dialogContext) {
-                                                      return Dialog(
-                                                        elevation: 0,
-                                                        insetPadding:
-                                                            EdgeInsets.zero,
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        child: _PendingVisitDialog(
-                                                          onViewVisits: () {
-                                                            Navigator.of(
-                                                                    dialogContext)
-                                                                .pop();
-                                                            context.pushNamed(
-                                                                DOVIACLIENTMisVisitasWidget
-                                                                    .routeName);
-                                                          },
-                                                          onDismiss: () =>
-                                                              Navigator.of(
-                                                                      dialogContext)
-                                                                  .pop(),
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                } else {
-                                                  // No pending visit — open the scheduling form
+                              Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 20.0, 0.0, 0.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        decoration: const BoxDecoration(),
+                                        child: Builder(
+                                          builder: (context) => wrapWithModel(
+                                            model: _model.primaryButtonModel,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: PrimaryButtonWidget(
+                                              text: 'Agendar cita',
+                                              onTap: () async {
+                                                if (FFAppState().UserRole ==
+                                                    'VISITOR') {
                                                   await showDialog(
                                                     context: context,
                                                     builder: (dialogContext) {
@@ -1463,49 +1451,123 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                                 ?.unfocus();
                                                           },
                                                           child:
-                                                              AgendarCitaWidget(
-                                                            propertyId:
-                                                                widget.propertyId,
-                                                            hasPendingVisit:
-                                                                false,
-                                                            onNavigateToVisits:
-                                                                () {
-                                                              context.pushNamed(
-                                                                  DOVIACLIENTMisVisitasWidget
-                                                                      .routeName);
-                                                            },
-                                                          ),
+                                                              const VisitorRestrictionPopupWidget(),
                                                         ),
                                                       );
                                                     },
                                                   );
+                                                } else {
+                                                  final repo = context
+                                                      .read<VisitsRepository>();
+                                                  final hasPending = await repo
+                                                      .hasActiveVisitForProperty(
+                                                          widget.propertyId ??
+                                                              '');
+
+                                                  if (hasPending) {
+                                                    // Show pending visit modal directly — skip the scheduling form
+                                                    await showDialog(
+                                                      context: context,
+                                                      barrierColor: Colors.black
+                                                          .withOpacity(0.5),
+                                                      builder: (dialogContext) {
+                                                        return Dialog(
+                                                          elevation: 0,
+                                                          insetPadding:
+                                                              EdgeInsets.zero,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          child:
+                                                              _PendingVisitDialog(
+                                                            onViewVisits: () {
+                                                              Navigator.of(
+                                                                      dialogContext)
+                                                                  .pop();
+                                                              context.pushNamed(
+                                                                  DOVIACLIENTMisVisitasWidget
+                                                                      .routeName);
+                                                            },
+                                                            onDismiss: () =>
+                                                                Navigator.of(
+                                                                        dialogContext)
+                                                                    .pop(),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  } else {
+                                                    // No pending visit — open the scheduling form
+                                                    await showDialog(
+                                                      context: context,
+                                                      builder: (dialogContext) {
+                                                        return Dialog(
+                                                          elevation: 0,
+                                                          insetPadding:
+                                                              EdgeInsets.zero,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          alignment: const AlignmentDirectional(
+                                                                  0.0, 0.0)
+                                                              .resolve(
+                                                                  Directionality.of(
+                                                                      context)),
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              FocusScope.of(
+                                                                      dialogContext)
+                                                                  .unfocus();
+                                                              FocusManager
+                                                                  .instance
+                                                                  .primaryFocus
+                                                                  ?.unfocus();
+                                                            },
+                                                            child:
+                                                                AgendarCitaWidget(
+                                                              propertyId: widget
+                                                                  .propertyId,
+                                                              hasPendingVisit:
+                                                                  false,
+                                                              onNavigateToVisits:
+                                                                  () {
+                                                                context.pushNamed(
+                                                                    DOVIACLIENTMisVisitasWidget
+                                                                        .routeName);
+                                                              },
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  }
                                                 }
-                                              }
-                                            },
+                                              },
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      decoration: const BoxDecoration(),
-                                      child: Builder(
-                                        builder: (context) => wrapWithModel(
-                                          model: _model.secondaryButtonModel,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: SecondaryButtonWidget(
-                                            text: 'Ofertar',
-                                            onTap: _handleOfertar,
+                                    Expanded(
+                                      child: Container(
+                                        decoration: const BoxDecoration(),
+                                        child: Builder(
+                                          builder: (context) => wrapWithModel(
+                                            model: _model.secondaryButtonModel,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: SecondaryButtonWidget(
+                                              text: 'Ofertar',
+                                              onTap: _handleOfertar,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ].divide(const SizedBox(width: 8.0)),
+                                  ].divide(const SizedBox(width: 8.0)),
+                                ),
                               ),
-                            ),
                             Align(
                               alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Padding(
@@ -1519,7 +1581,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                     text: TextSpan(
                                       children: [
                                         TextSpan(
-                                          text: _propertyType.isNotEmpty ? '${_propertyType[0]}${_propertyType.substring(1).toLowerCase()}\n' : '',
+                                          text: _propertyType.isNotEmpty
+                                              ? '${_propertyType[0]}${_propertyType.substring(1).toLowerCase()}\n'
+                                              : '',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1547,7 +1611,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                               ),
                                         ),
                                         TextSpan(
-                                          text: _address.isNotEmpty ? '$_address\n' : '',
+                                          text: _address.isNotEmpty
+                                              ? '$_address\n'
+                                              : '',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1669,7 +1735,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            _price.isNotEmpty ? '\$$_price' : '—',
+                                            _price.isNotEmpty
+                                                ? '\$$_price'
+                                                : '—',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1751,7 +1819,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            _landArea.isNotEmpty ? _landArea : '—',
+                                            _landArea.isNotEmpty
+                                                ? _landArea
+                                                : '—',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1833,7 +1903,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            _constructionArea.isNotEmpty ? _constructionArea : '—',
+                                            _constructionArea.isNotEmpty
+                                                ? _constructionArea
+                                                : '—',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(

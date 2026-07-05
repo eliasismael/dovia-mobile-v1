@@ -26,9 +26,9 @@ class _LegalProcess {
 
   final String id;
   final String category; // SALE, RENT, PUBLICATION
-  final String status;   // PENDING_START, DOCUMENT_COLLECTION, DRAFTING,
-                         // MEETING_COORDINATION, MEETING_SCHEDULED,
-                         // HQ_REVIEW, COMPLETED, REJECTED
+  final String status; // PENDING_START, DOCUMENT_COLLECTION, DRAFTING,
+  // MEETING_COORDINATION, MEETING_SCHEDULED,
+  // HQ_REVIEW, COMPLETED, REJECTED
   final String propertyId;
   final String address;
   final String imageUrl;
@@ -196,8 +196,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                         width: double.infinity,
                         height: 48.0,
                         decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context)
-                              .secondaryBackground,
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
                           borderRadius: BorderRadius.circular(100.0),
                         ),
                         child: Padding(
@@ -207,8 +207,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             children: [
                               Icon(
                                 Icons.search,
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryText,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
                                 size: 24.0,
                               ),
                               const SizedBox(width: 12.0),
@@ -247,8 +247,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                           // ────────────────────────────────────────────────
                           _buildSectionHeader(
                             context,
-                            title:
-                                'Tus siguientes inmuebles\nasignados',
+                            title: 'Tus siguientes inmuebles\nasignados',
                             onVerMas: () {
                               // TODO: navigate to full list
                             },
@@ -269,8 +268,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                           // ────────────────────────────────────────────────
                           _buildSectionHeader(
                             context,
-                            title:
-                                'Propiedades pendientes\npor revisar',
+                            title: 'Propiedades pendientes\npor revisar',
                             onVerMas: () {
                               // TODO: navigate to full list
                             },
@@ -280,8 +278,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             future: _inProgressFuture,
                             height: 155.0,
                             emptyMessage: 'No tienes procesos en curso',
-                            cardBuilder: (process) =>
-                                _buildPropertyCard(
+                            cardBuilder: (process) => _buildPropertyCard(
                               context,
                               process,
                               isCompleted: false,
@@ -305,8 +302,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             future: _completedFuture,
                             height: 155.0,
                             emptyMessage: 'Aún no tienes procesos completados',
-                            cardBuilder: (process) =>
-                                _buildPropertyCard(
+                            cardBuilder: (process) => _buildPropertyCard(
                               context,
                               process,
                               isCompleted: true,

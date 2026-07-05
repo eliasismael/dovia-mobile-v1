@@ -147,7 +147,8 @@ class PropertiesRepository extends ChangeNotifier {
     String? status,
   }) async {
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall.call(
+    final response =
+        await DOVIAAPIPropertyContextGroup.getMyPropertiesCall.call(
       page: page,
       limit: limit,
       status: status,
@@ -155,7 +156,8 @@ class PropertiesRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
-      return Failure('Error al cargar mis propiedades', statusCode: response.statusCode);
+      return Failure('Error al cargar mis propiedades',
+          statusCode: response.statusCode);
     }
     final rawData = (response.jsonBody?['data'] as List? ?? []);
     return Success(rawData);
@@ -182,7 +184,8 @@ class PropertiesRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
-      return Failure('Error al listar propiedades', statusCode: response.statusCode);
+      return Failure('Error al listar propiedades',
+          statusCode: response.statusCode);
     }
     final rawData = (response.jsonBody?['data'] as List? ?? []);
     return Success(rawData);
@@ -191,20 +194,24 @@ class PropertiesRepository extends ChangeNotifier {
   /// Gets the publishable zones.
   Future<Result<List<dynamic>>> getPublishableZones() async {
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIPropertyContextGroup.getPublishableZonesCall.call(
+    final response =
+        await DOVIAAPIPropertyContextGroup.getPublishableZonesCall.call(
       authToken: token,
     );
 
     if (!response.succeeded) {
-      return Failure('Error al cargar zonas de publicación', statusCode: response.statusCode);
+      return Failure('Error al cargar zonas de publicación',
+          statusCode: response.statusCode);
     }
     return Success(response.jsonBody as List? ?? []);
   }
 
   /// Changes the status of a property.
-  Future<Result<bool>> changePropertyStatus(String propertyId, String status, {String? note}) async {
+  Future<Result<bool>> changePropertyStatus(String propertyId, String status,
+      {String? note}) async {
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
+    final response =
+        await DOVIAAPIPropertyContextGroup.changePropertyStatusCall.call(
       propertyId: propertyId,
       status: status,
       note: note,
@@ -212,7 +219,8 @@ class PropertiesRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
-      return Failure('Error al cambiar el estado de la propiedad', statusCode: response.statusCode);
+      return Failure('Error al cambiar el estado de la propiedad',
+          statusCode: response.statusCode);
     }
     // Optionally remove from cache if status is DELETED
     if (status == 'DELETED' || status == 'ARCHIVED') {
@@ -269,7 +277,8 @@ class PropertiesRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
-      return Failure('Error al actualizar propiedad', statusCode: response.statusCode);
+      return Failure('Error al actualizar propiedad',
+          statusCode: response.statusCode);
     }
     _detailCache.remove(propertyId);
     return const Success(true);

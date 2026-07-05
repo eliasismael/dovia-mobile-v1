@@ -115,9 +115,13 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
     }
 
     // Try to read status from item or nested checklist / document fields
-    final status = (item['status'] ?? item['documentStatus'] ?? '').toString().toLowerCase();
+    final status = (item['status'] ?? item['documentStatus'] ?? '')
+        .toString()
+        .toLowerCase();
 
-    if (status.contains('approved') || status.contains('accepted') || status.contains('aceptada')) {
+    if (status.contains('approved') ||
+        status.contains('accepted') ||
+        status.contains('aceptada')) {
       return (
         text: 'Aceptada',
         bg: const Color(0x3370ACAD),
@@ -158,7 +162,8 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
     final token = currentAuthenticationToken ?? '';
     final statusFilter = _tabStatusMap[_model.activeTab] ?? '';
 
-    final res = await DOVIAAPIVisitContextGroup.getListerHqVisitDocumentsCall.call(
+    final res =
+        await DOVIAAPIVisitContextGroup.getListerHqVisitDocumentsCall.call(
       authToken: token,
       status: statusFilter,
       page: '1',
@@ -182,11 +187,12 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
         final prop = item['property'] ??
             (item['visit'] is Map ? item['visit']['property'] : null);
         if (prop is Map) {
-          propertyName = prop['name']?.toString() ??
-              prop['title']?.toString() ?? '';
+          propertyName =
+              prop['name']?.toString() ?? prop['title']?.toString() ?? '';
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ?? '';
+              locAddr?['street']?.toString() ??
+              '';
           imageUrl = prop['image']?.toString() ?? '';
         }
 
@@ -197,8 +203,8 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
         if (checklist is List) {
           for (final doc in checklist) {
             if (doc is Map) {
-              final docName = doc['name']?.toString() ??
-                  doc['type']?.toString() ?? '';
+              final docName =
+                  doc['name']?.toString() ?? doc['type']?.toString() ?? '';
               if (docName.isNotEmpty) {
                 documentNames.add(docName);
               }
@@ -213,7 +219,8 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
             for (final doc in documents) {
               if (doc is Map) {
                 final docName = doc['fileName']?.toString() ??
-                    doc['name']?.toString() ?? '';
+                    doc['name']?.toString() ??
+                    '';
                 if (docName.isNotEmpty) {
                   documentNames.add(docName);
                 }
@@ -317,9 +324,8 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         ),
                                       ),
                                       child: Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.fromSTEB(
-                                                10.0, 10.0, 10.0, 10.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(10.0, 10.0, 10.0, 10.0),
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8.0),
@@ -344,16 +350,19 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         obscureText: false,
                                         decoration: InputDecoration(
                                           isDense: true,
-                                          labelStyle: FlutterFlowTheme.of(context)
+                                          labelStyle: FlutterFlowTheme.of(
+                                                  context)
                                               .labelMedium
                                               .override(
                                                 font: GoogleFonts.inter(
                                                   fontWeight:
-                                                      FlutterFlowTheme.of(context)
+                                                      FlutterFlowTheme.of(
+                                                              context)
                                                           .labelMedium
                                                           .fontWeight,
                                                   fontStyle:
-                                                      FlutterFlowTheme.of(context)
+                                                      FlutterFlowTheme.of(
+                                                              context)
                                                           .labelMedium
                                                           .fontStyle,
                                                 ),
@@ -368,16 +377,19 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                         .fontStyle,
                                               ),
                                           hintText: 'Buscar documentos...',
-                                          hintStyle: FlutterFlowTheme.of(context)
+                                          hintStyle: FlutterFlowTheme.of(
+                                                  context)
                                               .labelMedium
                                               .override(
                                                 font: GoogleFonts.inter(
                                                   fontWeight:
-                                                      FlutterFlowTheme.of(context)
+                                                      FlutterFlowTheme.of(
+                                                              context)
                                                           .labelMedium
                                                           .fontWeight,
                                                   fontStyle:
-                                                      FlutterFlowTheme.of(context)
+                                                      FlutterFlowTheme.of(
+                                                              context)
                                                           .labelMedium
                                                           .fontStyle,
                                                 ),
@@ -391,59 +403,71 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                         .labelMedium
                                                         .fontStyle,
                                               ),
-                                          enabledBorder: const OutlineInputBorder(
+                                          enabledBorder:
+                                              const OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.only(
                                               bottomLeft: Radius.circular(0.0),
-                                              bottomRight: Radius.circular(25.0),
+                                              bottomRight:
+                                                  Radius.circular(25.0),
                                               topLeft: Radius.circular(0.0),
                                               topRight: Radius.circular(25.0),
                                             ),
                                           ),
-                                          focusedBorder: const OutlineInputBorder(
+                                          focusedBorder:
+                                              const OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.only(
                                               bottomLeft: Radius.circular(0.0),
-                                              bottomRight: Radius.circular(25.0),
+                                              bottomRight:
+                                                  Radius.circular(25.0),
                                               topLeft: Radius.circular(0.0),
                                               topRight: Radius.circular(25.0),
                                             ),
                                           ),
                                           errorBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
-                                              color: FlutterFlowTheme.of(context)
-                                                  .error,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .error,
                                               width: 1.0,
                                             ),
-                                            borderRadius: const BorderRadius.only(
+                                            borderRadius:
+                                                const BorderRadius.only(
                                               bottomLeft: Radius.circular(0.0),
-                                              bottomRight: Radius.circular(25.0),
+                                              bottomRight:
+                                                  Radius.circular(25.0),
                                               topLeft: Radius.circular(0.0),
                                               topRight: Radius.circular(25.0),
                                             ),
                                           ),
-                                          focusedErrorBorder: OutlineInputBorder(
+                                          focusedErrorBorder:
+                                              OutlineInputBorder(
                                             borderSide: BorderSide(
-                                              color: FlutterFlowTheme.of(context)
-                                                  .error,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .error,
                                               width: 1.0,
                                             ),
-                                            borderRadius: const BorderRadius.only(
+                                            borderRadius:
+                                                const BorderRadius.only(
                                               bottomLeft: Radius.circular(0.0),
-                                              bottomRight: Radius.circular(25.0),
+                                              bottomRight:
+                                                  Radius.circular(25.0),
                                               topLeft: Radius.circular(0.0),
                                               topRight: Radius.circular(25.0),
                                             ),
                                           ),
                                           filled: true,
-                                          fillColor: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
+                                          fillColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .secondaryBackground,
                                         ),
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -469,10 +493,12 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                       .fontStyle,
                                             ),
                                         maxLines: null,
-                                        cursorColor: FlutterFlowTheme.of(context)
-                                            .primaryText,
+                                        cursorColor:
+                                            FlutterFlowTheme.of(context)
+                                                .primaryText,
                                         enableInteractiveSelection: true,
-                                        validator: _model.textControllerValidator
+                                        validator: _model
+                                            .textControllerValidator
                                             .asValidator(context),
                                       ),
                                     ),
@@ -497,9 +523,8 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   ),
                                 ),
                                 child: Padding(
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          4.0, 4.0, 4.0, 4.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      4.0, 4.0, 4.0, 4.0),
                                   child: SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
@@ -512,24 +537,21 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         final isActive =
                                             _model.activeTab == tab;
                                         return Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                  0.0, 0.0, 4.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 4.0, 0.0),
                                           child: InkWell(
                                             splashColor: Colors.transparent,
                                             focusColor: Colors.transparent,
                                             hoverColor: Colors.transparent,
-                                            highlightColor:
-                                                Colors.transparent,
+                                            highlightColor: Colors.transparent,
                                             onTap: () async {
                                               _onTabChanged(tab);
                                             },
                                             child: Container(
                                               padding:
                                                   const EdgeInsetsDirectional
-                                                      .fromSTEB(16.0, 10.0,
-                                                      16.0, 10.0),
+                                                      .fromSTEB(
+                                                      16.0, 10.0, 16.0, 10.0),
                                               decoration: BoxDecoration(
                                                 color: isActive
                                                     ? FlutterFlowTheme.of(
@@ -537,16 +559,15 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                         .secondaryBackground
                                                     : Colors.transparent,
                                                 borderRadius:
-                                                    BorderRadius.circular(
-                                                        10.0),
+                                                    BorderRadius.circular(10.0),
                                                 boxShadow: isActive
                                                     ? const [
                                                         BoxShadow(
                                                           blurRadius: 4.0,
-                                                          color: Color(
-                                                              0x0D000000),
-                                                          offset: Offset(
-                                                              0.0, 2.0),
+                                                          color:
+                                                              Color(0x0D000000),
+                                                          offset:
+                                                              Offset(0.0, 2.0),
                                                         )
                                                       ]
                                                     : [],
@@ -569,8 +590,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                                                 .secondaryText,
                                                         fontWeight: isActive
                                                             ? FontWeight.w600
-                                                            : FontWeight
-                                                                .normal,
+                                                            : FontWeight.normal,
                                                       ),
                                                 ),
                                               ),
@@ -585,8 +605,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                             ),
                             // Section title
                             Align(
-                              alignment:
-                                  const AlignmentDirectional(-1.0, 0.0),
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
                               child: Text(
                                 'Documentos de propiedades',
                                 style: FlutterFlowTheme.of(context)
@@ -594,18 +613,16 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                     .override(
                                       font: GoogleFonts.inter(
                                         fontWeight: FontWeight.w600,
-                                        fontStyle:
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .fontStyle,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
                                       ),
                                       fontSize: 16.0,
                                       letterSpacing: 0.0,
                                       fontWeight: FontWeight.w600,
-                                      fontStyle:
-                                          FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .fontStyle,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
                                     ),
                               ),
                             ),
@@ -663,8 +680,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: cards
-                                      .map((card) =>
-                                          _buildDocumentCard(card))
+                                      .map((card) => _buildDocumentCard(card))
                                       .toList(),
                                 );
                               },
@@ -731,8 +747,8 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-                10.0, 10.0, 10.0, 10.0),
+            padding:
+                const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: [
@@ -776,11 +792,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Align(
-                          alignment:
-                              const AlignmentDirectional(-1.0, 0.0),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: RichText(
-                            textScaler:
-                                MediaQuery.of(context).textScaler,
+                            textScaler: MediaQuery.of(context).textScaler,
                             text: TextSpan(
                               children: [
                                 TextSpan(
@@ -798,10 +812,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         fontSize: 16.0,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.w500,
-                                        fontStyle:
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .fontStyle,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
                                       ),
                                 ),
                                 TextSpan(
@@ -821,14 +834,12 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                         ),
                                         fontSize: 12.0,
                                         letterSpacing: 0.0,
-                                        fontWeight:
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .fontWeight,
-                                        fontStyle:
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .fontStyle,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
                                       ),
                                 ),
                               ],
@@ -836,38 +847,31 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                   .bodyMedium
                                   .override(
                                     font: GoogleFonts.publicSans(
-                                      fontWeight:
-                                          FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .fontWeight,
-                                      fontStyle:
-                                          FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .fontStyle,
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
                                     ),
                                     letterSpacing: 0.0,
-                                    fontWeight:
-                                        FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                    fontStyle:
-                                        FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
                                     lineHeight: 1.5,
                                   ),
                             ),
                           ),
                         ),
                         Align(
-                          alignment:
-                              const AlignmentDirectional(0.0, 1.0),
+                          alignment: const AlignmentDirectional(0.0, 1.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment:
-                                CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
                                 'Estatus',
@@ -875,38 +879,31 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                     .bodyMedium
                                     .override(
                                       font: GoogleFonts.inter(
-                                        fontWeight:
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .fontWeight,
-                                        fontStyle:
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .fontStyle,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
                                       ),
                                       fontSize: 12.0,
                                       letterSpacing: 0.0,
-                                      fontWeight:
-                                          FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .fontWeight,
-                                      fontStyle:
-                                          FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .fontStyle,
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
                                     ),
                               ),
                               Container(
                                 decoration: BoxDecoration(
                                   color: card.statusBgColor,
-                                  borderRadius:
-                                      BorderRadius.circular(24.0),
+                                  borderRadius: BorderRadius.circular(24.0),
                                 ),
                                 child: Padding(
-                                  padding:
-                                      const EdgeInsetsDirectional
-                                          .fromSTEB(
-                                          16.0, 2.0, 16.0, 2.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 2.0, 16.0, 2.0),
                                   child: Text(
                                     card.statusText,
                                     style: FlutterFlowTheme.of(context)
@@ -915,8 +912,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           font: GoogleFonts.inter(
                                             fontWeight: FontWeight.w600,
                                             fontStyle:
-                                                FlutterFlowTheme.of(
-                                                        context)
+                                                FlutterFlowTheme.of(context)
                                                     .bodyMedium
                                                     .fontStyle,
                                           ),
@@ -925,8 +921,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.w600,
                                           fontStyle:
-                                              FlutterFlowTheme.of(
-                                                      context)
+                                              FlutterFlowTheme.of(context)
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),

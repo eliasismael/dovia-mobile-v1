@@ -32,8 +32,9 @@ class _DOVIACLIENTMisVisitasWidgetState
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   // ── Section futures ────────────────────────────────────────────────────
-  Future<ApiCallResponse>? _pendingOwnerFuture;         // All PENDING visits (MISSING_INFO + RESCHEDULE_REQUIRED)
-  Future<ApiCallResponse>? _rescheduledFuture;          // NO_SHOW edge cases
+  Future<ApiCallResponse>?
+      _pendingOwnerFuture; // All PENDING visits (MISSING_INFO + RESCHEDULE_REQUIRED)
+  Future<ApiCallResponse>? _rescheduledFuture; // NO_SHOW edge cases
 
   Future<ApiCallResponse>? _upcomingAssignedFuture;
   Future<ApiCallResponse>? _upcomingPendingFuture;
@@ -92,7 +93,6 @@ class _DOVIACLIENTMisVisitasWidgetState
       page: '1',
     );
 
-
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -149,10 +149,14 @@ class _DOVIACLIENTMisVisitasWidgetState
                           // ── 1. Tus próximas visitas ────────────────────
                           FutureBuilder<List<ApiCallResponse>>(
                             future: Future.wait([
-                              _pendingOwnerFuture     ?? Future.value(ApiCallResponse(null, {}, 0)),
-                              _upcomingAssignedFuture ?? Future.value(ApiCallResponse(null, {}, 0)),
-                              _upcomingPendingFuture  ?? Future.value(ApiCallResponse(null, {}, 0)),
-                              _rescheduledFuture      ?? Future.value(ApiCallResponse(null, {}, 0)),
+                              _pendingOwnerFuture ??
+                                  Future.value(ApiCallResponse(null, {}, 0)),
+                              _upcomingAssignedFuture ??
+                                  Future.value(ApiCallResponse(null, {}, 0)),
+                              _upcomingPendingFuture ??
+                                  Future.value(ApiCallResponse(null, {}, 0)),
+                              _rescheduledFuture ??
+                                  Future.value(ApiCallResponse(null, {}, 0)),
                             ]),
                             builder: (context, snap) {
                               final merged = <dynamic>[];
@@ -160,7 +164,9 @@ class _DOVIACLIENTMisVisitasWidgetState
                                 final seen = <String>{};
                                 for (final res in snap.data!) {
                                   for (final v in _parseVisits(res)) {
-                                    final id = v['visitId']?.toString() ?? v['id']?.toString() ?? '';
+                                    final id = v['visitId']?.toString() ??
+                                        v['id']?.toString() ??
+                                        '';
                                     if (seen.add(id)) merged.add(v);
                                   }
                                 }
@@ -172,14 +178,26 @@ class _DOVIACLIENTMisVisitasWidgetState
                                     'Tus próximas visitas',
                                     () {
                                       if (merged.isNotEmpty) {
-                                        Navigator.push(context, MaterialPageRoute(builder: (ctx) => _VerMasScreen(title: 'Tus próximas visitas', items: merged, cardType: _CardType.upcoming)));
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (ctx) => _VerMasScreen(
+                                                    title:
+                                                        'Tus próximas visitas',
+                                                    items: merged,
+                                                    cardType:
+                                                        _CardType.upcoming)));
                                       }
                                     },
                                     topPadding: 40,
                                   ),
-                                  if (!snap.hasData) _loader()
-                                  else if (merged.isEmpty) _emptyMessage('No tienes próximas visitas.')
-                                  else _visitListHorizontal(merged, cardType: _CardType.upcoming),
+                                  if (!snap.hasData)
+                                    _loader()
+                                  else if (merged.isEmpty)
+                                    _emptyMessage('No tienes próximas visitas.')
+                                  else
+                                    _visitListHorizontal(merged,
+                                        cardType: _CardType.upcoming),
                                 ],
                               );
                             },
@@ -189,7 +207,9 @@ class _DOVIACLIENTMisVisitasWidgetState
                           FutureBuilder<ApiCallResponse>(
                             future: _completedFuture,
                             builder: (context, snap) {
-                              final visits = snap.hasData ? _parseVisits(snap.data!) : <dynamic>[];
+                              final visits = snap.hasData
+                                  ? _parseVisits(snap.data!)
+                                  : <dynamic>[];
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -197,13 +217,26 @@ class _DOVIACLIENTMisVisitasWidgetState
                                     'Tus visitas anteriores',
                                     () {
                                       if (visits.isNotEmpty) {
-                                        Navigator.push(context, MaterialPageRoute(builder: (ctx) => _VerMasScreen(title: 'Tus visitas anteriores', items: visits, cardType: _CardType.completed)));
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (ctx) => _VerMasScreen(
+                                                    title:
+                                                        'Tus visitas anteriores',
+                                                    items: visits,
+                                                    cardType:
+                                                        _CardType.completed)));
                                       }
                                     },
                                   ),
-                                  if (!snap.hasData) _loader()
-                                  else if (visits.isEmpty) _emptyMessage('No tienes visitas completadas.')
-                                  else _visitListHorizontal(visits, cardType: _CardType.completed),
+                                  if (!snap.hasData)
+                                    _loader()
+                                  else if (visits.isEmpty)
+                                    _emptyMessage(
+                                        'No tienes visitas completadas.')
+                                  else
+                                    _visitListHorizontal(visits,
+                                        cardType: _CardType.completed),
                                 ],
                               );
                             },
@@ -241,7 +274,8 @@ class _DOVIACLIENTMisVisitasWidgetState
   }
 
   // ── Section header ────────────────────────────────────────────────────
-  Widget _sectionHeader(String title, VoidCallback onVerMasTap, {double topPadding = 24}) {
+  Widget _sectionHeader(String title, VoidCallback onVerMasTap,
+      {double topPadding = 24}) {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(0.0, topPadding, 0.0, 12.0),
       child: Row(
@@ -299,16 +333,27 @@ class _DOVIACLIENTMisVisitasWidgetState
     required _CardType cardType,
   }) {
     final cards = visits.map((v) {
-      final visitId = v['visitId']?.toString() ?? v['id']?.toString() ?? v['_id']?.toString() ?? '';
+      final visitId = v['visitId']?.toString() ??
+          v['id']?.toString() ??
+          v['_id']?.toString() ??
+          '';
       final showingAgentId = v['showingAgentId']?.toString() ?? '';
       final property = v['property'];
-      final propertyId = property is Map ? (property['id']?.toString() ?? '') : (v['propertyId']?.toString() ?? '');
+      final propertyId = property is Map
+          ? (property['id']?.toString() ?? '')
+          : (v['propertyId']?.toString() ?? '');
       final slot = v['confirmedTimeSlot'];
       final visitDate = slot is Map ? slot['date']?.toString() ?? '' : '';
       final visitTime = slot is Map ? slot['time']?.toString() ?? '' : '';
       final images = property is Map ? property['images'] : null;
-      final imageUrl = (images is List && images.isNotEmpty) ? images[0]['url']?.toString() ?? '' : '';
-      final propertyName = property is Map ? (property['name']?.toString() ?? property['title']?.toString() ?? 'Propiedad') : 'Propiedad';
+      final imageUrl = (images is List && images.isNotEmpty)
+          ? images[0]['url']?.toString() ?? ''
+          : '';
+      final propertyName = property is Map
+          ? (property['name']?.toString() ??
+              property['title']?.toString() ??
+              'Propiedad')
+          : 'Propiedad';
       final visitSubstatus = v['substatus']?.toString() ?? '';
       final visitStatus = v['status']?.toString() ?? '';
       final proposed = v['proposedTimeSlots'];
@@ -370,16 +415,16 @@ class _DOVIACLIENTMisVisitasWidgetState
                 style: TextStyle(color: Colors.red)),
           );
         }
-        final data =
-            getJsonField(res.jsonBody, r'$.data.items') ??
-                getJsonField(res.jsonBody, r'$.data') ??
-                [];
+        final data = getJsonField(res.jsonBody, r'$.data.items') ??
+            getJsonField(res.jsonBody, r'$.data') ??
+            [];
         final offers = data is List
             ? data
             : (data is Map && data['items'] != null
                 ? data['items'] as List
                 : [data]);
-        final offerCards = offers.map((offer) => _buildOfferCard(context, offer)).toList();
+        final offerCards =
+            offers.map((offer) => _buildOfferCard(context, offer)).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,7 +433,14 @@ class _DOVIACLIENTMisVisitasWidgetState
               'Tus ofertas',
               () {
                 if (offers.isNotEmpty) {
-                  Navigator.push(context, MaterialPageRoute(builder: (ctx) => _VerMasScreen(title: 'Tus ofertas', items: offers, cardType: _CardType.upcoming, isOffers: true)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (ctx) => _VerMasScreen(
+                              title: 'Tus ofertas',
+                              items: offers,
+                              cardType: _CardType.upcoming,
+                              isOffers: true)));
                 }
               },
             ),
@@ -409,21 +461,37 @@ class _DOVIACLIENTMisVisitasWidgetState
     );
   }
 
-  Widget _buildOfferCard(BuildContext context, dynamic offer, {bool isGrid = false}) {
+  Widget _buildOfferCard(BuildContext context, dynamic offer,
+      {bool isGrid = false}) {
     final offerId = offer['id'] ?? offer['_id'] ?? offer['offerId'] ?? '';
-    final amountRaw = offer['offerData']?['proposedAmount'] ?? offer['proposedAmount'] ?? offer['amount'];
-    final double amountDouble = amountRaw is num ? amountRaw.toDouble() : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
-    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0).format(amountDouble);
-    final currency = offer['offerData']?['currency']?.toString() ?? offer['currency']?.toString() ?? 'USD';
-    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ?? offer['paymentMethod']?.toString() ?? '';
+    final amountRaw = offer['offerData']?['proposedAmount'] ??
+        offer['proposedAmount'] ??
+        offer['amount'];
+    final double amountDouble = amountRaw is num
+        ? amountRaw.toDouble()
+        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0)
+        .format(amountDouble);
+    final currency = offer['offerData']?['currency']?.toString() ??
+        offer['currency']?.toString() ??
+        'USD';
+    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ??
+        offer['paymentMethod']?.toString() ??
+        '';
     final processStatus = offer['processStatus']?.toString() ?? '';
-    final offerStatus = offer['offerStatus']?.toString() ?? offer['status']?.toString() ?? 'pending';
+    final offerStatus = offer['offerStatus']?.toString() ??
+        offer['status']?.toString() ??
+        'pending';
     final status = processStatus.isNotEmpty ? processStatus : offerStatus;
     final property = offer['property'] ?? offer['propertyId'];
-    final propertyName = property is Map ? (property['title'] ?? property['name'] ?? 'Propiedad') : 'Propiedad';
+    final propertyName = property is Map
+        ? (property['title'] ?? property['name'] ?? 'Propiedad')
+        : 'Propiedad';
 
     return Padding(
-      padding: isGrid ? EdgeInsets.zero : const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
+      padding: isGrid
+          ? EdgeInsets.zero
+          : const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
       child: InkWell(
         onTap: () {
           context.pushNamed(
@@ -454,7 +522,8 @@ class _DOVIACLIENTMisVisitasWidgetState
                     child: Text(
                       propertyName,
                       style: FlutterFlowTheme.of(context).bodyLarge.override(
-                            font: GoogleFonts.publicSans(fontWeight: FontWeight.bold),
+                            font: GoogleFonts.publicSans(
+                                fontWeight: FontWeight.bold),
                             fontSize: 16.0,
                           ),
                       maxLines: 1,
@@ -462,15 +531,18 @@ class _DOVIACLIENTMisVisitasWidgetState
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
+                      color:
+                          FlutterFlowTheme.of(context).primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       status.toUpperCase(),
                       style: FlutterFlowTheme.of(context).bodySmall.override(
-                            font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                            font: GoogleFonts.publicSans(
+                                fontWeight: FontWeight.w600),
                             color: FlutterFlowTheme.of(context).primary,
                             fontSize: 10.0,
                           ),
@@ -481,13 +553,16 @@ class _DOVIACLIENTMisVisitasWidgetState
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.local_offer_outlined, size: 16, color: FlutterFlowTheme.of(context).secondaryText),
+                  Icon(Icons.local_offer_outlined,
+                      size: 16,
+                      color: FlutterFlowTheme.of(context).secondaryText),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       'Oferta: $currency \$ $amountStr',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.publicSans(fontWeight: FontWeight.w500),
+                            font: GoogleFonts.publicSans(
+                                fontWeight: FontWeight.w500),
                             color: FlutterFlowTheme.of(context).primaryText,
                           ),
                       maxLines: 1,
@@ -557,7 +632,8 @@ class _VisitCardState extends State<_VisitCard> {
     final cached = _VisitCard._nameCache[widget.propertyId];
     if (cached != null) {
       _displayName = cached;
-    } else if (widget.propertyName.isNotEmpty && widget.propertyName != 'Propiedad') {
+    } else if (widget.propertyName.isNotEmpty &&
+        widget.propertyName != 'Propiedad') {
       _displayName = widget.propertyName;
       _VisitCard._nameCache[widget.propertyId] = _displayName;
     } else {
@@ -582,8 +658,6 @@ class _VisitCardState extends State<_VisitCard> {
     }
   }
 
-
-
   String _formatDate(String raw) {
     if (raw.isEmpty) return 'Sin fecha';
     try {
@@ -599,14 +673,19 @@ class _VisitCardState extends State<_VisitCard> {
       queryParameters: {
         'propertyId': serializeParam(widget.propertyId, ParamType.String),
         'visitId': serializeParam(widget.visitId, ParamType.String),
-        'showingAgentId': serializeParam(widget.showingAgentId, ParamType.String),
+        'showingAgentId':
+            serializeParam(widget.showingAgentId, ParamType.String),
       }.withoutNulls,
     );
   }
 
-  bool get isPending => widget.visitStatus == 'PENDING' && widget.visitSubstatus == 'MISSING_INFO';
+  bool get isPending =>
+      widget.visitStatus == 'PENDING' &&
+      widget.visitSubstatus == 'MISSING_INFO';
   bool get isReschedule => widget.visitSubstatus == 'RESCHEDULE_REQUIRED';
-  bool get isConfirmed => widget.visitSubstatus == 'ASSIGNED' || widget.visitSubstatus == 'READY_TO_ASSIGN_SHOWING';
+  bool get isConfirmed =>
+      widget.visitSubstatus == 'ASSIGNED' ||
+      widget.visitSubstatus == 'READY_TO_ASSIGN_SHOWING';
 
   String get _label {
     if (widget.cardType == _CardType.completed) return 'Completada';
@@ -645,7 +724,8 @@ class _VisitCardState extends State<_VisitCard> {
       context: ctx,
       builder: (dialogCtx) => AlertDialog(
         title: const Text('Cancelar visita'),
-        content: const Text('¿Estás seguro de que deseas cancelar esta visita?'),
+        content:
+            const Text('¿Estás seguro de que deseas cancelar esta visita?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
@@ -660,11 +740,15 @@ class _VisitCardState extends State<_VisitCard> {
               );
               if (ctx.mounted) {
                 ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(content: Text(res.succeeded ? 'Visita cancelada' : 'Error al cancelar la visita')),
+                  SnackBar(
+                      content: Text(res.succeeded
+                          ? 'Visita cancelada'
+                          : 'Error al cancelar la visita')),
                 );
               }
             },
-            child: const Text('Sí, cancelar', style: TextStyle(color: Colors.red)),
+            child:
+                const Text('Sí, cancelar', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -708,7 +792,11 @@ class _VisitCardState extends State<_VisitCard> {
             // ── Property name ──────────────────────────────────────────
             Text(
               _displayName,
-              style: const TextStyle(fontFamily: 'Public Sans', fontSize: 13, fontWeight: FontWeight.w600, color: dark),
+              style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: dark),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -722,27 +810,41 @@ class _VisitCardState extends State<_VisitCard> {
               ),
               child: Text(
                 _label,
-                style: TextStyle(fontFamily: 'Public Sans', fontSize: 11, fontWeight: FontWeight.w600, color: _labelColor),
+                style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _labelColor),
               ),
             ),
             const SizedBox(height: 4),
             // ── Date / info ───────────────────────────────────────────
-            if (isPending) ..._pendingInfo()
+            if (isPending)
+              ..._pendingInfo()
             else if (isReschedule)
               const Text(
                 'El propietario solicita nuevas fechas',
-                style: TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.red),
+                style: TextStyle(
+                    fontFamily: 'Public Sans', fontSize: 12, color: Colors.red),
                 maxLines: 2,
               )
             else ...[
               Text(
                 _formatDate(widget.visitDate),
-                style: const TextStyle(fontFamily: 'Public Sans', fontSize: 15, fontWeight: FontWeight.w500, color: dark),
+                style: const TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: dark),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               if (widget.visitTime.isNotEmpty)
-                Text(widget.visitTime, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.grey)),
+                Text(widget.visitTime,
+                    style: const TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 12,
+                        color: Colors.grey)),
             ],
             const Spacer(),
             // ── Actions ───────────────────────────────────────────────
@@ -758,7 +860,8 @@ class _VisitCardState extends State<_VisitCard> {
       return [
         const Text(
           'Esperando confirmación del propietario',
-          style: TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: Colors.orange),
+          style: TextStyle(
+              fontFamily: 'Public Sans', fontSize: 12, color: Colors.orange),
           maxLines: 2,
         ),
       ];
@@ -771,7 +874,8 @@ class _VisitCardState extends State<_VisitCard> {
         padding: const EdgeInsets.only(bottom: 2),
         child: Text(
           '${e.key + 1}. ${_formatDate(date)} · $time',
-          style: const TextStyle(fontFamily: 'Public Sans', fontSize: 11, color: dark),
+          style: const TextStyle(
+              fontFamily: 'Public Sans', fontSize: 11, color: dark),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -782,7 +886,8 @@ class _VisitCardState extends State<_VisitCard> {
   List<Widget> _buildActions(BuildContext context) {
     if (widget.cardType == _CardType.completed) {
       return [
-        _pill(context, Icons.remove_red_eye_outlined, 'Ver detalle', onTap: () => _navigateToDetail(context)),
+        _pill(context, Icons.remove_red_eye_outlined, 'Ver detalle',
+            onTap: () => _navigateToDetail(context)),
       ];
     }
     if (isPending) {
@@ -792,34 +897,44 @@ class _VisitCardState extends State<_VisitCard> {
     }
     if (isReschedule) {
       return [
-        _pill(context, Icons.calendar_today, 'Agendar cita', onTap: () => _onRescheduleTap(context)),
+        _pill(context, Icons.calendar_today, 'Agendar cita',
+            onTap: () => _onRescheduleTap(context)),
       ];
     }
     if (isConfirmed) {
       return [
-        _pill(context, Icons.remove_red_eye_outlined, 'Sobre mi visita', onTap: () => _navigateToDetail(context)),
+        _pill(context, Icons.remove_red_eye_outlined, 'Sobre mi visita',
+            onTap: () => _navigateToDetail(context)),
         const SizedBox(height: 6),
         _cancelPill(context),
       ];
     }
     return [
-      _pill(context, Icons.remove_red_eye_outlined, 'Sobre mi visita', onTap: () => _navigateToDetail(context)),
+      _pill(context, Icons.remove_red_eye_outlined, 'Sobre mi visita',
+          onTap: () => _navigateToDetail(context)),
     ];
   }
 
-  Widget _pill(BuildContext context, IconData icon, String label, {required VoidCallback onTap}) {
+  Widget _pill(BuildContext context, IconData icon, String label,
+      {required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
         height: 30,
-        decoration: BoxDecoration(color: pillBg, borderRadius: BorderRadius.circular(99)),
+        decoration: BoxDecoration(
+            color: pillBg, borderRadius: BorderRadius.circular(99)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 16, color: primary),
             const SizedBox(width: 5),
-            Text(label, style: const TextStyle(fontFamily: 'Public Sans', fontSize: 13, fontWeight: FontWeight.w500, color: primary)),
+            Text(label,
+                style: const TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: primary)),
           ],
         ),
       ),
@@ -832,9 +947,16 @@ class _VisitCardState extends State<_VisitCard> {
       child: Container(
         width: double.infinity,
         height: 30,
-        decoration: BoxDecoration(border: Border.all(color: Colors.red.withOpacity(0.5)), borderRadius: BorderRadius.circular(99)),
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.red.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(99)),
         child: const Center(
-          child: Text('Cancelar visita', style: TextStyle(fontFamily: 'Public Sans', fontSize: 13, fontWeight: FontWeight.w500, color: Colors.red)),
+          child: Text('Cancelar visita',
+              style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.red)),
         ),
       ),
     );
@@ -869,14 +991,15 @@ class _VerMasScreen extends StatelessWidget {
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        iconTheme: IconThemeData(color: FlutterFlowTheme.of(context).primaryText),
+        iconTheme:
+            IconThemeData(color: FlutterFlowTheme.of(context).primaryText),
         title: Text(
           title,
           style: FlutterFlowTheme.of(context).headlineMedium.override(
-            font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-            color: FlutterFlowTheme.of(context).primaryText,
-            fontSize: 18.0,
-          ),
+                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                color: FlutterFlowTheme.of(context).primaryText,
+                fontSize: 18.0,
+              ),
         ),
         elevation: 0,
       ),
@@ -888,7 +1011,8 @@ class _VerMasScreen extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: isOffers ? 110 : (cardType == _CardType.upcoming ? 290 : 260),
+              mainAxisExtent:
+                  isOffers ? 110 : (cardType == _CardType.upcoming ? 290 : 260),
             ),
             itemCount: items.length,
             itemBuilder: (context, index) {
@@ -898,16 +1022,29 @@ class _VerMasScreen extends StatelessWidget {
                 return _OfferCard(offer: items[index]);
               }
               final v = items[index];
-              final visitId = v['visitId']?.toString() ?? v['id']?.toString() ?? v['_id']?.toString() ?? '';
+              final visitId = v['visitId']?.toString() ??
+                  v['id']?.toString() ??
+                  v['_id']?.toString() ??
+                  '';
               final showingAgentId = v['showingAgentId']?.toString() ?? '';
               final property = v['property'];
-              final propertyId = property is Map ? (property['id']?.toString() ?? '') : (v['propertyId']?.toString() ?? '');
+              final propertyId = property is Map
+                  ? (property['id']?.toString() ?? '')
+                  : (v['propertyId']?.toString() ?? '');
               final slot = v['confirmedTimeSlot'];
-              final visitDate = slot is Map ? slot['date']?.toString() ?? '' : '';
-              final visitTime = slot is Map ? slot['time']?.toString() ?? '' : '';
+              final visitDate =
+                  slot is Map ? slot['date']?.toString() ?? '' : '';
+              final visitTime =
+                  slot is Map ? slot['time']?.toString() ?? '' : '';
               final images = property is Map ? property['images'] : null;
-              final imageUrl = (images is List && images.isNotEmpty) ? images[0]['url']?.toString() ?? '' : '';
-              final propertyName = property is Map ? (property['name']?.toString() ?? property['title']?.toString() ?? 'Propiedad') : 'Propiedad';
+              final imageUrl = (images is List && images.isNotEmpty)
+                  ? images[0]['url']?.toString() ?? ''
+                  : '';
+              final propertyName = property is Map
+                  ? (property['name']?.toString() ??
+                      property['title']?.toString() ??
+                      'Propiedad')
+                  : 'Propiedad';
               final visitSubstatus = v['substatus']?.toString() ?? '';
               final visitStatus = v['status']?.toString() ?? '';
               final proposed = v['proposedTimeSlots'];
@@ -941,16 +1078,29 @@ class _OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final offerId = offer['id'] ?? offer['_id'] ?? offer['offerId'] ?? '';
-    final amountRaw = offer['offerData']?['proposedAmount'] ?? offer['proposedAmount'] ?? offer['amount'];
-    final double amountDouble = amountRaw is num ? amountRaw.toDouble() : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
-    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0).format(amountDouble);
-    final currency = offer['offerData']?['currency']?.toString() ?? offer['currency']?.toString() ?? 'USD';
-    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ?? offer['paymentMethod']?.toString() ?? '';
+    final amountRaw = offer['offerData']?['proposedAmount'] ??
+        offer['proposedAmount'] ??
+        offer['amount'];
+    final double amountDouble = amountRaw is num
+        ? amountRaw.toDouble()
+        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
+    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0)
+        .format(amountDouble);
+    final currency = offer['offerData']?['currency']?.toString() ??
+        offer['currency']?.toString() ??
+        'USD';
+    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ??
+        offer['paymentMethod']?.toString() ??
+        '';
     final processStatus = offer['processStatus']?.toString() ?? '';
-    final offerStatus = offer['offerStatus']?.toString() ?? offer['status']?.toString() ?? 'pending';
+    final offerStatus = offer['offerStatus']?.toString() ??
+        offer['status']?.toString() ??
+        'pending';
     final status = processStatus.isNotEmpty ? processStatus : offerStatus;
     final property = offer['property'] ?? offer['propertyId'];
-    final propertyName = property is Map ? (property['title'] ?? property['name'] ?? 'Propiedad') : 'Propiedad';
+    final propertyName = property is Map
+        ? (property['title'] ?? property['name'] ?? 'Propiedad')
+        : 'Propiedad';
 
     return InkWell(
       onTap: () {
@@ -1002,13 +1152,16 @@ class _OfferCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.local_offer_outlined, size: 14, color: FlutterFlowTheme.of(context).secondaryText),
+                Icon(Icons.local_offer_outlined,
+                    size: 14,
+                    color: FlutterFlowTheme.of(context).secondaryText),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     '\$ $amountStr',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.publicSans(fontWeight: FontWeight.w500),
+                          font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w500),
                           color: FlutterFlowTheme.of(context).primaryText,
                           fontSize: 12.0,
                         ),
@@ -1024,4 +1177,3 @@ class _OfferCard extends StatelessWidget {
     );
   }
 }
-

@@ -187,8 +187,10 @@ class _DeleteAccount2WidgetState extends State<DeleteAccount2Widget> {
                       alignment: Alignment.bottomCenter,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).secondaryBackground,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(24)),
                         ),
                         child: Padding(
                           padding: MediaQuery.viewInsetsOf(context),

@@ -68,7 +68,8 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
                   child: Container(
                     decoration: const BoxDecoration(),
                     child: Stack(
@@ -171,8 +172,8 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                   Align(
                     alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 8.0, 0.0, 0.0),
                       child: Text(
                         widget.price,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -196,7 +197,8 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 5.0, 0.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -284,8 +286,8 @@ class _FavoriteHousesCardWidgetState extends State<FavoriteHousesCardWidget> {
                   Align(
                     alignment: const AlignmentDirectional(-1.0, -1.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 5.0, 0.0, 0.0),
                       child: Wrap(
                         spacing: 0.0,
                         runSpacing: 0.0,

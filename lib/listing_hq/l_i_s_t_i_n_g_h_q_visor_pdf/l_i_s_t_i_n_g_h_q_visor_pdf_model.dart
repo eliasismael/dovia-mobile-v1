@@ -12,7 +12,8 @@ class LISTINGHQVisorPdfModel extends FlutterFlowModel<LISTINGHQVisorPdfWidget> {
 
   @override
   void initState(BuildContext context) {
-    cornerGradientBackgroundModel = createModel(context, () => CornerGradientBackgroundModel());
+    cornerGradientBackgroundModel =
+        createModel(context, () => CornerGradientBackgroundModel());
     lISTINGHQHeaderModel = createModel(context, () => LISTINGHQHeaderModel());
     lISTINGHQNavbarModel = createModel(context, () => LISTINGHQNavbarModel());
   }

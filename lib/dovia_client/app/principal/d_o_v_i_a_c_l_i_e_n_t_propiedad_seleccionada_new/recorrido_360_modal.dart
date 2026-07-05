@@ -9,7 +9,8 @@ class Recorrido360Modal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      insetPadding:
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       backgroundColor: Colors.transparent,
       child: Container(
         width: double.infinity,

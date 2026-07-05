@@ -65,15 +65,16 @@ class _SignInWidgetState extends State<SignInWidget> {
               child: const CornerGradientBackgroundWidget(),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 50.0, 0.0, 0.0),
                       child: Container(
                         decoration: const BoxDecoration(),
                         child: ClipRRect(
@@ -89,8 +90,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                     ),
                     Flexible(
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 40.0, 0.0, 0.0),
                         child: Text(
                           'Ingresa a tu cuenta',
                           style:
@@ -455,8 +456,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                     Align(
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 16.0, 0.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -540,8 +541,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 37.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 37.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: () async {
                           _model.invalidMailOrPassword = false;
@@ -582,16 +583,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 authToken: idToken,
                               );
 
-                              final userRole =
-                                  DOVIAAPIUserContextGroup
-                                      .getAuthenticatedUserProfileCall
-                                      .userRole(
+                              final userRole = DOVIAAPIUserContextGroup
+                                  .getAuthenticatedUserProfileCall
+                                  .userRole(
                                 (_model.apiResultProfile?.jsonBody ?? ''),
                               );
-                              final isActive =
-                                  DOVIAAPIUserContextGroup
-                                      .getAuthenticatedUserProfileCall
-                                      .isUserActive(
+                              final isActive = DOVIAAPIUserContextGroup
+                                  .getAuthenticatedUserProfileCall
+                                  .isUserActive(
                                 (_model.apiResultProfile?.jsonBody ?? ''),
                               );
 
@@ -674,14 +673,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                                               ),
                                               const SizedBox(height: 24.0),
                                               FFButtonWidget(
-                                                onPressed: () =>
-                                                    Navigator.pop(dialogContext),
+                                                onPressed: () => Navigator.pop(
+                                                    dialogContext),
                                                 text: 'Entendido',
                                                 options: FFButtonOptions(
-                                                  width:
-                                                      double.infinity,
+                                                  width: double.infinity,
                                                   height: 42.0,
-                                                  color: const Color(0xFF007376),
+                                                  color:
+                                                      const Color(0xFF007376),
                                                   textStyle:
                                                       FlutterFlowTheme.of(
                                                               context)
@@ -711,7 +710,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                                       context.mounted);
                                 } else {
                                   // Approved — route to role-specific home
-                                  FFAppState().UserRole = userRole ?? 'HOME_ASSOCIATE';
+                                  FFAppState().UserRole =
+                                      userRole ?? 'HOME_ASSOCIATE';
                                   if (userRole == 'SHOWING_AGENT') {
                                     context.pushNamedAuth(
                                         SHOWINGHomeWidget.routeName,
@@ -724,7 +724,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     context.pushNamedAuth(
                                         LISTINGHQHomeWidget.routeName,
                                         context.mounted);
-                                  } else if (userRole == 'LEGAL_ASSOCIATE' || userRole == 'LEGAL_OFFICER') {
+                                  } else if (userRole == 'LEGAL_ASSOCIATE' ||
+                                      userRole == 'LEGAL_OFFICER') {
                                     context.pushNamedAuth(
                                         LegalAssociateHomeWidget.routeName,
                                         context.mounted);
@@ -803,8 +804,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 26.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 26.0, 0.0, 0.0),
                       child: Text(
                         'O inicia con',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -828,8 +829,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 29.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 29.0, 0.0, 0.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         height: 46.6,

@@ -54,8 +54,7 @@ class PropertySummary {
       bathrooms: (features?['bathrooms'] as num?)?.toInt(),
       parkingSpots: (features?['parkingSpots'] as num?)?.toInt(),
       landArea: (features?['landArea'] as num?)?.toInt(),
-      fullAddress:
-          location?['address']?['fullAddress'] as String?,
+      fullAddress: location?['address']?['fullAddress'] as String?,
       coordinates: geoCoords,
       status: json['status'] as String?,
       isActive: json['active'] as bool?,

@@ -106,7 +106,6 @@ class _SHOWINGRegistroDeVisitaWidgetState
     final token = currentAuthenticationToken ?? '';
     final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
-      filter: 'past',
       page: '1',
       limit: '50',
     );
@@ -127,24 +126,24 @@ class _SHOWINGRegistroDeVisitaWidgetState
       final v = visits[i];
       final ov = overviews[i];
       if (!ov.succeeded) continue;
-      
+
       final data = getJsonField(ov.jsonBody, r'$.data');
       if (data is! Map) continue;
-      
+
       String title = '';
       String address = '';
       String ownerName = '';
       String image = '';
       String dateStr = '';
       String timeStr = '';
-      
+
       final prop = data['property'];
       if (prop is Map) {
         title = prop['name']?.toString() ?? '';
         image = prop['image']?.toString() ?? '';
         final location = prop['location'];
         if (location is Map) {
-            address = location['address']?.toString() ?? '';
+          address = location['address']?.toString() ?? '';
         }
       }
       final owner = data['ownerProfile'];
@@ -153,10 +152,10 @@ class _SHOWINGRegistroDeVisitaWidgetState
       }
       final slot = data['confirmedTimeSlot'];
       if (slot is Map) {
-          dateStr = slot['date']?.toString() ?? '';
-          timeStr = slot['time']?.toString() ?? '';
+        dateStr = slot['date']?.toString() ?? '';
+        timeStr = slot['time']?.toString() ?? '';
       }
-      
+
       out.add(_ScheduleVisit(
         visitId: v is Map ? v['visitId']?.toString() ?? '' : '',
         title: title,
@@ -182,8 +181,19 @@ class _SHOWINGRegistroDeVisitaWidgetState
     final parts = raw.split('-');
     if (parts.length != 3) return raw;
     const months = [
-      '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      '',
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre'
     ];
     final m = int.tryParse(parts[1]) ?? 0;
     final d = int.tryParse(parts[2]) ?? 0;
@@ -340,22 +350,26 @@ class _SHOWINGRegistroDeVisitaWidgetState
 
     for (final v in visits) {
       if (v.substatus == 'CANCELLED') continue;
-      
+
       DateTime visitDt;
       try {
         final dateParts = v.date.split('-');
         final timeParts = v.time.split(':');
         visitDt = DateTime(
-          int.parse(dateParts[0]), 
-          int.parse(dateParts[1]), 
-          int.parse(dateParts[2]), 
-          int.parse(timeParts[0]), 
-          int.parse(timeParts[1])
-        );
+            int.parse(dateParts[0]),
+            int.parse(dateParts[1]),
+            int.parse(dateParts[2]),
+            int.parse(timeParts[0]),
+            int.parse(timeParts[1]));
       } catch (_) {
         continue;
       }
-      
+
+      // If the visit is in the future, don't show it in the registration dashboard yet
+      if (visitDt.isAfter(now)) {
+        continue;
+      }
+
       // Regla de Backend (24 Horas)
       final diff = now.difference(visitDt);
       if (diff.inHours <= 24) {
@@ -366,7 +380,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
     }
 
     final children = <Widget>[];
-    
+
     if (enPlazo.isNotEmpty) {
       children.add(_buildSectionTitle('Hoy ${_formatDate(_todayStr())}'));
       children.add(const SizedBox(height: 14.0));

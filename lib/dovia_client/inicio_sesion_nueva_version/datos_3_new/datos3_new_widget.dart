@@ -64,7 +64,8 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                 child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 80.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 80.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -89,8 +90,8 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                     Align(
                       alignment: const AlignmentDirectional(0.0, 0.0),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: MediaQuery.sizeOf(context).height * 0.8,
@@ -116,8 +117,9 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 45.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 45.0, 0.0, 0.0),
                                     child: Container(
                                       decoration: const BoxDecoration(),
                                       child: Column(
@@ -159,9 +161,8 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                 ),
                                           ),
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 10.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 10.0, 0.0, 0.0),
                                             child: FlutterFlowDropDown<String>(
                                               controller: _model
                                                       .propiedadTipoDropDownValueController ??=
@@ -233,8 +234,9 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               borderColor: Colors.transparent,
                                               borderWidth: 0.0,
                                               borderRadius: 10.0,
-                                              margin: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              margin:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       12.0, 0.0, 12.0, 0.0),
                                               hidesUnderline: true,
                                               isOverButton: false,
@@ -247,8 +249,9 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 21.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 21.0, 0.0, 0.0),
                                     child: Container(
                                       decoration: const BoxDecoration(),
                                       child: Column(
@@ -290,9 +293,8 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                 ),
                                           ),
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 10.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 10.0, 0.0, 0.0),
                                             child: FlutterFlowDropDown<String>(
                                               controller: _model
                                                       .modalidadDropDownValueController ??=
@@ -302,7 +304,10 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               ),
                                               options: List<String>.from(
                                                   ['SALE', 'RENT']),
-                                              optionLabels: const ['Compra', 'Renta'],
+                                              optionLabels: const [
+                                                'Compra',
+                                                'Renta'
+                                              ],
                                               onChanged: (val) => safeSetState(
                                                   () => _model
                                                           .modalidadDropDownValue =
@@ -361,8 +366,9 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                               borderColor: Colors.transparent,
                                               borderWidth: 0.0,
                                               borderRadius: 10.0,
-                                              margin: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              margin:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       12.0, 0.0, 12.0, 0.0),
                                               hidesUnderline: true,
                                               isOverButton: false,
@@ -375,8 +381,9 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 21.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 21.0, 0.0, 0.0),
                                     child: Container(
                                       decoration: const BoxDecoration(),
                                       child: Column(
@@ -388,7 +395,8 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                         children: [
                                           Align(
                                             alignment:
-                                                const AlignmentDirectional(-1.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    -1.0, 0.0),
                                             child: Text(
                                               'Selecciona el perímetro de interés',
                                               style:
@@ -423,9 +431,8 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: Container(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
@@ -472,8 +479,9 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 21.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 21.0, 0.0, 0.0),
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -517,42 +525,41 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                 ),
                                           ),
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 12.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 12.0),
                                             child: Text(
                                               'La IA se encargará de captar la mayor cantidad \nde filtros',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        color:
-                                                            const Color(0xFF5D9299),
-                                                        fontSize: 12.0,
-                                                        letterSpacing: 0.24,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodyMedium
+                                                  .override(
+                                                    font: GoogleFonts.inter(
+                                                      fontWeight:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .bodyMedium
+                                                              .fontWeight,
+                                                      fontStyle:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .bodyMedium
+                                                              .fontStyle,
+                                                    ),
+                                                    color:
+                                                        const Color(0xFF5D9299),
+                                                    fontSize: 12.0,
+                                                    letterSpacing: 0.24,
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontStyle,
+                                                  ),
                                             ),
                                           ),
                                           SizedBox(
@@ -719,8 +726,9 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 30.0, 0.0, 50.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 30.0, 0.0, 50.0),
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -744,13 +752,14 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                             .width *
                                                         1.0,
                                                 height: 42.0,
-                                                padding: const EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
                                                     const EdgeInsetsDirectional
                                                         .fromSTEB(
-                                                            0.0, 0.0, 0.0, 0.0),
+                                                        0.0, 0.0, 0.0, 0.0),
                                                 color:
                                                     FlutterFlowTheme.of(context)
                                                         .secondaryBackground,
@@ -812,13 +821,14 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
                                                             .width *
                                                         1.0,
                                                 height: 42.0,
-                                                padding: const EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         16.0, 0.0, 16.0, 0.0),
                                                 iconPadding:
                                                     const EdgeInsetsDirectional
                                                         .fromSTEB(
-                                                            0.0, 0.0, 0.0, 0.0),
+                                                        0.0, 0.0, 0.0, 0.0),
                                                 color:
                                                     FlutterFlowTheme.of(context)
                                                         .primary,

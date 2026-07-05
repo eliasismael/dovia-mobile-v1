@@ -70,7 +70,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: Text(
                     'Transacción',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -95,7 +96,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: FlutterFlowDropDown<String>(
                     controller: _model.dropDownValueController1 ??=
                         FormFieldController<String>(null),
@@ -131,8 +133,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                     borderColor: Colors.transparent,
                     borderWidth: 0.0,
                     borderRadius: 8.0,
-                    margin:
-                        const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                    margin: const EdgeInsetsDirectional.fromSTEB(
+                        12.0, 0.0, 12.0, 0.0),
                     hidesUnderline: true,
                     isOverButton: false,
                     isSearchable: false,
@@ -143,7 +145,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: Text(
                     'Tipo',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -168,7 +171,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: FlutterFlowDropDown<String>(
                     controller: _model.dropDownValueController2 ??=
                         FormFieldController<String>(null),
@@ -204,8 +208,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                     borderColor: Colors.transparent,
                     borderWidth: 0.0,
                     borderRadius: 8.0,
-                    margin:
-                        const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                    margin: const EdgeInsetsDirectional.fromSTEB(
+                        12.0, 0.0, 12.0, 0.0),
                     hidesUnderline: true,
                     isOverButton: false,
                     isSearchable: false,
@@ -216,7 +220,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: Text(
                     'Moneda',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -241,7 +246,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: FlutterFlowDropDown<String>(
                     controller: _model.dropDownValueController3 ??=
                         FormFieldController<String>(null),
@@ -277,8 +283,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                     borderColor: Colors.transparent,
                     borderWidth: 0.0,
                     borderRadius: 8.0,
-                    margin:
-                        const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                    margin: const EdgeInsetsDirectional.fromSTEB(
+                        12.0, 0.0, 12.0, 0.0),
                     hidesUnderline: true,
                     isOverButton: false,
                     isSearchable: false,
@@ -289,7 +295,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: Text(
                     'Precio',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -312,7 +319,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -372,7 +380,8 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                 },
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 10.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 10.0, 0.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

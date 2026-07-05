@@ -104,11 +104,9 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                     onTap: () async {
                       final role = FFAppState().UserRole;
                       if (role == 'OPERATIVE_LISTER') {
-                        context.pushNamed(
-                            OPERATIVELISTINGHomeWidget.routeName);
+                        context.pushNamed(OPERATIVELISTINGHomeWidget.routeName);
                       } else {
-                        context.pushNamed(
-                            DOVIACLIENTHomePageWidget.routeName);
+                        context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
                       }
                     },
                     child: ClipRRect(
@@ -136,14 +134,16 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.publicSans(
                               fontWeight: FontWeight.w600,
-                              fontStyle:
-                                  FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontStyle,
                             ),
                             fontSize: 18.0,
                             letterSpacing: 0.0,
                             fontWeight: FontWeight.w600,
-                            fontStyle:
-                                FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .fontStyle,
                             lineHeight: 1.4,
                           ),
                     )
@@ -218,8 +218,8 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                 ),
                 if (widget.showCurrency)
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 8.0, 0.0, 0.0),
                     child: FlutterFlowDropDown<String>(
                       controller: _model.dropDownValueController ??=
                           FormFieldController<String>(null),

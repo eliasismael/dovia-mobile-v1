@@ -79,8 +79,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -151,10 +151,12 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                                   ),
                                 ),
                                 Align(
-                                  alignment: const AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -342,10 +344,12 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                                   ),
                                 ),
                                 Align(
-                                  alignment: const AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -670,7 +674,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                                       child: Padding(
                                         padding:
                                             MediaQuery.viewInsetsOf(context),
-                                        child: const DHCLIENTMaterialAprobadoWidget(),
+                                        child:
+                                            const DHCLIENTMaterialAprobadoWidget(),
                                       ),
                                     );
                                   },
@@ -685,8 +690,9 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                                 height: 42.0,
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
-                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
@@ -730,8 +736,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

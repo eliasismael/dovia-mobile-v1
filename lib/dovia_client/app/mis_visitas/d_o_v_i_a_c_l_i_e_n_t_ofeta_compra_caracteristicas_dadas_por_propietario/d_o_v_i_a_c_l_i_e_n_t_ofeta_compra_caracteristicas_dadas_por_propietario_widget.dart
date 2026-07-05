@@ -115,8 +115,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 12.0, 0.0, 0.0),
                       child: SizedBox(
                         width: MediaQuery.sizeOf(context).width * 0.4,
                         child: TextFormField(
@@ -251,8 +251,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                         ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: SizedBox(
                       width: MediaQuery.sizeOf(context).width * 0.4,
                       child: TextFormField(
@@ -394,7 +394,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                   child: SizedBox(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     child: TextFormField(
@@ -537,7 +538,8 @@ class _DOVIACLIENTOfetaCompraCaracteristicasDadasPorPropietarioWidgetState
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                   child: SizedBox(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     child: TextFormField(

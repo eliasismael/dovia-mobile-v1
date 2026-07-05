@@ -94,8 +94,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -141,10 +141,12 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                 ),
                                 Expanded(
                                   child: Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: SizedBox(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -314,8 +316,9 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 19.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 19.0, 0.0, 0.0),
                                     child: Text(
                                       'Fecha',
                                       style: FlutterFlowTheme.of(context)
@@ -349,12 +352,11 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                     children: [
                                       Expanded(
                                         child: Align(
-                                          alignment:
-                                              const AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
@@ -429,7 +431,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: const BorderSide(
+                                                    borderSide:
+                                                        const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -439,7 +442,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: const BorderSide(
+                                                    borderSide:
+                                                        const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -524,12 +528,11 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                       ),
                                       Expanded(
                                         child: Align(
-                                          alignment:
-                                              const AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
@@ -604,7 +607,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: const BorderSide(
+                                                    borderSide:
+                                                        const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -614,7 +618,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: const BorderSide(
+                                                    borderSide:
+                                                        const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -699,12 +704,11 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                       ),
                                       Expanded(
                                         child: Align(
-                                          alignment:
-                                              const AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: SizedBox(
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
@@ -779,7 +783,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                                       ),
                                                   enabledBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: const BorderSide(
+                                                    borderSide:
+                                                        const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -789,7 +794,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                                   ),
                                                   focusedBorder:
                                                       OutlineInputBorder(
-                                                    borderSide: const BorderSide(
+                                                    borderSide:
+                                                        const BorderSide(
                                                       color: Color(0x00000000),
                                                       width: 1.0,
                                                     ),
@@ -921,10 +927,12 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                 ),
                                 Expanded(
                                   child: Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: SizedBox(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -1123,10 +1131,12 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                 ),
                                 Expanded(
                                   child: Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: SizedBox(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -1421,10 +1431,12 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                 ),
                                 Expanded(
                                   child: Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: SizedBox(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -1702,8 +1714,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

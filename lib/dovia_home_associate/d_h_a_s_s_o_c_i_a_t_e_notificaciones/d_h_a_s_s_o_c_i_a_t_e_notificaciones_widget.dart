@@ -72,8 +72,8 @@ class _DHASSOCIATENotificacionesWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 35.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 35.0, 20.0, 0.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         decoration: const BoxDecoration(),
@@ -146,8 +146,8 @@ class _DHASSOCIATENotificacionesWidgetState
                     Align(
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 5.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),

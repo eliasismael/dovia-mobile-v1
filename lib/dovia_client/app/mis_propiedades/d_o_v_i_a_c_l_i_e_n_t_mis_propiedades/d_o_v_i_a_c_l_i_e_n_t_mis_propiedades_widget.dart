@@ -38,18 +38,41 @@ class _DOVIACLIENTMisPropiedadesWidgetState
   Future<ApiCallResponse> _fetchAllPending() async {
     final draftResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
         .call(status: 'DRAFT', authToken: currentAuthenticationToken);
-    final inProcessResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+    final inProcessResult = await DOVIAAPIPropertyContextGroup
+        .getMyPropertiesCall
         .call(status: 'IN_PROCESS', authToken: currentAuthenticationToken);
-    final pendingReviewResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+    final pendingReviewResult = await DOVIAAPIPropertyContextGroup
+        .getMyPropertiesCall
         .call(status: 'PENDING_REVIEW', authToken: currentAuthenticationToken);
     // Include ARCHIVED (paused) properties so the owner can see & reactivate them
-    final archivedResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+    final archivedResult = await DOVIAAPIPropertyContextGroup
+        .getMyPropertiesCall
         .call(status: 'ARCHIVED', authToken: currentAuthenticationToken);
 
-    final drafts = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(draftResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
-    final inProcess = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(inProcessResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
-    final pendingReview = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pendingReviewResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
-    final archived = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(archivedResult.jsonBody)?.where((e) => e != null).map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+    final drafts = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+            .data(draftResult.jsonBody)
+            ?.where((e) => e != null)
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList() ??
+        [];
+    final inProcess = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+            .data(inProcessResult.jsonBody)
+            ?.where((e) => e != null)
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList() ??
+        [];
+    final pendingReview = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+            .data(pendingReviewResult.jsonBody)
+            ?.where((e) => e != null)
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList() ??
+        [];
+    final archived = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+            .data(archivedResult.jsonBody)
+            ?.where((e) => e != null)
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList() ??
+        [];
 
     final combined = [...drafts, ...inProcess, ...pendingReview, ...archived];
 
@@ -72,19 +95,30 @@ class _DOVIACLIENTMisPropiedadesWidgetState
       final pubResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
           .call(status: 'PUBLISHED', authToken: currentAuthenticationToken);
       final pendingResponse = await _fetchAllPending();
-      
+
       if (!mounted) return;
 
-      final pubProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pubResult.jsonBody) ?? [];
-      final pendProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(pendingResponse.jsonBody) ?? [];
+      final pubProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+              .data(pubResult.jsonBody) ??
+          [];
+      final pendProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+              .data(pendingResponse.jsonBody) ??
+          [];
 
       // Also check archived: a user with only paused properties should NOT be redirected
-      final archivedCheck = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+      final archivedCheck = await DOVIAAPIPropertyContextGroup
+          .getMyPropertiesCall
           .call(status: 'ARCHIVED', authToken: currentAuthenticationToken);
       if (!mounted) return;
-      final archivedProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall.data(archivedCheck.jsonBody) ?? [];
+      final archivedProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+              .data(archivedCheck.jsonBody) ??
+          [];
 
-      if (pubProps.isEmpty && pendProps.isEmpty && archivedProps.isEmpty && pubResult.succeeded && pendingResponse.succeeded) {
+      if (pubProps.isEmpty &&
+          pendProps.isEmpty &&
+          archivedProps.isEmpty &&
+          pubResult.succeeded &&
+          pendingResponse.succeeded) {
         context.goNamed(DOVIACLIENTComoFuncionaWidget.routeName);
       }
     });
@@ -130,15 +164,19 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 16.0, 20.0, 0.0),
                       child: TextFormField(
                         controller: _model.searchController,
                         focusNode: _model.searchFocusNode,
                         decoration: InputDecoration(
                           hintText: 'Búsqueda con IA...',
-                          hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                          hintStyle: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
                                 font: GoogleFonts.inter(),
-                                color: FlutterFlowTheme.of(context).secondaryText,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
                               ),
                           prefixIcon: Icon(
                             Icons.search_rounded,
@@ -146,7 +184,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                             size: 24.0,
                           ),
                           filled: true,
-                          fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+                          fillColor:
+                              FlutterFlowTheme.of(context).secondaryBackground,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24.0),
                             borderSide: BorderSide.none,
@@ -200,7 +239,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                               FFButtonWidget(
                                 onPressed: () async {
                                   context.pushNamed(
-                                      DOVIACLIENTMisPropiedadesAccionesARealizarWidget.routeName);
+                                      DOVIACLIENTMisPropiedadesAccionesARealizarWidget
+                                          .routeName);
                                 },
                                 text: '+ Publicar más',
                                 options: FFButtonOptions(
@@ -271,15 +311,27 @@ class _DOVIACLIENTMisPropiedadesWidgetState
 
                                 return Builder(
                                   builder: (context) {
-                                    final eachOwnProperty = DOVIAAPIPropertyContextGroup
-                                            .getMyPropertiesCall
-                                            .data(listViewGetMyPropertiesResponse.jsonBody)
-                                            ?.toList() ?? [];
-                                    
-                                    final searchQuery = _model.searchController?.text.toLowerCase() ?? '';
-                                    final filteredPublished = eachOwnProperty.where((item) {
+                                    final eachOwnProperty =
+                                        DOVIAAPIPropertyContextGroup
+                                                .getMyPropertiesCall
+                                                .data(
+                                                    listViewGetMyPropertiesResponse
+                                                        .jsonBody)
+                                                ?.toList() ??
+                                            [];
+
+                                    final searchQuery = _model
+                                            .searchController?.text
+                                            .toLowerCase() ??
+                                        '';
+                                    final filteredPublished =
+                                        eachOwnProperty.where((item) {
                                       if (searchQuery.isEmpty) return true;
-                                      final itemName = getJsonField(item, r'''$.name''')?.toString().toLowerCase() ?? '';
+                                      final itemName =
+                                          getJsonField(item, r'''$.name''')
+                                                  ?.toString()
+                                                  .toLowerCase() ??
+                                              '';
                                       return itemName.contains(searchQuery);
                                     }).toList();
 
@@ -300,195 +352,231 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                           height: 250.0,
                                           child: GestureDetector(
                                             onTap: () {
-                                              context.pushNamed(
-                                                'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada',
-                                                queryParameters: {
-                                                  'propertyId': serializeParam(
-                                                    getJsonField(eachOwnPropertyItem, r'''$.id''').toString(),
-                                                    ParamType.String,
-                                                  ),
-                                                  'propertyStatus': serializeParam(
-                                                    'PUBLISHED',
-                                                    ParamType.String,
-                                                  ),
-                                                }.withoutNulls,
-                                              ).then((_) => safeSetState(() {}));
-                                            },
-                                              child: custom_widgets.DoviaClientHouseCard(
-                                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                                height: 250.0,
-                                                imageUrl: getJsonField(eachOwnPropertyItem, r'''$.photos[0].url''')?.toString() ?? 'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
-                                                name: getJsonField(eachOwnPropertyItem, r'''$.name''')?.toString(),
-                                                type: getJsonField(eachOwnPropertyItem, r'''$.listingType'''),
-                                                price: '${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD'} ${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].price''')?.toString() ?? '0'}',
-                                                landArea: castToType<double>(getJsonField(eachOwnPropertyItem, r'''$.features.general.landArea''')),
-                                                constructionArea: castToType<int>(getJsonField(eachOwnPropertyItem, r'''$.features.general.constructionArea''')),
-                                                bedrooms: castToType<int>(getJsonField(eachOwnPropertyItem, r'''$.features.general.bedrooms''')),
-                                                bathrooms: castToType<int>(getJsonField(eachOwnPropertyItem, r'''$.features.general.bathrooms''')),
-                                            isFavorite: getJsonField(
-                                              eachOwnPropertyItem,
-                                              r'''$.isFavorite''',
-                                            ),
-                                            onAddToFavorites: () async {
-                                              if (FFAppState().UserRole !=
-                                                  'VISITOR') {
-                                                _model.apiResultj56 =
-                                                    await DOVIAAPIFavoriteContextGroup
-                                                        .addPropertyToFavoritesCall
-                                                        .call(
-                                                  authToken:
-                                                      currentAuthenticationToken,
-                                                  propertyId: getJsonField(
-                                                          eachOwnPropertyItem,
-                                                          r'''$.id''')
-                                                      .toString(),
-                                                );
-
-                                                if ((_model.apiResultj56
-                                                        ?.succeeded ??
-                                                    true)) {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    enableDrag: false,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child: Padding(
-                                                          padding: MediaQuery
-                                                              .viewInsetsOf(
-                                                                  context),
-                                                          child:
-                                                              TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM:
-                                                                false,
-                                                            houseId: getJsonField(
-                                                                    eachOwnPropertyItem,
-                                                                    r'''$.id''')
-                                                                .toString(),
-                                                            propertyName: getJsonField(
-                                                                    eachOwnPropertyItem,
-                                                                    r'''$.name''')
-                                                                .toString(),
-                                                            propertyImage: '',
-                                                            propertyIsFavorite:
-                                                                false,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  ).then((value) =>
+                                              context
+                                                  .pushNamed(
+                                                    'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada',
+                                                    queryParameters: {
+                                                      'propertyId':
+                                                          serializeParam(
+                                                        getJsonField(
+                                                                eachOwnPropertyItem,
+                                                                r'''$.id''')
+                                                            .toString(),
+                                                        ParamType.String,
+                                                      ),
+                                                      'propertyStatus':
+                                                          serializeParam(
+                                                        'PUBLISHED',
+                                                        ParamType.String,
+                                                      ),
+                                                    }.withoutNulls,
+                                                  )
+                                                  .then((_) =>
                                                       safeSetState(() {}));
+                                            },
+                                            child: custom_widgets
+                                                .DoviaClientHouseCard(
+                                              width: MediaQuery.sizeOf(context)
+                                                      .width *
+                                                  1.0,
+                                              height: 250.0,
+                                              imageUrl: getJsonField(
+                                                          eachOwnPropertyItem,
+                                                          r'''$.photos[0].url''')
+                                                      ?.toString() ??
+                                                  'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                              name: getJsonField(
+                                                      eachOwnPropertyItem,
+                                                      r'''$.name''')
+                                                  ?.toString(),
+                                              type: getJsonField(
+                                                  eachOwnPropertyItem,
+                                                  r'''$.listingType'''),
+                                              price:
+                                                  '${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD'} ${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].price''')?.toString() ?? '0'}',
+                                              landArea: castToType<double>(
+                                                  getJsonField(
+                                                      eachOwnPropertyItem,
+                                                      r'''$.features.general.landArea''')),
+                                              constructionArea: castToType<int>(
+                                                  getJsonField(
+                                                      eachOwnPropertyItem,
+                                                      r'''$.features.general.constructionArea''')),
+                                              bedrooms: castToType<int>(
+                                                  getJsonField(
+                                                      eachOwnPropertyItem,
+                                                      r'''$.features.general.bedrooms''')),
+                                              bathrooms: castToType<int>(
+                                                  getJsonField(
+                                                      eachOwnPropertyItem,
+                                                      r'''$.features.general.bathrooms''')),
+                                              isFavorite: getJsonField(
+                                                eachOwnPropertyItem,
+                                                r'''$.isFavorite''',
+                                              ),
+                                              onAddToFavorites: () async {
+                                                if (FFAppState().UserRole !=
+                                                    'VISITOR') {
+                                                  _model.apiResultj56 =
+                                                      await DOVIAAPIFavoriteContextGroup
+                                                          .addPropertyToFavoritesCall
+                                                          .call(
+                                                    authToken:
+                                                        currentAuthenticationToken,
+                                                    propertyId: getJsonField(
+                                                            eachOwnPropertyItem,
+                                                            r'''$.id''')
+                                                        .toString(),
+                                                  );
+
+                                                  if ((_model.apiResultj56
+                                                          ?.succeeded ??
+                                                      true)) {
+                                                    await showModalBottomSheet(
+                                                      isScrollControlled: true,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      enableDrag: false,
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    context)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
+                                                          child: Padding(
+                                                            padding: MediaQuery
+                                                                .viewInsetsOf(
+                                                                    context),
+                                                            child:
+                                                                TusFavoritosCarpetasModalWidget(
+                                                              isCreatingNewFolderPARAM:
+                                                                  false,
+                                                              houseId: getJsonField(
+                                                                      eachOwnPropertyItem,
+                                                                      r'''$.id''')
+                                                                  .toString(),
+                                                              propertyName: getJsonField(
+                                                                      eachOwnPropertyItem,
+                                                                      r'''$.name''')
+                                                                  .toString(),
+                                                              propertyImage: '',
+                                                              propertyIsFavorite:
+                                                                  false,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ).then((value) =>
+                                                        safeSetState(() {}));
+                                                  } else {
+                                                    await showDialog(
+                                                      context: context,
+                                                      builder:
+                                                          (alertDialogContext) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              'Error'),
+                                                          content: Text((_model
+                                                                  .apiResultj56
+                                                                  ?.bodyText ??
+                                                              '')),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.pop(
+                                                                      alertDialogContext),
+                                                              child: const Text(
+                                                                  'Ok'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
+                                                  }
                                                 } else {
                                                   await showDialog(
                                                     context: context,
-                                                    builder:
-                                                        (alertDialogContext) {
-                                                      return AlertDialog(
-                                                        title:
-                                                            const Text('Error'),
-                                                        content: Text((_model
-                                                                .apiResultj56
-                                                                ?.bodyText ??
-                                                            '')),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () =>
-                                                                Navigator.pop(
-                                                                    alertDialogContext),
-                                                            child: const Text(
-                                                                'Ok'),
-                                                          ),
-                                                        ],
+                                                    builder: (dialogContext) {
+                                                      return Dialog(
+                                                        elevation: 0,
+                                                        insetPadding:
+                                                            EdgeInsets.zero,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        alignment:
+                                                            const AlignmentDirectional(
+                                                                    0.0, 0.0)
+                                                                .resolve(
+                                                                    Directionality.of(
+                                                                        context)),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    dialogContext)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
+                                                          child:
+                                                              const VisitorRestrictionPopupWidget(),
+                                                        ),
                                                       );
                                                     },
                                                   );
                                                 }
-                                              } else {
-                                                await showDialog(
+                                                safeSetState(() {});
+                                              },
+                                              onRemoveFromFavorites: () async {
+                                                await showModalBottomSheet(
+                                                  isScrollControlled: true,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  enableDrag: false,
                                                   context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
+                                                  builder: (context) {
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        FocusScope.of(context)
+                                                            .unfocus();
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                      },
+                                                      child: Padding(
+                                                        padding: MediaQuery
+                                                            .viewInsetsOf(
+                                                                context),
                                                         child:
-                                                            const VisitorRestrictionPopupWidget(),
+                                                            TusFavoritosCarpetasModalWidget(
+                                                          isCreatingNewFolderPARAM:
+                                                              false,
+                                                          houseId: getJsonField(
+                                                                  eachOwnPropertyItem,
+                                                                  r'''$.id''')
+                                                              .toString(),
+                                                          propertyName: getJsonField(
+                                                                  eachOwnPropertyItem,
+                                                                  r'''$.name''')
+                                                              .toString(),
+                                                          propertyImage: '',
+                                                          propertyIsFavorite:
+                                                              true,
+                                                        ),
                                                       ),
                                                     );
                                                   },
-                                                );
-                                              }
-                                              safeSetState(() {});
-                                            },
-                                            onRemoveFromFavorites: () async {
-                                              await showModalBottomSheet(
-                                                isScrollControlled: true,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                enableDrag: false,
-                                                context: context,
-                                                builder: (context) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      FocusScope.of(context)
-                                                          .unfocus();
-                                                      FocusManager
-                                                          .instance.primaryFocus
-                                                          ?.unfocus();
-                                                    },
-                                                    child: Padding(
-                                                      padding: MediaQuery
-                                                          .viewInsetsOf(
-                                                              context),
-                                                      child:
-                                                          TusFavoritosCarpetasModalWidget(
-                                                        isCreatingNewFolderPARAM:
-                                                            false,
-                                                        houseId: getJsonField(
-                                                                eachOwnPropertyItem,
-                                                                r'''$.id''')
-                                                            .toString(),
-                                                        propertyName: getJsonField(
-                                                                eachOwnPropertyItem,
-                                                                r'''$.name''')
-                                                            .toString(),
-                                                        propertyImage: '',
-                                                        propertyIsFavorite:
-                                                            true,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              ).then((value) =>
-                                                  safeSetState(() {}));
-                                              safeSetState(() {});
-                                            },
+                                                ).then((value) =>
+                                                    safeSetState(() {}));
+                                                safeSetState(() {});
+                                              },
                                             ),
                                           ),
                                         );
@@ -595,14 +683,26 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                   );
                                 }
                                 final res = snapshot.data!;
-                                final allProperties = res.jsonBody['data'] as List<dynamic>? ?? [];
-                                
-                                final searchQuery2 = _model.searchController?.text.toLowerCase() ?? '';
-                                final filteredPending = allProperties.where((p) {
-                                  final isPendingStatus = (getJsonField(p, r'''$.status''') as String?) != 'PUBLISHED';
+                                final allProperties =
+                                    res.jsonBody['data'] as List<dynamic>? ??
+                                        [];
+
+                                final searchQuery2 = _model
+                                        .searchController?.text
+                                        .toLowerCase() ??
+                                    '';
+                                final filteredPending =
+                                    allProperties.where((p) {
+                                  final isPendingStatus =
+                                      (getJsonField(p, r'''$.status''')
+                                              as String?) !=
+                                          'PUBLISHED';
                                   if (!isPendingStatus) return false;
                                   if (searchQuery2.isEmpty) return true;
-                                  final name = getJsonField(p, r'''$.name''')?.toString().toLowerCase() ?? '';
+                                  final name = getJsonField(p, r'''$.name''')
+                                          ?.toString()
+                                          .toLowerCase() ??
+                                      '';
                                   return name.contains(searchQuery2);
                                 }).toList();
 
@@ -613,55 +713,95 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                   itemCount: filteredPending.length,
                                   itemBuilder: (context, idx) {
                                     final p = filteredPending[idx];
-                                    final status = getJsonField(p, r'''$.status''') as String? ?? '';
+                                    final status =
+                                        getJsonField(p, r'''$.status''')
+                                                as String? ??
+                                            '';
                                     return Padding(
-                                      padding: const EdgeInsets.only(bottom: 12.0),
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12.0),
                                       child: GestureDetector(
                                         onTap: () {
-                                          final visitIdFromApi = getJsonField(p, r'''$.operativeListerVisit.visitId''')?.toString();
-                                          final hasVisit = visitIdFromApi != null || getJsonField(p, r'''$.lastVisitId''') != null;
-                                          final finalVisitId = visitIdFromApi ?? getJsonField(p, r'''$.lastVisitId''')?.toString() ?? '';
+                                          final visitIdFromApi = getJsonField(p,
+                                                  r'''$.operativeListerVisit.visitId''')
+                                              ?.toString();
+                                          final hasVisit = visitIdFromApi !=
+                                                  null ||
+                                              getJsonField(p,
+                                                      r'''$.lastVisitId''') !=
+                                                  null;
+                                          final finalVisitId = visitIdFromApi ??
+                                              getJsonField(
+                                                      p, r'''$.lastVisitId''')
+                                                  ?.toString() ??
+                                              '';
 
                                           if (status == 'ARCHIVED') {
                                             // Paused: go to property dashboard to reactivate
-                                            context.pushNamed(
-                                              'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada',
-                                              queryParameters: {
-                                                'propertyId': serializeParam(
-                                                  getJsonField(p, r'''$.id''').toString(),
-                                                  ParamType.String,
-                                                ),
-                                                'propertyStatus': serializeParam(
-                                                  'ARCHIVED',
-                                                  ParamType.String,
-                                                ),
-                                              }.withoutNulls,
-                                            ).then((_) => safeSetState(() {}));
-                                          } else if (status == 'IN_PROCESS' || status == 'PENDING_REVIEW' || (status == 'DRAFT' && hasVisit)) {
+                                            context
+                                                .pushNamed(
+                                                  'DOVIA_CLIENT_MisPropiedades_PropiedadPublicada',
+                                                  queryParameters: {
+                                                    'propertyId':
+                                                        serializeParam(
+                                                      getJsonField(
+                                                              p, r'''$.id''')
+                                                          .toString(),
+                                                      ParamType.String,
+                                                    ),
+                                                    'propertyStatus':
+                                                        serializeParam(
+                                                      'ARCHIVED',
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                )
+                                                .then(
+                                                    (_) => safeSetState(() {}));
+                                          } else if (status == 'IN_PROCESS' ||
+                                              status == 'PENDING_REVIEW' ||
+                                              (status == 'DRAFT' && hasVisit)) {
                                             context.pushNamed(
                                               'DOVIA_CLIENT_MisPropiedades_Visita_1',
                                               queryParameters: {
-                                                'visitId': serializeParam(finalVisitId, ParamType.String),
+                                                'visitId': serializeParam(
+                                                    finalVisitId,
+                                                    ParamType.String),
                                               },
                                             );
                                           } else if (status == 'DRAFT') {
-                                            final listingTypeField = getJsonField(p, r'''$.listingType''');
-                                            final listingTypeStr = listingTypeField?.toString() ?? '';
-                                            PropertyPublicationType parsedType = PropertyPublicationType.SALE;
+                                            final listingTypeField =
+                                                getJsonField(
+                                                    p, r'''$.listingType''');
+                                            final listingTypeStr =
+                                                listingTypeField?.toString() ??
+                                                    '';
+                                            PropertyPublicationType parsedType =
+                                                PropertyPublicationType.SALE;
                                             String title = 'Vender';
-                                            if (listingTypeStr.contains('SALE') && listingTypeStr.contains('RENT')) {
-                                              parsedType = PropertyPublicationType.SALE_AND_RENT;
+                                            if (listingTypeStr
+                                                    .contains('SALE') &&
+                                                listingTypeStr
+                                                    .contains('RENT')) {
+                                              parsedType =
+                                                  PropertyPublicationType
+                                                      .SALE_AND_RENT;
                                               title = 'Vender / Rentar';
-                                            } else if (listingTypeStr.contains('RENT')) {
-                                              parsedType = PropertyPublicationType.RENT;
+                                            } else if (listingTypeStr
+                                                .contains('RENT')) {
+                                              parsedType =
+                                                  PropertyPublicationType.RENT;
                                               title = 'Rentar';
                                             }
 
                                             context.pushNamed(
                                               'DOVIA_CLIENT_MisPropiedades_VenderRentar',
                                               queryParameters: {
-                                                'title': serializeParam(title, ParamType.String),
-                                                'transactionType': serializeParam(parsedType, ParamType.Enum),
+                                                'title': serializeParam(
+                                                    title, ParamType.String),
+                                                'transactionType':
+                                                    serializeParam(parsedType,
+                                                        ParamType.Enum),
                                               },
                                             );
                                           }

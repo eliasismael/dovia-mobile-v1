@@ -112,7 +112,7 @@ class _LISTINGHQPropiedadesWidgetState
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
     final visits = raw is List ? raw : <dynamic>[];
-    
+
     return visits.map((v) {
       final id = v is Map ? v['id']?.toString() ?? '' : '';
       String address = '';
@@ -121,7 +121,9 @@ class _LISTINGHQPropiedadesWidgetState
         if (prop is Map) {
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ?? prop['name']?.toString() ?? '';
+              locAddr?['street']?.toString() ??
+              prop['name']?.toString() ??
+              '';
         }
       }
       return _HqCardData(
@@ -139,7 +141,9 @@ class _LISTINGHQPropiedadesWidgetState
     required String status,
   }) async {
     final token = currentAuthenticationToken ?? '';
-    final res = await DOVIAAPILegalProcessContextGroup.listLegalProcessesListerHQCall.call(
+    final res = await DOVIAAPILegalProcessContextGroup
+        .listLegalProcessesListerHQCall
+        .call(
       authToken: token,
       status: status,
       page: '1',
@@ -148,16 +152,18 @@ class _LISTINGHQPropiedadesWidgetState
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
     final processes = raw is List ? raw : <dynamic>[];
-    
+
     return processes.map((p) {
       final id = p is Map ? p['id']?.toString() ?? '' : '';
       String address = '';
       if (p is Map) {
-        final prop = p['property'] ?? (p['visit'] is Map ? p['visit']['property'] : null);
+        final prop = p['property'] ??
+            (p['visit'] is Map ? p['visit']['property'] : null);
         if (prop is Map) {
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ?? '';
+              locAddr?['street']?.toString() ??
+              '';
         }
       }
       return _HqCardData(
@@ -294,13 +300,14 @@ class _LISTINGHQPropiedadesWidgetState
                     options: FFButtonOptions(
                       height: 30.0,
                       color: FlutterFlowTheme.of(context).primary,
-                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.publicSans(
-                              fontWeight: FontWeight.w300,
-                            ),
-                            color: Colors.white,
-                            fontSize: 13.0,
-                          ),
+                      textStyle:
+                          FlutterFlowTheme.of(context).titleSmall.override(
+                                font: GoogleFonts.publicSans(
+                                  fontWeight: FontWeight.w300,
+                                ),
+                                color: Colors.white,
+                                fontSize: 13.0,
+                              ),
                       elevation: 0.0,
                       borderRadius: BorderRadius.circular(24.0),
                     ),
@@ -308,7 +315,8 @@ class _LISTINGHQPropiedadesWidgetState
                 ),
                 if (onEyePressed != null)
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        8.0, 0.0, 0.0, 0.0),
                     child: Container(
                       width: 30.0,
                       height: 30.0,
@@ -414,27 +422,33 @@ class _LISTINGHQPropiedadesWidgetState
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return _buildLoader();
                                 return _buildHorizontalList(
-                                  snapshot.data!.map((e) => _buildCarouselCard(
-                                    address: e.address,
-                                    tagText: e.tagText,
-                                    statusText: e.statusText,
-                                    statusBgColor: e.statusBgColor,
-                                    statusTextColor: e.statusTextColor,
-                                    buttonText: 'Asignar Operative Listing',
-                                    onPressed: () => context.pushNamed(
-                                      LISTINGHQPropiedadAsignadaWidget.routeName,
-                                      queryParameters: {
-                                        'visitId': serializeParam(
-                                            e.id, ParamType.String),
-                                      }.withoutNulls,
-                                    ),
-                                    onEyePressed: () => context.pushNamed(
-                                      'LISTING_HQ_Propiedad',
-                                      queryParameters: {
-                                        'visitId': serializeParam(e.id, ParamType.String),
-                                      }.withoutNulls,
-                                    ),
-                                  )).toList(),
+                                  snapshot.data!
+                                      .map((e) => _buildCarouselCard(
+                                            address: e.address,
+                                            tagText: e.tagText,
+                                            statusText: e.statusText,
+                                            statusBgColor: e.statusBgColor,
+                                            statusTextColor: e.statusTextColor,
+                                            buttonText:
+                                                'Asignar Operative Listing',
+                                            onPressed: () => context.pushNamed(
+                                              LISTINGHQPropiedadAsignadaWidget
+                                                  .routeName,
+                                              queryParameters: {
+                                                'visitId': serializeParam(
+                                                    e.id, ParamType.String),
+                                              }.withoutNulls,
+                                            ),
+                                            onEyePressed: () =>
+                                                context.pushNamed(
+                                              'LISTING_HQ_Propiedad',
+                                              queryParameters: {
+                                                'visitId': serializeParam(
+                                                    e.id, ParamType.String),
+                                              }.withoutNulls,
+                                            ),
+                                          ))
+                                      .toList(),
                                 );
                               },
                             ),
@@ -448,20 +462,23 @@ class _LISTINGHQPropiedadesWidgetState
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return _buildLoader();
                                 return _buildHorizontalList(
-                                  snapshot.data!.map((e) => _buildCarouselCard(
-                                    address: e.address,
-                                    tagText: e.tagText,
-                                    statusText: e.statusText,
-                                    statusBgColor: e.statusBgColor,
-                                    statusTextColor: e.statusTextColor,
-                                    buttonText: 'Revisar checklist',
-                                    onPressed: () => context.pushNamed(
-                                      'LISTING_HQ_Propiedad',
-                                      queryParameters: {
-                                        'visitId': serializeParam(e.id, ParamType.String),
-                                      }.withoutNulls,
-                                    ),
-                                  )).toList(),
+                                  snapshot.data!
+                                      .map((e) => _buildCarouselCard(
+                                            address: e.address,
+                                            tagText: e.tagText,
+                                            statusText: e.statusText,
+                                            statusBgColor: e.statusBgColor,
+                                            statusTextColor: e.statusTextColor,
+                                            buttonText: 'Revisar checklist',
+                                            onPressed: () => context.pushNamed(
+                                              'LISTING_HQ_Propiedad',
+                                              queryParameters: {
+                                                'visitId': serializeParam(
+                                                    e.id, ParamType.String),
+                                              }.withoutNulls,
+                                            ),
+                                          ))
+                                      .toList(),
                                 );
                               },
                             ),
@@ -475,20 +492,24 @@ class _LISTINGHQPropiedadesWidgetState
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return _buildLoader();
                                 return _buildHorizontalList(
-                                  snapshot.data!.map((e) => _buildCarouselCard(
-                                    address: e.address,
-                                    tagText: e.tagText,
-                                    statusText: e.statusText,
-                                    statusBgColor: e.statusBgColor,
-                                    statusTextColor: e.statusTextColor,
-                                    buttonText: 'Actualizar Documentacion Legal',
-                                    onPressed: () => context.pushNamed(
-                                      'LISTING_HQ_Propiedad',
-                                      queryParameters: {
-                                        'visitId': serializeParam(e.id, ParamType.String),
-                                      }.withoutNulls,
-                                    ),
-                                  )).toList(),
+                                  snapshot.data!
+                                      .map((e) => _buildCarouselCard(
+                                            address: e.address,
+                                            tagText: e.tagText,
+                                            statusText: e.statusText,
+                                            statusBgColor: e.statusBgColor,
+                                            statusTextColor: e.statusTextColor,
+                                            buttonText:
+                                                'Actualizar Documentacion Legal',
+                                            onPressed: () => context.pushNamed(
+                                              'LISTING_HQ_Propiedad',
+                                              queryParameters: {
+                                                'visitId': serializeParam(
+                                                    e.id, ParamType.String),
+                                              }.withoutNulls,
+                                            ),
+                                          ))
+                                      .toList(),
                                 );
                               },
                             ),

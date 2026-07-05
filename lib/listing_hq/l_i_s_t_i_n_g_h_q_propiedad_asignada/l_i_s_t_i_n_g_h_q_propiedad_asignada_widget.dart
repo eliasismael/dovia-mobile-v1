@@ -140,8 +140,9 @@ class _LISTINGHQPropiedadAsignadaWidgetState
       _propertyType = property['propertyType']?.toString() ??
           property['name']?.toString() ??
           _propertyTypeFromListing(property['listingType']);
-      _address = _deepString(property, ['location', 'address', 'fullAddress']) ??
-          _address;
+      _address =
+          _deepString(property, ['location', 'address', 'fullAddress']) ??
+              _address;
       _description =
           _deepString(property, ['description', 'raw']) ?? _description;
     }
@@ -179,7 +180,9 @@ class _LISTINGHQPropiedadAsignadaWidgetState
     if (listerData is Map) {
       _initialLister = {
         'id': listerData['id'],
-        'name': '${listerData['firstName'] ?? listerData['name'] ?? ''} ${listerData['lastName'] ?? ''}'.trim(),
+        'name':
+            '${listerData['firstName'] ?? listerData['name'] ?? ''} ${listerData['lastName'] ?? ''}'
+                .trim(),
         'photoUrl': listerData['avatar'] ?? listerData['photoUrl'],
       };
       _selectedOperative = _initialLister;
@@ -422,31 +425,29 @@ class _LISTINGHQPropiedadAsignadaWidgetState
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 700) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildOwnerCard(cardWidth),
-                      _buildListerCard(cardWidth),
-                    ],
-                  );
-                } else {
-                  return Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildOwnerCard(constraints.maxWidth),
-                      const SizedBox(height: 16.0),
-                      _buildListerCard(constraints.maxWidth),
-                    ],
-                  );
-                }
+            child: LayoutBuilder(builder: (context, constraints) {
+              if (constraints.maxWidth > 700) {
+                return Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildOwnerCard(cardWidth),
+                    _buildListerCard(cardWidth),
+                  ],
+                );
+              } else {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildOwnerCard(constraints.maxWidth),
+                    const SizedBox(height: 16.0),
+                    _buildListerCard(constraints.maxWidth),
+                  ],
+                );
               }
-            ),
+            }),
           ),
           const SizedBox(height: 20.0),
           Text('Tipo de vivienda', style: _sectionTitleStyle()),
@@ -484,13 +485,19 @@ class _LISTINGHQPropiedadAsignadaWidgetState
           const SizedBox(height: 4.0),
           Row(
             children: [
-              Icon(Icons.description, color: FlutterFlowTheme.of(context).primary, size: 16),
+              Icon(Icons.description,
+                  color: FlutterFlowTheme.of(context).primary, size: 16),
               const SizedBox(width: 4),
-              Text('Acuerdo firmado', style: _subTextStyle().copyWith(color: FlutterFlowTheme.of(context).primary)),
+              Text('Acuerdo firmado',
+                  style: _subTextStyle()
+                      .copyWith(color: FlutterFlowTheme.of(context).primary)),
               const SizedBox(width: 16),
-              Icon(Icons.verified_user, color: FlutterFlowTheme.of(context).primary, size: 16),
+              Icon(Icons.verified_user,
+                  color: FlutterFlowTheme.of(context).primary, size: 16),
               const SizedBox(width: 4),
-              Text('Certificación', style: _subTextStyle().copyWith(color: FlutterFlowTheme.of(context).primary)),
+              Text('Certificación',
+                  style: _subTextStyle()
+                      .copyWith(color: FlutterFlowTheme.of(context).primary)),
             ],
           ),
           Padding(
@@ -498,30 +505,32 @@ class _LISTINGHQPropiedadAsignadaWidgetState
             child: wrapWithModel(
               model: _model.primaryButtonModel,
               updateCallback: () => safeSetState(() {}),
-              child: _initialLister != null && !_isReassigning 
-                ? PrimaryButtonWidget(
-                    text: 'Organizar información de la propiedad',
-                    onTap: () async {
-                      safeSetState(() {
-                        _selectedOperative = null;
-                        _isReassigning = true;
-                      });
-                    },
-                  )
-                : PrimaryButtonWidget(
-                    text: _submitting
-                        ? 'Confirmando...'
-                        : 'Confirmar visita y notificar',
-                    onTap: () async {
-                      if (!_submitting && _selectedOperative != null) {
-                        await _confirmAssignment();
-                      } else if (_selectedOperative == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Debe seleccionar un Operative Lister primero.')),
-                        );
-                      }
-                    },
-                  ),
+              child: _initialLister != null && !_isReassigning
+                  ? PrimaryButtonWidget(
+                      text: 'Organizar información de la propiedad',
+                      onTap: () async {
+                        safeSetState(() {
+                          _selectedOperative = null;
+                          _isReassigning = true;
+                        });
+                      },
+                    )
+                  : PrimaryButtonWidget(
+                      text: _submitting
+                          ? 'Confirmando...'
+                          : 'Confirmar visita y notificar',
+                      onTap: () async {
+                        if (!_submitting && _selectedOperative != null) {
+                          await _confirmAssignment();
+                        } else if (_selectedOperative == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Debe seleccionar un Operative Lister primero.')),
+                          );
+                        }
+                      },
+                    ),
             ),
           ),
           const SizedBox(height: 100.0),

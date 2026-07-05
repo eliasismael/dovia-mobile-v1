@@ -14,7 +14,8 @@ class PopupRechazarDocumentoWidget extends StatefulWidget {
       _PopupRechazarDocumentoWidgetState();
 }
 
-class _PopupRechazarDocumentoWidgetState extends State<PopupRechazarDocumentoWidget> {
+class _PopupRechazarDocumentoWidgetState
+    extends State<PopupRechazarDocumentoWidget> {
   late PopupRechazarDocumentoModel _model;
 
   @override
@@ -51,7 +52,8 @@ class _PopupRechazarDocumentoWidgetState extends State<PopupRechazarDocumentoWid
             borderRadius: BorderRadius.circular(20.0),
           ),
           child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 30.0),
+            padding:
+                const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 30.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -87,7 +89,8 @@ class _PopupRechazarDocumentoWidgetState extends State<PopupRechazarDocumentoWid
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: TextFormField(
                     controller: _model.commentTextController,
                     focusNode: _model.commentFocusNode,
@@ -95,7 +98,9 @@ class _PopupRechazarDocumentoWidgetState extends State<PopupRechazarDocumentoWid
                     obscureText: false,
                     decoration: InputDecoration(
                       hintText: 'Ej: RECORDAR QUE EL DEPÓSITO...',
-                      hintStyle: FlutterFlowTheme.of(context).bodySmall.override(
+                      hintStyle: FlutterFlowTheme.of(context)
+                          .bodySmall
+                          .override(
                             font: GoogleFonts.inter(),
                             color: FlutterFlowTheme.of(context).secondaryText,
                           ),
@@ -132,11 +137,13 @@ class _PopupRechazarDocumentoWidgetState extends State<PopupRechazarDocumentoWid
                           font: GoogleFonts.inter(),
                         ),
                     maxLines: 4,
-                    validator: _model.commentTextControllerValidator.asValidator(context),
+                    validator: _model.commentTextControllerValidator
+                        .asValidator(context),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
                   child: FFButtonWidget(
                     onPressed: () async {
                       Navigator.pop(context, _model.commentTextController.text);
@@ -145,15 +152,18 @@ class _PopupRechazarDocumentoWidgetState extends State<PopupRechazarDocumentoWid
                     options: FFButtonOptions(
                       width: double.infinity,
                       height: 48.0,
-                      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
+                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
                       color: FlutterFlowTheme.of(context).primary,
-                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            color: Colors.white,
-                          ),
+                      textStyle:
+                          FlutterFlowTheme.of(context).titleSmall.override(
+                                font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                color: Colors.white,
+                              ),
                       elevation: 0.0,
                       borderRadius: BorderRadius.circular(24.0),
                     ),

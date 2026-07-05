@@ -64,8 +64,8 @@ class _DHASSOCIATEServiciosWidgetState
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 42.0, 20.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,8 +197,8 @@ class _DHASSOCIATEServiciosWidgetState
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 36.0, 20.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       decoration: BoxDecoration(
@@ -492,8 +492,8 @@ class _DHASSOCIATEServiciosWidgetState
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 5.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

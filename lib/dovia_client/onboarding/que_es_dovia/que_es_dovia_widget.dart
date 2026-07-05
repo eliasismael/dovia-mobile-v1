@@ -89,8 +89,9 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 50.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 50.0, 0.0, 0.0),
                                       child: ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(0.0),
@@ -103,8 +104,9 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          24.0, 31.0, 24.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              24.0, 31.0, 24.0, 0.0),
                                       child: RichText(
                                         textScaler:
                                             MediaQuery.of(context).textScaler,
@@ -177,12 +179,13 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
-                                  Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        33.0, 18.0, 24.0, 0.0),
-                                    child: Container(
-                                      width: double.infinity,
-                                      decoration: const BoxDecoration(),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              33.0, 18.0, 24.0, 0.0),
+                                      child: Container(
+                                        width: double.infinity,
+                                        decoration: const BoxDecoration(),
                                         child: RichText(
                                           textScaler:
                                               MediaQuery.of(context).textScaler,
@@ -269,14 +272,15 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          20.0, 31.0, 21.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              20.0, 31.0, 21.0, 0.0),
                                       child: FFButtonWidget(
                                         onPressed: () async {
                                           await _model.pageViewController
                                               ?.nextPage(
-                                            duration:
-                                                const Duration(milliseconds: 300),
+                                            duration: const Duration(
+                                                milliseconds: 300),
                                             curve: Curves.ease,
                                           );
                                         },
@@ -284,12 +288,11 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                         options: FFButtonOptions(
                                           width: double.infinity,
                                           height: 42.0,
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  16.0, 0.0, 16.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(16.0, 0.0, 16.0, 0.0),
                                           iconPadding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 0.0),
+                                              const EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                           color: const Color(0xFFEBEAE3),
                                           textStyle: FlutterFlowTheme.of(
                                                   context)
@@ -325,8 +328,9 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          158.0, 10.0, 159.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              158.0, 10.0, 159.0, 0.0),
                                       child: InkWell(
                                         splashColor: Colors.transparent,
                                         focusColor: Colors.transparent,
@@ -367,9 +371,8 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                       child: Container(
                                         decoration: const BoxDecoration(),
                                         child: Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 25.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 25.0, 0.0, 0.0),
                                           child: ClipRRect(
                                             borderRadius:
                                                 BorderRadius.circular(0.0),
@@ -504,10 +507,12 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                           ),
                                           child: Align(
                                             alignment:
-                                                const AlignmentDirectional(-1.0, 0.0),
+                                                const AlignmentDirectional(
+                                                    -1.0, 0.0),
                                             child: Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .fromSTEB(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
                                                       20.0, 0.0, 0.0, 0.0),
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.max,
@@ -641,7 +646,8 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                 child: FFButtonWidget(
                                   onPressed: () async {
                                     await _model.pageViewController?.nextPage(
-                                      duration: const Duration(milliseconds: 300),
+                                      duration:
+                                          const Duration(milliseconds: 300),
                                       curve: Curves.ease,
                                     );
                                   },
@@ -649,10 +655,12 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                   options: FFButtonOptions(
                                     width: double.infinity,
                                     height: 49.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: const Color(0xFF007376),
                                     textStyle: FlutterFlowTheme.of(context)
                                         .labelLarge
@@ -723,8 +731,9 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                 child: Container(
                                   decoration: const BoxDecoration(),
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 25.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 25.0, 0.0, 0.0),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(0.0),
                                       child: SvgPicture.asset(
@@ -841,9 +850,8 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                       ),
                                       Expanded(
                                         child: Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  20.0, 0.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(20.0, 0.0, 0.0, 0.0),
                                           child: Container(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
@@ -989,7 +997,8 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                 child: FFButtonWidget(
                                   onPressed: () async {
                                     await _model.pageViewController?.nextPage(
-                                      duration: const Duration(milliseconds: 300),
+                                      duration:
+                                          const Duration(milliseconds: 300),
                                       curve: Curves.ease,
                                     );
                                   },
@@ -998,10 +1007,12 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                     width:
                                         MediaQuery.sizeOf(context).width * 1.0,
                                     height: 49.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: const Color(0xFF007376),
                                     textStyle: FlutterFlowTheme.of(context)
                                         .labelLarge
@@ -1072,8 +1083,9 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                 child: Container(
                                   decoration: const BoxDecoration(),
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 25.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 25.0, 0.0, 0.0),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(0.0),
                                       child: SvgPicture.asset(
@@ -1281,10 +1293,12 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                   options: FFButtonOptions(
                                     width: double.infinity,
                                     height: 49.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: const Color(0xFFEBEAE3),
                                     textStyle: FlutterFlowTheme.of(context)
                                         .labelLarge
@@ -1355,8 +1369,9 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                                 child: Container(
                                   decoration: const BoxDecoration(),
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 33.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 33.0, 0.0, 0.0),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(0.0),
                                       child: SvgPicture.asset(
@@ -1378,8 +1393,8 @@ class _QueEsDoviaWidgetState extends State<QueEsDoviaWidget> {
                   Align(
                     alignment: const AlignmentDirectional(0.0, 1.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 16.0),
                       child: smooth_page_indicator.SmoothPageIndicator(
                         controller: _model.pageViewController ??=
                             PageController(initialPage: 0),

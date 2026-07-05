@@ -133,14 +133,13 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
                           width: double.infinity,
                           height: 50.0,
                           color: FlutterFlowTheme.of(context).primary,
-                          textStyle: FlutterFlowTheme.of(context)
-                              .titleSmall
-                              .override(
-                                font: GoogleFonts.inter(
-                                    fontWeight: FontWeight.w600),
-                                color: Colors.white,
-                                letterSpacing: 0.0,
-                              ),
+                          textStyle:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600),
+                                    color: Colors.white,
+                                    letterSpacing: 0.0,
+                                  ),
                           elevation: 0.0,
                           borderRadius: BorderRadius.circular(10.0),
                         ),

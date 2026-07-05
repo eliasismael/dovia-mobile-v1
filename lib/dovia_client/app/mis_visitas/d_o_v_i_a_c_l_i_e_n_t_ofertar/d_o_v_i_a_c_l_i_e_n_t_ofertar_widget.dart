@@ -122,8 +122,8 @@ class _DOVIACLIENTOfertarWidgetState extends State<DOVIACLIENTOfertarWidget> {
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.0,
-                                  color: FlutterFlowTheme.of(context)
-                                      .primaryText,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
                                 ),
                           ),
                           const SizedBox(height: 8),
@@ -149,24 +149,23 @@ class _DOVIACLIENTOfertarWidgetState extends State<DOVIACLIENTOfertarWidget> {
                           _ToggleOptionButton(
                             label: 'Venta',
                             selected: _selectVenta,
-                            onTap: () =>
-                                safeSetState(() => _selectVenta = !_selectVenta),
+                            onTap: () => safeSetState(
+                                () => _selectVenta = !_selectVenta),
                           ),
                           const SizedBox(height: 16),
                           _ToggleOptionButton(
                             label: 'Renta',
                             selected: _selectRenta,
-                            onTap: () =>
-                                safeSetState(() => _selectRenta = !_selectRenta),
+                            onTap: () => safeSetState(
+                                () => _selectRenta = !_selectRenta),
                           ),
                           const Spacer(),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed:
-                                  (_selectVenta || _selectRenta)
-                                      ? _onContinuar
-                                      : null,
+                              onPressed: (_selectVenta || _selectRenta)
+                                  ? _onContinuar
+                                  : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     FlutterFlowTheme.of(context).primary,
@@ -232,8 +231,7 @@ class _ToggleOptionButton extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         width: double.infinity,
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20.0, vertical: 18.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 18.0),
         decoration: BoxDecoration(
           color: selected
               ? FlutterFlowTheme.of(context).primary.withOpacity(0.08)
@@ -262,8 +260,7 @@ class _ToggleOptionButton extends StatelessWidget {
                     color: selected
                         ? FlutterFlowTheme.of(context).primary
                         : FlutterFlowTheme.of(context).primaryText,
-                    fontWeight:
-                        selected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                     letterSpacing: 0.0,
                   ),
             ),

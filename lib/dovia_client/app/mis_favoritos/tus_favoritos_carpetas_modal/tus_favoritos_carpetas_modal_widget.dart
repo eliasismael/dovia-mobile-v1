@@ -114,7 +114,8 @@ class _TusFavoritosCarpetasModalWidgetState
               if (widget.isCreatingNewFolderPARAM != true &&
                   !_model.isCreatingNewFolder) {
                 return Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
@@ -168,8 +169,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 10.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 10.0, 0.0),
                                       child: ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(8.0),
@@ -185,8 +187,8 @@ class _TusFavoritosCarpetasModalWidgetState
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
-                                          alignment:
-                                              const AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: Text(
                                             valueOrDefault<String>(
                                               widget.propertyName,
@@ -301,12 +303,11 @@ class _TusFavoritosCarpetasModalWidgetState
                                         text: 'Nueva carpeta',
                                         options: FFButtonOptions(
                                           height: 30.0,
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  16.0, 0.0, 16.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(16.0, 0.0, 16.0, 0.0),
                                           iconPadding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 0.0),
+                                              const EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                           color: const Color(0xFF1CA9A9),
                                           textStyle: FlutterFlowTheme.of(
                                                   context)
@@ -388,8 +389,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                               final eachFolderItem =
                                                   eachFolder[eachFolderIndex];
                                               return Padding(
-                                                padding: const EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         20.0, 20.0, 20.0, 0.0),
                                                 child: Row(
                                                   mainAxisSize:
@@ -409,10 +411,10 @@ class _TusFavoritosCarpetasModalWidgetState
                                                             padding:
                                                                 const EdgeInsetsDirectional
                                                                     .fromSTEB(
-                                                                        0.0,
-                                                                        0.0,
-                                                                        10.0,
-                                                                        0.0),
+                                                                    0.0,
+                                                                    0.0,
+                                                                    10.0,
+                                                                    0.0),
                                                             child: ClipRRect(
                                                               borderRadius:
                                                                   BorderRadius
@@ -562,8 +564,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                   builder:
                                                                       (alertDialogContext) {
                                                                     return AlertDialog(
-                                                                      content: const Text(
-                                                                          'Se guardó correctamente'),
+                                                                      content:
+                                                                          const Text(
+                                                                              'Se guardó correctamente'),
                                                                       actions: [
                                                                         TextButton(
                                                                           onPressed: () =>
@@ -657,8 +660,8 @@ class _TusFavoritosCarpetasModalWidgetState
                 );
               } else {
                 return Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 20.0, 20.0, 20.0),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
@@ -717,9 +720,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                       r'''$.data.id''',
                                     ).toString();
 
-                                    final bool addedToFolder = widget.houseId !=
-                                            null &&
-                                        widget.houseId!.isNotEmpty;
+                                    final bool addedToFolder =
+                                        widget.houseId != null &&
+                                            widget.houseId!.isNotEmpty;
                                     if (addedToFolder) {
                                       await DOVIAAPIFavoriteContextGroup
                                           .addPropertyToFavoritesCall

@@ -72,8 +72,8 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 42.0, 20.0, 0.0),
                       child: Stack(
                         alignment: const AlignmentDirectional(0.0, 0.0),
                         children: [
@@ -241,16 +241,18 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                     borderColor: Colors.transparent,
                                     borderWidth: 0.0,
                                     borderRadius: 67.0,
-                                    margin: const EdgeInsetsDirectional.fromSTEB(
-                                        12.0, 0.0, 12.0, 0.0),
+                                    margin:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            12.0, 0.0, 12.0, 0.0),
                                     hidesUnderline: true,
                                     isOverButton: false,
                                     isSearchable: false,
                                     isMultiSelect: false,
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        4.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            4.0, 0.0, 0.0, 0.0),
                                     child: InkWell(
                                       splashColor: Colors.transparent,
                                       focusColor: Colors.transparent,
@@ -288,14 +290,16 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                                         builder:
                                                             (alertDialogContext) {
                                                           return AlertDialog(
-                                                            title: const Text('ok'),
+                                                            title: const Text(
+                                                                'ok'),
                                                             actions: [
                                                               TextButton(
                                                                 onPressed: () =>
                                                                     Navigator.pop(
                                                                         alertDialogContext),
                                                                 child:
-                                                                    const Text('Ok'),
+                                                                    const Text(
+                                                                        'Ok'),
                                                               ),
                                                             ],
                                                           );
@@ -308,14 +312,16 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                                                         builder:
                                                             (alertDialogContext) {
                                                           return AlertDialog(
-                                                            title: const Text('ok'),
+                                                            title: const Text(
+                                                                'ok'),
                                                             actions: [
                                                               TextButton(
                                                                 onPressed: () =>
                                                                     Navigator.pop(
                                                                         alertDialogContext),
                                                                 child:
-                                                                    const Text('Ok'),
+                                                                    const Text(
+                                                                        'Ok'),
                                                               ),
                                                             ],
                                                           );
@@ -379,8 +385,8 @@ class _DOVIACLIENTHomePage2MapaWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [

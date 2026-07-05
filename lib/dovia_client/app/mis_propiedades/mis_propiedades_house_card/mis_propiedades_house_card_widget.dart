@@ -44,18 +44,44 @@ class _MisPropiedadesHouseCardWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final statusKey = getJsonField(widget.property, r'''$.status''') as String? ?? 'DRAFT';
-    final name = getJsonField(widget.property, r'''$.name''') as String? ?? 'Propiedad sin nombre';
-    final typeName = getJsonField(widget.property, r'''$.propertyType.name''') as String? ?? 'Casa';
-    final propPrice = getJsonField(widget.property, r'''$.offerOptions[0].price''')?.toString() ?? '0';
-    final currency = getJsonField(widget.property, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD';
-    final bedrooms = getJsonField(widget.property, r'''$.features.general.bedrooms''')?.toString() ?? '0';
-    final bathrooms = getJsonField(widget.property, r'''$.features.general.bathrooms''')?.toString() ?? '0';
-    final constructionArea = getJsonField(widget.property, r'''$.features.general.constructionArea''')?.toString() ?? '0';
-    final landArea = getJsonField(widget.property, r'''$.features.general.landArea''')?.toString() ?? '0';
-    final imageUrl = getJsonField(widget.property, r'''$.photos[0].url''')?.toString();
+    final statusKey =
+        getJsonField(widget.property, r'''$.status''') as String? ?? 'DRAFT';
+    final name = getJsonField(widget.property, r'''$.name''') as String? ??
+        'Propiedad sin nombre';
+    final typeName =
+        getJsonField(widget.property, r'''$.propertyType.name''') as String? ??
+            'Casa';
+    final propPrice =
+        getJsonField(widget.property, r'''$.offerOptions[0].price''')
+                ?.toString() ??
+            '0';
+    final currency =
+        getJsonField(widget.property, r'''$.offerOptions[0].currency''')
+                ?.toString() ??
+            'USD';
+    final bedrooms =
+        getJsonField(widget.property, r'''$.features.general.bedrooms''')
+                ?.toString() ??
+            '0';
+    final bathrooms =
+        getJsonField(widget.property, r'''$.features.general.bathrooms''')
+                ?.toString() ??
+            '0';
+    final constructionArea = getJsonField(
+                widget.property, r'''$.features.general.constructionArea''')
+            ?.toString() ??
+        '0';
+    final landArea =
+        getJsonField(widget.property, r'''$.features.general.landArea''')
+                ?.toString() ??
+            '0';
+    final imageUrl =
+        getJsonField(widget.property, r'''$.photos[0].url''')?.toString();
 
-    final hasVisit = getJsonField(widget.property, r'''$.operativeListerVisit.visitId''') != null || getJsonField(widget.property, r'''$.lastVisitId''') != null;
+    final hasVisit =
+        getJsonField(widget.property, r'''$.operativeListerVisit.visitId''') !=
+                null ||
+            getJsonField(widget.property, r'''$.lastVisitId''') != null;
     final isPaused = statusKey == 'ARCHIVED';
 
     String statusText = 'Pendiente';
@@ -68,7 +94,8 @@ class _MisPropiedadesHouseCardWidgetState
     } else if (statusKey == 'PENDING_REVIEW') {
       statusText = 'En revisión';
       percent = 0.75;
-    } else if (statusKey == 'IN_PROCESS' || (statusKey == 'DRAFT' && hasVisit)) {
+    } else if (statusKey == 'IN_PROCESS' ||
+        (statusKey == 'DRAFT' && hasVisit)) {
       statusText = 'En proceso';
       percent = 0.5;
     } else if (statusKey == 'DRAFT') {
@@ -91,7 +118,8 @@ class _MisPropiedadesHouseCardWidgetState
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
                   child: Container(
                     decoration: const BoxDecoration(),
                     child: Stack(
@@ -234,8 +262,8 @@ class _MisPropiedadesHouseCardWidgetState
                   Align(
                     alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 8.0, 0.0, 0.0),
                       child: Text(
                         '$currency ${NumberFormat.decimalPattern().format(int.tryParse(propPrice) ?? 0)}',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -259,7 +287,8 @@ class _MisPropiedadesHouseCardWidgetState
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 5.0, 0.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -347,8 +376,8 @@ class _MisPropiedadesHouseCardWidgetState
                   Align(
                     alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 5.0, 0.0, 0.0),
                       child: Wrap(
                         spacing: 0.0,
                         runSpacing: 0.0,
@@ -499,15 +528,17 @@ class _MisPropiedadesHouseCardWidgetState
                     ],
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: LinearPercentIndicator(
                       percent: percent,
                       lineHeight: 12.0,
                       animation: true,
                       animateFromLastPercent: true,
                       progressColor: const Color(0xFF32D74B),
-                      backgroundColor: FlutterFlowTheme.of(context).secondaryText.withOpacity(0.2),
+                      backgroundColor: FlutterFlowTheme.of(context)
+                          .secondaryText
+                          .withOpacity(0.2),
                       barRadius: const Radius.circular(25.0),
                       padding: EdgeInsets.zero,
                     ),

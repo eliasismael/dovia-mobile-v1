@@ -174,19 +174,20 @@ class _SHOWINGPropiedadesAMostrarWidgetState
       }
       grouped[date]!.add(v);
     }
-    
-    final sortedKeys = grouped.keys.toList()..sort((a, b) {
-      if (a == 'Sin fecha') return 1;
-      if (b == 'Sin fecha') return -1;
-      return a.compareTo(b);
-    });
-    
+
+    final sortedKeys = grouped.keys.toList()
+      ..sort((a, b) {
+        if (a == 'Sin fecha') return 1;
+        if (b == 'Sin fecha') return -1;
+        return a.compareTo(b);
+      });
+
     final sortedGrouped = <String, List<_ShowingVisit>>{};
     for (final k in sortedKeys) {
       final list = grouped[k]!..sort((a, b) => a.time.compareTo(b.time));
       sortedGrouped[k] = list;
     }
-    
+
     return sortedGrouped;
   }
 
@@ -198,17 +199,28 @@ class _SHOWINGPropiedadesAMostrarWidgetState
       final year = parts[0];
       final monthNum = int.parse(parts[1]);
       final dayNum = int.parse(parts[2]);
-      
+
       const months = [
-        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre'
       ];
       if (monthNum < 1 || monthNum > 12) return dateStr;
       final month = months[monthNum - 1];
-      
+
       final now = DateTime.now();
-      final todayStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-      
+      final todayStr =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
       if (dateStr == todayStr) {
         return 'Hoy $dayNum de $month de $year';
       } else {
@@ -227,10 +239,20 @@ class _SHOWINGPropiedadesAMostrarWidgetState
       final year = parts[0];
       final monthNum = int.parse(parts[1]);
       final dayNum = int.parse(parts[2]);
-      
+
       const months = [
-        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre'
       ];
       if (monthNum < 1 || monthNum > 12) return dateStr;
       final month = months[monthNum - 1];
@@ -268,11 +290,13 @@ class _SHOWINGPropiedadesAMostrarWidgetState
   Future<void> _launchMap(_ShowingVisit v) async {
     if (v.lat == null || v.lng == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay coordenadas disponibles para esta propiedad.')),
+        const SnackBar(
+            content:
+                Text('No hay coordenadas disponibles para esta propiedad.')),
       );
       return;
     }
-    
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -286,7 +310,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
         );
       },
     );
-    
+
     if (confirm != true) return;
 
     // Marca la ruta como iniciada ("en camino") SOLO localmente: desbloquea la
@@ -299,16 +323,19 @@ class _SHOWINGPropiedadesAMostrarWidgetState
       }
     } catch (_) {}
 
-    final googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}");
-    final appleMapsUrl = Uri.parse("https://maps.apple.com/?q=${v.lat},${v.lng}");
-    
+    final googleMapsUrl = Uri.parse(
+        "https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}");
+    final appleMapsUrl =
+        Uri.parse("https://maps.apple.com/?q=${v.lat},${v.lng}");
+
     try {
       if (await canLaunchUrl(googleMapsUrl)) {
         await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
       } else if (await canLaunchUrl(appleMapsUrl)) {
         await launchUrl(appleMapsUrl, mode: LaunchMode.externalApplication);
       } else {
-        final webUrl = Uri.parse("https://www.google.com/maps/place/${v.lat},${v.lng}");
+        final webUrl =
+            Uri.parse("https://www.google.com/maps/place/${v.lat},${v.lng}");
         if (await canLaunchUrl(webUrl)) {
           await launchUrl(webUrl);
         }
@@ -347,157 +374,219 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    Align(
-                      alignment: const AlignmentDirectional(-1.0, 0.0),
-                      child: RichText(
-                        textScaler: MediaQuery.of(context).textScaler,
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${visit.title.isNotEmpty ? visit.title : "Propiedad"}\n',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.w500,
-                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                    ),
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
+                  Align(
+                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                    child: RichText(
+                      textScaler: MediaQuery.of(context).textScaler,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text:
+                                '${visit.title.isNotEmpty ? visit.title : "Propiedad"}\n',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
                                     fontWeight: FontWeight.w500,
-                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
                                   ),
-                            ),
-                            TextSpan(
-                              text: 'Dirección: ${visit.address.isNotEmpty ? visit.address : "—"}\n',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.normal,
-                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                    ),
-                                    fontSize: 12.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.normal,
-                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                  ),
-                            ),
-                            TextSpan(
-                              text: 'Fecha: ${_formatDateOnly(visit.date)}\n',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.normal,
-                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                    ),
-                                    fontSize: 12.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.normal,
-                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                  ),
-                            ),
-                            TextSpan(
-                              text: 'Hora: ${visit.time.isNotEmpty ? visit.time : "—"}\n',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.normal,
-                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                    ),
-                                    fontSize: 12.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.normal,
-                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                  ),
-                            ),
-                            TextSpan(
-                              text: '${visit.ownerName.isNotEmpty ? visit.ownerName : "Sin propietario asignado"}\n',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                    ),
-                                    fontSize: 12.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                  ),
-                            ),
-                          ],
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.publicSans(
-                                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                  fontSize: 16.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w500,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontStyle,
                                 ),
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                                lineHeight: 1.5,
+                          ),
+                          TextSpan(
+                            text:
+                                'Dirección: ${visit.address.isNotEmpty ? visit.address : "—"}\n',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.normal,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  fontSize: 12.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontStyle,
+                                ),
+                          ),
+                          TextSpan(
+                            text: 'Fecha: ${_formatDateOnly(visit.date)}\n',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.normal,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  fontSize: 12.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontStyle,
+                                ),
+                          ),
+                          TextSpan(
+                            text:
+                                'Hora: ${visit.time.isNotEmpty ? visit.time : "—"}\n',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.normal,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  fontSize: 12.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontStyle,
+                                ),
+                          ),
+                          TextSpan(
+                            text:
+                                '${visit.ownerName.isNotEmpty ? visit.ownerName : "Sin propietario asignado"}\n',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  fontSize: 12.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontWeight,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontStyle,
+                                ),
+                          ),
+                        ],
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.publicSans(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontStyle,
                               ),
-                        ),
+                              letterSpacing: 0.0,
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontStyle,
+                              lineHeight: 1.5,
+                            ),
                       ),
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        FFButtonWidget(
-                          onPressed: () => _launchMap(visit),
-                          text: 'Iniciar ruta',
-                          options: FFButtonOptions(
-                            height: 30.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                            color: const Color(0x00007376),
-                            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.normal,
-                                    fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                  ),
-                                  color: FlutterFlowTheme.of(context).primaryText,
-                                  fontSize: 14.0,
-                                  letterSpacing: 0.0,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      FFButtonWidget(
+                        onPressed: () => _launchMap(visit),
+                        text: 'Iniciar ruta',
+                        options: FFButtonOptions(
+                          height: 30.0,
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              12.0, 0.0, 12.0, 0.0),
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 0.0),
+                          color: const Color(0x00007376),
+                          textStyle: FlutterFlowTheme.of(context)
+                              .titleSmall
+                              .override(
+                                font: GoogleFonts.publicSans(
                                   fontWeight: FontWeight.normal,
-                                  fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .fontStyle,
                                 ),
-                            elevation: 0.0,
-                            borderSide: BorderSide(
-                              color: FlutterFlowTheme.of(context).primary,
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(24.0),
-                          ),
-                        ),
-                        FFButtonWidget(
-                          onPressed: () {
-                            context.pushNamed(
-                              'SHOWING_PropiedadAMostrar',
-                              queryParameters: {
-                                'visitId': serializeParam(visit.visitId, ParamType.String),
-                              }.withoutNulls,
-                            );
-                          },
-                          text: 'Detalles',
-                          options: FFButtonOptions(
-                            height: 30.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                fontSize: 14.0,
+                                letterSpacing: 0.0,
+                                fontWeight: FontWeight.normal,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .fontStyle,
+                              ),
+                          elevation: 0.0,
+                          borderSide: BorderSide(
                             color: FlutterFlowTheme.of(context).primary,
-                            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.normal,
-                                    fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                  ),
-                                  color: Colors.white,
-                                  fontSize: 14.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.normal,
-                                  fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(24.0),
+                            width: 1.0,
                           ),
+                          borderRadius: BorderRadius.circular(24.0),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      FFButtonWidget(
+                        onPressed: () {
+                          context.pushNamed(
+                            'SHOWING_PropiedadAMostrar',
+                            queryParameters: {
+                              'visitId': serializeParam(
+                                  visit.visitId, ParamType.String),
+                            }.withoutNulls,
+                          );
+                        },
+                        text: 'Detalles',
+                        options: FFButtonOptions(
+                          height: 30.0,
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              12.0, 0.0, 12.0, 0.0),
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 0.0),
+                          color: FlutterFlowTheme.of(context).primary,
+                          textStyle:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    font: GoogleFonts.publicSans(
+                                      fontWeight: FontWeight.normal,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                                    color: Colors.white,
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.normal,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .fontStyle,
+                                  ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
+            ),
           ].divide(const SizedBox(width: 10.0)),
         ),
       ),
@@ -624,7 +713,8 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                           FutureBuilder<List<_ShowingVisit>>(
                             future: _visitsFuture,
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 40.0),
                                   child: Center(
@@ -634,11 +724,13 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                               }
                               if (snapshot.hasError || !snapshot.hasData) {
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 40.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 40.0),
                                   child: Center(
                                     child: Text(
                                       'Error al cargar las visitas.',
-                                      style: FlutterFlowTheme.of(context).bodyMedium,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
                                     ),
                                   ),
                                 );
@@ -646,13 +738,17 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                               final visits = snapshot.data!;
                               if (visits.isEmpty) {
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 40.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 40.0),
                                   child: Center(
                                     child: Text(
                                       'No tienes visitas programadas.',
-                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
                                             font: GoogleFonts.inter(),
-                                            color: FlutterFlowTheme.of(context).secondaryText,
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
                                           ),
                                     ),
                                   ),
@@ -670,13 +766,15 @@ class _SHOWINGPropiedadesAMostrarWidgetState
 
                                   return Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Align(
-                                        alignment: const AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Padding(
-                                          padding: const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 20.0, 0.0, 10.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 20.0, 0.0, 10.0),
                                           child: Text(
                                             _formatDate(dateStr),
                                             style: FlutterFlowTheme.of(context)
@@ -692,8 +790,8 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                         ),
                                       ),
                                       ...dayVisits.map((v) => Padding(
-                                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 10.0, 0.0, 10.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 10.0, 0.0, 10.0),
                                             child: _buildVisitCard(v),
                                           )),
                                     ],
@@ -729,4 +827,3 @@ class _SHOWINGPropiedadesAMostrarWidgetState
     );
   }
 }
-

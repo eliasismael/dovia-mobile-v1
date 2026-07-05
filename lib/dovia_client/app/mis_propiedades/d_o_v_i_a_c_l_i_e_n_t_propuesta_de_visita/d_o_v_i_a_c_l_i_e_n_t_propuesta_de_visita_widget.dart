@@ -420,7 +420,8 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                               if (_visitSubstatus != 'RESCHEDULE_REQUIRED') ...[
                                 // Botón Secundario: Solicitar otra fecha
                                 OutlinedButton(
-                                  onPressed: _isSending ? null : _solicitarOtraFecha,
+                                  onPressed:
+                                      _isSending ? null : _solicitarOtraFecha,
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),

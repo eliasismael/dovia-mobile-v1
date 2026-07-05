@@ -80,8 +80,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 35.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 35.0, 20.0, 0.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         decoration: const BoxDecoration(),
@@ -126,8 +126,9 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Container(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -166,8 +167,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Align(
-                                        alignment:
-                                            const AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Text(
                                           'Describe los trabajos realizados',
                                           style: FlutterFlowTheme.of(context)
@@ -201,8 +202,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: SizedBox(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -316,8 +317,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                                       .secondaryBackground,
                                               contentPadding:
                                                   const EdgeInsetsDirectional
-                                                      .fromSTEB(20.0, 0.0, 0.0,
-                                                          100.0),
+                                                      .fromSTEB(
+                                                      20.0, 0.0, 0.0, 100.0),
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
@@ -397,8 +398,9 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Container(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -437,8 +439,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Align(
-                                        alignment:
-                                            const AlignmentDirectional(-1.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            -1.0, 0.0),
                                         child: Text(
                                           'Recomendaciones para el cliente',
                                           style: FlutterFlowTheme.of(context)
@@ -472,8 +474,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 12.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                         child: SizedBox(
                                           width:
                                               MediaQuery.sizeOf(context).width *
@@ -587,8 +589,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                                       .secondaryBackground,
                                               contentPadding:
                                                   const EdgeInsetsDirectional
-                                                      .fromSTEB(20.0, 0.0, 0.0,
-                                                          100.0),
+                                                      .fromSTEB(
+                                                      20.0, 0.0, 0.0, 100.0),
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
@@ -643,10 +645,12 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                     width:
                                         MediaQuery.sizeOf(context).width * 1.0,
                                     height: 42.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).primary,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -694,8 +698,8 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                     Align(
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 5.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),

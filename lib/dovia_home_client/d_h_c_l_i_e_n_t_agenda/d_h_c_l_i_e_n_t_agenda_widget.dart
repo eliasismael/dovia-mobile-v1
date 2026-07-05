@@ -73,8 +73,8 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -170,16 +170,18 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                     borderColor: Colors.transparent,
                                     borderWidth: 0.0,
                                     borderRadius: 10.0,
-                                    margin: const EdgeInsetsDirectional.fromSTEB(
-                                        12.0, 0.0, 12.0, 0.0),
+                                    margin:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            12.0, 0.0, 12.0, 0.0),
                                     hidesUnderline: true,
                                     isOverButton: false,
                                     isSearchable: false,
                                     isMultiSelect: false,
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: FlutterFlowDropDown<String>(
                                       controller:
                                           _model.dropDownValueController2 ??=
@@ -230,8 +232,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                       borderColor: Colors.transparent,
                                       borderWidth: 0.0,
                                       borderRadius: 10.0,
-                                      margin: const EdgeInsetsDirectional.fromSTEB(
-                                          12.0, 0.0, 12.0, 0.0),
+                                      margin:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              12.0, 0.0, 12.0, 0.0),
                                       hidesUnderline: true,
                                       isOverButton: false,
                                       isSearchable: false,
@@ -400,8 +403,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                                 height: 42.0,
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
-                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
@@ -445,8 +449,8 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

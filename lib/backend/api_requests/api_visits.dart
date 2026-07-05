@@ -32,8 +32,7 @@ class DOVIAAPIVisitContextGroup {
       GetAdminOperativeListingVisitsCall();
   static AdminAssignListerHqCall adminAssignListerHqCall =
       AdminAssignListerHqCall();
-  static UploadVisitDocumentCall
-      uploadVisitDocumentCall =
+  static UploadVisitDocumentCall uploadVisitDocumentCall =
       UploadVisitDocumentCall();
   static ReviewChecklistDocumentsCall reviewChecklistDocumentsCall =
       ReviewChecklistDocumentsCall();

@@ -55,7 +55,8 @@ class _PopupSubirDocumentoWidgetState extends State<PopupSubirDocumentoWidget> {
             borderRadius: BorderRadius.circular(20.0),
           ),
           child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 30.0),
+            padding:
+                const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 30.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -91,7 +92,8 @@ class _PopupSubirDocumentoWidgetState extends State<PopupSubirDocumentoWidget> {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
@@ -122,10 +124,20 @@ class _PopupSubirDocumentoWidgetState extends State<PopupSubirDocumentoWidget> {
                           width: 1.0,
                         ),
                       ),
-                      child: (_model.uploadedLocalFile.bytes?.isNotEmpty ?? false)
-                          ? ((_model.uploadedLocalFile.name?.toLowerCase().endsWith('.jpg') == true ||
-                                  _model.uploadedLocalFile.name?.toLowerCase().endsWith('.png') == true ||
-                                  _model.uploadedLocalFile.name?.toLowerCase().endsWith('.jpeg') == true)
+                      child: (_model.uploadedLocalFile.bytes?.isNotEmpty ??
+                              false)
+                          ? ((_model.uploadedLocalFile.name
+                                          ?.toLowerCase()
+                                          .endsWith('.jpg') ==
+                                      true ||
+                                  _model.uploadedLocalFile.name
+                                          ?.toLowerCase()
+                                          .endsWith('.png') ==
+                                      true ||
+                                  _model.uploadedLocalFile.name
+                                          ?.toLowerCase()
+                                          .endsWith('.jpeg') ==
+                                      true)
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(12.0),
                                   child: Image.memory(
@@ -141,17 +153,24 @@ class _PopupSubirDocumentoWidgetState extends State<PopupSubirDocumentoWidget> {
                                   children: [
                                     Icon(
                                       Icons.insert_drive_file_outlined,
-                                      color: FlutterFlowTheme.of(context).primary,
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
                                       size: 40.0,
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: Text(
                                         'Archivo seleccionado: ${_model.uploadedLocalFile.name}',
                                         textAlign: TextAlign.center,
-                                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
                                               font: GoogleFonts.inter(),
-                                              color: FlutterFlowTheme.of(context).secondaryText,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryText,
                                             ),
                                       ),
                                     ),
@@ -167,13 +186,17 @@ class _PopupSubirDocumentoWidgetState extends State<PopupSubirDocumentoWidget> {
                                   size: 40.0,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 10.0, 0.0, 0.0),
                                   child: Text(
                                     'Arrastra y suelta tu archivo aquí\no haz clic para seleccionarlo',
                                     textAlign: TextAlign.center,
-                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
                                           font: GoogleFonts.inter(),
-                                          color: FlutterFlowTheme.of(context).secondaryText,
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
                                         ),
                                   ),
                                 ),
@@ -183,7 +206,8 @@ class _PopupSubirDocumentoWidgetState extends State<PopupSubirDocumentoWidget> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
                   child: FFButtonWidget(
                     onPressed: () async {
                       Navigator.pop(context, _model.uploadedLocalFile);
@@ -192,15 +216,18 @@ class _PopupSubirDocumentoWidgetState extends State<PopupSubirDocumentoWidget> {
                     options: FFButtonOptions(
                       width: double.infinity,
                       height: 48.0,
-                      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
+                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
                       color: FlutterFlowTheme.of(context).primary,
-                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            color: Colors.white,
-                          ),
+                      textStyle:
+                          FlutterFlowTheme.of(context).titleSmall.override(
+                                font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                color: Colors.white,
+                              ),
                       elevation: 0.0,
                       borderRadius: BorderRadius.circular(24.0),
                     ),

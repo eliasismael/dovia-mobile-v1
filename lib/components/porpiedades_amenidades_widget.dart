@@ -144,7 +144,8 @@ class _PorpiedadesAmenidadesWidgetState
               child: Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                   child: Text(
                     'Amenidades',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -174,7 +175,8 @@ class _PorpiedadesAmenidadesWidgetState
                 color: FlutterFlowTheme.of(context).tertiary,
               ),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 20.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    20.0, 12.0, 20.0, 20.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -198,8 +200,8 @@ class _PorpiedadesAmenidadesWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 10.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -285,8 +287,8 @@ class _PorpiedadesAmenidadesWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 12.0, 0.0, 0.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         height: 1.0,
@@ -298,8 +300,8 @@ class _PorpiedadesAmenidadesWidgetState
                     Align(
                       alignment: const AlignmentDirectional(-1.0, 0.0),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 10.0, 0.0, 0.0),
                         child: Text(
                           'Áreas comúnes',
                           style:

@@ -93,13 +93,14 @@ class _DHASSOCIATECreateAccountWidgetState
               height: MediaQuery.sizeOf(context).height * 1.0,
               decoration: const BoxDecoration(),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 111.0, 0.0, 0.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(0.0),
                         child: SvgPicture.asset(
@@ -111,8 +112,8 @@ class _DHASSOCIATECreateAccountWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 53.0, 0.0, 0.0),
                       child: Text(
                         'Crea tu cuenta',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -133,8 +134,8 @@ class _DHASSOCIATECreateAccountWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 49.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 49.0, 0.0, 0.0),
                       child: Container(
                         width: 350.0,
                         decoration: BoxDecoration(
@@ -241,8 +242,8 @@ class _DHASSOCIATECreateAccountWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 118.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 118.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: () async {
                           FFAppState().UserRole = () {

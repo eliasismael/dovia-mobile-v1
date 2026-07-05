@@ -28,11 +28,14 @@ class LISTINGHQVisorPdfWidget extends StatefulWidget {
 
   final String documentName;
   final FFUploadedFile? uploadedFile;
+
   /// URL de S3 para documentos ya subidos por el owner (legalInfo.ownerIdDocument,
   /// legalInfo.propertyCertification). Tiene prioridad sobre [uploadedFile].
   final String? documentUrl;
+
   /// ID de la visita — necesario para PUT /visits/{visitId}/lister-hq/documents/{documentId}/review
   final String? visitId;
+
   /// ID del documento dentro del checklist de la visita.
   final String? documentId;
   final bool? isPdf;
@@ -68,8 +71,9 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
     final file = widget.uploadedFile;
 
     if (url != null && url.isNotEmpty) {
-      final isPdf = widget.isPdf ?? (url.toLowerCase().contains('.pdf') ||
-          url.toLowerCase().contains('/pdf'));
+      final isPdf = widget.isPdf ??
+          (url.toLowerCase().contains('.pdf') ||
+              url.toLowerCase().contains('/pdf'));
       if (isPdf) {
         return SfPdfViewer.network(url);
       }
@@ -149,26 +153,31 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 20.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             widget.documentName,
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
                                   font: GoogleFonts.inter(),
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 16.0, 0.0, 0.0),
                             child: Container(
                               width: double.infinity,
                               height: 500.0,
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).secondaryBackground,
+                                color: FlutterFlowTheme.of(context)
+                                    .secondaryBackground,
                                 borderRadius: BorderRadius.circular(12.0),
                                 border: Border.all(
                                   color: FlutterFlowTheme.of(context).alternate,
@@ -181,7 +190,8 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 24.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
                               children: [
@@ -195,14 +205,23 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                             elevation: 0,
                                             insetPadding: EdgeInsets.zero,
                                             backgroundColor: Colors.transparent,
-                                            alignment: const AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
-                                            child: const PopupRechazarDocumentoWidget(),
+                                            alignment:
+                                                const AlignmentDirectional(
+                                                        0.0, 0.0)
+                                                    .resolve(Directionality.of(
+                                                        context)),
+                                            child:
+                                                const PopupRechazarDocumentoWidget(),
                                           );
                                         },
                                       );
                                       if (note != null && note.isNotEmpty) {
-                                        final token = currentAuthenticationToken ?? '';
-                                        final res = await DOVIAAPIVisitContextGroup.reviewListerHqDocumentCall.call(
+                                        final token =
+                                            currentAuthenticationToken ?? '';
+                                        final res =
+                                            await DOVIAAPIVisitContextGroup
+                                                .reviewListerHqDocumentCall
+                                                .call(
                                           visitId: widget.visitId ?? '',
                                           documentId: widget.documentId,
                                           authToken: token,
@@ -215,8 +234,11 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                           }
                                         } else {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Error al rechazar el documento')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Error al rechazar el documento')),
                                             );
                                           }
                                         }
@@ -225,17 +247,23 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                     text: 'Rechazar documento',
                                     options: FFButtonOptions(
                                       height: 48.0,
-                                      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
                                       color: Colors.transparent,
-                                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
                                             font: GoogleFonts.inter(
                                               fontWeight: FontWeight.w600,
                                             ),
-                                            color: FlutterFlowTheme.of(context).primary,
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
                                           ),
                                       elevation: 0.0,
                                       borderSide: BorderSide(
-                                        color: FlutterFlowTheme.of(context).primary,
+                                        color: FlutterFlowTheme.of(context)
+                                            .primary,
                                         width: 1.0,
                                       ),
                                       borderRadius: BorderRadius.circular(24.0),
@@ -246,8 +274,12 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                 Expanded(
                                   child: FFButtonWidget(
                                     onPressed: () async {
-                                      final token = currentAuthenticationToken ?? '';
-                                      final res = await DOVIAAPIVisitContextGroup.reviewListerHqDocumentCall.call(
+                                      final token =
+                                          currentAuthenticationToken ?? '';
+                                      final res =
+                                          await DOVIAAPIVisitContextGroup
+                                              .reviewListerHqDocumentCall
+                                              .call(
                                         visitId: widget.visitId ?? '',
                                         documentId: widget.documentId,
                                         authToken: token,
@@ -261,16 +293,24 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                               return Dialog(
                                                 elevation: 0,
                                                 insetPadding: EdgeInsets.zero,
-                                                backgroundColor: Colors.transparent,
-                                                alignment: const AlignmentDirectional(0.0, 0.0)
-                                                    .resolve(Directionality.of(context)),
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                alignment:
+                                                    const AlignmentDirectional(
+                                                            0.0, 0.0)
+                                                        .resolve(
+                                                            Directionality.of(
+                                                                context)),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    Navigator.pop(dialogContext);
+                                                    Navigator.pop(
+                                                        dialogContext);
                                                   },
                                                   child: const PopupExitoWidget(
-                                                    title: 'Se envió con éxito al Equipo Legal',
-                                                    text: 'El documento se ha enviado al equipo de legal para que lo revisen.',
+                                                    title:
+                                                        'Se envió con éxito al Equipo Legal',
+                                                    text:
+                                                        'El documento se ha enviado al equipo de legal para que lo revisen.',
                                                   ),
                                                 ),
                                               );
@@ -282,8 +322,11 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                         }
                                       } else {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Error al aprobar el documento')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Error al aprobar el documento')),
                                           );
                                         }
                                       }
@@ -291,9 +334,14 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                     text: 'Aceptar y enviar a Dovia Legal',
                                     options: FFButtonOptions(
                                       height: 48.0,
-                                      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                      color: FlutterFlowTheme.of(context).primary,
-                                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
                                             font: GoogleFonts.inter(
                                               fontWeight: FontWeight.w600,
                                             ),

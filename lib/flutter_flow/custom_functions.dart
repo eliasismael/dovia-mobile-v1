@@ -1,4 +1,3 @@
-
 import '/backend/schema/structs/index.dart';
 
 /// Function to convert the response of GetPropertiesForMap to a model for the

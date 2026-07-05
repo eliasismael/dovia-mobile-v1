@@ -67,8 +67,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       height: MediaQuery.sizeOf(context).height * 1.0,
@@ -83,7 +83,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                               child: Container(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 decoration: const BoxDecoration(),
-                                alignment: const AlignmentDirectional(-1.0, 0.0),
+                                alignment:
+                                    const AlignmentDirectional(-1.0, 0.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(0.0),
                                   child: SvgPicture.asset(
@@ -133,8 +134,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: FlutterFlowDropDown<String>(
                                         controller: _model
                                                 .propiedadTipoDropDownValueController ??=
@@ -188,8 +190,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         borderColor: Colors.transparent,
                                         borderWidth: 0.0,
                                         borderRadius: 10.0,
-                                        margin: const EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
+                                        margin: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                         hidesUnderline: true,
                                         isOverButton: false,
                                         isSearchable: false,
@@ -238,8 +240,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: FlutterFlowDropDown<String>(
                                         controller: _model
                                                 .modalidadDropDownValueController1 ??=
@@ -292,8 +295,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         borderColor: Colors.transparent,
                                         borderWidth: 0.0,
                                         borderRadius: 10.0,
-                                        margin: const EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
+                                        margin: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                         hidesUnderline: true,
                                         isOverButton: false,
                                         isSearchable: false,
@@ -343,8 +346,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Container(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -417,8 +421,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 12.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 12.0),
                                       child: Text(
                                         'La IA se encargará de captar la mayor cantidad \nde filtros',
                                         style: FlutterFlowTheme.of(context)
@@ -631,8 +636,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: FlutterFlowDropDown<String>(
                                         controller: _model
                                                 .modalidadDropDownValueController2 ??=
@@ -685,8 +691,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         borderColor: Colors.transparent,
                                         borderWidth: 0.0,
                                         borderRadius: 10.0,
-                                        margin: const EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
+                                        margin: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                         hidesUnderline: true,
                                         isOverButton: false,
                                         isSearchable: false,
@@ -735,13 +741,20 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: FlutterFlowDropDown<String>(
                                         controller: _model
                                                 .modalidadDropDownValueController3 ??=
                                             FormFieldController<String>(null),
-                                        options: const ['1', '2', '3', '4', '5'],
+                                        options: const [
+                                          '1',
+                                          '2',
+                                          '3',
+                                          '4',
+                                          '5'
+                                        ],
                                         onChanged: (val) => safeSetState(() =>
                                             _model.modalidadDropDownValue3 =
                                                 val),
@@ -789,8 +802,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         borderColor: Colors.transparent,
                                         borderWidth: 0.0,
                                         borderRadius: 10.0,
-                                        margin: const EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
+                                        margin: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                         hidesUnderline: true,
                                         isOverButton: false,
                                         isSearchable: false,
@@ -839,8 +852,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: FlutterFlowDropDown<String>(
                                         controller: _model
                                                 .modalidadDropDownValueController4 ??=
@@ -893,8 +907,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         borderColor: Colors.transparent,
                                         borderWidth: 0.0,
                                         borderRadius: 10.0,
-                                        margin: const EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
+                                        margin: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                         hidesUnderline: true,
                                         isOverButton: false,
                                         isSearchable: false,
@@ -943,8 +957,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: FlutterFlowDropDown<String>(
                                         controller: _model
                                                 .modalidadDropDownValueController5 ??=
@@ -997,8 +1012,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         borderColor: Colors.transparent,
                                         borderWidth: 0.0,
                                         borderRadius: 10.0,
-                                        margin: const EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
+                                        margin: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                         hidesUnderline: true,
                                         isOverButton: false,
                                         isSearchable: false,
@@ -1047,8 +1062,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: FlutterFlowDropDown<String>(
                                         controller: _model
                                                 .modalidadDropDownValueController6 ??=
@@ -1101,8 +1117,8 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         borderColor: Colors.transparent,
                                         borderWidth: 0.0,
                                         borderRadius: 10.0,
-                                        margin: const EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
+                                        margin: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
                                         hidesUnderline: true,
                                         isOverButton: false,
                                         isSearchable: false,
@@ -1151,8 +1167,9 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                           ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 13.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 13.0, 0.0, 0.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -1250,10 +1267,11 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                       ),
                                     ),
                                     Align(
-                                      alignment: const AlignmentDirectional(0.0, 0.0),
+                                      alignment:
+                                          const AlignmentDirectional(0.0, 0.0),
                                       child: Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 10.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 10.0, 0.0, 0.0),
                                         child: Text(
                                           '\$${valueOrDefault<String>(
                                             _model.sliderValue.toString(),
@@ -1314,12 +1332,11 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
                                           height: 42.0,
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  16.0, 0.0, 16.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(16.0, 0.0, 16.0, 0.0),
                                           iconPadding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 0.0),
+                                              const EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                           color: FlutterFlowTheme.of(context)
                                               .secondaryBackground,
                                           textStyle: FlutterFlowTheme.of(
@@ -1375,12 +1392,11 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
                                           height: 42.0,
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  16.0, 0.0, 16.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(16.0, 0.0, 16.0, 0.0),
                                           iconPadding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 0.0),
+                                              const EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                           color: FlutterFlowTheme.of(context)
                                               .primary,
                                           textStyle: FlutterFlowTheme.of(

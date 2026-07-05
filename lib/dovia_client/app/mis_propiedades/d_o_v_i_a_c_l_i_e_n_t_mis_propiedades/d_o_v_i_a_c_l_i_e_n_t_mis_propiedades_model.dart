@@ -31,7 +31,7 @@ class DOVIACLIENTMisPropiedadesModel
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DOVIA_CLIENT_Navbar component.
   late DOVIACLIENTNavbarModel dOVIACLIENTNavbarModel;
-  
+
   FocusNode? searchFocusNode;
   TextEditingController? searchController;
 

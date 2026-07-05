@@ -58,7 +58,8 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -136,7 +137,8 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                     },
                                     child: Padding(
                                       padding: MediaQuery.viewInsetsOf(context),
-                                      child: const TusFavoritosCarpetasModalWidget(
+                                      child:
+                                          const TusFavoritosCarpetasModalWidget(
                                         isCreatingNewFolderPARAM: true,
                                         houseId: '-',
                                         propertyName: '-',
@@ -170,8 +172,8 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                         ],
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 20.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: const BoxDecoration(),
@@ -259,195 +261,244 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Stack(
-                                              alignment: const AlignmentDirectional(1.0, -1.0),
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                      1.0, -1.0),
                                               children: [
                                                 Container(
-                                                  width: MediaQuery.sizeOf(context)
-                                                          .width *
-                                                      1.0,
-                                                  decoration: const BoxDecoration(),
+                                                  width:
+                                                      MediaQuery.sizeOf(context)
+                                                              .width *
+                                                          1.0,
+                                                  decoration:
+                                                      const BoxDecoration(),
                                                   child: GridView(
-                                                padding: EdgeInsets.zero,
-                                                gridDelegate:
-                                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                                  crossAxisCount: 2,
-                                                  crossAxisSpacing: 0.0,
-                                                  mainAxisSpacing: 0.0,
-                                                  childAspectRatio: 1.0,
-                                                ),
-                                                primary: false,
-                                                shrinkWrap: true,
-                                                scrollDirection: Axis.vertical,
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                    child: Image.network(
-                                                      'https://picsum.photos/seed/408/600',
-                                                      width: 200.0,
-                                                      height: 200.0,
-                                                      fit: BoxFit.cover,
+                                                    padding: EdgeInsets.zero,
+                                                    gridDelegate:
+                                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                                      crossAxisCount: 2,
+                                                      crossAxisSpacing: 0.0,
+                                                      mainAxisSpacing: 0.0,
+                                                      childAspectRatio: 1.0,
                                                     ),
-                                                  ),
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                    child: Image.network(
-                                                      'https://picsum.photos/seed/40/600',
-                                                      width: 200.0,
-                                                      height: 200.0,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                    child: Image.network(
-                                                      'https://picsum.photos/seed/117/600',
-                                                      width: 200.0,
-                                                      height: 200.0,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                    child: Image.network(
-                                                      'https://picsum.photos/seed/595/600',
-                                                      width: 200.0,
-                                                      height: 200.0,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                              Padding(
-                                                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 5.0, 0.0),
-                                                child: InkWell(
-                                                  splashColor: Colors.transparent,
-                                                  focusColor: Colors.transparent,
-                                                  hoverColor: Colors.transparent,
-                                                  highlightColor: Colors.transparent,
-                                                  onTap: () async {
-                                                    final confirmDelete =
-                                                      await showDialog<bool>(
-                                                    context: context,
-                                                    builder:
-                                                        (alertDialogContext) {
-                                                      return Dialog(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(20),
+                                                    primary: false,
+                                                    shrinkWrap: true,
+                                                    scrollDirection:
+                                                        Axis.vertical,
+                                                    children: [
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8.0),
+                                                        child: Image.network(
+                                                          'https://picsum.photos/seed/408/600',
+                                                          width: 200.0,
+                                                          height: 200.0,
+                                                          fit: BoxFit.cover,
                                                         ),
-                                                        elevation: 0,
-                                                        backgroundColor: Colors.transparent,
-                                                        child: Container(
-                                                          padding: const EdgeInsets.all(24),
-                                                          decoration: BoxDecoration(
-                                                            color: Colors.white,
-                                                            shape: BoxShape.rectangle,
-                                                            borderRadius: BorderRadius.circular(20),
-                                                          ),
-                                                          child: Column(
-                                                            mainAxisSize: MainAxisSize.min,
-                                                            children: <Widget>[
-                                                              const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 60),
-                                                              const SizedBox(height: 16.0),
-                                                              Text(
-                                                                "Estás seguro que querés borrar esta carpeta. Se borrarán todos tus inmuebles guardados en ella",
-                                                                textAlign: TextAlign.center,
-                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                  font: GoogleFonts.inter(),
-                                                                  fontSize: 16.0,
-                                                                ),
-                                                              ),
-                                                              const SizedBox(height: 24.0),
-                                                              Row(
-                                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                children: [
-                                                                  TextButton(
-                                                                    onPressed: () => Navigator.of(alertDialogContext).pop(false),
-                                                                    child: const Text(
-                                                                      "Cancelar",
-                                                                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                                                      ),
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8.0),
+                                                        child: Image.network(
+                                                          'https://picsum.photos/seed/40/600',
+                                                          width: 200.0,
+                                                          height: 200.0,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8.0),
+                                                        child: Image.network(
+                                                          'https://picsum.photos/seed/117/600',
+                                                          width: 200.0,
+                                                          height: 200.0,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8.0),
+                                                        child: Image.network(
+                                                          'https://picsum.photos/seed/595/600',
+                                                          width: 200.0,
+                                                          height: 200.0,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                          0.0, 5.0, 5.0, 0.0),
+                                                  child: InkWell(
+                                                    splashColor:
+                                                        Colors.transparent,
+                                                    focusColor:
+                                                        Colors.transparent,
+                                                    hoverColor:
+                                                        Colors.transparent,
+                                                    highlightColor:
+                                                        Colors.transparent,
+                                                    onTap: () async {
+                                                      final confirmDelete =
+                                                          await showDialog<
+                                                                  bool>(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (alertDialogContext) {
+                                                                  return Dialog(
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              20),
                                                                     ),
-                                                                  ),
-                                                                  ElevatedButton(
-                                                                    onPressed: () => Navigator.of(alertDialogContext).pop(true),
-                                                                    style: ElevatedButton.styleFrom(
-                                                                      backgroundColor: Colors.redAccent,
-                                                                      shape: RoundedRectangleBorder(
-                                                                        borderRadius: BorderRadius.circular(10),
+                                                                    elevation:
+                                                                        0,
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .transparent,
+                                                                    child:
+                                                                        Container(
+                                                                      padding: const EdgeInsets
+                                                                          .all(
+                                                                          24),
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        shape: BoxShape
+                                                                            .rectangle,
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(20),
+                                                                      ),
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.min,
+                                                                        children: <Widget>[
+                                                                          const Icon(
+                                                                              Icons.warning_rounded,
+                                                                              color: Colors.redAccent,
+                                                                              size: 60),
+                                                                          const SizedBox(
+                                                                              height: 16.0),
+                                                                          Text(
+                                                                            "Estás seguro que querés borrar esta carpeta. Se borrarán todos tus inmuebles guardados en ella",
+                                                                            textAlign:
+                                                                                TextAlign.center,
+                                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                  font: GoogleFonts.inter(),
+                                                                                  fontSize: 16.0,
+                                                                                ),
+                                                                          ),
+                                                                          const SizedBox(
+                                                                              height: 24.0),
+                                                                          Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceEvenly,
+                                                                            children: [
+                                                                              TextButton(
+                                                                                onPressed: () => Navigator.of(alertDialogContext).pop(false),
+                                                                                child: const Text(
+                                                                                  "Cancelar",
+                                                                                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                                                                                ),
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                onPressed: () => Navigator.of(alertDialogContext).pop(true),
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: Colors.redAccent,
+                                                                                  shape: RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                  ),
+                                                                                ),
+                                                                                child: const Text(
+                                                                                  "Aceptar",
+                                                                                  style: TextStyle(color: Colors.white, fontSize: 16),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
                                                                       ),
                                                                     ),
-                                                                    child: const Text(
-                                                                      "Aceptar",
-                                                                      style: TextStyle(color: Colors.white, fontSize: 16),
-                                                                    ),
+                                                                  );
+                                                                },
+                                                              ) ??
+                                                              false;
+                                                      if (confirmDelete) {
+                                                        final deleteResponse =
+                                                            await DOVIAAPIFavoriteContextGroup
+                                                                .deleteFavoriteFolderCall
+                                                                .call(
+                                                          folderId: getJsonField(
+                                                                  eachFolderItem,
+                                                                  r'''$.id''')
+                                                              .toString(),
+                                                          authToken:
+                                                              currentAuthenticationToken,
+                                                        );
+                                                        if (deleteResponse
+                                                            .succeeded) {
+                                                          safeSetState(() {});
+                                                        } else {
+                                                          await showDialog(
+                                                            context: context,
+                                                            builder:
+                                                                (alertDialogContext) {
+                                                              return AlertDialog(
+                                                                title:
+                                                                    const Text(
+                                                                        'Error'),
+                                                                content: const Text(
+                                                                    'No se pudo borrar la carpeta. Intentá nuevamente.'),
+                                                                actions: [
+                                                                  TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            alertDialogContext),
+                                                                    child:
+                                                                        const Text(
+                                                                            'Ok'),
                                                                   ),
                                                                 ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  ) ??
-                                                  false;     
-                                                    if (confirmDelete) {
-                                                      final deleteResponse =
-                                                          await DOVIAAPIFavoriteContextGroup
-                                                              .deleteFavoriteFolderCall
-                                                              .call(
-                                                        folderId: getJsonField(eachFolderItem, r'''$.id''').toString(),
-                                                        authToken: currentAuthenticationToken,
-                                                      );
-                                                      if (deleteResponse.succeeded) {
-                                                        safeSetState(() {});
-                                                      } else {
-                                                        await showDialog(
-                                                          context: context,
-                                                          builder:
-                                                              (alertDialogContext) {
-                                                            return AlertDialog(
-                                                              title: const Text('Error'),
-                                                              content: const Text(
-                                                                  'No se pudo borrar la carpeta. Intentá nuevamente.'),
-                                                              actions: [
-                                                                TextButton(
-                                                                  onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          alertDialogContext),
-                                                                  child: const Text('Ok'),
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
+                                                              );
+                                                            },
+                                                          );
+                                                        }
                                                       }
-                                                    }
-                                                  },
-                                                  child: Container(
-                                                    width: 30.0,
-                                                    height: 30.0,
-                                                    decoration: const BoxDecoration(
-                                                      color: Colors.white,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.delete_outline,
-                                                      color: FlutterFlowTheme.of(context).error,
-                                                      size: 20.0,
+                                                    },
+                                                    child: Container(
+                                                      width: 30.0,
+                                                      height: 30.0,
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                        color: Colors.white,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Icon(
+                                                        Icons.delete_outline,
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .error,
+                                                        size: 20.0,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
+                                              ],
+                                            ),
                                             Text(
                                               getJsonField(
                                                 eachFolderItem,

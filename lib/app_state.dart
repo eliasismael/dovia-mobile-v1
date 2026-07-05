@@ -41,10 +41,12 @@ class FFAppState extends ChangeNotifier {
     });
     _safeInit(() {
       _requestedDateChangesVisits =
-          prefs.getStringList('ff_requestedDateChangesVisits') ?? _requestedDateChangesVisits;
+          prefs.getStringList('ff_requestedDateChangesVisits') ??
+              _requestedDateChangesVisits;
     });
     _safeInit(() {
-      _lastActiveVisitId = prefs.getString('ff_lastActiveVisitId') ?? _lastActiveVisitId;
+      _lastActiveVisitId =
+          prefs.getString('ff_lastActiveVisitId') ?? _lastActiveVisitId;
     });
     _safeInit(() {
       _routeStartedVisits =
@@ -108,12 +110,14 @@ class FFAppState extends ChangeNotifier {
 
   void addToRequestedDateChangesVisits(String value) {
     _requestedDateChangesVisits.add(value);
-    prefs.setStringList('ff_requestedDateChangesVisits', _requestedDateChangesVisits);
+    prefs.setStringList(
+        'ff_requestedDateChangesVisits', _requestedDateChangesVisits);
   }
 
   void removeFromRequestedDateChangesVisits(String value) {
     _requestedDateChangesVisits.remove(value);
-    prefs.setStringList('ff_requestedDateChangesVisits', _requestedDateChangesVisits);
+    prefs.setStringList(
+        'ff_requestedDateChangesVisits', _requestedDateChangesVisits);
   }
 
   String _lastActiveVisitId = '';

@@ -225,10 +225,12 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                                   text: 'Ver más',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -291,10 +293,12 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                                   text: 'Ver más',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -386,10 +390,12 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                                   text: 'Ver más',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -424,7 +430,9 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(showMap: false, showCurrency: false,
+                      child: const DOVIASHAREDHeaderWidget(
+                        showMap: false,
+                        showCurrency: false,
                         title: 'Visita',
                       ),
                     ),

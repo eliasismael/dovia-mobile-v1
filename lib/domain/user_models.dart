@@ -97,16 +97,16 @@ class UserProfile {
         _nonEmpty(prefs?['nacionalidad']);
 
     // location from preferences: try nested location/perimeter map, then flat keys
-    final locationMap = (prefs?['location'] as Map<String, dynamic>?)
-        ?? (prefs?['perimeter'] as Map<String, dynamic>?);
-    final latitude = _toDouble(locationMap?['latitude']
-        ?? locationMap?['lat']
-        ?? prefs?['latitude']
-        ?? prefs?['lat']);
-    final longitude = _toDouble(locationMap?['longitude']
-        ?? locationMap?['lng']
-        ?? prefs?['longitude']
-        ?? prefs?['lng']);
+    final locationMap = (prefs?['location'] as Map<String, dynamic>?) ??
+        (prefs?['perimeter'] as Map<String, dynamic>?);
+    final latitude = _toDouble(locationMap?['latitude'] ??
+        locationMap?['lat'] ??
+        prefs?['latitude'] ??
+        prefs?['lat']);
+    final longitude = _toDouble(locationMap?['longitude'] ??
+        locationMap?['lng'] ??
+        prefs?['longitude'] ??
+        prefs?['lng']);
 
     return UserProfile(
       uid: data['id'] as String? ?? data['uid'] as String? ?? '',

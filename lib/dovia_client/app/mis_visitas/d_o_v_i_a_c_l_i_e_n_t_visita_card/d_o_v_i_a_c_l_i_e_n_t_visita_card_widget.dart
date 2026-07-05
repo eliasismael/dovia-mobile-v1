@@ -88,7 +88,8 @@ class _DOVIACLIENTVisitaCardWidgetState
           mainAxisSize: MainAxisSize.max,
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100.0),

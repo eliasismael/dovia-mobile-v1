@@ -79,8 +79,8 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 20.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -261,14 +261,12 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                                           return GestureDetector(
                                             onTap: () {
                                               FocusScope.of(context).unfocus();
-                                              FocusManager
-                                                  .instance.primaryFocus
+                                              FocusManager.instance.primaryFocus
                                                   ?.unfocus();
                                             },
                                             child: Padding(
-                                              padding:
-                                                  MediaQuery.viewInsetsOf(
-                                                      context),
+                                              padding: MediaQuery.viewInsetsOf(
+                                                  context),
                                               child: SizedBox(
                                                 height:
                                                     MediaQuery.sizeOf(context)
@@ -404,8 +402,8 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                     Align(
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 5.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),

@@ -184,11 +184,15 @@ class _ShowingRegistroVisitaDatosState
       'WANTS_OTHER_OPTIONS': 'NOT_INTERESTED',
     };
 
-    final String kindLabel = _kindOpts.firstWhere((e) => e.value == _kind, orElse: () => (label: _kind ?? '', value: '')).label;
+    final String kindLabel = _kindOpts
+        .firstWhere((e) => e.value == _kind,
+            orElse: () => (label: _kind ?? '', value: ''))
+        .label;
     final String matchLabel = _matchesPublished == 'YES' ? 'Sí' : 'No';
-    final String extraComments = 'Modalidad: $kindLabel\nCoincide con lo publicado: $matchLabel';
-    final String finalComments = _commentController.text.trim().isEmpty 
-        ? extraComments 
+    final String extraComments =
+        'Modalidad: $kindLabel\nCoincide con lo publicado: $matchLabel';
+    final String finalComments = _commentController.text.trim().isEmpty
+        ? extraComments
         : '${_commentController.text.trim()}\n\n$extraComments';
 
     final data = <String, dynamic>{

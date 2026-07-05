@@ -66,7 +66,8 @@ class _DOVIACLIENTMisPropiedadesVisitaListerHQWidgetState
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: SvgPicture.asset(
@@ -76,7 +77,8 @@ class _DOVIACLIENTMisPropiedadesVisitaListerHQWidgetState
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.75,
                 decoration: BoxDecoration(
@@ -85,7 +87,8 @@ class _DOVIACLIENTMisPropiedadesVisitaListerHQWidgetState
                 ),
                 alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0),
                   child: Text(
                     'Dovia Lister HQ\n(Encargado del proceso)',
                     textAlign: TextAlign.center,
@@ -128,7 +131,8 @@ class _DOVIACLIENTMisPropiedadesVisitaListerHQWidgetState
             Align(
               alignment: const AlignmentDirectional(-1.0, 0.0),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                 child: Text(
                   'Nuestro equipo de HQ te contactará para:\n• Revisar y completar la información inicial.\n• Resolver cualquier duda que tengas.\n• Acompañarte durante todo el proceso de publicación y venta.',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(

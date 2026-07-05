@@ -69,7 +69,8 @@ class DOVIACLIENTMisPropiedadesVenderRentarModel
   // New fields for Rent
   FocusNode? disponibleDesdeFocusNode;
   TextEditingController? disponibleDesdeTextController;
-  String? Function(BuildContext, String?)? disponibleDesdeTextControllerValidator;
+  String? Function(BuildContext, String?)?
+      disponibleDesdeTextControllerValidator;
 
   FocusNode? usoPermitidoFocusNode;
   TextEditingController? usoPermitidoTextController;
@@ -77,7 +78,8 @@ class DOVIACLIENTMisPropiedadesVenderRentarModel
 
   FocusNode? usoNoPermitidoFocusNode;
   TextEditingController? usoNoPermitidoTextController;
-  String? Function(BuildContext, String?)? usoNoPermitidoTextControllerValidator;
+  String? Function(BuildContext, String?)?
+      usoNoPermitidoTextControllerValidator;
   // State field(s) for Zona widget.
   String? zonaValue;
   FormFieldController<String>? zonaValueController;

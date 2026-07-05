@@ -112,25 +112,29 @@ class DOVIACLIENTOfertaCompraModel
   // State field(s) for rent proposed amount (used in 'ambos' mode)
   FocusNode? propuestaRentaFocusNode;
   TextEditingController? propuestaRentaTextController;
-  String? Function(BuildContext, String?)? propuestaRentaTextControllerValidator;
+  String? Function(BuildContext, String?)?
+      propuestaRentaTextControllerValidator;
 
   // New State field(s) for RENT dates
   FocusNode? fechaInicioContratoFocusNode;
   TextEditingController? fechaInicioContratoTextController;
-  String? Function(BuildContext, String?)? fechaInicioContratoTextControllerValidator;
+  String? Function(BuildContext, String?)?
+      fechaInicioContratoTextControllerValidator;
 
   FocusNode? fechaFinalizacionContratoFocusNode;
   TextEditingController? fechaFinalizacionContratoTextController;
-  String? Function(BuildContext, String?)? fechaFinalizacionContratoTextControllerValidator;
+  String? Function(BuildContext, String?)?
+      fechaFinalizacionContratoTextControllerValidator;
 
   FocusNode? duracionContratoFocusNode;
   TextEditingController? duracionContratoTextController;
-  String? Function(BuildContext, String?)? duracionContratoTextControllerValidator;
-  
+  String? Function(BuildContext, String?)?
+      duracionContratoTextControllerValidator;
+
   // State field(s) for DropDown widget.
   String? usoADarPropertyUseValue;
   FormFieldController<String>? usoADarPropertyUseValueController;
-  
+
   // Model for PrimaryButton component.
   late PrimaryButtonModel primaryButtonModel;
   // Stores action output result for [Backend Call - API (Create Offer  PURCHASE Cash)] action in PrimaryButton widget.

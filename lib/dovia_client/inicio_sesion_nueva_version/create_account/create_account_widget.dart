@@ -87,7 +87,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
               height: MediaQuery.sizeOf(context).height * 1.0,
               decoration: const BoxDecoration(),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -111,8 +112,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 53.0, 0.0, 0.0),
                         child: Text(
                           'Crea tu cuenta',
                           style:
@@ -134,8 +135,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 39.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 39.0, 0.0, 0.0),
                         child: Form(
                           key: _model.formKey,
                           autovalidateMode: AutovalidateMode.disabled,
@@ -143,7 +144,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Align(
-                                alignment: const AlignmentDirectional(-1.0, 0.0),
+                                alignment:
+                                    const AlignmentDirectional(-1.0, 0.0),
                                 child: Text(
                                   'Correo',
                                   textAlign: TextAlign.start,
@@ -172,7 +174,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                 ),
                               ),
                               Align(
-                                alignment: const AlignmentDirectional(-1.0, 0.0),
+                                alignment:
+                                    const AlignmentDirectional(-1.0, 0.0),
                                 child: Padding(
                                   padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 12.0, 0.0, 0.0),
@@ -407,8 +410,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                 child: FFButtonWidget(
                                   onPressed: ((_model.mailInvalid == true) ||
                                           (_model.correoElectronicoTextController
-                                                      .text ==
-                                                  ''))
+                                                  .text ==
+                                              ''))
                                       ? null
                                       : () async {
                                           var shouldSetState = false;
@@ -416,7 +419,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                             context: context,
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
-                                                title: const Text('Valor del correo'),
+                                                title: const Text(
+                                                    'Valor del correo'),
                                                 content: Text(_model
                                                     .correoElectronicoTextController
                                                     .text),
@@ -499,10 +503,12 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                     width:
                                         MediaQuery.sizeOf(context).width * 1.0,
                                     height: 40.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 0.0, 16.0, 0.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: FlutterFlowTheme.of(context).primary,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -535,8 +541,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 39.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 39.0, 0.0, 0.0),
                         child: Text(
                           '----------------------  o  ----------------------',
                           style: FlutterFlowTheme.of(context)
@@ -595,8 +601,9 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 15.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 15.0, 0.0, 0.0),
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -619,8 +626,9 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 15.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 15.0, 0.0, 0.0),
                                     child: Container(
                                       width: 1000.0,
                                       height: 42.0,
@@ -648,8 +656,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 20.0, 0.0, 0.0),
                         child: RichText(
                           textScaler: MediaQuery.of(context).textScaler,
                           text: TextSpan(

@@ -10,7 +10,6 @@ class DOVIASHAREDHeaderModel extends FlutterFlowModel<DOVIASHAREDHeaderWidget> {
   String? dropDownValue;
   FormFieldController<String>? dropDownValueController;
 
-
   @override
   void initState(BuildContext context) {}
 

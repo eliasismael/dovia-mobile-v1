@@ -120,8 +120,8 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [

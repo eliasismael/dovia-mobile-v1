@@ -90,7 +90,9 @@ class _LISTINGHQProfileWidgetState extends State<LISTINGHQProfileWidget> {
                                 final router = GoRouter.of(context);
                                 context.read<UserRepository>().clear();
                                 await DOVIAAPIAuthContextGroup.logoutAllCall
-                                    .call(idToken: authManager.authenticationToken);
+                                    .call(
+                                        idToken:
+                                            authManager.authenticationToken);
                                 router.prepareAuthEvent();
                                 await authManager.signOut();
                                 router.clearRedirectLocation();

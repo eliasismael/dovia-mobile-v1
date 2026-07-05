@@ -65,14 +65,15 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
               height: MediaQuery.sizeOf(context).height * 1.0,
               decoration: const BoxDecoration(),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 111.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 111.0, 0.0, 0.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(0.0),
                         child: SvgPicture.asset(
@@ -84,8 +85,8 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 53.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 53.0, 0.0, 0.0),
                       child: Text(
                         '¿Olvidaste tu contraseña?',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -106,8 +107,8 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 41.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 41.0, 0.0, 0.0),
                       child: Container(
                         width: 350.0,
                         decoration: const BoxDecoration(),
@@ -178,10 +179,12 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: SizedBox(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -331,8 +334,9 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 67.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 67.0, 0.0, 0.0),
                                     child: FFButtonWidget(
                                       onPressed: () async {
                                         if (_model.formKey.currentState ==
@@ -364,11 +368,10 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
                                       options: FFButtonOptions(
                                         width: 349.0,
                                         height: 42.0,
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            20.0, 10.0, 20.0, 10.0),
-                                        iconPadding:
-                                            const EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(20.0, 10.0, 20.0, 10.0),
+                                        iconPadding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                         color: const Color(0xFF007376),
                                         textStyle: FlutterFlowTheme.of(context)
                                             .titleSmall

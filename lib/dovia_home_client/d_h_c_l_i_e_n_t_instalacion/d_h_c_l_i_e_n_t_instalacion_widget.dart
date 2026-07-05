@@ -74,8 +74,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -188,8 +188,9 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                 filled: true,
                                 fillColor: FlutterFlowTheme.of(context)
                                     .secondaryBackground,
-                                contentPadding: const EdgeInsetsDirectional.fromSTEB(
-                                    10.0, 50.0, 0.0, 50.0),
+                                contentPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        10.0, 50.0, 0.0, 50.0),
                               ),
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -373,8 +374,9 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                 height: 42.0,
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
-                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
@@ -418,8 +420,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

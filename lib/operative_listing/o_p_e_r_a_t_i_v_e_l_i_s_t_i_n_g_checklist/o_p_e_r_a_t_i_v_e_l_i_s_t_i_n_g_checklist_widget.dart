@@ -88,9 +88,8 @@ class _OPERATIVELISTINGChecklistWidgetState
       {required String substatus}) async {
     final token = currentAuthenticationToken ?? '';
 
-    final listRes = await DOVIAAPIVisitContextGroup
-        .getOperativeListerVisitsCall
-        .call(
+    final listRes =
+        await DOVIAAPIVisitContextGroup.getOperativeListerVisitsCall.call(
       authToken: token,
       substatus: substatus,
       page: '1',
@@ -149,9 +148,8 @@ class _OPERATIVELISTINGChecklistWidgetState
         if (data is Map) {
           final prop = data['property'];
           if (prop is Map) {
-            propertyName = prop['name']?.toString() ??
-                prop['title']?.toString() ??
-                '';
+            propertyName =
+                prop['name']?.toString() ?? prop['title']?.toString() ?? '';
             final locAddr = _deepMap(prop, ['location', 'address']);
             address = locAddr?['fullAddress']?.toString() ??
                 locAddr?['street']?.toString() ??
@@ -281,8 +279,8 @@ class _OPERATIVELISTINGChecklistWidgetState
 
                   // Search bar
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                     child: Container(
                       height: 64,
                       decoration: BoxDecoration(

@@ -16,7 +16,8 @@ class ListingHQMatchmakingSelectorWidget extends StatefulWidget {
   final double? height;
   final String? propertyId;
   final VoidCallback? onClose;
-  final Function(Map<String, dynamic> operative, DateTime date, TimeOfDay time)? onOperativeSelected;
+  final Function(Map<String, dynamic> operative, DateTime date, TimeOfDay time)?
+      onOperativeSelected;
 
   /// Slots propuestos por el propietario. Cada entrada es `{ 'date': 'yyyy-MM-dd',
   /// 'time': 'HH:mm' }`. Las dos primeras son obligatorias y la tercera opcional.
@@ -88,7 +89,7 @@ class _ListingHQMatchmakingSelectorWidgetState
 
   Future<void> _fetchOperatives() async {
     if (_selectedDate == null || _selectedTime == null) return;
-    
+
     setState(() {
       _isLoading = true;
       _selectedOperative = null;
@@ -96,8 +97,9 @@ class _ListingHQMatchmakingSelectorWidgetState
 
     try {
       final repo = context.read<VisitsRepository>();
-      final result = await repo.getAvailableOperatives(_selectedDate!, _selectedTime!);
-      
+      final result =
+          await repo.getAvailableOperatives(_selectedDate!, _selectedTime!);
+
       if (result.isSuccess && mounted) {
         setState(() {
           _availableOperatives = result.dataOrNull ?? [];
@@ -173,8 +175,11 @@ class _ListingHQMatchmakingSelectorWidgetState
   }
 
   void _handleAccept() {
-    if (_selectedOperative != null && _selectedDate != null && _selectedTime != null) {
-      widget.onOperativeSelected?.call(_selectedOperative!, _selectedDate!, _selectedTime!);
+    if (_selectedOperative != null &&
+        _selectedDate != null &&
+        _selectedTime != null) {
+      widget.onOperativeSelected
+          ?.call(_selectedOperative!, _selectedDate!, _selectedTime!);
     }
   }
 
@@ -204,7 +209,8 @@ class _ListingHQMatchmakingSelectorWidgetState
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back, color: colorScheme.primaryText),
-                  onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
+                  onPressed:
+                      widget.onClose ?? () => Navigator.of(context).pop(),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -343,7 +349,6 @@ class _ListingHQMatchmakingSelectorWidgetState
             ),
           ),
 
-
           // Botón de acción fijo en la parte inferior.
           SafeArea(
             top: false,
@@ -461,7 +466,9 @@ class _ListingHQMatchmakingSelectorWidgetState
       return [_buildProposedRow(Icons.calendar_today, 'Sin fechas propuestas')];
     }
     return List.generate(slots.length, (i) {
-      final label = i < 2 ? 'Opción ${i + 1} (Obligatoria)' : 'Opción ${i + 1} (Opcional)';
+      final label = i < 2
+          ? 'Opción ${i + 1} (Obligatoria)'
+          : 'Opción ${i + 1} (Opcional)';
       return _buildProposedRow(
         Icons.calendar_today,
         '$label: ${_formatSlot(slots[i])}',
@@ -530,7 +537,8 @@ class _ListingHQMatchmakingSelectorWidgetState
               ),
             ),
             const Spacer(),
-            Icon(Icons.chevron_right, size: 20, color: colorScheme.secondaryText),
+            Icon(Icons.chevron_right,
+                size: 20, color: colorScheme.secondaryText),
           ],
         ),
       ),

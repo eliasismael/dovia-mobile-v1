@@ -137,7 +137,8 @@ class ListOffersByPropertyCall {
           'pendingResponseBy': pendingResponseBy,
         if (counterOfferState != null && counterOfferState.isNotEmpty)
           'counterOfferState': counterOfferState,
-        if (rejectedBy != null && rejectedBy.isNotEmpty) 'rejectedBy': rejectedBy,
+        if (rejectedBy != null && rejectedBy.isNotEmpty)
+          'rejectedBy': rejectedBy,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -218,7 +219,8 @@ class AcceptOfferCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '{ "acceptedBy": "${escapeStringForJson(acceptedBy)}" }';
+    final ffApiRequestBody =
+        '{ "acceptedBy": "${escapeStringForJson(acceptedBy)}" }';
     return ApiManager.instance.makeApiCall(
       callName: 'Accept Offer',
       apiUrl: '$baseUrl/offers/$offerId/accept',
@@ -382,7 +384,8 @@ class ListMyOffersCall {
           'pendingResponseBy': pendingResponseBy,
         if (counterOfferState != null && counterOfferState.isNotEmpty)
           'counterOfferState': counterOfferState,
-        if (rejectedBy != null && rejectedBy.isNotEmpty) 'rejectedBy': rejectedBy,
+        if (rejectedBy != null && rejectedBy.isNotEmpty)
+          'rejectedBy': rejectedBy,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -461,7 +464,8 @@ class ListOffersOnMyPropertiesCall {
           'pendingResponseBy': pendingResponseBy,
         if (counterOfferState != null && counterOfferState.isNotEmpty)
           'counterOfferState': counterOfferState,
-        if (rejectedBy != null && rejectedBy.isNotEmpty) 'rejectedBy': rejectedBy,
+        if (rejectedBy != null && rejectedBy.isNotEmpty)
+          'rejectedBy': rejectedBy,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -839,8 +843,8 @@ class UploadDoviAgreementCall {
     );
   }
 
-  String? doviaAgreementDocumentUrl(dynamic response) =>
-      castToType<String>(getJsonField(response, r'''$.data.doviaAgreementDocumentUrl'''));
+  String? doviaAgreementDocumentUrl(dynamic response) => castToType<String>(
+      getJsonField(response, r'''$.data.doviaAgreementDocumentUrl'''));
 }
 
 /// End DOVIA API - Offer Context Group Code

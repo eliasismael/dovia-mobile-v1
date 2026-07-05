@@ -69,14 +69,15 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                 child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 50.0, 0.0, 0.0),
                         child: Container(
                           width: 80.0,
                           height: 100.0,
@@ -93,8 +94,8 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 84.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 84.0, 0.0, 0.0),
                         child: Text(
                           'Ingresa el código que recibiste en tu correo',
                           style:
@@ -259,7 +260,8 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                         context: context,
                                         builder: (alertDialogContext) {
                                           return AlertDialog(
-                                            title: const Text('ERROR EN CODIGO'),
+                                            title:
+                                                const Text('ERROR EN CODIGO'),
                                             content: Text((_model.apiResultvj1
                                                         ?.jsonBody ??
                                                     '')
@@ -457,8 +459,8 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 63.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 63.0, 0.0, 0.0),
                         child: FFButtonWidget(
                           onPressed: () async {
                             context.safePop();

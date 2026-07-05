@@ -149,8 +149,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                 Align(
                   alignment: const AlignmentDirectional(-1.0, 0.0),
                   child: Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 38.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 38.0, 0.0, 0.0),
                     child: Text(
                       'Método de pago',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -174,7 +174,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                   child: FlutterFlowDropDown<String>(
                     controller: _model.dropDownValueController ??=
                         FormFieldController<String>(null),
@@ -210,8 +211,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                     borderColor: Colors.transparent,
                     borderWidth: 0.0,
                     borderRadius: 10.0,
-                    margin:
-                        const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                    margin: const EdgeInsetsDirectional.fromSTEB(
+                        12.0, 0.0, 12.0, 0.0),
                     hidesUnderline: true,
                     isOverButton: false,
                     isSearchable: false,
@@ -219,7 +220,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
                   child: Builder(
                     builder: (context) {
                       if (_model.dropDownValue == 'Hipoteca') {
@@ -325,7 +327,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Enganche',
                                       style: FlutterFlowTheme.of(context)
@@ -355,8 +358,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -520,8 +524,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
-                                          alignment:
-                                              const AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: Text(
                                             'Propuesta económica',
                                             style: FlutterFlowTheme.of(context)
@@ -555,9 +559,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: SizedBox(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
@@ -739,8 +742,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
-                                          alignment:
-                                              const AlignmentDirectional(-1.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
                                           child: Text(
                                             'Banco a utilizar',
                                             style: FlutterFlowTheme.of(context)
@@ -774,9 +777,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                           child: SizedBox(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
@@ -956,7 +958,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Estado de crédito',
                                       style: FlutterFlowTheme.of(context)
@@ -986,8 +989,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -1143,7 +1147,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Tiempo estimado para aprobación del banco',
                                       style: FlutterFlowTheme.of(context)
@@ -1173,8 +1178,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -1352,7 +1358,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Nombre del comprador',
                                       style: FlutterFlowTheme.of(context)
@@ -1382,8 +1389,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -1571,7 +1579,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Razón social',
                                       style: FlutterFlowTheme.of(context)
@@ -1601,8 +1610,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -1758,7 +1768,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Representante legal',
                                       style: FlutterFlowTheme.of(context)
@@ -1788,8 +1799,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -1945,7 +1957,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Consideraciones o solicitudes',
                                       style: FlutterFlowTheme.of(context)
@@ -1975,8 +1988,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -2083,7 +2097,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                               FlutterFlowTheme.of(context)
                                                   .secondaryBackground,
                                           contentPadding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional
+                                                  .fromSTEB(
                                                   0.0, 40.0, 0.0, 40.0),
                                         ),
                                         style: FlutterFlowTheme.of(context)
@@ -2204,7 +2219,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Propuesta económica',
                                       style: FlutterFlowTheme.of(context)
@@ -2234,8 +2250,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -2391,7 +2408,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Tiempo estimado de pago tras aceptación de oferta',
                                       style: FlutterFlowTheme.of(context)
@@ -2421,8 +2439,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -2600,7 +2619,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Nombre del comprador',
                                       style: FlutterFlowTheme.of(context)
@@ -2630,8 +2650,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -2819,7 +2840,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Razón social',
                                       style: FlutterFlowTheme.of(context)
@@ -2849,8 +2871,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -3006,7 +3029,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Representante legal',
                                       style: FlutterFlowTheme.of(context)
@@ -3036,8 +3060,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -3193,7 +3218,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Consideraciones o solicitudes',
                                       style: FlutterFlowTheme.of(context)
@@ -3223,8 +3249,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -3331,7 +3358,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                               FlutterFlowTheme.of(context)
                                                   .secondaryBackground,
                                           contentPadding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional
+                                                  .fromSTEB(
                                                   0.0, 40.0, 0.0, 40.0),
                                         ),
                                         style: FlutterFlowTheme.of(context)
@@ -3452,7 +3480,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Propuesta económica',
                                       style: FlutterFlowTheme.of(context)
@@ -3482,8 +3511,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -3665,7 +3695,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Reserva inicial',
                                       style: FlutterFlowTheme.of(context)
@@ -3695,8 +3726,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -3852,7 +3884,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Pago final',
                                       style: FlutterFlowTheme.of(context)
@@ -3882,8 +3915,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -4039,7 +4073,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Tiempo de promesa',
                                       style: FlutterFlowTheme.of(context)
@@ -4069,8 +4104,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -4248,7 +4284,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Nombre del arrendatario',
                                       style: FlutterFlowTheme.of(context)
@@ -4278,8 +4315,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -4467,7 +4505,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Razón social',
                                       style: FlutterFlowTheme.of(context)
@@ -4497,8 +4536,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -4654,7 +4694,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Representante legal',
                                       style: FlutterFlowTheme.of(context)
@@ -4684,8 +4725,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -4841,7 +4883,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Consideraciones o solicitudes',
                                       style: FlutterFlowTheme.of(context)
@@ -4871,8 +4914,9 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 12.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
                                     child: SizedBox(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -4979,7 +5023,8 @@ class _DOVIACLIENTMisVisitasOfertaCompraTuPropuestaWidgetState
                                               FlutterFlowTheme.of(context)
                                                   .secondaryBackground,
                                           contentPadding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              const EdgeInsetsDirectional
+                                                  .fromSTEB(
                                                   0.0, 40.0, 0.0, 40.0),
                                         ),
                                         style: FlutterFlowTheme.of(context)

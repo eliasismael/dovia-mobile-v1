@@ -84,7 +84,7 @@ class _LEGALHQAjustesWidgetState extends State<LEGALHQAjustesWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 40.0, 0.0, 0.0),
                             child: Container(
-                            child: custom_widgets.OperativeListingProfile(
+                              child: custom_widgets.OperativeListingProfile(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: MediaQuery.sizeOf(context).height * 1.0,
                                 onTermsAndConditions: () async {},
@@ -93,7 +93,9 @@ class _LEGALHQAjustesWidgetState extends State<LEGALHQAjustesWidget> {
                                   final router = GoRouter.of(context);
                                   context.read<UserRepository>().clear();
                                   await DOVIAAPIAuthContextGroup.logoutAllCall
-                                      .call(idToken: authManager.authenticationToken);
+                                      .call(
+                                          idToken:
+                                              authManager.authenticationToken);
                                   router.prepareAuthEvent();
                                   await authManager.signOut();
                                   router.clearRedirectLocation();

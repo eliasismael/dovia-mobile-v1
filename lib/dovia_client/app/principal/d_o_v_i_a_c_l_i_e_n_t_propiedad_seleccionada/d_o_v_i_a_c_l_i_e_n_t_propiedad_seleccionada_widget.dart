@@ -64,10 +64,9 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
           final listingTypeRaw =
               getJsonField(response.jsonBody, r'''$.data.listingType''');
           if (listingTypeRaw != null && mounted) {
-            final parsed = (listingTypeRaw as List?)
-                    ?.map((e) => e.toString())
-                    .toList() ??
-                [];
+            final parsed =
+                (listingTypeRaw as List?)?.map((e) => e.toString()).toList() ??
+                    [];
             safeSetState(() => _listingType = parsed);
           }
         }
@@ -229,9 +228,8 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.inter(
                         fontWeight: FontWeight.bold,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .fontStyle,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                       ),
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -244,12 +242,10 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
                 textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.inter(
-                        fontWeight: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .fontWeight,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .fontStyle,
+                        fontWeight:
+                            FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                       ),
                       color: FlutterFlowTheme.of(context).secondaryText,
                       letterSpacing: 0,
@@ -289,12 +285,11 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
-                        context.pushNamed(
-                            DOVIACLIENTMisVisitasWidget.routeName);
+                        context
+                            .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            FlutterFlowTheme.of(context).primary,
+                        backgroundColor: FlutterFlowTheme.of(context).primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(100)),

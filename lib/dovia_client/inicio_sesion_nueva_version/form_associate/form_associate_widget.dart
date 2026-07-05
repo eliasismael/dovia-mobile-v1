@@ -80,14 +80,15 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                 child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 40.0, 0.0, 0.0),
                       child: SizedBox(
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         height: MediaQuery.sizeOf(context).height * 0.8,
@@ -110,7 +111,8 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         ClipRRect(
-                                          borderRadius: BorderRadius.circular(0.0),
+                                          borderRadius:
+                                              BorderRadius.circular(0.0),
                                           child: SvgPicture.asset(
                                             'assets/images/D-verde.svg',
                                             width: 48.0,
@@ -122,40 +124,54 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                                         Text(
                                           'Tu cuenta se creó con éxito.',
                                           textAlign: TextAlign.center,
-                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                            font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                                            fontSize: 18.0,
-                                            color: const Color(0xFF00444B),
-                                            letterSpacing: 0.0,
-                                          ),
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.publicSans(
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                                fontSize: 18.0,
+                                                color: const Color(0xFF00444B),
+                                                letterSpacing: 0.0,
+                                              ),
                                         ),
                                         const SizedBox(height: 12.0),
                                         Text(
                                           'El equipo de DOVIA se comunicará contigo a la brevedad para continuar con el proceso de incorporación.',
                                           textAlign: TextAlign.center,
-                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                            font: GoogleFonts.publicSans(fontWeight: FontWeight.normal),
-                                            fontSize: 14.0,
-                                            letterSpacing: 0.0,
-                                            lineHeight: 1.4,
-                                          ),
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.publicSans(
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                                fontSize: 14.0,
+                                                letterSpacing: 0.0,
+                                                lineHeight: 1.4,
+                                              ),
                                         ),
                                         const SizedBox(height: 24.0),
                                         FFButtonWidget(
-                                          onPressed: () => Navigator.pop(dialogContext),
+                                          onPressed: () =>
+                                              Navigator.pop(dialogContext),
                                           text: 'Entendido',
                                           options: FFButtonOptions(
                                             width: double.infinity,
                                             height: 42.0,
                                             color: const Color(0xFF007376),
-                                            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                              font: GoogleFonts.publicSans(),
-                                              color: Colors.white,
-                                              fontSize: 15.0,
-                                              letterSpacing: 0.0,
-                                            ),
+                                            textStyle: FlutterFlowTheme.of(
+                                                    context)
+                                                .titleSmall
+                                                .override(
+                                                  font:
+                                                      GoogleFonts.publicSans(),
+                                                  color: Colors.white,
+                                                  fontSize: 15.0,
+                                                  letterSpacing: 0.0,
+                                                ),
                                             elevation: 0.0,
-                                            borderRadius: BorderRadius.circular(25.0),
+                                            borderRadius:
+                                                BorderRadius.circular(25.0),
                                           ),
                                         ),
                                       ],
@@ -166,7 +182,8 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                             );
                             await authManager.signOut();
                             if (context.mounted) {
-                              context.pushNamedAuth(BienvenidaWidget.routeName, context.mounted);
+                              context.pushNamedAuth(
+                                  BienvenidaWidget.routeName, context.mounted);
                             }
                           },
                           onMapPointSelected: (latitude, longitude) async {},

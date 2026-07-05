@@ -146,7 +146,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     required String defaultStatus,
   }) async {
     final token = currentAuthenticationToken ?? '';
-    final res = await DOVIAAPIVisitContextGroup.getListerHqVisitDocumentsCall.call(
+    final res =
+        await DOVIAAPIVisitContextGroup.getListerHqVisitDocumentsCall.call(
       authToken: token,
       status: status,
       page: '1',
@@ -155,7 +156,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
     final docs = raw is List ? raw : <dynamic>[];
-    
+
     return docs.map((v) {
       final id = _resolveVisitId(v);
       String address = '';
@@ -165,7 +166,9 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
         if (prop is Map) {
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ?? prop['name']?.toString() ?? '';
+              locAddr?['street']?.toString() ??
+              prop['name']?.toString() ??
+              '';
         }
       }
       return _HqCardData(
@@ -194,7 +197,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
     final visits = raw is List ? raw : <dynamic>[];
-    
+
     return visits.map((v) {
       final id = v is Map ? v['id']?.toString() ?? '' : '';
       String address = '';
@@ -203,7 +206,9 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
         if (prop is Map) {
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ?? prop['name']?.toString() ?? '';
+              locAddr?['street']?.toString() ??
+              prop['name']?.toString() ??
+              '';
         }
       }
       return _HqCardData(
@@ -221,7 +226,9 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     required String status,
   }) async {
     final token = currentAuthenticationToken ?? '';
-    final res = await DOVIAAPILegalProcessContextGroup.listLegalProcessesListerHQCall.call(
+    final res = await DOVIAAPILegalProcessContextGroup
+        .listLegalProcessesListerHQCall
+        .call(
       authToken: token,
       status: status,
       page: '1',
@@ -230,21 +237,26 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
     final processes = raw is List ? raw : <dynamic>[];
-    
+
     return processes.map((p) {
       final id = p is Map ? p['id']?.toString() ?? '' : '';
       String title = 'Propiedad';
       String address = '';
       String ownerName = '';
       if (p is Map) {
-        final prop = p['property'] ?? (p['visit'] is Map ? p['visit']['property'] : null);
+        final prop = p['property'] ??
+            (p['visit'] is Map ? p['visit']['property'] : null);
         if (prop is Map) {
-          title = prop['name']?.toString() ?? prop['title']?.toString() ?? 'Propiedad';
+          title = prop['name']?.toString() ??
+              prop['title']?.toString() ??
+              'Propiedad';
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ?? '';
+              locAddr?['street']?.toString() ??
+              '';
         }
-        final owner = p['ownerProfile'] ?? (p['visit'] is Map ? p['visit']['ownerProfile'] : null);
+        final owner = p['ownerProfile'] ??
+            (p['visit'] is Map ? p['visit']['ownerProfile'] : null);
         if (owner is Map) {
           ownerName = owner['fullName']?.toString() ?? '';
         }
@@ -272,7 +284,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
     final visits = raw is List ? raw : <dynamic>[];
-    
+
     return visits.map((v) {
       final id = v is Map ? v['id']?.toString() ?? '' : '';
       String title = 'Propiedad';
@@ -281,10 +293,13 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
       if (v is Map) {
         final prop = v['property'];
         if (prop is Map) {
-          title = prop['name']?.toString() ?? prop['title']?.toString() ?? 'Propiedad';
+          title = prop['name']?.toString() ??
+              prop['title']?.toString() ??
+              'Propiedad';
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ?? '';
+              locAddr?['street']?.toString() ??
+              '';
         }
         final owner = v['ownerProfile'];
         if (owner is Map) {
@@ -440,9 +455,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
               ],
             ),
             FFButtonWidget(
-              onPressed: onPressed ?? () {
-                print('Button pressed ...');
-              },
+              onPressed: onPressed ??
+                  () {
+                    print('Button pressed ...');
+                  },
               text: buttonText,
               options: FFButtonOptions(
                 width: double.infinity,
@@ -549,7 +565,9 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                     ),
                     const SizedBox(height: 4.0),
                     Text(
-                      address.isNotEmpty ? 'Dirección: $address' : 'Dirección: N/A',
+                      address.isNotEmpty
+                          ? 'Dirección: $address'
+                          : 'Dirección: N/A',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(),
                             fontSize: 12.0,
@@ -572,14 +590,16 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                         borderRadius: BorderRadius.circular(24.0),
                       ),
                       child: Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(10.0, 4.0, 10.0, 4.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            10.0, 4.0, 10.0, 4.0),
                         child: Text(
                           'Falta información',
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.inter(),
-                                color: const Color(0xFFFF5963),
-                                fontSize: 12.0,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(),
+                                    color: const Color(0xFFFF5963),
+                                    fontSize: 12.0,
+                                  ),
                         ),
                       ),
                     ),
@@ -654,7 +674,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            20.0, 20.0, 20.0, 0.0),
                         child: InkWell(
                           splashColor: Colors.transparent,
                           focusColor: Colors.transparent,
@@ -667,11 +688,13 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                             width: double.infinity,
                             height: 64.0,
                             decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
                               borderRadius: BorderRadius.circular(100.0),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
@@ -683,7 +706,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                       height: 24.0,
                                       fit: BoxFit.none,
                                       colorFilter: ColorFilter.mode(
-                                        FlutterFlowTheme.of(context).primaryText,
+                                        FlutterFlowTheme.of(context)
+                                            .primaryText,
                                         BlendMode.srcIn,
                                       ),
                                     ),
@@ -691,7 +715,9 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                   const SizedBox(width: 20.0),
                                   Text(
                                     'Búsqueda con IA',
-                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
                                           font: GoogleFonts.publicSans(),
                                           color: const Color(0xFF888888),
                                           fontSize: 15.0,
@@ -720,23 +746,26 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return _buildLoader();
                                 return _buildHorizontalList(
-                                  snapshot.data!.map((e) => _buildCarouselCard(
-                                    address: e.address,
-                                    tagText: e.tagText,
-                                    statusText: e.statusText,
-                                    statusBgColor: e.statusBgColor,
-                                    statusTextColor: e.statusTextColor,
-                                    buttonText: 'Revisar ahora',
-                                    onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => LISTINGHQPropiedadArchivosPendientesWidget(
-                                          title: e.address,
-                                          visitId: e.id,
-                                        ),
-                                      ),
-                                    ),
-                                  )).toList(),
+                                  snapshot.data!
+                                      .map((e) => _buildCarouselCard(
+                                            address: e.address,
+                                            tagText: e.tagText,
+                                            statusText: e.statusText,
+                                            statusBgColor: e.statusBgColor,
+                                            statusTextColor: e.statusTextColor,
+                                            buttonText: 'Revisar ahora',
+                                            onPressed: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LISTINGHQPropiedadArchivosPendientesWidget(
+                                                  title: e.address,
+                                                  visitId: e.id,
+                                                ),
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
                                 );
                               },
                             ),
@@ -751,21 +780,24 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return _buildLoader();
                                 return _buildHorizontalList(
-                                  snapshot.data!.map((e) => _buildCarouselCard(
-                                    address: e.address,
-                                    tagText: e.tagText,
-                                    statusText: e.statusText,
-                                    statusBgColor: e.statusBgColor,
-                                    statusTextColor: e.statusTextColor,
-                                    buttonText: 'Asignar',
-                                    onPressed: () => context.pushNamed(
-                                      LISTINGHQPropiedadAsignadaWidget.routeName,
-                                      queryParameters: {
-                                        'visitId': serializeParam(
-                                            e.id, ParamType.String),
-                                      }.withoutNulls,
-                                    ),
-                                  )).toList(),
+                                  snapshot.data!
+                                      .map((e) => _buildCarouselCard(
+                                            address: e.address,
+                                            tagText: e.tagText,
+                                            statusText: e.statusText,
+                                            statusBgColor: e.statusBgColor,
+                                            statusTextColor: e.statusTextColor,
+                                            buttonText: 'Asignar',
+                                            onPressed: () => context.pushNamed(
+                                              LISTINGHQPropiedadAsignadaWidget
+                                                  .routeName,
+                                              queryParameters: {
+                                                'visitId': serializeParam(
+                                                    e.id, ParamType.String),
+                                              }.withoutNulls,
+                                            ),
+                                          ))
+                                      .toList(),
                                 );
                               },
                             ),
@@ -780,20 +812,23 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return _buildLoader();
                                 return _buildHorizontalList(
-                                  snapshot.data!.map((e) => _buildCarouselCard(
-                                    address: e.address,
-                                    tagText: e.tagText,
-                                    statusText: e.statusText,
-                                    statusBgColor: e.statusBgColor,
-                                    statusTextColor: e.statusTextColor,
-                                    buttonText: 'Revisar checklist',
-                                    onPressed: () => context.pushNamed(
-                                      'LISTING_HQ_Propiedad',
-                                      queryParameters: {
-                                        'visitId': serializeParam(e.id, ParamType.String),
-                                      }.withoutNulls,
-                                    ),
-                                  )).toList(),
+                                  snapshot.data!
+                                      .map((e) => _buildCarouselCard(
+                                            address: e.address,
+                                            tagText: e.tagText,
+                                            statusText: e.statusText,
+                                            statusBgColor: e.statusBgColor,
+                                            statusTextColor: e.statusTextColor,
+                                            buttonText: 'Revisar checklist',
+                                            onPressed: () => context.pushNamed(
+                                              'LISTING_HQ_Propiedad',
+                                              queryParameters: {
+                                                'visitId': serializeParam(
+                                                    e.id, ParamType.String),
+                                              }.withoutNulls,
+                                            ),
+                                          ))
+                                      .toList(),
                                 );
                               },
                             ),
@@ -805,7 +840,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               isExpanded: _model.isRechazadasExpanded,
                               onToggle: () {
                                 setState(() {
-                                  _model.isRechazadasExpanded = !_model.isRechazadasExpanded;
+                                  _model.isRechazadasExpanded =
+                                      !_model.isRechazadasExpanded;
                                 });
                               },
                             ),
@@ -815,10 +851,12 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                 if (!snapshot.hasData) return _buildLoader();
                                 if (snapshot.data!.isEmpty) {
                                   return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16.0),
+                                    padding:
+                                        const EdgeInsets.only(bottom: 16.0),
                                     child: Text(
                                       'No hay propiedades en esta sección',
-                                      style: FlutterFlowTheme.of(context).bodyMedium,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
                                     ),
                                   );
                                 }
@@ -830,32 +868,43 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                       first.title,
                                       first.ownerName,
                                       first.address,
-                                      buttonText: 'Actualizar Documentacion Legal',
+                                      buttonText:
+                                          'Actualizar Documentacion Legal',
                                       onPressed: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => LISTINGHQPropiedadRechazadaWidget(processId: first.id),
+                                          builder: (context) =>
+                                              LISTINGHQPropiedadRechazadaWidget(
+                                                  processId: first.id),
                                         ),
                                       ),
                                     ),
                                     AnimatedSize(
-                                      duration: const Duration(milliseconds: 250),
+                                      duration:
+                                          const Duration(milliseconds: 250),
                                       curve: Curves.easeInOut,
                                       child: _model.isRechazadasExpanded
                                           ? Column(
                                               mainAxisSize: MainAxisSize.min,
-                                              children: rest.map((e) => _buildLargeCard(
-                                                e.title,
-                                                e.ownerName,
-                                                e.address,
-                                                buttonText: 'Actualizar Documentacion Legal',
-                                                onPressed: () => Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => LISTINGHQPropiedadRechazadaWidget(processId: e.id),
-                                                  ),
-                                                ),
-                                              )).toList(),
+                                              children: rest
+                                                  .map((e) => _buildLargeCard(
+                                                        e.title,
+                                                        e.ownerName,
+                                                        e.address,
+                                                        buttonText:
+                                                            'Actualizar Documentacion Legal',
+                                                        onPressed: () =>
+                                                            Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                LISTINGHQPropiedadRechazadaWidget(
+                                                                    processId:
+                                                                        e.id),
+                                                          ),
+                                                        ),
+                                                      ))
+                                                  .toList(),
                                             )
                                           : const SizedBox.shrink(),
                                     ),
@@ -871,7 +920,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               isExpanded: _model.isCorreccionesExpanded,
                               onToggle: () {
                                 setState(() {
-                                  _model.isCorreccionesExpanded = !_model.isCorreccionesExpanded;
+                                  _model.isCorreccionesExpanded =
+                                      !_model.isCorreccionesExpanded;
                                 });
                               },
                             ),
@@ -881,10 +931,12 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                 if (!snapshot.hasData) return _buildLoader();
                                 if (snapshot.data!.isEmpty) {
                                   return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16.0),
+                                    padding:
+                                        const EdgeInsets.only(bottom: 16.0),
                                     child: Text(
                                       'No hay propiedades en esta sección',
-                                      style: FlutterFlowTheme.of(context).bodyMedium,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
                                     ),
                                   );
                                 }
@@ -900,28 +952,41 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                       onPressed: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => LISTINGHQPropiedadArchivosPendientesWidget(title: first.title, visitId: first.id),
+                                          builder: (context) =>
+                                              LISTINGHQPropiedadArchivosPendientesWidget(
+                                                  title: first.title,
+                                                  visitId: first.id),
                                         ),
                                       ),
                                     ),
                                     AnimatedSize(
-                                      duration: const Duration(milliseconds: 250),
+                                      duration:
+                                          const Duration(milliseconds: 250),
                                       curve: Curves.easeInOut,
                                       child: _model.isCorreccionesExpanded
                                           ? Column(
                                               mainAxisSize: MainAxisSize.min,
-                                              children: rest.map((e) => _buildLargeCard(
-                                                e.title,
-                                                e.ownerName,
-                                                e.address,
-                                                buttonText: 'Contactar con Propietario',
-                                                onPressed: () => Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => LISTINGHQPropiedadArchivosPendientesWidget(title: e.title, visitId: e.id),
-                                                  ),
-                                                ),
-                                              )).toList(),
+                                              children: rest
+                                                  .map((e) => _buildLargeCard(
+                                                        e.title,
+                                                        e.ownerName,
+                                                        e.address,
+                                                        buttonText:
+                                                            'Contactar con Propietario',
+                                                        onPressed: () =>
+                                                            Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                LISTINGHQPropiedadArchivosPendientesWidget(
+                                                                    title:
+                                                                        e.title,
+                                                                    visitId:
+                                                                        e.id),
+                                                          ),
+                                                        ),
+                                                      ))
+                                                  .toList(),
                                             )
                                           : const SizedBox.shrink(),
                                     ),

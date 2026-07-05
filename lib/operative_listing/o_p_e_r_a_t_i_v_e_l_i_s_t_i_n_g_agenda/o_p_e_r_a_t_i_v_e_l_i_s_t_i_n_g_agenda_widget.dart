@@ -19,8 +19,8 @@ class _AgendaVisitData {
   final String visitId;
   final String propertyName;
   final String address;
-  final String date;   // "2026-05-19"
-  final String time;   // "10:00"
+  final String date; // "2026-05-19"
+  final String time; // "10:00"
 
   const _AgendaVisitData({
     required this.visitId,
@@ -76,9 +76,8 @@ class _OPERATIVELISTINGAgendaWidgetState
   Future<void> _fetchVisits() async {
     final token = currentAuthenticationToken ?? '';
 
-    final listRes = await DOVIAAPIVisitContextGroup
-        .getOperativeListerVisitsCall
-        .call(
+    final listRes =
+        await DOVIAAPIVisitContextGroup.getOperativeListerVisitsCall.call(
       authToken: token,
       substatus: 'ASSIGNED',
       page: '1',
@@ -106,8 +105,7 @@ class _OPERATIVELISTINGAgendaWidgetState
     // We also need the property details from overview to show address/propertyName
     final overviewFutures = visits.map((v) {
       final id = v is Map ? v['id']?.toString() ?? '' : '';
-      return DOVIAAPIVisitContextGroup
-          .getOperativeListerVisitOverviewCall
+      return DOVIAAPIVisitContextGroup.getOperativeListerVisitOverviewCall
           .call(authToken: token, visitId: id);
     }).toList();
 
@@ -129,11 +127,12 @@ class _OPERATIVELISTINGAgendaWidgetState
         if (data is Map) {
           final prop = data['property'];
           if (prop is Map) {
-            propertyName = prop['name']?.toString() ??
-                prop['title']?.toString() ?? '';
+            propertyName =
+                prop['name']?.toString() ?? prop['title']?.toString() ?? '';
             final locAddr = _deepMap(prop, ['location', 'address']);
             address = locAddr?['fullAddress']?.toString() ??
-                locAddr?['street']?.toString() ?? '';
+                locAddr?['street']?.toString() ??
+                '';
           }
         }
       }
@@ -192,8 +191,29 @@ class _OPERATIVELISTINGAgendaWidgetState
   String _formatDate(String dateStr) {
     try {
       final DateTime dt = DateTime.parse(dateStr);
-      final List<String> weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-      final List<String> months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      final List<String> weekdays = [
+        'Lunes',
+        'Martes',
+        'Miércoles',
+        'Jueves',
+        'Viernes',
+        'Sábado',
+        'Domingo'
+      ];
+      final List<String> months = [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre'
+      ];
       return '${weekdays[dt.weekday - 1]}, ${dt.day} de ${months[dt.month - 1]}';
     } catch (_) {
       return dateStr;
@@ -226,7 +246,8 @@ class _OPERATIVELISTINGAgendaWidgetState
     String filterDateStr = '';
     if (_model.selectedDate != null) {
       final d = _model.selectedDate!;
-      filterDateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      filterDateStr =
+          '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
     }
 
     List<String> visibleDates = _groupedVisits.keys.toList();
@@ -278,7 +299,8 @@ class _OPERATIVELISTINGAgendaWidgetState
                               child: custom_widgets.DateSelectorWidget(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 70.0,
-                                initialDate: _model.selectedDate ?? DateTime.now(),
+                                initialDate:
+                                    _model.selectedDate ?? DateTime.now(),
                                 onDateSelected: (newDate) async {
                                   _model.selectedDate = newDate;
                                   safeSetState(() {});
@@ -307,8 +329,9 @@ class _OPERATIVELISTINGAgendaWidgetState
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 20.0, 0.0, 10.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 20.0, 0.0, 10.0),
                                     child: Text(
                                       _formatDate(dateKey),
                                       style: FlutterFlowTheme.of(context)
@@ -364,7 +387,8 @@ class _OPERATIVELISTINGAgendaWidgetState
           queryParameters: {
             'visitId': serializeParam(visit.visitId, ParamType.String),
             'isPrimeraVisita': serializeParam(true, ParamType.bool),
-            'propertyName': serializeParam(visit.propertyName, ParamType.String),
+            'propertyName':
+                serializeParam(visit.propertyName, ParamType.String),
             'isReadOnly': serializeParam(isReadOnly, ParamType.bool),
           }.withoutNulls,
         );
@@ -378,7 +402,8 @@ class _OPERATIVELISTINGAgendaWidgetState
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 15.0),
+            padding:
+                const EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 15.0),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -389,9 +414,12 @@ class _OPERATIVELISTINGAgendaWidgetState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        visit.propertyName.isNotEmpty ? visit.propertyName : 'Dirección',
+                        visit.propertyName.isNotEmpty
+                            ? visit.propertyName
+                            : 'Dirección',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                              font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w500),
                               fontSize: 16.0,
                               fontWeight: FontWeight.w500,
                             ),
@@ -400,7 +428,8 @@ class _OPERATIVELISTINGAgendaWidgetState
                       Text(
                         '${_formatDateShort(visit.date)} a las ${visit.time}',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(fontWeight: FontWeight.normal),
+                              font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.normal),
                               fontSize: 12.0,
                               fontWeight: FontWeight.normal,
                               color: const Color(0xFF5A5A5A),

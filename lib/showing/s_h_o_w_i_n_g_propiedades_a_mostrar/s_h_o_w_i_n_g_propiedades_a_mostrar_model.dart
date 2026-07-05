@@ -32,4 +32,3 @@ class SHOWINGPropiedadesAMostrarModel
     sHOWINGNavbarModel.dispose();
   }
 }
-

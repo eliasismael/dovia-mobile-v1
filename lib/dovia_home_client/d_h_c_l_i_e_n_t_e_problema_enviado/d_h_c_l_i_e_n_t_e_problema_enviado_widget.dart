@@ -52,14 +52,15 @@ class _DHCLIENTEProblemaEnviadoWidgetState
               borderRadius: BorderRadius.circular(10.4),
             ),
             child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(42.0, 0.0, 42.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        42.0, 0.0, 42.0, 0.0),
                     child: Text(
                       'Se envió con éxito',
                       textAlign: TextAlign.center,
@@ -80,8 +81,8 @@ class _DHCLIENTEProblemaEnviadoWidgetState
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 34.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 34.0, 0.0, 0.0),
                     child: Text(
                       'Tu problema se ha enviado y será revisado por el equipo de Dovia',
                       textAlign: TextAlign.center,

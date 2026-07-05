@@ -36,8 +36,9 @@ class ProcessState extends StatelessWidget {
     'Publicación\nde propiedad',
   ];
 
-  List<String> get _titles =>
-      (stepNames != null && stepNames!.isNotEmpty) ? stepNames! : _defaultTitles;
+  List<String> get _titles => (stepNames != null && stepNames!.isNotEmpty)
+      ? stepNames!
+      : _defaultTitles;
 
   @override
   Widget build(BuildContext context) {
@@ -123,9 +124,8 @@ class ProcessState extends StatelessWidget {
                       fontWeight: _stateOf(i) == _StepState.pending
                           ? FontWeight.w400
                           : FontWeight.w600,
-                      color: _stateOf(i) == _StepState.pending
-                          ? _gray
-                          : _textDark,
+                      color:
+                          _stateOf(i) == _StepState.pending ? _gray : _textDark,
                       height: 1.35,
                     ),
                   ),

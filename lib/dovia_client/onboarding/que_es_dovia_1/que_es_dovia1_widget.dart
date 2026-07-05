@@ -67,8 +67,8 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
             mainAxisSize: MainAxisSize.max,
             children: [
               Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(157.0, 109.0, 156.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    157.0, 109.0, 156.0, 0.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(0.0),
                   child: SvgPicture.asset(
@@ -80,7 +80,8 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(24.0, 31.0, 24.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(24.0, 31.0, 24.0, 0.0),
                 child: RichText(
                   textScaler: MediaQuery.of(context).textScaler,
                   text: TextSpan(
@@ -138,7 +139,8 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(33.0, 18.0, 24.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(33.0, 18.0, 24.0, 0.0),
                 child: Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(),
@@ -207,7 +209,8 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 31.0, 21.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 31.0, 21.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
                     await widget.onSiguienteTap?.call();
@@ -216,10 +219,10 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                   options: FFButtonOptions(
                     width: double.infinity,
                     height: 42.0,
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                    iconPadding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        16.0, 0.0, 16.0, 0.0),
+                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 0.0, 0.0),
                     color: const Color(0xFFEBEAE3),
                     textStyle: FlutterFlowTheme.of(context).labelLarge.override(
                           font: GoogleFonts.publicSans(
@@ -244,8 +247,8 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(158.0, 10.0, 159.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    158.0, 10.0, 159.0, 0.0),
                 child: InkWell(
                   splashColor: Colors.transparent,
                   focusColor: Colors.transparent,
@@ -275,7 +278,8 @@ class _QueEsDovia1WidgetState extends State<QueEsDovia1Widget> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(79.0, 25.0, 79.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(79.0, 25.0, 79.0, 0.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: SvgPicture.asset(

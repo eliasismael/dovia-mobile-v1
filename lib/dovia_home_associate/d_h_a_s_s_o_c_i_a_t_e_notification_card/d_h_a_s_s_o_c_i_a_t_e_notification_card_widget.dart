@@ -96,7 +96,8 @@ class _DHASSOCIATENotificationCardWidgetState
             Align(
               alignment: const AlignmentDirectional(-1.0, 0.0),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,8 +124,8 @@ class _DHASSOCIATENotificationCardWidgetState
                           ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 5.0, 0.0, 0.0),
                       child: Text(
                         'Están buscando plomero',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -149,8 +150,8 @@ class _DHASSOCIATENotificationCardWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 5.0, 0.0, 0.0),
                       child: Text(
                         '10/04/2025 - Hora XX',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(

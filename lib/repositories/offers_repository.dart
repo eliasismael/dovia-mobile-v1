@@ -15,7 +15,8 @@ class OffersRepository extends ChangeNotifier {
     notifyListeners();
 
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIOfferContextGroup.createCounterOfferCall.call(
+    final response =
+        await DOVIAAPIOfferContextGroup.createCounterOfferCall.call(
       offerId: offerId,
       authToken: token,
       counterOfferData: counterOfferData,

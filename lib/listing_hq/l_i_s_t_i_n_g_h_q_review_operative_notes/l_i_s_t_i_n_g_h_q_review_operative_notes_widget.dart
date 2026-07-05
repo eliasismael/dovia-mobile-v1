@@ -52,8 +52,10 @@ class _LISTINGHQReviewOperativeNotesWidgetState
     if (!detailRes.succeeded) return null;
 
     final data = (getJsonField(detailRes.jsonBody, r'$.data') as Map?) ??
-        (detailRes.jsonBody is Map ? detailRes.jsonBody as Map : <String, dynamic>{});
-    
+        (detailRes.jsonBody is Map
+            ? detailRes.jsonBody as Map
+            : <String, dynamic>{});
+
     return Map<String, dynamic>.from(data);
   }
 
@@ -84,89 +86,110 @@ class _LISTINGHQReviewOperativeNotesWidgetState
                 child: const CornerGradientBackgroundWidget(),
               ),
               FutureBuilder<Map<String, dynamic>?>(
-                future: _visitDetailsFuture,
-                builder: (context, snapshot) {
-                  if (widget.visitId != null && snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                  future: _visitDetailsFuture,
+                  builder: (context, snapshot) {
+                    if (widget.visitId != null &&
+                        snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                  final data = snapshot.data;
-                  final property = data?['property'] is Map ? data!['property'] as Map : null;
-                  final owner = data?['ownerProfile'] is Map ? data!['ownerProfile'] as Map : (property?['owner'] is Map ? property!['owner'] as Map : null);
-                  final lister = data?['lister'] is Map ? data!['lister'] as Map : null;
-                  final report = data?['report'] is Map ? data!['report'] as Map : null;
-                  final visit = data?['visit'] is Map ? data!['visit'] as Map : null;
+                    final data = snapshot.data;
+                    final property = data?['property'] is Map
+                        ? data!['property'] as Map
+                        : null;
+                    final owner = data?['ownerProfile'] is Map
+                        ? data!['ownerProfile'] as Map
+                        : (property?['owner'] is Map
+                            ? property!['owner'] as Map
+                            : null);
+                    final lister =
+                        data?['lister'] is Map ? data!['lister'] as Map : null;
+                    final report =
+                        data?['report'] is Map ? data!['report'] as Map : null;
+                    final visit =
+                        data?['visit'] is Map ? data!['visit'] as Map : null;
 
-                  final propertyName = property?['title']?.toString() ?? property?['name']?.toString() ?? 'Propiedad';
-                  final operativeNote = report?['hqNote']?.toString() ?? visit?['infoHq']?.toString() ?? 'Sin notas adicionales.';
-                  
-                  final opFirstName = lister?['firstName']?.toString() ?? lister?['name']?.toString() ?? 'Operativo';
-                  final opLastName = lister?['lastName']?.toString() ?? '';
-                  
-                  final ownFirstName = owner?['firstName']?.toString() ?? owner?['name']?.toString() ?? 'Propietario';
-                  final ownLastName = owner?['lastName']?.toString() ?? '';
+                    final propertyName = property?['title']?.toString() ??
+                        property?['name']?.toString() ??
+                        'Propiedad';
+                    final operativeNote = report?['hqNote']?.toString() ??
+                        visit?['infoHq']?.toString() ??
+                        'Sin notas adicionales.';
 
-                  return Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      wrapWithModel(
-                        model: _model.lISTINGHQHeaderModel,
-                        updateCallback: () => safeSetState(() {}),
-                        child: LISTINGHQHeaderWidget(
-                          titleText: propertyName,
+                    final opFirstName = lister?['firstName']?.toString() ??
+                        lister?['name']?.toString() ??
+                        'Operativo';
+                    final opLastName = lister?['lastName']?.toString() ?? '';
+
+                    final ownFirstName = owner?['firstName']?.toString() ??
+                        owner?['name']?.toString() ??
+                        'Propietario';
+                    final ownLastName = owner?['lastName']?.toString() ?? '';
+
+                    return Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        wrapWithModel(
+                          model: _model.lISTINGHQHeaderModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: LISTINGHQHeaderWidget(
+                            titleText: propertyName,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: custom_widgets.ListingHqReviewNotes(
-                          width: MediaQuery.sizeOf(context).width * 1.0,
-                          propertyName: propertyName,
-                          operativeNote: operativeNote,
-                          operativeName: opFirstName,
-                          operativeLastName: opLastName,
-                          ownerName: ownFirstName,
-                          ownerLastName: ownLastName,
-                          onChecklistPressed: () async {
-                            // Navigate to checklist in edit mode
-                            if (context.mounted) {
-                              context.pushNamed(
-                                'OPERATIVE_LISTING_Checklist_Form',
-                                queryParameters: {
-                                  'visitId': widget.visitId,
-                                },
-                              );
-                            }
-                          },
-                          onReassignPressed: () async {
-                            // Cancel current visit and navigate to reassignment
-                            final cancelRes = await DOVIAAPIVisitContextGroup.cancelVisitCall.call(
-                              visitId: widget.visitId,
-                              authToken: currentAuthenticationToken ?? '',
-                            );
-                            
-                            if (cancelRes.succeeded) {
+                        Expanded(
+                          child: custom_widgets.ListingHqReviewNotes(
+                            width: MediaQuery.sizeOf(context).width * 1.0,
+                            propertyName: propertyName,
+                            operativeNote: operativeNote,
+                            operativeName: opFirstName,
+                            operativeLastName: opLastName,
+                            ownerName: ownFirstName,
+                            ownerLastName: ownLastName,
+                            onChecklistPressed: () async {
+                              // Navigate to checklist in edit mode
                               if (context.mounted) {
                                 context.pushNamed(
-                                  'LISTING_HQ_PropiedadAsignada',
+                                  'OPERATIVE_LISTING_Checklist_Form',
                                   queryParameters: {
                                     'visitId': widget.visitId,
                                   },
                                 );
                               }
-                            } else {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Error al cancelar la visita.')),
-                                );
+                            },
+                            onReassignPressed: () async {
+                              // Cancel current visit and navigate to reassignment
+                              final cancelRes = await DOVIAAPIVisitContextGroup
+                                  .cancelVisitCall
+                                  .call(
+                                visitId: widget.visitId,
+                                authToken: currentAuthenticationToken ?? '',
+                              );
+
+                              if (cancelRes.succeeded) {
+                                if (context.mounted) {
+                                  context.pushNamed(
+                                    'LISTING_HQ_PropiedadAsignada',
+                                    queryParameters: {
+                                      'visitId': widget.visitId,
+                                    },
+                                  );
+                                }
+                              } else {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Error al cancelar la visita.')),
+                                  );
+                                }
                               }
-                            }
-                          },
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 80), // Space for navbar
-                    ],
-                  );
-                }
-              ),
+                        const SizedBox(height: 80), // Space for navbar
+                      ],
+                    );
+                  }),
               Align(
                 alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(

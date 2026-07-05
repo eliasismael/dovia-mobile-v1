@@ -228,7 +228,8 @@ class UserRepository extends ChangeNotifier {
     notifyListeners();
 
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIUserContextGroup.updateUserPreferencesNEWCall.call(
+    final response =
+        await DOVIAAPIUserContextGroup.updateUserPreferencesNEWCall.call(
       userId: userId,
       authToken: token,
       propertyType: propertyType,
@@ -256,7 +257,8 @@ class UserRepository extends ChangeNotifier {
     notifyListeners();
 
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIUserContextGroup.deactivateMyAccountCall.call(
+    final response =
+        await DOVIAAPIUserContextGroup.deactivateMyAccountCall.call(
       authToken: token,
       reason: reason,
     );

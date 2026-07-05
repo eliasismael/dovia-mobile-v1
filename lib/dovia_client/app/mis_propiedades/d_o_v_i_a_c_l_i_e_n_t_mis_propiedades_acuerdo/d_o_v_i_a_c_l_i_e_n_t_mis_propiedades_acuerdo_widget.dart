@@ -175,27 +175,28 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
 
         if (_offerData != null) {
           // API uses 'initialReserve', not 'reservationAmount'
-          final resAmt =
-              getJsonField(_offerData, r'''$.activeOfferData.initialReserve''') ??
-              getJsonField(_offerData, r'''$.activeOfferData.reservationAmount''') ??
+          final resAmt = getJsonField(
+                  _offerData, r'''$.activeOfferData.initialReserve''') ??
+              getJsonField(
+                  _offerData, r'''$.activeOfferData.reservationAmount''') ??
               getJsonField(_offerData, r'''$.initialReserve''');
           if (resAmt != null) _model.textController9?.text = '\$${resAmt}';
 
           final finalPay =
               getJsonField(_offerData, r'''$.activeOfferData.finalPayment''') ??
-              getJsonField(_offerData, r'''$.finalPayment''');
+                  getJsonField(_offerData, r'''$.finalPayment''');
           if (finalPay != null) _model.textController10?.text = '\$${finalPay}';
 
           // API uses 'promiseTimeMonths', not 'promiseTime'
-          final promiseTime =
-              getJsonField(_offerData, r'''$.activeOfferData.promiseTimeMonths''') ??
+          final promiseTime = getJsonField(
+                  _offerData, r'''$.activeOfferData.promiseTimeMonths''') ??
               getJsonField(_offerData, r'''$.activeOfferData.promiseTime''') ??
               getJsonField(_offerData, r'''$.promiseTimeMonths''');
           if (promiseTime != null)
             _model.textController11?.text = '${promiseTime} meses';
 
-          final method =
-              getJsonField(_offerData, r'''$.activeOfferData.paymentMethod''') ??
+          final method = getJsonField(
+                  _offerData, r'''$.activeOfferData.paymentMethod''') ??
               getJsonField(_offerData, r'''$.paymentMethod''');
           if (method != null) {
             if (method.toString().toLowerCase() == 'purchase_promise') {
@@ -207,8 +208,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
             _model.textController7?.text = 'Promesa de compra';
           }
 
-          final amount =
-              getJsonField(_offerData, r'''$.activeOfferData.proposedAmount''') ??
+          final amount = getJsonField(
+                  _offerData, r'''$.activeOfferData.proposedAmount''') ??
               getJsonField(_offerData, r'''$.proposedAmount''');
           if (amount != null) _model.textController8?.text = '\$${amount}';
         }
@@ -1655,8 +1656,11 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       r'''$.paymentMethod''') ??
                                                   getJsonField(_offerData,
                                                       r'''$.paymentMethod''');
-                                              if (m == null) return 'Promesa de compra';
-                                              return m.toString().toLowerCase() ==
+                                              if (m == null)
+                                                return 'Promesa de compra';
+                                              return m
+                                                          .toString()
+                                                          .toLowerCase() ==
                                                       'purchase_promise'
                                                   ? 'Promesa de compra'
                                                   : m.toString();
@@ -1668,7 +1672,8 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       r'''$.proposedAmount''');
                                               return v != null
                                                   ? '\$$v'
-                                                  : (widget.proposedAmount ?? '—');
+                                                  : (widget.proposedAmount ??
+                                                      '—');
                                             }();
                                             final reservaVal = () {
                                               final v = getJsonField(activeData,
@@ -1717,14 +1722,16 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                           .override(
                                                             font: GoogleFonts
                                                                 .inter(
-                                                              fontWeight: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                              fontStyle: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
+                                                              fontWeight:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontWeight,
+                                                              fontStyle:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontStyle,
                                                             ),
                                                             letterSpacing: 0.0,
                                                           ),
@@ -1747,28 +1754,28 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       ),
                                                       child: Text(
                                                         value,
-                                                        style: FlutterFlowTheme
-                                                                .of(context)
-                                                            .bodyMedium
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .publicSans(
-                                                                fontWeight: FlutterFlowTheme
-                                                                        .of(
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .publicSans(
+                                                                    fontWeight: FlutterFlowTheme.of(
                                                                             context)
-                                                                    .bodyMedium
-                                                                    .fontWeight,
-                                                                fontStyle: FlutterFlowTheme
-                                                                        .of(
+                                                                        .bodyMedium
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
                                                                             context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                              ),
-                                                              color: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .secondaryText,
-                                                              letterSpacing: 0.0,
-                                                            ),
+                                                                        .bodyMedium
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondaryText,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                ),
                                                       ),
                                                     ),
                                                   ],

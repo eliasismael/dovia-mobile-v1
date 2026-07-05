@@ -56,8 +56,8 @@ class _PasswordSuccessfullyChangedWidgetState
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(42.0, 71.0, 42.0, 34.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      42.0, 71.0, 42.0, 34.0),
                   child: Text(
                     'Se actualizó con éxito la contraseña',
                     textAlign: TextAlign.center,

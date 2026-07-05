@@ -53,8 +53,7 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
 
   Future<void> _handleUpload() async {
     final file = _model.uploadedLocalFile_documentoFirmado;
-    final hasFile =
-        file.bytes != null && file.bytes!.isNotEmpty;
+    final hasFile = file.bytes != null && file.bytes!.isNotEmpty;
 
     if (!hasFile) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -104,8 +103,8 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-                'No se pudo enviar el comprobante. Intentá nuevamente.'),
+            content:
+                Text('No se pudo enviar el comprobante. Intentá nuevamente.'),
           ),
         );
       }

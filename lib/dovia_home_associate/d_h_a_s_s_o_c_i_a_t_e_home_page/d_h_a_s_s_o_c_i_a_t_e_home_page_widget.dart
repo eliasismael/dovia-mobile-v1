@@ -63,8 +63,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 42.0, 20.0, 0.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -194,8 +194,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                   ),
                 ),
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 36.0, 20.0, 0.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     decoration: const BoxDecoration(),
@@ -236,8 +236,9 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 height: 30.0,
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     24.0, 6.0, 24.0, 6.0),
-                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
                                 color: const Color(0xFFCCE3E4),
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
@@ -440,16 +441,16 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                   ),
                 ),
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(20.0, 46.0, 20.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 46.0, 20.0, 0.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 1.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 1.0, 0.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -486,8 +487,9 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                   height: 30.0,
                                   padding: const EdgeInsetsDirectional.fromSTEB(
                                       24.0, 6.0, 24.0, 6.0),
-                                  iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
                                   color: const Color(0xFFCCE3E4),
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
@@ -697,8 +699,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                 Align(
                   alignment: const AlignmentDirectional(1.0, 0.0),
                   child: Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 15.0, 5.0),
                     child: wrapWithModel(
                       model: _model.fixedDoviaIconModel,
                       updateCallback: () => safeSetState(() {}),

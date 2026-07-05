@@ -845,14 +845,16 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           const SizedBox(height: 16),
           _buildNotificationSwitch(
             title: 'Daily listing',
-            subtitle: 'Recibe notificaciones cuando publiquemos nuevas propiedades que pueden interesarte',
+            subtitle:
+                'Recibe notificaciones cuando publiquemos nuevas propiedades que pueden interesarte',
             value: _notifDailyListing,
             onChanged: (val) => setState(() => _notifDailyListing = val),
           ),
           const SizedBox(height: 16),
           _buildNotificationSwitch(
             title: 'Recomendaciones',
-            subtitle: 'Recibe notificaciones cuando encontremos propiedades que se ajusten a tus búsquedas recientes.',
+            subtitle:
+                'Recibe notificaciones cuando encontremos propiedades que se ajusten a tus búsquedas recientes.',
             value: _notifRecomendaciones,
             onChanged: (val) => setState(() => _notifRecomendaciones = val),
           ),
@@ -873,7 +875,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           const SizedBox(height: 16),
           _buildNotificationSwitch(
             title: 'Informe semanal',
-            subtitle: 'Recibe un informe semanal sobre la interacción que tuvo tu propiedad.',
+            subtitle:
+                'Recibe un informe semanal sobre la interacción que tuvo tu propiedad.',
             value: _notifInformeSemanal,
             onChanged: (val) => setState(() => _notifInformeSemanal = val),
           ),
@@ -953,8 +956,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     setState(() => _tempAvatarBytes = null);
     switch (result) {
       case Success():
-        setState(
-            () => _avatarVersion = DateTime.now().millisecondsSinceEpoch);
+        setState(() => _avatarVersion = DateTime.now().millisecondsSinceEpoch);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Imagen actualizada correctamente'),
           backgroundColor: aqua,
@@ -1032,7 +1034,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _openTermsModal() {
@@ -1144,9 +1147,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               ),
             ),
             Icon(
-              isExpanded
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
+              isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
               size: 24,
               color: textPrimary,
             ),
@@ -1439,7 +1440,8 @@ class _TermsModal extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 8),
+              padding: const EdgeInsets.only(
+                  left: 20, top: 20, right: 20, bottom: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -1457,7 +1459,8 @@ class _TermsModal extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.close, color: Color(0xFF00444B), size: 24),
+                    child: const Icon(Icons.close,
+                        color: Color(0xFF00444B), size: 24),
                   ),
                 ],
               ),
@@ -1569,7 +1572,8 @@ class _DeleteConfirmDialog extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF007376), width: 1.5),
+                        side: const BorderSide(
+                            color: Color(0xFF007376), width: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
@@ -1617,7 +1621,8 @@ class _DeleteConfirmDialog extends StatelessWidget {
 class _DeleteReasonDialog extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onConfirm;
-  const _DeleteReasonDialog({required this.controller, required this.onConfirm});
+  const _DeleteReasonDialog(
+      {required this.controller, required this.onConfirm});
 
   @override
   Widget build(BuildContext context) {

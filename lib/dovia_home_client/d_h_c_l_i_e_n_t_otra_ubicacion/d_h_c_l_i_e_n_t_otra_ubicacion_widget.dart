@@ -71,8 +71,8 @@ class _DHCLIENTOtraUbicacionWidgetState
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(60.0, 0.0, 60.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        60.0, 0.0, 60.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -136,8 +136,9 @@ class _DHCLIENTOtraUbicacionWidgetState
                                         ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 6.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 6.0, 0.0, 0.0),
                                     child: RichText(
                                       textScaler:
                                           MediaQuery.of(context).textScaler,
@@ -229,8 +230,9 @@ class _DHCLIENTOtraUbicacionWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 25.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 25.0, 0.0, 0.0),
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
@@ -241,8 +243,8 @@ class _DHCLIENTOtraUbicacionWidgetState
                                             BorderRadius.circular(24.0),
                                       ),
                                       child: Align(
-                                        alignment:
-                                            const AlignmentDirectional(0.0, 0.0),
+                                        alignment: const AlignmentDirectional(
+                                            0.0, 0.0),
                                         child: Text(
                                           'Aplicando X% Off',
                                           style: FlutterFlowTheme.of(context)
@@ -275,8 +277,9 @@ class _DHCLIENTOtraUbicacionWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 9.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 9.0, 0.0, 0.0),
                                     child: Text(
                                       'Por tener la suscripción Dovia Basic, \nse te cobrara: ',
                                       textAlign: TextAlign.center,
@@ -308,8 +311,9 @@ class _DHCLIENTOtraUbicacionWidgetState
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 9.0, 0.0, 9.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 9.0, 0.0, 9.0),
                                     child: Text(
                                       '\$X',
                                       style: FlutterFlowTheme.of(context)
@@ -400,8 +404,8 @@ class _DHCLIENTOtraUbicacionWidgetState
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

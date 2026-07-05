@@ -5,7 +5,8 @@ import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import '/custom_code/widgets/operative_listing_check_list.dart' as custom_checklist;
+import '/custom_code/widgets/operative_listing_check_list.dart'
+    as custom_checklist;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
@@ -33,7 +34,8 @@ class _OPERATIVELISTINGChecklistFormWidgetState
   late OPERATIVELISTINGChecklistFormModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final _checklistKey = GlobalKey<custom_checklist.OperativeListingCheckListState>();
+  final _checklistKey =
+      GlobalKey<custom_checklist.OperativeListingCheckListState>();
   bool _fetchingVisit = false;
 
   @override
@@ -46,11 +48,12 @@ class _OPERATIVELISTINGChecklistFormWidgetState
       if (widget.visitId.isNotEmpty) {
         FFAppState().lastActiveVisitId = widget.visitId;
       }
-      
+
       if (FFAppState().lastActiveVisitId.isEmpty) {
         setState(() => _fetchingVisit = true);
         final token = currentAuthenticationToken ?? '';
-        final response = await DOVIAAPIVisitContextGroup.getOperativeListerVisitsCall.call(
+        final response =
+            await DOVIAAPIVisitContextGroup.getOperativeListerVisitsCall.call(
           authToken: token,
           substatus: 'ASSIGNED',
           page: '1',
@@ -119,7 +122,8 @@ class _OPERATIVELISTINGChecklistFormWidgetState
                             if (_fetchingVisit)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40),
-                                child: Center(child: CircularProgressIndicator()),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
                               )
                             else if (FFAppState().lastActiveVisitId.isEmpty)
                               const Padding(
@@ -200,56 +204,85 @@ class _OPERATIVELISTINGChecklistFormWidgetState
                                   child: PrimaryButtonWidget(
                                     text: 'Enviar',
                                     onTap: () async {
-                                      if (_checklistKey.currentState?.validateForm() == true) {
-                                        final token = currentAuthenticationToken ?? '';
-                                        final visitId = FFAppState().lastActiveVisitId;
-                                        
+                                      if (_checklistKey.currentState
+                                              ?.validateForm() ==
+                                          true) {
+                                        final token =
+                                            currentAuthenticationToken ?? '';
+                                        final visitId =
+                                            FFAppState().lastActiveVisitId;
+
                                         // Show loading indicator
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Obteniendo información de la visita...')),
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Obteniendo información de la visita...')),
                                         );
 
                                         // 1. Fetch visit overview to get propertyId
-                                        final overviewResponse = await DOVIAAPIVisitContextGroup.getOperativeListerVisitOverviewCall.call(
+                                        final overviewResponse =
+                                            await DOVIAAPIVisitContextGroup
+                                                .getOperativeListerVisitOverviewCall
+                                                .call(
                                           visitId: visitId,
                                           authToken: token,
                                         );
 
                                         if (!overviewResponse.succeeded) {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Error al obtener datos de la propiedad: ${overviewResponse.jsonBody}')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      'Error al obtener datos de la propiedad: ${overviewResponse.jsonBody}')),
                                             );
                                           }
                                           return;
                                         }
 
-                                        final propData = getJsonField(overviewResponse.jsonBody, r'$.data.property');
+                                        final propData = getJsonField(
+                                            overviewResponse.jsonBody,
+                                            r'$.data.property');
                                         String? propertyId;
                                         if (propData is Map) {
-                                          propertyId = propData['id']?.toString() ?? propData['_id']?.toString();
+                                          propertyId =
+                                              propData['id']?.toString() ??
+                                                  propData['_id']?.toString();
                                         }
 
-                                        if (propertyId == null || propertyId.isEmpty) {
+                                        if (propertyId == null ||
+                                            propertyId.isEmpty) {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('No se pudo identificar el ID de la propiedad.')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'No se pudo identificar el ID de la propiedad.')),
                                             );
                                           }
                                           return;
                                         }
 
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Enviando datos de la propiedad...')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Enviando datos de la propiedad...')),
                                           );
                                         }
 
                                         // 2. Call PATCH /properties/{propertyId} with checklist data
-                                        final formData = _checklistKey.currentState!.getFormData();
-                                        final patchResponse = await ApiManager.instance.makeApiCall(
+                                        final formData = _checklistKey
+                                            .currentState!
+                                            .getFormData();
+                                        final patchResponse = await ApiManager
+                                            .instance
+                                            .makeApiCall(
                                           callName: 'PATCH Property Details',
-                                          apiUrl: '${DOVIAAPIPropertyContextGroup.getBaseUrl()}/properties/$propertyId',
+                                          apiUrl:
+                                              '${DOVIAAPIPropertyContextGroup.getBaseUrl()}/properties/$propertyId',
                                           callType: ApiCallType.PATCH,
                                           headers: {
                                             'Authorization': 'Bearer $token',
@@ -268,36 +301,52 @@ class _OPERATIVELISTINGChecklistFormWidgetState
 
                                         if (!patchResponse.succeeded) {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Error al actualizar propiedad: ${patchResponse.jsonBody}')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      'Error al actualizar propiedad: ${patchResponse.jsonBody}')),
                                             );
                                           }
                                           return;
                                         }
 
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Finalizando visita...')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Finalizando visita...')),
                                           );
                                         }
 
                                         // 3. Mark visit as completed
-                                        final response = await DOVIAAPIVisitContextGroup.markVisitedCall.call(
+                                        final response =
+                                            await DOVIAAPIVisitContextGroup
+                                                .markVisitedCall
+                                                .call(
                                           visitId: visitId,
                                           authToken: token,
                                         );
 
                                         if (response.succeeded) {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('¡Visita completada con éxito!')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      '¡Visita completada con éxito!')),
                                             );
-                                            context.goNamed('OPERATIVE_LISTING_Home');
+                                            context.goNamed(
+                                                'OPERATIVE_LISTING_Home');
                                           }
                                         } else {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Error al enviar el reporte: ${response.jsonBody}')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      'Error al enviar el reporte: ${response.jsonBody}')),
                                             );
                                           }
                                         }

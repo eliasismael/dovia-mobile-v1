@@ -66,7 +66,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 19.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 19.0, 0.0, 0.0),
                   child: FFButtonWidget(
                     onPressed: () {
                       print('Button pressed ...');
@@ -74,10 +75,10 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     text: 'DOVIA BASIC',
                     options: FFButtonOptions(
                       width: 115.0,
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(14.0, 0.0, 14.0, 0.0),
-                      iconPadding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          14.0, 0.0, 14.0, 0.0),
+                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
                       color: const Color(0x20FFFFFF),
                       textStyle:
                           FlutterFlowTheme.of(context).titleSmall.override(
@@ -101,7 +102,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                   child: RichText(
                     textScaler: MediaQuery.of(context).textScaler,
                     text: TextSpan(
@@ -206,13 +208,14 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 18.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 18.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 21.0, 0.0, 0.0),
                     child: Text(
                       'Plan diseñado para 1 propiedad registrada en DOVIA. Mantén tu hogar en perfectas condiciones con nuestro servicio integral.',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -237,8 +240,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 34.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 34.0, 0.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -279,8 +282,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       height: 40.0,
@@ -343,8 +346,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       height: 40.0,
@@ -408,8 +411,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       height: 40.0,
@@ -472,8 +475,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: Container(
                       height: 40.0,
                       decoration: BoxDecoration(
@@ -536,8 +539,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       decoration: BoxDecoration(
@@ -549,8 +552,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                         ),
                       ),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 8.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            8.0, 8.0, 8.0, 8.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -584,8 +587,9 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                                 ),
                                 Flexible(
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        8.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            8.0, 0.0, 0.0, 0.0),
                                     child: Text(
                                       'Beneficios adicionales',
                                       style: FlutterFlowTheme.of(context)
@@ -642,8 +646,9 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                                 ),
                                 Flexible(
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        8.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            8.0, 0.0, 0.0, 0.0),
                                     child: Text(
                                       'Prioridad en reservas',
                                       style: FlutterFlowTheme.of(context)
@@ -700,8 +705,9 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                                 ),
                                 Flexible(
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        8.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            8.0, 0.0, 0.0, 0.0),
                                     child: Text(
                                       'Asesoría técnica gratuita',
                                       style: FlutterFlowTheme.of(context)
@@ -758,8 +764,9 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                                 ),
                                 Flexible(
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        8.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            8.0, 0.0, 0.0, 0.0),
                                     child: Text(
                                       'Historial detallado de servicios',
                                       style: FlutterFlowTheme.of(context)
@@ -792,8 +799,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 40.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 40.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       decoration: BoxDecoration(
@@ -805,8 +812,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                         ),
                       ),
                       child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 8.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            8.0, 8.0, 8.0, 8.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [

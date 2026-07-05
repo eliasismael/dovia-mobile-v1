@@ -3,6 +3,7 @@ import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
@@ -256,8 +257,79 @@ class _SHOWINGRegistroDeVisita2WidgetState
                     wrapWithModel(
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const SHOWINGHeaderWidget(
+                      child: SHOWINGHeaderWidget(
                         title: 'Registro de visita',
+                        actionWidget: FFButtonWidget(
+                          onPressed: () async {
+                            final reason = await showDialog<String>(
+                              context: context,
+                              builder: (dialogContext) {
+                                return Dialog(
+                                  elevation: 0,
+                                  insetPadding: EdgeInsets.zero,
+                                  backgroundColor: Colors.transparent,
+                                  alignment:
+                                      const AlignmentDirectional(0.0, 0.0)
+                                          .resolve(Directionality.of(context)),
+                                  child: const SHOWINGReportPopupWidget(
+                                    title: 'Visita no realizada',
+                                    subtitle:
+                                        'Por favor, describe por qué no se realizó la visita',
+                                  ),
+                                );
+                              },
+                            );
+
+                            if (reason != null && reason.trim().isNotEmpty) {
+                              final res = await DOVIAAPIVisitContextGroup
+                                  .showingNotCompletedReportCall
+                                  .call(
+                                visitId: widget.visitId,
+                                authToken: currentAuthenticationToken,
+                                reason: reason.trim(),
+                              );
+                              if (!mounted) return;
+                              if (res.succeeded) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Reporte enviado correctamente.')),
+                                );
+                                context.safePop();
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Error al enviar el reporte.')),
+                                );
+                              }
+                            }
+                          },
+                          text: 'No se realizó',
+                          options: FFButtonOptions(
+                            height: 30.0,
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                8.0, 0.0, 8.0, 0.0),
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 0.0),
+                            color: Colors.transparent,
+                            textStyle: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
+                                  font: GoogleFonts.publicSans(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  color: const Color(0xFFC90A0A),
+                                  fontSize: 12.0,
+                                ),
+                            elevation: 0.0,
+                            borderSide: const BorderSide(
+                              color: Color(0xFFC90A0A),
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                        ),
                       ),
                     ),
                     Padding(

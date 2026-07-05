@@ -132,7 +132,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
           : prop['propertyType']?.toString() ?? '';
       final locAddr = _deepMap(prop, ['location', 'address']);
       address = locAddr?['fullAddress']?.toString() ??
-          locAddr?['street']?.toString() ?? '';
+          locAddr?['street']?.toString() ??
+          '';
       description = prop['description']?.toString() ?? '';
       final coords = _deepValue(prop, ['location', 'geo', 'coordinates']);
       if (coords is List && coords.length >= 2) {
@@ -215,11 +216,15 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
       final t = _visitTime.split(':');
       if (d.length < 3 || t.length < 2) return false;
       final visitDt = DateTime(
-        int.parse(d[0]), int.parse(d[1]), int.parse(d[2]),
-        int.parse(t[0]), int.parse(t[1]),
+        int.parse(d[0]),
+        int.parse(d[1]),
+        int.parse(d[2]),
+        int.parse(t[0]),
+        int.parse(t[1]),
       );
       // Unlock 15 min before the scheduled time
-      return DateTime.now().isAfter(visitDt.subtract(const Duration(minutes: 15)));
+      return DateTime.now()
+          .isAfter(visitDt.subtract(const Duration(minutes: 15)));
     } catch (_) {
       return false;
     }
@@ -308,7 +313,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                   width: 35.0,
                                   height: 35.0,
                                   decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context).alternate,
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
                                     shape: BoxShape.circle,
                                   ),
                                   child: ClipRRect(
@@ -390,8 +396,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                       child: _loading
                           ? const Padding(
                               padding: EdgeInsets.symmetric(vertical: 60),
-                              child:
-                                  Center(child: CircularProgressIndicator()),
+                              child: Center(child: CircularProgressIndicator()),
                             )
                           : Column(
                               mainAxisSize: MainAxisSize.max,
@@ -419,9 +424,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                   ),
                                 ),
                                 Padding(
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 16.0, 0.0, 0.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 16.0, 0.0, 0.0),
                                   child: Container(
                                     width: double.infinity,
                                     decoration: BoxDecoration(
@@ -443,9 +447,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                               ? Image.network(
                                                   _ownerAvatarUrl,
                                                   fit: BoxFit.cover,
-                                                  errorBuilder:
-                                                      (_, __, ___) =>
-                                                          _avatarPlaceholder(),
+                                                  errorBuilder: (_, __, ___) =>
+                                                      _avatarPlaceholder(),
                                                 )
                                               : _avatarPlaceholder(),
                                         ),
@@ -455,19 +458,16 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                           _ownerName.isNotEmpty
                                               ? _ownerName
                                               : 'Sin nombre',
-                                          style:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .override(
-                                                    font:
-                                                        GoogleFonts.publicSans(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600),
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: _dark,
-                                                  ),
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.publicSans(
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: _dark,
+                                              ),
                                         ),
                                         const SizedBox(height: 16),
                                         // Hablar con Dovia HQ box
@@ -480,8 +480,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                     .width *
                                                 0.7,
                                             decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context)
-                                                  .accent1,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .accent1,
                                               borderRadius:
                                                   BorderRadius.circular(16.0),
                                             ),
@@ -495,8 +496,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                           context)
                                                       .bodyMedium
                                                       .override(
-                                                        font:
-                                                            GoogleFonts.publicSans(
+                                                        font: GoogleFonts
+                                                            .publicSans(
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w600),
@@ -509,25 +510,25 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                   const SizedBox(height: 8),
                                                   Row(
                                                     mainAxisAlignment:
-                                                        MainAxisAlignment.center,
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
                                                       const Icon(
                                                           Icons.phone_outlined,
                                                           size: 18,
-                                                          color:
-                                                              Color(0xFF007376)),
+                                                          color: Color(
+                                                              0xFF007376)),
                                                       const SizedBox(width: 6),
                                                       Text(
                                                         _ownerPhone,
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodySmall
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .publicSans(),
-                                                                  color: _primary,
-                                                                ),
+                                                        style: FlutterFlowTheme
+                                                                .of(context)
+                                                            .bodySmall
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .publicSans(),
+                                                              color: _primary,
+                                                            ),
                                                       ),
                                                     ],
                                                   ),
@@ -661,9 +662,8 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
 
                                 // ── Map ──────────────────────────────────
                                 Padding(
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 20.0, 0.0, 0.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 20.0, 0.0, 0.0),
                                   child: SizedBox(
                                     width: double.infinity,
                                     height: 250.0,
@@ -681,147 +681,156 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                 if (!widget.isReadOnly) ...[
                                   // ── Hint text ────────────────────────────
                                   Padding(
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 16.0, 0.0, 0.0),
-                                  child: Text(
-                                    'Ya llegué al punto, enviar mi ubicación.',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.publicSans(),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                        ),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 16.0, 0.0, 0.0),
+                                    child: Text(
+                                      'Ya llegué al punto, enviar mi ubicación.',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts.publicSans(),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                          ),
+                                    ),
                                   ),
-                                ),
 
-                                // ── Bottom buttons ───────────────────────
-                                Padding(
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: FFButtonWidget(
-                                              onPressed: (_onMyWayLoading || _onMyWaySent)
-                                                  ? null
-                                                  : _onMyWay,
-                                              text: _onMyWaySent
-                                                  ? '¡En camino!'
-                                                  : 'Enviar mi ubicación y notificar',
-                                              showLoadingIndicator:
-                                                  _onMyWayLoading,
-                                              options: FFButtonOptions(
-                                                height: 44.0,
-                                                color: _onMyWaySent
-                                                    ? const Color(0xFF007376)
-                                                    : Colors.transparent,
-                                                textStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .publicSans(),
-                                                          color: _onMyWaySent
-                                                              ? Colors.white
-                                                              : FlutterFlowTheme
-                                                                  .of(context)
-                                                                  .primaryText,
-                                                        ),
-                                                elevation: 0.0,
-                                                borderSide: BorderSide(
+                                  // ── Bottom buttons ───────────────────────
+                                  Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 12.0, 0.0, 0.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: FFButtonWidget(
+                                                onPressed: (_onMyWayLoading ||
+                                                        _onMyWaySent)
+                                                    ? null
+                                                    : _onMyWay,
+                                                text: _onMyWaySent
+                                                    ? '¡En camino!'
+                                                    : 'Enviar mi ubicación y notificar',
+                                                showLoadingIndicator:
+                                                    _onMyWayLoading,
+                                                options: FFButtonOptions(
+                                                  height: 44.0,
                                                   color: _onMyWaySent
                                                       ? const Color(0xFF007376)
-                                                      : FlutterFlowTheme.of(
+                                                      : Colors.transparent,
+                                                  textStyle:
+                                                      FlutterFlowTheme.of(
                                                               context)
-                                                          .primaryText,
+                                                          .titleSmall
+                                                          .override(
+                                                            font: GoogleFonts
+                                                                .publicSans(),
+                                                            color: _onMyWaySent
+                                                                ? Colors.white
+                                                                : FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primaryText,
+                                                          ),
+                                                  elevation: 0.0,
+                                                  borderSide: BorderSide(
+                                                    color: _onMyWaySent
+                                                        ? const Color(
+                                                            0xFF007376)
+                                                        : FlutterFlowTheme.of(
+                                                                context)
+                                                            .primaryText,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          24.0),
                                                 ),
-                                                borderRadius:
-                                                    BorderRadius.circular(24.0),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: FFButtonWidget(
-                                              onPressed: _isChecklistEnabled
-                                                  ? () => context.pushNamed(
-                                                      OPERATIVELISTINGChecklistWidget.routeName)
-                                                  : null,
-                                              text: 'Checklist',
-                                              options: FFButtonOptions(
-                                                height: 44.0,
-                                                color: _isChecklistEnabled
-                                                    ? _primary
-                                                    : const Color(0xFFB0BEC5),
-                                                disabledColor:
-                                                    const Color(0xFFB0BEC5),
-                                                disabledTextColor:
-                                                    Colors.white,
-                                                textStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .publicSans(),
-                                                          color: Colors.white,
-                                                        ),
-                                                elevation: 0.0,
-                                                borderRadius:
-                                                    BorderRadius.circular(24.0),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: FFButtonWidget(
+                                                onPressed: _isChecklistEnabled
+                                                    ? () => context.pushNamed(
+                                                        OPERATIVELISTINGChecklistWidget
+                                                            .routeName)
+                                                    : null,
+                                                text: 'Checklist',
+                                                options: FFButtonOptions(
+                                                  height: 44.0,
+                                                  color: _isChecklistEnabled
+                                                      ? _primary
+                                                      : const Color(0xFFB0BEC5),
+                                                  disabledColor:
+                                                      const Color(0xFFB0BEC5),
+                                                  disabledTextColor:
+                                                      Colors.white,
+                                                  textStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .titleSmall
+                                                          .override(
+                                                            font: GoogleFonts
+                                                                .publicSans(),
+                                                            color: Colors.white,
+                                                          ),
+                                                  elevation: 0.0,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          24.0),
+                                                ),
                                               ),
+                                            ),
+                                          ],
+                                        ),
+                                        // "Notificar que llegué" — visible solo cuando el checklist está habilitado
+                                        if (_isChecklistEnabled) ...[
+                                          const SizedBox(height: 10),
+                                          FFButtonWidget(
+                                            onPressed: (_arrivedLoading ||
+                                                    _arrivedSent)
+                                                ? null
+                                                : _arrived,
+                                            text: _arrivedSent
+                                                ? '¡Llegada notificada!'
+                                                : 'Notificar que llegué',
+                                            showLoadingIndicator:
+                                                _arrivedLoading,
+                                            options: FFButtonOptions(
+                                              width: double.infinity,
+                                              height: 44.0,
+                                              color: _arrivedSent
+                                                  ? const Color(0xFF007376)
+                                                  : Colors.transparent,
+                                              textStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .publicSans(),
+                                                        color: _arrivedSent
+                                                            ? Colors.white
+                                                            : _primary,
+                                                      ),
+                                              elevation: 0.0,
+                                              borderSide: BorderSide(
+                                                color: _arrivedSent
+                                                    ? const Color(0xFF007376)
+                                                    : _primary,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(24.0),
                                             ),
                                           ),
                                         ],
-                                      ),
-                                      // "Notificar que llegué" — visible solo cuando el checklist está habilitado
-                                      if (_isChecklistEnabled) ...[
-                                        const SizedBox(height: 10),
-                                        FFButtonWidget(
-                                          onPressed: (_arrivedLoading || _arrivedSent)
-                                              ? null
-                                              : _arrived,
-                                          text: _arrivedSent
-                                              ? '¡Llegada notificada!'
-                                              : 'Notificar que llegué',
-                                          showLoadingIndicator: _arrivedLoading,
-                                          options: FFButtonOptions(
-                                            width: double.infinity,
-                                            height: 44.0,
-                                            color: _arrivedSent
-                                                ? const Color(0xFF007376)
-                                                : Colors.transparent,
-                                            textStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .override(
-                                                      font: GoogleFonts
-                                                          .publicSans(),
-                                                      color: _arrivedSent
-                                                          ? Colors.white
-                                                          : _primary,
-                                                    ),
-                                            elevation: 0.0,
-                                            borderSide: BorderSide(
-                                              color: _arrivedSent
-                                                  ? const Color(0xFF007376)
-                                                  : _primary,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(24.0),
-                                          ),
-                                        ),
                                       ],
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                ],
                               ],
-                            ],
-                          ),
+                            ),
                     ),
                   ],
                 ),

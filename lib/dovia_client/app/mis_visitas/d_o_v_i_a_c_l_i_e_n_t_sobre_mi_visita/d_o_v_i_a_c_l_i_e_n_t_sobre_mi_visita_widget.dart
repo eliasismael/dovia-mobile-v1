@@ -101,15 +101,21 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
           ? widget.showingAgentId
           : getJsonField(body, r'$.data.showing');
 
-      if ((showingIdOrObj == null || (showingIdOrObj is String && showingIdOrObj.isEmpty)) && visit is Map) {
-        showingIdOrObj = visit['showing'] ?? visit['showingAgentId'] ?? visit['operativeListerId'] ?? visit['listerHqId'];
+      if ((showingIdOrObj == null ||
+              (showingIdOrObj is String && showingIdOrObj.isEmpty)) &&
+          visit is Map) {
+        showingIdOrObj = visit['showing'] ??
+            visit['showingAgentId'] ??
+            visit['operativeListerId'] ??
+            visit['listerHqId'];
       }
 
       Map<String, dynamic>? showingData;
       if (showingIdOrObj is Map) {
         showingData = showingIdOrObj as Map<String, dynamic>;
       } else if (showingIdOrObj is String && showingIdOrObj.isNotEmpty) {
-        final showingRes = await DOVIAAPIUserContextGroup.getUserByIDNEWCall.call(
+        final showingRes =
+            await DOVIAAPIUserContextGroup.getUserByIDNEWCall.call(
           userId: showingIdOrObj,
           authToken: currentAuthenticationToken,
         );
@@ -121,39 +127,43 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
       }
 
       // If coordinates not populated by visit details, fetch from property API
-      if (_lat == null && _lng == null && widget.propertyId != null && widget.propertyId!.isNotEmpty) {
-        final propRes = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
+      if (_lat == null &&
+          _lng == null &&
+          widget.propertyId != null &&
+          widget.propertyId!.isNotEmpty) {
+        final propRes =
+            await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
           propertyId: widget.propertyId,
         );
         if (propRes.succeeded) {
-          final propData = getJsonField(propRes.jsonBody, r'$.data.data') ?? 
-                           getJsonField(propRes.jsonBody, r'$.data');
+          final propData = getJsonField(propRes.jsonBody, r'$.data.data') ??
+              getJsonField(propRes.jsonBody, r'$.data');
           if (propData is Map) {
-            final geo = _deepValue(propData, ['location', 'geo', 'coordinates']);
+            final geo =
+                _deepValue(propData, ['location', 'geo', 'coordinates']);
             if (geo is List && geo.length >= 2) {
               _lat = (geo[1] as num?)?.toDouble();
               _lng = (geo[0] as num?)?.toDouble();
             }
             if (_address.isEmpty) {
-              _address = _deepStr(propData, ['location', 'address', 'fullAddress']) ??
-                         _deepStr(propData, ['location', 'address', 'street']) ?? '';
+              _address =
+                  _deepStr(propData, ['location', 'address', 'fullAddress']) ??
+                      _deepStr(propData, ['location', 'address', 'street']) ??
+                      '';
             }
           }
         }
       }
 
       safeSetState(() {
-        _propertyName = _str(property, 'name') ??
-            _str(property, 'title') ??
-            '';
+        _propertyName = _str(property, 'name') ?? _str(property, 'title') ?? '';
 
         final images = property is Map ? property['images'] : null;
         if (images is List && images.isNotEmpty) {
           _propertyImageUrl = images[0]['url']?.toString() ?? '';
         }
 
-        _address = _deepStr(property,
-                ['location', 'address', 'fullAddress']) ??
+        _address = _deepStr(property, ['location', 'address', 'fullAddress']) ??
             _deepStr(property, ['location', 'address', 'street']) ??
             '';
 
@@ -181,12 +191,16 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
         if (showingData != null && showingData.isNotEmpty) {
           _advisorAssigned = true;
           _advisorId = _str(showingData, 'id') ?? widget.showingAgentId ?? '';
-          
+
           final fullNameObj = showingData['fullName'];
           if (fullNameObj is Map) {
-            _advisorName = '${fullNameObj['name'] ?? ''} ${fullNameObj['lastname'] ?? ''}'.trim();
+            _advisorName =
+                '${fullNameObj['name'] ?? ''} ${fullNameObj['lastname'] ?? ''}'
+                    .trim();
           } else {
-            _advisorName = _str(showingData, 'fullName') ?? _str(showingData, 'name') ?? '';
+            _advisorName = _str(showingData, 'fullName') ??
+                _str(showingData, 'name') ??
+                '';
           }
 
           final birthDate = _str(showingData, 'birthDate') ?? '';
@@ -201,12 +215,14 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
           } else {
             _advisorAge = _str(showingData, 'age') ?? '';
           }
-          
+
           _advisorAvatarUrl = _str(showingData, 'avatar') ?? '';
-          
+
           final phoneObj = showingData['phone'];
           if (phoneObj is Map) {
-            _advisorPhone = '${phoneObj['countryCode'] ?? ''}${phoneObj['number'] ?? ''}'.trim();
+            _advisorPhone =
+                '${phoneObj['countryCode'] ?? ''}${phoneObj['number'] ?? ''}'
+                    .trim();
           } else {
             _advisorPhone = _str(showingData, 'phone') ?? '';
           }
@@ -214,8 +230,12 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
           // Vehicle info
           final vehicleObj = showingData['vehicle'] ?? showingData['car'];
           if (vehicleObj is Map) {
-            _advisorVehicle = '${vehicleObj['brand'] ?? ''} ${vehicleObj['model'] ?? ''}'.trim();
-            _advisorLicensePlate = _str(vehicleObj, 'plate') ?? _str(vehicleObj, 'licensePlate') ?? '';
+            _advisorVehicle =
+                '${vehicleObj['brand'] ?? ''} ${vehicleObj['model'] ?? ''}'
+                    .trim();
+            _advisorLicensePlate = _str(vehicleObj, 'plate') ??
+                _str(vehicleObj, 'licensePlate') ??
+                '';
           } else {
             _advisorVehicle = _str(showingData, 'vehicle') ?? '';
             _advisorLicensePlate = _str(showingData, 'licensePlate') ?? '';
@@ -287,8 +307,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
       }
     } else if (_address.isNotEmpty) {
       final encoded = Uri.encodeComponent(_address);
-      final googleUri = Uri.parse(
-          'https://www.google.com/maps/search/?api=1&query=$encoded');
+      final googleUri =
+          Uri.parse('https://www.google.com/maps/search/?api=1&query=$encoded');
       if (await canLaunchUrl(googleUri)) {
         await launchUrl(googleUri, mode: LaunchMode.externalApplication);
         return;
@@ -309,8 +329,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Cancelar visita'),
-        content: const Text(
-            '¿Estás seguro de que deseas cancelar esta visita?'),
+        content:
+            const Text('¿Estás seguro de que deseas cancelar esta visita?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -320,8 +340,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               'Sí, cancelar',
-              style: TextStyle(
-                  color: FlutterFlowTheme.of(context).error),
+              style: TextStyle(color: FlutterFlowTheme.of(context).error),
             ),
           ),
         ],
@@ -429,10 +448,15 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                   FFButtonWidget(
                                     onPressed: () async {
                                       final uri = Uri.parse('https://wa.me/');
-                                      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                                      if (!await launchUrl(uri,
+                                          mode:
+                                              LaunchMode.externalApplication)) {
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('No se pudo abrir WhatsApp')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'No se pudo abrir WhatsApp')),
                                           );
                                         }
                                       }
@@ -460,8 +484,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                             fontWeight: FontWeight.normal,
                                           ),
                                       elevation: 0.0,
-                                      borderRadius:
-                                          BorderRadius.circular(24.0),
+                                      borderRadius: BorderRadius.circular(24.0),
                                     ),
                                   ),
                                 ],
@@ -470,7 +493,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
 
                             // Property image card
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16.0),
                               child: SizedBox(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 240.0,
@@ -549,18 +573,17 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                   context.pushNamed(
                                     DOVIACLIENTOfertarWidget.routeName,
                                     queryParameters: {
-                                      'propertyId': serializeParam(widget.propertyId, ParamType.String),
+                                      'propertyId': serializeParam(
+                                          widget.propertyId, ParamType.String),
                                     }.withoutNulls,
                                   );
                                 },
                                 text: 'Ofertar',
                                 options: FFButtonOptions(
-                                  width:
-                                      MediaQuery.sizeOf(context).width * 1.0,
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
                                   height: 48.0,
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
                                   iconPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 0.0, 0.0, 0.0),
@@ -590,12 +613,10 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                     ? 'Cancelando...'
                                     : 'Cancelar visita',
                                 options: FFButtonOptions(
-                                  width:
-                                      MediaQuery.sizeOf(context).width * 1.0,
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
                                   height: 42.0,
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
                                   iconPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 0.0, 0.0, 0.0),
@@ -613,8 +634,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                       ),
                                   elevation: 0.0,
                                   borderSide: BorderSide(
-                                    color:
-                                        FlutterFlowTheme.of(context).primary,
+                                    color: FlutterFlowTheme.of(context).primary,
                                     width: 1.0,
                                   ),
                                   borderRadius: BorderRadius.circular(24.0),
@@ -635,7 +655,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                     context: context,
                                     builder: (context) {
                                       return Padding(
-                                        padding: MediaQuery.viewInsetsOf(context),
+                                        padding:
+                                            MediaQuery.viewInsetsOf(context),
                                         child: Wrap(
                                           children: [
                                             RescheduleVisitWidget(
@@ -650,12 +671,10 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                 },
                                 text: 'Reagendar visita',
                                 options: FFButtonOptions(
-                                  width:
-                                      MediaQuery.sizeOf(context).width * 1.0,
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
                                   height: 42.0,
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
                                   iconPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 0.0, 0.0, 0.0),
@@ -673,8 +692,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                       ),
                                   elevation: 0.0,
                                   borderSide: BorderSide(
-                                    color:
-                                        FlutterFlowTheme.of(context).primary,
+                                    color: FlutterFlowTheme.of(context).primary,
                                     width: 1.0,
                                   ),
                                   borderRadius: BorderRadius.circular(24.0),
@@ -710,8 +728,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
 
   Widget _infoSection({required String label, required Widget child}) {
     return Padding(
-      padding:
-          const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
       child: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
         decoration: BoxDecoration(
@@ -735,8 +752,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                   ),
             ),
             Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
               child: child,
             ),
           ],
@@ -774,8 +790,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                   ),
             ),
             Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 padding: const EdgeInsetsDirectional.fromSTEB(
@@ -791,9 +806,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                           fontWeight: FlutterFlowTheme.of(context)
                               .bodyMedium
                               .fontWeight,
-                          fontStyle: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontStyle,
+                          fontStyle:
+                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                         ),
                         color: content.isNotEmpty
                             ? FlutterFlowTheme.of(context).secondaryText
@@ -806,8 +820,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
               child: Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: FFButtonWidget(
@@ -847,8 +860,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
   Widget _infoText(String text) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      padding:
-          const EdgeInsetsDirectional.fromSTEB(10.0, 12.0, 10.0, 12.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(10.0, 12.0, 10.0, 12.0),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).alternate,
         borderRadius: BorderRadius.circular(10.0),
@@ -857,10 +869,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
         text,
         style: FlutterFlowTheme.of(context).bodyMedium.override(
               font: GoogleFonts.publicSans(
-                fontWeight:
-                    FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                fontStyle:
-                    FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
               ),
               color: FlutterFlowTheme.of(context).secondaryText,
               letterSpacing: 0.0,
@@ -871,18 +881,16 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
 
   Widget _emptyText(String text) {
     return Padding(
-      padding:
-          const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
       child: Text(
         text,
         style: FlutterFlowTheme.of(context).bodyMedium.override(
               font: GoogleFonts.inter(
-                fontWeight:
-                    FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                fontStyle:
-                    FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
               ),
-              color: FlutterFlowTheme.of(context).secondaryText.withOpacity(0.6),
+              color:
+                  FlutterFlowTheme.of(context).secondaryText.withOpacity(0.6),
               letterSpacing: 0.0,
             ),
       ),

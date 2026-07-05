@@ -22,8 +22,10 @@ class DHCLIENTCalificarWidget extends StatefulWidget {
 
   /// Para POST /associate-feedback/visits/{visitId}/ratings
   final String? visitId;
+
   /// Para POST /associate-feedback/offers/{offerId}/ratings — tiene prioridad sobre visitId.
   final String? offerId;
+
   /// SHOWING_AGENT | LISTER_HQ | OPERATIVE_LISTER | LEGAL_ASSOCIATE | LEGAL_OFFICER
   final String targetRole;
 
@@ -87,8 +89,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -229,10 +231,12 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                                 ),
                                 Expanded(
                                   child: Align(
-                                    alignment: const AlignmentDirectional(0.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(0.0, 0.0),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: SizedBox(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -347,7 +351,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                                                 FlutterFlowTheme.of(context)
                                                     .alternate,
                                             contentPadding:
-                                                const EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional
+                                                    .fromSTEB(
                                                     20.0, 40.0, 0.0, 40.0),
                                           ),
                                           style: FlutterFlowTheme.of(context)
@@ -420,7 +425,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                                     },
                                     child: Padding(
                                       padding: MediaQuery.viewInsetsOf(context),
-                                      child: const DHCLIENTCalificoExitoWidget(),
+                                      child:
+                                          const DHCLIENTCalificoExitoWidget(),
                                     ),
                                   );
                                 },
@@ -476,8 +482,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

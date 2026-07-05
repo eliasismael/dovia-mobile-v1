@@ -52,7 +52,8 @@ class _TodasLasFotosWidgetState extends State<TodasLasFotosWidget> {
   List<PhotoCategory>? _buildCategories() {
     final List<PhotoCategory> categories = [];
 
-    if (widget.habitacionImages != null && widget.habitacionImages!.isNotEmpty) {
+    if (widget.habitacionImages != null &&
+        widget.habitacionImages!.isNotEmpty) {
       categories.add(PhotoCategory(
         name: 'Habitación',
         imagePaths: widget.habitacionImages!,

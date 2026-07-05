@@ -1457,13 +1457,14 @@ class _PublishedModal extends StatelessWidget {
                     options: FFButtonOptions(
                       height: 46.0,
                       color: Colors.transparent,
-                      textStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.inter(
-                                    fontWeight: FontWeight.w600),
-                                color: _teal,
-                                letterSpacing: 0.0,
-                              ),
+                      textStyle: FlutterFlowTheme.of(context)
+                          .bodyMedium
+                          .override(
+                            font:
+                                GoogleFonts.inter(fontWeight: FontWeight.w600),
+                            color: _teal,
+                            letterSpacing: 0.0,
+                          ),
                       elevation: 0.0,
                       borderSide: const BorderSide(color: _teal, width: 1.5),
                       borderRadius: BorderRadius.circular(24.0),
@@ -1479,13 +1480,14 @@ class _PublishedModal extends StatelessWidget {
                     options: FFButtonOptions(
                       height: 46.0,
                       color: _teal,
-                      textStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.inter(
-                                    fontWeight: FontWeight.w600),
-                                color: Colors.white,
-                                letterSpacing: 0.0,
-                              ),
+                      textStyle: FlutterFlowTheme.of(context)
+                          .bodyMedium
+                          .override(
+                            font:
+                                GoogleFonts.inter(fontWeight: FontWeight.w600),
+                            color: Colors.white,
+                            letterSpacing: 0.0,
+                          ),
                       elevation: 0.0,
                       borderRadius: BorderRadius.circular(24.0),
                     ),

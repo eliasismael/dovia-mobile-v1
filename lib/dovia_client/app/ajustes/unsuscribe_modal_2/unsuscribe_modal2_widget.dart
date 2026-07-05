@@ -180,7 +180,8 @@ class _UnsuscribeModal2WidgetState extends State<UnsuscribeModal2Widget> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(24)),
                       ),
                       child: Padding(
                         padding: MediaQuery.viewInsetsOf(context),

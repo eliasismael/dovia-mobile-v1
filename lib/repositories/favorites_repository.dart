@@ -69,7 +69,8 @@ class FavoritesRepository extends ChangeNotifier {
     ApiCallResponse response;
 
     if (wasAlreadyFavorited) {
-      response = await DOVIAAPIFavoriteContextGroup.removePropertyFromFavoritesCall
+      response = await DOVIAAPIFavoriteContextGroup
+          .removePropertyFromFavoritesCall
           .call(propertyId: propertyId, authToken: token);
     } else {
       response = await DOVIAAPIFavoriteContextGroup.addPropertyToFavoritesCall
@@ -106,7 +107,8 @@ class FavoritesRepository extends ChangeNotifier {
     notifyListeners();
 
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIFavoriteContextGroup.addPropertyToFavoritesCall
+    final response = await DOVIAAPIFavoriteContextGroup
+        .addPropertyToFavoritesCall
         .call(propertyId: propertyId, folderId: folderId, authToken: token);
 
     if (!response.succeeded) {
@@ -156,8 +158,8 @@ class FavoritesRepository extends ChangeNotifier {
     notifyListeners();
 
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIFavoriteContextGroup.getDefaultFavoritesCall
-        .call(
+    final response =
+        await DOVIAAPIFavoriteContextGroup.getDefaultFavoritesCall.call(
       authToken: token,
       page: page.toString(),
       limit: limit.toString(),
@@ -193,7 +195,8 @@ class FavoritesRepository extends ChangeNotifier {
   /// Loads all favorite folders for the user.
   Future<Result<List<FavoriteFolder>>> loadFolders() async {
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIFavoriteContextGroup.getAllFavoriteFoldersCall
+    final response = await DOVIAAPIFavoriteContextGroup
+        .getAllFavoriteFoldersCall
         .call(authToken: token);
 
     if (!response.succeeded) {
@@ -251,7 +254,8 @@ class FavoritesRepository extends ChangeNotifier {
         .call(propertyId: propertyId, authToken: token);
 
     if (response.succeeded) {
-      final isFavorited = response.jsonBody?['data']?['isFavorited'] as bool? ?? false;
+      final isFavorited =
+          response.jsonBody?['data']?['isFavorited'] as bool? ?? false;
       if (isFavorited) {
         _favoritedIds.add(propertyId);
       } else {
@@ -264,7 +268,8 @@ class FavoritesRepository extends ChangeNotifier {
   /// Updates a folder's name.
   Future<Result<void>> updateFolderName(String folderId, String newName) async {
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIFavoriteContextGroup.updateFavoriteFolderNameCall
+    final response = await DOVIAAPIFavoriteContextGroup
+        .updateFavoriteFolderNameCall
         .call(folderId: folderId, udatedFolderName: newName, authToken: token);
 
     if (!response.succeeded) {
@@ -284,10 +289,15 @@ class FavoritesRepository extends ChangeNotifier {
   }
 
   /// Gets properties inside a specific folder.
-  Future<Result<List<dynamic>>> getFavoritesInFolder(String folderId, {int page = 1, int limit = 20}) async {
+  Future<Result<List<dynamic>>> getFavoritesInFolder(String folderId,
+      {int page = 1, int limit = 20}) async {
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIFavoriteContextGroup.getFavoritesInFolderCall
-        .call(folderId: folderId, page: page.toString(), limit: limit.toString(), authToken: token);
+        .call(
+            folderId: folderId,
+            page: page.toString(),
+            limit: limit.toString(),
+            authToken: token);
 
     if (!response.succeeded) {
       return Failure(
@@ -295,15 +305,17 @@ class FavoritesRepository extends ChangeNotifier {
         statusCode: response.statusCode,
       );
     }
-    
+
     final rawData = (response.jsonBody?['data']?['favorites'] as List? ?? []);
     return Success(rawData);
   }
 
   /// Removes a property from a specific folder.
-  Future<Result<void>> removeFavoriteFromFolder(String folderId, String propertyId) async {
+  Future<Result<void>> removeFavoriteFromFolder(
+      String folderId, String propertyId) async {
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIFavoriteContextGroup.removeFavoriteFromFolderCall
+    final response = await DOVIAAPIFavoriteContextGroup
+        .removeFavoriteFromFolderCall
         .call(folderId: folderId, propertyId: propertyId, authToken: token);
 
     if (!response.succeeded) {
@@ -318,7 +330,8 @@ class FavoritesRepository extends ChangeNotifier {
   }
 
   /// Adds a property to a specific folder.
-  Future<Result<void>> addFavoriteToFolder(String folderId, String propertyId) async {
+  Future<Result<void>> addFavoriteToFolder(
+      String folderId, String propertyId) async {
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIFavoriteContextGroup.addFavoriteToFolderCall
         .call(folderId: folderId, propertyId: propertyId, authToken: token);

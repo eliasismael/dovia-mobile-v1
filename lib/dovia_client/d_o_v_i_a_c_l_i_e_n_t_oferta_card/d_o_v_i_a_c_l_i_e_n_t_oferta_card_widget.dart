@@ -66,7 +66,8 @@ class _DOVIACLIENTOfertaCardWidgetState
           mainAxisSize: MainAxisSize.max,
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100.0),
@@ -179,8 +180,8 @@ class _DOVIACLIENTOfertaCardWidgetState
                       borderRadius: BorderRadius.circular(24.0),
                     ),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -228,10 +229,10 @@ class _DOVIACLIENTOfertaCardWidgetState
                     options: FFButtonOptions(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       height: 30.0,
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 0.0),
-                      iconPadding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 10.0, 20.0, 0.0),
+                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
                       color: FlutterFlowTheme.of(context).tertiary,
                       textStyle:
                           FlutterFlowTheme.of(context).titleSmall.override(

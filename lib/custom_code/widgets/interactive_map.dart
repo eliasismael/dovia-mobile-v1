@@ -58,7 +58,8 @@ class _InteractiveMapState extends State<InteractiveMap> {
                   onTap: () {
                     print("Marcador tocado");
                   },
-                  child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                  child: const Icon(Icons.location_on,
+                      color: Colors.red, size: 40),
                 ),
               ),
             ],

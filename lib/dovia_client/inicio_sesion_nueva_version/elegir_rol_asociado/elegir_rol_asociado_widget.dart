@@ -62,7 +62,8 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                 child: const CornerGradientBackgroundWidget(),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -70,8 +71,8 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 60.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 60.0, 0.0, 0.0),
                         child: Container(
                           width: 100.0,
                           height: 100.0,
@@ -86,19 +87,25 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 60.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 60.0, 0.0, 0.0),
                         child: custom_widgets.DoviaAssociateDropdownWidget(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: MediaQuery.sizeOf(context).height * 1.0,
                           onShowingAssociateTap: () async {
-                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                            final result = await DOVIAAPIAuthContextGroup
+                                .selectRoleCall
+                                .call(
                               role: 'SHOWING_AGENT',
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
-                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
-                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              final newToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .refreshToken(result.jsonBody);
                               if (newToken != null && newToken.isNotEmpty) {
                                 authManager.updateAuthUserData(
                                   authenticationToken: newToken,
@@ -108,17 +115,25 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                                 );
                               }
                               FFAppState().UserRole = 'SHOWING_AGENT';
-                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                              if (context.mounted)
+                                context
+                                    .pushNamed(FormAssociateWidget.routeName);
                             }
                           },
                           onListerAssociateTap: () async {
-                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                            final result = await DOVIAAPIAuthContextGroup
+                                .selectRoleCall
+                                .call(
                               role: 'OPERATIVE_LISTER',
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
-                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
-                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              final newToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .refreshToken(result.jsonBody);
                               if (newToken != null && newToken.isNotEmpty) {
                                 authManager.updateAuthUserData(
                                   authenticationToken: newToken,
@@ -128,17 +143,25 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                                 );
                               }
                               FFAppState().UserRole = 'OPERATIVE_LISTER';
-                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                              if (context.mounted)
+                                context
+                                    .pushNamed(FormAssociateWidget.routeName);
                             }
                           },
                           onHomeAssociateTap: () async {
-                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                            final result = await DOVIAAPIAuthContextGroup
+                                .selectRoleCall
+                                .call(
                               role: 'HOME_ASSOCIATE',
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
-                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
-                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              final newToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .refreshToken(result.jsonBody);
                               if (newToken != null && newToken.isNotEmpty) {
                                 authManager.updateAuthUserData(
                                   authenticationToken: newToken,
@@ -148,17 +171,25 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                                 );
                               }
                               FFAppState().UserRole = 'HOME_ASSOCIATE';
-                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                              if (context.mounted)
+                                context
+                                    .pushNamed(FormAssociateWidget.routeName);
                             }
                           },
                           onLegalAssociateTap: () async {
-                            final result = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
+                            final result = await DOVIAAPIAuthContextGroup
+                                .selectRoleCall
+                                .call(
                               role: 'LEGAL_ASSOCIATE',
                               authToken: currentAuthenticationToken,
                             );
                             if (result.succeeded) {
-                              final newToken = DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
-                              final newRefreshToken = DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
+                              final newToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .accessToken(result.jsonBody);
+                              final newRefreshToken = DOVIAAPIAuthContextGroup
+                                  .selectRoleCall
+                                  .refreshToken(result.jsonBody);
                               if (newToken != null && newToken.isNotEmpty) {
                                 authManager.updateAuthUserData(
                                   authenticationToken: newToken,
@@ -168,14 +199,16 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
                                 );
                               }
                               FFAppState().UserRole = 'LEGAL_ASSOCIATE';
-                              if (context.mounted) context.pushNamed(FormAssociateWidget.routeName);
+                              if (context.mounted)
+                                context
+                                    .pushNamed(FormAssociateWidget.routeName);
                             }
                           },
                         ),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 12.0, 0.0, 0.0),
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(0.0),

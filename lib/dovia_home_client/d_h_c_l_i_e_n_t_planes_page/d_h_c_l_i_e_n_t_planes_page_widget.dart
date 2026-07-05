@@ -72,8 +72,8 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 12.0, 20.0, 0.0),
                     child: wrapWithModel(
                       model: _model.dHCLIENTPlanesModel,
                       updateCallback: () => safeSetState(() {}),
@@ -81,8 +81,8 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 80.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 20.0, 20.0, 80.0),
                     child: FFButtonWidget(
                       onPressed: () async {
                         context.pushNamed(DHCLIENTUbicacionWidget.routeName);
@@ -93,8 +93,8 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                         height: 40.0,
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             16.0, 0.0, 16.0, 0.0),
-                        iconPadding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 0.0, 0.0),
                         color: FlutterFlowTheme.of(context).secondaryBackground,
                         textStyle:
                             FlutterFlowTheme.of(context).titleSmall.override(
@@ -136,8 +136,8 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

@@ -51,7 +51,8 @@ class _BackgroundGradientGreenWidgetState
         ),
       ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(141.0, 354.0, 141.0, 354.0),
+        padding:
+            const EdgeInsetsDirectional.fromSTEB(141.0, 354.0, 141.0, 354.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(0.0),
           child: SvgPicture.asset(

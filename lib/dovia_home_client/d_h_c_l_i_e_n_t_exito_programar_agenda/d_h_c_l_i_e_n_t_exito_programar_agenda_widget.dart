@@ -52,14 +52,15 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
               borderRadius: BorderRadius.circular(10.4),
             ),
             child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(42.0, 0.0, 42.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        42.0, 0.0, 42.0, 0.0),
                     child: Text(
                       'Se programó con éxito',
                       textAlign: TextAlign.center,
@@ -80,8 +81,8 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 34.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 34.0, 0.0, 0.0),
                     child: Text(
                       'Programaste con éxito tu servicio para la Casa A.',
                       textAlign: TextAlign.center,

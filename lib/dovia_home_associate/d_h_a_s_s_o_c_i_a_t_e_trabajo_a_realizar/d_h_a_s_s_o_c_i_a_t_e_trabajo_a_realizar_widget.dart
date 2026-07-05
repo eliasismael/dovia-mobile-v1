@@ -70,8 +70,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 35.0, 20.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 35.0, 20.0, 0.0),
                     child: Container(
                       width: MediaQuery.sizeOf(context).width * 1.0,
                       decoration: const BoxDecoration(),
@@ -85,7 +85,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 Align(
-                                  alignment: const AlignmentDirectional(-1.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(-1.0, 0.0),
                                   child: Text(
                                     'Trabajos a realizar',
                                     style: FlutterFlowTheme.of(context)
@@ -125,8 +126,9 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          15.0, 12.0, 15.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              15.0, 12.0, 15.0, 0.0),
                                       child: RichText(
                                         textScaler:
                                             MediaQuery.of(context).textScaler,
@@ -281,7 +283,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Text(
                                       'Imagenes o video del trabajo',
                                       style: FlutterFlowTheme.of(context)
@@ -312,10 +315,12 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                     ),
                                   ),
                                   Align(
-                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                    alignment:
+                                        const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
                                         child: Row(
@@ -393,8 +398,9 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       height: 42.0,
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
@@ -443,8 +449,9 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       height: 42.0,
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
@@ -493,8 +500,9 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
                                       height: 42.0,
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 16.0, 0.0),
                                       iconPadding:
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
@@ -554,8 +562,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 5.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 5.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

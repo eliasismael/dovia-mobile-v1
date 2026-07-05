@@ -137,9 +137,8 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 19.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 19.0, 0.0, 0.0),
                                             child: Text(
                                               'Sube el ID o pasaporte',
                                               style:
@@ -174,9 +173,8 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 12.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
                                             child: InkWell(
                                               splashColor: Colors.transparent,
                                               focusColor: Colors.transparent,
@@ -257,10 +255,10 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                                 child: Builder(
                                                   builder: (context) {
                                                     if ((_model
-                                                                .uploadedLocalFile_uploadData5so
-                                                                .bytes
-                                                                ?.isNotEmpty ??
-                                                            false)) {
+                                                            .uploadedLocalFile_uploadData5so
+                                                            .bytes
+                                                            ?.isNotEmpty ??
+                                                        false)) {
                                                       return ClipRRect(
                                                         borderRadius:
                                                             BorderRadius
@@ -322,7 +320,8 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                       elevation: 0,
                                       insetPadding: EdgeInsets.zero,
                                       backgroundColor: Colors.transparent,
-                                      alignment: const AlignmentDirectional(0.0, 0.0)
+                                      alignment: const AlignmentDirectional(
+                                              0.0, 0.0)
                                           .resolve(Directionality.of(context)),
                                       child: GestureDetector(
                                         onTap: () {
@@ -359,7 +358,8 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                       elevation: 0,
                                       insetPadding: EdgeInsets.zero,
                                       backgroundColor: Colors.transparent,
-                                      alignment: const AlignmentDirectional(0.0, 0.0)
+                                      alignment: const AlignmentDirectional(
+                                              0.0, 0.0)
                                           .resolve(Directionality.of(context)),
                                       child: GestureDetector(
                                         onTap: () {
@@ -375,7 +375,8 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   0.9,
-                                          child: const TerminosCondicionesWidget(),
+                                          child:
+                                              const TerminosCondicionesWidget(),
                                         ),
                                       ),
                                     );
@@ -504,8 +505,8 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                             20.0, 18.0, 20.0, 25.0),
                         child: FFButtonWidget(
                           onPressed: (((_model.uploadedLocalFile_uploadData5so
-                                              .bytes?.isEmpty ??
-                                          true)) ||
+                                          .bytes?.isEmpty ??
+                                      true)) ||
                                   (_model.terminosAceptados == false))
                               ? null
                               : () async {

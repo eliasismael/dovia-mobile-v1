@@ -74,8 +74,8 @@ class _DCFormaPagoSuscripcion1WidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 80.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 0.0, 20.0, 80.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [

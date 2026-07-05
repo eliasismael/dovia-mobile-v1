@@ -93,7 +93,8 @@ class _QueSignificaSerAsociadoWidgetState
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(6.0, 6.0, 6.0, 6.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        6.0, 6.0, 6.0, 6.0),
                     child: Container(
                       width: 10.0,
                       height: 10.0,
@@ -125,7 +126,8 @@ class _QueSignificaSerAsociadoWidgetState
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                   child: Text(
                     'Un DOVIA Associate elige sus asignaciones y gana por cada trabajo.',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -152,7 +154,8 @@ class _QueSignificaSerAsociadoWidgetState
               Align(
                 alignment: const AlignmentDirectional(-1.0, 0.0),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
                   child: Text(
                     'Forma parte de una red profesional respaldada por DOVIA.',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(

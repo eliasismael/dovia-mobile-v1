@@ -12,9 +12,11 @@ class SHOWINGHeaderWidget extends StatefulWidget {
   const SHOWINGHeaderWidget({
     super.key,
     required this.title,
+    this.actionWidget,
   });
 
   final String? title;
+  final Widget? actionWidget;
 
   @override
   State<SHOWINGHeaderWidget> createState() => _SHOWINGHeaderWidgetState();
@@ -143,76 +145,77 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
             ),
             textAlign: TextAlign.center,
           ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                width: 40.0,
-                height: 40.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  shape: BoxShape.circle,
-                ),
-                child: InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () async {
-                    context.pushNamed(SHOWINGAgendaWidget.routeName);
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: SvgPicture.asset(
-                      'assets/images/calendar.svg',
-                      width: 8.0,
-                      height: 8.0,
-                      fit: BoxFit.none,
+          widget.actionWidget ??
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    width: 40.0,
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
+                      shape: BoxShape.circle,
+                    ),
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () async {
+                        context.pushNamed(SHOWINGAgendaWidget.routeName);
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: SvgPicture.asset(
+                          'assets/images/calendar.svg',
+                          width: 8.0,
+                          height: 8.0,
+                          fit: BoxFit.none,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Container(
-                width: 40.0,
-                height: 40.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  shape: BoxShape.circle,
-                ),
-                child: InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () async {
-                    await showDialog(
-                      context: context,
-                      builder: (dialogContext) {
-                        return Dialog(
-                          elevation: 0,
-                          insetPadding: EdgeInsets.zero,
-                          backgroundColor: Colors.transparent,
-                          alignment: const AlignmentDirectional(0.0, 0.0)
-                              .resolve(Directionality.of(context)),
-                          child: const SHOWINGToNavegationAppWidget(),
+                  Container(
+                    width: 40.0,
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
+                      shape: BoxShape.circle,
+                    ),
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (dialogContext) {
+                            return Dialog(
+                              elevation: 0,
+                              insetPadding: EdgeInsets.zero,
+                              backgroundColor: Colors.transparent,
+                              alignment: const AlignmentDirectional(0.0, 0.0)
+                                  .resolve(Directionality.of(context)),
+                              child: const SHOWINGToNavegationAppWidget(),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: SvgPicture.asset(
-                      'assets/images/Vector23.svg',
-                      width: 8.0,
-                      height: 8.0,
-                      fit: BoxFit.none,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: SvgPicture.asset(
+                          'assets/images/Vector23.svg',
+                          width: 8.0,
+                          height: 8.0,
+                          fit: BoxFit.none,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ].divide(const SizedBox(width: 8.0)),
               ),
-            ].divide(const SizedBox(width: 8.0)),
-          ),
         ],
       ),
     );

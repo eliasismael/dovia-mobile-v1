@@ -72,8 +72,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -187,8 +187,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 10.0, 0.0, 0.0),
                                       child: Container(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -199,12 +200,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                               BorderRadius.circular(16.0),
                                         ),
                                         child: Align(
-                                          alignment:
-                                              const AlignmentDirectional(0.0, 0.0),
+                                          alignment: const AlignmentDirectional(
+                                              0.0, 0.0),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    16.0, 16.0, 16.0, 16.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(
+                                                16.0, 16.0, 16.0, 16.0),
                                             child: Text(
                                               'Precio base para usuarios sin suscripción. Están incluidos si tienes Dovia Basic',
                                               style: FlutterFlowTheme.of(
@@ -242,8 +243,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 12.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 12.0, 0.0, 0.0),
                                       child: Container(
                                         width:
                                             MediaQuery.sizeOf(context).width *
@@ -284,7 +286,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                                     width: 40.0,
                                                     height: 40.0,
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0x98007376),
+                                                      color: const Color(
+                                                          0x98007376),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               10.0),
@@ -356,7 +359,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                                     width: 40.0,
                                                     height: 40.0,
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0x98007376),
+                                                      color: const Color(
+                                                          0x98007376),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               10.0),
@@ -428,7 +432,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                                     width: 40.0,
                                                     height: 40.0,
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0x98007376),
+                                                      color: const Color(
+                                                          0x98007376),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               10.0),
@@ -500,7 +505,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                                     width: 40.0,
                                                     height: 40.0,
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0x98007376),
+                                                      color: const Color(
+                                                          0x98007376),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               10.0),
@@ -585,8 +591,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                                       width: 40.0,
                                                       height: 40.0,
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            const Color(0x98007376),
+                                                        color: const Color(
+                                                            0x98007376),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(10.0),
@@ -671,8 +677,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                                       width: 40.0,
                                                       height: 40.0,
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            const Color(0x551ACDD3),
+                                                        color: const Color(
+                                                            0x551ACDD3),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(10.0),
@@ -781,8 +787,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                             ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 14.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 14.0, 0.0, 0.0),
                                         child: Text(
                                           'Para trabajos fuera del alcance estándar o mejoras grandes',
                                           style: FlutterFlowTheme.of(context)
@@ -816,8 +822,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 14.0, 0.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 14.0, 0.0, 0.0),
                                         child: FFButtonWidget(
                                           onPressed: () async {
                                             context.pushNamed(
@@ -830,11 +836,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                                     .width *
                                                 1.0,
                                             height: 40.0,
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    16.0, 0.0, 16.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(16.0, 0.0, 16.0, 0.0),
                                             iconPadding:
-                                                const EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional
+                                                    .fromSTEB(
                                                     0.0, 0.0, 0.0, 0.0),
                                             color: FlutterFlowTheme.of(context)
                                                 .secondaryBackground,
@@ -910,10 +916,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   text: 'Ver más',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        20.0, 6.0, 20.0, 6.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            20.0, 6.0, 20.0, 6.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: const Color(0xFFCCE3E4),
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -1026,10 +1034,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   text: 'Ver todo',
                                   options: FFButtonOptions(
                                     height: 30.0,
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        20.0, 6.0, 20.0, 6.0),
-                                    iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            20.0, 6.0, 20.0, 6.0),
+                                    iconPadding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 0.0, 0.0, 0.0),
                                     color: const Color(0xFFCCE3E4),
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
@@ -1122,8 +1132,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   ),
                                   Expanded(
                                     child: Padding(
-                                      padding: const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 0.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 0.0, 0.0, 0.0),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
@@ -1132,9 +1143,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 15.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 15.0, 0.0, 0.0),
                                             child: Text(
                                               'Reparación de tubería',
                                               style: FlutterFlowTheme.of(
@@ -1170,9 +1180,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                             ),
                                           ),
                                           Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 7.0, 0.0, 0.0),
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 7.0, 0.0, 0.0),
                                             child: Text(
                                               'Visita realizada',
                                               style:
@@ -1251,8 +1260,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

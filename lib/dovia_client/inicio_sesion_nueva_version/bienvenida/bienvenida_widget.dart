@@ -68,14 +68,15 @@ class _BienvenidaWidgetState extends State<BienvenidaWidget> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 40.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 40.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 50.0, 0.0, 0.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(0.0),
                           child: SvgPicture.asset(

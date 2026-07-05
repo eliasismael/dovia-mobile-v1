@@ -22,8 +22,10 @@ class DHCLIENTReportarProblemaWidget extends StatefulWidget {
 
   /// Para POST /associate-feedback/visits/{visitId}/reports
   final String? visitId;
+
   /// Para POST /associate-feedback/offers/{offerId}/reports — tiene prioridad sobre visitId.
   final String? offerId;
+
   /// SHOWING_AGENT | LISTER_HQ | OPERATIVE_LISTER | LEGAL_ASSOCIATE | LEGAL_OFFICER
   final String targetRole;
 
@@ -88,8 +90,8 @@ class _DHCLIENTReportarProblemaWidgetState
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -206,8 +208,9 @@ class _DHCLIENTReportarProblemaWidgetState
                                 filled: true,
                                 fillColor:
                                     FlutterFlowTheme.of(context).alternate,
-                                contentPadding: const EdgeInsetsDirectional.fromSTEB(
-                                    20.0, 40.0, 20.0, 40.0),
+                                contentPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        20.0, 40.0, 20.0, 40.0),
                               ),
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -294,10 +297,13 @@ class _DHCLIENTReportarProblemaWidgetState
                                 0.0, 150.0, 0.0, 0.0),
                             child: FFButtonWidget(
                               onPressed: () async {
-                                final message = _model.textController?.text.trim() ?? '';
+                                final message =
+                                    _model.textController?.text.trim() ?? '';
                                 if (message.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Por favor describe el problema.')),
+                                    const SnackBar(
+                                        content: Text(
+                                            'Por favor describe el problema.')),
                                   );
                                   return;
                                 }
@@ -324,7 +330,8 @@ class _DHCLIENTReportarProblemaWidgetState
                                       child: Padding(
                                         padding:
                                             MediaQuery.viewInsetsOf(context),
-                                        child: const DHCLIENTEProblemaEnviadoWidget(),
+                                        child:
+                                            const DHCLIENTEProblemaEnviadoWidget(),
                                       ),
                                     );
                                   },
@@ -336,8 +343,9 @@ class _DHCLIENTReportarProblemaWidgetState
                                 height: 42.0,
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     16.0, 0.0, 16.0, 0.0),
-                                iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
@@ -381,8 +389,8 @@ class _DHCLIENTReportarProblemaWidgetState
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),

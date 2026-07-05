@@ -77,7 +77,8 @@ class _TerminosYCondicionesScrolleableWidgetState
             ),
           ),
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 0.0),
+            padding:
+                const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 0.0),
             child: Container(
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -104,13 +105,14 @@ class _TerminosYCondicionesScrolleableWidgetState
               height: 150.0,
               decoration: const BoxDecoration(),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 40.0, 0.0, 0.0),
                       child: Text(
                         'Al aceptar, significa que he leído y acepto los términos y condiciones de uso',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -130,8 +132,8 @@ class _TerminosYCondicionesScrolleableWidgetState
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 20.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: !_model.hasCompletedScroll
                             ? null

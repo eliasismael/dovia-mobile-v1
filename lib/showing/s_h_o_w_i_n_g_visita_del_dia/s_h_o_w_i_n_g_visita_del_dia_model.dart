@@ -28,4 +28,3 @@ class SHOWINGVisitaDelDiaModel
     sHOWINGNavbarModel.dispose();
   }
 }
-

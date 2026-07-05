@@ -20,8 +20,7 @@ class LISTINGHQProfileModel extends FlutterFlowModel<LISTINGHQProfileWidget> {
     cornerGradientBackgroundModel =
         createModel(context, () => CornerGradientBackgroundModel());
     lISTINGHQHeaderModel = createModel(context, () => LISTINGHQHeaderModel());
-    lISTINGHQNavbarModel =
-        createModel(context, () => LISTINGHQNavbarModel());
+    lISTINGHQNavbarModel = createModel(context, () => LISTINGHQNavbarModel());
   }
 
   @override
