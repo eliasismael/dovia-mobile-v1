@@ -2,6 +2,8 @@
 // Imports other custom widgets
 // Imports custom functions
 import 'package:flutter/material.dart';
+import '/flutter_flow/upload_data.dart';
+import '/flutter_flow/uploaded_file.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -56,47 +58,49 @@ class _ShowingRegistroVisitaDatosState
 
   // ==================== OPTION SETS (label → API enum) ====================
   static const List<_Opt> _kindOpts = [
-    (label: 'Presencial', value: 'IN_PERSON'),
-    (label: 'Virtual', value: 'VIRTUAL'),
+    (label: 'Primera visita', value: 'FIRST_VISIT'),
+    (label: 'Segunda visita', value: 'SECOND_VISIT'),
+    (label: 'Visita de seguimiento', value: 'FOLLOW_UP_VISIT'),
   ];
   static const List<_Opt> _durationOpts = [
     (label: '< 15 min', value: 'LESS_THAN_15_MIN'),
     (label: '15–30 min', value: 'BETWEEN_15_AND_30_MIN'),
-    (label: '30–60 min', value: 'BETWEEN_30_AND_60_MIN'),
-    (label: '+60 min', value: 'MORE_THAN_60_MIN'),
+    (label: '+30 min', value: 'MORE_THAN_30_MIN'),
   ];
   static const List<_Opt> _attendeesOpts = [
-    (label: 'No', value: 'NONE'),
     (label: 'Pareja', value: 'PARTNER'),
     (label: 'Familiar', value: 'FAMILY'),
-    (label: 'Asesor financiero', value: 'FINANCIAL_ADVISOR'),
+    (label: 'No', value: 'NONE'),
     (label: 'Otro', value: 'OTHER'),
   ];
   static const List<_Opt> _conditionOpts = [
-    (label: 'Excelente', value: 'EXCELLENT'),
-    (label: 'Bueno', value: 'GOOD'),
-    (label: 'Regular', value: 'FAIR'),
-    (label: 'Malo', value: 'POOR'),
+    (label: 'Limpio', value: 'CLEAN'),
+    (label: 'Requiere mantenimiento', value: 'NEEDS_MAINTENANCE'),
+    (label: 'En obra', value: 'UNDER_CONSTRUCTION'),
+  ];
+  static const List<_Opt> _matchOpts = [
+    (label: 'Sí', value: 'YES'),
+    (label: 'No', value: 'NO'),
   ];
   static const List<_Opt> _interestOpts = [
-    (label: 'Muy interesado', value: 'VERY_INTERESTED'),
-    (label: 'Interesado', value: 'INTERESTED'),
-    (label: 'Neutral', value: 'NEUTRAL'),
-    (label: 'No interesado', value: 'NOT_INTERESTED'),
+    (label: 'Alto', value: 'HIGH'),
+    (label: 'Medio', value: 'MEDIUM'),
+    (label: 'Bajo', value: 'LOW'),
   ];
   static const List<_Opt> _reasonOpts = [
     (label: 'Precio', value: 'PRICE'),
     (label: 'Ubicación', value: 'LOCATION'),
     (label: 'Tamaño', value: 'SIZE'),
     (label: 'Estado del inmueble', value: 'CONDITION'),
-    (label: 'Características', value: 'FEATURES'),
     (label: 'Otro', value: 'OTHER'),
   ];
   static const List<_Opt> _nextStepOpts = [
-    (label: 'Hacer oferta', value: 'MAKE_OFFER'),
+    (label: 'Solicitar documentos', value: 'REQUEST_DOCUMENTS'),
     (label: 'Agendar segunda visita', value: 'SCHEDULE_SECOND_VISIT'),
-    (label: 'Lo está pensando', value: 'CONSIDERING'),
-    (label: 'No le interesa', value: 'NOT_INTERESTED'),
+    (label: 'Enviar propuesta', value: 'SEND_PROPOSAL'),
+    (label: 'No continúa', value: 'NOT_CONTINUING'),
+    (label: 'Interesado, lo pensará', value: 'INTERESTED_THINKING'),
+    (label: 'Quiere ver otras opciones', value: 'WANTS_OTHER_OPTIONS'),
   ];
 
   // ==================== FORM STATE (stores API enum values) ====================
@@ -105,12 +109,15 @@ class _ShowingRegistroVisitaDatosState
   String? _attendees;
   int _overallRating = 0;
   String? _propertyCondition;
+  String? _matchesPublished;
   String? _interest;
   String? _mainReason;
   String? _nextStep;
 
   final _commentController = TextEditingController();
   bool _confirmed = false;
+  List<FFUploadedFile> _uploadedPhotos = [];
+  bool _isUploadingPhotos = false;
 
   @override
   void dispose() {
@@ -124,6 +131,7 @@ class _ShowingRegistroVisitaDatosState
       _attendees != null &&
       _overallRating > 0 &&
       _propertyCondition != null &&
+      _matchesPublished != null &&
       _interest != null &&
       _mainReason != null &&
       _nextStep != null &&
@@ -145,11 +153,13 @@ class _ShowingRegistroVisitaDatosState
       'showingVisitDuration': _duration,
       'additionalAttendees': _attendees,
       'propertyCondition': _propertyCondition,
+      'matchesPublished': _matchesPublished,
       'clientInterestLevel': _interest,
       'overallRating': _overallRating,
       'mainReason': _mainReason,
       'nextStep': _nextStep,
       'comments': _commentController.text,
+      'photos': _uploadedPhotos,
       'confirmationAccepted': _confirmed,
     };
 
@@ -157,6 +167,36 @@ class _ShowingRegistroVisitaDatosState
       widget.onSave!(data);
     } else if (widget.onFinalizarRegistro != null) {
       widget.onFinalizarRegistro!();
+    }
+  }
+
+  Future<void> _handleUploadPhotos() async {
+    final selectedMedia = await selectMediaWithSourceBottomSheet(
+      context: context,
+      allowPhoto: true,
+      pickerFontFamily: 'Public Sans',
+    );
+    if (selectedMedia != null &&
+        selectedMedia
+            .every((m) => validateFileFormat(m.storagePath, context))) {
+      setState(() => _isUploadingPhotos = true);
+      try {
+        final newFiles = selectedMedia
+            .map((m) => FFUploadedFile(
+                  name: m.storagePath.split('/').last,
+                  bytes: m.bytes,
+                  height: m.dimensions?.height,
+                  width: m.dimensions?.width,
+                  blurHash: m.blurHash,
+                  originalFilename: m.originalFilename,
+                ))
+            .toList();
+        setState(() {
+          _uploadedPhotos.addAll(newFiles);
+        });
+      } finally {
+        setState(() => _isUploadingPhotos = false);
+      }
     }
   }
 
@@ -338,8 +378,7 @@ class _ShowingRegistroVisitaDatosState
       child: Container(
         height: height,
         width: expand ? double.infinity : null,
-        padding:
-            expand ? null : const EdgeInsets.symmetric(horizontal: 16),
+        padding: expand ? null : const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color:
               isSelected ? primaryColor.withValues(alpha: 0.1) : Colors.white,
@@ -477,19 +516,10 @@ class _ShowingRegistroVisitaDatosState
           ],
         ),
         const SizedBox(height: 16),
-        _buildFieldLabel('Modalidad de la visita'),
-        const SizedBox(height: 8),
-        _optionsInline(
-            _kindOpts, _kind, (v) => _kind = v, height: 46),
+        _optionsInline(_kindOpts, _kind, (v) => _kind = v, height: 46),
         const SizedBox(height: 16),
-        _buildFieldLabel('Duración'),
-        const SizedBox(height: 8),
-        // 4 duration options split into two rows of two.
-        _optionsInline(
-            _durationOpts.sublist(0, 2), _duration, (v) => _duration = v),
-        const SizedBox(height: 12),
-        _optionsInline(
-            _durationOpts.sublist(2, 4), _duration, (v) => _duration = v),
+        _optionsInline(_durationOpts, _duration, (v) => _duration = v,
+            height: 46),
       ],
     );
   }
@@ -507,8 +537,8 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
         _buildFieldLabel('¿Asistieron más personas?'),
         const SizedBox(height: 8),
-        _optionsVertical(
-            _attendeesOpts, _attendees, (v) => _attendees = v, height: 42),
+        _optionsInline(_attendeesOpts, _attendees, (v) => _attendees = v,
+            height: 38),
       ],
     );
   }
@@ -526,9 +556,15 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
         _buildFieldLabel('Condiciones'),
         const SizedBox(height: 8),
-        _optionsVertical(_conditionOpts, _propertyCondition,
-            (v) => _propertyCondition = v,
-            height: 42),
+        _optionsInline(
+            _conditionOpts, _propertyCondition, (v) => _propertyCondition = v,
+            height: 38),
+        const SizedBox(height: 16),
+        _buildFieldLabel('¿Coincide con lo publicado?'),
+        const SizedBox(height: 8),
+        _optionsInline(
+            _matchOpts, _matchesPublished, (v) => _matchesPublished = v,
+            height: 38),
       ],
     );
   }
@@ -564,8 +600,8 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
         _buildFieldLabel('Interés del cliente'),
         const SizedBox(height: 8),
-        _optionsVertical(
-            _interestOpts, _interest, (v) => _interest = v, height: 42),
+        _optionsInline(_interestOpts, _interest, (v) => _interest = v,
+            height: 42),
         const SizedBox(height: 16),
         _buildFieldLabel('Motivo principal'),
         const SizedBox(height: 8),
@@ -600,8 +636,44 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
         _buildFieldLabel('¿Qué sigue?'),
         const SizedBox(height: 8),
-        _optionsVertical(
-            _nextStepOpts, _nextStep, (v) => _nextStep = v, height: 46),
+        _buildNextStepGrid(),
+      ],
+    );
+  }
+
+  Widget _buildNextStepGrid() {
+    return Column(
+      children: [
+        for (int i = 0; i < _nextStepOpts.length; i += 2)
+          Padding(
+            padding:
+                EdgeInsets.only(bottom: i < _nextStepOpts.length - 2 ? 12 : 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _optionBox(
+                    label: _nextStepOpts[i].label,
+                    isSelected: _nextStep == _nextStepOpts[i].value,
+                    onTap: () =>
+                        setState(() => _nextStep = _nextStepOpts[i].value),
+                    height: 42,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: i + 1 < _nextStepOpts.length
+                      ? _optionBox(
+                          label: _nextStepOpts[i + 1].label,
+                          isSelected: _nextStep == _nextStepOpts[i + 1].value,
+                          onTap: () => setState(
+                              () => _nextStep = _nextStepOpts[i + 1].value),
+                          height: 42,
+                        )
+                      : const SizedBox(),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -612,6 +684,107 @@ class _ShowingRegistroVisitaDatosState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeading('Evidencia (opcional)'),
+        const SizedBox(height: 16),
+        const Row(
+          children: [
+            Icon(Icons.camera_alt_outlined, size: 16, color: textColor),
+            SizedBox(width: 4),
+            Text(
+              'Fotos',
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: textColor,
+                height: 20 / 14,
+                letterSpacing: -0.15,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: _isUploadingPhotos ? null : _handleUploadPhotos,
+          child: Container(
+            height: 42,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: inputBackground,
+              border: Border.all(color: inputBorderColor, width: 1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: _isUploadingPhotos
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: primaryColor,
+                    ),
+                  )
+                : const Text(
+                    'Subir fotos',
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: textColor,
+                    ),
+                  ),
+          ),
+        ),
+        if (_uploadedPhotos.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _uploadedPhotos.map((file) {
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: file.bytes != null
+                          ? DecorationImage(
+                              image: MemoryImage(file.bytes!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                      color: Colors.grey[200],
+                    ),
+                    child: file.bytes == null
+                        ? const Icon(Icons.image, color: Colors.grey)
+                        : null,
+                  ),
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _uploadedPhotos.remove(file);
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.cancel,
+                            size: 20, color: Colors.red),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
         const SizedBox(height: 16),
         const Row(
           children: [
@@ -729,7 +902,8 @@ class _ShowingRegistroVisitaDatosState
             width: double.infinity,
             height: 56,
             decoration: BoxDecoration(
-              color: _isValid ? primaryColor : primaryColor.withValues(alpha: 0.5),
+              color:
+                  _isValid ? primaryColor : primaryColor.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(25),
             ),
             alignment: Alignment.center,
