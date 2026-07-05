@@ -74,35 +74,64 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
+  DateTime? _parseDateTime(String dateStr, String timeStr) {
+    if (dateStr.isEmpty) return null;
+    try {
+      final d = dateStr.split('-');
+      if (d.length != 3) return null;
+      int hour = 0;
+      int minute = 0;
+      if (timeStr.isNotEmpty) {
+        final t = timeStr.split(':');
+        if (t.isNotEmpty) hour = int.tryParse(t[0]) ?? 0;
+        if (t.length > 1) minute = int.tryParse(t[1]) ?? 0;
+      }
+      return DateTime(
+        int.parse(d[0]),
+        int.parse(d[1]),
+        int.parse(d[2]),
+        hour,
+        minute,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   void _loadAll() {
     _acceptableFuture = _fetchUnassigned();
-    final todayAll = _fetchAssigned(today: 'true');
-    _upcomingTodayFuture = todayAll.then((list) {
+    final assignedAll = _fetchAssigned();
+
+    _upcomingTodayFuture = assignedAll.then((list) {
       final now = DateTime.now();
       return list.where((v) {
-        if (v.time.isEmpty) return true; // keep if no time to be safe
-        try {
-          final t = v.time.split(':');
-          final visitDt = DateTime(now.year, now.month, now.day, int.parse(t[0]), int.parse(t[1]));
-          return !visitDt.isBefore(now);
-        } catch (_) { return true; }
+        final visitDt = _parseDateTime(v.date, v.time);
+        if (visitDt == null) return false;
+        return visitDt.year == now.year &&
+            visitDt.month == now.month &&
+            visitDt.day == now.day &&
+            !visitDt.isBefore(now);
       }).toList();
     });
-    _pastTodayFuture = todayAll.then((list) {
+
+    _pastTodayFuture = assignedAll.then((list) {
       final now = DateTime.now();
       return list.where((v) {
-        if (v.time.isEmpty) return false;
-        try {
-          final t = v.time.split(':');
-          final visitDt = DateTime(now.year, now.month, now.day, int.parse(t[0]), int.parse(t[1]));
-          return visitDt.isBefore(now);
-        } catch (_) { return false; }
+        final visitDt = _parseDateTime(v.date, v.time);
+        if (visitDt == null) return false;
+        return visitDt.isBefore(now);
       }).toList();
     });
-    _acceptedFuture = _fetchAssigned(filter: 'upcoming').then((list) {
+
+    _acceptedFuture = assignedAll.then((list) {
       final now = DateTime.now();
-      final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-      return list.where((v) => v.date != todayStr).toList();
+      return list.where((v) {
+        final visitDt = _parseDateTime(v.date, v.time);
+        if (visitDt == null) return false;
+        final today = DateTime(now.year, now.month, now.day);
+        final vDay = DateTime(visitDt.year, visitDt.month, visitDt.day);
+        return vDay.isAfter(today);
+      }).toList();
     });
   }
 
@@ -132,7 +161,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
   // Unassigned visits expose only propertyId — enrich via Get Property by ID.
   Future<List<_ShowingVisit>> _fetchUnassigned() async {
     final token = currentAuthenticationToken ?? '';
-    final res = await DOVIAAPIVisitContextGroup.getShowingAgentUnassignedVisitsCall
+    final res = await DOVIAAPIVisitContextGroup
+        .getShowingAgentUnassignedVisitsCall
         .call(authToken: token, page: '1', limit: '10');
     if (!res.succeeded) return [];
 
@@ -141,7 +171,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
 
     final propFutures = visits.map((v) {
       final pid = v is Map ? v['propertyId']?.toString() ?? '' : '';
-      return DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(propertyId: pid);
+      return DOVIAAPIPropertyContextGroup.getPropertyByIDCall
+          .call(propertyId: pid);
     }).toList();
     final props = await Future.wait(propFutures);
 
@@ -176,7 +207,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
 
   // Assigned visits carry property.image; enrich address/owner via overview
   // (ownerProfile is privacy-gated and may be null until 2h before the visit).
-  Future<List<_ShowingVisit>> _fetchAssigned({String? today, String? filter}) async {
+  Future<List<_ShowingVisit>> _fetchAssigned(
+      {String? today, String? filter}) async {
     final token = currentAuthenticationToken ?? '';
     final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
@@ -290,9 +322,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
       safeSetState(_loadAll);
     } else {
       final errorCode = (getJsonField(res.jsonBody, r'$.errorCode') ??
-              getJsonField(res.jsonBody, r'$.code') ??
-              getJsonField(res.jsonBody, r'$.message'))
-          ?.toString() ??
+                  getJsonField(res.jsonBody, r'$.code') ??
+                  getJsonField(res.jsonBody, r'$.message'))
+              ?.toString() ??
           '';
       final msg = errorCode == 'SHOWING_ASSIGNMENT_WINDOW_CLOSED'
           ? 'Ya no puedes aceptar esta visita: falta 1 hora o menos.'
@@ -377,7 +409,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 context.pushNamed(
                                   'SHOWING_PropiedadAMostrar',
                                   queryParameters: {
-                                    'visitId': serializeParam(v.visitId, ParamType.String),
+                                    'visitId': serializeParam(
+                                        v.visitId, ParamType.String),
                                   }.withoutNulls,
                                 );
                               },
@@ -392,7 +425,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           ),
                           _horizontalList(
                             future: _pastTodayFuture,
-                            emptyMsg: 'No tienes visitas pendientes de registro.',
+                            emptyMsg:
+                                'No tienes visitas pendientes de registro.',
                             height: 220,
                             cardBuilder: (v) => _buildVisitCard(
                               visit: v,
@@ -402,7 +436,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 context.pushNamed(
                                   'SHOWING_RegistroDeVisita_2',
                                   queryParameters: {
-                                    'visitId': serializeParam(v.visitId, ParamType.String),
+                                    'visitId': serializeParam(
+                                        v.visitId, ParamType.String),
                                   }.withoutNulls,
                                 );
                               },
@@ -427,7 +462,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                 context.pushNamed(
                                   'SHOWING_PropiedadAMostrar',
                                   queryParameters: {
-                                    'visitId': serializeParam(v.visitId, ParamType.String),
+                                    'visitId': serializeParam(
+                                        v.visitId, ParamType.String),
                                   }.withoutNulls,
                                 );
                               },
@@ -553,8 +589,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      0.0, 4.0, 0.0, 10.0),
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 10.0),
                   child: Text(
                     _formatDateHeader(entry.key),
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -620,8 +656,19 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     final parts = raw.split('-');
     if (parts.length != 3) return raw;
     const months = [
-      '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      '',
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre'
     ];
     final m = int.tryParse(parts[1]) ?? 0;
     return '${parts[2]} de ${months[m]} de ${parts[0]}';
@@ -661,7 +708,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         borderRadius: BorderRadius.circular(12.0),
         boxShadow: const [
           BoxShadow(
-              blurRadius: 4.0, color: Color(0x33000000), offset: Offset(0.0, 2.0))
+              blurRadius: 4.0,
+              color: Color(0x33000000),
+              offset: Offset(0.0, 2.0))
         ],
       ),
       child: Padding(
@@ -722,7 +771,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           ),
                     ),
                   Text(
-                    v.ownerName.isNotEmpty ? 'Propietario: ${v.ownerName}' : 'Propietario:',
+                    v.ownerName.isNotEmpty
+                        ? 'Propietario: ${v.ownerName}'
+                        : 'Propietario:',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -738,10 +789,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       width: double.infinity,
                       height: 30.0,
                       color: Colors.transparent,
-                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.inter(
-                                color: _primary, fontSize: 14.0),
-                          ),
+                      textStyle:
+                          FlutterFlowTheme.of(context).titleSmall.override(
+                                font: GoogleFonts.inter(
+                                    color: _primary, fontSize: 14.0),
+                              ),
                       elevation: 0.0,
                       borderSide: const BorderSide(color: _primary, width: 1.0),
                       borderRadius: BorderRadius.circular(24.0),
@@ -770,7 +822,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         borderRadius: BorderRadius.circular(12.0),
         boxShadow: const [
           BoxShadow(
-              blurRadius: 4.0, color: Color(0x33000000), offset: Offset(0.0, 2.0))
+              blurRadius: 4.0,
+              color: Color(0x33000000),
+              offset: Offset(0.0, 2.0))
         ],
       ),
       child: Padding(
@@ -831,7 +885,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           ),
                     ),
                   Text(
-                    visit.ownerName.isNotEmpty ? 'Propietario: ${visit.ownerName}' : 'Propietario:',
+                    visit.ownerName.isNotEmpty
+                        ? 'Propietario: ${visit.ownerName}'
+                        : 'Propietario:',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -846,10 +902,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       children: [
                         Text(
                           'Estatus',
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.inter(fontSize: 12.0),
-                                color: _primary,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
                         ),
                         _buildStatusPill(_statusLabel(visit.substatus)),
                       ],

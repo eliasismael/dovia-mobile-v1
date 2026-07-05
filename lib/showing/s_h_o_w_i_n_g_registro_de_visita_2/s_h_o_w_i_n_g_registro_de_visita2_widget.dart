@@ -11,6 +11,7 @@ import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.da
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
 export 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
 
@@ -40,7 +41,8 @@ class _SHOWINGRegistroDeVisita2WidgetState
     super.initState();
     _model = createModel(context, () => SHOWINGRegistroDeVisita2Model());
     if (widget.visitId != null && widget.visitId!.isNotEmpty) {
-      _overviewFuture = DOVIAAPIVisitContextGroup.getShowingVisitOverviewCall.call(
+      _overviewFuture =
+          DOVIAAPIVisitContextGroup.getShowingVisitOverviewCall.call(
         authToken: currentAuthenticationToken,
         visitId: widget.visitId,
       );
@@ -107,6 +109,86 @@ class _SHOWINGRegistroDeVisita2WidgetState
       return;
     }
 
+    final photos = data['photos'] as List?;
+    if (photos != null && photos.isNotEmpty) {
+      // 1. Presign
+      final uploadsReq = photos.asMap().entries.map((e) {
+        final i = e.key;
+        final p = e.value;
+        return {
+          'fileName': p.name ?? 'foto_$i.jpg',
+          'mimeType': 'image/jpeg',
+          'sizeBytes': p.bytes?.length ?? 0,
+          'clientUploadId': 'upload_$i',
+        };
+      }).toList();
+
+      final presignRes =
+          await DOVIAAPIVisitContextGroup.presignShowingReportEvidenceCall.call(
+        visitId: visitId,
+        authToken: currentAuthenticationToken,
+        uploads: uploadsReq,
+      );
+
+      if (!presignRes.succeeded) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al preparar subida de fotos.')),
+          );
+        }
+        return;
+      }
+
+      final items = getJsonField(presignRes.jsonBody, r'$.data.items');
+      if (items is List) {
+        // 2. Upload to S3
+        for (final item in items) {
+          final clientId = item['clientUploadId'];
+          final uploadUrl = item['uploadUrl'];
+
+          // find matching photo
+          final pIndex =
+              int.tryParse(clientId.toString().replaceAll('upload_', '')) ?? 0;
+          final pBytes = photos[pIndex].bytes;
+
+          if (pBytes != null && uploadUrl != null) {
+            await http.put(
+              Uri.parse(uploadUrl.toString()),
+              headers: {'Content-Type': 'image/jpeg'},
+              body: pBytes,
+            );
+          }
+        }
+
+        // 3. Confirm
+        final confirmReq = items
+            .map((item) => {
+                  'storageKey': item['storageKey'],
+                  'clientUploadId': item['clientUploadId'],
+                })
+            .toList();
+
+        final confirmRes = await DOVIAAPIVisitContextGroup
+            .confirmShowingReportEvidenceCall
+            .call(
+          visitId: visitId,
+          authToken: currentAuthenticationToken,
+          uploads: confirmReq,
+        );
+
+        if (!confirmRes.succeeded) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Error al confirmar fotos subidas.')),
+            );
+          }
+          return;
+        }
+      }
+    }
+
+    // 4. Submit Report
     final res = await DOVIAAPIVisitContextGroup.submitShowingReportCall.call(
       authToken: currentAuthenticationToken,
       visitId: visitId,
@@ -185,11 +267,14 @@ class _SHOWINGRegistroDeVisita2WidgetState
                         future: _overviewFuture,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
                           final res = snapshot.data!;
                           if (!res.succeeded) {
-                            return const Center(child: Text('Error al cargar la información de la visita.'));
+                            return const Center(
+                                child: Text(
+                                    'Error al cargar la información de la visita.'));
                           }
 
                           final data = getJsonField(res.jsonBody, r'$.data');
@@ -205,20 +290,53 @@ class _SHOWINGRegistroDeVisita2WidgetState
                           if (data is Map) {
                             final prop = data['property'];
                             if (prop is Map) {
-                              title = prop['name']?.toString() ?? 'Propiedad';
-                              propertyType = prop['propertyType']?.toString() ?? 'Tipo';
-                              price = prop['price']?.toString() ?? '';
+                              title = prop['name']?.toString() ??
+                                  prop['title']?.toString() ??
+                                  'Propiedad';
+
+                              final lt = prop['listingType'];
+                              propertyType = (lt is List && lt.isNotEmpty)
+                                  ? lt[0].toString()
+                                  : prop['propertyType']?.toString() ?? 'Tipo';
+
+                              final priceVal = prop['price'] ??
+                                  prop['saleInfo']?['salePrice'];
+                              price = priceVal?.toString() ?? '';
+
                               imageUrl = prop['image']?.toString() ?? '';
-                              final buildSize = prop['buildSize']?.toString() ?? '-';
-                              final bedrooms = prop['bedrooms']?.toString() ?? '-';
-                              final bathrooms = prop['bathrooms']?.toString() ?? '-';
-                              specs = '$buildSize M2  $bedrooms Habitaciones  $bathrooms Baños\n';
+
+                              String buildSize = '-';
+                              String bedrooms = '-';
+                              String bathrooms = '-';
+
+                              final general =
+                                  prop['features']?['general'] as Map?;
+                              if (general != null) {
+                                bedrooms =
+                                    general['bedrooms']?.toString() ?? '-';
+                                bathrooms =
+                                    general['bathrooms']?.toString() ?? '-';
+                                buildSize =
+                                    general['constructionArea']?.toString() ??
+                                        general['landArea']?.toString() ??
+                                        '-';
+                              }
+
+                              specs =
+                                  '$buildSize M2 - $bedrooms Habitaciones - $bathrooms Baños\n';
                             }
                             final owner = data['ownerProfile'];
                             if (owner is Map) {
-                              ownerName = owner['fullName']?.toString() ?? 'Cliente';
+                              ownerName =
+                                  owner['fullName']?.toString() ?? 'Cliente';
                             }
-                            final slot = data['confirmedTimeSlot'];
+                            final visitMap = data['visit'] is Map
+                                ? data['visit'] as Map
+                                : {};
+                            final slot = data['confirmedTimeSlot'] ??
+                                data['confirmedSlot'] ??
+                                visitMap['confirmedTimeSlot'] ??
+                                visitMap['confirmedSlot'];
                             if (slot is Map) {
                               dateText = slot['date']?.toString() ?? '';
                               timeText = slot['time']?.toString() ?? '';
@@ -239,13 +357,16 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 10.0, 10.0, 10.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            10.0, 10.0, 10.0, 10.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Container(
-                                          width: MediaQuery.sizeOf(context).width * 1.0,
+                                          width:
+                                              MediaQuery.sizeOf(context).width *
+                                                  1.0,
                                           height: 150.0,
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -272,10 +393,12 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                           ),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 20.0, 0.0, 0.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 20.0, 0.0, 0.0),
                                           child: Container(
-                                            width: MediaQuery.sizeOf(context).width * 1.0,
+                                            width: MediaQuery.sizeOf(context)
+                                                    .width *
+                                                1.0,
                                             decoration: const BoxDecoration(),
                                             child: IntrinsicWidth(
                                               child: Column(
@@ -284,30 +407,55 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Align(
-                                                    alignment: const AlignmentDirectional(-1.0, 0.0),
+                                                    alignment:
+                                                        const AlignmentDirectional(
+                                                            -1.0, 0.0),
                                                     child: RichText(
-                                                      textScaler: MediaQuery.of(context).textScaler,
+                                                      textScaler:
+                                                          MediaQuery.of(context)
+                                                              .textScaler,
                                                       text: TextSpan(
                                                         children: [
                                                           TextSpan(
                                                             text: '$title\n',
-                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                              font: GoogleFonts.inter(
-                                                                fontWeight: FontWeight.w500,
-                                                              ),
-                                                              fontSize: 16.0,
-                                                              fontWeight: FontWeight.w500,
-                                                            ),
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  font:
+                                                                      GoogleFonts
+                                                                          .inter(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                                  fontSize:
+                                                                      16.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
                                                           ),
                                                           TextSpan(
-                                                            text: '$propertyType\n',
-                                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                              font: GoogleFonts.inter(
-                                                                fontWeight: FontWeight.normal,
-                                                              ),
-                                                              fontSize: 12.0,
-                                                              fontWeight: FontWeight.normal,
-                                                            ),
+                                                            text:
+                                                                '$propertyType\n',
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  font:
+                                                                      GoogleFonts
+                                                                          .inter(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .normal,
+                                                                  ),
+                                                                  fontSize:
+                                                                      12.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .normal,
+                                                                ),
                                                           ),
                                                           TextSpan(
                                                             text: '\$$price\n',
@@ -316,12 +464,19 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                                             text: specs,
                                                           )
                                                         ],
-                                                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                          font: GoogleFonts.publicSans(
-                                                            fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                                                          ),
-                                                          lineHeight: 1.5,
-                                                        ),
+                                                        style: FlutterFlowTheme
+                                                                .of(context)
+                                                            .bodyMedium
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .publicSans(
+                                                                fontWeight: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontWeight,
+                                                              ),
+                                                              lineHeight: 1.5,
+                                                            ),
                                                       ),
                                                     ),
                                                   ),
@@ -338,16 +493,18 @@ class _SHOWINGRegistroDeVisita2WidgetState
                               SizedBox(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: MediaQuery.sizeOf(context).height * 1.0,
-                                child: custom_widgets.ShowingRegistroVisitaDatos(
+                                child:
+                                    custom_widgets.ShowingRegistroVisitaDatos(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
-                                  height: MediaQuery.sizeOf(context).height * 1.0,
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 1.0,
                                   propertyName: title,
                                   clientName: ownerName,
                                   dateText: dateText,
                                   timeText: timeText,
                                   onCancelVisit: () => _onCancelVisit(),
-                                  onSave: (data) =>
-                                      _submitReport(data as Map<String, dynamic>),
+                                  onSave: (data) => _submitReport(
+                                      data as Map<String, dynamic>),
                                   onFinalizarRegistro: () async {},
                                 ),
                               ),

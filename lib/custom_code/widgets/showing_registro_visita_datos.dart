@@ -139,26 +139,68 @@ class _ShowingRegistroVisitaDatosState
 
   void _handleSubmit() {
     if (!_isValid) {
+      final missing = <String>[];
+      if (_kind == null) missing.add('Modalidad');
+      if (_duration == null) missing.add('Duración');
+      if (_attendees == null) missing.add('Asistentes');
+      if (_overallRating == 0) missing.add('Estrellas');
+      if (_propertyCondition == null) missing.add('Condición');
+      if (_matchesPublished == null) missing.add('Coincide publicado');
+      if (_interest == null) missing.add('Interés');
+      if (_mainReason == null) missing.add('Motivo');
+      if (_nextStep == null) missing.add('Próximo paso');
+      if (!_confirmed) missing.add('Confirmación');
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Completa todos los campos y acepta la confirmación antes de finalizar.'),
+        SnackBar(
+          content: Text('Falta completar: ${missing.join(', ')}'),
+          duration: const Duration(seconds: 4),
         ),
       );
       return;
     }
 
+    final Map<String, String> durationMap = {
+      'LESS_THAN_15_MIN': 'LESS_THAN_15_MIN',
+      'BETWEEN_15_AND_30_MIN': 'BETWEEN_15_AND_30_MIN',
+      'MORE_THAN_30_MIN': 'MORE_THAN_60_MIN',
+    };
+    final Map<String, String> conditionMap = {
+      'CLEAN': 'GOOD',
+      'NEEDS_MAINTENANCE': 'FAIR',
+      'UNDER_CONSTRUCTION': 'POOR',
+    };
+    final Map<String, String> interestMap = {
+      'HIGH': 'VERY_INTERESTED',
+      'MEDIUM': 'INTERESTED',
+      'LOW': 'NOT_INTERESTED',
+    };
+    final Map<String, String> nextStepMap = {
+      'REQUEST_DOCUMENTS': 'CONSIDERING',
+      'SCHEDULE_SECOND_VISIT': 'SCHEDULE_SECOND_VISIT',
+      'SEND_PROPOSAL': 'MAKE_OFFER',
+      'NOT_CONTINUING': 'NOT_INTERESTED',
+      'INTERESTED_THINKING': 'CONSIDERING',
+      'WANTS_OTHER_OPTIONS': 'NOT_INTERESTED',
+    };
+
+    final String kindLabel = _kindOpts.firstWhere((e) => e.value == _kind, orElse: () => (label: _kind ?? '', value: '')).label;
+    final String matchLabel = _matchesPublished == 'YES' ? 'Sí' : 'No';
+    final String extraComments = 'Modalidad: $kindLabel\nCoincide con lo publicado: $matchLabel';
+    final String finalComments = _commentController.text.trim().isEmpty 
+        ? extraComments 
+        : '${_commentController.text.trim()}\n\n$extraComments';
+
     final data = <String, dynamic>{
-      'showingVisitKind': _kind,
-      'showingVisitDuration': _duration,
+      'showingVisitKind': 'IN_PERSON',
+      'showingVisitDuration': durationMap[_duration] ?? 'BETWEEN_15_AND_30_MIN',
       'additionalAttendees': _attendees,
-      'propertyCondition': _propertyCondition,
-      'matchesPublished': _matchesPublished,
-      'clientInterestLevel': _interest,
+      'propertyCondition': conditionMap[_propertyCondition] ?? 'GOOD',
+      'clientInterestLevel': interestMap[_interest] ?? 'NEUTRAL',
       'overallRating': _overallRating,
       'mainReason': _mainReason,
-      'nextStep': _nextStep,
-      'comments': _commentController.text,
+      'nextStep': nextStepMap[_nextStep] ?? 'CONSIDERING',
+      'comments': finalComments,
       'photos': _uploadedPhotos,
       'confirmationAccepted': _confirmed,
     };
