@@ -225,10 +225,10 @@ class _SHOWINGRegistroDeVisitaWidgetState
     );
     if (message == null || message.trim().isEmpty) return;
 
-    final res = await DOVIAAPIVisitContextGroup.showingReportProblemCall.call(
+    final res = await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
       authToken: currentAuthenticationToken,
       visitId: visitId,
-      message: message.trim(),
+      reason: message.trim(),
     );
     if (!mounted) return;
 

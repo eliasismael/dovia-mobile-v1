@@ -10,6 +10,8 @@ import '/backend/api_requests/api_visits.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart';
+import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import 's_h_o_w_i_n_g_propiedades_a_mostrar_model.dart';
 export 's_h_o_w_i_n_g_propiedades_a_mostrar_model.dart';
 
@@ -72,7 +74,6 @@ class _SHOWINGPropiedadesAMostrarWidgetState
     final token = currentAuthenticationToken ?? '';
     final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
-      filter: 'upcoming',
       page: '1',
       limit: '100',
     );
@@ -138,6 +139,96 @@ class _SHOWINGPropiedadesAMostrarWidgetState
       ));
     }
     return out;
+  }
+
+  DateTime? _parseDateTime(String dateStr, String timeStr) {
+    if (dateStr.isEmpty) return null;
+    try {
+      final d = dateStr.split('-');
+      if (d.length != 3) return null;
+      int hour = 0;
+      int minute = 0;
+      if (timeStr.isNotEmpty) {
+        final t = timeStr.split(':');
+        if (t.isNotEmpty) hour = int.tryParse(t[0]) ?? 0;
+        if (t.length > 1) minute = int.tryParse(t[1]) ?? 0;
+      }
+      return DateTime(
+        int.parse(d[0]),
+        int.parse(d[1]),
+        int.parse(d[2]),
+        hour,
+        minute,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool _isPast(_ShowingVisit v) {
+    final s = v.substatus.toUpperCase();
+    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
+    final dt = _parseDateTime(v.date, v.time);
+    if (dt == null) return false;
+    return dt.isBefore(DateTime.now());
+  }
+
+  bool _isOverdue(_ShowingVisit v) {
+    final s = v.substatus.toUpperCase();
+    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
+    final dt = _parseDateTime(v.date, v.time);
+    if (dt == null) return false;
+    return DateTime.now().difference(dt).inHours > 24;
+  }
+
+  void _openForm(String visitId) {
+    context.pushNamed(
+      SHOWINGRegistroDeVisita2Widget.routeName,
+      queryParameters: {
+        'visitId': serializeParam(visitId, ParamType.String),
+      }.withoutNulls,
+    );
+  }
+
+  Future<void> _onReport(String visitId) async {
+    final message = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: const SHOWINGReportPopupWidget(),
+        );
+      },
+    );
+    if (message == null || message.trim().isEmpty) return;
+
+    final res = await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: visitId,
+      reason: message.trim(),
+    );
+    if (!mounted) return;
+
+    if (res.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Reporte enviado.',
+            style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).secondary,
+        ),
+      );
+      safeSetState(() => _visitsFuture = _fetchVisits());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo enviar el reporte.')),
+      );
+    }
   }
 
   String _slot(dynamic visit, String field) {
@@ -509,79 +600,134 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      FFButtonWidget(
-                        onPressed: () => _launchMap(visit),
-                        text: 'Iniciar ruta',
-                        options: FFButtonOptions(
-                          height: 30.0,
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              12.0, 0.0, 12.0, 0.0),
-                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 0.0),
-                          color: const Color(0x00007376),
-                          textStyle: FlutterFlowTheme.of(context)
-                              .titleSmall
-                              .override(
-                                font: GoogleFonts.publicSans(
-                                  fontWeight: FontWeight.normal,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                fontSize: 14.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.normal,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
-                              ),
-                          elevation: 0.0,
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(24.0),
-                        ),
-                      ),
-                      FFButtonWidget(
-                        onPressed: () {
-                          context.pushNamed(
-                            'SHOWING_PropiedadAMostrar',
-                            queryParameters: {
-                              'visitId': serializeParam(
-                                  visit.visitId, ParamType.String),
-                            }.withoutNulls,
-                          );
-                        },
-                        text: 'Detalles',
-                        options: FFButtonOptions(
-                          height: 30.0,
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              12.0, 0.0, 12.0, 0.0),
-                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 0.0),
-                          color: FlutterFlowTheme.of(context).primary,
-                          textStyle:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.normal,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                    color: Colors.white,
-                                    fontSize: 14.0,
-                                    letterSpacing: 0.0,
+                      if (!_isPast(visit))
+                        FFButtonWidget(
+                          onPressed: () => _launchMap(visit),
+                          text: 'Iniciar ruta',
+                          options: FFButtonOptions(
+                            height: 30.0,
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 0.0),
+                            color: const Color(0x00007376),
+                            textStyle: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
+                                  font: GoogleFonts.publicSans(
                                     fontWeight: FontWeight.normal,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .fontStyle,
                                   ),
-                          elevation: 0.0,
-                          borderRadius: BorderRadius.circular(24.0),
+                                  color: FlutterFlowTheme.of(context).primaryText,
+                                  fontSize: 14.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .fontStyle,
+                                ),
+                            elevation: 0.0,
+                            borderSide: BorderSide(
+                              color: FlutterFlowTheme.of(context).primary,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(24.0),
+                          ),
+                        )
+                      else if (_isOverdue(visit))
+                        Expanded(
+                          child: FFButtonWidget(
+                            onPressed: () => _onReport(visit.visitId),
+                            text: 'Reportar',
+                            options: FFButtonOptions(
+                              width: double.infinity,
+                              height: 30.0,
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  12.0, 0.0, 12.0, 0.0),
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 0.0),
+                              color: const Color(0xFFC90A0A),
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                    color: Colors.white,
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.0,
+                                  ),
+                              elevation: 0.0,
+                              borderRadius: BorderRadius.circular(24.0),
+                            ),
+                          ),
+                        )
+                      else
+                        FFButtonWidget(
+                          onPressed: () => _openForm(visit.visitId),
+                          text: 'Registrar visita',
+                          options: FFButtonOptions(
+                            height: 30.0,
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 0.0),
+                            color: const Color(0xFF007376),
+                            textStyle: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
+                                  font: GoogleFonts.publicSans(
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                  color: Colors.white,
+                                  fontSize: 14.0,
+                                  letterSpacing: 0.0,
+                                ),
+                            elevation: 0.0,
+                            borderRadius: BorderRadius.circular(24.0),
+                          ),
                         ),
-                      ),
+                      if (!_isOverdue(visit))
+                        FFButtonWidget(
+                          onPressed: () {
+                            context.pushNamed(
+                              'SHOWING_PropiedadAMostrar',
+                              queryParameters: {
+                                'visitId': serializeParam(
+                                    visit.visitId, ParamType.String),
+                              }.withoutNulls,
+                            );
+                          },
+                          text: 'Detalles',
+                          options: FFButtonOptions(
+                            height: 30.0,
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 0.0),
+                            color: FlutterFlowTheme.of(context).primary,
+                            textStyle:
+                                FlutterFlowTheme.of(context).titleSmall.override(
+                                      font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.normal,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontStyle,
+                                      ),
+                                      color: Colors.white,
+                                      fontSize: 14.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.normal,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                            elevation: 0.0,
+                            borderRadius: BorderRadius.circular(24.0),
+                          ),
+                        ),
                     ],
                   ),
                 ],
