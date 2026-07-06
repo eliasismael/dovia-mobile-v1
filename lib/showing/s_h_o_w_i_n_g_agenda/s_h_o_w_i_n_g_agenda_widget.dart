@@ -8,10 +8,11 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_propiedad_a_mostrar/s_h_o_w_i_n_g_propiedad_a_mostrar_widget.dart';
+import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/showing/s_h_o_w_i_n_g_to_navegation_app/s_h_o_w_i_n_g_to_navegation_app_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 's_h_o_w_i_n_g_agenda_model.dart';
 export 's_h_o_w_i_n_g_agenda_model.dart';
@@ -25,6 +26,8 @@ class _AgendaVisit {
   final String time;
   final String imageUrl;
   final String substatus;
+  final double? lat;
+  final double? lng;
 
   const _AgendaVisit({
     required this.visitId,
@@ -35,6 +38,8 @@ class _AgendaVisit {
     this.time = '',
     this.imageUrl = '',
     this.substatus = '',
+    this.lat,
+    this.lng,
   });
 }
 
@@ -62,11 +67,11 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     _model = createModel(context, () => SHOWINGAgendaModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _model.selectedDate = DateTime.now();
-      _currentFetchedMonth = _model.selectedDate!;
+      // Start with no day filter → show the whole month grouped by date.
+      _model.selectedDate = null;
+      _currentFetchedMonth = DateTime.now();
       safeSetState(() {});
-      await _fetchSchedule(
-          _currentFetchedMonth.year, _currentFetchedMonth.month);
+      await _loadVisits();
     });
   }
 
@@ -76,15 +81,18 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     super.dispose();
   }
 
-  Future<void> _fetchSchedule(int year, int month) async {
+  // The Agenda mirrors the Home's data source (Get Showing Agent Visits +
+  // per-visit overview) so it shows exactly the same assigned visits, across
+  // every status, grouped by day. Fetched once; month/day filtering happens
+  // client-side.
+  Future<void> _loadVisits() async {
     safeSetState(() => _loading = true);
     final token = currentAuthenticationToken ?? '';
 
-    final res =
-        await DOVIAAPIVisitContextGroup.getShowingAgentScheduleCall.call(
+    final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
-      year: year,
-      month: month,
+      page: '1',
+      limit: '100',
     );
 
     if (!res.succeeded) {
@@ -92,70 +100,189 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
       return;
     }
 
-    final rawData = getJsonField(res.jsonBody, r'$.data');
-    if (rawData is! Map) {
-      if (mounted) safeSetState(() => _loading = false);
-      return;
-    }
+    final raw = getJsonField(res.jsonBody, r'$.data');
+    final visits = raw is List ? raw : <dynamic>[];
 
-    final schedule = rawData['schedule'];
-    if (schedule is! Map) {
-      if (mounted) safeSetState(() => _loading = false);
-      return;
-    }
+    // Enrich each visit with title/address/owner/coordinates via its overview.
+    final ovFutures = visits.map((v) {
+      final id = v is Map ? v['visitId']?.toString() ?? '' : '';
+      return DOVIAAPIVisitContextGroup.getShowingVisitOverviewCall
+          .call(authToken: token, visitId: id);
+    }).toList();
+    final overviews = await Future.wait(ovFutures);
 
-    final Map<String, List<_AgendaVisit>> newGrouped = {};
-    for (final dateKey in schedule.keys) {
-      final listRaw = schedule[dateKey];
-      if (listRaw is List) {
-        final parsedList = <_AgendaVisit>[];
-        for (final v in listRaw) {
-          if (v is Map) {
-            final prop = v['property'] is Map ? v['property'] as Map : {};
-            final loc = prop['location'] is Map ? prop['location'] as Map : {};
-            final addressObj =
-                loc['address'] is Map ? loc['address'] as Map : {};
-            final slot = v['confirmedTimeSlot'] is Map
-                ? v['confirmedTimeSlot'] as Map
-                : {};
+    final Map<String, List<_AgendaVisit>> grouped = {};
+    for (int i = 0; i < visits.length; i++) {
+      final v = visits[i];
+      if (v is! Map) continue;
 
-            parsedList.add(_AgendaVisit(
-              visitId: v['id']?.toString() ?? '',
-              title:
-                  prop['name']?.toString() ?? prop['title']?.toString() ?? '',
-              imageUrl: prop['image']?.toString() ?? '',
-              address: addressObj['fullAddress']?.toString() ?? '',
-              ownerName: v['ownerFullName']?.toString() ?? '',
-              date: slot['date']?.toString() ?? '',
-              time: slot['time']?.toString() ?? '',
-              substatus: v['substatus']?.toString() ?? '',
-            ));
+      String image = '';
+      if (v['property'] is Map) {
+        image = (v['property'] as Map)['image']?.toString() ?? '';
+      }
+      final slot =
+          v['confirmedTimeSlot'] is Map ? v['confirmedTimeSlot'] as Map : {};
+      final date = slot['date']?.toString() ?? '';
+      final time = slot['time']?.toString() ?? '';
+
+      String title = '';
+      String address = '';
+      String ownerName = v['ownerFullName']?.toString() ?? '';
+      double? lat;
+      double? lng;
+
+      final ov = overviews[i];
+      if (ov.succeeded) {
+        final data = getJsonField(ov.jsonBody, r'$.data');
+        if (data is Map) {
+          final prop = data['property'];
+          if (prop is Map) {
+            title =
+                prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+            if (image.isEmpty) image = prop['image']?.toString() ?? '';
+            final addr = _deepMap(prop, ['location', 'address']);
+            address = addr?['fullAddress']?.toString() ?? '';
+            final coords = _deepValue(prop, ['location', 'geo', 'coordinates']);
+            if (coords is List && coords.length >= 2) {
+              lng = (coords[0] as num?)?.toDouble();
+              lat = (coords[1] as num?)?.toDouble();
+            }
+          }
+          final owner = data['ownerProfile'];
+          if (owner is Map && ownerName.isEmpty) {
+            ownerName = owner['fullName']?.toString() ?? '';
           }
         }
-        parsedList.sort((a, b) => a.time.compareTo(b.time));
-        newGrouped[dateKey] = parsedList;
       }
+
+      if (date.isEmpty) continue; // can't place it on the calendar
+
+      (grouped[date] ??= []).add(_AgendaVisit(
+        visitId: v['visitId']?.toString() ?? '',
+        title: title,
+        address: address,
+        ownerName: ownerName,
+        date: date,
+        time: time,
+        imageUrl: image,
+        substatus: v['substatus']?.toString() ?? '',
+        lat: lat,
+        lng: lng,
+      ));
+    }
+
+    for (final list in grouped.values) {
+      list.sort((a, b) => a.time.compareTo(b.time));
     }
 
     if (mounted) {
       safeSetState(() {
-        _groupedVisits = newGrouped;
+        _groupedVisits = grouped;
         _loading = false;
       });
     }
   }
 
-  void _onDateSelected(DateTime date) {
-    if (date.year != _currentFetchedMonth.year ||
-        date.month != _currentFetchedMonth.month) {
-      _currentFetchedMonth = date;
-      _model.selectedDate = date;
-      _fetchSchedule(date.year, date.month);
-    } else {
-      safeSetState(() {
-        _model.selectedDate = date;
-      });
+  Map? _deepMap(dynamic obj, List<String> keys) {
+    dynamic cur = obj;
+    for (final k in keys) {
+      if (cur is! Map) return null;
+      cur = cur[k];
     }
+    return cur is Map ? cur : null;
+  }
+
+  dynamic _deepValue(dynamic obj, List<String> keys) {
+    dynamic cur = obj;
+    for (final k in keys) {
+      if (cur is! Map) return null;
+      cur = cur[k];
+    }
+    return cur;
+  }
+
+  // Data is loaded once for all months; selecting a day just filters the list.
+  void _onDateSelected(DateTime date) {
+    safeSetState(() {
+      _currentFetchedMonth = DateTime(date.year, date.month, 1);
+      _model.selectedDate = date;
+    });
+  }
+
+  // Arrows moved the month while no day was selected → show that month's full
+  // (unfiltered) list.
+  void _onMonthChanged(DateTime firstOfMonth) {
+    safeSetState(() {
+      _currentFetchedMonth = firstOfMonth;
+      _model.selectedDate = null;
+    });
+  }
+
+  // Clear the day filter and go back to the full month grouped by date.
+  void _clearDayFilter() {
+    safeSetState(() {
+      _model.selectedDate = null;
+    });
+  }
+
+  // Confirm and open the device navigation app for a visit, mirroring the
+  // behaviour of the visit-detail screen. Prefers coordinates and falls back
+  // to the address string.
+  Future<void> _startRoute(_AgendaVisit visit) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: const SHOWINGToNavegationAppWidget(),
+        );
+      },
+    );
+    if (confirm != true) return;
+
+    // Unlock the private contact info on the visit-detail screen too.
+    if (visit.visitId.isNotEmpty) {
+      try {
+        FFAppState().addToRouteStartedVisits(visit.visitId);
+      } catch (_) {}
+    }
+
+    String? query;
+    if (visit.lat != null && visit.lng != null) {
+      query = '${visit.lat},${visit.lng}';
+    } else if (visit.address.isNotEmpty) {
+      query = Uri.encodeComponent(visit.address);
+    }
+
+    if (query == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('No hay ubicación disponible para esta visita.')),
+        );
+      }
+      return;
+    }
+
+    final googleMapsUrl =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+    final appleMapsUrl = Uri.parse('https://maps.apple.com/?q=$query');
+    try {
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(appleMapsUrl)) {
+        await launchUrl(appleMapsUrl, mode: LaunchMode.externalApplication);
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('No se pudo abrir la app de navegación.')),
+        );
+      }
+    } catch (_) {}
   }
 
   String _formatDateString(String dateStr) {
@@ -192,6 +319,70 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     }
   }
 
+  // A visit is "overdue" when >24h passed since its scheduled start and it
+  // hasn't been registered/closed yet.
+  bool _isOverdue(_AgendaVisit visit) {
+    final s = visit.substatus.toUpperCase();
+    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
+    if (visit.date.isEmpty) return false;
+    try {
+      final d = visit.date.split('-');
+      final t = visit.time.isNotEmpty ? visit.time.split(':') : ['0', '0'];
+      final dt = DateTime(
+        int.parse(d[0]),
+        int.parse(d[1]),
+        int.parse(d[2]),
+        int.parse(t[0]),
+        t.length > 1 ? int.parse(t[1]) : 0,
+      );
+      return DateTime.now().difference(dt).inHours > 24;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Report an overdue visit: justify the delay, then unassign/republish it.
+  Future<void> _onReport(String visitId) async {
+    final message = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: const SHOWINGReportPopupWidget(),
+        );
+      },
+    );
+    if (message == null || message.trim().isEmpty) return;
+
+    final res = await DOVIAAPIVisitContextGroup.showingReportProblemCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: visitId,
+      message: message.trim(),
+    );
+    if (!mounted) return;
+
+    if (res.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Reporte enviado.',
+            style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).secondary,
+        ),
+      );
+      _loadVisits();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo enviar el reporte.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     String filterDateStr = '';
@@ -201,11 +392,20 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
           '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
     }
 
-    List<String> visibleDates = _groupedVisits.keys.toList()..sort();
-    if (filterDateStr.isNotEmpty && _groupedVisits.containsKey(filterDateStr)) {
-      visibleDates = [filterDateStr];
-    } else if (filterDateStr.isNotEmpty) {
-      visibleDates = [];
+    List<String> visibleDates;
+    if (filterDateStr.isNotEmpty) {
+      // A specific day is selected → show only that day.
+      visibleDates =
+          _groupedVisits.containsKey(filterDateStr) ? [filterDateStr] : [];
+    } else {
+      // Full-month view → every day of the displayed month, grouped by date.
+      visibleDates = _groupedVisits.keys.where((k) {
+        final dt = DateTime.tryParse(k);
+        return dt != null &&
+            dt.year == _currentFetchedMonth.year &&
+            dt.month == _currentFetchedMonth.month;
+      }).toList()
+        ..sort();
     }
 
     return GestureDetector(
@@ -252,15 +452,20 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                                 child: custom_widgets.DateSelectorWidget(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
                                   height: 70.0,
-                                  initialDate:
-                                      _model.selectedDate ?? DateTime.now(),
+                                  dayNavigation: true,
+                                  selectedDate: _model.selectedDate,
+                                  displayMonth: _currentFetchedMonth,
                                   onDateSelected: (newDate) {
                                     if (newDate != null)
                                       _onDateSelected(newDate);
                                   },
+                                  onMonthChanged: (firstOfMonth) =>
+                                      _onMonthChanged(firstOfMonth),
                                 ),
                               ),
                             ),
+                            if (_model.selectedDate != null)
+                              _buildFilterChip(filterDateStr),
                             if (_loading)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 60.0),
@@ -268,11 +473,14 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                                     color: Color(0xFF007376)),
                               )
                             else if (visibleDates.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 60.0),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 60.0),
                                 child: Text(
-                                  'No tienes visitas agendadas para esta fecha.',
-                                  style: TextStyle(color: Colors.grey),
+                                  _model.selectedDate != null
+                                      ? 'No tienes visitas agendadas para esta fecha.'
+                                      : 'No tienes visitas agendadas para este mes.',
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
                               )
                             else
@@ -330,9 +538,60 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     );
   }
 
+  // Banner shown above the list when a single day is being filtered, with a
+  // shortcut back to the full-month view.
+  Widget _buildFilterChip(String filterDateStr) {
+    const primary = Color(0xFF007376);
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Mostrando ${_formatDateString(filterDateStr)}',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600, fontSize: 14.0),
+                    color: const Color(0xFF0F3E48),
+                  ),
+            ),
+          ),
+          GestureDetector(
+            onTap: _clearDayFilter,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(24.0),
+                border: Border.all(color: primary, width: 1.0),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.close, size: 14.0, color: primary),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    'Ver todo el mes',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600, fontSize: 12.0),
+                          color: primary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildVisitCard(_AgendaVisit visit) {
     final primary = const Color(0xFF007376);
     final isToday = _isToday(visit.date);
+    final overdue = _isOverdue(visit);
 
     return Container(
       width: double.infinity,
@@ -436,7 +695,25 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                     ),
                   ],
                   const SizedBox(height: 12.0),
-                  Row(
+                  if (overdue)
+                    FFButtonWidget(
+                      onPressed: () => _onReport(visit.visitId),
+                      text: 'Reportar',
+                      options: FFButtonOptions(
+                        width: double.infinity,
+                        height: 30.0,
+                        color: const Color(0xFFC90A0A),
+                        textStyle:
+                            FlutterFlowTheme.of(context).titleSmall.override(
+                                  font: GoogleFonts.inter(
+                                      color: Colors.white, fontSize: 14.0),
+                                ),
+                        elevation: 0.0,
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                    )
+                  else
+                    Row(
                     children: [
                       Expanded(
                         child: FFButtonWidget(
@@ -469,22 +746,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: FFButtonWidget(
-                            onPressed: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (dialogContext) {
-                                  return Dialog(
-                                    elevation: 0,
-                                    insetPadding: EdgeInsets.zero,
-                                    backgroundColor: Colors.transparent,
-                                    alignment: const AlignmentDirectional(
-                                            0.0, 0.0)
-                                        .resolve(Directionality.of(context)),
-                                    child: const SHOWINGToNavegationAppWidget(),
-                                  );
-                                },
-                              );
-                            },
+                            onPressed: () => _startRoute(visit),
                             text: 'Iniciar ruta',
                             options: FFButtonOptions(
                               height: 30.0,

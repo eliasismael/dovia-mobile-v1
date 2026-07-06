@@ -11,6 +11,7 @@ import '/showing/s_h_o_w_i_n_g_accept_visit_popup/s_h_o_w_i_n_g_accept_visit_pop
 import '/showing/s_h_o_w_i_n_g_visit_already_accepted_popup/s_h_o_w_i_n_g_visit_already_accepted_popup_widget.dart';
 import '/showing/s_h_o_w_i_n_g_registro_de_visita/s_h_o_w_i_n_g_registro_de_visita_widget.dart';
 import '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart';
+import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_home_model.dart';
@@ -344,6 +345,58 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     );
   }
 
+  // A visit is "overdue" when more than 24h passed since its scheduled start
+  // and it hasn't been registered/closed yet.
+  bool _isOverdue(_ShowingVisit v) {
+    final s = v.substatus.toUpperCase();
+    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
+    final dt = _parseDateTime(v.date, v.time);
+    if (dt == null) return false;
+    return DateTime.now().difference(dt).inHours > 24;
+  }
+
+  // Report an overdue visit: justify the delay, then unassign/republish it.
+  Future<void> _onReport(String visitId) async {
+    final message = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: const SHOWINGReportPopupWidget(),
+        );
+      },
+    );
+    if (message == null || message.trim().isEmpty) return;
+
+    final res = await DOVIAAPIVisitContextGroup.showingReportProblemCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: visitId,
+      message: message.trim(),
+    );
+    if (!mounted) return;
+
+    if (res.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Reporte enviado.',
+            style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).secondary,
+        ),
+      );
+      safeSetState(_loadAll);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo enviar el reporte.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -428,20 +481,20 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                             emptyMsg:
                                 'No tienes visitas pendientes de registro.',
                             height: 220,
-                            cardBuilder: (v) => _buildVisitCard(
-                              visit: v,
-                              showStatus: false,
-                              buttonText: 'Registrar visita',
-                              onPressed: () {
-                                context.pushNamed(
-                                  'SHOWING_RegistroDeVisita_2',
-                                  queryParameters: {
-                                    'visitId': serializeParam(
-                                        v.visitId, ParamType.String),
-                                  }.withoutNulls,
-                                );
-                              },
-                            ),
+                            cardBuilder: (v) {
+                              final overdue = _isOverdue(v);
+                              return _buildVisitCard(
+                                visit: v,
+                                showStatus: false,
+                                buttonText:
+                                    overdue ? 'Reportar' : 'Registrar visita',
+                                buttonColor:
+                                    overdue ? const Color(0xFFC90A0A) : null,
+                                onPressed: overdue
+                                    ? () => _onReport(v.visitId)
+                                    : () => _openForm(v.visitId),
+                              );
+                            },
                           ),
 
                           // 4. Visitas aceptadas (assigned upcoming)
@@ -814,6 +867,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     required bool showStatus,
     required String buttonText,
     required VoidCallback onPressed,
+    Color? buttonColor,
   }) {
     return Container(
       width: 320.0,
@@ -919,7 +973,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                     options: FFButtonOptions(
                       width: double.infinity,
                       height: 30.0,
-                      color: _primary,
+                      color: buttonColor ?? _primary,
                       textStyle: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 14.0,

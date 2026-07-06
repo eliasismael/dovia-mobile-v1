@@ -9,16 +9,37 @@ class DateSelectorWidget extends StatefulWidget {
   final double? width;
   final double? height;
 
+  /// Legacy entry point: initial concrete date (used when [dayNavigation] is
+  /// false).
   final DateTime? initialDate;
 
+  /// Currently selected day (null = no day filter → the parent shows the full
+  /// month grouped by date). Only honored when [dayNavigation] is true.
+  final DateTime? selectedDate;
+
+  /// Month rendered in the pills. Only honored when [dayNavigation] is true.
+  final DateTime? displayMonth;
+
+  /// When true the arrows step a selected day by ±1 (or the month when no day
+  /// is selected) and the "Día" pill reflects the selected day number.
+  final bool dayNavigation;
+
   final ValueChanged<DateTime?>? onDateSelected;
+
+  /// Fired when the arrows change the month while no day is selected (only in
+  /// [dayNavigation] mode).
+  final ValueChanged<DateTime>? onMonthChanged;
 
   const DateSelectorWidget({
     super.key,
     this.width,
     this.height,
     this.initialDate,
+    this.selectedDate,
+    this.displayMonth,
+    this.dayNavigation = false,
     this.onDateSelected,
+    this.onMonthChanged,
   });
 
   @override
@@ -30,7 +51,12 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
   static const Color aqua = Color(0xFF007376);
   static const Color bgColor = Color(0xFFF5F5F5);
 
-  late DateTime _selectedDate;
+  // Currently selected day. Null means "no day filter" → the parent renders the
+  // full month grouped by date. Only used when [dayNavigation] is true.
+  DateTime? _selectedDay;
+
+  // Month shown in the pills (and stepped by the arrows in month view).
+  late DateTime _displayMonth;
 
   static const List<String> _spanishMonths = [
     'Enero',
@@ -50,33 +76,67 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate ?? DateTime.now();
+    if (widget.dayNavigation) {
+      _selectedDay = widget.selectedDate;
+      _displayMonth = _monthOf(
+          widget.displayMonth ?? widget.selectedDate ?? DateTime.now());
+    } else {
+      // Legacy behaviour: a concrete date is always selected.
+      _selectedDay = widget.initialDate ?? DateTime.now();
+      _displayMonth = _monthOf(_selectedDay!);
+    }
   }
 
-  String get _monthName => _spanishMonths[_selectedDate.month - 1];
-  String get _year => _selectedDate.year.toString();
-  String get _day => 'Día';
-
-  void _goToPreviousMonth() {
-    setState(() {
-      _selectedDate = DateTime(
-        _selectedDate.year,
-        _selectedDate.month - 1,
-        1,
-      );
-    });
-    widget.onDateSelected?.call(_selectedDate);
+  @override
+  void didUpdateWidget(covariant DateSelectorWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.dayNavigation) return;
+    // Keep in sync when the parent clears the day filter or changes month.
+    if (widget.selectedDate != oldWidget.selectedDate) {
+      _selectedDay = widget.selectedDate;
+    }
+    if (widget.displayMonth != oldWidget.displayMonth &&
+        widget.displayMonth != null) {
+      _displayMonth = _monthOf(widget.displayMonth!);
+    }
   }
 
-  void _goToNextMonth() {
-    setState(() {
-      _selectedDate = DateTime(
-        _selectedDate.year,
-        _selectedDate.month + 1,
-        1,
+  DateTime _monthOf(DateTime d) => DateTime(d.year, d.month, 1);
+
+  String get _monthName => _spanishMonths[_displayMonth.month - 1];
+  String get _year => _displayMonth.year.toString();
+  String get _dayLabel => widget.dayNavigation
+      ? (_selectedDay != null ? '${_selectedDay!.day}' : 'Día')
+      : 'Día';
+
+  // Left/right arrows. In day-navigation mode they step the selected day by ±1
+  // (or the month when no day is selected); otherwise they step the month.
+  void _step(int direction) {
+    if (widget.dayNavigation && _selectedDay != null) {
+      final nd = DateTime(
+        _selectedDay!.year,
+        _selectedDay!.month,
+        _selectedDay!.day + direction,
       );
-    });
-    widget.onDateSelected?.call(_selectedDate);
+      setState(() {
+        _selectedDay = nd;
+        _displayMonth = _monthOf(nd);
+      });
+      widget.onDateSelected?.call(nd);
+    } else if (widget.dayNavigation) {
+      final nm =
+          DateTime(_displayMonth.year, _displayMonth.month + direction, 1);
+      setState(() => _displayMonth = nm);
+      widget.onMonthChanged?.call(nm);
+    } else {
+      final nm =
+          DateTime(_displayMonth.year, _displayMonth.month + direction, 1);
+      setState(() {
+        _displayMonth = nm;
+        _selectedDay = nm;
+      });
+      widget.onDateSelected?.call(nm);
+    }
   }
 
   Future<void> _openCalendar() async {
@@ -93,14 +153,16 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
               color: const Color(0xFFF4F4F4),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: _CustomCalendarPicker(initialDate: _selectedDate),
+            child: _CustomCalendarPicker(
+                initialDate: _selectedDay ?? _displayMonth),
           ),
         );
       },
     );
     if (picked != null) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDay = picked;
+        _displayMonth = _monthOf(picked);
       });
       widget.onDateSelected?.call(picked);
     }
@@ -131,7 +193,7 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
             // Left arrow button
             _buildNavButton(
               icon: Icons.chevron_left,
-              onTap: _goToPreviousMonth,
+              onTap: () => _step(-1),
             ),
 
             const Spacer(),
@@ -141,7 +203,7 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Día pill
-                _buildPill(_day, isSelected: false),
+                _buildPill(_dayLabel, isSelected: false),
                 const SizedBox(width: 1.5),
                 // Month pill (highlighted with border)
                 _buildPill(_monthName, isSelected: true),
@@ -156,7 +218,7 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
             // Right arrow button
             _buildNavButton(
               icon: Icons.chevron_right,
-              onTap: _goToNextMonth,
+              onTap: () => _step(1),
             ),
           ],
         ),

@@ -4,6 +4,10 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
+import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_widget.dart';
+import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_2/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_widget.dart';
+import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos/l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos_widget.dart';
+import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos_2/l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos2_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,6 +26,7 @@ class _LegalProcess {
     this.imageUrl = '',
     this.propertyType = '',
     this.createdAt = '',
+    this.commission,
   });
 
   final String id;
@@ -35,6 +40,10 @@ class _LegalProcess {
   final String propertyType;
   final String createdAt;
 
+  /// Commission the associate can earn for this assignment. Null when the
+  /// backend does not (yet) return an amount.
+  final double? commission;
+
   /// Factory from API JSON item
   factory _LegalProcess.fromJson(Map<String, dynamic> json) {
     final property = json['property'] as Map<String, dynamic>? ?? {};
@@ -47,7 +56,29 @@ class _LegalProcess {
       imageUrl: property['image']?.toString() ?? '',
       propertyType: property['propertyType']?.toString() ?? '',
       createdAt: json['createdAt']?.toString() ?? '',
+      commission: _readCommission(json),
     );
+  }
+
+  /// Reads the commission amount defensively. The exact backend field name is
+  /// not yet confirmed, so we try the most likely keys (top-level and nested)
+  /// and fall back to null. Adjust the key list once the API contract is set.
+  static double? _readCommission(Map<String, dynamic> json) {
+    final property = json['property'] as Map<String, dynamic>? ?? {};
+    final candidates = <dynamic>[
+      json['commission'],
+      json['associateCommission'],
+      json['potentialCommission'],
+      json['estimatedCommission'],
+      property['commission'],
+    ];
+    for (final value in candidates) {
+      if (value == null) continue;
+      if (value is num) return value.toDouble();
+      final parsed = double.tryParse(value.toString());
+      if (parsed != null) return parsed;
+    }
+    return null;
   }
 }
 
@@ -249,7 +280,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             context,
                             title: 'Tus siguientes inmuebles\nasignados',
                             onVerMas: () {
-                              // TODO: navigate to full list
+                              context.pushNamed(
+                                  LEGALASSOCIATEProcesosWidget.routeName);
                             },
                           ),
                           const SizedBox(height: 14.0),
@@ -270,7 +302,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             context,
                             title: 'Propiedades pendientes\npor revisar',
                             onVerMas: () {
-                              // TODO: navigate to full list
+                              context.pushNamed(
+                                  LEGALASSOCIATEProcesosWidget.routeName);
                             },
                           ),
                           const SizedBox(height: 14.0),
@@ -294,7 +327,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             context,
                             title: 'Propiedades Completadas',
                             onVerMas: () {
-                              // TODO: navigate to history
+                              context.pushNamed(
+                                  LEGALASSOCIATEDocumentosWidget.routeName);
                             },
                           ),
                           const SizedBox(height: 14.0),
@@ -444,7 +478,6 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
   Widget _buildAssignedCard(BuildContext context, _LegalProcess process) {
     final formattedDate = _formatDate(process.createdAt);
     final formattedTime = _formatTime(process.createdAt);
-    final categoryLabel = _categoryLabel(process.category);
 
     return Container(
       width: 280.0,
@@ -495,12 +528,13 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                   ),
                 ),
                 const SizedBox(height: 2.0),
+                // Commission highlighted ("Podrás ganar: X")
                 Text(
-                  categoryLabel,
+                  'Podrás ganar: ${_formatCommission(process.commission)}',
                   style: GoogleFonts.publicSans(
-                    color: _textDark,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
+                    color: _aqua,
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -510,8 +544,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                   height: 29.0,
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: navigate to legal process step-by-step
-                      debugPrint('Iniciar Proceso: ${process.id}');
+                      context.pushNamed(
+                          LEGALASSOCIATEProcesos2Widget.routeName);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _aqua,
@@ -551,8 +585,18 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
     return GestureDetector(
       onTap: isCompleted
           ? () {
-              // TODO: open read-only history / PDFs
-              debugPrint('Ver historial: ${process.id}');
+              // Open the read-only history / final PDFs for this deal
+              context.pushNamed(
+                LEGALASSOCAITEDocumentos2Widget.routeName,
+                queryParameters: {
+                  'selectedProperty': serializeParam(
+                    process.address.isNotEmpty
+                        ? process.address
+                        : _propertyTypeLabel(process.propertyType),
+                    ParamType.String,
+                  ),
+                }.withoutNulls,
+              );
             }
           : null,
       child: Container(
@@ -609,7 +653,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                   ),
                   const SizedBox(height: 10.0),
                   // Status badge
-                  _buildStatusBadge(process.status, isCompleted),
+                  _buildStatusBadge(
+                      process.status, process.category, isCompleted),
                 ],
               ),
             ),
@@ -646,14 +691,15 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
 
   // ── Status badge builder ──────────────────────────────────────────────────
 
-  Widget _buildStatusBadge(String status, bool isCompleted) {
+  Widget _buildStatusBadge(String status, String category, bool isCompleted) {
     late String label;
     late Color bgColor;
     late Color textColor;
 
     if (isCompleted) {
-      // Approved properties always get success badge
-      label = 'Aprobado';
+      // Completed properties always get a definitive green success badge,
+      // worded by deal type (overrides any "pending" state from the mockup).
+      label = _completedLabel(category);
       bgColor = _badgeSuccessBg;
       textColor = _badgeSuccessText;
     } else {
@@ -735,6 +781,32 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
       return '$h12:$minute $period';
     } catch (_) {
       return '--:--';
+    }
+  }
+
+  // ── Helper: format commission amount ("Podrás ganar: X") ──────────────────
+
+  String _formatCommission(double? amount) {
+    if (amount == null || amount <= 0) return 'Por confirmar';
+    final whole = amount.round().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < whole.length; i++) {
+      if (i > 0 && (whole.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(whole[i]);
+    }
+    return '\$$buffer';
+  }
+
+  // ── Helper: definitive completed badge label by deal type ─────────────────
+
+  String _completedLabel(String category) {
+    switch (category) {
+      case 'SALE':
+        return 'Vendido';
+      case 'RENT':
+        return 'Arrendado';
+      default:
+        return 'Completado';
     }
   }
 
