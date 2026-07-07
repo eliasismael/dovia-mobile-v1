@@ -215,13 +215,11 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                             color: FlutterFlowTheme.of(context).secondaryBackground,
                             shape: BoxShape.circle,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
                             child: SvgPicture.asset(
                               'assets/images/shopping-bag.svg',
-                              width: 20.0,
-                              height: 20.0,
-                              fit: BoxFit.none,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
