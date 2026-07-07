@@ -173,6 +173,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     child: const DOVIASHAREDHeaderWidget(
                       title: 'Dovia Home',
                       showCart: true,
+                      showMap: false,
+                      showCurrency: false,
                     ),
                   ),
                   Padding(
