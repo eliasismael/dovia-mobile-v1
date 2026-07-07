@@ -4,6 +4,8 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
+import '/flutter_flow/flutter_flow_drop_down.dart';
+import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
@@ -86,65 +88,98 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          Text(
-                            'Selecciona la ubicación de tu propiedad con cobertura',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                  lineHeight: 1.3,
-                                ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 14.0, 0.0, 0.0),
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF007376),
+                              borderRadius: BorderRadius.circular(24.0),
+                              boxShadow: const [
+                                BoxShadow(
+                                  blurRadius: 12.0,
+                                  color: Color(0x33007376),
+                                  offset: Offset(0.0, 8.0),
+                                )
+                              ],
+                            ),
+                            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 15.0),
                             child: Text(
-                              'Podrás cambiar la ubicación de tu propiedad antes de la renovación de plan mensual',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
+                              '¡Al contratar Premium en DOVIA Home podras tener beneficios unicos!',
+                              style: FlutterFlowTheme.of(context).bodyMedium.override(
                                     font: GoogleFonts.publicSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    letterSpacing: 0.28,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
+                                    fontSize: 17.0,
                                   ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 14.0, 0.0, 0.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 300.0,
-                              child: custom_widgets.InteractiveMap(
-                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: 300.0,
-                                accessToken: FFAppConstants.MapboxAccessToken,
-                                startLat: -35.0,
-                                startLng: -58.0,
+                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
+                            child: Text(
+                              'Selecciona la ubicación de tu propiedad con cobertura',
+                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(
+                                      color: const Color(0xFF00444B),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    fontSize: 24.0,
+                                    lineHeight: 1.36,
+                                  ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+                            child: Text(
+                              'Podrás cambiar la ubicación de tu propiedad antes de la renovación de plan mensual',
+                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(
+                                      color: const Color(0xFF00444B),
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                    fontSize: 16.0,
+                                  ),
+                            ),
+                          ),
+                          Align(
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                              child: Text(
+                                'Zona donde se encuentre el inmueble',
+                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                      font: GoogleFonts.publicSans(
+                                        color: const Color(0xFF00444B),
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                      fontSize: 16.0,
+                                    ),
                               ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                            child: FlutterFlowDropDown<String>(
+                              controller: _model.dropDownValueController ??= FormFieldController<String>(null),
+                              options: const ['Zona Norte', 'Zona Sur', 'Centro'],
+                              onChanged: (val) => safeSetState(() => _model.dropDownValue = val),
+                              width: MediaQuery.sizeOf(context).width * 1.0,
+                              height: 50.0,
+                              textStyle: FlutterFlowTheme.of(context).bodyMedium,
+                              hintText: 'Selecciona zona donde se encuentra el inmueble',
+                              icon: const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: Color(0xFF191919),
+                                size: 24.0,
+                              ),
+                              fillColor: Colors.white,
+                              elevation: 2.0,
+                              borderColor: const Color(0xFFDFDFDF),
+                              borderWidth: 0.0,
+                              borderRadius: 10.0,
+                              margin: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                              hidesUnderline: true,
+                              isSearchable: false,
+                              isMultiSelect: false,
                             ),
                           ),
                           Align(
@@ -287,8 +322,23 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                 cursorColor:
                                     FlutterFlowTheme.of(context).primaryText,
                                 enableInteractiveSelection: true,
+                                onChanged: (_) => safeSetState(() {}),
                                 validator: _model.textController1Validator
                                     .asValidator(context),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+                            child: SizedBox(
+                              width: MediaQuery.sizeOf(context).width * 1.0,
+                              height: 300.0,
+                              child: custom_widgets.InteractiveMap(
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                height: 300.0,
+                                accessToken: FFAppConstants.MapboxAccessToken,
+                                startLat: -35.0,
+                                startLng: -58.0,
                               ),
                             ),
                           ),
@@ -445,11 +495,11 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 90.0),
                             child: FFButtonWidget(
-                              onPressed: () async {
+                              onPressed: (_model.dropDownValue == null || (_model.textController1?.text ?? '').isEmpty) ? null : () async {
                                 context.pushNamed(
                                     DHCLIENTHomepageWidget.routeName);
                               },
-                              text: 'Continuar',
+                              text: 'Aceptar',
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 42.0,
@@ -459,6 +509,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                     const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
+                                disabledColor: const Color(0xFFDFDFDF),
+                                disabledTextColor: const Color(0xFF6A6A6A),
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
                                     .override(
