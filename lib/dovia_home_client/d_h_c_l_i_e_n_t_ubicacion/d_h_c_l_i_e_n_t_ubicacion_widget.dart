@@ -21,6 +21,8 @@ class DHCLIENTUbicacionWidget extends StatefulWidget {
 
   static String routeName = 'DH_CLIENT_Ubicacion';
   static String routePath = '/dHCLIENTUbicacion';
+  
+  static String? pendingNextRoute;
 
   @override
   State<DHCLIENTUbicacionWidget> createState() =>
@@ -496,8 +498,12 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                 0.0, 20.0, 0.0, 90.0),
                             child: FFButtonWidget(
                               onPressed: (_model.dropDownValue == null || (_model.textController1?.text ?? '').isEmpty) ? null : () async {
-                                context.pushNamed(
-                                    DHCLIENTHomepageWidget.routeName);
+                                if (DHCLIENTUbicacionWidget.pendingNextRoute != null) {
+                                  context.pushNamed(DHCLIENTUbicacionWidget.pendingNextRoute!);
+                                  DHCLIENTUbicacionWidget.pendingNextRoute = null;
+                                } else {
+                                  context.pushNamed(DHCLIENTHomepageWidget.routeName);
+                                }
                               },
                               text: 'Aceptar',
                               options: FFButtonOptions(

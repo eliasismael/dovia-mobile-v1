@@ -40,14 +40,17 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     super.dispose();
   }
 
-  Widget _buildServiceCard(String title, String iconPath, {bool isEmergency = false, VoidCallback? onTap}) {
+  Widget _buildServiceCard(String title, String iconPath,
+      {bool isEmergency = false, VoidCallback? onTap}) {
     return InkWell(
       onTap: onTap,
       child: Container(
         width: 100.0,
         height: 100.0,
         decoration: BoxDecoration(
-          color: isEmergency ? FlutterFlowTheme.of(context).primary : FlutterFlowTheme.of(context).alternate,
+          color: isEmergency
+              ? FlutterFlowTheme.of(context).primary
+              : FlutterFlowTheme.of(context).alternate,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Column(
@@ -58,7 +61,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               width: 40.0,
               height: 40.0,
               decoration: BoxDecoration(
-                color: isEmergency ? const Color(0x551ACDD3) : const Color(0x98007376),
+                color: isEmergency
+                    ? const Color(0x551ACDD3)
+                    : const Color(0x98007376),
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ClipRRect(
@@ -70,7 +75,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     width: 24.0,
                     height: 24.0,
                     fit: BoxFit.contain,
-                    colorFilter: isEmergency ? const ColorFilter.mode(Colors.white, BlendMode.srcIn) : null,
+                    colorFilter: isEmergency
+                        ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                        : null,
                   ),
                 ),
               ),
@@ -80,10 +87,14 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               textAlign: TextAlign.center,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     font: GoogleFonts.inter(
-                      fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                      fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                      fontWeight:
+                          FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                      fontStyle:
+                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                     ),
-                    color: isEmergency ? Colors.white : FlutterFlowTheme.of(context).primaryText,
+                    color: isEmergency
+                        ? Colors.white
+                        : FlutterFlowTheme.of(context).primaryText,
                     fontSize: 12.0,
                   ),
             ),
@@ -105,11 +116,14 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: FlutterFlowTheme.of(context).alternate, width: 1),
+              border: Border.all(
+                  color: FlutterFlowTheme.of(context).alternate, width: 1),
             ),
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: SvgPicture.asset(iconPath, colorFilter: ColorFilter.mode(FlutterFlowTheme.of(context).primary, BlendMode.srcIn)),
+              child: SvgPicture.asset(iconPath,
+                  colorFilter: ColorFilter.mode(
+                      FlutterFlowTheme.of(context).primary, BlendMode.srcIn)),
             ),
           ),
           const SizedBox(width: 12),
@@ -178,7 +192,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 100.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 20.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +205,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             image: const DecorationImage(
-                              image: AssetImage('assets/images/TuHogarBanner.png'),
+                              image:
+                                  AssetImage('assets/images/TuHogarBanner.png'),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -198,7 +214,10 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
                               gradient: LinearGradient(
-                                colors: [Colors.black.withOpacity(0.4), Colors.transparent],
+                                colors: [
+                                  Colors.black.withOpacity(0.4),
+                                  Colors.transparent
+                                ],
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                               ),
@@ -233,11 +252,13 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                         // Catalogo de Servicios
                         Text(
                           'Servicios que encontraras en Dovia Home',
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                                fontSize: 16.0,
-                                color: FlutterFlowTheme.of(context).primary,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
+                                    fontSize: 16.0,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                  ),
                         ),
                         const SizedBox(height: 16),
                         Wrap(
@@ -245,19 +266,35 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           runSpacing: 8.0,
                           alignment: WrapAlignment.center,
                           children: [
-                            _buildServiceCard('Plomería', 'assets/images/IconoServicioPlomeria.svg'),
-                            _buildServiceCard('Eléctrico', 'assets/images/IconoServicioElectrico.svg'),
-                            _buildServiceCard('Albañilería', 'assets/images/IconoServicioAlbaileria.svg'),
-                            _buildServiceCard('Pintura', 'assets/images/IconServicioPintura.svg'),
-                            _buildServiceCard('Instalación', 'assets/images/IconServicioInstalacion.svg', onTap: () {
-                              context.pushNamed(DHCLIENTInstalacionWidget.routeName);
+                            _buildServiceCard('Plomería',
+                                'assets/images/IconoServicioPlomeria.svg'),
+                            _buildServiceCard('Eléctrico',
+                                'assets/images/IconoServicioElectrico.svg'),
+                            _buildServiceCard('Albañilería',
+                                'assets/images/IconoServicioAlbaileria.svg'),
+                            _buildServiceCard('Pintura',
+                                'assets/images/IconServicioPintura.svg'),
+                            _buildServiceCard('Instalación',
+                                'assets/images/IconServicioInstalacion.svg',
+                                onTap: () {
+                              DHCLIENTUbicacionWidget.pendingNextRoute =
+                                  DHCLIENTInstalacionWidget.routeName;
+                              context
+                                  .pushNamed(DHCLIENTUbicacionWidget.routeName);
                             }),
-                            _buildServiceCard('Servicio de\nemergencia', 'assets/images/warning-triangle.svg', isEmergency: true, onTap: () {
+                            _buildServiceCard('Servicio de\nemergencia',
+                                'assets/images/warning-triangle.svg',
+                                isEmergency: true, onTap: () {
                               if (hasSubscription) {
-                                context.pushNamed(DHCLIENTEmergenciasWidget.routeName);
+                                DHCLIENTUbicacionWidget.pendingNextRoute =
+                                    DHCLIENTEmergenciasWidget.routeName;
+                                context.pushNamed(
+                                    DHCLIENTUbicacionWidget.routeName);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Este servicio es solo para usuarios con suscripción.')),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Este servicio es solo para usuarios con suscripción.')),
                                 );
                               }
                             }),
@@ -293,26 +330,37 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   '1 servicio mensual incluido (programado o emergencia)',
                                   'Acceso a cotizaciones',
                                   'Atención prioritaria'
-                                ].map((benefit) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(Icons.check_circle, color: Colors.orange, size: 20),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          benefit,
-                                          style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )).toList(),
+                                ]
+                                    .map((benefit) => Padding(
+                                          padding: const EdgeInsets.only(
+                                              bottom: 8.0),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Icon(Icons.check_circle,
+                                                  color: Colors.orange,
+                                                  size: 20),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  benefit,
+                                                  style: GoogleFonts.inter(
+                                                      color: Colors.white,
+                                                      fontSize: 13),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ))
+                                    .toList(),
                                 const SizedBox(height: 16),
                                 FFButtonWidget(
                                   onPressed: () {
-                                    context.pushNamed('DC_Forma_Pago_Suscripcion1');
+                                    DHCLIENTUbicacionWidget.pendingNextRoute =
+                                        'DC_Forma_Pago_Suscripcion1';
+                                    context.pushNamed(
+                                        DHCLIENTUbicacionWidget.routeName);
                                   },
                                   text: 'Quiero suscribirme',
                                   options: FFButtonOptions(
@@ -320,7 +368,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                     height: 40.0,
                                     color: Colors.white,
                                     textStyle: GoogleFonts.publicSans(
-                                      color: FlutterFlowTheme.of(context).primary,
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                     borderRadius: BorderRadius.circular(24.0),
@@ -338,8 +387,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           children: [
                             Text(
                               'Próximas visitas',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
                                     fontSize: 16.0,
                                     color: FlutterFlowTheme.of(context).primary,
                                   ),
@@ -349,9 +401,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                               text: 'Ver todo',
                               options: FFButtonOptions(
                                 height: 30.0,
-                                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
                                 color: const Color(0xFFCCE3E4),
-                                textStyle: GoogleFonts.publicSans(color: FlutterFlowTheme.of(context).primary, fontSize: 14.0),
+                                textStyle: GoogleFonts.publicSans(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    fontSize: 14.0),
                                 borderRadius: BorderRadius.circular(24.0),
                                 elevation: 0,
                               ),
@@ -361,7 +416,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                         const SizedBox(height: 12),
                         Text(
                           'Revisa y gestiona las visitas ya calendizadas',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 12, color: FlutterFlowTheme.of(context).secondaryText),
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color:
+                                  FlutterFlowTheme.of(context).secondaryText),
                         ),
                         const SizedBox(height: 12),
                         wrapWithModel(
@@ -386,8 +445,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           children: [
                             Text(
                               'Visitas Finalizadas',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
                                     fontSize: 16.0,
                                     color: FlutterFlowTheme.of(context).primary,
                                   ),
@@ -397,9 +459,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                               text: 'Ver todo',
                               options: FFButtonOptions(
                                 height: 30.0,
-                                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
                                 color: const Color(0xFFCCE3E4),
-                                textStyle: GoogleFonts.publicSans(color: FlutterFlowTheme.of(context).primary, fontSize: 14.0),
+                                textStyle: GoogleFonts.publicSans(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    fontSize: 14.0),
                                 borderRadius: BorderRadius.circular(24.0),
                                 elevation: 0,
                               ),
@@ -409,7 +474,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                         const SizedBox(height: 12),
                         Text(
                           'Revisa y gestiona las visitas ya Finalizadas',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 12, color: FlutterFlowTheme.of(context).secondaryText),
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color:
+                                  FlutterFlowTheme.of(context).secondaryText),
                         ),
                         const SizedBox(height: 12),
                         Container(
@@ -417,7 +486,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: FlutterFlowTheme.of(context).alternate, width: 1),
+                            border: Border.all(
+                                color: FlutterFlowTheme.of(context).alternate,
+                                width: 1),
                           ),
                           child: Row(
                             children: [
@@ -430,7 +501,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: SvgPicture.asset('assets/images/IconoServicioPlomeria.svg'),
+                                  child: SvgPicture.asset(
+                                      'assets/images/IconoServicioPlomeria.svg'),
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -438,9 +510,16 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Reparación de tubería', style: GoogleFonts.publicSans(fontWeight: FontWeight.w600, fontSize: 14)),
+                                    Text('Reparación de tubería',
+                                        style: GoogleFonts.publicSans(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14)),
                                     const SizedBox(height: 4),
-                                    Text('Visita realizada', style: GoogleFonts.inter(color: FlutterFlowTheme.of(context).secondaryText, fontSize: 12)),
+                                    Text('Visita realizada',
+                                        style: GoogleFonts.inter(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            fontSize: 12)),
                                   ],
                                 ),
                               ),
@@ -450,11 +529,26 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                         const SizedBox(height: 50),
 
                         // Footer Confianza
-                        _buildTrustItem('assets/images/check.svg', 'Asociados verificados', 'Ejecutan bajo estándares DOVIA. No improvisamos, operamos.'),
-                        _buildTrustItem('assets/images/position.svg', 'Precios claros desde el inicio', 'Ves costo real, descuentos y ahorro antes de confirmar.'),
-                        _buildTrustItem('assets/images/IconRayito.svg', 'Respuesta en tiempo real', 'Emergencias sin espera. Actuamos lo antes posible.'),
-                        _buildTrustItem('assets/images/help-circle.svg', 'Sin fricción en el proceso', 'Solicitas, apruebas y resuelves sin llamadas ni vueltas.'),
-                        _buildTrustItem('assets/images/IconEscudo.svg', 'DOVIA supervisa todo el proceso', 'Cada servicio es monitoreado para garantizar calidad.'),
+                        _buildTrustItem(
+                            'assets/images/check.svg',
+                            'Asociados verificados',
+                            'Ejecutan bajo estándares DOVIA. No improvisamos, operamos.'),
+                        _buildTrustItem(
+                            'assets/images/position.svg',
+                            'Precios claros desde el inicio',
+                            'Ves costo real, descuentos y ahorro antes de confirmar.'),
+                        _buildTrustItem(
+                            'assets/images/IconRayito.svg',
+                            'Respuesta en tiempo real',
+                            'Emergencias sin espera. Actuamos lo antes posible.'),
+                        _buildTrustItem(
+                            'assets/images/help-circle.svg',
+                            'Sin fricción en el proceso',
+                            'Solicitas, apruebas y resuelves sin llamadas ni vueltas.'),
+                        _buildTrustItem(
+                            'assets/images/IconEscudo.svg',
+                            'DOVIA supervisa todo el proceso',
+                            'Cada servicio es monitoreado para garantizar calidad.'),
 
                         const SizedBox(height: 100), // Space for Navbar
                       ],
@@ -472,7 +566,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                   Align(
                     alignment: const AlignmentDirectional(1.0, 0.0),
                     child: Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 100.0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 15.0, 100.0),
                       child: wrapWithModel(
                         model: _model.fixedDoviaIconModel,
                         updateCallback: () => safeSetState(() {}),
