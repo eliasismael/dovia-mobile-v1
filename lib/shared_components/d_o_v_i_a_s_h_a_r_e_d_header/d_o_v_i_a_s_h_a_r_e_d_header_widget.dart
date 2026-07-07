@@ -17,6 +17,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showCurrency = true,
     this.showMap = true,
     this.showLogo = true,
+    this.showCart = false,
   }) : title = title ?? '[title]';
 
   final String title;
@@ -24,6 +25,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   final bool showCurrency;
   final bool showMap;
   final bool showLogo;
+  final bool showCart;
 
   @override
   State<DOVIASHAREDHeaderWidget> createState() =>
@@ -194,6 +196,33 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                             width: 8.0,
                             height: 8.0,
                             fit: BoxFit.none,
+                          ),
+                        ),
+                      ),
+                    if (widget.showCart)
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          // TODO: Navigate to cart
+                        },
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                            shape: BoxShape.circle,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: SvgPicture.asset(
+                              'assets/images/shopping-bag.svg',
+                              width: 20.0,
+                              height: 20.0,
+                              fit: BoxFit.none,
+                            ),
                           ),
                         ),
                       ),
