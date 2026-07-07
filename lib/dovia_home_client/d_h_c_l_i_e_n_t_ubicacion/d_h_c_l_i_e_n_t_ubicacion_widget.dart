@@ -21,7 +21,7 @@ class DHCLIENTUbicacionWidget extends StatefulWidget {
 
   static String routeName = 'DH_CLIENT_Ubicacion';
   static String routePath = '/dHCLIENTUbicacion';
-  
+
   static String? pendingNextRoute;
 
   @override
@@ -81,6 +81,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
                       title: 'Dovia Basic',
+                      showMap: false,
+                      showCurrency: false,
                     ),
                   ),
                   Padding(
@@ -103,23 +105,29 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                 )
                               ],
                             ),
-                            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 15.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 15.0, 20.0, 15.0),
                             child: Text(
-                              '¡Al contratar Premium en DOVIA Home podras tener beneficios unicos!',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              '¡Al contratar Premium en DOVIA Home podrás tener beneficios únicos!',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
                                     font: GoogleFonts.publicSans(
-                                      color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                     ),
+                                    color: Colors.white,
                                     fontSize: 17.0,
                                   ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 25.0, 0.0, 0.0),
                             child: Text(
                               'Selecciona la ubicación de tu propiedad con cobertura',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
                                     font: GoogleFonts.publicSans(
                                       color: const Color(0xFF00444B),
                                       fontWeight: FontWeight.w600,
@@ -130,10 +138,13 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 14.0, 0.0, 0.0),
                             child: Text(
                               'Podrás cambiar la ubicación de tu propiedad antes de la renovación de plan mensual',
-                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
                                     font: GoogleFonts.publicSans(
                                       color: const Color(0xFF00444B),
                                       fontWeight: FontWeight.normal,
@@ -145,10 +156,13 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Zona donde se encuentre el inmueble',
-                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
                                       font: GoogleFonts.publicSans(
                                         color: const Color(0xFF00444B),
                                         fontWeight: FontWeight.normal,
@@ -159,15 +173,43 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 12.0, 0.0, 0.0),
                             child: FlutterFlowDropDown<String>(
-                              controller: _model.dropDownValueController ??= FormFieldController<String>(null),
-                              options: const ['Zona Norte', 'Zona Sur', 'Centro'],
-                              onChanged: (val) => safeSetState(() => _model.dropDownValue = val),
+                              controller: _model.dropDownValueController ??=
+                                  FormFieldController<String>(null),
+                              options: const [
+                                'Zona 1',
+                                'Zona 2',
+                                'Zona 3',
+                                'Zona 4',
+                                'Zona 5',
+                                'Zona 6',
+                                'Zona 7',
+                                'Zona 8',
+                                'Zona 9',
+                                'Zona 10',
+                                'Zona 11',
+                                'Zona 12',
+                                'Zona 13',
+                                'Zona 14',
+                                'Zona 15',
+                                'Zona 16',
+                                'Zona 17',
+                                'Zona 18',
+                                'Zona 19',
+                                'Zona 21',
+                                'Zona 24',
+                                'Zona 25'
+                              ],
+                              onChanged: (val) => safeSetState(
+                                  () => _model.dropDownValue = val),
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 50.0,
-                              textStyle: FlutterFlowTheme.of(context).bodyMedium,
-                              hintText: 'Selecciona zona donde se encuentra el inmueble',
+                              textStyle:
+                                  FlutterFlowTheme.of(context).bodyMedium,
+                              hintText:
+                                  'Selecciona zona donde se encuentra el inmueble',
                               icon: const Icon(
                                 Icons.keyboard_arrow_down_rounded,
                                 color: Color(0xFF191919),
@@ -178,7 +220,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                               borderColor: const Color(0xFFDFDFDF),
                               borderWidth: 0.0,
                               borderRadius: 10.0,
-                              margin: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                              margin: const EdgeInsetsDirectional.fromSTEB(
+                                  12.0, 0.0, 12.0, 0.0),
                               hidesUnderline: true,
                               isSearchable: false,
                               isMultiSelect: false,
@@ -331,7 +374,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 14.0, 0.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 14.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 300.0,
@@ -497,14 +541,24 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 90.0),
                             child: FFButtonWidget(
-                              onPressed: (_model.dropDownValue == null || (_model.textController1?.text ?? '').isEmpty) ? null : () async {
-                                if (DHCLIENTUbicacionWidget.pendingNextRoute != null) {
-                                  context.pushNamed(DHCLIENTUbicacionWidget.pendingNextRoute!);
-                                  DHCLIENTUbicacionWidget.pendingNextRoute = null;
-                                } else {
-                                  context.pushNamed(DHCLIENTHomepageWidget.routeName);
-                                }
-                              },
+                              onPressed: (_model.dropDownValue == null ||
+                                      (_model.textController1?.text ?? '')
+                                          .isEmpty)
+                                  ? null
+                                  : () async {
+                                      if (DHCLIENTUbicacionWidget
+                                              .pendingNextRoute !=
+                                          null) {
+                                        context.pushNamed(
+                                            DHCLIENTUbicacionWidget
+                                                .pendingNextRoute!);
+                                        DHCLIENTUbicacionWidget
+                                            .pendingNextRoute = null;
+                                      } else {
+                                        context.pushNamed(
+                                            DHCLIENTHomepageWidget.routeName);
+                                      }
+                                    },
                               text: 'Aceptar',
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
