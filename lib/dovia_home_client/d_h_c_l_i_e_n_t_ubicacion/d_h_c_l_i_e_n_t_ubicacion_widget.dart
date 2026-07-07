@@ -225,6 +225,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                               hidesUnderline: true,
                               isSearchable: false,
                               isMultiSelect: false,
+                              maxHeight: 300.0,
                             ),
                           ),
                           Align(
