@@ -26,6 +26,13 @@ class DHCLIENTUbicacionModel extends FlutterFlowModel<DHCLIENTUbicacionWidget> {
   FocusNode? textFieldFocusNode2;
   TextEditingController? textController2;
   String? Function(BuildContext, String?)? textController2Validator;
+  // State field(s) for the "Altura" (street number) TextField.
+  FocusNode? alturaFocusNode;
+  TextEditingController? alturaController;
+  String? Function(BuildContext, String?)? alturaControllerValidator;
+  // Selected location from the interactive map.
+  double? selectedLat;
+  double? selectedLng;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
@@ -50,6 +57,9 @@ class DHCLIENTUbicacionModel extends FlutterFlowModel<DHCLIENTUbicacionWidget> {
 
     textFieldFocusNode2?.dispose();
     textController2?.dispose();
+
+    alturaFocusNode?.dispose();
+    alturaController?.dispose();
 
     fixedDoviaIconModel.dispose();
     dHCLIENTNavbarModel.dispose();
