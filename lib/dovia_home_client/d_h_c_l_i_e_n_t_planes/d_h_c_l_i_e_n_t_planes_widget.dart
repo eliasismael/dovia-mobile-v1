@@ -1,6 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,15 +28,387 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTPlanesModel());
-
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
   void dispose() {
     _model.maybeDispose();
-
     super.dispose();
+  }
+
+  Widget _buildBullet(String text) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).alternate,
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 8.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                width: 16.0,
+                height: 16.0,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 10.0,
+                ),
+              ),
+              Flexible(
+                child: Padding(
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
+                  child: Text(
+                    text,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.publicSans(),
+                          fontSize: 14.0,
+                          lineHeight: 1.4,
+                        ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 8.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Container(
+            width: 4.0,
+            height: 24.0,
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).primary,
+              borderRadius: BorderRadius.circular(2.0),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
+            child: Text(
+              title,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    fontSize: 20.0,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBeneficiosBadgeIcon({required double size, required IconData icon}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFB900), Color(0xFFFE9A00)],
+          begin: AlignmentDirectional(-1.0, -1.0),
+          end: AlignmentDirectional(1.0, 1.0),
+        ),
+        borderRadius: BorderRadius.circular(size / 2),
+      ),
+      child: Icon(
+        icon,
+        color: Colors.white,
+        size: size * 0.6,
+      ),
+    );
+  }
+
+  Widget _buildBeneficiosCard(List<String> additionals) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        padding: const EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 8.0),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFFBEB), Color(0xFFFFF7ED)],
+            begin: AlignmentDirectional(-1.0, -1.0),
+            end: AlignmentDirectional(1.0, 1.0),
+          ),
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: const Color(0xFFFEF3C6),
+            width: 1.0,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  _buildBeneficiosBadgeIcon(
+                      size: 20.0, icon: Icons.card_giftcard),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        8.0, 0.0, 0.0, 0.0),
+                    child: Text(
+                      'Beneficios adicionales',
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            color: const Color(0xFF0A7A7A),
+                            fontSize: 17.6,
+                            letterSpacing: -0.44,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 4.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: additionals
+                    .map((text) => Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 8.0, 0.0, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              _buildBeneficiosBadgeIcon(
+                                  size: 20.0, icon: Icons.check),
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      8.0, 0.0, 0.0, 0.0),
+                                  child: Text(
+                                    text,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.publicSans(
+                                            fontWeight:
+                                                text.contains('2 meses gratis')
+                                                    ? FontWeight.bold
+                                                    : FontWeight.normal,
+                                          ),
+                                          color: const Color(0xCC0A7A7A),
+                                          fontSize: 14.0,
+                                          letterSpacing: -0.15,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlcanceSection() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F8F8),
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Text(
+              'Alcance de los servicios',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    color: FlutterFlowTheme.of(context).primary,
+                    fontSize: 14.0,
+                  ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+              child: Text(
+                'Cada servicio cubre un alcance estándar. Si durante la visita se detecta que el trabajo requiere más tiempo, materiales o un proyecto mayor, DOVIA te enviará una propuesta clara antes de continuar. Nada se hace sin tu aprobación.',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.publicSans(),
+                      color: const Color(0xFF00444B),
+                      fontSize: 13.0,
+                      lineHeight: 1.4,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlanCard({
+    required String title,
+    required String price,
+    required String period,
+    required List<String> includes,
+    required List<String> additionals,
+  }) {
+    return InkWell(
+      splashColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTap: () async {
+        DHCLIENTUbicacionWidget.pendingNextRoute =
+            'DC_Forma_Pago_Suscripcion1';
+        context.pushNamed(DHCLIENTUbicacionWidget.routeName);
+      },
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          boxShadow: const [
+            BoxShadow(
+              blurRadius: 10.0,
+              color: Color(0x33000000),
+              offset: Offset(0.0, 2.0),
+            )
+          ],
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              width: MediaQuery.sizeOf(context).width * 1.0,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF0A7A7A), Color(0xFF0D9F9F)],
+                  stops: [0.0, 1.0],
+                  begin: AlignmentDirectional(0.0, -1.0),
+                  end: AlignmentDirectional(0, 1.0),
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(0.0),
+                  bottomRight: Radius.circular(0.0),
+                  topLeft: Radius.circular(24.0),
+                  topRight: Radius.circular(24.0),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    20.0, 20.0, 20.0, 20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text(
+                      title,
+                      style: FlutterFlowTheme.of(context).titleSmall.override(
+                            font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 8.0, 0.0, 0.0),
+                      child: RichText(
+                        textScaler: MediaQuery.of(context).textScaler,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: price,
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    color: Colors.white,
+                                    fontSize: 32.0,
+                                  ),
+                            ),
+                            TextSpan(
+                              text: period,
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.inter(),
+                                    color: const Color(0xCDFFFFFF),
+                                    fontSize: 16.0,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 4.0, 0.0, 0.0),
+                      child: Text(
+                        '* Renovación automática',
+                        style: FlutterFlowTheme.of(context).bodySmall.override(
+                              font: GoogleFonts.publicSans(),
+                              color: const Color(0xCDFFFFFF),
+                              fontSize: 12.0,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 30.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSectionTitle('Incluye:'),
+                  ...includes.map((text) => _buildBullet(text)),
+                  _buildBeneficiosCard(additionals),
+                  _buildAlcanceSection(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -43,869 +416,46 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 100.0,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0A7A7A), Color(0xFF0D9F9F)],
-                stops: [0.0, 1.0],
-                begin: AlignmentDirectional(0.0, -1.0),
-                end: AlignmentDirectional(0, 1.0),
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(0.0),
-                bottomRight: Radius.circular(0.0),
-                topLeft: Radius.circular(40.0),
-                topRight: Radius.circular(40.0),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(0.0, 19.0, 0.0, 0.0),
-                  child: FFButtonWidget(
-                    onPressed: () {
-                      print('Button pressed ...');
-                    },
-                    text: 'DOVIA BASIC',
-                    options: FFButtonOptions(
-                      width: 115.0,
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          14.0, 0.0, 14.0, 0.0),
-                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 0.0, 0.0, 0.0),
-                      color: const Color(0x20FFFFFF),
-                      textStyle:
-                          FlutterFlowTheme.of(context).titleSmall.override(
-                                font: GoogleFonts.publicSans(
-                                  fontWeight: FontWeight.normal,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                                color: Colors.white,
-                                fontSize: 14.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.normal,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
-                              ),
-                      elevation: 0.0,
-                      borderRadius: BorderRadius.circular(24.0),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
-                  child: RichText(
-                    textScaler: MediaQuery.of(context).textScaler,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '\$30',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                    fontSize: 60.0,
-                                    letterSpacing: 0.2,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                        ),
-                        TextSpan(
-                          text: '/mes\n',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    color: const Color(0xCDFFFFFF),
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                        ),
-                        TextSpan(
-                          text: 'Tu propiedad, siempre al dia',
-                          style: GoogleFonts.publicSans(
-                            color: const Color(0xCDFFFFFF),
-                          ),
-                        )
-                      ],
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
+          _buildPlanCard(
+            title: 'PLAN MENSUAL',
+            price: 'Q299.99',
+            period: ' /mes',
+            includes: [
+              '1 servicio mensual incluido (programado o emergencia).',
+              'Acceso a cotizaciones.',
+              'Servicios programados con mínimo de 24 horas de anticipación.',
+              '35% de descuento en servicios adicionales (Programados o de Emergencia).',
+              'Acceso a servicios de emergencia con tiempo objetivo menor a 18 horas.',
+              'Garantía DOVIA en todos los trabajos.',
+            ],
+            additionals: [
+              'Atención prioritaria.',
+              'Descuento en tus servicios.',
+              'Historial detallado de servicios.',
+            ],
           ),
-          Container(
-            width: 100.0,
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              boxShadow: const [
-                BoxShadow(
-                  blurRadius: 10.0,
-                  color: Color(0x33000000),
-                  offset: Offset(
-                    0.0,
-                    2.0,
-                  ),
-                )
-              ],
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24.0),
-                bottomRight: Radius.circular(24.0),
-                topLeft: Radius.circular(0.0),
-                topRight: Radius.circular(0.0),
-              ),
-            ),
-            child: Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 18.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 21.0, 0.0, 0.0),
-                    child: Text(
-                      'Plan diseñado para 1 propiedad registrada en DOVIA. Mantén tu hogar en perfectas condiciones con nuestro servicio integral.',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.publicSans(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                            color: const Color(0xCD00444B),
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                      overflow: TextOverflow.clip,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 34.0, 0.0, 0.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(0.0),
-                          child: SvgPicture.asset(
-                            'assets/images/IconoPlanesContiene.svg',
-                            width: 4.0,
-                            height: 24.0,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              10.0, 0.0, 0.0, 0.0),
-                          child: Text(
-                            'Incluye:',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  fontSize: 20.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                  lineHeight: 1.4,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 12.0, 0.0, 0.0),
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 1.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).alternate,
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                8.0, 0.0, 0.0, 0.0),
-                            child: Container(
-                              width: 16.0,
-                              height: 16.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/IconRayito.svg',
-                                  fit: BoxFit.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                '2 servicios mensuales',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.publicSans(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 12.0, 0.0, 0.0),
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 1.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                8.0, 0.0, 0.0, 0.0),
-                            child: Container(
-                              width: 16.0,
-                              height: 16.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).alternate,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/IconRegalo.svg',
-                                  fit: BoxFit.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                '10% de descuento en cualquier\ncotización adicional',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.publicSans(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                overflow: TextOverflow.clip,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 12.0, 0.0, 0.0),
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 1.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).alternate,
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                8.0, 0.0, 0.0, 0.0),
-                            child: Container(
-                              width: 16.0,
-                              height: 16.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/IconRegaloDHC.svg',
-                                  fit: BoxFit.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                'Atención de emergencias en menos\nde 24 horas',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.publicSans(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 12.0, 0.0, 0.0),
-                    child: Container(
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                8.0, 0.0, 0.0, 0.0),
-                            child: Container(
-                              width: 16.0,
-                              height: 16.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).alternate,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/IconEscudo.svg',
-                                  fit: BoxFit.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                'Garantía DOVIA en todos los trabajos',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.publicSans(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                overflow: TextOverflow.clip,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 12.0, 0.0, 0.0),
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 1.0,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFFBEB),
-                        borderRadius: BorderRadius.circular(16.0),
-                        border: Border.all(
-                          color: const Color(0xFFFEF3C6),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            8.0, 8.0, 8.0, 8.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Container(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Color(0xFFFFB900),
-                                        Color(0xFFFE9A00)
-                                      ],
-                                      stops: [0.0, 1.0],
-                                      begin: AlignmentDirectional(0.0, -1.0),
-                                      end: AlignmentDirectional(0, 1.0),
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/IconRegaloBlanco.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            8.0, 0.0, 0.0, 0.0),
-                                    child: Text(
-                                      'Beneficios adicionales',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.w600,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            fontSize: 17.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.4,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Container(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Color(0xFFFFB900),
-                                        Color(0xFFFE9A00)
-                                      ],
-                                      stops: [0.0, 1.0],
-                                      begin: AlignmentDirectional(0.0, -1.0),
-                                      end: AlignmentDirectional(0, 1.0),
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/IconoVistoBlanco.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            8.0, 0.0, 0.0, 0.0),
-                                    child: Text(
-                                      'Prioridad en reservas',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.normal,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            fontSize: 14.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.4,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Container(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Color(0xFFFFB900),
-                                        Color(0xFFFE9A00)
-                                      ],
-                                      stops: [0.0, 1.0],
-                                      begin: AlignmentDirectional(0.0, -1.0),
-                                      end: AlignmentDirectional(0, 1.0),
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/IconoVistoBlanco.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            8.0, 0.0, 0.0, 0.0),
-                                    child: Text(
-                                      'Asesoría técnica gratuita',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.normal,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            fontSize: 14.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.4,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Container(
-                                  width: 20.0,
-                                  height: 20.0,
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Color(0xFFFFB900),
-                                        Color(0xFFFE9A00)
-                                      ],
-                                      stops: [0.0, 1.0],
-                                      begin: AlignmentDirectional(0.0, -1.0),
-                                      end: AlignmentDirectional(0, 1.0),
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/IconoVistoBlanco.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            8.0, 0.0, 0.0, 0.0),
-                                    child: Text(
-                                      'Historial detallado de servicios',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.normal,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            fontSize: 14.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.4,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ].divide(const SizedBox(height: 8.0)),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 12.0, 0.0, 40.0),
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 1.0,
-                      decoration: BoxDecoration(
-                        color: const Color(0x0E0A7A7A),
-                        borderRadius: BorderRadius.circular(16.0),
-                        border: Border.all(
-                          color: const Color(0xFF0A7A7A),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            8.0, 8.0, 8.0, 8.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Text(
-                                'Alcance de los servicios',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.publicSans(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 17.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                            ),
-                            Text(
-                              'Cada servicio cubre un alcance estándar. Si durante la visita se detecta que el trabajo requiere más tiempo, materiales o un proyecto mayor, DOVIA te enviará una propuesta clara antes de continuar.',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.publicSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    color: const Color(0xB00B757D),
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                    lineHeight: 1.6,
-                                  ),
-                            ),
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 24.0, 0.0, 0.0),
-                                child: Text(
-                                  'Nada se hace sin tu aprobación.',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 16.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        lineHeight: 1.6,
-                                      ),
-                                ),
-                              ),
-                            ),
-                          ].divide(const SizedBox(height: 8.0)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          const SizedBox(height: 24.0),
+          _buildPlanCard(
+            title: 'PLAN ANUAL',
+            price: 'Q2,999.99',
+            period: ' /año',
+            includes: [
+              '1 servicio mensual incluido (programado o emergencia).',
+              'Acceso a cotizaciones.',
+              'Servicios programados con mínimo de 24 horas de anticipación.',
+              '35% de descuento en servicios adicionales (Programados o de Emergencia).',
+              'Acceso a servicios de emergencia con tiempo objetivo menor a 18 horas.',
+              'Garantía DOVIA en todos los trabajos.',
+            ],
+            additionals: [
+              'Atención prioritaria.',
+              '2 meses gratis',
+              'Historial detallado de servicios.',
+            ],
           ),
+          const SizedBox(height: 24.0),
         ],
       ),
     );

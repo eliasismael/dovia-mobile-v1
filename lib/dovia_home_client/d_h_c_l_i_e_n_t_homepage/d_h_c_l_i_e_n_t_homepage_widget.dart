@@ -357,10 +357,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                 const SizedBox(height: 16),
                                 FFButtonWidget(
                                   onPressed: () {
-                                    DHCLIENTUbicacionWidget.pendingNextRoute =
-                                        'DC_Forma_Pago_Suscripcion1';
                                     context.pushNamed(
-                                        DHCLIENTUbicacionWidget.routeName);
+                                        DHCLIENTPlanesPageWidget.routeName);
                                   },
                                   text: 'Quiero suscribirme',
                                   options: FFButtonOptions(
