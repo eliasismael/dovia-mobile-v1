@@ -85,7 +85,8 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                         20.0, 20.0, 20.0, 80.0),
                     child: FFButtonWidget(
                       onPressed: () async {
-                        context.pushNamed(DHCLIENTUbicacionWidget.routeName);
+                        context.pushNamed(
+                            DHCLIENTValorVisitaPageWidget.routeName);
                       },
                       text: 'Omitir',
                       options: FFButtonOptions(

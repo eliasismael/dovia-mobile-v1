@@ -46,6 +46,8 @@ export '/dovia_home_client/d_h_c_l_i_e_n_t_planes_page/d_h_c_l_i_e_n_t_planes_pa
     show DHCLIENTPlanesPageWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_ubicacion/d_h_c_l_i_e_n_t_ubicacion_widget.dart'
     show DHCLIENTUbicacionWidget;
+export '/dovia_home_client/d_h_c_l_i_e_n_t_valor_visita_page/d_h_c_l_i_e_n_t_valor_visita_page_widget.dart'
+    show DHCLIENTValorVisitaPageWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart'
     show DHCLIENTHomepageWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_emergencias/d_h_c_l_i_e_n_t_emergencias_widget.dart'

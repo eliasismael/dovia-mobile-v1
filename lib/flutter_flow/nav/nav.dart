@@ -213,6 +213,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const DHCLIENTUbicacionWidget(),
         ),
         FFRoute(
+          name: DHCLIENTValorVisitaPageWidget.routeName,
+          path: DHCLIENTValorVisitaPageWidget.routePath,
+          builder: (context, params) => const DHCLIENTValorVisitaPageWidget(),
+        ),
+        FFRoute(
           name: DHCLIENTHomepageWidget.routeName,
           path: DHCLIENTHomepageWidget.routePath,
           builder: (context, params) => const DHCLIENTHomepageWidget(),
