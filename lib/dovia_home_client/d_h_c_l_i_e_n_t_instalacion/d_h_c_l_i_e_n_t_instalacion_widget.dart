@@ -2,9 +2,11 @@ import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +18,17 @@ class DHCLIENTInstalacionWidget extends StatefulWidget {
 
   static String routeName = 'DH_CLIENT_Instalacion';
   static String routePath = '/dHCLIENTInstalacion';
+
+  /// Título del servicio elegido en el homepage (Ej: "Plomería",
+  /// "Instalación"). Debe inyectarse dinámicamente según la categoría que el
+  /// cliente haya seleccionado. Se usa un campo estático porque la ruta se
+  /// navega solo por nombre (mismo patrón que
+  /// [DHCLIENTUbicacionWidget.pendingNextRoute]).
+  static String serviceTitle = 'Instalación';
+
+  /// Listado de alcanzables que incluye la categoría. Idealmente proviene del
+  /// backend; si viene vacío se muestran los placeholders del diseño.
+  static List<String> alcanzables = [];
 
   @override
   State<DHCLIENTInstalacionWidget> createState() =>
@@ -45,6 +58,97 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     super.dispose();
   }
 
+  /// La descripción tiene texto y hay al menos una foto cargada.
+  bool get _canContinue =>
+      (_model.textController?.text.trim().isNotEmpty ?? false) &&
+      _model.uploadedPhotos.isNotEmpty;
+
+  Future<void> _pickPhotos() async {
+    final selectedMedia = await selectMediaWithSourceBottomSheet(
+      context: context,
+      allowPhoto: true,
+      pickerFontFamily: 'Public Sans',
+    );
+    if (selectedMedia == null ||
+        !selectedMedia
+            .every((m) => validateFileFormat(m.storagePath, context))) {
+      return;
+    }
+    safeSetState(() => _model.isPhotoUploading = true);
+    try {
+      final files = selectedMedia
+          .map((m) => FFUploadedFile(
+                name: m.storagePath.split('/').last,
+                bytes: m.bytes,
+                height: m.dimensions?.height,
+                width: m.dimensions?.width,
+                blurHash: m.blurHash,
+                originalFilename: m.originalFilename,
+              ))
+          .toList();
+      safeSetState(() => _model.uploadedPhotos.addAll(files));
+    } finally {
+      safeSetState(() => _model.isPhotoUploading = false);
+    }
+  }
+
+  Widget _buildPhotoThumbnails() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Wrap(
+        spacing: 10.0,
+        runSpacing: 10.0,
+        children: List.generate(_model.uploadedPhotos.length, (index) {
+          final photo = _model.uploadedPhotos[index];
+          return Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: photo.bytes != null
+                    ? Image.memory(
+                        photo.bytes!,
+                        width: 90.0,
+                        height: 90.0,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: 90.0,
+                        height: 90.0,
+                        color: FlutterFlowTheme.of(context).alternate,
+                      ),
+              ),
+              Positioned(
+                top: 4.0,
+                right: 4.0,
+                child: InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () => safeSetState(
+                      () => _model.uploadedPhotos.removeAt(index)),
+                  child: Container(
+                    width: 22.0,
+                    height: 22.0,
+                    decoration: const BoxDecoration(
+                      color: Color(0xCC000000),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 16.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -69,13 +173,15 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                   wrapWithModel(
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: const DOVIASHAREDHeaderWidget(
-                      title: 'Instalación',
+                    child: DOVIASHAREDHeaderWidget(
+                      title: DHCLIENTInstalacionWidget.serviceTitle,
+                      showCurrency: false,
+                      showMap: false,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 0.0, 20.0, 100.0),
+                        20.0, 24.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -112,6 +218,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                             child: TextFormField(
                               controller: _model.textController,
                               focusNode: _model.textFieldFocusNode,
+                              onChanged: (_) => safeSetState(() {}),
                               autofocus: false,
                               enabled: true,
                               obscureText: false,
@@ -279,16 +386,42 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 10.0, 0.0, 0.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: SvgPicture.asset(
-                              'assets/images/AddMediaImage.svg',
+                          child: InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: _model.isPhotoUploading ? null : _pickPhotos,
+                            child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 200.0,
-                              fit: BoxFit.cover,
+                              height: 104.0,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFAFAFA),
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: _model.isPhotoUploading
+                                  ? SizedBox(
+                                      width: 24.0,
+                                      height: 24.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          FlutterFlowTheme.of(context).primary,
+                                        ),
+                                      ),
+                                    )
+                                  : SvgPicture.asset(
+                                      'assets/images/AddMediaImage.svg',
+                                      width: 24.0,
+                                      height: 24.0,
+                                      fit: BoxFit.contain,
+                                    ),
                             ),
                           ),
                         ),
+                        if (_model.uploadedPhotos.isNotEmpty)
+                          _buildPhotoThumbnails(),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 12.0, 0.0, 0.0),
@@ -307,7 +440,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                   children: [
                                     TextSpan(
                                       text:
-                                          'Recuerda que los alcanzables en X servicio consiste en:\n-\n-\n-\nCualquier trabajo adicional se te cotizara y lo recibirás en la plataformas ',
+                                          'Recuerda que los alcanzables en ${DHCLIENTInstalacionWidget.serviceTitle.toLowerCase()} consiste en:\n${DHCLIENTInstalacionWidget.alcanzables.isEmpty ? '-\n-\n-' : DHCLIENTInstalacionWidget.alcanzables.map((e) => '- $e').join('\n')}\nCualquier trabajo adicional se te cotizara y lo recibirás en la plataforma',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -365,9 +498,13 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 150.0, 0.0, 0.0),
                             child: FFButtonWidget(
-                              onPressed: () {
-                                print('Button pressed ...');
-                              },
+                              onPressed: _canContinue
+                                  ? () async {
+                                      context.pushNamed(
+                                          DHCLIENTValorVisitaPageWidget
+                                              .routeName);
+                                    }
+                                  : null,
                               text: 'Siguiente',
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -378,6 +515,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                     const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
+                                disabledColor: const Color(0xFFDFDFDF),
+                                disabledTextColor: const Color(0xFF6A6A6A),
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
                                     .override(

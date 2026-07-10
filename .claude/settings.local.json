@@ -24,7 +24,9 @@
       "PowerShell(dart analyze lib\\\\showing\\\\s_h_o_w_i_n_g_propiedad_detalle lib\\\\showing\\\\s_h_o_w_i_n_g_propiedad_a_mostrar lib\\\\flutter_flow\\\\nav 2>&1)",
       "PowerShell(dart analyze lib\\\\app_state.dart lib\\\\showing\\\\s_h_o_w_i_n_g_propiedad_a_mostrar lib\\\\showing\\\\s_h_o_w_i_n_g_propiedades_a_mostrar 2>&1)",
       "PowerShell(dart analyze lib/showing/s_h_o_w_i_n_g_home/s_h_o_w_i_n_g_home_widget.dart lib/showing/s_h_o_w_i_n_g_propiedad_a_mostrar/s_h_o_w_i_n_g_propiedad_a_mostrar_widget.dart)",
-      "mcp__claude_ai_Figma__get_design_context"
+      "mcp__claude_ai_Figma__get_design_context",
+      "Bash(flutter analyze *)",
+      "Bash(dart analyze *)"
     ]
   }
 }

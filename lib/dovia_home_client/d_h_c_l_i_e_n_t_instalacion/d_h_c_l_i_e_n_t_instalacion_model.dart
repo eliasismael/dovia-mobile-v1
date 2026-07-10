@@ -18,6 +18,9 @@ class DHCLIENTInstalacionModel
   FocusNode? textFieldFocusNode;
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
+  // Fotos cargadas por el cliente para describir el problema/trabajo.
+  List<FFUploadedFile> uploadedPhotos = [];
+  bool isPhotoUploading = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.

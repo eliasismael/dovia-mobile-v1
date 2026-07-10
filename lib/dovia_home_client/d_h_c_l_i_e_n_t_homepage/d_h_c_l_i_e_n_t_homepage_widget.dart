@@ -104,6 +104,15 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     );
   }
 
+  /// Abre la pantalla de levantamiento del servicio (describir problema y
+  /// subir fotos) con el título de la categoría elegida. Al continuar, el
+  /// cliente sin suscripción avanza a la pantalla de valor de la visita.
+  void _openServiceDetail(String serviceTitle) {
+    DHCLIENTInstalacionWidget.serviceTitle = serviceTitle;
+    DHCLIENTInstalacionWidget.alcanzables = [];
+    context.pushNamed(DHCLIENTInstalacionWidget.routeName);
+  }
+
   Widget _buildTrustItem(String iconPath, String title, String subtitle) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -267,21 +276,20 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           alignment: WrapAlignment.center,
                           children: [
                             _buildServiceCard('Plomería',
-                                'assets/images/IconoServicioPlomeria.svg'),
+                                'assets/images/IconoServicioPlomeria.svg',
+                                onTap: () => _openServiceDetail('Plomería')),
                             _buildServiceCard('Eléctrico',
-                                'assets/images/IconoServicioElectrico.svg'),
+                                'assets/images/IconoServicioElectrico.svg',
+                                onTap: () => _openServiceDetail('Eléctrico')),
                             _buildServiceCard('Albañilería',
-                                'assets/images/IconoServicioAlbaileria.svg'),
+                                'assets/images/IconoServicioAlbaileria.svg',
+                                onTap: () => _openServiceDetail('Albañilería')),
                             _buildServiceCard('Pintura',
-                                'assets/images/IconServicioPintura.svg'),
+                                'assets/images/IconServicioPintura.svg',
+                                onTap: () => _openServiceDetail('Pintura')),
                             _buildServiceCard('Instalación',
                                 'assets/images/IconServicioInstalacion.svg',
-                                onTap: () {
-                              DHCLIENTUbicacionWidget.pendingNextRoute =
-                                  DHCLIENTInstalacionWidget.routeName;
-                              context
-                                  .pushNamed(DHCLIENTUbicacionWidget.routeName);
-                            }),
+                                onTap: () => _openServiceDetail('Instalación')),
                             _buildServiceCard('Servicio de\nemergencia',
                                 'assets/images/warning-triangle.svg',
                                 isEmergency: true, onTap: () {
