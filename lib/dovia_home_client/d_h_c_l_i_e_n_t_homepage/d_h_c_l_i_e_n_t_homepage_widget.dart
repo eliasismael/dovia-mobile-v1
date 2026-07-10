@@ -13,11 +13,34 @@ import 'package:google_fonts/google_fonts.dart';
 import 'd_h_c_l_i_e_n_t_homepage_model.dart';
 export 'd_h_c_l_i_e_n_t_homepage_model.dart';
 
+/// Solicitud de servicio agendada por el cliente. Se muestra en "Próximas
+/// visitas" con estatus "Pendiente".
+///
+/// TODO: Reemplazar por los datos reales de la solicitud creada en el backend
+/// (GET de próximas visitas del cliente) una vez exista el endpoint.
+class ScheduledVisit {
+  const ScheduledVisit({
+    required this.service,
+    required this.date,
+    required this.time,
+    this.status = 'Pendiente',
+  });
+
+  final String service;
+  final String date;
+  final String time;
+  final String status;
+}
+
 class DHCLIENTHomepageWidget extends StatefulWidget {
   const DHCLIENTHomepageWidget({super.key});
 
   static String routeName = 'DH_CLIENT_Homepage';
   static String routePath = '/dHCLIENTHomepage';
+
+  /// Visitas recién agendadas desde el flujo de solicitud. La pantalla de
+  /// Agenda agrega aquí la nueva solicitud antes de redirigir al Dashboard.
+  static final List<ScheduledVisit> upcomingVisits = [];
 
   @override
   State<DHCLIENTHomepageWidget> createState() => _DHCLIENTHomepageWidgetState();
@@ -429,6 +452,17 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   FlutterFlowTheme.of(context).secondaryText),
                         ),
                         const SizedBox(height: 12),
+                        // Solicitudes recién agendadas (estatus Pendiente).
+                        ...DHCLIENTHomepageWidget.upcomingVisits.map(
+                          (visit) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: DHCLIENTProximasVisitasWidget(
+                              title: visit.service,
+                              date: '${visit.date} · ${visit.time}',
+                              status: visit.status,
+                            ),
+                          ),
+                        ),
                         wrapWithModel(
                           model: _model.dHCLIENTProximasVisitasModel1,
                           updateCallback: () => safeSetState(() {}),

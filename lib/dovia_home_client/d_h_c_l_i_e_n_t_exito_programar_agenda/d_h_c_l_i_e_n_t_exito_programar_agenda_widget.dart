@@ -29,6 +29,14 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
     super.initState();
     _model = createModel(context, () => DHCLIENTExitoProgramarAgendaModel());
 
+    // Cierre automático del pop-up tras 2s (también se cierra al tapear
+    // fuera). Al cerrarse, la pantalla de Agenda redirige al Dashboard.
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        Navigator.of(context).maybePop();
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -42,11 +50,12 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
           child: Container(
-            width: MediaQuery.sizeOf(context).width * 1.0,
+            width: double.infinity,
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).secondaryBackground,
               borderRadius: BorderRadius.circular(10.4),
@@ -84,7 +93,7 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         0.0, 34.0, 0.0, 0.0),
                     child: Text(
-                      'Programaste con éxito tu servicio para la Casa A.',
+                      'Programaste con éxito tu servicio, pronto se te avisara para confirmar la visita a tu casa.',
                       textAlign: TextAlign.center,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(
@@ -111,22 +120,26 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
             ),
           ),
         ),
-        Align(
-          alignment: const AlignmentDirectional(0.0, -1.0),
-          child: Container(
-            width: 104.0,
-            height: 104.0,
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).primary,
-              shape: BoxShape.circle,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24.0),
-              child: SvgPicture.asset(
-                'assets/images/Visto.svg',
-                width: 104.0,
-                height: 104.0,
-                fit: BoxFit.none,
+        PositionedDirectional(
+          top: -2.0,
+          start: 0.0,
+          end: 0.0,
+          child: Center(
+            child: Container(
+              width: 104.0,
+              height: 104.0,
+              decoration: BoxDecoration(
+                color: FlutterFlowTheme.of(context).primary,
+                shape: BoxShape.circle,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24.0),
+                child: SvgPicture.asset(
+                  'assets/images/Visto.svg',
+                  width: 104.0,
+                  height: 104.0,
+                  fit: BoxFit.none,
+                ),
               ),
             ),
           ),

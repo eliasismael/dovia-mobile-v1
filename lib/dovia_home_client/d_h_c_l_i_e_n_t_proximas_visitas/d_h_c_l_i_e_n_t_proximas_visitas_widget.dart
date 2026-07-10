@@ -12,11 +12,15 @@ class DHCLIENTProximasVisitasWidget extends StatefulWidget {
     this.title,
     this.date,
     this.icom,
+    this.status,
   });
 
   final String? title;
   final String? date;
   final String? icom;
+
+  /// Estatus de la solicitud (Ej: "Pendiente"). Si es null no se muestra.
+  final String? status;
 
   @override
   State<DHCLIENTProximasVisitasWidget> createState() =>
@@ -88,7 +92,7 @@ class _DHCLIENTProximasVisitasWidgetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Instalación de TV',
+                      widget.title ?? 'Instalación de TV',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.publicSans(
                               fontWeight: FlutterFlowTheme.of(context)
@@ -112,7 +116,7 @@ class _DHCLIENTProximasVisitasWidgetState
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           0.0, 15.0, 0.0, 0.0),
                       child: Text(
-                        'Lunes, 10 de Noviembre',
+                        widget.date ?? 'Lunes, 10 de Noviembre',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,
@@ -132,6 +136,24 @@ class _DHCLIENTProximasVisitasWidgetState
                 ),
               ),
             ),
+            if (widget.status != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0, vertical: 6.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDECC8),
+                  borderRadius: BorderRadius.circular(100.0),
+                ),
+                child: Text(
+                  widget.status!,
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.publicSans(
+                            fontWeight: FontWeight.w600),
+                        color: const Color(0xFF9A6700),
+                        fontSize: 12.0,
+                      ),
+                ),
+              ),
           ],
         ),
       ),

@@ -19,6 +19,22 @@ class DHCLIENTValorVisitaPageWidget extends StatefulWidget {
   static String routeName = 'DH_CLIENT_ValorVisita';
   static String routePath = '/dHCLIENTValorVisita';
 
+  /// Precio regular del servicio (pago por uso, sin plan).
+  static const String regularPrice = 'Q449.99';
+
+  /// Precio del servicio con descuento al suscribirse a Dovia Home.
+  static const String discountedPrice = 'Q314.99';
+
+  /// Bandera que la pantalla de planes activa al volver a este paso tras
+  /// contratar una suscripción. Como la navegación crea una nueva instancia de
+  /// esta página, usamos un campo estático para propagar el estado "suscrito"
+  /// de regreso (mismo patrón que [DHCLIENTUbicacionWidget.pendingNextRoute]).
+  ///
+  /// TODO: Cuando exista la pasarela de pago, esta bandera debe activarse solo
+  /// tras confirmar la compra del plan y procesar (o eximir con el 1er servicio
+  /// incluido) el cobro del servicio a precio con descuento.
+  static bool returnedFromSubscription = false;
+
   @override
   State<DHCLIENTValorVisitaPageWidget> createState() =>
       _DHCLIENTValorVisitaPageWidgetState();
@@ -30,12 +46,47 @@ class _DHCLIENTValorVisitaPageWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Cómo se pagó el servicio: null = sin pagar, 'direct' = pago por uso,
+  /// 'subscription' = pagado con descuento tras suscribirse.
+  String? _paidMethod;
+
+  bool get _isPaid => _paidMethod != null;
+
+  /// Anticipación mínima para agendar: 24h con suscripción, 36h sin plan.
+  int get _minAdvanceHours => _paidMethod == 'subscription' ? 24 : 36;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTValorVisitaPageModel());
 
+    // El cliente regresó desde la contratación del plan: el servicio queda
+    // pagado con descuento (simulado hasta integrar la pasarela).
+    if (DHCLIENTValorVisitaPageWidget.returnedFromSubscription) {
+      DHCLIENTValorVisitaPageWidget.returnedFromSubscription = false;
+      _paidMethod = 'subscription';
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  /// Pago por uso a precio regular. Al tapear "Contratar" se abriría la
+  /// pasarela de pagos; al confirmarse el cobro, el servicio queda pagado y
+  /// se habilita "Siguiente".
+  Future<void> _payDirect() async {
+    if (_isPaid) return;
+    // TODO: Abrir la pasarela de pagos (tarjetas guardadas o nueva tarjeta) por
+    // DHCLIENTValorVisitaPageWidget.regularPrice. Marcar como pagado solo tras
+    // confirmar el cobro. Mientras no esté integrada, simulamos el éxito.
+    safeSetState(() => _paidMethod = 'direct');
+  }
+
+  /// Flujo de upsell: redirige a la selección y pago del plan. La pantalla de
+  /// planes regresa a este paso marcando el servicio como pagado con descuento.
+  void _goToSubscription() {
+    if (_isPaid) return;
+    DHCLIENTValorVisitaPageWidget.returnedFromSubscription = true;
+    context.pushNamed(DHCLIENTPlanesPageWidget.routeName);
   }
 
   @override
@@ -74,28 +125,49 @@ class _DHCLIENTValorVisitaPageWidgetState
     );
   }
 
-  Widget _buildSoftButton(String text, {required VoidCallback onTap}) {
+  Widget _buildSoftButton(
+    String text, {
+    required VoidCallback onTap,
+    bool paid = false,
+  }) {
     return InkWell(
       splashColor: Colors.transparent,
       focusColor: Colors.transparent,
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
-      onTap: onTap,
+      onTap: paid ? null : onTap,
       child: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
         height: 52.0,
         decoration: BoxDecoration(
-          color: const Color(0xFFCCE3E4),
+          color: paid ? const Color(0xFF007376) : const Color(0xFFCCE3E4),
           borderRadius: BorderRadius.circular(100.0),
         ),
         alignment: const AlignmentDirectional(0.0, 0.0),
-        child: Text(
-          text,
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.publicSans(),
-                color: const Color(0xFF007376),
-                fontSize: 18.0,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (paid)
+              const Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 8.0, 0.0),
+                child: Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                  size: 20.0,
+                ),
               ),
+            Text(
+              paid ? 'Pagado' : text,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(
+                      fontWeight: paid ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                    color: paid ? Colors.white : const Color(0xFF007376),
+                    fontSize: 18.0,
+                  ),
+            ),
+          ],
         ),
       ),
     );
@@ -172,19 +244,17 @@ class _DHCLIENTValorVisitaPageWidgetState
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 8.0, 0.0, 0.0),
-                              child: _buildPrice('\$449', ' /el día'),
+                              child: _buildPrice(
+                                  DHCLIENTValorVisitaPageWidget.regularPrice,
+                                  ' /visita'),
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: _buildSoftButton(
                                 'Contratar',
-                                onTap: () async {
-                                  DHCLIENTUbicacionWidget.pendingNextRoute =
-                                      null;
-                                  context.pushNamed(
-                                      DHCLIENTUbicacionWidget.routeName);
-                                },
+                                paid: _paidMethod == 'direct',
+                                onTap: _payDirect,
                               ),
                             ),
                             Padding(
@@ -207,17 +277,17 @@ class _DHCLIENTValorVisitaPageWidgetState
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 0.0),
-                              child: _buildPrice('\$300', ' /el día'),
+                              child: _buildPrice(
+                                  DHCLIENTValorVisitaPageWidget.discountedPrice,
+                                  ' /visita'),
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: _buildSoftButton(
                                 'Subscribirse',
-                                onTap: () async {
-                                  context.pushNamed(
-                                      DHCLIENTPlanesPageWidget.routeName);
-                                },
+                                paid: _paidMethod == 'subscription',
+                                onTap: _goToSubscription,
                               ),
                             ),
                           ],
@@ -229,10 +299,17 @@ class _DHCLIENTValorVisitaPageWidgetState
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         20.0, 30.0, 20.0, 110.0),
                     child: FFButtonWidget(
-                      onPressed: () async {
-                        DHCLIENTUbicacionWidget.pendingNextRoute = null;
-                        context.pushNamed(DHCLIENTUbicacionWidget.routeName);
-                      },
+                      // Bloqueo duro: no se puede avanzar sin pagar el servicio.
+                      onPressed: _isPaid
+                          ? () async {
+                              // Propaga la anticipación mínima (36h sin plan,
+                              // 24h con suscripción) al calendario.
+                              DHCLIENTAgendaWidget.minAdvanceHours =
+                                  _minAdvanceHours;
+                              context
+                                  .pushNamed(DHCLIENTAgendaWidget.routeName);
+                            }
+                          : null,
                       text: 'Siguiente',
                       options: FFButtonOptions(
                         width: MediaQuery.sizeOf(context).width * 1.0,
@@ -242,6 +319,8 @@ class _DHCLIENTValorVisitaPageWidgetState
                         iconPadding: const EdgeInsetsDirectional.fromSTEB(
                             0.0, 0.0, 0.0, 0.0),
                         color: const Color(0xFF007376),
+                        disabledColor: const Color(0xFFDFDFDF),
+                        disabledTextColor: const Color(0xFF6A6A6A),
                         textStyle:
                             FlutterFlowTheme.of(context).titleSmall.override(
                                   font: GoogleFonts.publicSans(
@@ -252,8 +331,10 @@ class _DHCLIENTValorVisitaPageWidgetState
                                   letterSpacing: 0.34,
                                 ),
                         elevation: 0.0,
-                        borderSide: const BorderSide(
-                          color: Color(0xFF007376),
+                        borderSide: BorderSide(
+                          color: _isPaid
+                              ? const Color(0xFF007376)
+                              : Colors.transparent,
                           width: 1.0,
                         ),
                         borderRadius: BorderRadius.circular(100.0),

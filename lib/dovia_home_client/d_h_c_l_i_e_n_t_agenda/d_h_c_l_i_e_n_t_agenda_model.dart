@@ -1,6 +1,5 @@
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
@@ -15,12 +14,15 @@ class DHCLIENTAgendaModel extends FlutterFlowModel<DHCLIENTAgendaWidget> {
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DOVIA_SHARED_Header component.
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
-  // State field(s) for DropDown widget.
-  String? dropDownValue1;
-  FormFieldController<String>? dropDownValueController1;
-  // State field(s) for DropDown widget.
-  String? dropDownValue2;
-  FormFieldController<String>? dropDownValueController2;
+  // Fecha seleccionada para la visita.
+  DateTime? selectedDate;
+  // Si el selector de hora está desplegado.
+  bool timeExpanded = false;
+  // El cliente ya eligió una franja horaria.
+  bool timeChosen = false;
+  // Índices seleccionados en el selector de hora (franja + AM/PM).
+  int selectedSlotIndex = 1;
+  int selectedPeriodIndex = 0;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
