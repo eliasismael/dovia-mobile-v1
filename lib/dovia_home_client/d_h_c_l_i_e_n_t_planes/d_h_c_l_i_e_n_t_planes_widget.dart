@@ -379,7 +379,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           0.0, 4.0, 0.0, 0.0),
                       child: Text(
-                        '* Renovación automática',
+                        'Tu propiedad, siempre al día.',
                         style: FlutterFlowTheme.of(context).bodySmall.override(
                               font: GoogleFonts.publicSans(),
                               color: const Color(0xCDFFFFFF),
@@ -398,6 +398,18 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    child: Text(
+                      'Plan diseñado para 1 propiedad registrada en DOVIA. Mantén tu hogar en perfectas condiciones con nuestro servicio integral.',
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(),
+                            color: const Color(0xFF0A7A7A),
+                            fontSize: 14.0,
+                            lineHeight: 1.5,
+                          ),
+                    ),
+                  ),
                   _buildSectionTitle('Incluye:'),
                   ...includes.map((text) => _buildBullet(text)),
                   _buildBeneficiosCard(additionals),
@@ -419,40 +431,40 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildPlanCard(
-            title: 'PLAN MENSUAL',
+            title: 'DOVIA PREMIUM',
             price: 'Q299.99',
             period: ' /mes',
             includes: [
-              '1 servicio mensual incluido (programado o emergencia).',
-              'Acceso a cotizaciones.',
-              'Servicios programados con mínimo de 24 horas de anticipación.',
-              '35% de descuento en servicios adicionales (Programados o de Emergencia).',
-              'Acceso a servicios de emergencia con tiempo objetivo menor a 18 horas.',
-              'Garantía DOVIA en todos los trabajos.',
+              '1 servicios mensuales',
+              'Acceso a cotizaciones',
+              'Atención programada con minimo de 24 horas',
+              '10% de descuento en cualquier cotización adicional',
+              'Acceso a servicios de emergencia',
+              'Garantía DOVIA en todos los trabajos',
             ],
             additionals: [
-              'Atención prioritaria.',
-              'Descuento en tus servicios.',
-              'Historial detallado de servicios.',
+              'Prioridad en reservas',
+              'Descuento en tus servicios',
+              'Historial detallado de servicios',
             ],
           ),
           const SizedBox(height: 24.0),
           _buildPlanCard(
-            title: 'PLAN ANUAL',
+            title: 'DOVIA PREMIUM',
             price: 'Q2,999.99',
             period: ' /año',
             includes: [
-              '1 servicio mensual incluido (programado o emergencia).',
-              'Acceso a cotizaciones.',
-              'Servicios programados con mínimo de 24 horas de anticipación.',
-              '35% de descuento en servicios adicionales (Programados o de Emergencia).',
-              'Acceso a servicios de emergencia con tiempo objetivo menor a 18 horas.',
-              'Garantía DOVIA en todos los trabajos.',
+              '1 servicios mensuales',
+              'Acceso a cotizaciones',
+              'Atención programada con minimo de 24 horas',
+              '10% de descuento en cualquier cotización adicional',
+              'Acceso a servicios de emergencia',
+              'Garantía DOVIA en todos los trabajos',
             ],
             additionals: [
-              'Atención prioritaria.',
-              '2 meses gratis',
-              'Historial detallado de servicios.',
+              'Prioridad en reservas',
+              '2 meses gratis en tu renovacion',
+              'Historial detallado de servicios',
             ],
           ),
           const SizedBox(height: 24.0),
