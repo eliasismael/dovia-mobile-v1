@@ -9,6 +9,7 @@ export 'api_offers.dart';
 export 'api_properties.dart';
 export 'api_users.dart';
 export 'api_visits.dart';
+export 'api_payments.dart';
 export 'api_metrics.dart';
 export 'api_recruitment.dart';
 export 'api_settings.dart';
