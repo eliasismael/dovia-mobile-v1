@@ -129,22 +129,28 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
     return '$weekday, ${d.day} de $month';
   }
 
-  /// Regla de estatus (enum backend: PENDING, TAKEN, IN_PROGRESS, FINISHED):
-  /// sin que ningún Home Associate haya tomado el trabajo la solicitud es
-  /// estrictamente "Pendiente"; cuando alguien la toma queda "Programada".
-  String _statusLabel(Map<String, dynamic> data) {
-    final status = (_str(data['status']) ?? 'PENDING').toUpperCase();
-    switch (status) {
-      case 'TAKEN':
-        return 'Programada';
-      case 'IN_PROGRESS':
-        return 'En progreso';
-      case 'FINISHED':
-        return 'Finalizada';
-      case 'PENDING':
-      default:
-        return 'Pendiente';
+  /// Detección best-effort de si el cliente reportó un problema sobre este
+  /// trabajo finalizado. El shape del backend es incierto, por eso se prueban
+  /// varias claves. Determina la píldora roja "Reportado".
+  bool _isReported(Map<String, dynamic> data) {
+    if (data['reported'] == true ||
+        data['hasReport'] == true ||
+        data['isReported'] == true) {
+      return true;
     }
+    if (_str(data['reportedAt']) != null) return true;
+    final sub = (_str(data['subStatus']) ?? '').toUpperCase();
+    if (sub.contains('REPORT')) return true;
+    return false;
+  }
+
+  /// Regla de estatus para el historial. El listado ya está acotado a las
+  /// solicitudes FINISHED, así que la píldora sólo distingue el estado final
+  /// real: "Reportado" (rojo) si el cliente reportó un problema, o
+  /// "Finalizada" (verde) en caso contrario. Se ignora deliberadamente el
+  /// texto "Pendiente" del diseño visual.
+  String _statusLabel(Map<String, dynamic> data) {
+    return _isReported(data) ? 'Reportado' : 'Finalizada';
   }
 
   // ---------------------------------------------------------------------------
@@ -197,23 +203,13 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
     }
   }
 
-  /// Abre el detalle de la solicitud en **modo consulta** (solo lectura). Sin
-  /// botón "Aceptar" y sin edición de campos: es estrictamente un registro.
+  /// Abre el detalle "Trabajo finalizado" del servicio (registro inmutable de
+  /// solo lectura). Los datos exactos y bloqueados de esa solicitud se pasan por
+  /// el campo estático [DHCLIENTTrabajoFinalizadoWidget.requestData].
   void _openDetail(Map<String, dynamic> data) {
-    final address = data['address'];
-    DHCLIENTCasaAWidget.requestData = data;
-    DHCLIENTCasaAWidget.houseName = (address is Map
-            ? _str(address['name']) ??
-                _str(address['label']) ??
-                _str(address['nickname']) ??
-                _str(address['alias'])
-            : null) ??
-        'Casa A';
-    // Modo consulta: oculta el botón "Aceptar". La tarjeta del asociado se
-    // muestra/oculta dentro del detalle según el estatus de la solicitud.
-    DHCLIENTCasaAWidget.alreadyConfirmed = true;
+    DHCLIENTTrabajoFinalizadoWidget.requestData = data;
     context
-        .pushNamed(DHCLIENTCasaAWidget.routeName)
+        .pushNamed(DHCLIENTTrabajoFinalizadoWidget.routeName)
         .then((_) => safeSetState(() {}));
   }
 
@@ -379,7 +375,7 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text(
-                'Próximas Visitas',
+                'Visitas Finalizadas',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                       fontSize: 22.0,
@@ -416,6 +412,7 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
           options: const [
             _allOption,
             'Finalizada',
+            'Reportado',
           ],
           hint: 'Selecciona el tipo',
           onChanged: (val) => safeSetState(() => _model.statusFilter = val),

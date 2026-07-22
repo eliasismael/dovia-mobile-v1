@@ -16,10 +16,6 @@ class DHCLIENTTrabajoFinalizadoModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DOVIA_SHARED_Header component.
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
-  // State field(s) for TextField widget.
-  FocusNode? textFieldFocusNode;
-  TextEditingController? textController;
-  String? Function(BuildContext, String?)? textControllerValidator;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
@@ -39,9 +35,6 @@ class DHCLIENTTrabajoFinalizadoModel
   void dispose() {
     cornerGradientBackgroundModel.dispose();
     dOVIASHAREDHeaderModel.dispose();
-    textFieldFocusNode?.dispose();
-    textController?.dispose();
-
     fixedDoviaIconModel.dispose();
     dHCLIENTNavbarModel.dispose();
   }

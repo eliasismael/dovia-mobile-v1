@@ -52,6 +52,8 @@ export '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_wid
     show DHCLIENTHomepageWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_emergencias/d_h_c_l_i_e_n_t_emergencias_widget.dart'
     show DHCLIENTEmergenciasWidget;
+export '/dovia_home_client/d_h_c_l_i_e_n_t_costo_emergencia/d_h_c_l_i_e_n_t_costo_emergencia_widget.dart'
+    show DHCLIENTCostoEmergenciaWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_instalacion/d_h_c_l_i_e_n_t_instalacion_widget.dart'
     show DHCLIENTInstalacionWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_cotizacion/d_h_c_l_i_e_n_t_cotizacion_widget.dart'

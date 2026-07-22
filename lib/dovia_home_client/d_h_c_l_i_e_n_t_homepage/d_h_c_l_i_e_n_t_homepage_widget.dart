@@ -31,12 +31,17 @@ class ScheduledVisit {
     required this.date,
     required this.time,
     this.status = 'Pendiente',
+    this.isEmergency = false,
   });
 
   final String service;
   final String date;
   final String time;
   final String status;
+
+  /// Solicitud de emergencia: la tarjeta muestra un indicador visual de alta
+  /// prioridad para que la red de Home Associates la tome de inmediato.
+  final bool isEmergency;
 }
 
 class DHCLIENTHomepageWidget extends StatefulWidget {
@@ -918,6 +923,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                               title: visit.service,
                               date: '${visit.date} · ${visit.time}',
                               status: visit.status,
+                              isEmergency: visit.isEmergency,
                             ),
                           ),
                         ),

@@ -228,6 +228,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const DHCLIENTEmergenciasWidget(),
         ),
         FFRoute(
+          name: DHCLIENTCostoEmergenciaWidget.routeName,
+          path: DHCLIENTCostoEmergenciaWidget.routePath,
+          builder: (context, params) => const DHCLIENTCostoEmergenciaWidget(),
+        ),
+        FFRoute(
           name: DHCLIENTInstalacionWidget.routeName,
           path: DHCLIENTInstalacionWidget.routePath,
           builder: (context, params) => const DHCLIENTInstalacionWidget(),

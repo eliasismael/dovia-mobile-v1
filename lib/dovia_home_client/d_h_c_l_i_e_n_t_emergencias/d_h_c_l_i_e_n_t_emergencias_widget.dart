@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,16 +35,26 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
+    // Rehabilita el botón [Enviar] en tiempo real según haya descripción.
+    _model.textController!.addListener(_onDescriptionChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
   void dispose() {
+    _model.textController?.removeListener(_onDescriptionChanged);
     _model.dispose();
 
     super.dispose();
   }
+
+  void _onDescriptionChanged() => safeSetState(() {});
+
+  /// El botón [Enviar] se habilita únicamente cuando el usuario ingresó una
+  /// descripción en el campo de texto.
+  bool get _hasDescription =>
+      (_model.textController?.text.trim().isNotEmpty) ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +81,7 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
-                      title: 'Emergemcias',
+                      title: 'Emergencias',
                     ),
                   ),
                   Padding(
@@ -78,7 +89,26 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                         20.0, 0.0, 20.0, 100.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Aviso de nivel de servicio (obligatorio).
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 16.0),
+                          child: Text(
+                            'Atención prioritaria de emergencia, con respuesta en menos de 18 horas',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.publicSans(
+                                      fontWeight: FontWeight.w700),
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  fontSize: 14.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
                         Align(
                           alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
@@ -295,9 +325,17 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 150.0, 0.0, 0.0),
                             child: FFButtonWidget(
-                              onPressed: () {
-                                print('Button pressed ...');
-                              },
+                              // Sólo se habilita con una descripción cargada.
+                              onPressed: _hasDescription
+                                  ? () async {
+                                      DHCLIENTCostoEmergenciaWidget
+                                              .description =
+                                          _model.textController!.text.trim();
+                                      context.pushNamed(
+                                          DHCLIENTCostoEmergenciaWidget
+                                              .routeName);
+                                    }
+                                  : null,
                               text: 'Enviar',
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -308,6 +346,8 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                                     const EdgeInsetsDirectional.fromSTEB(
                                         0.0, 0.0, 0.0, 0.0),
                                 color: FlutterFlowTheme.of(context).primary,
+                                disabledColor: const Color(0xFFDFDFDF),
+                                disabledTextColor: const Color(0xFF6A6A6A),
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
                                     .override(

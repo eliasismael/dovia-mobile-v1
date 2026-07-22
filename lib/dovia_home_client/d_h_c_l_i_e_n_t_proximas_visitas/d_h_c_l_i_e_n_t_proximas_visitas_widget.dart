@@ -14,12 +14,16 @@ class DHCLIENTProximasVisitasWidget extends StatefulWidget {
     this.icom,
     this.status,
     this.showRedDot = false,
+    this.isEmergency = false,
   });
 
   final String? title;
   final String? date;
   final String? icom;
   final bool showRedDot;
+
+  /// Solicitud de emergencia: muestra un indicador de alta prioridad.
+  final bool isEmergency;
 
   /// Estatus de la solicitud (Ej: "Pendiente"). Si es null no se muestra.
   final String? status;
@@ -52,6 +56,34 @@ class _DHCLIENTProximasVisitasWidgetState
     _model.maybeDispose();
 
     super.dispose();
+  }
+
+  /// Color de fondo de la píldora de estatus según el label.
+  /// - "Confirmar" / "Reportado" → rojo
+  /// - "Finalizada" → verde
+  /// - resto (p. ej. "Pendiente", "Programada") → ámbar
+  Color get _pillBackgroundColor {
+    switch (widget.status) {
+      case 'Confirmar':
+      case 'Reportado':
+        return const Color(0xFFFFE5E5);
+      case 'Finalizada':
+        return const Color(0xFFDCF5E3);
+      default:
+        return const Color(0xFFFDECC8);
+    }
+  }
+
+  Color get _pillTextColor {
+    switch (widget.status) {
+      case 'Confirmar':
+      case 'Reportado':
+        return Colors.red;
+      case 'Finalizada':
+        return const Color(0xFF1E7A46);
+      default:
+        return const Color(0xFF9A6700);
+    }
   }
 
   @override
@@ -93,6 +125,38 @@ class _DHCLIENTProximasVisitasWidgetState
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (widget.isEmergency)
+                      Padding(
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 6.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 3.0),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFE5E5),
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.priority_high_rounded,
+                                color: Colors.red,
+                                size: 14.0,
+                              ),
+                              const SizedBox(width: 3.0),
+                              Text(
+                                'Emergencia',
+                                style: GoogleFonts.publicSans(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     Text(
                       widget.title ?? 'Instalación de TV',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -156,9 +220,7 @@ class _DHCLIENTProximasVisitasWidgetState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12.0, vertical: 6.0),
                     decoration: BoxDecoration(
-                      color: widget.status == 'Confirmar' 
-                          ? const Color(0xFFFFE5E5) 
-                          : const Color(0xFFFDECC8),
+                      color: _pillBackgroundColor,
                       borderRadius: BorderRadius.circular(100.0),
                     ),
                     child: Text(
@@ -166,9 +228,7 @@ class _DHCLIENTProximasVisitasWidgetState
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.publicSans(
                                 fontWeight: FontWeight.w600),
-                            color: widget.status == 'Confirmar' 
-                                ? Colors.red 
-                                : const Color(0xFF9A6700),
+                            color: _pillTextColor,
                             fontSize: 12.0,
                           ),
                     ),
