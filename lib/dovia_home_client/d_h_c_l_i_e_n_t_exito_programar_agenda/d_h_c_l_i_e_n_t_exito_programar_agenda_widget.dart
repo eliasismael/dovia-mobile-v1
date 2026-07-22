@@ -7,7 +7,19 @@ import 'd_h_c_l_i_e_n_t_exito_programar_agenda_model.dart';
 export 'd_h_c_l_i_e_n_t_exito_programar_agenda_model.dart';
 
 class DHCLIENTExitoProgramarAgendaWidget extends StatefulWidget {
-  const DHCLIENTExitoProgramarAgendaWidget({super.key});
+  const DHCLIENTExitoProgramarAgendaWidget({
+    super.key,
+    this.houseName,
+    this.message,
+  });
+
+  /// Nombre de la propiedad (Ej: "Casa A") para personalizar el mensaje de
+  /// éxito al confirmar la visita.
+  final String? houseName;
+
+  /// Mensaje del cuerpo. Si es null se usa el mensaje por defecto (flujo de
+  /// agendado); las pantallas de confirmación inyectan su propio texto.
+  final String? message;
 
   @override
   State<DHCLIENTExitoProgramarAgendaWidget> createState() =>
@@ -93,7 +105,8 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         0.0, 34.0, 0.0, 0.0),
                     child: Text(
-                      'Programaste con éxito tu servicio, pronto se te avisara para confirmar la visita a tu casa.',
+                      widget.message ??
+                          'Programaste con éxito tu servicio, pronto se te avisara para confirmar la visita a tu casa.',
                       textAlign: TextAlign.center,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(

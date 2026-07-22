@@ -1,5 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +21,10 @@ class DHCLIENTProveedorCardWidget extends StatefulWidget {
     this.about,
     this.vehicle,
     this.licensePlate,
+    this.roleLabel,
+    this.showDownloadId = false,
+    this.idDocumentUrl,
+    this.onDownloadId,
   });
 
   final String? fullName;
@@ -33,6 +38,22 @@ class DHCLIENTProveedorCardWidget extends StatefulWidget {
   final String? about;
   final String? vehicle;
   final String? licensePlate;
+
+  /// Texto del badge del rol (Ej: "Dovia Home Associate"). Si es null usa el
+  /// valor por defecto de la tarjeta de Showing.
+  final String? roleLabel;
+
+  /// Muestra el botón "Descargar ID" (documento de identidad verificado del
+  /// asociado). Se usa en la pantalla de confirmación del cliente.
+  final bool showDownloadId;
+
+  /// URL/base del documento de identidad a descargar o abrir en pantalla
+  /// completa. Si viene null, [onDownloadId] decide el comportamiento.
+  final String? idDocumentUrl;
+
+  /// Callback opcional al tapear "Descargar ID". Si es null, se abre
+  /// [idDocumentUrl] en el navegador/visor externo.
+  final VoidCallback? onDownloadId;
 
   @override
   State<DHCLIENTProveedorCardWidget> createState() =>
@@ -84,6 +105,35 @@ class _DHCLIENTProveedorCardWidgetState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No se pudo iniciar la llamada')),
+        );
+      }
+    }
+  }
+
+  /// Descarga / abre en pantalla completa el documento de identidad verificado
+  /// del asociado. Si hay un [onDownloadId] se delega en él; si no, se intenta
+  /// abrir [idDocumentUrl] con el visor externo.
+  Future<void> _downloadId() async {
+    if (widget.onDownloadId != null) {
+      widget.onDownloadId!();
+      return;
+    }
+    final url = widget.idDocumentUrl ?? '';
+    if (url.isEmpty) {
+      // TODO: conectar con el endpoint del documento de identidad del asociado
+      // cuando exista. Por ahora solo se notifica al usuario.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Documento de identidad no disponible')),
+        );
+      }
+      return;
+    }
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir el documento')),
         );
       }
     }
@@ -160,32 +210,39 @@ class _DHCLIENTProveedorCardWidgetState
 
         const SizedBox(height: 12),
 
-        // Action icons row (WhatsApp + Llamar)
-        if (widget.phoneNumber != null && widget.phoneNumber!.isNotEmpty)
+        // Action icons row. En la variante "Descargar ID" (confirmación del
+        // cliente) siempre se muestra el ícono de alerta; el chat/teléfono van
+        // en la cabecera. En el resto se conserva el comportamiento original:
+        // se muestra la fila (alerta + chat) solo si hay teléfono.
+        if (widget.showDownloadId ||
+            (widget.phoneNumber != null && widget.phoneNumber!.isNotEmpty))
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Report / emergency icon (red)
               GestureDetector(
-                onTap: () {
-                  // report/emergency action — placeholder
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Soporte de emergencia')),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.warning_amber_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+              onTap: () {
+                // report/emergency action — placeholder
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Soporte de emergencia')),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                  size: 16,
                 ),
               ),
+            ),
+            if (!widget.showDownloadId &&
+                widget.phoneNumber != null &&
+                widget.phoneNumber!.isNotEmpty) ...[
               const SizedBox(width: 12),
               // WhatsApp / Chat icon (teal)
               GestureDetector(
@@ -204,7 +261,8 @@ class _DHCLIENTProveedorCardWidgetState
                 ),
               ),
             ],
-          ),
+          ],
+        ),
 
         const SizedBox(height: 10),
 
@@ -218,7 +276,7 @@ class _DHCLIENTProveedorCardWidgetState
           ),
           alignment: Alignment.center,
           child: Text(
-            'Dovia Showing Associate',
+            widget.roleLabel ?? 'Dovia Showing Associate',
             style: FlutterFlowTheme.of(context).bodyMedium.override(
                   font: GoogleFonts.publicSans(
                     fontWeight: FontWeight.normal,
@@ -289,6 +347,8 @@ class _DHCLIENTProveedorCardWidgetState
                 Expanded(
                   child: Text(
                     'ID: ${widget.advisorId!.length > 8 ? widget.advisorId!.substring(0, 8).toUpperCase() : widget.advisorId!.toUpperCase()}',
+                    textAlign:
+                        widget.showDownloadId ? TextAlign.center : TextAlign.start,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.publicSans(
                             fontWeight: FontWeight.w600,
@@ -300,31 +360,57 @@ class _DHCLIENTProveedorCardWidgetState
                         ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: _callPhone,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF7F7F7),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0x3370ACAD),
-                          blurRadius: 2.7,
-                          offset: const Offset(0, 2.7),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.phone_outlined,
-                      size: 18,
-                      color: FlutterFlowTheme.of(context).primary,
+                if (!widget.showDownloadId)
+                  GestureDetector(
+                    onTap: _callPhone,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7F7F7),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0x3370ACAD),
+                            blurRadius: 2.7,
+                            offset: const Offset(0, 2.7),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.phone_outlined,
+                        size: 18,
+                        color: FlutterFlowTheme.of(context).primary,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
+
+        // Botón "Descargar ID": abre/descarga el documento de identidad
+        // verificado del asociado.
+        if (widget.showDownloadId) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FFButtonWidget(
+              onPressed: _downloadId,
+              text: 'Descargar',
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 40.0,
+                color: FlutterFlowTheme.of(context).primary,
+                textStyle: GoogleFonts.publicSans(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.0,
+                ),
+                elevation: 0.0,
+                borderRadius: BorderRadius.circular(24.0),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

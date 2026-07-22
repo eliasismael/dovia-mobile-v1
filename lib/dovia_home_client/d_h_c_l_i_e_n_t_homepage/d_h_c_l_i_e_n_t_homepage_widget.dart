@@ -49,6 +49,13 @@ class DHCLIENTHomepageWidget extends StatefulWidget {
   /// Agenda agrega aquí la nueva solicitud antes de redirigir al Dashboard.
   static final List<ScheduledVisit> upcomingVisits = [];
 
+  /// Ids de solicitudes cuya visita el cliente ya confirmó ("Programada").
+  /// Se maneja client-side porque aún no existe endpoint de confirmación en el
+  /// backend; al confirmar en la pantalla de detalle se agrega aquí el id y la
+  /// tarjeta pierde el punto rojo y pasa de "Confirmar" a "Programada".
+  /// TODO: derivar el estatus del backend cuando exista el endpoint.
+  static final Set<String> confirmedVisitIds = {};
+
   @override
   State<DHCLIENTHomepageWidget> createState() => _DHCLIENTHomepageWidgetState();
 }
@@ -167,6 +174,45 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     DHCLIENTInstalacionWidget.serviceTitle = serviceTitle;
     DHCLIENTInstalacionWidget.alcanzables = [];
     context.pushNamed(DHCLIENTInstalacionWidget.routeName);
+  }
+
+  String? _str(dynamic v) =>
+      (v is String && v.trim().isNotEmpty) ? v.trim() : null;
+
+  /// Mapea el estatus del backend a la etiqueta que ve el cliente en la tarjeta
+  /// de "Próximas visitas". Una solicitud con asociado asignado pide acción
+  /// ("Confirmar"); una vez confirmada por el cliente queda "Programada".
+  String _visitStatusLabel(String status, {required bool confirmed}) {
+    if (confirmed) return 'Programada';
+    switch (status) {
+      case 'ASSIGNED':
+        return 'Confirmar';
+      case 'IN_TRANSIT':
+        return 'En camino';
+      case 'IN_PROGRESS':
+        return 'En progreso';
+      case 'PENDING':
+      default:
+        return 'Pendiente';
+    }
+  }
+
+  /// Abre la pantalla de detalle/confirmación (Casa A) con los datos de la
+  /// solicitud. Al volver refresca el Dashboard para reflejar el nuevo estatus.
+  void _openVisitDetail(Map<String, dynamic> data, {required bool confirmed}) {
+    final address = data['address'];
+    DHCLIENTCasaAWidget.requestData = data;
+    DHCLIENTCasaAWidget.houseName = (address is Map
+            ? _str(address['name']) ??
+                _str(address['label']) ??
+                _str(address['nickname']) ??
+                _str(address['alias'])
+            : null) ??
+        'Casa A';
+    DHCLIENTCasaAWidget.alreadyConfirmed = confirmed;
+    context
+        .pushNamed(DHCLIENTCasaAWidget.routeName)
+        .then((_) => safeSetState(() {}));
   }
 
   Widget _buildTrustItem(String iconPath, String title, String subtitle) {
@@ -886,45 +932,68 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                 final title = data['serviceName'] ?? 'Servicio';
                                 // Obtener fecha del appointment o del createdAt
                                 final apt = data['appointment'];
-                                final dateStr = (apt != null && apt['scheduledAt'] != null) 
-                                    ? apt['scheduledAt'] as String 
+                                final dateStr = (apt != null && apt['scheduledAt'] != null)
+                                    ? apt['scheduledAt'] as String
                                     : (data['createdAt'] as String? ?? '');
                                 final date = dateStr.isNotEmpty ? dateStr.split('T').first : 'Fecha pendiente';
-                                final status = data['status'] ?? 'Pendiente';
-                                
-                                // Regla UI: si la solicitud requiere accion del usuario, mostrar punto rojo.
-                                // Ejemplo: si el estado es PENDING, marcamos como requiere atencion.
-                                final needsAction = status == 'PENDING';
-                                
+                                final status = (data['status'] as String?) ?? 'PENDING';
+                                final id = (data['id'] ?? data['serviceRequestId'])
+                                        ?.toString() ??
+                                    '';
+
+                                // Regla UI: con un Home Associate asignado la
+                                // solicitud pide acción ("Confirmar" + punto
+                                // rojo). Al confirmarla el cliente, pasa a
+                                // "Programada" y pierde el punto.
+                                final isConfirmed = id.isNotEmpty &&
+                                    DHCLIENTHomepageWidget.confirmedVisitIds
+                                        .contains(id);
+                                final isAssigned = status == 'ASSIGNED';
+                                final needsAction = isAssigned && !isConfirmed;
+                                final canOpenDetail =
+                                    (isAssigned || isConfirmed) && id.isNotEmpty;
+
                                 final card = DHCLIENTProximasVisitasWidget(
                                   title: title,
                                   date: date,
-                                  status: status,
+                                  status: _visitStatusLabel(status,
+                                      confirmed: isConfirmed),
                                 );
-                                
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 10.0),
-                                  child: needsAction
-                                      ? Stack(
-                                          clipBehavior: Clip.none,
-                                          children: [
-                                            card,
-                                            PositionedDirectional(
-                                              top: -4,
-                                              end: -4,
-                                              child: Container(
-                                                width: 14,
-                                                height: 14,
-                                                decoration: BoxDecoration(
-                                                  color: const Color(0xFFE53935),
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(color: Colors.white, width: 2),
-                                                ),
+
+                                final content = needsAction
+                                    ? Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          card,
+                                          PositionedDirectional(
+                                            top: -4,
+                                            end: -4,
+                                            child: Container(
+                                              width: 14,
+                                              height: 14,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE53935),
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                    color: Colors.white,
+                                                    width: 2),
                                               ),
                                             ),
-                                          ],
-                                        )
-                                      : card,
+                                          ),
+                                        ],
+                                      )
+                                    : card;
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 10.0),
+                                  child: InkWell(
+                                    onTap: canOpenDetail
+                                        ? () => _openVisitDetail(data,
+                                            confirmed: isConfirmed)
+                                        : null,
+                                    borderRadius: BorderRadius.circular(14.0),
+                                    child: content,
+                                  ),
                                 );
                               }).toList(),
                             );
