@@ -13,11 +13,13 @@ class DHCLIENTProximasVisitasWidget extends StatefulWidget {
     this.date,
     this.icom,
     this.status,
+    this.showRedDot = false,
   });
 
   final String? title;
   final String? date;
   final String? icom;
+  final bool showRedDot;
 
   /// Estatus de la solicitud (Ej: "Pendiente"). Si es null no se muestra.
   final String? status;
@@ -137,22 +139,41 @@ class _DHCLIENTProximasVisitasWidgetState
               ),
             ),
             if (widget.status != null)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12.0, vertical: 6.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFDECC8),
-                  borderRadius: BorderRadius.circular(100.0),
-                ),
-                child: Text(
-                  widget.status!,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.publicSans(
-                            fontWeight: FontWeight.w600),
-                        color: const Color(0xFF9A6700),
-                        fontSize: 12.0,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.showRedDot)
+                    Container(
+                      width: 8.0,
+                      height: 8.0,
+                      margin: const EdgeInsets.only(right: 6.0),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
                       ),
-                ),
+                    ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 6.0),
+                    decoration: BoxDecoration(
+                      color: widget.status == 'Confirmar' 
+                          ? const Color(0xFFFFE5E5) 
+                          : const Color(0xFFFDECC8),
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                    child: Text(
+                      widget.status!,
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(
+                                fontWeight: FontWeight.w600),
+                            color: widget.status == 'Confirmar' 
+                                ? Colors.red 
+                                : const Color(0xFF9A6700),
+                            fontSize: 12.0,
+                          ),
+                    ),
+                  ),
+                ],
               ),
           ],
         ),

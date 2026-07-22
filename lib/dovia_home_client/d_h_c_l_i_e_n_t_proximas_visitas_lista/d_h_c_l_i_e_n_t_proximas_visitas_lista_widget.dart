@@ -134,6 +134,10 @@ class _DHCLIENTProximasVisitasListaWidgetState
   /// estrictamente "Pendiente"; cuando alguien la toma queda "Programada".
   String _statusLabel(Map<String, dynamic> data) {
     final status = (_str(data['status']) ?? 'PENDING').toUpperCase();
+    final id = (data['id'] ?? data['serviceRequestId'])?.toString() ?? '';
+    if (status == 'TAKEN' && !DHCLIENTHomepageWidget.confirmedVisitIds.contains(id)) {
+      return 'Confirmar';
+    }
     switch (status) {
       case 'TAKEN':
         return 'Programada';
@@ -211,7 +215,8 @@ class _DHCLIENTProximasVisitasListaWidgetState
         'Casa A';
     // Modo consulta: oculta el botón "Aceptar". La tarjeta del asociado se
     // muestra/oculta dentro del detalle según el estatus de la solicitud.
-    DHCLIENTCasaAWidget.alreadyConfirmed = true;
+    final id = (data['id'] ?? data['serviceRequestId'])?.toString() ?? '';
+    DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
         .then((_) => safeSetState(() {}));
@@ -301,6 +306,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
                                         title: _serviceName(data),
                                         date: _formattedDate(data),
                                         status: _statusLabel(data),
+                                        showRedDot: _statusLabel(data) == 'Confirmar',
                                       ),
                                     ),
                                   ),

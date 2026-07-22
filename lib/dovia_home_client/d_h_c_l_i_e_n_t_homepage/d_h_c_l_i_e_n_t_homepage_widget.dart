@@ -116,7 +116,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
         height: 100.0,
         decoration: BoxDecoration(
           color: isEmergency
-              ? FlutterFlowTheme.of(context).primary
+              ? FlutterFlowTheme.of(context).success
               : FlutterFlowTheme.of(context).alternate,
           borderRadius: BorderRadius.circular(8.0),
         ),
@@ -129,7 +129,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               height: 40.0,
               decoration: BoxDecoration(
                 color: isEmergency
-                    ? const Color(0x551ACDD3)
+                    ? Colors.white.withOpacity(0.3)
                     : const Color(0x98007376),
                 borderRadius: BorderRadius.circular(10.0),
               ),
@@ -187,7 +187,10 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// etiqueta que ve el cliente en la tarjeta de "Próximas visitas". Sin que
   /// ningún Home Associate haya tomado el trabajo es "Pendiente"; cuando alguien
   /// lo toma queda "Programada".
-  String _visitStatusLabel(String status) {
+  String _visitStatusLabel(String status, String id) {
+    if (status.toUpperCase() == 'TAKEN' && !DHCLIENTHomepageWidget.confirmedVisitIds.contains(id)) {
+      return 'Confirmar';
+    }
     switch (status.toUpperCase()) {
       case 'TAKEN':
         return 'Programada';
@@ -214,7 +217,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                 _str(address['alias'])
             : null) ??
         'Casa A';
-    DHCLIENTCasaAWidget.alreadyConfirmed = true;
+    final id = (data['id'] ?? data['serviceRequestId'])?.toString() ?? '';
+    DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
         .then((_) => safeSetState(() {}));
@@ -972,7 +976,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                     child: DHCLIENTProximasVisitasWidget(
                                       title: title,
                                       date: date,
-                                      status: _visitStatusLabel(status),
+                                      status: _visitStatusLabel(status, id),
+                                      showRedDot: _visitStatusLabel(status, id) == 'Confirmar',
                                     ),
                                   ),
                                 );
@@ -998,9 +1003,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   ),
                             ),
                             FFButtonWidget(
-                              // TODO: enlazar a la vista completa de "Visitas
-                              // finalizadas" cuando exista esa pantalla de listado.
-                              onPressed: () {},
+                              onPressed: () {
+                                context.pushNamed(
+                                    DHCLIENTVisitasFinalizadasListaWidget
+                                        .routeName);
+                              },
                               text: 'Ver todo',
                               options: FFButtonOptions(
                                 height: 30.0,
