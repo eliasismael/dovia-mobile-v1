@@ -225,6 +225,23 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   String get _requestId =>
       _firstString([_data?['id'], _data?['serviceRequestId']]) ?? '';
 
+  String get _status => _firstString([_data?['status']]) ?? '';
+
+  /// Regla de renderizado del asociado: la tarjeta del profesional solo se
+  /// muestra cuando alguien ya tomó el trabajo (solicitud "Programada"/asignada
+  /// o con datos del asociado). Si nadie lo ha tomado ("Pendiente") se oculta y
+  /// se muestra el placeholder "Buscando al profesional ideal...".
+  bool get _associateAssigned {
+    if (_associate != null &&
+        (_associateName.trim().isNotEmpty || _associateId.isNotEmpty)) {
+      return true;
+    }
+    // Enum backend: PENDING (nadie lo tomó) → sin asociado; TAKEN/IN_PROGRESS/
+    // FINISHED → alguien tomó el trabajo.
+    const assignedStatuses = {'TAKEN', 'IN_PROGRESS', 'FINISHED'};
+    return assignedStatuses.contains(_status.toUpperCase());
+  }
+
   // ---------------------------------------------------------------------------
   // Contacto con el asociado (cabecera).
   // ---------------------------------------------------------------------------
@@ -415,6 +432,41 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
         ),
       );
 
+  /// Estado vacío del asociado cuando la solicitud sigue "Pendiente" (nadie ha
+  /// tomado el trabajo). Reemplaza a la tarjeta del profesional.
+  Widget _searchingAssociatePlaceholder() => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 28.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6.0),
+          border: Border.all(
+            color: FlutterFlowTheme.of(context).primary,
+            width: 1.0,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_search_outlined,
+              size: 48.0,
+              color: FlutterFlowTheme.of(context).primary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 12.0),
+            Text(
+              'Buscando al profesional ideal...',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                    letterSpacing: 0.0,
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                  ),
+            ),
+          ],
+        ),
+      );
+
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
@@ -582,24 +634,30 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.dHCLIENTProveedorCardModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: DHCLIENTProveedorCardWidget(
-                                isAssigned: true,
-                                roleLabel: 'Dovia Home Associate',
-                                fullName: _associateName.isNotEmpty
-                                    ? _associateName
-                                    : 'Nombre Apellido',
-                                age: _associateAge,
-                                avatarUrl: _associateAvatar,
-                                phoneNumber: _associatePhone,
-                                advisorId: _associateId,
-                                about: _associateAbout,
-                                showDownloadId: true,
-                                idDocumentUrl: _associateIdDoc,
-                              ),
-                            ),
+                            // Regla de renderizado del asociado: si nadie tomó
+                            // el trabajo ("Pendiente") se oculta la tarjeta del
+                            // profesional y se muestra un placeholder de
+                            // búsqueda.
+                            child: _associateAssigned
+                                ? wrapWithModel(
+                                    model: _model.dHCLIENTProveedorCardModel,
+                                    updateCallback: () => safeSetState(() {}),
+                                    child: DHCLIENTProveedorCardWidget(
+                                      isAssigned: true,
+                                      roleLabel: 'Dovia Home Associate',
+                                      fullName: _associateName.isNotEmpty
+                                          ? _associateName
+                                          : 'Nombre Apellido',
+                                      age: _associateAge,
+                                      avatarUrl: _associateAvatar,
+                                      phoneNumber: _associatePhone,
+                                      advisorId: _associateId,
+                                      about: _associateAbout,
+                                      showDownloadId: true,
+                                      idDocumentUrl: _associateIdDoc,
+                                    ),
+                                  )
+                                : _searchingAssociatePlaceholder(),
                           ),
                           const SizedBox(height: 20.0),
                         ],

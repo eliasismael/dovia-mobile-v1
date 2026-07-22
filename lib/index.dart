@@ -62,6 +62,8 @@ export '/dovia_home_client/d_h_c_l_i_e_n_t_casa_a/d_h_c_l_i_e_n_t_casa_a_widget.
     show DHCLIENTCasaAWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_otra_ubicacion/d_h_c_l_i_e_n_t_otra_ubicacion_widget.dart'
     show DHCLIENTOtraUbicacionWidget;
+export '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas_lista/d_h_c_l_i_e_n_t_proximas_visitas_lista_widget.dart'
+    show DHCLIENTProximasVisitasListaWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_cotizaciones_recibidas/d_h_c_l_i_e_n_t_cotizaciones_recibidas_widget.dart'
     show DHCLIENTCotizacionesRecibidasWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_materiales/d_h_c_l_i_e_n_t_materiales_widget.dart'

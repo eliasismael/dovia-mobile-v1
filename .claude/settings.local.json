@@ -28,7 +28,8 @@
       "Bash(flutter analyze *)",
       "Bash(dart analyze *)",
       "Bash(curl -L -o \"C:/Users/ELAS~1/AppData/Local/Temp/claude/c--Users-El-as-Desktop-dev-work-dovia-code-from-flutterflow-dovia/f3e8d424-5182-4de5-a5ed-cb1bbec22b66/scratchpad/premium_home.png\" \"https://www.figma.com/api/mcp/asset/2384a5bd-defa-4088-a6f2-6ed9914818d3\")",
-      "Bash(curl -L -o figma_premium.png \"https://www.figma.com/api/mcp/asset/bc1a3823-71cb-4ef5-bf47-8b9251a613ec\")"
+      "Bash(curl -L -o figma_premium.png \"https://www.figma.com/api/mcp/asset/bc1a3823-71cb-4ef5-bf47-8b9251a613ec\")",
+      "mcp__claude_ai_Figma__get_metadata"
     ]
   }
 }

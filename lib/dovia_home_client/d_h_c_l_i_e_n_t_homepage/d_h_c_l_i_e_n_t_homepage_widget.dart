@@ -74,14 +74,18 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     _model = createModel(context, () => DHCLIENTHomepageModel());
     
     final token = currentAuthenticationToken ?? '';
+    // El endpoint valida `status` contra el enum PENDING/TAKEN/IN_PROGRESS/
+    // FINISHED y acepta un único valor (un string multi-valor devuelve 400
+    // "status invalido"). Para "Próximas visitas" (varios estados) se traen
+    // todas sin filtro y se excluye FINISHED client-side; para las finalizadas
+    // se filtra directamente por FINISHED.
     _upcomingVisitsFuture = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
       authToken: token,
-      status: 'PENDING,ASSIGNED,IN_TRANSIT,IN_PROGRESS',
-      limit: 2,
+      limit: 20,
     );
     _completedVisitsFuture = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
       authToken: token,
-      status: 'COMPLETED,CLOSED,CANCELED',
+      status: 'FINISHED',
       limit: 2,
     );
     _proposalsFuture = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.call(
@@ -179,27 +183,28 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   String? _str(dynamic v) =>
       (v is String && v.trim().isNotEmpty) ? v.trim() : null;
 
-  /// Mapea el estatus del backend a la etiqueta que ve el cliente en la tarjeta
-  /// de "Próximas visitas". Una solicitud con asociado asignado pide acción
-  /// ("Confirmar"); una vez confirmada por el cliente queda "Programada".
-  String _visitStatusLabel(String status, {required bool confirmed}) {
-    if (confirmed) return 'Programada';
-    switch (status) {
-      case 'ASSIGNED':
-        return 'Confirmar';
-      case 'IN_TRANSIT':
-        return 'En camino';
+  /// Mapea el estatus del backend (enum PENDING/TAKEN/IN_PROGRESS/FINISHED) a la
+  /// etiqueta que ve el cliente en la tarjeta de "Próximas visitas". Sin que
+  /// ningún Home Associate haya tomado el trabajo es "Pendiente"; cuando alguien
+  /// lo toma queda "Programada".
+  String _visitStatusLabel(String status) {
+    switch (status.toUpperCase()) {
+      case 'TAKEN':
+        return 'Programada';
       case 'IN_PROGRESS':
         return 'En progreso';
+      case 'FINISHED':
+        return 'Finalizada';
       case 'PENDING':
       default:
         return 'Pendiente';
     }
   }
 
-  /// Abre la pantalla de detalle/confirmación (Casa A) con los datos de la
-  /// solicitud. Al volver refresca el Dashboard para reflejar el nuevo estatus.
-  void _openVisitDetail(Map<String, dynamic> data, {required bool confirmed}) {
+  /// Abre la pantalla de detalle (Casa A) en **modo consulta** (solo lectura,
+  /// sin botón "Aceptar") con los datos de la solicitud. Al volver refresca el
+  /// Dashboard.
+  void _openVisitDetail(Map<String, dynamic> data) {
     final address = data['address'];
     DHCLIENTCasaAWidget.requestData = data;
     DHCLIENTCasaAWidget.houseName = (address is Map
@@ -209,7 +214,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                 _str(address['alias'])
             : null) ??
         'Casa A';
-    DHCLIENTCasaAWidget.alreadyConfirmed = confirmed;
+    DHCLIENTCasaAWidget.alreadyConfirmed = true;
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
         .then((_) => safeSetState(() {}));
@@ -871,9 +876,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   ),
                             ),
                             FFButtonWidget(
-                              // TODO: enlazar a la vista completa de "Próximas
-                              // visitas" cuando exista esa pantalla de listado.
-                              onPressed: () {},
+                              onPressed: () {
+                                context.pushNamed(
+                                    DHCLIENTProximasVisitasListaWidget
+                                        .routeName);
+                              },
                               text: 'Ver todo',
                               options: FFButtonOptions(
                                 height: 30.0,
@@ -921,14 +928,28 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             if (!response.succeeded) {
                               return const SizedBox.shrink();
                             }
-                            final visits = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.requestsList(response) ?? [];
-                            if (visits.isEmpty && DHCLIENTHomepageWidget.upcomingVisits.isEmpty) {
+                            final rawVisits = DOVIAAPIDoviaHomeContextGroup
+                                    .listServiceRequestsCall
+                                    .requestsList(response) ??
+                                [];
+                            // Solo próximas: excluye las solicitudes finalizadas
+                            // (FINISHED) y toma las 2 primeras.
+                            final visits = rawVisits
+                                .whereType<Map>()
+                                .map((e) => Map<String, dynamic>.from(e))
+                                .where((data) =>
+                                    ((data['status'] as String?) ?? 'PENDING')
+                                        .toUpperCase() !=
+                                    'FINISHED')
+                                .take(2)
+                                .toList();
+                            if (visits.isEmpty &&
+                                DHCLIENTHomepageWidget.upcomingVisits.isEmpty) {
                               return const SizedBox.shrink();
                             }
-                            
+
                             return Column(
-                              children: visits.take(2).map((visitData) {
-                                final data = visitData as Map<String, dynamic>;
+                              children: visits.map((data) {
                                 final title = data['serviceName'] ?? 'Servicio';
                                 // Obtener fecha del appointment o del createdAt
                                 final apt = data['appointment'];
@@ -941,58 +962,18 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                         ?.toString() ??
                                     '';
 
-                                // Regla UI: con un Home Associate asignado la
-                                // solicitud pide acción ("Confirmar" + punto
-                                // rojo). Al confirmarla el cliente, pasa a
-                                // "Programada" y pierde el punto.
-                                final isConfirmed = id.isNotEmpty &&
-                                    DHCLIENTHomepageWidget.confirmedVisitIds
-                                        .contains(id);
-                                final isAssigned = status == 'ASSIGNED';
-                                final needsAction = isAssigned && !isConfirmed;
-                                final canOpenDetail =
-                                    (isAssigned || isConfirmed) && id.isNotEmpty;
-
-                                final card = DHCLIENTProximasVisitasWidget(
-                                  title: title,
-                                  date: date,
-                                  status: _visitStatusLabel(status,
-                                      confirmed: isConfirmed),
-                                );
-
-                                final content = needsAction
-                                    ? Stack(
-                                        clipBehavior: Clip.none,
-                                        children: [
-                                          card,
-                                          PositionedDirectional(
-                                            top: -4,
-                                            end: -4,
-                                            child: Container(
-                                              width: 14,
-                                              height: 14,
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFE53935),
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                    color: Colors.white,
-                                                    width: 2),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : card;
-
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 10.0),
                                   child: InkWell(
-                                    onTap: canOpenDetail
-                                        ? () => _openVisitDetail(data,
-                                            confirmed: isConfirmed)
+                                    onTap: id.isNotEmpty
+                                        ? () => _openVisitDetail(data)
                                         : null,
                                     borderRadius: BorderRadius.circular(14.0),
-                                    child: content,
+                                    child: DHCLIENTProximasVisitasWidget(
+                                      title: title,
+                                      date: date,
+                                      status: _visitStatusLabel(status),
+                                    ),
                                   ),
                                 );
                               }).toList(),
