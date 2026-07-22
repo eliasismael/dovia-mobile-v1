@@ -12,6 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_dovia_home.dart';
+import '/backend/api_requests/api_manager.dart';
+
 import 'd_h_c_l_i_e_n_t_homepage_model.dart';
 export 'd_h_c_l_i_e_n_t_homepage_model.dart';
 
@@ -52,10 +57,31 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   late DHCLIENTHomepageModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  late Future<ApiCallResponse> _upcomingVisitsFuture;
+  late Future<ApiCallResponse> _completedVisitsFuture;
+  late Future<ApiCallResponse> _proposalsFuture;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTHomepageModel());
+    
+    final token = currentAuthenticationToken ?? '';
+    _upcomingVisitsFuture = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+      authToken: token,
+      status: 'PENDING,ASSIGNED,IN_TRANSIT,IN_PROGRESS',
+      limit: 2,
+    );
+    _completedVisitsFuture = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+      authToken: token,
+      status: 'COMPLETED,CLOSED,CANCELED',
+      limit: 2,
+    );
+    _proposalsFuture = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.call(
+      authToken: token,
+      limit: 2,
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Carga el estado de suscripcion (Recurrente) para decidir que UI mostrar.
       // Cacheado en el repo: no re-consulta en cada rebuild.
@@ -399,54 +425,82 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// TODO: Poblar con el listado real (GET /dovia-home/proposals o fuera de
   /// alcance) cuando se conecte el flujo; por ahora es un placeholder.
   Widget _buildCotizacionesRecibidas() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return FutureBuilder<ApiCallResponse>(
+      future: _proposalsFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        final response = snapshot.data!;
+        if (!response.succeeded) {
+          return const SizedBox.shrink(); // No mostrar si hay error
+        }
+
+        final proposals = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.proposalsList(response) ?? [];
+        if (proposals.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Cotizaciones recibidas',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                    fontSize: 16.0,
-                    color: FlutterFlowTheme.of(context).primary,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Cotizaciones recibidas',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                        fontSize: 16.0,
+                        color: FlutterFlowTheme.of(context).primary,
+                      ),
+                ),
+                FFButtonWidget(
+                  onPressed: () {
+                    context.pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
+                  },
+                  text: 'Ver todo',
+                  options: FFButtonOptions(
+                    height: 30.0,
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    color: const Color(0xFFCCE3E4),
+                    textStyle: GoogleFonts.publicSans(
+                        color: FlutterFlowTheme.of(context).primary, fontSize: 14.0),
+                    borderRadius: BorderRadius.circular(24.0),
+                    elevation: 0,
                   ),
+                ),
+              ],
             ),
-            FFButtonWidget(
-              onPressed: () {
-                context
-                    .pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
-              },
-              text: 'Ver todo',
-              options: FFButtonOptions(
-                height: 30.0,
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                color: const Color(0xFFCCE3E4),
-                textStyle: GoogleFonts.publicSans(
-                    color: FlutterFlowTheme.of(context).primary, fontSize: 14.0),
-                borderRadius: BorderRadius.circular(24.0),
-                elevation: 0,
-              ),
+            const SizedBox(height: 12),
+            Text(
+              'Cotizaciones generadas a partir de diagnósticos',
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                  color: FlutterFlowTheme.of(context).secondaryText),
             ),
+            const SizedBox(height: 12),
+            ...proposals.take(2).map((proposal) {
+              final data = proposal as Map<String, dynamic>;
+              final title = data['serviceRequest']?['serviceName'] ?? 'Cotización de servicio';
+              final dateStr = data['createdAt'] as String? ?? '';
+              final date = dateStr.isNotEmpty ? dateStr.split('T').first : 'DD/MM/AAAA';
+              
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: _buildQuoteResultCard(
+                  title: title,
+                  subtitle: 'Diagnóstico generado',
+                  date: date,
+                  status: data['status'] ?? 'Pendiente',
+                ),
+              );
+            }).toList(),
           ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Cotizaciones generadas a partir de diagnósticos',
-          style: GoogleFonts.inter(
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-              color: FlutterFlowTheme.of(context).secondaryText),
-        ),
-        const SizedBox(height: 12),
-        _buildQuoteResultCard(
-          title: 'Reparación de tubería',
-          subtitle: 'Visita realizada',
-          date: 'DD/MM/AAAA',
-          status: 'Pendiente',
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -810,44 +864,71 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             ),
                           ),
                         ),
-                        // Regla UI: si la solicitud requiere accion del usuario
-                        // (Ej: confirmar al asociado), se muestra un punto rojo
-                        // de alerta en la esquina de la tarjeta.
-                        // TODO: condicionar `needsAction` a la solicitud real
-                        // cuando exista el endpoint de proximas visitas.
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            wrapWithModel(
-                              model: _model.dHCLIENTProximasVisitasModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: const DHCLIENTProximasVisitasWidget(
-                                title: 'Instalación de TV',
-                                date: 'Lunes, 10 de Noviembre',
-                                status: 'Pendiente',
-                              ),
-                            ),
-                            PositionedDirectional(
-                              top: -4,
-                              end: -4,
-                              child: Container(
-                                width: 14,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE53935),
-                                  shape: BoxShape.circle,
-                                  border:
-                                      Border.all(color: Colors.white, width: 2),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        wrapWithModel(
-                          model: _model.dHCLIENTProximasVisitasModel2,
-                          updateCallback: () => safeSetState(() {}),
-                          child: const DHCLIENTProximasVisitasWidget(),
+                        // Regla UI: Lista dinamica del backend
+                        FutureBuilder<ApiCallResponse>(
+                          future: _upcomingVisitsFuture,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                            final response = snapshot.data!;
+                            if (!response.succeeded) {
+                              return const SizedBox.shrink();
+                            }
+                            final visits = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.requestsList(response) ?? [];
+                            if (visits.isEmpty && DHCLIENTHomepageWidget.upcomingVisits.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            
+                            return Column(
+                              children: visits.take(2).map((visitData) {
+                                final data = visitData as Map<String, dynamic>;
+                                final title = data['serviceName'] ?? 'Servicio';
+                                // Obtener fecha del appointment o del createdAt
+                                final apt = data['appointment'];
+                                final dateStr = (apt != null && apt['scheduledAt'] != null) 
+                                    ? apt['scheduledAt'] as String 
+                                    : (data['createdAt'] as String? ?? '');
+                                final date = dateStr.isNotEmpty ? dateStr.split('T').first : 'Fecha pendiente';
+                                final status = data['status'] ?? 'Pendiente';
+                                
+                                // Regla UI: si la solicitud requiere accion del usuario, mostrar punto rojo.
+                                // Ejemplo: si el estado es PENDING, marcamos como requiere atencion.
+                                final needsAction = status == 'PENDING';
+                                
+                                final card = DHCLIENTProximasVisitasWidget(
+                                  title: title,
+                                  date: date,
+                                  status: status,
+                                );
+                                
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 10.0),
+                                  child: needsAction
+                                      ? Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            card,
+                                            PositionedDirectional(
+                                              top: -4,
+                                              end: -4,
+                                              child: Container(
+                                                width: 14,
+                                                height: 14,
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFE53935),
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(color: Colors.white, width: 2),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : card,
+                                );
+                              }).toList(),
+                            );
+                          },
                         ),
                         const SizedBox(height: 30),
 
@@ -895,50 +976,72 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   FlutterFlowTheme.of(context).secondaryText),
                         ),
                         const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                                color: FlutterFlowTheme.of(context).alternate,
-                                width: 1),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: SvgPicture.asset(
-                                      'assets/images/IconoServicioPlomeria.svg'),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Reparación de tubería',
-                                        style: GoogleFonts.publicSans(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14)),
-                                    const SizedBox(height: 4),
-                                    Text('Visita realizada',
-                                        style: GoogleFonts.inter(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            fontSize: 12)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                        FutureBuilder<ApiCallResponse>(
+                          future: _completedVisitsFuture,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                            final response = snapshot.data!;
+                            if (!response.succeeded) {
+                              return const SizedBox.shrink();
+                            }
+                            final visits = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.requestsList(response) ?? [];
+                            if (visits.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            
+                            return Column(
+                              children: visits.take(2).map((visitData) {
+                                final data = visitData as Map<String, dynamic>;
+                                final title = data['serviceName'] ?? 'Servicio';
+                                
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: FlutterFlowTheme.of(context).alternate, width: 1),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context).alternate,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: SvgPicture.asset('assets/images/IconoServicioPlomeria.svg'),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(title,
+                                                  style: GoogleFonts.publicSans(
+                                                      fontWeight: FontWeight.w600, fontSize: 14)),
+                                              const SizedBox(height: 4),
+                                              Text('Visita realizada',
+                                                  style: GoogleFonts.inter(
+                                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                                      fontSize: 12)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          },
                         ),
                         const SizedBox(height: 50),
 
