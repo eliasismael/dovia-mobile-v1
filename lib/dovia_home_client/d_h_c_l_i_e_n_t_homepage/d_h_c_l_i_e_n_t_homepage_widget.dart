@@ -6,10 +6,12 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/repositories/payments_repository.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_homepage_model.dart';
 export 'd_h_c_l_i_e_n_t_homepage_model.dart';
 
@@ -54,7 +56,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTHomepageModel());
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Carga el estado de suscripcion (Recurrente) para decidir que UI mostrar.
+      // Cacheado en el repo: no re-consulta en cada rebuild.
+      context.read<PaymentsRepository>().loadCurrentSubscription();
+      safeSetState(() {});
+    });
   }
 
   @override
@@ -189,10 +196,340 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     );
   }
 
+  /// Item de beneficio (check naranja + texto blanco) usado en las tarjetas
+  /// Premium.
+  Widget _buildPremiumCheckItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.check_circle, color: Colors.orange, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Caja cuadrada translucida usada como contenedor de icono/contador dentro
+  /// de las tarjetas Premium.
+  Widget _buildPremiumTile({required Widget child}) {
+    return Container(
+      width: 64.0,
+      height: 64.0,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(14.0),
+      ),
+      child: child,
+    );
+  }
+
+  /// Botón blanco tipo pill al pie de las tarjetas Premium.
+  Widget _buildPremiumPillButton(String text, VoidCallback onPressed) {
+    return FFButtonWidget(
+      onPressed: onPressed,
+      text: text,
+      options: FFButtonOptions(
+        width: double.infinity,
+        height: 40.0,
+        color: Colors.white,
+        textStyle: GoogleFonts.publicSans(
+          color: FlutterFlowTheme.of(context).primary,
+          fontWeight: FontWeight.w600,
+        ),
+        elevation: 0,
+        borderRadius: BorderRadius.circular(24.0),
+      ),
+    );
+  }
+
+  /// Tarjeta Premium "Servicios incluidos disponibles": contador dinamico de
+  /// servicios gratuitos del plan (usados/total) + perks, incluyendo la regla
+  /// de negocio del 35% de descuento en cotizaciones.
+  ///
+  /// TODO: `usedServices`/`totalServices` deben inyectarse desde el plan del
+  /// backend cuando exista el endpoint; por ahora son placeholders.
+  Widget _buildIncludedServicesCard() {
+    const usedServices = 1;
+    const totalServices = 2;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).primary,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Servicios incluidos disponibles',
+            style: GoogleFonts.publicSans(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  _buildPremiumTile(
+                    child: const Icon(Icons.calendar_month,
+                        color: Colors.white, size: 30),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildPremiumTile(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$usedServices/$totalServices',
+                          style: GoogleFonts.publicSans(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'total\ndisponibles',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            color: Colors.white70,
+                            fontSize: 8,
+                            height: 1.1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPremiumCheckItem('Atención prioritaria'),
+                    _buildPremiumCheckItem('Descuentos únicos del 35%'),
+                    _buildPremiumCheckItem('Cotización disponible'),
+                    _buildPremiumCheckItem('Tiempo de espera reducido'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildPremiumPillButton('Califica nuestra app', () {
+            // TODO: enlazar a la calificacion de la app (store review).
+            print('Califica nuestra app');
+          }),
+        ],
+      ),
+    );
+  }
+
+  /// Tarjeta Premium "Solicita una Cotización": acceso directo al flujo de
+  /// cotizacion (trabajos grandes o a medida). El boton "Solicitar" abre el
+  /// formulario de cotizacion.
+  Widget _buildQuoteRequestCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).primary,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Solicita una Cotización',
+            style: GoogleFonts.publicSans(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPremiumTile(
+                child: const Icon(Icons.request_quote,
+                    color: Colors.white, size: 30),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPremiumCheckItem('Atención prioritaria'),
+                    _buildPremiumCheckItem('Cotización personalizada'),
+                    _buildPremiumCheckItem(
+                        'Garantía de Dovia en todos los trabajos'),
+                    _buildPremiumCheckItem(
+                        '¿Tienes un gran problema? Escríbenos'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildPremiumPillButton('Solicitar', () {
+            context.pushNamed(DHCLIENTCotizacionWidget.routeName);
+          }),
+        ],
+      ),
+    );
+  }
+
+  /// Seccion "Cotizaciones recibidas" (exclusivo Premium): diagnosticos de
+  /// trabajos fuera de alcance que la red de proveedores cotizo para el cliente.
+  ///
+  /// TODO: Poblar con el listado real (GET /dovia-home/proposals o fuera de
+  /// alcance) cuando se conecte el flujo; por ahora es un placeholder.
+  Widget _buildCotizacionesRecibidas() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Cotizaciones recibidas',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                    fontSize: 16.0,
+                    color: FlutterFlowTheme.of(context).primary,
+                  ),
+            ),
+            FFButtonWidget(
+              onPressed: () {
+                context
+                    .pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
+              },
+              text: 'Ver todo',
+              options: FFButtonOptions(
+                height: 30.0,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                color: const Color(0xFFCCE3E4),
+                textStyle: GoogleFonts.publicSans(
+                    color: FlutterFlowTheme.of(context).primary, fontSize: 14.0),
+                borderRadius: BorderRadius.circular(24.0),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Cotizaciones generadas a partir de diagnósticos',
+          style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              color: FlutterFlowTheme.of(context).secondaryText),
+        ),
+        const SizedBox(height: 12),
+        _buildQuoteResultCard(
+          title: 'Reparación de tubería',
+          subtitle: 'Visita realizada',
+          date: 'DD/MM/AAAA',
+          status: 'Pendiente',
+        ),
+      ],
+    );
+  }
+
+  /// Tarjeta de una cotizacion recibida (titulo, estado de la visita, fecha y
+  /// pill de estatus).
+  Widget _buildQuoteResultCard({
+    required String title,
+    required String subtitle,
+    required String date,
+    String status = 'Pendiente',
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border:
+            Border.all(color: FlutterFlowTheme.of(context).alternate, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).alternate,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SvgPicture.asset(
+                  'assets/images/IconoServicioPlomeria.svg'),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: GoogleFonts.publicSans(
+                        fontWeight: FontWeight.w600, fontSize: 14)),
+                const SizedBox(height: 4),
+                Text(subtitle,
+                    style: GoogleFonts.inter(
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 12)),
+                const SizedBox(height: 4),
+                Text(date,
+                    style: GoogleFonts.inter(
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 12)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDECC8),
+              borderRadius: BorderRadius.circular(100.0),
+            ),
+            child: Text(
+              status,
+              style: GoogleFonts.publicSans(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF9A6700),
+                  fontSize: 12.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Variable mock para la logica de subscripcion
-    bool hasSubscription = false;
+    // Estado real de suscripcion (Recurrente) desde PaymentsRepository.
+    // `hasActiveSubscription` es true para ACTIVE, PAST_DUE y CANCEL_SCHEDULED,
+    // que es el criterio con el que el backend habilita los beneficios Premium.
+    final hasSubscription =
+        context.watch<PaymentsRepository>().hasActiveSubscription;
 
     return GestureDetector(
       onTap: () {
@@ -410,6 +747,14 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                         ),
                         if (!hasSubscription) const SizedBox(height: 30),
 
+                        // Tarjetas Premium (usuario con suscripcion activa)
+                        if (hasSubscription) ...[
+                          _buildIncludedServicesCard(),
+                          const SizedBox(height: 16),
+                          _buildQuoteRequestCard(),
+                          const SizedBox(height: 30),
+                        ],
+
                         // Proximas Visitas
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -426,6 +771,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   ),
                             ),
                             FFButtonWidget(
+                              // TODO: enlazar a la vista completa de "Próximas
+                              // visitas" cuando exista esa pantalla de listado.
                               onPressed: () {},
                               text: 'Ver todo',
                               options: FFButtonOptions(
@@ -463,13 +810,38 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             ),
                           ),
                         ),
-                        wrapWithModel(
-                          model: _model.dHCLIENTProximasVisitasModel1,
-                          updateCallback: () => safeSetState(() {}),
-                          child: const DHCLIENTProximasVisitasWidget(
-                            title: 'Instalación de TV',
-                            date: 'Lunes, 10 de Noviembre',
-                          ),
+                        // Regla UI: si la solicitud requiere accion del usuario
+                        // (Ej: confirmar al asociado), se muestra un punto rojo
+                        // de alerta en la esquina de la tarjeta.
+                        // TODO: condicionar `needsAction` a la solicitud real
+                        // cuando exista el endpoint de proximas visitas.
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            wrapWithModel(
+                              model: _model.dHCLIENTProximasVisitasModel1,
+                              updateCallback: () => safeSetState(() {}),
+                              child: const DHCLIENTProximasVisitasWidget(
+                                title: 'Instalación de TV',
+                                date: 'Lunes, 10 de Noviembre',
+                                status: 'Pendiente',
+                              ),
+                            ),
+                            PositionedDirectional(
+                              top: -4,
+                              end: -4,
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE53935),
+                                  shape: BoxShape.circle,
+                                  border:
+                                      Border.all(color: Colors.white, width: 2),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 10),
                         wrapWithModel(
@@ -495,6 +867,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   ),
                             ),
                             FFButtonWidget(
+                              // TODO: enlazar a la vista completa de "Visitas
+                              // finalizadas" cuando exista esa pantalla de listado.
                               onPressed: () {},
                               text: 'Ver todo',
                               options: FFButtonOptions(
@@ -567,6 +941,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           ),
                         ),
                         const SizedBox(height: 50),
+
+                        // Cotizaciones recibidas (exclusivo Premium)
+                        if (hasSubscription) ...[
+                          _buildCotizacionesRecibidas(),
+                          const SizedBox(height: 50),
+                        ],
 
                         // Footer Confianza
                         _buildTrustItem(
