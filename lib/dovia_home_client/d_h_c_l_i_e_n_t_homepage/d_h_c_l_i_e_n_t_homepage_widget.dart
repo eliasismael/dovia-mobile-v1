@@ -424,6 +424,20 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     );
   }
 
+  /// Único punto de entrada al flujo de cotización: sólo se renderiza para
+  /// clientes con suscripción activa, por lo que "Solicitar" es la vía por la
+  /// que el Cliente Premium levanta un requerimiento a medida.
+  void _openQuoteRequest() {
+    // Cada solicitud arranca limpia: descarta la ubicación verificada y la
+    // navegación pendiente que pudiera haber quedado de un intento anterior.
+    DHCLIENTCotizacionWidget.verifiedAddressId = null;
+    DHCLIENTCotizacionWidget.verifiedAddressLabel = null;
+    DHCLIENTUbicacionWidget.pendingNextRoute = null;
+    context
+        .pushNamed(DHCLIENTCotizacionWidget.routeName)
+        .then((_) => safeSetState(() {}));
+  }
+
   /// Tarjeta Premium "Solicita una Cotización": acceso directo al flujo de
   /// cotizacion (trabajos grandes o a medida). El boton "Solicitar" abre el
   /// formulario de cotizacion.
@@ -471,9 +485,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildPremiumPillButton('Solicitar', () {
-            context.pushNamed(DHCLIENTCotizacionWidget.routeName);
-          }),
+          _buildPremiumPillButton('Solicitar', _openQuoteRequest),
         ],
       ),
     );
