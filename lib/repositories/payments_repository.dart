@@ -34,6 +34,11 @@ class PaymentsRepository extends ChangeNotifier {
   List<SubscriptionPlan> get plans => _plans;
   Subscription? get currentSubscription => _currentSubscription;
   bool get hasActiveSubscription => _currentSubscription?.keepsBenefits ?? false;
+
+  /// Si ya se resolvió el estado de suscripción. Permite a la UI distinguir
+  /// "todavía no sé" de "no tiene suscripción" y así no mostrarle upsells de
+  /// Premium a un cliente que sí paga mientras carga.
+  bool get subscriptionLoaded => _subscriptionLoaded;
   List<PaymentOrder> get payments => _payments;
   bool get isLoading => _isLoading;
   String? get error => _error;

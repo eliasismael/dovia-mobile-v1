@@ -14,9 +14,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
+import '/repositories/payments_repository.dart';
 
 import 'd_h_c_l_i_e_n_t_ubicacion_model.dart';
 export 'd_h_c_l_i_e_n_t_ubicacion_model.dart';
@@ -418,7 +420,12 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
 
     _loadCoverageData();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Asegura el estado de suscripción (cacheado en el repo) para decidir si
+      // corresponde el upsell de Premium.
+      context.read<PaymentsRepository>().loadCurrentSubscription();
+      safeSetState(() {});
+    });
   }
 
   @override
@@ -502,6 +509,13 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // El upsell de Premium sólo aplica a clientes sin suscripción activa; el
+    // Cliente Premium ve la pantalla limpia, como el diseño. Mientras el estado
+    // no esté resuelto no se muestra, para no ofrecerle Premium a quien ya paga.
+    final payments = context.watch<PaymentsRepository>();
+    final showPremiumUpsell =
+        payments.subscriptionLoaded && !payments.hasActiveSubscription;
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -525,7 +539,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
-                      title: 'Dovia Basic',
+                      title: 'Dovia Home',
                       showMap: false,
                       showCurrency: false,
                     ),
@@ -537,37 +551,39 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF007376),
-                              borderRadius: BorderRadius.circular(24.0),
-                              boxShadow: const [
-                                BoxShadow(
-                                  blurRadius: 12.0,
-                                  color: Color(0x33007376),
-                                  offset: Offset(0.0, 8.0),
-                                )
-                              ],
-                            ),
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                20.0, 15.0, 20.0, 15.0),
-                            child: Text(
-                              '¡Al contratar Premium en DOVIA Home podrás tener beneficios únicos!',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w600,
+                          // Upsell sólo para clientes sin suscripción.
+                          if (showPremiumUpsell)
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF007376),
+                                borderRadius: BorderRadius.circular(24.0),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    blurRadius: 12.0,
+                                    color: Color(0x33007376),
+                                    offset: Offset(0.0, 8.0),
+                                  )
+                                ],
+                              ),
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  20.0, 15.0, 20.0, 15.0),
+                              child: Text(
+                                '¡Al contratar Premium en DOVIA Home podrás tener beneficios únicos!',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      color: Colors.white,
+                                      fontSize: 17.0,
                                     ),
-                                    color: Colors.white,
-                                    fontSize: 17.0,
-                                  ),
+                              ),
                             ),
-                          ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 25.0, 0.0, 0.0),
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, showPremiumUpsell ? 25.0 : 0.0, 0.0, 0.0),
                             child: Text(
                               'Selecciona la ubicación de tu propiedad con cobertura',
                               style: FlutterFlowTheme.of(context)
