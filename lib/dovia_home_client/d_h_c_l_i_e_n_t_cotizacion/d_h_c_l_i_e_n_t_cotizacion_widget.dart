@@ -529,9 +529,9 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     );
   }
 
-  /// Zona de carga multimedia. Borde punteado + ícono + texto guía para que se
-  /// distinga como una zona tocable, no un campo vacío. Al tapear abre el
-  /// selector nativo (Cámara/Galería).
+  /// Zona de carga multimedia. Al tapear abre el selector nativo (Cámara/Galería).
+  /// El asset ya trae la caja completa (fondo + ícono), igual que en el resto
+  /// de la app (subir_archivo, reportar_problema, materiales, etc.).
   Widget _photoDropZone() {
     return InkWell(
       splashColor: Colors.transparent,
@@ -540,61 +540,28 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       highlightColor: Colors.transparent,
       borderRadius: BorderRadius.circular(10.0),
       onTap: _model.isPhotoUploading ? null : _pickPhotos,
-      child: CustomPaint(
-        painter: const _DashedBorderPainter(
-          color: Color(0xFF007376),
-          borderRadius: 10.0,
-        ),
-        child: Container(
-          width: double.infinity,
-          height: 110.0,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAFAFA),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
+            child: SvgPicture.asset(
+              'assets/images/AddMediaImage.svg',
+              width: double.infinity,
+              height: 104.0,
+              fit: BoxFit.cover,
+            ),
           ),
-          alignment: const AlignmentDirectional(0.0, 0.0),
-          child: _model.isPhotoUploading
-              ? const SizedBox(
-                  width: 24.0,
-                  height: 24.0,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.0,
-                    color: Color(0xFF007376),
-                  ),
-                )
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 36.0,
-                      height: 36.0,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFCCE3E4),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: const AlignmentDirectional(0.0, 0.0),
-                      child: SvgPicture.asset(
-                        'assets/images/AddMediaImage.svg',
-                        width: 18.0,
-                        height: 18.0,
-                        fit: BoxFit.contain,
-                        colorFilter: const ColorFilter.mode(
-                            Color(0xFF007376), BlendMode.srcIn),
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Text(
-                      'Toca para agregar fotos',
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            font: GoogleFonts.publicSans(
-                                fontWeight: FontWeight.w600),
-                            color: const Color(0xFF007376),
-                            fontSize: 13.0,
-                          ),
-                    ),
-                  ],
-                ),
-        ),
+          if (_model.isPhotoUploading)
+            const SizedBox(
+              width: 24.0,
+              height: 24.0,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.0,
+                color: Color(0xFF007376),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -774,59 +741,4 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       ),
     );
   }
-}
-
-/// Borde punteado para marcar visualmente una zona de carga (drop zone), ya
-/// que un borde sólido del mismo color de fondo la deja indistinguible de un
-/// campo vacío.
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({
-    required this.color,
-    required this.borderRadius,
-  });
-
-  final Color color;
-  final double borderRadius;
-  final double strokeWidth = 1.5;
-  final double dashWidth = 6.0;
-  final double dashGap = 4.0;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
-
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(
-        strokeWidth / 2,
-        strokeWidth / 2,
-        size.width - strokeWidth,
-        size.height - strokeWidth,
-      ),
-      Radius.circular(borderRadius),
-    );
-
-    final path = Path()..addRRect(rrect);
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next = distance + dashWidth;
-        canvas.drawPath(
-          metric.extractPath(distance, next.clamp(0.0, metric.length)),
-          paint,
-        );
-        distance = next + dashGap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
-      oldDelegate.color != color ||
-      oldDelegate.borderRadius != borderRadius ||
-      oldDelegate.strokeWidth != strokeWidth ||
-      oldDelegate.dashWidth != dashWidth ||
-      oldDelegate.dashGap != dashGap;
 }
