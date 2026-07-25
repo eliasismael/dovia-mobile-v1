@@ -518,6 +518,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                 ),
                 FFButtonWidget(
                   onPressed: () {
+                    // Sin solicitud fijada la pantalla lista todas las
+                    // propuestas recibidas por el cliente.
+                    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
                     context.pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
                   },
                   text: 'Ver todo',
@@ -548,13 +551,31 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               final dateStr = data['createdAt'] as String? ?? '';
               final date = dateStr.isNotEmpty ? dateStr.split('T').first : 'DD/MM/AAAA';
               
+              // Abre las propuestas de esa solicitud para compararlas y aceptar
+              // una.
+              final requestId = _str(data['serviceRequestId']) ??
+                  (data['serviceRequest'] is Map
+                      ? _str((data['serviceRequest'] as Map)['id'])
+                      : null);
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
-                child: _buildQuoteResultCard(
-                  title: title,
-                  subtitle: 'Diagnóstico generado',
-                  date: date,
-                  status: data['status'] ?? 'Pendiente',
+                child: InkWell(
+                  onTap: () {
+                    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId =
+                        requestId;
+                    context
+                        .pushNamed(
+                            DHCLIENTCotizacionesRecibidasWidget.routeName)
+                        .then((_) => safeSetState(() {}));
+                  },
+                  borderRadius: BorderRadius.circular(16.0),
+                  child: _buildQuoteResultCard(
+                    title: title,
+                    subtitle: 'Diagnóstico generado',
+                    date: date,
+                    status: data['status'] ?? 'Pendiente',
+                  ),
                 ),
               );
             }).toList(),

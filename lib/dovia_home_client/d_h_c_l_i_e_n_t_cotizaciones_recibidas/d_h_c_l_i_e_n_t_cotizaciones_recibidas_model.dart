@@ -16,12 +16,11 @@ class DHCLIENTCotizacionesRecibidasModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DOVIA_SHARED_Header component.
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
-  // State field(s) for Checkbox widget.
-  bool? checkboxValue1;
-  // State field(s) for Checkbox widget.
-  bool? checkboxValue2;
-  // State field(s) for Checkbox widget.
-  bool? checkboxValue3;
+  // Id de la propuesta marcada por el cliente. Sólo se puede aceptar una, así
+  // que el listado se comporta como un grupo de selección única.
+  String? selectedProposalId;
+  // Aceptación de la propuesta en curso (bloquea el botón [Continuar]).
+  bool isAccepting = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.

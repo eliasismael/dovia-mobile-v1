@@ -2,6 +2,7 @@ import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/shared_components/dovia_support/dovia_support_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -224,20 +225,43 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                           ),
                         ),
                       ),
-                    Container(
-                      width: 40.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        shape: BoxShape.circle,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: SvgPicture.asset(
-                          'assets/images/IconoDoviaHomeClienteMensajes.svg',
-                          width: 8.0,
-                          height: 8.0,
-                          fit: BoxFit.none,
+                    // Chat: abre el soporte de DOVIA (mismo panel que el ícono
+                    // flotante).
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () async {
+                        await showModalBottomSheet(
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          enableDrag: false,
+                          context: context,
+                          builder: (context) {
+                            return Padding(
+                              padding: MediaQuery.viewInsetsOf(context),
+                              child: const DoviaSupportWidget(),
+                            );
+                          },
+                        ).then((value) => safeSetState(() {}));
+                      },
+                      child: Container(
+                        width: 40.0,
+                        height: 40.0,
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          shape: BoxShape.circle,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: SvgPicture.asset(
+                            'assets/images/IconoDoviaHomeClienteMensajes.svg',
+                            width: 8.0,
+                            height: 8.0,
+                            fit: BoxFit.none,
+                          ),
                         ),
                       ),
                     ),

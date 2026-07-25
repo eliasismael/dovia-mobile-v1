@@ -18,6 +18,12 @@ class DHCLIENTCotizacionModel
   FocusNode? textFieldFocusNode;
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
+  // Evidencia opcional del requerimiento (fotos del problema/trabajo).
+  List<FFUploadedFile> uploadedPhotos = [];
+  bool isPhotoUploading = false;
+  // Envío de la solicitud en curso: bloquea el botón [Enviar] para evitar
+  // crear la misma cotización dos veces.
+  bool isSubmitting = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.

@@ -33,6 +33,9 @@ class DHCLIENTUbicacionModel extends FlutterFlowModel<DHCLIENTUbicacionWidget> {
   // Selected location from the interactive map.
   double? selectedLat;
   double? selectedLng;
+  // State field(s) for the "Ubicaciones anteriores" DropDown widget.
+  String? previousAddressValue;
+  FormFieldController<String>? previousAddressValueController;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.

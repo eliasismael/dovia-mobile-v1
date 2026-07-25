@@ -14,11 +14,20 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_dovia_home.dart';
+
 import 'd_h_c_l_i_e_n_t_ubicacion_model.dart';
 export 'd_h_c_l_i_e_n_t_ubicacion_model.dart';
 
 /// Página donde se selecciona en el mapa la ubicacion de la propiedad a
 /// cubrir
+///
+/// Es el paso de **Coverage Check**: la zona elegida se valida contra las zonas
+/// operables de DOVIA (`GET /dovia-home/workable-zones`) antes de registrar la
+/// dirección. Si la zona no está cubierta se deriva a
+/// [DHCLIENTFueraDeAlcanceWidget] y no se crea la dirección.
 class DHCLIENTUbicacionWidget extends StatefulWidget {
   const DHCLIENTUbicacionWidget({super.key});
 
@@ -40,6 +49,223 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   bool _isGeocoding = false;
   Timer? _debounce;
   List<Map<String, dynamic>> _suggestions = [];
+
+  /// Zonas con cobertura operativa de DOVIA. Alimentan el desplegable y son el
+  /// criterio del Coverage Check. Si el endpoint falla se usa [_fallbackZones]
+  /// para no bloquear el flujo, y la validación se delega al backend al crear la
+  /// dirección.
+  List<String> _workableZones = [];
+  bool _zonesLoaded = false;
+
+  /// Direcciones de servicio ya registradas ("Ubicaciones anteriores").
+  List<Map<String, dynamic>> _previousAddresses = [];
+
+  /// Registro de la dirección en curso (bloquea el botón [Aceptar]).
+  bool _isSaving = false;
+
+  static const List<String> _fallbackZones = [
+    'Zona 1',
+    'Zona 2',
+    'Zona 3',
+    'Zona 4',
+    'Zona 5',
+    'Zona 6',
+    'Zona 7',
+    'Zona 8',
+    'Zona 9',
+    'Zona 10',
+    'Zona 11',
+    'Zona 12',
+    'Zona 13',
+    'Zona 14',
+    'Zona 15',
+    'Zona 16',
+    'Zona 17',
+    'Zona 18',
+    'Zona 19',
+    'Zona 21',
+    'Zona 24',
+    'Zona 25',
+  ];
+
+  String? _str(dynamic value) =>
+      (value is String && value.trim().isNotEmpty) ? value.trim() : null;
+
+  /// Zonas ofrecidas en el desplegable: las del backend si llegaron, si no el
+  /// listado de respaldo.
+  List<String> get _zoneOptions =>
+      _workableZones.isNotEmpty ? _workableZones : _fallbackZones;
+
+  /// Carga zonas operables y direcciones previas del cliente en paralelo.
+  Future<void> _loadCoverageData() async {
+    final token = currentAuthenticationToken ?? '';
+    final results = await Future.wait([
+      DOVIAAPIDoviaHomeContextGroup.listWorkableZonesCall.call(authToken: token),
+      DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall
+          .call(authToken: token),
+    ]);
+    if (!mounted) return;
+
+    final zonesRes = results[0];
+    final addressesRes = results[1];
+
+    final zones = <String>[];
+    if (zonesRes.succeeded) {
+      final raw = DOVIAAPIDoviaHomeContextGroup.listWorkableZonesCall
+              .zonesList(zonesRes.jsonBody) ??
+          [];
+      for (final zone in raw) {
+        // El endpoint puede devolver strings o objetos { name/zone/label }.
+        final name = zone is Map
+            ? (_str(zone['name']) ??
+                _str(zone['zone']) ??
+                _str(zone['label']) ??
+                _str(zone['code']))
+            : _str(zone);
+        if (name != null && !zones.contains(name)) {
+          zones.add(name);
+        }
+      }
+    }
+
+    final addresses = <Map<String, dynamic>>[];
+    if (addressesRes.succeeded) {
+      final raw = DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall
+              .addressesList(addressesRes.jsonBody) ??
+          [];
+      for (final address in raw.whereType<Map>()) {
+        addresses.add(Map<String, dynamic>.from(address));
+      }
+    }
+
+    safeSetState(() {
+      _workableZones = zones;
+      _zonesLoaded = true;
+      _previousAddresses = addresses;
+    });
+  }
+
+  /// Etiqueta visible de una dirección previa en el desplegable.
+  String _addressLabel(Map<String, dynamic> address) {
+    final name = _str(address['name']) ??
+        _str(address['label']) ??
+        _str(address['nickname']) ??
+        _str(address['alias']);
+    final street = _str(address['address']) ?? _str(address['fullAddress']);
+    if (name != null && street != null) return '$name · $street';
+    return name ?? street ?? 'Ubicación registrada';
+  }
+
+  String? _addressId(Map<String, dynamic> address) =>
+      _str(address['id']) ?? _str(address['addressId']);
+
+  /// Direcciones previas que tienen id (las únicas seleccionables).
+  List<Map<String, dynamic>> get _selectablePreviousAddresses =>
+      _previousAddresses.where((a) => _addressId(a) != null).toList();
+
+  /// El cliente eligió una ubicación ya registrada: no hace falta Coverage Check
+  /// porque su cobertura se validó al darla de alta. Se devuelve directamente al
+  /// flujo que pidió la ubicación.
+  void _onPreviousAddressSelected(String? addressId) {
+    safeSetState(() => _model.previousAddressValue = addressId);
+    if (addressId == null) return;
+
+    final match = _selectablePreviousAddresses
+        .where((a) => _addressId(a) == addressId)
+        .toList();
+    if (match.isEmpty) return;
+
+    _returnWithAddress(addressId, _addressLabel(match.first));
+  }
+
+  /// ¿La zona elegida está dentro del área de servicio de DOVIA?
+  /// Si no se pudieron cargar las zonas del backend se deja pasar y la
+  /// validación definitiva queda en el POST de la dirección.
+  bool _isZoneCovered(String zone) {
+    if (_workableZones.isEmpty) return true;
+    return _workableZones
+        .any((z) => z.toLowerCase().trim() == zone.toLowerCase().trim());
+  }
+
+  /// Coverage Check + alta de la dirección. Sólo cuando la zona está cubierta y
+  /// el backend acepta la dirección se continúa al flujo pendiente.
+  Future<void> _verifyCoverageAndSave() async {
+    final zone = _model.dropDownValue;
+    final street = (_model.textController1?.text ?? '').trim();
+    final altura = (_model.alturaController?.text ?? '').trim();
+    final lat = _model.selectedLat;
+    final lng = _model.selectedLng;
+    if (zone == null || street.isEmpty || lat == null || lng == null) return;
+
+    // Regla de cobertura: fuera del área de servicio no se permite la solicitud.
+    if (!_isZoneCovered(zone)) {
+      context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
+      return;
+    }
+
+    final fullAddress = altura.isNotEmpty ? '$street $altura, $zone' : '$street, $zone';
+    final instructions = (_model.textController2?.text ?? '').trim();
+
+    safeSetState(() => _isSaving = true);
+    try {
+      final response =
+          await DOVIAAPIDoviaHomeContextGroup.createServiceAddressCall.call(
+        address: fullAddress,
+        latitude: lat,
+        longitude: lng,
+        zone: zone,
+        accessInstructions: instructions.isEmpty ? null : instructions,
+        authToken: currentAuthenticationToken ?? '',
+      );
+      if (!mounted) return;
+
+      if (!response.succeeded) {
+        // El backend rechaza las direcciones fuera de cobertura: se deriva a la
+        // pantalla de fuera de alcance en ese caso y se avisa en el resto.
+        if (response.statusCode == 422 || response.statusCode == 409) {
+          context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content:
+                  Text('No se pudo registrar la ubicación. Intenta de nuevo.'),
+            ),
+          );
+        }
+        return;
+      }
+
+      final addressId = DOVIAAPIDoviaHomeContextGroup.createServiceAddressCall
+          .id(response.jsonBody);
+      _returnWithAddress(addressId, fullAddress);
+    } finally {
+      if (mounted) {
+        safeSetState(() => _isSaving = false);
+      }
+    }
+  }
+
+  /// Publica la dirección verificada para el flujo que pidió la ubicación y
+  /// continúa la navegación pendiente.
+  void _returnWithAddress(String? addressId, String label) {
+    final nextRoute = DHCLIENTUbicacionWidget.pendingNextRoute;
+    DHCLIENTUbicacionWidget.pendingNextRoute = null;
+
+    if (nextRoute == DHCLIENTCotizacionWidget.routeName) {
+      DHCLIENTCotizacionWidget.verifiedAddressId = addressId;
+      DHCLIENTCotizacionWidget.verifiedAddressLabel = label;
+      // Vuelve al formulario de cotización que quedó en la pila con la
+      // ubicación ya validada.
+      context.safePop();
+      return;
+    }
+
+    if (nextRoute != null) {
+      context.pushNamed(nextRoute);
+    } else {
+      context.pushNamed(DHCLIENTHomepageWidget.routeName);
+    }
+  }
 
   /// Builds the search query combining street, street number and zone.
   /// Street + number go in a single token ("6a Avenida 1234") so Mapbox
@@ -189,6 +415,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
 
     _model.alturaController ??= TextEditingController();
     _model.alturaFocusNode ??= FocusNode();
+
+    _loadCoverageData();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -370,6 +598,86 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                   ),
                             ),
                           ),
+                          // Ubicaciones ya registradas: atajo que evita repetir
+                          // el Coverage Check de una dirección ya validada.
+                          if (_selectablePreviousAddresses.isNotEmpty) ...[
+                            Align(
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
+                              child: Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 20.0, 0.0, 0.0),
+                                child: Text(
+                                  'Ubicaciones anteriores:',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.publicSans(),
+                                        color: const Color(0xFF00444B),
+                                        fontSize: 16.0,
+                                        letterSpacing: 0.32,
+                                      ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 12.0, 0.0, 0.0),
+                              child: FlutterFlowDropDown<String>(
+                                controller:
+                                    _model.previousAddressValueController ??=
+                                        FormFieldController<String>(null),
+                                options: _selectablePreviousAddresses
+                                    .map((a) => _addressId(a)!)
+                                    .toList(),
+                                optionLabels: _selectablePreviousAddresses
+                                    .map(_addressLabel)
+                                    .toList(),
+                                onChanged: _onPreviousAddressSelected,
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                height: 50.0,
+                                textStyle:
+                                    FlutterFlowTheme.of(context).bodyMedium,
+                                hintText:
+                                    'Selecciona ubicación agregada anteriormente',
+                                icon: const Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Color(0xFF191919),
+                                  size: 24.0,
+                                ),
+                                fillColor: Colors.white,
+                                elevation: 2.0,
+                                borderColor: const Color(0xFFDFDFDF),
+                                borderWidth: 0.0,
+                                borderRadius: 10.0,
+                                margin: const EdgeInsetsDirectional.fromSTEB(
+                                    12.0, 0.0, 12.0, 0.0),
+                                hidesUnderline: true,
+                                isSearchable: false,
+                                isMultiSelect: false,
+                                maxHeight: 300.0,
+                              ),
+                            ),
+                          ],
+                          Align(
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 25.0, 0.0, 0.0),
+                              child: Text(
+                                'Agregue una nueva ubicación y verifique su cobertura',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      color: const Color(0xFF00444B),
+                                      fontSize: 17.0,
+                                      letterSpacing: 0.34,
+                                    ),
+                              ),
+                            ),
+                          ),
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
@@ -395,30 +703,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             child: FlutterFlowDropDown<String>(
                               controller: _model.dropDownValueController ??=
                                   FormFieldController<String>(null),
-                              options: const [
-                                'Zona 1',
-                                'Zona 2',
-                                'Zona 3',
-                                'Zona 4',
-                                'Zona 5',
-                                'Zona 6',
-                                'Zona 7',
-                                'Zona 8',
-                                'Zona 9',
-                                'Zona 10',
-                                'Zona 11',
-                                'Zona 12',
-                                'Zona 13',
-                                'Zona 14',
-                                'Zona 15',
-                                'Zona 16',
-                                'Zona 17',
-                                'Zona 18',
-                                'Zona 19',
-                                'Zona 21',
-                                'Zona 24',
-                                'Zona 25'
-                              ],
+                              // Sólo zonas con cobertura operativa de DOVIA.
+                              options: _zoneOptions,
                               onChanged: (val) => safeSetState(
                                   () => _model.dropDownValue = val),
                               width: MediaQuery.sizeOf(context).width * 1.0,
@@ -783,7 +1069,11 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 90.0),
                             child: FFButtonWidget(
-                              onPressed: (_model.dropDownValue == null ||
+                              // Valida cobertura y registra la dirección antes
+                              // de continuar el flujo que pidió la ubicación.
+                              onPressed: (!_zonesLoaded ||
+                                      _isSaving ||
+                                      _model.dropDownValue == null ||
                                       (_model.textController1?.text ?? '')
                                           .trim()
                                           .isEmpty ||
@@ -793,21 +1083,10 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                       _model.selectedLat == null ||
                                       _model.selectedLng == null)
                                   ? null
-                                  : () async {
-                                      if (DHCLIENTUbicacionWidget
-                                              .pendingNextRoute !=
-                                          null) {
-                                        context.pushNamed(
-                                            DHCLIENTUbicacionWidget
-                                                .pendingNextRoute!);
-                                        DHCLIENTUbicacionWidget
-                                            .pendingNextRoute = null;
-                                      } else {
-                                        context.pushNamed(
-                                            DHCLIENTHomepageWidget.routeName);
-                                      }
-                                    },
-                              text: 'Aceptar',
+                                  : () async => _verifyCoverageAndSave(),
+                              text: _isSaving
+                                  ? 'Verificando cobertura…'
+                                  : 'Aceptar',
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 42.0,
