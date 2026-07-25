@@ -259,3 +259,4 @@ export '/listing_hq/l_i_s_t_i_n_g_h_q_review_operative_notes/l_i_s_t_i_n_g_h_q_r
 export '/showing/s_h_o_w_i_n_g_propiedades_a_mostrar/s_h_o_w_i_n_g_propiedades_a_mostrar_widget.dart'
     show SHOWINGPropiedadesAMostrarWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_visitas_finalizadas_lista/d_h_c_l_i_e_n_t_visitas_finalizadas_lista_widget.dart' show DHCLIENTVisitasFinalizadasListaWidget;
+export '/shared_components/premium_upsell_popup/premium_upsell_popup_widget.dart' show PremiumUpsellPopupWidget;

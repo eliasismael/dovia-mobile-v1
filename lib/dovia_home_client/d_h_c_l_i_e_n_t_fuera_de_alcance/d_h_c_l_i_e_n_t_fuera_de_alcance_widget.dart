@@ -9,6 +9,8 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '/repositories/index.dart';
 import 'd_h_c_l_i_e_n_t_fuera_de_alcance_model.dart';
 export 'd_h_c_l_i_e_n_t_fuera_de_alcance_model.dart';
 
@@ -198,144 +200,18 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                                     padding:
                                         const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 12.0, 0.0, 0.0),
-                                    child: SizedBox(
-                                      width: MediaQuery.sizeOf(context).width *
-                                          1.0,
-                                      child: TextFormField(
-                                        controller:
-                                            _model.apellidosInputTextController,
-                                        focusNode:
-                                            _model.apellidosInputFocusNode,
-                                        autofocus: false,
-                                        enabled: true,
-                                        obscureText: false,
-                                        decoration: InputDecoration(
-                                          isDense: true,
-                                          labelStyle: FlutterFlowTheme.of(
-                                                  context)
-                                              .labelMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontStyle,
-                                              ),
-                                          hintText: 'xxx',
-                                          hintStyle: FlutterFlowTheme.of(
-                                                  context)
-                                              .labelMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontStyle,
-                                              ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: const BorderSide(
-                                              color: Color(0x00000000),
-                                              width: 1.0,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: const BorderSide(
-                                              color: Color(0x00000000),
-                                              width: 1.0,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          errorBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .error,
-                                              width: 1.0,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          focusedErrorBorder:
-                                              OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .error,
-                                              width: 1.0,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          filled: true,
-                                          fillColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .alternate,
+                                    child: Container(
+                                      width: MediaQuery.sizeOf(context).width * 1.0,
+                                      decoration: BoxDecoration(
+                                        color: FlutterFlowTheme.of(context).alternate,
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Text(
+                                          'El problema requiere reparaciones mayores en la estructura. Es muy complejo para resolverlo en la visita actual.',
+                                          style: FlutterFlowTheme.of(context).bodyMedium,
                                         ),
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                        cursorColor:
-                                            FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                        enableInteractiveSelection: true,
-                                        validator: _model
-                                            .apellidosInputTextControllerValidator
-                                            .asValidator(context),
                                       ),
                                     ),
                                   ),
@@ -407,9 +283,9 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                         ),
                         FFButtonWidget(
                           onPressed: () {
-                            print('Button pressed ...');
+                            Navigator.pop(context);
                           },
-                          text: 'No quiero que me cotizen. Finalizar.',
+                          text: 'No quiero que me coticen, finalizar',
                           options: FFButtonOptions(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: 42.0,
@@ -480,8 +356,38 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                                 0.0, 30.0, 0.0, 0.0),
                             child: FFButtonWidget(
                               onPressed: () async {
-                                context.pushNamed(
-                                    DHCLIENTMaterialesWidget.routeName);
+                                final hasSub = context.read<PaymentsRepository>().hasActiveSubscription;
+                                if (hasSub) {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return Dialog(
+                                        backgroundColor: Colors.transparent,
+                                        elevation: 0,
+                                        child: PopupExitoWidget(
+                                          title: 'Se solicitó la cotización con éxito',
+                                          text: 'Visualiza la publicación en el perfil de DOVIA home',
+                                          onContinue: () {
+                                            Navigator.pop(context); // Close popup
+                                            Navigator.pop(context); // Go back
+                                          },
+                                          continueText: 'Cerrar',
+                                        ),
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return const Dialog(
+                                        backgroundColor: Colors.transparent,
+                                        elevation: 0,
+                                        child: PremiumUpsellPopupWidget(),
+                                      );
+                                    },
+                                  );
+                                }
                               },
                               text: 'Sí quiero que me coticen',
                               options: FFButtonOptions(
