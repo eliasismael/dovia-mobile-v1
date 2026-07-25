@@ -1,14 +1,16 @@
+import '/dovia_home_client/d_h_c_l_i_e_n_t_agenda/d_h_c_l_i_e_n_t_agenda_widget.dart';
+import '/dovia_home_client/d_h_c_l_i_e_n_t_instalacion/d_h_c_l_i_e_n_t_instalacion_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
-import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
-import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/repositories/payments_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
@@ -34,9 +36,26 @@ class DHCLIENTCotizacionesRecibidasWidget extends StatefulWidget {
   /// null se listan todas las propuestas recibidas por el cliente.
   static String? serviceRequestId;
 
+  /// Descuento del plan Dovia Home aplicado al costo del proyecto.
+  static const double premiumDiscountRate = 0.35;
+
+  /// Etiqueta del descuento en la tarjeta (misma que el resto del flujo).
+  static const String premiumDiscountLabel = '35% OFF';
+
   @override
   State<DHCLIENTCotizacionesRecibidasWidget> createState() =>
       _DHCLIENTCotizacionesRecibidasWidgetState();
+}
+
+/// Precio ya resuelto para la tarjeta: lo que el cliente pagará y, cuando
+/// aplica el beneficio Premium, el precio de lista que queda tachado.
+class _ProposalPrice {
+  const _ProposalPrice({required this.finalLabel, this.baseLabel});
+
+  final String finalLabel;
+  final String? baseLabel;
+
+  bool get hasDiscount => baseLabel != null;
 }
 
 class _DHCLIENTCotizacionesRecibidasWidgetState
@@ -71,7 +90,12 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
             limit: 20,
           );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    // El estatus de suscripción decide si la tarjeta refleja el descuento
+    // Premium sobre el costo del proyecto (queda cacheado en el repo).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PaymentsRepository>().loadCurrentSubscription();
+      safeSetState(() {});
+    });
   }
 
   @override
@@ -133,19 +157,94 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
       ]) ??
       '-';
 
-  String _price(Map<String, dynamic> proposal) {
-    final amount = _firstValue([
+  /// Monto numérico de la primera clave que traiga un número usable. Tolera que
+  /// el backend mande el precio como texto ("Q1,200.00").
+  num? _amount(List<dynamic> candidates) {
+    for (final candidate in candidates) {
+      if (candidate is num) return candidate;
+      if (candidate is String) {
+        final cleaned =
+            candidate.replaceAll(RegExp(r'[^0-9.\-]'), '').replaceAll(',', '');
+        final parsed = num.tryParse(cleaned);
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
+  }
+
+  /// El backend ya descontó el beneficio del plan sobre el precio enviado, así
+  /// que la pantalla no debe volver a aplicarlo.
+  bool _discountAlreadyApplied(Map<String, dynamic> proposal) =>
+      proposal['premiumDiscountApplied'] == true ||
+      proposal['discountApplied'] == true;
+
+  String _formatAmount(num amount, String currency) {
+    final rounded = (amount * 100).round() / 100;
+    final fixed = rounded.toStringAsFixed(2);
+    final parts = fixed.split('.');
+    final grouped = parts[0].replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'),
+      (m) => '${m[1]},',
+    );
+    final body = parts[1] == '00' ? grouped : '$grouped.${parts[1]}';
+    return currency.toUpperCase() == 'GTQ' ? 'Q$body' : '$currency $body';
+  }
+
+  /// Costo final del proyecto. Si al cliente le corresponde el descuento del
+  /// 35% por su plan Dovia Home, la tarjeta muestra el precio de lista tachado
+  /// y el monto real a pagar.
+  _ProposalPrice _price(Map<String, dynamic> proposal, bool isPremium) {
+    final currency = _firstValue([proposal['currency']]) ?? 'GTQ';
+
+    final listPriceKeys = [
       proposal['price'],
       proposal['amount'],
       proposal['totalPrice'],
       proposal['total'],
+    ];
+    // Precio final cuando el backend ya calculó el beneficio del plan.
+    final discounted = _amount([
+      proposal['finalPrice'],
+      proposal['discountedPrice'],
+      proposal['priceWithDiscount'],
+      proposal['premiumPrice'],
     ]);
-    if (amount == null) return '-';
-    // Si el backend ya envía el monto formateado no se le agrega la moneda.
-    if (amount.contains(RegExp(r'[A-Za-z$]'))) return amount;
-    final currency = _firstValue([proposal['currency']]) ?? 'GTQ';
-    return '$currency $amount';
+    final listed = _amount(listPriceKeys);
+
+    if (listed == null && discounted == null) {
+      // Sin monto interpretable se respeta el texto tal cual llegó.
+      return _ProposalPrice(finalLabel: _firstValue(listPriceKeys) ?? '-');
+    }
+
+    if (discounted != null && listed != null && discounted < listed) {
+      return _ProposalPrice(
+        finalLabel: _formatAmount(discounted, currency),
+        baseLabel: _formatAmount(listed, currency),
+      );
+    }
+
+    final amount = discounted ?? listed!;
+    if (isPremium && discounted == null && !_discountAlreadyApplied(proposal)) {
+      return _ProposalPrice(
+        finalLabel: _formatAmount(
+          amount *
+              (1 - DHCLIENTCotizacionesRecibidasWidget.premiumDiscountRate),
+          currency,
+        ),
+        baseLabel: _formatAmount(amount, currency),
+      );
+    }
+    return _ProposalPrice(finalLabel: _formatAmount(amount, currency));
   }
+
+  /// Nombre del servicio con el que la solicitud queda registrada al agendar.
+  String _serviceTitle(Map<String, dynamic> proposal) =>
+      _firstValue([
+        _asMap(proposal['serviceRequest'])?['title'],
+        _asMap(proposal['serviceRequest'])?['serviceName'],
+        proposal['serviceName'],
+      ]) ??
+      'Trabajo cotizado';
 
   String _warranty(Map<String, dynamic> proposal) =>
       _firstValue([
@@ -186,16 +285,21 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     });
   }
 
-  /// Acepta la propuesta marcada. Al confirmarse, la solicitud avanza con ese
-  /// proveedor y el cliente vuelve al Dashboard.
-  Future<void> _acceptSelected(List<Map<String, dynamic>> proposals) async {
+  /// Acepta la propuesta marcada. Al confirmarse, la solicitud avanza con esa
+  /// empresa proveedora y el cliente pasa al agendamiento/pago, donde el
+  /// proyecto se cristaliza con fecha y hora.
+  Future<void> _acceptSelected(
+    List<Map<String, dynamic>> proposals,
+    bool isPremium,
+  ) async {
     final proposalId = _model.selectedProposalId;
     if (proposalId == null) return;
 
-    final match = proposals.where((p) => _proposalId(p) == proposalId).toList();
-    if (match.isEmpty) return;
+    final index = proposals.indexWhere((p) => _proposalId(p) == proposalId);
+    if (index < 0) return;
+    final accepted = proposals[index];
 
-    final requestId = _requestIdOf(match.first);
+    final requestId = _requestIdOf(accepted);
     if (requestId == null || requestId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -226,24 +330,13 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
         return;
       }
 
-      await showDialog(
-        barrierDismissible: true,
-        context: context,
-        builder: (context) {
-          return const Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: DHCLIENTExitoProgramarAgendaWidget(
-              message:
-                  'Aceptaste la cotización. Coordinaremos el trabajo con el proveedor y te avisaremos por la plataforma.',
-            ),
-          );
-        },
-      );
-      if (mounted) {
-        DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
-        context.goNamed(DHCLIENTHomepageWidget.routeName);
-      }
+      // Propuesta aceptada: el proyecto se cristaliza con esa empresa en el
+      // paso de agendamiento (el cobro va contra el plan del cliente Premium).
+      DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
+      DHCLIENTInstalacionWidget.serviceTitle = _serviceTitle(accepted);
+      // Anticipación mínima para agendar: 24h con plan, 36h sin él.
+      DHCLIENTAgendaWidget.minAdvanceHours = isPremium ? 24 : 36;
+      context.pushNamed(DHCLIENTAgendaWidget.routeName);
     } finally {
       if (mounted) {
         safeSetState(() => _model.isAccepting = false);
@@ -253,6 +346,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final isPremium = context.watch<PaymentsRepository>().hasActiveSubscription;
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -323,11 +418,12 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                               proposals.length,
                               (index) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),
-                                child: _proposalCard(proposals[index], index),
+                                child: _proposalCard(
+                                    proposals[index], index, isPremium),
                               ),
                             ),
                             const SizedBox(height: 18.0),
-                            _continueButton(proposals),
+                            _continueButton(proposals, isPremium),
                           ],
                         );
                       },
@@ -389,7 +485,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   }
 
   /// Tarjeta de una cotización recibida con su checkbox de selección.
-  Widget _proposalCard(Map<String, dynamic> proposal, int index) {
+  Widget _proposalCard(
+      Map<String, dynamic> proposal, int index, bool isPremium) {
     final id = _proposalId(proposal);
     final selected = id.isNotEmpty && _model.selectedProposalId == id;
 
@@ -434,7 +531,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                       'Trabajo a realizar:', _workDescription(proposal)),
                   _proposalField(
                       'Tiempo estimado del trabajo:', _estimatedTime(proposal)),
-                  _proposalField('Precio:', _price(proposal)),
+                  _priceField(_price(proposal, isPremium)),
                   _proposalField('Garantía:', _warranty(proposal)),
                 ],
               ),
@@ -490,11 +587,90 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     );
   }
 
+  /// Precio del proyecto. Con el beneficio Premium se muestra el precio de
+  /// lista tachado, el monto real a pagar y la etiqueta del descuento.
+  Widget _priceField(_ProposalPrice price) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Precio:',
+            style: FlutterFlowTheme.of(context).bodySmall.override(
+                  font: GoogleFonts.publicSans(),
+                  color: const Color(0xFF007376),
+                  fontSize: 12.0,
+                ),
+          ),
+          if (price.hasDiscount)
+            Text(
+              price.baseLabel!,
+              style: FlutterFlowTheme.of(context).bodySmall.override(
+                    font: GoogleFonts.publicSans(),
+                    color: const Color(0xFF6A7282),
+                    fontSize: 12.0,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+            ),
+          Text(
+            price.finalLabel,
+            style: FlutterFlowTheme.of(context).bodySmall.override(
+                  font: GoogleFonts.publicSans(
+                    fontWeight:
+                        price.hasDiscount ? FontWeight.w700 : FontWeight.normal,
+                  ),
+                  color: const Color(0xFF007376),
+                  fontSize: price.hasDiscount ? 14.0 : 12.0,
+                  lineHeight: 1.3,
+                ),
+          ),
+          if (price.hasDiscount)
+            Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCCE3E4),
+                  borderRadius: BorderRadius.circular(100.0),
+                ),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(10.0, 4.0, 10.0, 4.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      DHCLIENTCotizacionesRecibidasWidget.premiumDiscountLabel,
+                      style: GoogleFonts.publicSans(
+                        color: const Color(0xFF007376),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                    const SizedBox(width: 6.0),
+                    Text(
+                      'DOVIA PREMIUM',
+                      style: GoogleFonts.publicSans(
+                        color: const Color(0xFF6A7282),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 9.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   /// [Continuar]: inactivo hasta que el cliente marque una cotización.
-  Widget _continueButton(List<Map<String, dynamic>> proposals) {
+  Widget _continueButton(List<Map<String, dynamic>> proposals, bool isPremium) {
     final enabled = _model.selectedProposalId != null && !_model.isAccepting;
     return FFButtonWidget(
-      onPressed: enabled ? () async => _acceptSelected(proposals) : null,
+      onPressed:
+          enabled ? () async => _acceptSelected(proposals, isPremium) : null,
       text: _model.isAccepting ? 'Aceptando…' : 'Continuar',
       options: FFButtonOptions(
         width: double.infinity,
