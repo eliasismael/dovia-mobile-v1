@@ -32,6 +32,7 @@ class ScheduledVisit {
     required this.time,
     this.status = 'Pendiente',
     this.isEmergency = false,
+    this.id,
   });
 
   final String service;
@@ -42,6 +43,11 @@ class ScheduledVisit {
   /// Solicitud de emergencia: la tarjeta muestra un indicador visual de alta
   /// prioridad para que la red de Home Associates la tome de inmediato.
   final bool isEmergency;
+
+  /// Id de la solicitud creada en el backend, cuando se conoce. Permite que el
+  /// listado del backend no vuelva a pintar la misma solicitud que ya se agregó
+  /// de forma optimista al volver al Dashboard.
+  final String? id;
 }
 
 class DHCLIENTHomepageWidget extends StatefulWidget {
@@ -196,7 +202,13 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     if (status.toUpperCase() == 'TAKEN' && !DHCLIENTHomepageWidget.confirmedVisitIds.contains(id)) {
       return 'Confirmar';
     }
-    switch (status.toUpperCase()) {
+    final upper = status.toUpperCase();
+    // Familia de estatus del flujo de cotización (Ej: QUOTE_QUOTING): la
+    // solicitud está en manos de la red de proveedores esperando propuestas.
+    if (upper.startsWith('QUOTE')) {
+      return DHCLIENTCotizacionWidget.pendingQuoteStatus;
+    }
+    switch (upper) {
       case 'TAKEN':
         return 'Programada';
       case 'IN_PROGRESS':
@@ -975,11 +987,21 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                     .listServiceRequestsCall
                                     .requestsList(response) ??
                                 [];
+                            // Ids ya pintados de forma optimista al volver de
+                            // crear la solicitud: no se repiten desde el backend.
+                            final optimisticIds = DHCLIENTHomepageWidget
+                                .upcomingVisits
+                                .map((v) => v.id)
+                                .whereType<String>()
+                                .toSet();
                             // Solo próximas: excluye las solicitudes finalizadas
                             // (FINISHED) y toma las 2 primeras.
                             final visits = rawVisits
                                 .whereType<Map>()
                                 .map((e) => Map<String, dynamic>.from(e))
+                                .where((data) => !optimisticIds.contains(
+                                    (data['id'] ?? data['serviceRequestId'])
+                                        ?.toString()))
                                 .where((data) =>
                                     ((data['status'] as String?) ?? 'PENDING')
                                         .toUpperCase() !=

@@ -320,10 +320,12 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       if (!mounted) return;
 
       // La solicitud recién creada se refleja en "Próximas visitas" del
-      // Dashboard con el estatus de cotización pendiente.
+      // Dashboard con el estatus de cotización pendiente. Se guarda el id para
+      // que el listado del backend no la pinte por duplicado.
       DHCLIENTHomepageWidget.upcomingVisits.insert(
         0,
-        const ScheduledVisit(
+        ScheduledVisit(
+          id: serviceRequestId,
           service: 'Solicitud de cotización',
           date: 'En evaluación',
           time: 'proveedores DOVIA',
