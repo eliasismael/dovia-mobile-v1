@@ -53,22 +53,23 @@ class DHCLIENTCotizacionWidget extends StatefulWidget {
       _DHCLIENTCotizacionWidgetState();
 }
 
-/// Lugar del servicio elegido por el cliente.
-enum _ServiceLocation { mainProperty, otherLocation }
-
 class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
   late DHCLIENTCotizacionModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  /// Opción seleccionada en "Selecciona el lugar del servicio". Null = ninguna,
-  /// por lo que el botón [Enviar] permanece inactivo.
-  _ServiceLocation? _selectedLocation;
-
-  /// Propiedad principal registrada del cliente (primera dirección de servicio).
-  /// Da el nombre dinámico del primer botón; si no hay ninguna se usa 'Casa A'.
-  Map<String, dynamic>? _mainAddress;
+  /// Direcciones de servicio registradas del cliente. Cada una es un botón de
+  /// selección; tocarlas **sólo** elige el lugar del servicio.
+  List<Map<String, dynamic>> _addresses = [];
   bool _isLoadingAddresses = true;
+
+  /// `addressId` elegido. Null = ninguno, por lo que [Enviar] queda inactivo.
+  String? _selectedAddressId;
+
+  /// Dirección recién dada de alta en esta sesión. Se conserva como respaldo por
+  /// si el listado del backend todavía no la refleja, para que el cliente no vea
+  /// desaparecer la ubicación que acaba de agregar.
+  Map<String, dynamic>? _justAddedAddress;
 
   @override
   void initState() {
@@ -80,13 +81,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     // Rehabilita el botón [Enviar] en tiempo real según haya descripción.
     _model.textController!.addListener(_onDescriptionChanged);
 
-    // El cliente volvió del flujo de "Otra ubicación" con una dirección que ya
-    // pasó el Coverage Check: queda seleccionada al reconstruirse la pantalla.
-    if (DHCLIENTCotizacionWidget.verifiedAddressId != null) {
-      _selectedLocation = _ServiceLocation.otherLocation;
-    }
-
-    _loadMainAddress();
+    _loadAddresses();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -101,64 +96,60 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
 
   void _onDescriptionChanged() => safeSetState(() {});
 
-  /// Trae las direcciones de servicio del cliente para nombrar dinámicamente la
-  /// propiedad principal (Ej: "Casa A") y poder enviar su `addressId`.
-  Future<void> _loadMainAddress() async {
+  /// Trae las direcciones de servicio registradas del cliente, que son las
+  /// opciones seleccionables del lugar del servicio.
+  Future<void> _loadAddresses() async {
     final response =
         await DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall.call(
       authToken: currentAuthenticationToken ?? '',
     );
     if (!mounted) return;
 
-    Map<String, dynamic>? main;
+    final addresses = <Map<String, dynamic>>[];
     if (response.succeeded) {
-      final addresses = DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall
+      final raw = DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall
               .addressesList(response.jsonBody) ??
           [];
-      final typed = addresses.whereType<Map>().toList();
-      if (typed.isNotEmpty) {
-        main = Map<String, dynamic>.from(typed.first);
+      for (final address in raw.whereType<Map>()) {
+        final typed = Map<String, dynamic>.from(address);
+        if (_addressId(typed) != null) addresses.add(typed);
       }
     }
+
+    // La dirección recién agregada se conserva si el listado aún no la trae.
+    final justAdded = _justAddedAddress;
+    if (justAdded != null &&
+        !addresses.any((a) => _addressId(a) == _addressId(justAdded))) {
+      addresses.add(justAdded);
+    }
+
     safeSetState(() {
-      _mainAddress = main;
+      _addresses = addresses;
       _isLoadingAddresses = false;
+      // Si la dirección elegida ya no existe se limpia la selección.
+      if (_selectedAddressId != null &&
+          !addresses.any((a) => _addressId(a) == _selectedAddressId)) {
+        _selectedAddressId = null;
+      }
     });
   }
 
   String? _str(dynamic value) =>
       (value is String && value.trim().isNotEmpty) ? value.trim() : null;
 
-  /// Nombre visible de la propiedad principal. El backend no garantiza una
-  /// clave única para el alias, así que se prueban las habituales y se cae a la
-  /// dirección; si no hay nada se usa el placeholder del diseño.
-  String get _mainPropertyLabel =>
-      _str(_mainAddress?['name']) ??
-      _str(_mainAddress?['label']) ??
-      _str(_mainAddress?['nickname']) ??
-      _str(_mainAddress?['alias']) ??
-      _str(_mainAddress?['address']) ??
-      'Casa A';
+  String? _addressId(Map<String, dynamic> address) =>
+      _str(address['id']) ?? _str(address['addressId']);
 
-  String? get _mainPropertyId =>
-      _str(_mainAddress?['id']) ?? _str(_mainAddress?['addressId']);
-
-  /// Etiqueta del botón "Otra ubicación": una vez verificada la cobertura pasa a
-  /// mostrar la dirección elegida.
-  String get _otherLocationLabel =>
-      DHCLIENTCotizacionWidget.verifiedAddressLabel ?? 'Otra ubicación';
-
-  /// `addressId` que se enviará al backend según la opción seleccionada.
-  String? get _selectedAddressId {
-    switch (_selectedLocation) {
-      case _ServiceLocation.mainProperty:
-        return _mainPropertyId;
-      case _ServiceLocation.otherLocation:
-        return DHCLIENTCotizacionWidget.verifiedAddressId;
-      case null:
-        return null;
-    }
-  }
+  /// Etiqueta visible de una dirección. El backend no garantiza una clave única
+  /// para el alias, así que se prueban las habituales y se cae a la dirección.
+  String _addressLabel(Map<String, dynamic> address) =>
+      _str(address['name']) ??
+      _str(address['label']) ??
+      _str(address['nickname']) ??
+      _str(address['alias']) ??
+      _str(address['address']) ??
+      _str(address['fullAddress']) ??
+      'Ubicación registrada';
 
   bool get _hasDescription =>
       (_model.textController?.text.trim().isNotEmpty) ?? false;
@@ -166,28 +157,40 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
   /// Regla del botón [Enviar]: inactivo hasta que haya descripción **y** un
   /// lugar de servicio seleccionado (las fotos son opcionales).
   bool get _canSubmit =>
-      _hasDescription &&
-      _selectedLocation != null &&
-      _selectedAddressId != null &&
-      !_model.isSubmitting;
+      _hasDescription && _selectedAddressId != null && !_model.isSubmitting;
 
-  /// Selecciona la propiedad principal registrada.
-  void _selectMainProperty() {
-    safeSetState(() => _selectedLocation = _ServiceLocation.mainProperty);
+  /// Elige el lugar del servicio. No navega: los botones de las propiedades son
+  /// sólo de selección.
+  void _selectAddress(String addressId) {
+    safeSetState(() => _selectedAddressId = addressId);
   }
 
-  /// "Otra ubicación": dispara el Coverage Check. Se envía al cliente a la
-  /// pantalla de ubicación, que valida que la nueva dirección esté dentro de la
-  /// zona de servicio de DOVIA y recién entonces la deja disponible aquí.
-  void _selectOtherLocation() {
-    safeSetState(() => _selectedLocation = _ServiceLocation.otherLocation);
+  /// Acción permanente "Otra ubicación": lleva al alta de dirección, que valida
+  /// que esté dentro de la zona de servicio de DOVIA (Coverage Check). Al volver
+  /// se recarga el listado y la nueva dirección queda seleccionada.
+  Future<void> _addOtherLocation() async {
     DHCLIENTUbicacionWidget.pendingNextRoute =
         DHCLIENTCotizacionWidget.routeName;
-    // Al volver se refresca para reflejar la dirección ya verificada (o dejar el
-    // botón [Enviar] inactivo si el cliente canceló).
-    context
-        .pushNamed(DHCLIENTUbicacionWidget.routeName)
-        .then((_) => safeSetState(() {}));
+    await context.pushNamed(DHCLIENTUbicacionWidget.routeName);
+    if (!mounted) return;
+
+    final verifiedId = DHCLIENTCotizacionWidget.verifiedAddressId;
+    final verifiedLabel = DHCLIENTCotizacionWidget.verifiedAddressLabel;
+    DHCLIENTCotizacionWidget.verifiedAddressId = null;
+    DHCLIENTCotizacionWidget.verifiedAddressLabel = null;
+
+    // Si el cliente canceló no hay dirección verificada y la selección previa se
+    // mantiene intacta.
+    if (verifiedId == null) return;
+
+    safeSetState(() {
+      _justAddedAddress = {
+        'id': verifiedId,
+        'address': verifiedLabel ?? 'Ubicación agregada',
+      };
+      _selectedAddressId = verifiedId;
+    });
+    await _loadAddresses();
   }
 
   Future<void> _pickPhotos() async {
@@ -327,11 +330,6 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
           status: DHCLIENTCotizacionWidget.pendingQuoteStatus,
         ),
       );
-
-      // Limpia la dirección verificada para no arrastrarla a la próxima
-      // solicitud.
-      DHCLIENTCotizacionWidget.verifiedAddressId = null;
-      DHCLIENTCotizacionWidget.verifiedAddressLabel = null;
 
       await showDialog(
         barrierDismissible: true,
@@ -643,34 +641,37 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
               ),
         ),
         const SizedBox(height: 12.0),
-        _locationOption(
-          label: _isLoadingAddresses ? 'Cargando…' : _mainPropertyLabel,
-          selected: _selectedLocation == _ServiceLocation.mainProperty,
-          onTap: (_isLoadingAddresses || _mainPropertyId == null)
-              ? null
-              : _selectMainProperty,
-        ),
-        const SizedBox(height: 20.0),
-        _locationOption(
-          label: _otherLocationLabel,
-          selected: _selectedLocation == _ServiceLocation.otherLocation,
-          onTap: _selectOtherLocation,
-        ),
-        // Sin propiedad registrada la única vía es "Otra ubicación", que valida
-        // cobertura antes de habilitar el envío.
-        if (!_isLoadingAddresses && _mainPropertyId == null)
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-            child: Text(
-              'Todavía no tienes una propiedad registrada. Agrega una ubicación para verificar su cobertura.',
-              style: FlutterFlowTheme.of(context).bodySmall.override(
-                    font: GoogleFonts.publicSans(),
-                    color: const Color(0xFF6A6A6A),
-                    fontSize: 12.0,
-                    lineHeight: 1.3,
-                  ),
+        if (_isLoadingAddresses)
+          _locationOption(label: 'Cargando…', selected: false, onTap: null)
+        else ...[
+          // Una opción por propiedad registrada: tocarlas sólo selecciona.
+          for (final address in _addresses)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
+              child: _locationOption(
+                label: _addressLabel(address),
+                selected: _selectedAddressId == _addressId(address),
+                onTap: () => _selectAddress(_addressId(address)!),
+              ),
             ),
-          ),
+          if (_addresses.isEmpty)
+            Padding(
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+              child: Text(
+                'Todavía no tienes una ubicación registrada. Agrega una para verificar su cobertura.',
+                style: FlutterFlowTheme.of(context).bodySmall.override(
+                      font: GoogleFonts.publicSans(),
+                      color: const Color(0xFF6A6A6A),
+                      fontSize: 12.0,
+                      lineHeight: 1.3,
+                    ),
+              ),
+            ),
+        ],
+        // Acción permanente: siempre disponible para dar de alta otra ubicación,
+        // sin importar cuántas propiedades ya tenga el cliente.
+        _addLocationButton(),
       ],
     );
   }
@@ -690,7 +691,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 42.0,
+        constraints: const BoxConstraints(minHeight: 42.0),
         decoration: BoxDecoration(
           color: selected ? const Color(0xFF007376) : Colors.white,
           borderRadius: BorderRadius.circular(25.0),
@@ -699,6 +700,8 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
             width: 1.5,
           ),
         ),
+        padding:
+            const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
         alignment: const AlignmentDirectional(0.0, 0.0),
         child: Text(
           label,
@@ -712,6 +715,46 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                         : const Color(0xFF6A6A6A)),
                 fontSize: 14.0,
               ),
+        ),
+      ),
+    );
+  }
+
+  /// Acción "Otra ubicación": no es una opción seleccionable, sino el acceso al
+  /// alta de una dirección nueva. Se diferencia visualmente con el ícono [+] y
+  /// un borde tenue para que no se confunda con los botones de las propiedades.
+  Widget _addLocationButton() {
+    return InkWell(
+      splashColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      borderRadius: BorderRadius.circular(25.0),
+      onTap: () async => _addOtherLocation(),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 42.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFAFAFA),
+          borderRadius: BorderRadius.circular(25.0),
+          border: Border.all(color: const Color(0xFFDFDFDF), width: 1.5),
+        ),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add, color: Color(0xFF007376), size: 18.0),
+            const SizedBox(width: 8.0),
+            Text(
+              'Otra ubicación',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                    color: const Color(0xFF007376),
+                    fontSize: 14.0,
+                  ),
+            ),
+          ],
         ),
       ),
     );
