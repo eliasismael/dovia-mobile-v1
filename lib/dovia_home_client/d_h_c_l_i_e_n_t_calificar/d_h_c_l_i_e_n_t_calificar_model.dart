@@ -13,13 +13,15 @@ class DHCLIENTCalificarModel extends FlutterFlowModel<DHCLIENTCalificarWidget> {
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DOVIA_SHARED_Header component.
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
-  // State field(s) for RatingBar widget.
+  // State field(s) for RatingBar widget. Null = sin estrellas seleccionadas,
+  // por eso [Enviar] nace deshabilitado.
   double? ratingBarValue;
-  // State field(s) for DireccionInput widget.
-  FocusNode? direccionInputFocusNode;
-  TextEditingController? direccionInputTextController;
-  String? Function(BuildContext, String?)?
-      direccionInputTextControllerValidator;
+  // State field(s) for el comentario opcional.
+  FocusNode? comentarioFocusNode;
+  TextEditingController? comentarioTextController;
+  String? Function(BuildContext, String?)? comentarioTextControllerValidator;
+  // Evita reenvíos mientras el POST está en vuelo.
+  bool isSubmitting = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
@@ -39,8 +41,8 @@ class DHCLIENTCalificarModel extends FlutterFlowModel<DHCLIENTCalificarWidget> {
   void dispose() {
     cornerGradientBackgroundModel.dispose();
     dOVIASHAREDHeaderModel.dispose();
-    direccionInputFocusNode?.dispose();
-    direccionInputTextController?.dispose();
+    comentarioFocusNode?.dispose();
+    comentarioTextController?.dispose();
 
     fixedDoviaIconModel.dispose();
     dHCLIENTNavbarModel.dispose();

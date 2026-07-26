@@ -19,6 +19,11 @@ class DHCLIENTReportarProblemaModel
   FocusNode? textFieldFocusNode;
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
+  // Evidencia (imágenes o video) seleccionada por el cliente.
+  List<FFUploadedFile> uploadedMedia = [];
+  bool isMediaUploading = false;
+  // Evita reenvíos mientras el POST está en vuelo.
+  bool isSubmitting = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
