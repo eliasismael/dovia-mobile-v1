@@ -227,6 +227,37 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   String get _status => _firstString([_data?['status']]) ?? '';
 
+  /// Solicitud de materiales adicionales que el asociado envió desde su app y
+  /// que sigue esperando la decisión del cliente. Mientras exista, el detalle
+  /// del servicio ofrece el acceso directo a la pantalla de revisión.
+  Map<String, dynamic>? get _pendingExtraMaterials {
+    final raw = _data?['extraMaterials'] ??
+        _data?['extraMaterialsRequest'] ??
+        _data?['extraMaterialsRequests'] ??
+        _data?['materialsRequest'];
+    final Map<String, dynamic>? materials = raw is Map
+        ? Map<String, dynamic>.from(raw)
+        : (raw is List && raw.isNotEmpty && raw.last is Map
+            ? Map<String, dynamic>.from(raw.last as Map)
+            : null);
+    if (materials == null) return null;
+
+    final status =
+        _firstString([materials['materialsStatus'], materials['status']])
+            ?.toUpperCase();
+    // Sin estatus legible se asume pendiente, para no ocultarle al cliente una
+    // solicitud que el asociado sí envió.
+    const decided = {
+      'ACCEPTED',
+      'APPROVED',
+      'PAID',
+      'REJECTED',
+      'CANCELLED',
+      'COMPLETED',
+    };
+    return decided.contains(status) ? null : materials;
+  }
+
   /// Regla de renderizado del asociado: la tarjeta del profesional solo se
   /// muestra cuando alguien ya tomó el trabajo (solicitud "Programada"/asignada
   /// o con datos del asociado). Si nadie lo ha tomado ("Pendiente") se oculta y
@@ -409,6 +440,60 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
       ),
     );
   }
+
+  /// Acceso a la revisión de los materiales adicionales que pidió el asociado.
+  /// El cliente decide ahí si autoriza la compra; al volver se refresca el
+  /// detalle para reflejar la decisión.
+  void _openMateriales() {
+    DHCLIENTMaterialesWidget.serviceRequestIdRef = _requestId;
+    DHCLIENTMaterialesWidget.requestData = _data;
+    context
+        .pushNamed(DHCLIENTMaterialesWidget.routeName)
+        .then((_) => safeSetState(() {}));
+  }
+
+  Widget _extraMaterialsBanner() => Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
+        child: InkWell(
+          onTap: _openMateriales,
+          borderRadius: BorderRadius.circular(10.0),
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0x3670ACAD),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.shopping_bag_outlined,
+                  color: FlutterFlowTheme.of(context).primary,
+                  size: 24.0,
+                ),
+                const SizedBox(width: 12.0),
+                Expanded(
+                  child: Text(
+                    'El asociado necesita materiales adicionales.\nRevisa la solicitud para que pueda continuar.',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600),
+                          fontSize: 14.0,
+                          letterSpacing: 0.0,
+                          lineHeight: 1.3,
+                        ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: FlutterFlowTheme.of(context).primary,
+                  size: 24.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 
   Widget _savingsBanner() => Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
@@ -600,6 +685,10 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Acción pendiente del cliente: va primero para que
+                          // no quede tapada por el detalle de la visita.
+                          if (_pendingExtraMaterials != null)
+                            _extraMaterialsBanner(),
                           _labeledSection(
                               'Dirección exacta', _readOnlyBox(_exactAddress)),
                           _labeledSection('Fecha', _dateField()),

@@ -19,6 +19,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showMap = true,
     this.showLogo = true,
     this.showCart = false,
+    this.onChatTap,
   }) : title = title ?? '[title]';
 
   final String title;
@@ -27,6 +28,11 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   final bool showMap;
   final bool showLogo;
   final bool showCart;
+
+  /// Destino alternativo del ícono de chat. Sin este callback el ícono abre el
+  /// soporte de DOVIA; las pantallas donde el interlocutor es otro (Ej: el
+  /// asociado que está en la casa del cliente) lo redirigen con este parámetro.
+  final VoidCallback? onChatTap;
 
   @override
   State<DOVIASHAREDHeaderWidget> createState() =>
@@ -226,13 +232,17 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                         ),
                       ),
                     // Chat: abre el soporte de DOVIA (mismo panel que el ícono
-                    // flotante).
+                    // flotante), salvo que la pantalla defina otro destino.
                     InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onTap: () async {
+                        if (widget.onChatTap != null) {
+                          widget.onChatTap!();
+                          return;
+                        }
                         await showModalBottomSheet(
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,

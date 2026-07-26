@@ -15,16 +15,33 @@ class DHCLIENTMaterialesModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DOVIA_SHARED_Header component.
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
-  // State field(s) for ApellidosInput widget.
-  FocusNode? apellidosInputFocusNode1;
-  TextEditingController? apellidosInputTextController1;
-  String? Function(BuildContext, String?)?
-      apellidosInputTextController1Validator;
-  // State field(s) for ApellidosInput widget.
-  FocusNode? apellidosInputFocusNode2;
-  TextEditingController? apellidosInputTextController2;
-  String? Function(BuildContext, String?)?
-      apellidosInputTextController2Validator;
+
+  /// True mientras se lee la solicitud de materiales del backend.
+  bool isLoading = false;
+
+  /// True cuando la lectura falló: la pantalla avisa en vez de mostrarse vacía
+  /// como si el asociado no hubiera pedido nada.
+  bool loadFailed = false;
+
+  /// True mientras se aprueba o se rechaza, para que la decisión contraria no
+  /// pueda dispararse al mismo tiempo.
+  bool isSubmitting = false;
+
+  /// Descripción del material que el Home Associate cargó desde su app.
+  String? materialText;
+
+  /// Precio de referencia ingresado por el asociado, ya formateado con su
+  /// moneda (Ej: "Q350.00"). Null cuando el backend todavía no lo envía.
+  String? estimatedPrice;
+
+  /// Fotos que el asociado tomó como evidencia de dónde se usará el material.
+  List<String> imageUrls = [];
+
+  /// Estatus de la solicitud de materiales extra (`PENDING` mientras espera la
+  /// decisión del cliente; `ACCEPTED`/`REJECTED` una vez decidida). Null si
+  /// todavía no se leyó.
+  String? materialsStatus;
+
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
@@ -44,12 +61,6 @@ class DHCLIENTMaterialesModel
   void dispose() {
     cornerGradientBackgroundModel.dispose();
     dOVIASHAREDHeaderModel.dispose();
-    apellidosInputFocusNode1?.dispose();
-    apellidosInputTextController1?.dispose();
-
-    apellidosInputFocusNode2?.dispose();
-    apellidosInputTextController2?.dispose();
-
     fixedDoviaIconModel.dispose();
     dHCLIENTNavbarModel.dispose();
   }
