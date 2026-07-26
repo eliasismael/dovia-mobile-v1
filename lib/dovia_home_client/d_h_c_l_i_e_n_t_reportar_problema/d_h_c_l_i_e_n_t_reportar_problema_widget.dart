@@ -1,6 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
-import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_e_problema_enviado/d_h_c_l_i_e_n_t_e_problema_enviado_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
@@ -33,10 +32,9 @@ const Color _kFieldSurface = Color(0xFFFAFAFA);
 class DHCLIENTReportarProblemaWidget extends StatefulWidget {
   const DHCLIENTReportarProblemaWidget({super.key});
 
-  /// Título del trabajo reportado, para dar contexto al equipo de soporte.
-  static String? jobTitle;
-
-  /// Solicitud de DOVIA Home reportada. Se usa para adjuntar la evidencia.
+  /// Para POST /associate-feedback/dovia-home/services/{serviceRequestId}/reports
+  /// — es la vía normal de esta pantalla. El backend resuelve el asociado desde
+  /// la solicitud, por eso no se envía `targetRole`.
   static String? serviceRequestId;
 
   /// Para POST /associate-feedback/visits/{visitId}/reports
@@ -87,12 +85,14 @@ class _DHCLIENTReportarProblemaWidgetState
       (_model.textController?.text.trim().isNotEmpty ?? false) &&
       !_model.isSubmitting;
 
-  /// Selector nativo del dispositivo: Cámara / Galería, fotos y video.
+  /// Selector nativo del dispositivo: Cámara / Galería.
+  ///
+  /// Sólo fotos: el presign de reportes del backend rechaza cualquier archivo
+  /// que no sea imagen, así que ofrecer video terminaría en un adjunto perdido.
   Future<void> _pickMedia() async {
     final selectedMedia = await selectMediaWithSourceBottomSheet(
       context: context,
       allowPhoto: true,
-      allowVideo: true,
       pickerFontFamily: 'Public Sans',
     );
     if (selectedMedia == null ||
@@ -118,33 +118,59 @@ class _DHCLIENTReportarProblemaWidgetState
     }
   }
 
-  /// Sube la evidencia a S3 con el flujo presign → PUT → confirm y devuelve
-  /// cuántos archivos quedaron adjuntos a la solicitud. Es best-effort: un fallo
-  /// de subida no debe impedir que el reclamo llegue a soporte.
-  Future<int> _uploadEvidence(String serviceRequestId) async {
-    final media = _model.uploadedMedia;
-    if (media.isEmpty) return 0;
+  /// El backend valida el tipo declarado, así que se deriva de la extensión en
+  /// vez de asumir JPEG para todo.
+  String _mimeTypeFor(String fileName) {
+    final ext = fileName.toLowerCase().split('.').last;
+    switch (ext) {
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      case 'heif':
+        return 'image/heif';
+      default:
+        return 'image/jpeg';
+    }
+  }
 
+  /// Adjunta la evidencia al reporte con el flujo presign → PUT → confirm. Es
+  /// best-effort: el reporte ya está creado, así que un fallo de subida no debe
+  /// invalidar el reclamo.
+  Future<void> _uploadEvidence(String serviceRequestId, String reportId) async {
+    final media = _model.uploadedMedia;
+    if (media.isEmpty) return;
+
+    final token = currentAuthenticationToken ?? '';
+    final mimeTypes = <String>[];
     final uploads = <Map<String, dynamic>>[];
     for (var i = 0; i < media.length; i++) {
+      final fileName = media[i].name ?? 'evidencia_$i.jpg';
+      final mimeType = _mimeTypeFor(fileName);
+      mimeTypes.add(mimeType);
       uploads.add({
         'clientUploadId': 'upload_$i',
-        'contentType': 'image/jpeg',
-        'fileName': media[i].name ?? 'evidencia_$i.jpg',
+        'fileName': fileName,
+        'mimeType': mimeType,
+        'sizeBytes': media[i].bytes?.length ?? 0,
       });
     }
 
-    final presignRes =
-        await DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall.call(
+    final presignRes = await DOVIAAPIAssociateFeedbackContextGroup
+        .presignDoviaHomeReportImagesCall
+        .call(
       serviceRequestId: serviceRequestId,
       uploads: uploads,
-      authToken: currentAuthenticationToken ?? '',
+      authToken: token,
     );
-    if (!presignRes.succeeded) return 0;
+    if (!presignRes.succeeded) return;
 
-    final items = DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall
+    final items = DOVIAAPIAssociateFeedbackContextGroup
+        .presignDoviaHomeReportImagesCall
         .items(presignRes.jsonBody);
-    if (items == null || items.isEmpty) return 0;
+    if (items == null || items.isEmpty) return;
 
     final storageKeys = <String>[];
     for (final item in items) {
@@ -161,7 +187,7 @@ class _DHCLIENTReportarProblemaWidgetState
 
       final putRes = await http.put(
         Uri.parse(uploadUrl),
-        headers: {'Content-Type': 'image/jpeg'},
+        headers: {'Content-Type': mimeTypes[index]},
         body: bytes,
       );
       if (putRes.statusCode >= 200 &&
@@ -171,13 +197,14 @@ class _DHCLIENTReportarProblemaWidgetState
       }
     }
 
-    if (storageKeys.isEmpty) return 0;
-    await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestImagesCall.call(
+    if (storageKeys.isEmpty) return;
+    await DOVIAAPIAssociateFeedbackContextGroup.confirmDoviaHomeReportImagesCall
+        .call(
       serviceRequestId: serviceRequestId,
+      reportId: reportId,
       storageKeys: storageKeys,
-      authToken: currentAuthenticationToken ?? '',
+      authToken: token,
     );
-    return storageKeys.length;
   }
 
   Future<void> _submit() async {
@@ -188,32 +215,35 @@ class _DHCLIENTReportarProblemaWidgetState
     try {
       final token = currentAuthenticationToken ?? '';
       final serviceRequestId = DHCLIENTReportarProblemaWidget.serviceRequestId;
-
-      // La evidencia se adjunta a la solicitud antes de enviar el reclamo, para
-      // que el ticket de soporte ya la tenga disponible.
-      var attached = 0;
-      if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
-        attached = await _uploadEvidence(serviceRequestId);
-      }
-
-      final jobTitle = DHCLIENTReportarProblemaWidget.jobTitle;
-      final message = [
-        if (jobTitle != null && jobTitle.isNotEmpty) 'Trabajo: $jobTitle',
-        description,
-        if (attached > 0) 'Evidencia adjunta: $attached archivo(s).',
-      ].join('\n');
-
       final offerId = DHCLIENTReportarProblemaWidget.offerId;
       final visitId = DHCLIENTReportarProblemaWidget.visitId;
 
       ApiCallResponse? response;
-      if (offerId != null && offerId.isNotEmpty) {
+      if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
+        response = await DOVIAAPIAssociateFeedbackContextGroup
+            .createDoviaHomeAssociateReportCall
+            .call(
+          serviceRequestId: serviceRequestId,
+          message: description,
+          authToken: token,
+        );
+        // Las imágenes se adjuntan al reporte ya creado (nace con
+        // `imageUrls: []`), por eso la subida va después del POST.
+        if (response.succeeded) {
+          final reportId = DOVIAAPIAssociateFeedbackContextGroup
+              .createDoviaHomeAssociateReportCall
+              .id(response.jsonBody);
+          if (reportId != null && reportId.isNotEmpty) {
+            await _uploadEvidence(serviceRequestId, reportId);
+          }
+        }
+      } else if (offerId != null && offerId.isNotEmpty) {
         response = await DOVIAAPIAssociateFeedbackContextGroup
             .createOfferAssociateReportCall
             .call(
           offerId: offerId,
           targetRole: DHCLIENTReportarProblemaWidget.targetRole,
-          message: message,
+          message: description,
           authToken: token,
         );
       } else if (visitId != null && visitId.isNotEmpty) {
@@ -222,13 +252,10 @@ class _DHCLIENTReportarProblemaWidgetState
             .call(
           visitId: visitId,
           targetRole: DHCLIENTReportarProblemaWidget.targetRole,
-          message: message,
+          message: description,
           authToken: token,
         );
       }
-      // Sin visita ni oferta (caso DOVIA Home) no hay endpoint de reportes al
-      // cual postear todavía; queda pendiente de wiring cuando el backend lo
-      // exponga para service-requests.
 
       if (response != null && !response.succeeded) {
         if (mounted) {
@@ -549,15 +576,14 @@ class _DHCLIENTReportarProblemaWidgetState
     );
   }
 
-  /// Los videos no se pueden previsualizar con Image.memory: se muestra un
-  /// marcador con el ícono de multimedia.
+  /// Marcador para una imagen que no se pudo decodificar en la previsualización.
   Widget _mediaFallback() => Container(
         width: 90.0,
         height: 90.0,
         color: FlutterFlowTheme.of(context).alternate,
         alignment: const AlignmentDirectional(0.0, 0.0),
         child: Icon(
-          Icons.play_circle_outline_rounded,
+          Icons.image_outlined,
           color: FlutterFlowTheme.of(context).secondaryText,
           size: 28.0,
         ),

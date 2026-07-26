@@ -225,7 +225,6 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
   }
 
   void _openReportarProblema() {
-    DHCLIENTReportarProblemaWidget.jobTitle = _jobTitle;
     DHCLIENTReportarProblemaWidget.serviceRequestId = _serviceRequestId;
     context.pushNamed(DHCLIENTReportarProblemaWidget.routeName);
   }

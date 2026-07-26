@@ -33,9 +33,9 @@ class DHCLIENTCalificarWidget extends StatefulWidget {
   /// 8:35am").
   static String? jobDateLabel;
 
-  /// Solicitud de DOVIA Home calificada. DOVIA Home todavía no expone endpoint
-  /// de calificación propio (sólo existen los de visitas/ofertas), así que por
-  /// ahora sólo da contexto.
+  /// Para POST /associate-feedback/dovia-home/services/{serviceRequestId}/ratings
+  /// — es la vía normal de esta pantalla. El backend resuelve el asociado desde
+  /// la solicitud, por eso no se envía `targetRole`.
   static String? serviceRequestId;
 
   /// Para POST /associate-feedback/visits/{visitId}/ratings
@@ -92,11 +92,20 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
     safeSetState(() => _model.isSubmitting = true);
     try {
       final token = currentAuthenticationToken ?? '';
+      final serviceRequestId = DHCLIENTCalificarWidget.serviceRequestId;
       final offerId = DHCLIENTCalificarWidget.offerId;
       final visitId = DHCLIENTCalificarWidget.visitId;
 
       ApiCallResponse? response;
-      if (offerId != null && offerId.isNotEmpty) {
+      if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
+        response = await DOVIAAPIAssociateFeedbackContextGroup
+            .createDoviaHomeAssociateRatingCall
+            .call(
+          serviceRequestId: serviceRequestId,
+          stars: stars,
+          authToken: token,
+        );
+      } else if (offerId != null && offerId.isNotEmpty) {
         response = await DOVIAAPIAssociateFeedbackContextGroup
             .createOfferAssociateRatingCall
             .call(
@@ -115,17 +124,15 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
           authToken: token,
         );
       }
-      // Sin visita ni oferta (caso DOVIA Home) no hay endpoint al cual postear
-      // todavía; la calificación se confirma en la UI y queda pendiente de
-      // wiring cuando el backend exponga el endpoint de service-requests.
 
       if (response != null && !response.succeeded) {
         if (mounted) {
+          // 409: la calificación es inmutable y única por cliente + servicio.
+          final message = response.statusCode == 409
+              ? 'Ya calificaste este servicio.'
+              : 'No se pudo enviar la calificación. Intenta de nuevo.';
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'No se pudo enviar la calificación. Intenta de nuevo.'),
-            ),
+            SnackBar(content: Text(message)),
           );
         }
         return;
