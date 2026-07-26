@@ -34,7 +34,23 @@
       "Bash(curl -sL -o tf.png \"https://www.figma.com/api/mcp/asset/b45c2626-4de0-400a-8bf0-abeb894e6e80\")",
       "Bash(curl -sL -o emerg.png \"https://www.figma.com/api/mcp/asset/77a0c391-5990-41e3-88f5-eb1fe14e2de1\")",
       "Bash(curl -sL -o costo.png \"https://www.figma.com/api/mcp/asset/aab20876-9ba4-4a7e-9a2e-87e71fafff71\")",
-      "mcp__claude_ai_Figma__read_skill_uri"
+      "mcp__claude_ai_Figma__read_skill_uri",
+      "Bash(dart format *)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && grep -rn \"mapClientOutOfScopeRequest\" --include=*.ts . | head -10)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src/**)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && ls contexts/dovia-home/application/use-cases/shared/ 2>/dev/null)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src/contexts/dovia-home/application/use-cases/shared/**)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && grep -rn \"enum DoviaHomeOutOfScopeRequestStatus\" -A 15 --include=*.ts . | head -25)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && grep -rln \"TransformInterceptor\\\\|ResponseInterceptor\\\\|useGlobalInterceptors\" --include=*.ts . | head -10)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && grep -rn \"out-of-scope-requests/:requestId'\" -B 8 -A 12 --include=*.controller.ts . | head -60)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && grep -rln \"GetClientOutOfScopeRequestUseCase\" --include=*.ts . | head)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && grep -n \"GetClientOutOfScopeRequest\" -B 20 -A 15 contexts/dovia-home/infrastructure/in/controllers/dovia-home-out-of-scope.controller.ts | head -70)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && sed -n '54,140p' contexts/dovia-home/infrastructure/in/controllers/dovia-home-out-of-scope.controller.ts)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src/shared/infrastructure/helpers/**)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && ls contexts/dovia-home/application/use-cases/confirm-out-of-scope-images/ && grep -rn \"imageUrls\\\\|publicUrl\\\\|getPublicUrl\\\\|signed\" contexts/dovia-home/application/use-cases/confirm-out-of-scope-images/*.ts | head -20)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src/contexts/dovia-home/application/use-cases/confirm-out-of-scope-images/**)",
+      "Bash(cd \"c:/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src\" && grep -rn \"confirmDoviaHomeImages\" -A 40 contexts/dovia-home/application/use-cases/shared/dovia-home-application.helper.ts | head -55)",
+      "Read(//c/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src/contexts/dovia-home/application/use-cases/get-client-out-of-scope-request/**)"
     ]
   }
 }

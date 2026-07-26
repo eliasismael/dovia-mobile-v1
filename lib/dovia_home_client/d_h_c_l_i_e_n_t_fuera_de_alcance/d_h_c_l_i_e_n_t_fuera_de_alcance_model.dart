@@ -16,11 +16,23 @@ class DHCLIENTFueraDeAlcanceModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DOVIA_SHARED_Header component.
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
-  // State field(s) for ApellidosInput widget.
-  FocusNode? apellidosInputFocusNode;
-  TextEditingController? apellidosInputTextController;
-  String? Function(BuildContext, String?)?
-      apellidosInputTextControllerValidator;
+  bool isLoadingDiagnosis = false;
+
+  /// True cuando la lectura del diagnóstico falló: la pantalla avisa en vez de
+  /// mostrarse vacía como si el asociado no hubiera cargado nada.
+  bool diagnosisLoadFailed = false;
+
+  /// True mientras se autoriza o se cierra la solicitud, para que la decisión
+  /// contraria no pueda dispararse al mismo tiempo.
+  bool isSubmitting = false;
+  String? diagnosisText;
+  List<String> diagnosisImagesUrls = [];
+
+  /// Estatus de la solicitud fuera de alcance (`CLIENT_APPROVAL_PENDING`
+  /// mientras espera la decisión del cliente, `QUOTING` una vez autorizada,
+  /// cerrada si el cliente la finalizó). Null si todavía no se leyó.
+  String? requestStatus;
+
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
@@ -40,8 +52,6 @@ class DHCLIENTFueraDeAlcanceModel
   void dispose() {
     cornerGradientBackgroundModel.dispose();
     dOVIASHAREDHeaderModel.dispose();
-    apellidosInputFocusNode?.dispose();
-    apellidosInputTextController?.dispose();
 
     fixedDoviaIconModel.dispose();
     dHCLIENTNavbarModel.dispose();
