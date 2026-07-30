@@ -11,7 +11,12 @@ import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_dovia_home.dart';
+
 import 'd_h_c_l_i_e_n_t_costo_emergencia_model.dart';
 export 'd_h_c_l_i_e_n_t_costo_emergencia_model.dart';
 
@@ -32,6 +37,13 @@ class DHCLIENTCostoEmergenciaWidget extends StatefulWidget {
 
   /// Descripción del problema capturada en la pantalla de Emergencias.
   static String? description;
+
+  /// Fotos opcionales adjuntadas en la pantalla de Emergencias. Se suben a la
+  /// solicitud (presign → PUT → confirm) una vez creada.
+  static List<FFUploadedFile> photos = [];
+
+  /// Moneda del cobro. Todo el catálogo de DOVIA Home está en quetzales.
+  static const String currency = 'GTQ';
 
   /// Precio base del servicio de emergencia (sin descuento).
   static const String basePrice = 'Q600';
@@ -71,6 +83,10 @@ class _DHCLIENTCostoEmergenciaWidgetState
 
   bool get _isPaid => _paidMethod != null;
 
+  /// Id de la solicitud de emergencia creada en el backend. Se crea una sola
+  /// vez (al cobrar) y se reutiliza para adjuntar fotos y confirmar el pago.
+  String? _serviceRequestId;
+
   @override
   void initState() {
     super.initState();
@@ -82,8 +98,8 @@ class _DHCLIENTCostoEmergenciaWidgetState
       safeSetState(() {});
     });
 
-    // El cliente regresó desde la contratación del plan: el servicio queda
-    // pagado con descuento (simulado hasta integrar la pasarela).
+    // El cliente regresó desde la contratación del plan: ya es Premium, así que
+    // se desbloquea [Siguiente], que cobra el precio con descuento.
     if (DHCLIENTCostoEmergenciaWidget.returnedFromSubscription) {
       DHCLIENTCostoEmergenciaWidget.returnedFromSubscription = false;
       _paidMethod = 'subscription';
@@ -96,55 +112,237 @@ class _DHCLIENTCostoEmergenciaWidgetState
     super.dispose();
   }
 
-  /// Pago por uso a precio regular (Free). Al integrarse la pasarela, marcar
-  /// como pagado sólo tras confirmar el cobro.
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Crea la solicitud de emergencia (`POST /dovia-home/service-requests/
+  /// emergencies`) con la descripción levantada en la pantalla anterior y la
+  /// dirección de servicio del cliente, y le adjunta las fotos. Idempotente:
+  /// si ya se creó en este paso devuelve el mismo id.
+  Future<String?> _ensureServiceRequest() async {
+    if (_serviceRequestId != null) return _serviceRequestId;
+
+    final token = currentAuthenticationToken ?? '';
+    final addressId = await _resolveAddressId(token);
+    if (addressId == null) {
+      _showError(
+          'No encontramos una ubicación registrada para enviarte el técnico.');
+      return null;
+    }
+
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.createEmergencyServiceRequestCall
+            .call(
+      description: DHCLIENTCostoEmergenciaWidget.description ?? '',
+      addressId: addressId,
+      authToken: token,
+    );
+    if (!response.succeeded) {
+      _showError('No se pudo registrar la emergencia. Intenta de nuevo.');
+      return null;
+    }
+
+    final id = DOVIAAPIDoviaHomeContextGroup.createEmergencyServiceRequestCall
+        .id(response.jsonBody);
+    if (id == null || id.isEmpty) {
+      _showError('No se pudo registrar la emergencia. Intenta de nuevo.');
+      return null;
+    }
+
+    _serviceRequestId = id;
+    await _uploadPhotos(id, token);
+    return id;
+  }
+
+  /// Dirección de servicio a la que se envía el técnico. El levantamiento de la
+  /// emergencia no pide ubicación (es urgente), así que se usa la primera
+  /// dirección registrada del cliente.
+  Future<String?> _resolveAddressId(String token) async {
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall.call(
+      authToken: token,
+    );
+    if (!response.succeeded) return null;
+
+    final raw = DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall
+            .addressesList(response.jsonBody) ??
+        [];
+    for (final address in raw.whereType<Map>()) {
+      final id = (address['id'] ?? address['addressId'])?.toString();
+      if (id != null && id.trim().isNotEmpty) return id.trim();
+    }
+    return null;
+  }
+
+  /// Sube las fotos de la emergencia a S3 (presign → PUT → confirm). Es
+  /// best-effort: la solicitud ya existe, un fallo de fotos no la invalida.
+  Future<void> _uploadPhotos(String serviceRequestId, String token) async {
+    final photos = DHCLIENTCostoEmergenciaWidget.photos;
+    if (photos.isEmpty) return;
+
+    final uploads = <Map<String, dynamic>>[];
+    for (var i = 0; i < photos.length; i++) {
+      uploads.add({
+        'clientUploadId': 'upload_$i',
+        'contentType': 'image/jpeg',
+        'fileName': photos[i].name ?? 'foto_$i.jpg',
+      });
+    }
+
+    final presignRes =
+        await DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall.call(
+      serviceRequestId: serviceRequestId,
+      uploads: uploads,
+      authToken: token,
+    );
+    if (!presignRes.succeeded) return;
+
+    final items = DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall
+        .items(presignRes.jsonBody);
+    if (items == null || items.isEmpty) return;
+
+    final storageKeys = <String>[];
+    for (final item in items) {
+      if (item is! Map) continue;
+      final clientUploadId = item['clientUploadId']?.toString() ?? '';
+      final uploadUrl = item['uploadUrl']?.toString();
+      final storageKey = item['storageKey']?.toString();
+      final index =
+          int.tryParse(clientUploadId.replaceAll('upload_', '')) ?? -1;
+      if (uploadUrl == null || index < 0 || index >= photos.length) continue;
+
+      final bytes = photos[index].bytes;
+      if (bytes == null) continue;
+
+      final putRes = await http.put(
+        Uri.parse(uploadUrl),
+        headers: {'Content-Type': 'image/jpeg'},
+        body: bytes,
+      );
+      if (putRes.statusCode >= 200 &&
+          putRes.statusCode < 300 &&
+          storageKey != null) {
+        storageKeys.add(storageKey);
+      }
+    }
+
+    if (storageKeys.isEmpty) return;
+    await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestImagesCall.call(
+      serviceRequestId: serviceRequestId,
+      storageKeys: storageKeys,
+      authToken: token,
+    );
+  }
+
+  /// Cobra la solicitud (`POST /service-requests/{id}/payment/confirm`).
+  /// - Premium: se cobra el precio con descuento a la tarjeta guardada.
+  /// - Free: se cobra el monto total al contratar.
+  Future<bool> _chargeRequest() async {
+    final serviceRequestId = await _ensureServiceRequest();
+    if (serviceRequestId == null) return false;
+
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestPaymentCall
+            .call(
+      serviceRequestId: serviceRequestId,
+      currency: DHCLIENTCostoEmergenciaWidget.currency,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!response.succeeded) {
+      _showError('No se pudo procesar el cobro. Intenta de nuevo.');
+      return false;
+    }
+    return true;
+  }
+
+  /// Escenario Free — [Contratar]: cobra el monto total. Sólo al confirmarse el
+  /// cobro se desbloquea el botón inferior [Siguiente].
   Future<void> _payDirect() async {
-    if (_isPaid) return;
-    // TODO: Abrir pasarela por [regularPrice] y marcar pagado tras confirmar.
-    safeSetState(() => _paidMethod = 'direct');
+    if (_isPaid || _model.isSubmitting) return;
+    safeSetState(() => _model.isSubmitting = true);
+    try {
+      final charged = await _chargeRequest();
+      if (!mounted || !charged) return;
+      safeSetState(() => _paidMethod = 'direct');
+    } finally {
+      if (mounted) safeSetState(() => _model.isSubmitting = false);
+    }
   }
 
-  /// Upsell: redirige a la contratación del plan; al volver se marca pagado.
-  void _goToSubscription() {
-    if (_isPaid) return;
+  /// Escenario Free — [Subscribirse]: abre el flujo de adquisición del plan
+  /// DOVIA Home. Al volver se re-consulta la suscripción: si quedó activa, la
+  /// pantalla pasa al escenario Premium (tarjeta de descuento).
+  Future<void> _goToSubscription() async {
+    if (_isPaid || _model.isSubmitting) return;
     DHCLIENTCostoEmergenciaWidget.returnedFromSubscription = true;
-    context.pushNamed(DHCLIENTPlanesPageWidget.routeName);
+    // Sin esto, "Omitir" en Planes deriva al flujo de visita estándar (con paso
+    // de calendario), que es justo el que la emergencia debe saltear.
+    DHCLIENTPlanesPageWidget.pendingReturnRoute =
+        DHCLIENTCostoEmergenciaWidget.routeName;
+    await context.pushNamed(DHCLIENTPlanesPageWidget.routeName);
+    if (!mounted) return;
+    DHCLIENTPlanesPageWidget.pendingReturnRoute = null;
+
+    // El cliente volvió a esta misma instancia: si hubiera contratado el plan,
+    // la bandera ya la habría consumido una instancia nueva. Se limpia para que
+    // no marque como pagada una emergencia futura.
+    DHCLIENTCostoEmergenciaWidget.returnedFromSubscription = false;
+    await context
+        .read<PaymentsRepository>()
+        .loadCurrentSubscription(forceRefresh: true);
+    if (mounted) safeSetState(() {});
   }
 
-  /// Confirma el pago de la emergencia. **Omite el calendario**: registra la
-  /// solicitud en "Próximas visitas" con alta prioridad, lanza el modal de
-  /// éxito y redirige al Dashboard.
+  /// Confirma la solicitud de emergencia. **Omite el calendario**: no hay paso
+  /// de selección de fecha y hora. Cobra si todavía no se cobró (Premium),
+  /// registra la solicitud en "Próximas visitas" con alta prioridad, lanza el
+  /// modal de éxito y redirige al Dashboard.
   Future<void> _confirmAndSchedule() async {
-    // TODO: Cobrar a la tarjeta guardada (Premium) o el monto pagado (Free) y
-    // POST /dovia-home/service-requests/emergencies con la descripción.
-    DHCLIENTHomepageWidget.upcomingVisits.insert(
-      0,
-      const ScheduledVisit(
-        service: 'Servicio de emergencia',
-        date: 'Atención prioritaria',
-        time: 'respuesta < 18h',
-        status: 'Pendiente',
-        isEmergency: true,
-      ),
-    );
-    DHCLIENTCostoEmergenciaWidget.description = null;
+    if (_model.isSubmitting) return;
+    safeSetState(() => _model.isSubmitting = true);
+    try {
+      // Sólo [Contratar] cobra por adelantado; en el resto de los casos
+      // (Premium, o Free que acaba de suscribirse) el cobro se procesa acá
+      // contra la tarjeta guardada, al precio que resuelve el backend.
+      final charged = _paidMethod == 'direct' ? true : await _chargeRequest();
+      if (!mounted || !charged) return;
 
-    await showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (context) {
-        return const Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: DHCLIENTExitoProgramarAgendaWidget(
-            message: 'Programaste con éxito tu servicio para la Casa.',
-          ),
-        );
-      },
-    );
-    // Al cerrarse el modal (auto o al tapear fuera) redirige al Dashboard.
-    if (context.mounted) {
-      context.goNamed(DHCLIENTHomepageWidget.routeName);
+      DHCLIENTHomepageWidget.upcomingVisits.insert(
+        0,
+        ScheduledVisit(
+          id: _serviceRequestId,
+          service: 'Servicio de emergencia',
+          date: 'Atención prioritaria',
+          time: 'respuesta < 18h',
+          status: 'Pendiente',
+          isEmergency: true,
+        ),
+      );
+      DHCLIENTCostoEmergenciaWidget.description = null;
+      DHCLIENTCostoEmergenciaWidget.photos = [];
+
+      await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (context) {
+          return const Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(horizontal: 20.0),
+            child: DHCLIENTExitoProgramarAgendaWidget(
+              message: 'Programaste con éxito tu servicio para la Casa',
+            ),
+          );
+        },
+      );
+      // Al cerrarse el modal (auto o al tapear fuera) redirige al Dashboard.
+      if (mounted) {
+        context.goNamed(DHCLIENTHomepageWidget.routeName);
+      }
+    } finally {
+      if (mounted) safeSetState(() => _model.isSubmitting = false);
     }
   }
 
@@ -451,7 +649,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
       focusColor: Colors.transparent,
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
-      onTap: paid ? null : onTap,
+      onTap: (paid || _model.isSubmitting) ? null : onTap,
       child: Container(
         width: double.infinity,
         height: 52.0,
@@ -485,9 +683,10 @@ class _DHCLIENTCostoEmergenciaWidgetState
 
   /// Botón inferior [Siguiente].
   /// - Premium: siempre habilitado (cobra a la tarjeta guardada).
-  /// - Free: bloqueado hasta que el usuario complete el pago.
+  /// - Free: bloqueado hasta que el usuario complete el pago (contratando
+  ///   directo o suscribiéndose).
   Widget _nextButton(bool isPremium) {
-    final enabled = isPremium || _isPaid;
+    final enabled = (isPremium || _isPaid) && !_model.isSubmitting;
     return FFButtonWidget(
       onPressed: enabled ? () async => _confirmAndSchedule() : null,
       text: 'Siguiente',

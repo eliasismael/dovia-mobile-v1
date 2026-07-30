@@ -84,7 +84,7 @@ class _DHCLIENTEProblemaEnviadoWidgetState
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         0.0, 34.0, 0.0, 0.0),
                     child: Text(
-                      'Tu problema se ha enviado y será revisado por el equipo de Dovia',
+                      'Tu problema se ha enviado y será revisado por el equipo de Dovia.',
                       textAlign: TextAlign.center,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(

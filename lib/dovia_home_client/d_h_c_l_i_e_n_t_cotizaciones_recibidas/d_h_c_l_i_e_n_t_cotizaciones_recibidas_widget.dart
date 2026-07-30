@@ -196,7 +196,10 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   _ProposalPrice _price(Map<String, dynamic> proposal, bool isPremium) {
     final currency = _firstValue([proposal['currency']]) ?? 'GTQ';
 
+    // `totalAmount` es el campo con el que la empresa proveedora envía el costo
+    // del proyecto (POST .../quote-proposals, multipart file + totalAmount).
     final listPriceKeys = [
+      proposal['totalAmount'],
       proposal['price'],
       proposal['amount'],
       proposal['totalPrice'],
@@ -254,35 +257,53 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
       ]) ??
       '-';
 
-  /// Nombre de la cotización. Si el backend no manda título ni proveedor se usa
-  /// el esquema del diseño ("Cotización A", "Cotización B", …).
-  String _proposalTitle(Map<String, dynamic> proposal, int index) =>
-      _firstValue([
-        proposal['title'],
-        _asMap(proposal['company'])?['name'],
-        proposal['companyName'],
-      ]) ??
+  /// Nombre de la cotización: se rotulan por orden de llegada siguiendo el
+  /// diseño ("Cotización A", "Cotización B", …).
+  String _proposalTitle(int index) =>
       'Cotización ${String.fromCharCode(65 + index)}';
 
-  /// Normaliza el listado según el endpoint usado.
+  /// Empresa proveedora que envió la propuesta. Se muestra debajo del rótulo
+  /// sólo cuando el backend la informa.
+  String? _providerName(Map<String, dynamic> proposal) => _firstValue([
+        _asMap(proposal['company'])?['name'],
+        proposal['companyName'],
+        _asMap(proposal['provider'])?['name'],
+      ]);
+
+  /// Normaliza el listado según el endpoint usado. Los listados de la API
+  /// pueden venir como `data: [...]` o paginados como `data: { items: [...] }`,
+  /// así que se desenvuelve el sobre antes de mapear.
   List<Map<String, dynamic>> _extractProposals(ApiCallResponse response) {
     final raw = _hasRequestId
         ? DOVIAAPIDoviaHomeContextGroup.listQuoteProposalsCall
             .proposalsList(response.jsonBody)
         : DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall
             .proposalsList(response.jsonBody);
-    return (raw ?? [])
+
+    final items = <dynamic>[];
+    for (final entry in raw ?? const []) {
+      final page = _asMap(entry);
+      final paged = page == null
+          ? null
+          : (page['items'] ?? page['results'] ?? page['data']);
+      if (paged is List) {
+        items.addAll(paged);
+      } else {
+        items.add(entry);
+      }
+    }
+
+    return items
         .whereType<Map>()
         .map((e) => Map<String, dynamic>.from(e))
         .toList();
   }
 
-  void _toggleProposal(String proposalId) {
-    safeSetState(() {
-      // Selección única: volver a tapear la marcada la deselecciona.
-      _model.selectedProposalId =
-          _model.selectedProposalId == proposalId ? null : proposalId;
-    });
+  /// Selección única (radio button): marcar una cotización desmarca la
+  /// anterior. Volver a tapear la marcada la deja marcada.
+  void _selectProposal(String proposalId) {
+    if (_model.selectedProposalId == proposalId) return;
+    safeSetState(() => _model.selectedProposalId = proposalId);
   }
 
   /// Acepta la propuesta marcada. Al confirmarse, la solicitud avanza con esa
@@ -371,7 +392,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
-                      title: 'Cotizaciones\nrecibidas',
+                      title: 'Cotizaciones Recibidas',
                       showMap: false,
                       showCurrency: false,
                     ),
@@ -484,76 +505,103 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     );
   }
 
-  /// Tarjeta de una cotización recibida con su checkbox de selección.
+  /// Tarjeta de una cotización recibida con su radio button de selección.
   Widget _proposalCard(
       Map<String, dynamic> proposal, int index, bool isPremium) {
     final id = _proposalId(proposal);
     final selected = id.isNotEmpty && _model.selectedProposalId == id;
+    final providerName = _providerName(proposal);
 
-    return InkWell(
-      splashColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      onTap: id.isEmpty ? null : () => _toggleProposal(id),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: const Color(0xFFFBFBFB),
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(
-            color: selected ? const Color(0xFF007376) : const Color(0xFFE5E7EB),
-            width: selected ? 1.5 : 1.0,
-          ),
-        ),
-        padding: const EdgeInsetsDirectional.fromSTEB(8.0, 20.0, 12.0, 20.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _checkbox(selected),
-            const SizedBox(width: 14.0),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _proposalTitle(proposal, index),
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.publicSans(
-                              fontWeight: FontWeight.w600),
-                          color: const Color(0xFF00444B),
-                          fontSize: 14.0,
-                        ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  _proposalField(
-                      'Trabajo a realizar:', _workDescription(proposal)),
-                  _proposalField(
-                      'Tiempo estimado del trabajo:', _estimatedTime(proposal)),
-                  _priceField(_price(proposal, isPremium)),
-                  _proposalField('Garantía:', _warranty(proposal)),
-                ],
-              ),
+    return Semantics(
+      // Grupo de selección única: sólo una cotización puede quedar marcada.
+      inMutuallyExclusiveGroup: true,
+      selected: selected,
+      child: InkWell(
+        splashColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: id.isEmpty ? null : () => _selectProposal(id),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFBFBFB),
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(
+              color:
+                  selected ? const Color(0xFF007376) : const Color(0xFFE5E7EB),
+              width: selected ? 1.5 : 1.0,
             ),
-          ],
+          ),
+          padding: const EdgeInsetsDirectional.fromSTEB(8.0, 20.0, 12.0, 20.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _radioButton(selected),
+              const SizedBox(width: 14.0),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _proposalTitle(index),
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(
+                                fontWeight: FontWeight.w600),
+                            color: const Color(0xFF00444B),
+                            fontSize: 14.0,
+                          ),
+                    ),
+                    if (providerName != null)
+                      Text(
+                        providerName,
+                        style: FlutterFlowTheme.of(context).bodySmall.override(
+                              font: GoogleFonts.publicSans(),
+                              color: const Color(0xFF6A7282),
+                              fontSize: 12.0,
+                            ),
+                      ),
+                    const SizedBox(height: 8.0),
+                    _proposalField(
+                        'Trabajo a realizar:', _workDescription(proposal)),
+                    _proposalField('Tiempo estimado del trabajo:',
+                        _estimatedTime(proposal)),
+                    _priceField(_price(proposal, isPremium)),
+                    _proposalField('Garantía:', _warranty(proposal)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Checkbox cuadrado con borde aqua del diseño.
-  Widget _checkbox(bool selected) {
+  /// Radio button de selección única, con el círculo aqua del diseño.
+  Widget _radioButton(bool selected) {
     return Container(
       width: 24.0,
       height: 24.0,
       decoration: BoxDecoration(
-        color: selected ? const Color(0xFF007376) : Colors.transparent,
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: const Color(0xFF007376), width: 1.5),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: const Color(0xFF007376),
+          width: selected ? 2.0 : 1.5,
+        ),
       ),
       child: selected
-          ? const Icon(Icons.check, color: Colors.white, size: 16.0)
+          ? Center(
+              child: Container(
+                width: 12.0,
+                height: 12.0,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF007376),
+                ),
+              ),
+            )
           : null,
     );
   }

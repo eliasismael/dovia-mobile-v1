@@ -1,3 +1,5 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proveedor_card/d_h_c_l_i_e_n_t_proveedor_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -47,12 +49,53 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Solicitud a renderizar. Nace con el resumen que inyecta la pantalla que
+  /// navegó hasta acá y se completa con el detalle real en [_loadDetail].
+  Map<String, dynamic>? _serviceData;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTCasaAModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    // Lo ya inyectado se pinta sin esperar al backend; el fetch sólo completa.
+    _serviceData = DHCLIENTCasaAWidget.requestData;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDetail());
+  }
+
+  String? get _serviceRequestId {
+    final raw = DHCLIENTCasaAWidget.requestData;
+    final id = (raw?['id'] ?? raw?['serviceRequestId'])?.toString().trim();
+    return (id == null || id.isEmpty) ? null : id;
+  }
+
+  /// El listado devuelve un resumen: dirección, instrucciones, fotos y datos del
+  /// asociado sólo vienen en el detalle. Se mergea sobre el resumen para no
+  /// perder los campos que el listado sí traía (mismo patrón que
+  /// `d_h_c_l_i_e_n_t_trabajo_finalizado`). Si falla, se queda con el resumen.
+  Future<void> _loadDetail() async {
+    final id = _serviceRequestId;
+    if (id == null) {
+      safeSetState(() {});
+      return;
+    }
+    try {
+      final response =
+          await DOVIAAPIDoviaHomeContextGroup.getServiceRequestCall.call(
+        serviceRequestId: id,
+        authToken: currentAuthenticationToken ?? '',
+      );
+      if (!mounted || !response.succeeded) return;
+      final raw =
+          getJsonField(response.jsonBody, r'''$.data''') ?? response.jsonBody;
+      if (raw is! Map) return;
+      safeSetState(() {
+        _serviceData = {...?_serviceData, ...Map<String, dynamic>.from(raw)};
+      });
+    } catch (_) {
+      // Sin detalle se renderiza el resumen inyectado.
+    }
   }
 
   @override
@@ -67,7 +110,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   // y cae a un fallback vacío para que la pantalla renderice siempre.
   // ---------------------------------------------------------------------------
 
-  Map<String, dynamic>? get _data => DHCLIENTCasaAWidget.requestData;
+  Map<String, dynamic>? get _data => _serviceData;
 
   Map? get _address => _data?['address'] is Map ? _data!['address'] as Map : null;
 

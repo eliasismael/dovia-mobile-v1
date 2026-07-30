@@ -386,7 +386,16 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
         return const Dialog(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          child: DHCLIENTMaterialAprobadoWidget(),
+          insetPadding: EdgeInsets.zero,
+          alignment: Alignment.center,
+          // El pop-up es un Stack con un Align adentro (el check). Con alto
+          // acotado ese Align se estira a todo el alto disponible y la tarjeta
+          // queda pegada arriba; el Column min lo deja sin acotar para que el
+          // Stack mida lo que mide la tarjeta y quede centrada en pantalla.
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [DHCLIENTMaterialAprobadoWidget()],
+          ),
         );
       },
     );
@@ -707,6 +716,9 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
       );
 
   /// Aviso legal y operativo: setea la expectativa de cobro antes de decidir.
+  /// Las tres reglas van como líneas separadas (igual que el diseño) en vez de
+  /// un único bloque de texto, para que el salto entre reglas no se confunda
+  /// con el wrap de una regla larga en pantallas angostas.
   Widget _infoBanner() => Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -714,20 +726,33 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
           borderRadius: BorderRadius.circular(16.0),
         ),
         padding: const EdgeInsets.all(16.0),
-        child: Text(
-          'Para completar el trabajo, necesitamos adquirir materiales '
-          'adicionales.\n\n'
-          'El precio mostrado es una referencia; el monto final dependerá del '
-          'costo real en tienda.\n\n'
-          'El asociado comprará los materiales, cargará la factura y —tras '
-          'verificación— se aplicará el cobro correspondiente a tu cuenta.',
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.publicSans(),
-                fontSize: 16.0,
-                letterSpacing: 0.0,
-                lineHeight: 1.3,
-              ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _bannerRule(
+              'Para completar el trabajo, necesitamos adquirir materiales adicionales.',
+            ),
+            const SizedBox(height: 10.0),
+            _bannerRule(
+              'El precio mostrado es una referencia; el monto final dependerá del costo real en tienda.',
+            ),
+            const SizedBox(height: 10.0),
+            _bannerRule(
+              'El asociado comprará los materiales, cargará la factura y — tras verificación — se aplicará el cobro correspondiente a tu cuenta.',
+            ),
+          ],
         ),
+      );
+
+  Widget _bannerRule(String text) => Text(
+        text,
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.publicSans(),
+              fontSize: 16.0,
+              letterSpacing: 0.0,
+              lineHeight: 1.3,
+            ),
       );
 
   /// [Rechazar] outline + [Pagar] primario, del mismo ancho.

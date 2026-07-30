@@ -15,6 +15,9 @@ class DHCLIENTCostoEmergenciaModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DOVIA_SHARED_Header component.
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
+  // Cobro / creación de la solicitud en curso: bloquea los botones para no
+  // registrar la misma emergencia (ni cobrarla) dos veces.
+  bool isSubmitting = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.

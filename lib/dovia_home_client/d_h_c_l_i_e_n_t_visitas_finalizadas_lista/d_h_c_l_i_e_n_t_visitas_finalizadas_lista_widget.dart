@@ -17,14 +17,19 @@ import '/backend/api_requests/api_manager.dart';
 import 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
 export 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
 
-/// Listado completo y filtrable de las solicitudes de servicio del cliente
-/// (Dovia Home). Se abre desde el botón "Ver todo" de la sección "Próximas
-/// visitas" del Dashboard.
+/// Historial completo y filtrable de los servicios finalizados del cliente
+/// (Dovia Home). Se abre desde el botón "Ver todo" de la sección de historial
+/// del Dashboard.
 ///
-/// Cada tarjeta muestra el título del trabajo, la fecha programada y una pill
-/// con el estatus actual (una solicitud sin asociado asignado se cataloga como
-/// "Pendiente"). Al tapear una tarjeta se abre el detalle en **modo consulta**
-/// (solo lectura, sin botón "Aceptar"): [DHCLIENTCasaAWidget].
+/// El listado se acota a las solicitudes FINISHED (filtro server-side) y ofrece
+/// tres filtros de búsqueda: Tipo de Trabajo, Estado del trabajo y Fecha del
+/// trabajo.
+///
+/// Cada tarjeta muestra el título del trabajo, la fecha y una píldora con el
+/// estado final real: "Finalizada" (verde) o "Reportado" (rojo). Se ignora
+/// deliberadamente el texto "Pendiente" del diseño visual: en un historial la
+/// solicitud ya terminó. Al tapear una tarjeta se abre el registro inmutable
+/// (solo lectura): [DHCLIENTTrabajoFinalizadoWidget].
 class DHCLIENTVisitasFinalizadasListaWidget extends StatefulWidget {
   const DHCLIENTVisitasFinalizadasListaWidget({super.key});
 
@@ -46,8 +51,9 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
 
   static const String _allOption = 'Todos';
 
-  /// Estatus finalizados que NO forman parte de "Próximas visitas". Se excluyen
-  /// client-side porque la llamada trae todas las solicitudes del cliente.
+  /// Estatus que componen el historial. La llamada ya filtra por FINISHED
+  /// server-side; este set queda como guarda defensiva por si el backend
+  /// ignorara el parámetro `status`.
   /// El enum del backend es: PENDING, TAKEN, IN_PROGRESS, FINISHED.
   static const Set<String> _finalizedStatuses = {'FINISHED'};
 
@@ -57,13 +63,21 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
     _model = createModel(context, () => DHCLIENTVisitasFinalizadasListaModel());
 
     final token = currentAuthenticationToken ?? '';
-    // Trae todas las solicitudes del cliente para el listado. NO se envía el
-    // filtro `status`: el backend rechaza el string multi-valor
-    // ("status invalido", 400), así que las solicitudes finalizadas se excluyen
-    // client-side ([_finalizedStatuses]) junto con el resto de filtros de la UI.
+    // El historial se acota a un único estatus (FINISHED), así que se filtra
+    // server-side: el endpoint valida `status` contra el enum
+    // PENDING/TAKEN/IN_PROGRESS/FINISHED y acepta un valor único. (La pantalla
+    // hermana "Próximas visitas" necesita varios estatus a la vez —un string
+    // multi-valor devuelve 400 "status invalido"—, por eso ella sí filtra
+    // client-side; acá no aplica.)
+    //
+    // Filtrar en el server además es lo correcto para un historial: pidiendo el
+    // listado sin filtro, `limit` se consume con solicitudes de cualquier
+    // estatus y las finalizadas pueden quedar fuera de la página a medida que
+    // el cliente acumula solicitudes activas.
     _visitsFuture =
         DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
       authToken: token,
+      status: 'FINISHED',
       limit: 50,
     );
 
@@ -280,7 +294,7 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
                                     'No se pudieron cargar tus servicios.')
                               else if (visits.isEmpty)
                                 _emptyState(
-                                    'Aún no tienes servicios solicitados.')
+                                    'Aún no tienes visitas finalizadas.')
                               else if (filtered.isEmpty)
                                 _emptyState(_hasActiveFilters
                                     ? 'No hay servicios que coincidan con los filtros.'

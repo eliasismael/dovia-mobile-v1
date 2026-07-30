@@ -2,6 +2,7 @@ import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
@@ -55,6 +56,94 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
   /// descripción en el campo de texto.
   bool get _hasDescription =>
       (_model.textController?.text.trim().isNotEmpty) ?? false;
+
+  /// Zona de carga de fotografías: selector nativo Cámara / Galería. Las fotos
+  /// son opcionales, se adjuntan a la solicitud al confirmar el pago.
+  Future<void> _pickPhotos() async {
+    final selectedMedia = await selectMediaWithSourceBottomSheet(
+      context: context,
+      allowPhoto: true,
+      pickerFontFamily: 'Public Sans',
+    );
+    if (selectedMedia == null ||
+        !selectedMedia
+            .every((m) => validateFileFormat(m.storagePath, context))) {
+      return;
+    }
+    safeSetState(() => _model.isPhotoUploading = true);
+    try {
+      final files = selectedMedia
+          .map((m) => FFUploadedFile(
+                name: m.storagePath.split('/').last,
+                bytes: m.bytes,
+                height: m.dimensions?.height,
+                width: m.dimensions?.width,
+                blurHash: m.blurHash,
+                originalFilename: m.originalFilename,
+              ))
+          .toList();
+      safeSetState(() => _model.uploadedPhotos.addAll(files));
+    } finally {
+      safeSetState(() => _model.isPhotoUploading = false);
+    }
+  }
+
+  Widget _buildPhotoThumbnails() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Wrap(
+        spacing: 10.0,
+        runSpacing: 10.0,
+        children: List.generate(_model.uploadedPhotos.length, (index) {
+          final photo = _model.uploadedPhotos[index];
+          return Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: photo.bytes != null
+                    ? Image.memory(
+                        photo.bytes!,
+                        width: 90.0,
+                        height: 90.0,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: 90.0,
+                        height: 90.0,
+                        color: FlutterFlowTheme.of(context).alternate,
+                      ),
+              ),
+              Positioned(
+                top: 4.0,
+                right: 4.0,
+                child: InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () => safeSetState(
+                      () => _model.uploadedPhotos.removeAt(index)),
+                  child: Container(
+                    width: 22.0,
+                    height: 22.0,
+                    decoration: const BoxDecoration(
+                      color: Color(0xCC000000),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 16.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +256,7 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                                           .fontStyle,
                                     ),
                                 hintText:
-                                    'Describe el problema o el trabajo que deseas realizar.  Mientras más claro, mejor pordemos ayudarte',
+                                    'Describe el problema o el trabajo que deseas realizar.  Trata de ser específico',
                                 hintStyle: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
@@ -306,19 +395,47 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                             ),
                           ),
                         ),
+                        // Zona de carga de fotografías (opcional).
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 10.0, 0.0, 0.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: SvgPicture.asset(
-                              'assets/images/AddMediaImage.svg',
+                          child: InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: _model.isPhotoUploading ? null : _pickPhotos,
+                            child: Container(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 200.0,
-                              fit: BoxFit.cover,
+                              height: 104.0,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFAFAFA),
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: _model.isPhotoUploading
+                                  ? SizedBox(
+                                      width: 24.0,
+                                      height: 24.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          FlutterFlowTheme.of(context).primary,
+                                        ),
+                                      ),
+                                    )
+                                  : SvgPicture.asset(
+                                      'assets/images/AddMediaImage.svg',
+                                      width: 24.0,
+                                      height: 24.0,
+                                      fit: BoxFit.contain,
+                                    ),
                             ),
                           ),
                         ),
+                        if (_model.uploadedPhotos.isNotEmpty)
+                          _buildPhotoThumbnails(),
                         Align(
                           alignment: const AlignmentDirectional(0.0, 1.0),
                           child: Padding(
@@ -328,9 +445,14 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                               // Sólo se habilita con una descripción cargada.
                               onPressed: _hasDescription
                                   ? () async {
+                                      // El levantamiento viaja al paso de cobro,
+                                      // que crea la solicitud de emergencia y
+                                      // adjunta las fotos al confirmar el pago.
                                       DHCLIENTCostoEmergenciaWidget
                                               .description =
                                           _model.textController!.text.trim();
+                                      DHCLIENTCostoEmergenciaWidget.photos =
+                                          List.of(_model.uploadedPhotos);
                                       context.pushNamed(
                                           DHCLIENTCostoEmergenciaWidget
                                               .routeName);

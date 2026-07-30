@@ -141,15 +141,22 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       _str(address['id']) ?? _str(address['addressId']);
 
   /// Etiqueta visible de una dirección. El backend no garantiza una clave única
-  /// para el alias, así que se prueban las habituales y se cae a la dirección.
-  String _addressLabel(Map<String, dynamic> address) =>
-      _str(address['name']) ??
-      _str(address['label']) ??
-      _str(address['nickname']) ??
-      _str(address['alias']) ??
-      _str(address['address']) ??
-      _str(address['fullAddress']) ??
-      'Ubicación registrada';
+  /// para el alias, así que se prueban las habituales.
+  ///
+  /// Sin nombre propio, la primera propiedad registrada se muestra como
+  /// "Casa A" —misma convención que el Dashboard—, y el resto cae a la
+  /// dirección.
+  String _addressLabel(Map<String, dynamic> address, {int index = 0}) {
+    final name = _str(address['name']) ??
+        _str(address['label']) ??
+        _str(address['nickname']) ??
+        _str(address['alias']);
+    if (name != null) return name;
+    if (index == 0) return 'Casa A';
+    return _str(address['address']) ??
+        _str(address['fullAddress']) ??
+        'Ubicación registrada';
+  }
 
   bool get _hasDescription =>
       (_model.textController?.text.trim().isNotEmpty) ?? false;
@@ -647,13 +654,13 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
           _locationOption(label: 'Cargando…', selected: false, onTap: null)
         else ...[
           // Una opción por propiedad registrada: tocarlas sólo selecciona.
-          for (final address in _addresses)
+          for (var i = 0; i < _addresses.length; i++)
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
               child: _locationOption(
-                label: _addressLabel(address),
-                selected: _selectedAddressId == _addressId(address),
-                onTap: () => _selectAddress(_addressId(address)!),
+                label: _addressLabel(_addresses[i], index: i),
+                selected: _selectedAddressId == _addressId(_addresses[i]),
+                onTap: () => _selectAddress(_addressId(_addresses[i])!),
               ),
             ),
           if (_addresses.isEmpty)
@@ -671,8 +678,8 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
               ),
             ),
         ],
-        // Acción permanente: siempre disponible para dar de alta otra ubicación,
-        // sin importar cuántas propiedades ya tenga el cliente.
+        // Opción permanente: siempre disponible, sin importar cuántas
+        // propiedades registradas ya tenga el cliente.
         _addLocationButton(),
       ],
     );
@@ -722,43 +729,18 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     );
   }
 
-  /// Acción "Otra ubicación": no es una opción seleccionable, sino el acceso al
-  /// alta de una dirección nueva. Se diferencia visualmente con el ícono [+] y
-  /// un borde tenue para que no se confunda con los botones de las propiedades.
+  /// Opción "Otra ubicación": es un botón de selección más, con el mismo aspecto
+  /// que las propiedades registradas (así lo pide el diseño).
+  ///
+  /// A diferencia de las demás no queda elegida en el acto: dispara la
+  /// validación de dirección (Coverage Check) y sólo si la dirección cae dentro
+  /// de la zona de servicio de DOVIA se registra y vuelve ya seleccionada como
+  /// una propiedad más de la lista.
   Widget _addLocationButton() {
-    return InkWell(
-      splashColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      borderRadius: BorderRadius.circular(25.0),
+    return _locationOption(
+      label: 'Otra ubicación',
+      selected: false,
       onTap: () async => _addOtherLocation(),
-      child: Container(
-        width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 42.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFAFAFA),
-          borderRadius: BorderRadius.circular(25.0),
-          border: Border.all(color: const Color(0xFFDFDFDF), width: 1.5),
-        ),
-        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.add, color: Color(0xFF007376), size: 18.0),
-            const SizedBox(width: 8.0),
-            Text(
-              'Otra ubicación',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                    color: const Color(0xFF007376),
-                    fontSize: 14.0,
-                  ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

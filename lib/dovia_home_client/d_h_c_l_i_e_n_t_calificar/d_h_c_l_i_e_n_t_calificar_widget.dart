@@ -85,6 +85,12 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
   bool get _canSubmit =>
       (_model.ratingBarValue ?? 0.0) >= 1.0 && !_model.isSubmitting;
 
+  /// Envía la calificación.
+  ///
+  /// NOTA: el comentario opcional se captura (lo exige el AC) pero **no viaja**:
+  /// los tres endpoints de ratings sólo aceptan `stars` (y `targetRole` donde
+  /// aplica), no hay campo para el texto. Queda pendiente que el backend acepte
+  /// `comment` para poder adjuntarlo; hasta entonces se descarta.
   Future<void> _submit() async {
     final stars = _model.ratingBarValue ?? 0.0;
     if (stars < 1.0) return;

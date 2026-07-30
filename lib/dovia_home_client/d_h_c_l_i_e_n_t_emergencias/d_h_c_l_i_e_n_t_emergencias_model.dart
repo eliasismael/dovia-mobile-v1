@@ -18,6 +18,10 @@ class DHCLIENTEmergenciasModel
   FocusNode? textFieldFocusNode;
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
+  // Fotos opcionales de la emergencia: ayudan a asignar el técnico adecuado.
+  // No condicionan el botón [Enviar], que sólo depende de la descripción.
+  List<FFUploadedFile> uploadedPhotos = [];
+  bool isPhotoUploading = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.

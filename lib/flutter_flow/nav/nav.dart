@@ -259,6 +259,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               const DHCLIENTProximasVisitasListaWidget(),
         ),
         FFRoute(
+          name: DHCLIENTVisitasFinalizadasListaWidget.routeName,
+          path: DHCLIENTVisitasFinalizadasListaWidget.routePath,
+          builder: (context, params) =>
+              const DHCLIENTVisitasFinalizadasListaWidget(),
+        ),
+        FFRoute(
           name: DHCLIENTOtraUbicacionWidget.routeName,
           path: DHCLIENTOtraUbicacionWidget.routePath,
           builder: (context, params) => const DHCLIENTOtraUbicacionWidget(),

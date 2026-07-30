@@ -138,6 +138,13 @@ class _DHCLIENTProximasVisitasListaWidgetState
     if (status == 'TAKEN' && !DHCLIENTHomepageWidget.confirmedVisitIds.contains(id)) {
       return 'Confirmar';
     }
+    // Familia de estatus del flujo de cotización (Ej: QUOTE_QUOTING): la
+    // solicitud ya está en la red de proveedores esperando propuestas. Se usa
+    // el mismo label que el Dashboard para que la misma solicitud no aparezca
+    // con dos estatus distintos según la pantalla.
+    if (status.startsWith('QUOTE')) {
+      return DHCLIENTCotizacionWidget.pendingQuoteStatus;
+    }
     switch (status) {
       case 'TAKEN':
         return 'Programada';
@@ -160,11 +167,27 @@ class _DHCLIENTProximasVisitasListaWidgetState
       (_model.statusFilter != null && _model.statusFilter != _allOption) ||
       _model.dateFilter != null;
 
+  /// Solo "Próximas visitas": excluye las solicitudes ya finalizadas (esas
+  /// viven en la pantalla "Visitas Finalizadas").
+  bool _isUpcoming(Map<String, dynamic> data) =>
+      !_finalizedStatuses.contains((_str(data['status']) ?? '').toUpperCase());
+
+  /// Opciones del filtro "Estado del trabajo". Las del checklist siempre están
+  /// presentes y se completan con los estatus realmente devueltos por el
+  /// backend (Ej: "Pendiente de Cotización"), para que ninguna solicitud del
+  /// listado quede sin poder filtrarse.
+  List<String> _statusOptions(List<Map<String, dynamic>> upcoming) => <String>{
+        _allOption,
+        'Pendiente',
+        'Confirmar',
+        'Programada',
+        'En progreso',
+        for (final v in upcoming) _statusLabel(v),
+      }.toList();
+
   List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> visits) {
     return visits.where((data) {
-      // Solo "Próximas visitas": excluye las solicitudes ya finalizadas.
-      final rawStatus = (_str(data['status']) ?? '').toUpperCase();
-      if (_finalizedStatuses.contains(rawStatus)) return false;
+      if (!_isUpcoming(data)) return false;
 
       final type = _model.typeFilter;
       if (type != null && type != _allOption && _serviceName(data) != type) {
@@ -213,10 +236,18 @@ class _DHCLIENTProximasVisitasListaWidgetState
                 _str(address['alias'])
             : null) ??
         'Casa A';
-    // Modo consulta: oculta el botón "Aceptar". La tarjeta del asociado se
-    // muestra/oculta dentro del detalle según el estatus de la solicitud.
-    final id = (data['id'] ?? data['serviceRequestId'])?.toString() ?? '';
-    DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
+    // Modo consulta (UI Security): a diferencia de la pantalla de confirmación
+    // inicial —que se abre desde el Dashboard— este listado es estrictamente un
+    // registro, así que el detalle se abre SIN el botón "Aceptar" y sin edición
+    // de campos. `alreadyConfirmed` es la bandera con la que
+    // [DHCLIENTCasaAWidget] oculta ese botón; confirmar la visita sigue siendo
+    // posible desde el Dashboard.
+    // TODO: cuando exista, reemplazar por una bandera propia de solo lectura en
+    // [DHCLIENTCasaAWidget] (Ej: `consultationMode`), para no sobrecargar la
+    // semántica de "ya confirmada".
+    DHCLIENTCasaAWidget.alreadyConfirmed = true;
+    // La tarjeta del asociado se muestra/oculta dentro del detalle según el
+    // estatus de la solicitud (Programada → perfil; Pendiente → placeholder).
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
         .then((_) => safeSetState(() {}));
@@ -269,9 +300,14 @@ class _DHCLIENTProximasVisitasListaWidgetState
                             .map((e) => Map<String, dynamic>.from(e))
                             .toList();
 
+                        // Las opciones de los filtros se arman solo con las
+                        // próximas visitas: ofrecer un tipo o un estatus que
+                        // solo existe entre las finalizadas daría siempre un
+                        // resultado vacío.
+                        final upcoming = visits.where(_isUpcoming).toList();
                         final typeOptions = <String>{
                           _allOption,
-                          for (final v in visits) _serviceName(v),
+                          for (final v in upcoming) _serviceName(v),
                         }.toList();
 
                         final filtered = _applyFilters(visits);
@@ -282,7 +318,8 @@ class _DHCLIENTProximasVisitasListaWidgetState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFilters(typeOptions),
+                              _buildFilters(
+                                  typeOptions, _statusOptions(upcoming)),
                               const SizedBox(height: 20.0),
                               if (!response.succeeded)
                                 _emptyState(
@@ -400,7 +437,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
     );
   }
 
-  Widget _buildFilters(List<String> typeOptions) {
+  Widget _buildFilters(List<String> typeOptions, List<String> statusOptions) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -419,12 +456,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
         _dropdown(
           controller: _model.statusController ??=
               FormFieldController<String>(_model.statusFilter),
-          options: const [
-            _allOption,
-            'Pendiente',
-            'Programada',
-            'En progreso',
-          ],
+          options: statusOptions,
           hint: 'Selecciona el tipo',
           onChanged: (val) => safeSetState(() => _model.statusFilter = val),
         ),

@@ -84,7 +84,7 @@ class _DHCLIENTMaterialAprobadoWidgetState
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         0.0, 34.0, 0.0, 0.0),
                     child: Text(
-                      'Se le avisara al asociado que podrá tener el material adicional para poder completar el trabajo.',
+                      'Se le avisará al asociado que podrá tener el material adicional para poder completar el trabajo.',
                       textAlign: TextAlign.center,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(

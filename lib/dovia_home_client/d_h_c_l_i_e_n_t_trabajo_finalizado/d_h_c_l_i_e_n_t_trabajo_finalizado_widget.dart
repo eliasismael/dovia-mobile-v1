@@ -1,3 +1,5 @@
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -53,12 +55,20 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Solicitud a renderizar. Nace con lo inyectado por la lista de visitas
+  /// finalizadas (un item del listado, que es un resumen) y se completa con el
+  /// detalle real del servicio en [_loadDetail].
+  Map<String, dynamic>? _serviceData;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTTrabajoFinalizadoModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    // Lo ya inyectado se pinta sin esperar al backend; el fetch sólo completa.
+    _serviceData = DHCLIENTTrabajoFinalizadoWidget.requestData;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDetail());
   }
 
   @override
@@ -69,10 +79,67 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
   }
 
   // ---------------------------------------------------------------------------
+  // Lectura de la solicitud.
+  // ---------------------------------------------------------------------------
+
+  Map<String, dynamic>? _asMap(dynamic value) =>
+      value is Map ? Map<String, dynamic>.from(value) : null;
+
+  /// Trae el detalle completo del servicio.
+  ///
+  /// La lista de visitas finalizadas inyecta un item del listado
+  /// (GET /dovia-home/service-requests), que es un resumen: no trae la evidencia
+  /// de completado, el texto de "Trabajo realizado", el material sobrante, los
+  /// puntos de garantía ni la fecha real de finalización. Sin esta lectura la
+  /// pantalla sólo podría mostrar placeholders y la ventana de garantía se
+  /// evaluaría contra la fecha agendada en vez de la de finalización.
+  ///
+  /// El detalle se mergea sobre el resumen (no lo reemplaza) para no perder
+  /// campos que el listado sí traía.
+  Future<void> _loadDetail() async {
+    final serviceRequestId = _serviceRequestId;
+    if (serviceRequestId == null) {
+      // Sin id no hay detalle que leer: se renderiza lo inyectado.
+      if (mounted) safeSetState(() {});
+      return;
+    }
+
+    safeSetState(() {
+      _model.isLoading = true;
+      _model.loadFailed = false;
+    });
+    try {
+      final response =
+          await DOVIAAPIDoviaHomeContextGroup.getServiceRequestCall.call(
+        serviceRequestId: serviceRequestId,
+        authToken: currentAuthenticationToken ?? '',
+      );
+      if (!mounted) return;
+
+      if (!response.succeeded) {
+        safeSetState(() => _model.loadFailed = true);
+        return;
+      }
+
+      final detail = _asMap(getJsonField(response.jsonBody, r'''$.data''')) ??
+          _asMap(response.jsonBody);
+      if (detail == null || detail.isEmpty) return;
+
+      safeSetState(() {
+        _serviceData = {...?_serviceData, ...detail};
+      });
+    } catch (_) {
+      if (mounted) safeSetState(() => _model.loadFailed = true);
+    } finally {
+      if (mounted) safeSetState(() => _model.isLoading = false);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Extracción best-effort de los datos del trabajo finalizado.
   // ---------------------------------------------------------------------------
 
-  Map<String, dynamic>? get _data => DHCLIENTTrabajoFinalizadoWidget.requestData;
+  Map<String, dynamic>? get _data => _serviceData;
 
   String? _firstString(List<dynamic> candidates) {
     for (final c in candidates) {
@@ -106,21 +173,53 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
   String get _jobTitle =>
       _firstString([_data?['serviceName'], _data?['title']]) ?? 'Servicio';
 
+  /// Imágenes de completado agrupadas por categoría.
+  ///
+  /// El asociado las sube contra
+  /// `completion-images/confirm` con `category: WORK | LEFTOVER_MATERIALS`, así
+  /// que el detalle puede devolverlas como un Map indexado por esa categoría
+  /// (además de las variantes planas que se prueban en cada getter).
+  List<String> _categorizedImages(String category) {
+    for (final key in const [
+      'completionImages',
+      'completionImagesByCategory',
+      'images',
+    ]) {
+      final node = _data?[key];
+      if (node is Map) {
+        final bucket = node[category] ?? node[category.toLowerCase()];
+        final urls = _urlsFrom(bucket);
+        if (urls.isNotEmpty) return urls;
+      }
+    }
+    return [];
+  }
+
   /// Fotografías de evidencia del trabajo terminado (subidas por el asociado al
   /// finalizar).
-  List<String> get _evidenceImages => _urlsFrom(
-        _data?['completionImages'] ??
-            _data?['completedImages'] ??
-            _data?['evidenceImages'] ??
-            _data?['finishImages'],
-      );
+  List<String> get _evidenceImages {
+    final categorized = _categorizedImages('WORK');
+    if (categorized.isNotEmpty) return categorized;
+    return _urlsFrom(
+      _data?['completionImages'] ??
+          _data?['workImages'] ??
+          _data?['completedImages'] ??
+          _data?['evidenceImages'] ??
+          _data?['finishImages'],
+    );
+  }
 
   /// Fotografías del material sobrante (si aplica).
-  List<String> get _leftoverImages => _urlsFrom(
-        _data?['leftoverImages'] ??
-            _data?['remainingMaterialsImages'] ??
-            _data?['materialImages'],
-      );
+  List<String> get _leftoverImages {
+    final categorized = _categorizedImages('LEFTOVER_MATERIALS');
+    if (categorized.isNotEmpty) return categorized;
+    return _urlsFrom(
+      _data?['leftoverMaterialsImages'] ??
+          _data?['leftoverImages'] ??
+          _data?['remainingMaterialsImages'] ??
+          _data?['materialImages'],
+    );
+  }
 
   /// Texto del campo "Trabajo realizado" (descripción de completado).
   String get _workDone =>
@@ -153,28 +252,51 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
         _data?['warranty'],
         _data?['warrantyDescription'],
       ]) ??
-      'Recuerda que los trabajos tienen garantía Dovia.';
+      'Recuerda que los trabajos tienen garantía Dovia, la cual consiste en:';
 
-  /// Fecha de finalización, para evaluar la ventana de garantía de 7 días. Si el
-  /// backend no la envía se usa la fecha agendada: la solicitud ya está
-  /// FINISHED, así que es la mejor aproximación disponible.
-  DateTime? get _finishedAt {
+  /// Fecha **real** de finalización del trabajo, tal como la envía el backend.
+  /// Es la única base válida para la ventana de garantía de 7 días.
+  DateTime? get _finishedAtReal {
     final apt = _data?['appointment'];
     final raw = _firstString([
       _data?['finishedAt'],
       _data?['completedAt'],
+      _data?['completionDate'],
       apt is Map ? apt['finishedAt'] : null,
-      apt is Map ? apt['scheduledAt'] : null,
+      apt is Map ? apt['completedAt'] : null,
     ]);
     if (raw == null) return null;
     return DateTime.tryParse(raw)?.toLocal();
   }
 
-  /// Ventana de 7 días: "Reportar problema" sólo se habilita hasta la fecha de
-  /// finalización + 7 días. Sin fecha se habilita (fail-open, a favor del
-  /// cliente).
+  /// Fecha agendada. **No** se usa para la regla de 7 días (adelantaría o
+  /// atrasaría el vencimiento de la garantía respecto de la finalización real);
+  /// sólo alimenta la cabecera de contexto de "Calificar" cuando el backend no
+  /// manda la fecha de finalización.
+  DateTime? get _scheduledAt {
+    final apt = _data?['appointment'];
+    final raw = _firstString([
+      apt is Map ? apt['scheduledAt'] : null,
+      _data?['scheduledAt'],
+    ]);
+    if (raw == null) return null;
+    return DateTime.tryParse(raw)?.toLocal();
+  }
+
+  /// Fecha mostrada al usuario (cabecera de "Calificar").
+  DateTime? get _finishedAt => _finishedAtReal ?? _scheduledAt;
+
+  /// Ventana de garantía: `Fecha Actual <= Fecha de Finalización + 7 días`.
+  ///
+  /// Se evalúa **sólo** contra [_finishedAtReal] (la fecha de finalización que
+  /// manda el backend), nunca contra la fecha agendada: usar la agendada movería
+  /// el vencimiento de la garantía respecto del trabajo real.
+  ///
+  /// Si el backend todavía no expone la fecha de finalización, se habilita
+  /// (fail-open, a favor del cliente): el backend es el gate real del reclamo, y
+  /// bloquear aquí le negaría al cliente una garantía vigente.
   bool get _canReport {
-    final finished = _finishedAt;
+    final finished = _finishedAtReal;
     if (finished == null) return true;
     return !DateTime.now().isAfter(
       finished.add(
@@ -286,7 +408,9 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
                         const SizedBox(height: 12.0),
                         _readOnlyText(_workDone.isNotEmpty
                             ? _workDone
-                            : 'Sin descripción registrada.'),
+                            : (_model.isLoading
+                                ? ''
+                                : 'Sin descripción registrada.')),
                         if (_hasLeftover) ...[
                           const SizedBox(height: 18.0),
                           _sectionLabel(_leftoverLocation.isNotEmpty

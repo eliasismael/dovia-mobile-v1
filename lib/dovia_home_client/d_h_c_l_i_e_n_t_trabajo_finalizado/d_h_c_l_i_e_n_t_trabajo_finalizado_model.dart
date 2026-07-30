@@ -20,6 +20,9 @@ class DHCLIENTTrabajoFinalizadoModel
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
   late DHCLIENTNavbarModel dHCLIENTNavbarModel;
+  // Lectura del detalle del servicio (GET /dovia-home/service-requests/{id}).
+  bool isLoading = false;
+  bool loadFailed = false;
 
   @override
   void initState(BuildContext context) {

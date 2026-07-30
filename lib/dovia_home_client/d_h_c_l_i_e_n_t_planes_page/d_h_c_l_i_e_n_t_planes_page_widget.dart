@@ -18,6 +18,12 @@ class DHCLIENTPlanesPageWidget extends StatefulWidget {
   static String routeName = 'DH_CLIENT_PlanesPage';
   static String routePath = '/dHCLIENTPlanesPage';
 
+  /// Pantalla a la que se vuelve al salir de Planes. La fija el flujo que trajo
+  /// al cliente hasta acá (Ej: el paso de costo de una emergencia). Si es null
+  /// se mantiene el destino histórico: el valor de la visita estándar.
+  /// Mismo patrón que [DHCLIENTUbicacionWidget.pendingNextRoute].
+  static String? pendingReturnRoute;
+
   @override
   State<DHCLIENTPlanesPageWidget> createState() =>
       _DHCLIENTPlanesPageWidgetState();
@@ -85,7 +91,10 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                         20.0, 20.0, 20.0, 80.0),
                     child: FFButtonWidget(
                       onPressed: () async {
-                        context.pushNamed(
+                        final returnRoute =
+                            DHCLIENTPlanesPageWidget.pendingReturnRoute;
+                        DHCLIENTPlanesPageWidget.pendingReturnRoute = null;
+                        context.pushNamed(returnRoute ??
                             DHCLIENTValorVisitaPageWidget.routeName);
                       },
                       text: 'Omitir',

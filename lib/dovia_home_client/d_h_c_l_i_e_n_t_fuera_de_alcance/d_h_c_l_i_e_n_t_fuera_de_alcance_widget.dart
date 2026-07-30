@@ -54,6 +54,11 @@ class _DHCLIENTFueraDeAlcanceWidgetState
     _model = createModel(context, () => DHCLIENTFueraDeAlcanceModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // El estatus de suscripción decide si "Sí quiero que me coticen" autoriza
+      // o muestra el bloqueo de Premium. Se resuelve al entrar (queda cacheado
+      // en el repo) para que un cliente que sí paga no vea el upsell por llegar
+      // acá antes de que el estado estuviera cargado.
+      context.read<PaymentsRepository>().loadCurrentSubscription();
       _loadDiagnosisData();
     });
   }
@@ -228,7 +233,18 @@ class _DHCLIENTFueraDeAlcanceWidgetState
   /// Autorizada la solicitud, el backend la mueve a QUOTING y el trabajo pasa a
   /// figurar entre las cotizaciones del cliente.
   Future<void> _solicitarCotizacion() async {
-    if (!context.read<PaymentsRepository>().hasActiveSubscription) {
+    final payments = context.read<PaymentsRepository>();
+    // `hasActiveSubscription` es false mientras el estado no se resolvió: si
+    // todavía no cargó se consulta antes de decidir, para no bloquear con el
+    // upsell a un cliente que sí tiene plan activo.
+    if (!payments.subscriptionLoaded) {
+      safeSetState(() => _model.isSubmitting = true);
+      await payments.loadCurrentSubscription();
+      if (!mounted) return;
+      safeSetState(() => _model.isSubmitting = false);
+    }
+
+    if (!payments.hasActiveSubscription) {
       await showDialog(
         context: context,
         builder: (context) {

@@ -325,7 +325,9 @@ class _DHCLIENTReportarProblemaWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
-                      title: 'Reportar problema',
+                      // Título de pantalla en plural, como el diseño (el botón
+                      // de entrada sí es "Reportar problema", en singular).
+                      title: 'Reportar problemas',
                       showCurrency: false,
                     ),
                   ),

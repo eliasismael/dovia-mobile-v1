@@ -521,7 +521,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
           return const SizedBox.shrink(); // No mostrar si hay error
         }
 
-        final proposals = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.proposalsList(response) ?? [];
+        // `proposalsList` resuelve un JsonPath sobre el JSON decodificado, no
+        // sobre el ApiCallResponse: hay que pasarle `jsonBody`.
+        final proposals = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall
+                .proposalsList(response.jsonBody) ??
+            [];
         if (proposals.isEmpty) {
           return const SizedBox.shrink();
         }

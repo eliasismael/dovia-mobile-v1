@@ -106,7 +106,7 @@ class _DHCLIENTExitoProgramarAgendaWidgetState
                         0.0, 34.0, 0.0, 0.0),
                     child: Text(
                       widget.message ??
-                          'Programaste con éxito tu servicio, pronto se te avisara para confirmar la visita a tu casa.',
+                          'Programaste con éxito tu servicio, pronto se te avisará para confirmar la visita a tu casa.',
                       textAlign: TextAlign.center,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(
