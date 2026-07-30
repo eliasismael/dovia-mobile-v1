@@ -53,7 +53,12 @@
       "Read(//c/Users/Elías/Desktop/dev/work/dovia/repo-completo/dovia/backend/src/contexts/dovia-home/application/use-cases/get-client-out-of-scope-request/**)",
       "PowerShell(flutter analyze lib/dovia_home_client/d_h_c_l_i_e_n_t_trabajo_finalizado lib/dovia_home_client/d_h_c_l_i_e_n_t_calificar lib/dovia_home_client/d_h_c_l_i_e_n_t_reportar_problema)",
       "mcp__claude_ai_Figma__get_figma_skill",
-      "PowerShell(flutter analyze *)"
+      "PowerShell(flutter analyze *)",
+      "PowerShell(flutter analyze lib/dovia_home_client/d_h_c_l_i_e_n_t_casa_a lib/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas_lista lib/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas lib/dovia_home_client/d_h_c_l_i_e_n_t_homepage)",
+      "PowerShell(flutter analyze --no-pub)",
+      "Bash(echo \"--- exit: $? ---\")",
+      "Bash(grep -n \"data.items\\\\|\\\\$.data\\\\b\\\\|r'''\\\\\\\\\\\\$\\\\.data\" lib/backend/api_requests/api_dovia_home.dart)",
+      "Bash(dart run *)"
     ]
   }
 }

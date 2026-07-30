@@ -21,6 +21,9 @@ export 'd_h_c_l_i_e_n_t_casa_a_model.dart';
 /// de seguridad del profesional asignado. El botón inferior [Aceptar] confirma
 /// la visita; una vez confirmada ([alreadyConfirmed] = true) el botón
 /// desaparece y la pantalla queda como consulta.
+///
+/// Abierta desde el listado de "Próximas visitas" ([readOnly] = true) la
+/// pantalla es estrictamente un registro de consulta: nunca muestra [Aceptar].
 class DHCLIENTCasaAWidget extends StatefulWidget {
   const DHCLIENTCasaAWidget({super.key});
 
@@ -36,6 +39,14 @@ class DHCLIENTCasaAWidget extends StatefulWidget {
   /// Si la visita ya fue confirmada por el cliente. Cuando es true se oculta el
   /// botón [Aceptar] y la pantalla queda en modo consulta.
   static bool alreadyConfirmed = false;
+
+  /// Modo consulta estricto: la pantalla se abrió desde un listado de registro
+  /// (Ej: "Próximas visitas"), no desde el flujo de confirmación. Oculta el
+  /// botón [Aceptar] sin importar el estatus de la solicitud.
+  ///
+  /// Cada origen debe setearlo antes de navegar (el Dashboard lo pone en false
+  /// porque desde ahí sí se confirma la visita).
+  static bool readOnly = false;
 
   /// Nombre de la propiedad mostrado en la cabecera (Ej: "Casa A").
   static String houseName = 'Casa A';
@@ -315,6 +326,13 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
     const assignedStatuses = {'TAKEN', 'IN_PROGRESS', 'FINISHED'};
     return assignedStatuses.contains(_status.toUpperCase());
   }
+
+  /// Hay algo que confirmar solo cuando un Home Associate ya tomó el trabajo
+  /// (TAKEN). Con la solicitud aún "Pendiente" nadie la tomó, así que no hay
+  /// visita que aceptar. Sin datos (ruta directa / modo diseño) se muestra el
+  /// botón para no romper el mockup.
+  bool get _awaitsConfirmation =>
+      _data == null || _status.toUpperCase() == 'TAKEN';
 
   // ---------------------------------------------------------------------------
   // Contacto con el asociado (cabecera).
@@ -674,7 +692,12 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final showAceptar = !DHCLIENTCasaAWidget.alreadyConfirmed;
+    // El botón inferior solo existe en el flujo de confirmación: nunca en modo
+    // consulta, nunca si ya se confirmó y nunca si todavía nadie tomó el
+    // trabajo.
+    final showAceptar = !DHCLIENTCasaAWidget.readOnly &&
+        !DHCLIENTCasaAWidget.alreadyConfirmed &&
+        _awaitsConfirmation;
 
     return GestureDetector(
       onTap: () {

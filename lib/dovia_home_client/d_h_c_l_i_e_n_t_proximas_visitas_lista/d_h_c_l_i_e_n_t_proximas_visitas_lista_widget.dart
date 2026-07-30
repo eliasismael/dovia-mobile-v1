@@ -1,9 +1,11 @@
+import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/dovia_home_client/service_request_fields.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
@@ -77,86 +79,13 @@ class _DHCLIENTProximasVisitasListaWidgetState
   }
 
   // ---------------------------------------------------------------------------
-  // Helpers de extracción de datos de la solicitud.
+  // Helpers de extracción de datos de la solicitud. El mapeo de campos contra el
+  // payload real vive en [service_request_fields.dart], compartido con el
+  // Dashboard para que ambas pantallas pinten la misma solicitud igual.
   // ---------------------------------------------------------------------------
 
-  String? _str(dynamic v) =>
-      (v is String && v.trim().isNotEmpty) ? v.trim() : null;
-
-  String _serviceName(Map<String, dynamic> data) =>
-      _str(data['serviceName']) ?? 'Servicio';
-
-  /// Fecha programada (appointment.scheduledAt) o, si no existe, la de creación.
-  DateTime? _visitDate(Map<String, dynamic> data) {
-    final apt = data['appointment'];
-    final raw = _str(apt is Map ? apt['scheduledAt'] : null) ??
-        _str(data['createdAt']);
-    if (raw == null) return null;
-    return DateTime.tryParse(raw)?.toLocal();
-  }
-
-  // El app solo inicializa el locale 'en', por eso las fechas en español se
-  // arman manualmente (mismo criterio que el resto de pantallas del cliente).
-  static const List<String> _weekdaysEs = [
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-    'Domingo',
-  ];
-  static const List<String> _monthsEs = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-  ];
-
-  String _formattedDate(Map<String, dynamic> data) {
-    final d = _visitDate(data);
-    if (d == null) return 'Fecha pendiente';
-    final weekday = _weekdaysEs[d.weekday - 1];
-    final month = _monthsEs[d.month - 1];
-    return '$weekday, ${d.day} de $month';
-  }
-
-  /// Regla de estatus (enum backend: PENDING, TAKEN, IN_PROGRESS, FINISHED):
-  /// sin que ningún Home Associate haya tomado el trabajo la solicitud es
-  /// estrictamente "Pendiente"; cuando alguien la toma queda "Programada".
-  String _statusLabel(Map<String, dynamic> data) {
-    final status = (_str(data['status']) ?? 'PENDING').toUpperCase();
-    final id = (data['id'] ?? data['serviceRequestId'])?.toString() ?? '';
-    if (status == 'TAKEN' && !DHCLIENTHomepageWidget.confirmedVisitIds.contains(id)) {
-      return 'Confirmar';
-    }
-    // Familia de estatus del flujo de cotización (Ej: QUOTE_QUOTING): la
-    // solicitud ya está en la red de proveedores esperando propuestas. Se usa
-    // el mismo label que el Dashboard para que la misma solicitud no aparezca
-    // con dos estatus distintos según la pantalla.
-    if (status.startsWith('QUOTE')) {
-      return DHCLIENTCotizacionWidget.pendingQuoteStatus;
-    }
-    switch (status) {
-      case 'TAKEN':
-        return 'Programada';
-      case 'IN_PROGRESS':
-        return 'En progreso';
-      case 'FINISHED':
-        return 'Finalizada';
-      case 'PENDING':
-      default:
-        return 'Pendiente';
-    }
-  }
+  String _statusLabel(Map<String, dynamic> data) =>
+      srStatusLabel(data, DHCLIENTHomepageWidget.confirmedVisitIds);
 
   // ---------------------------------------------------------------------------
   // Filtros.
@@ -167,30 +96,16 @@ class _DHCLIENTProximasVisitasListaWidgetState
       (_model.statusFilter != null && _model.statusFilter != _allOption) ||
       _model.dateFilter != null;
 
-  /// Solo "Próximas visitas": excluye las solicitudes ya finalizadas (esas
-  /// viven en la pantalla "Visitas Finalizadas").
+  /// Solo "Próximas visitas": excluye las solicitudes ya finalizadas.
   bool _isUpcoming(Map<String, dynamic> data) =>
-      !_finalizedStatuses.contains((_str(data['status']) ?? '').toUpperCase());
-
-  /// Opciones del filtro "Estado del trabajo". Las del checklist siempre están
-  /// presentes y se completan con los estatus realmente devueltos por el
-  /// backend (Ej: "Pendiente de Cotización"), para que ninguna solicitud del
-  /// listado quede sin poder filtrarse.
-  List<String> _statusOptions(List<Map<String, dynamic>> upcoming) => <String>{
-        _allOption,
-        'Pendiente',
-        'Confirmar',
-        'Programada',
-        'En progreso',
-        for (final v in upcoming) _statusLabel(v),
-      }.toList();
+      !_finalizedStatuses.contains((srString(data['status']) ?? '').toUpperCase());
 
   List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> visits) {
     return visits.where((data) {
       if (!_isUpcoming(data)) return false;
 
       final type = _model.typeFilter;
-      if (type != null && type != _allOption && _serviceName(data) != type) {
+      if (type != null && type != _allOption && srServiceName(data) != type) {
         return false;
       }
       final status = _model.statusFilter;
@@ -199,7 +114,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
       }
       final date = _model.dateFilter;
       if (date != null) {
-        final d = _visitDate(data);
+        final d = srFilterDate(data);
         if (d == null ||
             d.year != date.year ||
             d.month != date.month ||
@@ -209,6 +124,46 @@ class _DHCLIENTProximasVisitasListaWidgetState
       }
       return true;
     }).toList();
+  }
+
+  /// Mismos filtros, aplicados a las visitas agregadas de forma optimista al
+  /// crear la solicitud ([DHCLIENTHomepageWidget.upcomingVisits]).
+  bool _matchesLocalFilters(ScheduledVisit visit) {
+    final type = _model.typeFilter;
+    if (type != null && type != _allOption && visit.service != type) {
+      return false;
+    }
+    final status = _model.statusFilter;
+    if (status != null && status != _allOption && visit.status != status) {
+      return false;
+    }
+    final date = _model.dateFilter;
+    if (date != null) {
+      final d = visit.scheduledAt;
+      if (d == null ||
+          d.year != date.year ||
+          d.month != date.month ||
+          d.day != date.day) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Solicitudes que el Dashboard ya pinta pero que el backend todavía no
+  /// devuelve en el listado. Sin esto la pantalla muestra menos visitas que el
+  /// Home y el cliente cree que su solicitud se perdió.
+  ///
+  /// Se descartan las que el backend ya devolvió (mismo id) para no duplicar.
+  List<ScheduledVisit> _localVisits(List<Map<String, dynamic>> backendVisits) {
+    final backendIds = backendVisits
+        .map((data) => (data['id'] ?? data['serviceRequestId'])?.toString())
+        .whereType<String>()
+        .toSet();
+    return DHCLIENTHomepageWidget.upcomingVisits
+        .where((v) => v.id == null || !backendIds.contains(v.id))
+        .where(_matchesLocalFilters)
+        .toList();
   }
 
   Future<void> _pickDate() async {
@@ -230,24 +185,18 @@ class _DHCLIENTProximasVisitasListaWidgetState
     final address = data['address'];
     DHCLIENTCasaAWidget.requestData = data;
     DHCLIENTCasaAWidget.houseName = (address is Map
-            ? _str(address['name']) ??
-                _str(address['label']) ??
-                _str(address['nickname']) ??
-                _str(address['alias'])
+            ? srString(address['name']) ??
+                srString(address['label']) ??
+                srString(address['nickname']) ??
+                srString(address['alias'])
             : null) ??
         'Casa A';
-    // Modo consulta (UI Security): a diferencia de la pantalla de confirmación
-    // inicial —que se abre desde el Dashboard— este listado es estrictamente un
-    // registro, así que el detalle se abre SIN el botón "Aceptar" y sin edición
-    // de campos. `alreadyConfirmed` es la bandera con la que
-    // [DHCLIENTCasaAWidget] oculta ese botón; confirmar la visita sigue siendo
-    // posible desde el Dashboard.
-    // TODO: cuando exista, reemplazar por una bandera propia de solo lectura en
-    // [DHCLIENTCasaAWidget] (Ej: `consultationMode`), para no sobrecargar la
-    // semántica de "ya confirmada".
-    DHCLIENTCasaAWidget.alreadyConfirmed = true;
-    // La tarjeta del asociado se muestra/oculta dentro del detalle según el
-    // estatus de la solicitud (Programada → perfil; Pendiente → placeholder).
+    // Modo consulta: este listado es un registro, no el flujo de confirmación,
+    // así que el detalle nunca muestra el botón "Aceptar". La tarjeta del
+    // asociado se muestra/oculta dentro del detalle según el estatus.
+    final id = srId(data);
+    DHCLIENTCasaAWidget.readOnly = true;
+    DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
         .then((_) => safeSetState(() {}));
@@ -289,10 +238,13 @@ class _DHCLIENTProximasVisitasListaWidgetState
                               child: CircularProgressIndicator());
                         }
                         final response = snapshot.data!;
+                        // El parser corre sobre `jsonBody`: pasarle el
+                        // ApiCallResponse deja a JsonPath sin nada que recorrer
+                        // y devuelve null en silencio (listado siempre vacío).
                         final rawList = response.succeeded
                             ? (DOVIAAPIDoviaHomeContextGroup
                                     .listServiceRequestsCall
-                                    .requestsList(response) ??
+                                    .requestsList(response.jsonBody) ??
                                 [])
                             : [];
                         final visits = rawList
@@ -300,17 +252,24 @@ class _DHCLIENTProximasVisitasListaWidgetState
                             .map((e) => Map<String, dynamic>.from(e))
                             .toList();
 
-                        // Las opciones de los filtros se arman solo con las
-                        // próximas visitas: ofrecer un tipo o un estatus que
-                        // solo existe entre las finalizadas daría siempre un
-                        // resultado vacío.
-                        final upcoming = visits.where(_isUpcoming).toList();
+                        // Las opciones salen de las visitas próximas (no de las
+                        // finalizadas, que este listado no muestra) y no
+                        // dependen del resto de filtros, para que el desplegable
+                        // no se vacíe al filtrar.
                         final typeOptions = <String>{
                           _allOption,
-                          for (final v in upcoming) _serviceName(v),
+                          for (final v in DHCLIENTHomepageWidget.upcomingVisits)
+                            v.service,
+                          for (final v in visits)
+                            if (_isUpcoming(v)) srServiceName(v),
                         }.toList();
 
                         final filtered = _applyFilters(visits);
+                        final localVisits = _localVisits(visits);
+                        final hasAnyVisit = visits.isNotEmpty ||
+                            DHCLIENTHomepageWidget.upcomingVisits.isNotEmpty;
+                        final hasResults =
+                            filtered.isNotEmpty || localVisits.isNotEmpty;
 
                         return SingleChildScrollView(
                           padding: const EdgeInsetsDirectional.fromSTEB(
@@ -318,36 +277,53 @@ class _DHCLIENTProximasVisitasListaWidgetState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFilters(
-                                  typeOptions, _statusOptions(upcoming)),
+                              _buildFilters(typeOptions),
                               const SizedBox(height: 20.0),
-                              if (!response.succeeded)
+                              if (!response.succeeded && !hasAnyVisit)
                                 _emptyState(
                                     'No se pudieron cargar tus servicios.')
-                              else if (visits.isEmpty)
+                              else if (!hasAnyVisit)
                                 _emptyState(
                                     'Aún no tienes servicios solicitados.')
-                              else if (filtered.isEmpty)
+                              else if (!hasResults)
                                 _emptyState(_hasActiveFilters
                                     ? 'No hay servicios que coincidan con los filtros.'
                                     : 'Aún no tienes próximas visitas.')
-                              else
-                                ...filtered.map(
-                                  (data) => Padding(
+                              else ...[
+                                // Recién solicitadas: el Dashboard ya las
+                                // muestra. No abren detalle porque todavía no
+                                // existe el registro en el backend.
+                                ...localVisits.map(
+                                  (visit) => Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12.0),
+                                    child: DHCLIENTProximasVisitasWidget(
+                                      title: visit.service,
+                                      date: '${visit.date} · ${visit.time}',
+                                      status: visit.status,
+                                      isEmergency: visit.isEmergency,
+                                    ),
+                                  ),
+                                ),
+                                ...filtered.map((data) {
+                                  final status = _statusLabel(data);
+                                  return Padding(
                                     padding:
                                         const EdgeInsets.only(bottom: 12.0),
                                     child: InkWell(
                                       onTap: () => _openDetail(data),
                                       borderRadius: BorderRadius.circular(14.0),
                                       child: DHCLIENTProximasVisitasWidget(
-                                        title: _serviceName(data),
-                                        date: _formattedDate(data),
-                                        status: _statusLabel(data),
-                                        showRedDot: _statusLabel(data) == 'Confirmar',
+                                        title: srServiceName(data),
+                                        date: srFormattedDate(data),
+                                        status: status,
+                                        isEmergency: srIsEmergency(data),
+                                        showRedDot: status == 'Confirmar',
                                       ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                }),
+                              ],
                             ],
                           ),
                         );
@@ -437,7 +413,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
     );
   }
 
-  Widget _buildFilters(List<String> typeOptions, List<String> statusOptions) {
+  Widget _buildFilters(List<String> typeOptions) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -456,7 +432,16 @@ class _DHCLIENTProximasVisitasListaWidgetState
         _dropdown(
           controller: _model.statusController ??=
               FormFieldController<String>(_model.statusFilter),
-          options: statusOptions,
+          // Mismas etiquetas que devuelve [_statusLabel] para las solicitudes
+          // no finalizadas, para que toda tarjeta visible sea filtrable.
+          options: const [
+            _allOption,
+            'Pendiente',
+            kPendingQuoteStatusLabel,
+            'Confirmar',
+            'Programada',
+            'En progreso',
+          ],
           hint: 'Selecciona el tipo',
           onChanged: (val) => safeSetState(() => _model.statusFilter = val),
         ),

@@ -262,6 +262,15 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
       return;
     }
 
+    if (nextRoute == DHCLIENTAgendaWidget.routeName) {
+      DHCLIENTAgendaWidget.verifiedAddressId = addressId;
+      DHCLIENTAgendaWidget.verifiedAddressLabel = label;
+      // Vuelve a la Agenda, que quedó en la pila esperando el lugar del
+      // servicio para poder crear la solicitud.
+      context.safePop();
+      return;
+    }
+
     if (nextRoute != null) {
       context.pushNamed(nextRoute);
     } else {

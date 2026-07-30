@@ -1,5 +1,6 @@
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
+import '/dovia_home_client/service_request_fields.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -33,12 +34,18 @@ class ScheduledVisit {
     this.status = 'Pendiente',
     this.isEmergency = false,
     this.id,
+    this.scheduledAt,
   });
 
   final String service;
   final String date;
   final String time;
   final String status;
+
+  /// Fecha agendada como dato (no como texto). [date] es solo la etiqueta que
+  /// se pinta; esta es la que usan los filtros por fecha del listado completo.
+  /// Null cuando la solicitud aún no tiene fecha (Ej: cotización en evaluación).
+  final DateTime? scheduledAt;
 
   /// Solicitud de emergencia: la tarjeta muestra un indicador visual de alta
   /// prioridad para que la red de Home Associates la tome de inmediato.
@@ -188,42 +195,25 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   void _openServiceDetail(String serviceTitle) {
     DHCLIENTInstalacionWidget.serviceTitle = serviceTitle;
     DHCLIENTInstalacionWidget.alcanzables = [];
+    // Solicitud nueva: descarta el levantamiento de una anterior sin enviar.
+    DHCLIENTInstalacionWidget.resetDraft();
     context.pushNamed(DHCLIENTInstalacionWidget.routeName);
   }
 
   String? _str(dynamic v) =>
       (v is String && v.trim().isNotEmpty) ? v.trim() : null;
 
-  /// Mapea el estatus del backend (enum PENDING/TAKEN/IN_PROGRESS/FINISHED) a la
-  /// etiqueta que ve el cliente en la tarjeta de "Próximas visitas". Sin que
-  /// ningún Home Associate haya tomado el trabajo es "Pendiente"; cuando alguien
-  /// lo toma queda "Programada".
-  String _visitStatusLabel(String status, String id) {
-    if (status.toUpperCase() == 'TAKEN' && !DHCLIENTHomepageWidget.confirmedVisitIds.contains(id)) {
-      return 'Confirmar';
-    }
-    final upper = status.toUpperCase();
-    // Familia de estatus del flujo de cotización (Ej: QUOTE_QUOTING): la
-    // solicitud está en manos de la red de proveedores esperando propuestas.
-    if (upper.startsWith('QUOTE')) {
-      return DHCLIENTCotizacionWidget.pendingQuoteStatus;
-    }
-    switch (upper) {
-      case 'TAKEN':
-        return 'Programada';
-      case 'IN_PROGRESS':
-        return 'En progreso';
-      case 'FINISHED':
-        return 'Finalizada';
-      case 'PENDING':
-      default:
-        return 'Pendiente';
-    }
-  }
+  /// Etiqueta que ve el cliente en la tarjeta de "Próximas visitas". El mapeo
+  /// contra el payload real vive en [service_request_fields.dart], compartido
+  /// con el listado completo para que la misma solicitud se pinte igual en
+  /// ambas pantallas.
+  String _visitStatusLabel(Map<String, dynamic> data) =>
+      srStatusLabel(data, DHCLIENTHomepageWidget.confirmedVisitIds);
 
-  /// Abre la pantalla de detalle (Casa A) en **modo consulta** (solo lectura,
-  /// sin botón "Aceptar") con los datos de la solicitud. Al volver refresca el
-  /// Dashboard.
+  /// Abre la pantalla de detalle (Casa A) con los datos de la solicitud. Los
+  /// campos son de solo lectura; el botón "Aceptar" aparece únicamente cuando
+  /// hay una visita tomada por un asociado pendiente de confirmar. Al volver
+  /// refresca el Dashboard.
   void _openVisitDetail(Map<String, dynamic> data) {
     final address = data['address'];
     DHCLIENTCasaAWidget.requestData = data;
@@ -235,6 +225,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             : null) ??
         'Casa A';
     final id = (data['id'] ?? data['serviceRequestId'])?.toString() ?? '';
+    // Desde el Dashboard sí se confirma la visita (no es modo consulta).
+    DHCLIENTCasaAWidget.readOnly = false;
     DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
@@ -989,7 +981,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             }
                             final rawVisits = DOVIAAPIDoviaHomeContextGroup
                                     .listServiceRequestsCall
-                                    .requestsList(response) ??
+                                    .requestsList(response.jsonBody) ??
                                 [];
                             // Ids ya pintados de forma optimista al volver de
                             // crear la solicitud: no se repiten desde el backend.
@@ -1003,11 +995,10 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             final visits = rawVisits
                                 .whereType<Map>()
                                 .map((e) => Map<String, dynamic>.from(e))
-                                .where((data) => !optimisticIds.contains(
-                                    (data['id'] ?? data['serviceRequestId'])
-                                        ?.toString()))
                                 .where((data) =>
-                                    ((data['status'] as String?) ?? 'PENDING')
+                                    !optimisticIds.contains(srId(data)))
+                                .where((data) =>
+                                    (srString(data['status']) ?? 'PENDING')
                                         .toUpperCase() !=
                                     'FINISHED')
                                 .take(2)
@@ -1019,17 +1010,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
 
                             return Column(
                               children: visits.map((data) {
-                                final title = data['serviceName'] ?? 'Servicio';
-                                // Obtener fecha del appointment o del createdAt
-                                final apt = data['appointment'];
-                                final dateStr = (apt != null && apt['scheduledAt'] != null)
-                                    ? apt['scheduledAt'] as String
-                                    : (data['createdAt'] as String? ?? '');
-                                final date = dateStr.isNotEmpty ? dateStr.split('T').first : 'Fecha pendiente';
-                                final status = (data['status'] as String?) ?? 'PENDING';
-                                final id = (data['id'] ?? data['serviceRequestId'])
-                                        ?.toString() ??
-                                    '';
+                                final id = srId(data);
+                                final status = _visitStatusLabel(data);
 
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 10.0),
@@ -1039,10 +1021,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                         : null,
                                     borderRadius: BorderRadius.circular(14.0),
                                     child: DHCLIENTProximasVisitasWidget(
-                                      title: title,
-                                      date: date,
-                                      status: _visitStatusLabel(status, id),
-                                      showRedDot: _visitStatusLabel(status, id) == 'Confirmar',
+                                      title: srServiceName(data),
+                                      date: srFormattedDate(data),
+                                      status: status,
+                                      isEmergency: srIsEmergency(data),
+                                      showRedDot: status == 'Confirmar',
                                     ),
                                   ),
                                 );
@@ -1108,7 +1091,10 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             if (!response.succeeded) {
                               return const SizedBox.shrink();
                             }
-                            final visits = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.requestsList(response) ?? [];
+                            final visits = DOVIAAPIDoviaHomeContextGroup
+                                    .listServiceRequestsCall
+                                    .requestsList(response.jsonBody) ??
+                                [];
                             if (visits.isEmpty) {
                               return const SizedBox.shrink();
                             }

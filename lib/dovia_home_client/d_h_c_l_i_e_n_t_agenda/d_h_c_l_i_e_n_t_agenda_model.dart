@@ -23,6 +23,8 @@ class DHCLIENTAgendaModel extends FlutterFlowModel<DHCLIENTAgendaWidget> {
   // Índices seleccionados en el selector de hora (franja + AM/PM).
   int selectedSlotIndex = 1;
   int selectedPeriodIndex = 0;
+  // Envío de la solicitud en curso: bloquea el botón para no crearla dos veces.
+  bool isSubmitting = false;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.
