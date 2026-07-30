@@ -30,6 +30,20 @@ class DHCLIENTInstalacionWidget extends StatefulWidget {
   /// backend; si viene vacío se muestran los placeholders del diseño.
   static List<String> alcanzables = [];
 
+  /// Levantamiento del trabajo (descripción + fotos) que viaja hasta la pantalla
+  /// de Agenda, donde recién se crea la solicitud en el backend (el POST
+  /// necesita la fecha, que se elige allí). Se usan campos estáticos por la
+  /// misma razón que [serviceTitle]: go_router navega solo por nombre.
+  static String description = '';
+  static List<FFUploadedFile> photos = [];
+
+  /// Limpia el levantamiento anterior. Se llama al iniciar una solicitud nueva
+  /// y al terminar de enviarla, para que no se filtre entre solicitudes.
+  static void resetDraft() {
+    description = '';
+    photos = [];
+  }
+
   @override
   State<DHCLIENTInstalacionWidget> createState() =>
       _DHCLIENTInstalacionWidgetState();
@@ -500,6 +514,13 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                             child: FFButtonWidget(
                               onPressed: _canContinue
                                   ? () async {
+                                      // El levantamiento viaja al paso de
+                                      // Agenda, que es donde se crea la
+                                      // solicitud en el backend.
+                                      DHCLIENTInstalacionWidget.description =
+                                          _model.textController!.text.trim();
+                                      DHCLIENTInstalacionWidget.photos =
+                                          List.of(_model.uploadedPhotos);
                                       context.pushNamed(
                                           DHCLIENTValorVisitaPageWidget
                                               .routeName);

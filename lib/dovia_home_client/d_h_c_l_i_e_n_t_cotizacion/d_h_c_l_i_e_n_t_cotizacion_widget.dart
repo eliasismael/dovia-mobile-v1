@@ -1,6 +1,7 @@
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
+import '/dovia_home_client/service_request_fields.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -36,8 +37,10 @@ class DHCLIENTCotizacionWidget extends StatefulWidget {
   static String routeName = 'DH_CLIENT_Cotizacion';
   static String routePath = '/dHCLIENTCotizacion';
 
-  /// Estatus con el que la solicitud aparece en el Dashboard tras enviarse.
-  static const String pendingQuoteStatus = 'Pendiente de Cotización';
+  /// Estatus con el que la solicitud aparece en el Dashboard tras enviarse. Es
+  /// la misma etiqueta que las pantallas derivan del `subStatus` que devuelve el
+  /// backend, para que la tarjeta optimista y la del listado coincidan.
+  static const String pendingQuoteStatus = kPendingQuoteStatusLabel;
 
   /// Dirección devuelta por el flujo de "Otra ubicación" ([DHCLIENTUbicacionWidget])
   /// una vez que pasó el Coverage Check. Se usan campos estáticos porque
@@ -326,7 +329,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
         0,
         ScheduledVisit(
           id: serviceRequestId,
-          service: 'Solicitud de cotización',
+          service: kQuoteRequestTitle,
           date: 'En evaluación',
           time: 'proveedores DOVIA',
           status: DHCLIENTCotizacionWidget.pendingQuoteStatus,

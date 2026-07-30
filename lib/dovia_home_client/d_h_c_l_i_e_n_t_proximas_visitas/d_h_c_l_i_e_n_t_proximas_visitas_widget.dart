@@ -61,7 +61,8 @@ class _DHCLIENTProximasVisitasWidgetState
   /// Color de fondo de la píldora de estatus según el label.
   /// - "Confirmar" / "Reportado" → rojo
   /// - "Finalizada" → verde
-  /// - resto (p. ej. "Pendiente", "Programada") → ámbar
+  /// - "Pendiente" (nadie tomó el trabajo) → naranja/salmón (diseño)
+  /// - resto (p. ej. "Programada") → ámbar
   Color get _pillBackgroundColor {
     switch (widget.status) {
       case 'Confirmar':
@@ -69,6 +70,8 @@ class _DHCLIENTProximasVisitasWidgetState
         return const Color(0xFFFFE5E5);
       case 'Finalizada':
         return const Color(0xFFDCF5E3);
+      case 'Pendiente':
+        return const Color(0xFFFFE3D2);
       default:
         return const Color(0xFFFDECC8);
     }
@@ -81,6 +84,8 @@ class _DHCLIENTProximasVisitasWidgetState
         return Colors.red;
       case 'Finalizada':
         return const Color(0xFF1E7A46);
+      case 'Pendiente':
+        return const Color(0xFFC2410C);
       default:
         return const Color(0xFF9A6700);
     }

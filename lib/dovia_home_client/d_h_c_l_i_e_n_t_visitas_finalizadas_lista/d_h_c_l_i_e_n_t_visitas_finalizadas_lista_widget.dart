@@ -249,10 +249,13 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
                               child: CircularProgressIndicator());
                         }
                         final response = snapshot.data!;
+                        // El parser corre sobre `jsonBody`: pasarle el
+                        // ApiCallResponse deja a JsonPath sin nada que recorrer
+                        // y devuelve null en silencio (listado siempre vacío).
                         final rawList = response.succeeded
                             ? (DOVIAAPIDoviaHomeContextGroup
                                     .listServiceRequestsCall
-                                    .requestsList(response) ??
+                                    .requestsList(response.jsonBody) ??
                                 [])
                             : [];
                         final visits = rawList
