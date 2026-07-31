@@ -232,6 +232,23 @@ String asrLongDate(Map<String, dynamic> data) {
       '${scheduled.year}';
 }
 
+/// Mes al que pertenece la solicitud, como clave ordenable (`2026-08`).
+///
+/// Null cuando la solicitud no tiene ninguna fecha: no se la puede agrupar, así
+/// que queda fuera de cualquier filtro de mes en vez de caer en uno arbitrario.
+String? asrMonthKey(Map<String, dynamic> data) {
+  final date = asrFilterDate(data);
+  if (date == null) return null;
+  return '${date.year}-${_two(date.month)}';
+}
+
+/// Etiqueta del mes para el filtro de fecha (`Agosto 2026`).
+String? asrMonthLabel(Map<String, dynamic> data) {
+  final date = asrFilterDate(data);
+  if (date == null) return null;
+  return '${_monthsEs[date.month - 1]} ${date.year}';
+}
+
 /// Hora de la visita (`Hora: HH:mm`). Una emergencia sin hora agendada se
 /// atiende cuanto antes, así que se dice eso en vez de inventar una hora.
 String asrTimeLabel(Map<String, dynamic> data) {

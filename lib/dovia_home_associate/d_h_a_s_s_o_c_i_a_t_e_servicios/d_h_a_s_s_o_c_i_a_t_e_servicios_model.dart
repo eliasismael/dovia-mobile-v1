@@ -1,3 +1,4 @@
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
@@ -12,15 +13,55 @@ class DHASSOCIATEServiciosModel
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
+  // Model for DH_ASSOCIATE_Header component.
+  late DHASSOCIATEHeaderModel dHASSOCIATEHeaderModel;
+
+  /// Categoría elegida para la solicitud. Es un único id y no un set: el flujo
+  /// exige "1 formulario por especialización", así que el selector se comporta
+  /// como un radio button.
+  String? selectedCategoryId;
+
+  // State field(s) for the "experiencia" TextField.
+  FocusNode? experienceFocusNode;
+  TextEditingController? experienceController;
+  String? Function(BuildContext, String?)? experienceControllerValidator;
+
+  /// Certificado o título de respaldo. Uno solo, por la misma regla de "1
+  /// formulario por especialización".
+  FFUploadedFile? certificate;
+  bool isPickingCertificate = false;
+
+  /// Evita reenvíos mientras el POST está en vuelo.
+  bool isSubmitting = false;
+
+  /// Categorías que este asociado ya solicitó **en esta sesión**. Se atenúan en
+  /// el selector para que no mande dos veces la misma solicitud apenas ve el
+  /// modal de éxito: la categoría no sale del catálogo hasta que el Backoffice
+  /// aprueba, así que sin esto seguiría tappable.
+  ///
+  /// Es memoria de pantalla, no estado del servidor: al recargar vuelve a
+  /// aparecer habilitada. La defensa definitiva contra duplicados es del
+  /// backend.
+  final Set<String> requestedCategoryIds = {};
+
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_ASSOCIATE_Navbar component.
   late DHASSOCIATENavbarModel dHASSOCIATENavbarModel;
 
+  /// Deja el formulario como recién abierto, después de un envío exitoso.
+  void resetForm() {
+    selectedCategoryId = null;
+    experienceController?.clear();
+    certificate = null;
+  }
+
   @override
   void initState(BuildContext context) {
     cornerGradientBackgroundModel =
         createModel(context, () => CornerGradientBackgroundModel());
+    dHASSOCIATEHeaderModel =
+        createModel(context, () => DHASSOCIATEHeaderModel());
     fixedDoviaIconModel = createModel(context, () => FixedDoviaIconModel());
     dHASSOCIATENavbarModel =
         createModel(context, () => DHASSOCIATENavbarModel());
@@ -29,6 +70,10 @@ class DHASSOCIATEServiciosModel
   @override
   void dispose() {
     cornerGradientBackgroundModel.dispose();
+    dHASSOCIATEHeaderModel.dispose();
+    experienceFocusNode?.dispose();
+    experienceController?.dispose();
+
     fixedDoviaIconModel.dispose();
     dHASSOCIATENavbarModel.dispose();
   }

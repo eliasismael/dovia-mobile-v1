@@ -58,7 +58,24 @@
       "PowerShell(flutter analyze --no-pub)",
       "Bash(echo \"--- exit: $? ---\")",
       "Bash(grep -n \"data.items\\\\|\\\\$.data\\\\b\\\\|r'''\\\\\\\\\\\\$\\\\.data\" lib/backend/api_requests/api_dovia_home.dart)",
-      "Bash(dart run *)"
+      "Bash(dart run *)",
+      "mcp__Figma__get_design_context",
+      "mcp__Figma__get_screenshot",
+      "mcp__Figma__get_metadata",
+      "mcp__Figma__get_variable_defs",
+      "Bash(grep -rn \"formatNumber\\\\|NumberFormat\\\\|'Q'\\\\|\\\\\\\\\\\\$ \\\\|currency\" lib/dovia_home_client/*/*.dart)",
+      "Bash(grep -n \"text: '\\\\|'Dirección\\\\|'Hora\\\\|Text\\(\\\\s*$\" lib/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_tu_trabajo/d_h_a_s_s_o_c_i_a_t_e_tu_trabajo_widget.dart)",
+      "Bash(grep -n \"'.\\\\{3,60\\\\}',\" lib/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_tu_trabajo/d_h_a_s_s_o_c_i_a_t_e_tu_trabajo_widget.dart)",
+      "PowerShell(dart analyze lib 2>&1)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(sort -u -t: -k2)",
+      "Bash(awk -F: '{print $2}')",
+      "PowerShell(flutter analyze lib/dovia_home_associate lib/backend/api_requests/api_associate_specialties.dart)",
+      "PowerShell(flutter analyze --no-pub 2>&1)",
+      "PowerShell($OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dart analyze)",
+      "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dart analyze 2>&1 | Select-String -Pattern \"d_h_a_s_s_o_c_i_a_t_e_servicios|api_associate_specialties|associate_service_categories\")",
+      "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dart format lib/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_servicios lib/dovia_home_associate/associate_service_categories.dart lib/backend/api_requests/api_associate_specialties.dart)"
     ]
   }
 }

@@ -75,9 +75,9 @@ String _iconFor(String? code, String label) =>
 /// en false). El endpoint responde el catálogo que el backend expone al usuario
 /// autenticado, así que ese flag es hoy la única señal de habilitación.
 ///
-/// TODO: cuando exista el endpoint de especialidades del asociado, cruzar este
-/// listado contra sus categorías aprobadas en vez de confiar sólo en el flag del
-/// catálogo.
+/// Este listado es el catálogo **completo** de la plataforma. Para separar lo
+/// que el asociado ya tiene aprobado de lo que todavía puede pedir, cruzarlo
+/// contra [parseApprovedSpecialtyKeys] con [categoryIsApproved].
 List<AssociateServiceCategory> parseAssociateCategories(List<dynamic> raw) {
   final categories = <AssociateServiceCategory>[];
   for (final item in raw) {
@@ -102,6 +102,82 @@ List<AssociateServiceCategory> parseAssociateCategories(List<dynamic> raw) {
   }
   return categories;
 }
+
+/// Estados de una especialidad que **no** habilitan a operar: una solicitud en
+/// auditoría o rechazada no es una especialidad aprobada, y pintarla entre los
+/// "Servicios actuales" le haría creer al asociado que ya puede tomar esos
+/// trabajos.
+///
+/// Se compara por lista negra y no por lista blanca a propósito: si el endpoint
+/// devuelve un estado nuevo que no conocemos, o directamente no manda `status`
+/// (ya devuelve sólo las aprobadas), la especialidad cuenta como aprobada. El
+/// caso opuesto —esconder una especialidad real— dejaría al asociado pidiendo
+/// de nuevo algo que ya tiene.
+const Set<String> _kUnapprovedStatuses = {
+  'PENDING',
+  'IN_REVIEW',
+  'REJECTED',
+  'REVOKED',
+  'EXPIRED',
+  'INACTIVE',
+};
+
+/// Claves normalizadas de las especialidades **aprobadas** del asociado, tal
+/// como las devuelve `GET /dovia-home/associate/specialties`.
+///
+/// Se guardan todas las referencias que trae cada ítem (id de catálogo, código
+/// y etiqueta) porque no está confirmado con cuál de las tres apunta el payload
+/// a la categoría; alcanza con que una coincida ([categoryIsApproved]).
+Set<String> parseApprovedSpecialtyKeys(List<dynamic> raw) {
+  final keys = <String>{};
+  for (final item in raw) {
+    // Un listado de strings sueltos (Ej: ["PLUMBING"]) también es válido.
+    if (item is String) {
+      if (item.trim().isNotEmpty) keys.add(_key(item));
+      continue;
+    }
+    if (item is! Map) continue;
+    final data = Map<String, dynamic>.from(item);
+
+    final status = asrString(data['status']) ?? asrString(data['state']);
+    if (status != null && _kUnapprovedStatuses.contains(status.toUpperCase())) {
+      continue;
+    }
+
+    // El servicio puede venir plano o anidado, igual que en el marketplace.
+    final service = data['service'] is Map
+        ? Map<String, dynamic>.from(data['service'] as Map)
+        : (data['serviceDetail'] is Map
+            ? Map<String, dynamic>.from(data['serviceDetail'] as Map)
+            : const <String, dynamic>{});
+
+    for (final candidate in [
+      data['serviceId'],
+      data['id'],
+      data['code'],
+      data['label'],
+      data['name'],
+      service['id'],
+      service['code'],
+      service['label'],
+      service['name'],
+    ]) {
+      final value = asrString(candidate);
+      if (value != null) keys.add(_key(value));
+    }
+  }
+  return keys;
+}
+
+/// ¿El asociado ya está aprobado para operar esta categoría? Se cruza por id de
+/// catálogo, por código y por etiqueta normalizada.
+bool categoryIsApproved(
+  AssociateServiceCategory category,
+  Set<String> approvedKeys,
+) =>
+    approvedKeys.contains(_key(category.id)) ||
+    approvedKeys.contains(_key(category.code)) ||
+    approvedKeys.contains(_key(category.label));
 
 /// ¿La solicitud pertenece a la categoría seleccionada? Compara por código de
 /// catálogo y, si el payload no lo trae, por etiqueta.
