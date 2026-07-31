@@ -1,3 +1,4 @@
+import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -16,6 +17,12 @@ class DHASSOCIATETuTrabajoWidget extends StatefulWidget {
 
   static String routeName = 'DH_ASSOCIATE_TuTrabajo';
   static String routePath = '/dHASSOCIATETuTrabajo';
+
+  /// Solicitud que el asociado abrió desde su agenda ("Próximos trabajos").
+  /// Se fija antes de navegar; null cuando se entra a la pantalla sin haber
+  /// elegido un trabajo, en cuyo caso el encabezado queda con el placeholder
+  /// del diseño.
+  static Map<String, dynamic>? requestData;
 
   @override
   State<DHASSOCIATETuTrabajoWidget> createState() =>
@@ -50,6 +57,22 @@ class _DHASSOCIATETuTrabajoWidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Resumen del trabajo que el asociado abrió desde su agenda: título, cuándo
+  /// es la visita y cuánto va a cobrar. Sin solicitud seleccionada se mantiene
+  /// el placeholder del diseño.
+  String _summaryLine(int index) {
+    final data = DHASSOCIATETuTrabajoWidget.requestData;
+    if (data == null) return 'x\n';
+    switch (index) {
+      case 0:
+        return '${asrServiceName(data)}\n';
+      case 1:
+        return '${asrLongDate(data)} · ${asrTimeLabel(data)}\n';
+      default:
+        return '${asrPayoutLabel(data)}\n';
+    }
   }
 
   @override
@@ -299,7 +322,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                           text: TextSpan(
                                             children: [
                                               TextSpan(
-                                                text: 'x\n',
+                                                text: _summaryLine(0),
                                                 style: FlutterFlowTheme.of(
                                                         context)
                                                     .bodyMedium
@@ -335,7 +358,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                     ),
                                               ),
                                               TextSpan(
-                                                text: 'x\n',
+                                                text: _summaryLine(1),
                                                 style: FlutterFlowTheme.of(
                                                         context)
                                                     .bodyMedium
@@ -365,7 +388,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                     ),
                                               ),
                                               TextSpan(
-                                                text: 'x\n',
+                                                text: _summaryLine(2),
                                                 style: FlutterFlowTheme.of(
                                                         context)
                                                     .bodyMedium

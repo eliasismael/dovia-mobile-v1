@@ -69,7 +69,7 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
               hoverColor: Colors.transparent,
               highlightColor: Colors.transparent,
               onTap: () async {
-                context.pushNamed(DHASSOCIATEBienvenidaWidget.routeName);
+                context.pushNamed(DHASSOCIATEHomePageWidget.routeName);
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),

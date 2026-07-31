@@ -32,6 +32,10 @@ export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_ajustes/d_h_a_s_s_o_c_i_a_t_
     show DHASSOCIATEAjustesWidget;
 export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_home_page/d_h_a_s_s_o_c_i_a_t_e_home_page_widget.dart'
     show DHASSOCIATEHomePageWidget;
+export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajos_disponibles/d_h_a_s_s_o_c_i_a_t_e_trabajos_disponibles_widget.dart'
+    show DHASSOCIATETrabajosDisponiblesWidget;
+export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_proximos_trabajos/d_h_a_s_s_o_c_i_a_t_e_proximos_trabajos_widget.dart'
+    show DHASSOCIATEProximosTrabajosWidget;
 export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_tu_trabajo/d_h_a_s_s_o_c_i_a_t_e_tu_trabajo_widget.dart'
     show DHASSOCIATETuTrabajoWidget;
 export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar_widget.dart'

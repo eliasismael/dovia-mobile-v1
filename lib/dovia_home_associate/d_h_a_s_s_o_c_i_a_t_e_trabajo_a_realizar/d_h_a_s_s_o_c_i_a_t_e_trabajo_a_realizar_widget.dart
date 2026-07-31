@@ -1,3 +1,4 @@
+import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -15,6 +16,11 @@ class DHASSOCIATETrabajoARealizarWidget extends StatefulWidget {
 
   static String routeName = 'DH_ASSOCIATE_TrabajoARealizar';
   static String routePath = '/dHASSOCIATETrabajoARealizar';
+
+  /// Oportunidad que el asociado abrió desde la bolsa de trabajos disponibles.
+  /// Se fija antes de navegar; null cuando se entra sin haber elegido una, en
+  /// cuyo caso el encabezado queda con el placeholder del diseño.
+  static Map<String, dynamic>? requestData;
 
   @override
   State<DHASSOCIATETrabajoARealizarWidget> createState() =>
@@ -40,6 +46,23 @@ class _DHASSOCIATETrabajoARealizarWidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Resumen de la oportunidad que el asociado abrió desde la bolsa: título,
+  /// cuándo pide la visita el cliente y cuánto va a cobrar neto. La ubicación
+  /// sigue siendo sólo la zona: la dirección exacta se revela recién cuando
+  /// toma el trabajo.
+  String _summaryLine(int index) {
+    final data = DHASSOCIATETrabajoARealizarWidget.requestData;
+    if (data == null) return 'x\n';
+    switch (index) {
+      case 0:
+        return '${asrServiceName(data)}\n';
+      case 1:
+        return '${asrLongDate(data)} · ${asrTimeLabel(data)}\n';
+      default:
+        return '${asrZoneLabel(data)} · ${asrPayoutLabel(data)}\n';
+    }
   }
 
   @override
@@ -135,7 +158,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                         text: TextSpan(
                                           children: [
                                             TextSpan(
-                                              text: 'x\n',
+                                              text: _summaryLine(0),
                                               style:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
@@ -171,7 +194,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                                       ),
                                             ),
                                             TextSpan(
-                                              text: 'x\n',
+                                              text: _summaryLine(1),
                                               style:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
@@ -201,7 +224,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                                       ),
                                             ),
                                             TextSpan(
-                                              text: 'x\n',
+                                              text: _summaryLine(2),
                                               style:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium

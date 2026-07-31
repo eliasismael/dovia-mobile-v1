@@ -175,6 +175,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const DHASSOCIATEHomePageWidget(),
         ),
         FFRoute(
+          name: DHASSOCIATETrabajosDisponiblesWidget.routeName,
+          path: DHASSOCIATETrabajosDisponiblesWidget.routePath,
+          builder: (context, params) =>
+              const DHASSOCIATETrabajosDisponiblesWidget(),
+        ),
+        FFRoute(
+          name: DHASSOCIATEProximosTrabajosWidget.routeName,
+          path: DHASSOCIATEProximosTrabajosWidget.routePath,
+          builder: (context, params) =>
+              const DHASSOCIATEProximosTrabajosWidget(),
+        ),
+        FFRoute(
           name: DHASSOCIATETuTrabajoWidget.routeName,
           path: DHASSOCIATETuTrabajoWidget.routePath,
           builder: (context, params) => const DHASSOCIATETuTrabajoWidget(),

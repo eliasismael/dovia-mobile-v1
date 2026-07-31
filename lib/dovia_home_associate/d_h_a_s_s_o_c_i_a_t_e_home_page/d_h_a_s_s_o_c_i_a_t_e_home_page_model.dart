@@ -11,6 +11,16 @@ class DHASSOCIATEHomePageModel
     extends FlutterFlowModel<DHASSOCIATEHomePageWidget> {
   ///  State fields for stateful widgets in this page.
 
+  // State field(s) for the "Búsqueda con IA" TextField.
+  FocusNode? searchFocusNode;
+  TextEditingController? searchController;
+
+  /// Texto de búsqueda aplicado a los dos feeds de trabajos.
+  String searchQuery = '';
+
+  /// Categoría seleccionada en el carrusel de filtros rápidos. Null = todas.
+  String? selectedCategoryId;
+
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for FIXED_DOVIA_ICON component.
@@ -29,6 +39,8 @@ class DHASSOCIATEHomePageModel
 
   @override
   void dispose() {
+    searchFocusNode?.dispose();
+    searchController?.dispose();
     cornerGradientBackgroundModel.dispose();
     fixedDoviaIconModel.dispose();
     dHASSOCIATENavbarModel.dispose();
