@@ -155,8 +155,7 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
         onTap: () => safeSetState(() => _model.urgentOnly = value),
         borderRadius: BorderRadius.circular(24.0),
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           decoration: BoxDecoration(
             color: isSelected
                 ? FlutterFlowTheme.of(context).primary
@@ -232,8 +231,8 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
                             if (!snapshot.hasData) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40.0),
-                                child: Center(
-                                    child: CircularProgressIndicator()),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
                               );
                             }
                             final response = snapshot.data!;
@@ -242,8 +241,8 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
                                 'No pudimos cargar los trabajos disponibles. '
                                 'Intentá de nuevo en un momento.',
                                 style: GoogleFonts.inter(
-                                  color:
-                                      FlutterFlowTheme.of(context).secondaryText,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
                                   fontSize: 13.0,
                                 ),
                               );
@@ -258,8 +257,8 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
                               return Text(
                                 'No hay trabajos disponibles con estos filtros.',
                                 style: GoogleFonts.inter(
-                                  color:
-                                      FlutterFlowTheme.of(context).secondaryText,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
                                   fontSize: 13.0,
                                 ),
                               );

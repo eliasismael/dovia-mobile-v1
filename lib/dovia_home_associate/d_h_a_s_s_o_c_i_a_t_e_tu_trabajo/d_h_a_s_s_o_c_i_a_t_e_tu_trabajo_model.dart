@@ -10,6 +10,11 @@ class DHASSOCIATETuTrabajoModel
     extends FlutterFlowModel<DHASSOCIATETuTrabajoWidget> {
   ///  State fields for stateful widgets in this page.
 
+  /// Detalle completo de la visita traído del backend. Es el que trae la
+  /// dirección exacta y las instrucciones de ingreso, que el listado del
+  /// marketplace no expone.
+  Map<String, dynamic>? detail;
+
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // State field(s) for TextField widget.

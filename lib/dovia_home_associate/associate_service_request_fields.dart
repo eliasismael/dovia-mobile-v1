@@ -115,20 +115,30 @@ String? asrServiceCode(Map<String, dynamic> data) {
   ])?.toUpperCase();
 }
 
+Map<String, dynamic>? _addressOf(Map<String, dynamic> data) =>
+    _asMap(data['address']) ?? _asMap(data['serviceAddress']);
+
 /// Zona/barrio de la visita. **Nunca la calle ni el número**: en la bolsa de
 /// oportunidades el asociado todavía no tomó el trabajo, y revelar la dirección
 /// exacta de un cliente que no lo contrató es una fuga de datos. La dirección
-/// completa se ve en el detalle de la visita, después de aceptarla.
+/// completa se ve en el detalle de la visita, después de aceptarla
+/// ([asrExactAddress]).
+///
+/// `zone` viaja como string en el contrato de direcciones
+/// (`CreateServiceAddressCall`), pero se contempla también anidado por si el
+/// listado del marketplace lo expande a objeto.
 String asrZone(Map<String, dynamic> data) {
-  final address = _asMap(data['address']) ?? _asMap(data['serviceAddress']);
-  final zone = _asMap(address?['zone']) ?? _asMap(data['workableZone']);
+  final address = _addressOf(data);
+  final zoneObject = _asMap(address?['zone']) ?? _asMap(data['workableZone']);
   return _firstString([
+        address?['zone'],
         address?['zoneName'],
         address?['neighborhood'],
         address?['sector'],
-        zone?['name'],
-        zone?['label'],
+        zoneObject?['name'],
+        zoneObject?['label'],
         address?['city'],
+        data['zone'],
         data['zoneName'],
       ]) ??
       kHiddenAddressPlaceholder;
@@ -136,6 +146,57 @@ String asrZone(Map<String, dynamic> data) {
 
 /// Etiqueta de ubicación de la tarjeta, con el mismo formato del diseño.
 String asrZoneLabel(Map<String, dynamic> data) => 'Dirección: ${asrZone(data)}';
+
+/// Dirección exacta de la visita. **Sólo para el detalle de un trabajo ya
+/// tomado**: el backend la incluye recién cuando el asociado quedó asignado.
+/// Null mientras la solicitud siga en la bolsa de oportunidades.
+String? asrExactAddress(Map<String, dynamic> data) {
+  final address = _addressOf(data);
+  return _firstString([
+    address?['address'],
+    address?['fullAddress'],
+    address?['line1'],
+    data['exactAddress'],
+    data['addressLine'],
+  ]);
+}
+
+/// Instrucciones para llegar / ingresar que dejó el cliente.
+String? asrAccessInstructions(Map<String, dynamic> data) {
+  final address = _addressOf(data);
+  return _firstString([
+    address?['accessInstructions'],
+    address?['instructions'],
+    address?['reference'],
+    data['accessInstructions'],
+    data['arrivalInstructions'],
+  ]);
+}
+
+/// Estado del ciclo de vida de la solicitud (PENDING / TAKEN / IN_PROGRESS /
+/// FINISHED).
+String asrStatus(Map<String, dynamic> data) =>
+    (asrString(data['status']) ?? 'PENDING').toUpperCase();
+
+/// Estados en los que la solicitud ya tiene dueño y no se puede tomar.
+const Set<String> _kClaimedStatuses = {'TAKEN', 'IN_PROGRESS', 'FINISHED'};
+
+/// ¿La solicitud sigue libre para que el asociado se postule?
+///
+/// Se descarta por estado (ya tomada / en curso / finalizada) y por tener un
+/// asociado asignado. Deliberadamente **no** exige `status == PENDING`: un
+/// estado desconocido del backend no debería esconder el botón y dejar al
+/// asociado mirando las acciones de un trabajo que no es suyo. Si igual estaba
+/// tomada, el backend rechaza la toma y [asrIsTakeable] no es la última
+/// palabra — la toma es atómica del lado del servidor.
+bool asrIsTakeable(Map<String, dynamic> data) {
+  if (_kClaimedStatuses.contains(asrStatus(data))) return false;
+  final assigned = data['associate'] ??
+      data['assignedAssociate'] ??
+      data['homeAssociate'] ??
+      data['associateId'];
+  return assigned == null || (assigned is String && assigned.trim().isEmpty);
+}
 
 DateTime? asrScheduledAt(Map<String, dynamic> data) {
   final apt = _asMap(data['appointment']);
@@ -176,7 +237,9 @@ String asrLongDate(Map<String, dynamic> data) {
 String asrTimeLabel(Map<String, dynamic> data) {
   final scheduled = asrScheduledAt(data);
   if (scheduled == null) {
-    return asrIsEmergency(data) ? 'Hora: lo antes posible' : 'Hora: por definir';
+    return asrIsEmergency(data)
+        ? 'Hora: lo antes posible'
+        : 'Hora: por definir';
   }
   return 'Hora: ${_two(scheduled.hour)}:${_two(scheduled.minute)}';
 }

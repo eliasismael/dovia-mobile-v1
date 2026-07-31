@@ -73,8 +73,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
     super.dispose();
   }
 
-  bool _isFinished(Map<String, dynamic> data) =>
-      (asrString(data['status']) ?? 'PENDING').toUpperCase() == 'FINISHED';
+  bool _isFinished(Map<String, dynamic> data) => asrStatus(data) == 'FINISHED';
 
   List<Map<String, dynamic>> _applyFilters(List<dynamic> raw) {
     final jobs = raw
@@ -205,8 +204,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                             Checkbox(
                               value: _model.includeFinished,
                               activeColor: FlutterFlowTheme.of(context).primary,
-                              onChanged: (value) => safeSetState(
-                                  () => _model.includeFinished = value ?? false),
+                              onChanged: (value) => safeSetState(() =>
+                                  _model.includeFinished = value ?? false),
                             ),
                             Expanded(
                               child: Text(
@@ -227,8 +226,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                             if (!snapshot.hasData) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40.0),
-                                child: Center(
-                                    child: CircularProgressIndicator()),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
                               );
                             }
                             final response = snapshot.data!;
@@ -237,8 +236,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                                 'No pudimos cargar tu agenda. Intentá de nuevo '
                                 'en un momento.',
                                 style: GoogleFonts.inter(
-                                  color:
-                                      FlutterFlowTheme.of(context).secondaryText,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
                                   fontSize: 13.0,
                                 ),
                               );
@@ -253,8 +252,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                               return Text(
                                 'Todavía no tenés trabajos agendados.',
                                 style: GoogleFonts.inter(
-                                  color:
-                                      FlutterFlowTheme.of(context).secondaryText,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
                                   fontSize: 13.0,
                                 ),
                               );

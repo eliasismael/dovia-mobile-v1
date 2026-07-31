@@ -123,15 +123,13 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
         .where(asrIsWorkableByIndependent)
         .where((data) => asrMatchesQuery(data, _model.searchQuery))
         .where((data) =>
-            category == null ||
-            associateRequestMatchesCategory(data, category))
+            category == null || associateRequestMatchesCategory(data, category))
         .toList();
   }
 
   /// Agenda activa: lo que este asociado ya aceptó y todavía tiene por delante.
   /// Los trabajos finalizados salen de "Próximos trabajos".
-  bool _isUpcoming(Map<String, dynamic> data) =>
-      (asrString(data['status']) ?? 'PENDING').toUpperCase() != 'FINISHED';
+  bool _isUpcoming(Map<String, dynamic> data) => asrStatus(data) != 'FINISHED';
 
   // ---------------------------------------------------------------------------
   // Navegación.
@@ -502,10 +500,10 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                 builder: (context, snapshot) {
                   final response = snapshot.data;
                   final categories = (response != null && response.succeeded)
-                      ? parseAssociateCategories(
-                          DOVIAAPIDoviaHomeContextGroup.listCatalogServicesCall
-                                  .servicesList(response.jsonBody) ??
-                              const [])
+                      ? parseAssociateCategories(DOVIAAPIDoviaHomeContextGroup
+                              .listCatalogServicesCall
+                              .servicesList(response.jsonBody) ??
+                          const [])
                       : const <AssociateServiceCategory>[];
 
                   return SingleChildScrollView(
@@ -534,8 +532,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                   ConnectionState.waiting)
                                 const SizedBox(
                                   height: 100.0,
-                                  child:
-                                      Center(child: CircularProgressIndicator()),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
                                 )
                               else
                                 _buildCategoriesCarousel(categories),
@@ -567,9 +565,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 'Próximos trabajos',
                                 actionText: 'Ver más',
                                 onAction: () => context
-                                    .pushNamed(
-                                        DHASSOCIATEProximosTrabajosWidget
-                                            .routeName)
+                                    .pushNamed(DHASSOCIATEProximosTrabajosWidget
+                                        .routeName)
                                     .then((_) => safeSetState(_loadFeeds)),
                               ),
                               const SizedBox(height: 14.0),

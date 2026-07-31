@@ -11,6 +11,21 @@ class DHASSOCIATETrabajoARealizarModel
     extends FlutterFlowModel<DHASSOCIATETrabajoARealizarWidget> {
   ///  State fields for stateful widgets in this page.
 
+  /// Detalle fresco de la solicitud traído del backend. Reemplaza al dato que
+  /// llegó del listado en cuanto responde.
+  Map<String, dynamic>? detail;
+
+  /// Lectura del detalle en curso.
+  bool isLoadingDetail = false;
+
+  /// Postulación en curso: bloquea el botón para no tomar dos veces el mismo
+  /// trabajo con un doble tap.
+  bool isTaking = false;
+
+  /// El asociado ya tomó este trabajo en esta pantalla. Evita ofrecerle
+  /// postularse de nuevo antes de que vuelva al panel.
+  bool taken = false;
+
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DH_ASSOCIATE_Header component.

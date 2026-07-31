@@ -9,6 +9,10 @@ import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_dovia_home.dart';
+
 import 'd_h_a_s_s_o_c_i_a_t_e_tu_trabajo_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_tu_trabajo_model.dart';
 
@@ -49,7 +53,62 @@ class _DHASSOCIATETuTrabajoWidgetState
     _model.textController3 ??= TextEditingController();
     _model.textFieldFocusNode3 ??= FocusNode();
 
+    _loadDetail();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  /// Solicitud vigente: el detalle del backend si ya respondió, y mientras
+  /// tanto lo que trajo la agenda.
+  Map<String, dynamic>? get _request =>
+      _model.detail ?? DHASSOCIATETuTrabajoWidget.requestData;
+
+  /// Trae el detalle completo de la visita. Es la lectura que revela la
+  /// dirección exacta y las instrucciones de ingreso: el listado del
+  /// marketplace sólo expone la zona, porque ahí el trabajo todavía no era de
+  /// nadie.
+  Future<void> _loadDetail() async {
+    final data = DHASSOCIATETuTrabajoWidget.requestData;
+    final id = data == null ? '' : asrId(data);
+    if (id.isEmpty) return;
+
+    try {
+      final response = await DOVIAAPIDoviaHomeContextGroup
+          .getAssociateServiceRequestCall
+          .call(
+        serviceRequestId: id,
+        authToken: currentAuthenticationToken ?? '',
+      );
+      if (!mounted || !response.succeeded) return;
+
+      final detail = getJsonField(response.jsonBody, r'''$.data''');
+      if (detail is! Map) return;
+
+      safeSetState(() {
+        _model.detail = Map<String, dynamic>.from(detail);
+        _fillVisitFields();
+      });
+    } catch (_) {
+      // Sin detalle la pantalla queda con los campos vacíos y su hint; no se
+      // rompe la navegación por un fallo de red.
+    }
+  }
+
+  /// Vuelca la dirección exacta y las instrucciones de ingreso en los campos de
+  /// la pantalla. No pisa lo que el asociado haya escrito a mano.
+  void _fillVisitFields() {
+    final data = _request;
+    if (data == null) return;
+
+    final address = asrExactAddress(data);
+    if (address != null && (_model.textController1?.text ?? '').isEmpty) {
+      _model.textController1?.text = address;
+    }
+
+    final instructions = asrAccessInstructions(data);
+    if (instructions != null && (_model.textController2?.text ?? '').isEmpty) {
+      _model.textController2?.text = instructions;
+    }
   }
 
   @override
@@ -63,7 +122,7 @@ class _DHASSOCIATETuTrabajoWidgetState
   /// es la visita y cuánto va a cobrar. Sin solicitud seleccionada se mantiene
   /// el placeholder del diseño.
   String _summaryLine(int index) {
-    final data = DHASSOCIATETuTrabajoWidget.requestData;
+    final data = _request;
     if (data == null) return 'x\n';
     switch (index) {
       case 0:
