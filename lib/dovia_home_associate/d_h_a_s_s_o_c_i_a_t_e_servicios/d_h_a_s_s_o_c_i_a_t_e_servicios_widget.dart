@@ -1,7 +1,7 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_associate_specialties.dart';
-import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
+import '/dovia_home_associate/associate_specialties_loader.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -54,31 +54,13 @@ class DHASSOCIATEServiciosWidget extends StatefulWidget {
       _DHASSOCIATEServiciosWidgetState();
 }
 
-/// Catálogo ya cruzado contra las especialidades aprobadas del asociado.
-class _ServiciosData {
-  const _ServiciosData({
-    required this.approved,
-    required this.available,
-    required this.catalogFailed,
-  });
-
-  /// Categorías en las que el asociado ya opera.
-  final List<AssociateServiceCategory> approved;
-
-  /// Categorías del catálogo que todavía puede solicitar.
-  final List<AssociateServiceCategory> available;
-
-  /// El catálogo no respondió: sin él no hay nada que ofrecer ni que pedir.
-  final bool catalogFailed;
-}
-
 class _DHASSOCIATEServiciosWidgetState
     extends State<DHASSOCIATEServiciosWidget> {
   late DHASSOCIATEServiciosModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Future<_ServiciosData> _serviciosFuture;
+  late Future<AssociateCategories> _serviciosFuture;
 
   @override
   void initState() {
@@ -88,7 +70,8 @@ class _DHASSOCIATEServiciosWidgetState
     _model.experienceController ??= TextEditingController();
     _model.experienceFocusNode ??= FocusNode();
 
-    _serviciosFuture = _loadServicios();
+    _serviciosFuture =
+        loadAssociateCategories(authToken: currentAuthenticationToken ?? '');
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -98,70 +81,6 @@ class _DHASSOCIATEServiciosWidgetState
     _model.dispose();
 
     super.dispose();
-  }
-
-  // ---------------------------------------------------------------------------
-  // Datos.
-  // ---------------------------------------------------------------------------
-
-  /// Catálogo de la plataforma + especialidades aprobadas del asociado, en
-  /// paralelo.
-  ///
-  /// Si el listado de especialidades falla se sigue adelante con el catálogo
-  /// completo: pierde la sección de "Servicios actuales", pero conserva lo que
-  /// vino a hacer acá, que es pedir una categoría nueva. Si el que falla es el
-  /// catálogo no hay pantalla posible, y eso sí se avisa.
-  Future<_ServiciosData> _loadServicios() async {
-    final token = currentAuthenticationToken ?? '';
-
-    final responses = await Future.wait([
-      DOVIAAPIDoviaHomeContextGroup.listCatalogServicesCall
-          .call(authToken: token),
-      DOVIAAPIAssociateSpecialtiesContextGroup.listAssociateSpecialtiesCall
-          .call(authToken: token),
-    ]);
-
-    final catalogRes = responses[0];
-    final specialtiesRes = responses[1];
-
-    if (!catalogRes.succeeded) {
-      return const _ServiciosData(
-        approved: [],
-        available: [],
-        catalogFailed: true,
-      );
-    }
-
-    final categories = parseAssociateCategories(
-      DOVIAAPIDoviaHomeContextGroup.listCatalogServicesCall
-              .servicesList(catalogRes.jsonBody) ??
-          const [],
-    );
-
-    final approvedKeys = specialtiesRes.succeeded
-        ? parseApprovedSpecialtyKeys(
-            DOVIAAPIAssociateSpecialtiesContextGroup
-                    .listAssociateSpecialtiesCall
-                    .specialtiesList(specialtiesRes.jsonBody) ??
-                const [],
-          )
-        : <String>{};
-
-    final approved = <AssociateServiceCategory>[];
-    final available = <AssociateServiceCategory>[];
-    for (final category in categories) {
-      if (categoryIsApproved(category, approvedKeys)) {
-        approved.add(category);
-      } else {
-        available.add(category);
-      }
-    }
-
-    return _ServiciosData(
-      approved: approved,
-      available: available,
-      catalogFailed: false,
-    );
   }
 
   // ---------------------------------------------------------------------------
@@ -667,12 +586,8 @@ class _DHASSOCIATEServiciosWidgetState
       );
 
   /// Cuerpo de la pantalla una vez resuelto el catálogo.
-  Widget _buildContent(_ServiciosData data) {
-    if (data.catalogFailed) {
-      return _hint(
-          'No pudimos cargar el catálogo de servicios. Intentá de nuevo en un '
-          'momento.');
-    }
+  Widget _buildContent(AssociateCategories data) {
+    if (data.catalogFailed) return _hint(data.catalogErrorMessage);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -796,7 +711,7 @@ class _DHASSOCIATEServiciosWidgetState
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 30.0, 20.0, 140.0),
-                      child: FutureBuilder<_ServiciosData>(
+                      child: FutureBuilder<AssociateCategories>(
                         future: _serviciosFuture,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
