@@ -8,7 +8,13 @@ import 'premium_upsell_popup_model.dart';
 export 'premium_upsell_popup_model.dart';
 
 class PremiumUpsellPopupWidget extends StatefulWidget {
-  const PremiumUpsellPopupWidget({super.key});
+  const PremiumUpsellPopupWidget({super.key, this.dismissOnTap = true});
+
+  /// Si el bloque está dentro de un diálogo hay que cerrarlo antes de navegar a
+  /// los planes. Las pantallas que lo embeben en el cuerpo (Ej: el bloqueo de
+  /// [DHCLIENTCotizacionWidget]) lo desactivan: ahí no hay diálogo que cerrar y
+  /// el pop sacaría al cliente de la pantalla.
+  final bool dismissOnTap;
 
   @override
   State<PremiumUpsellPopupWidget> createState() =>
@@ -80,7 +86,9 @@ class _PremiumUpsellPopupWidgetState extends State<PremiumUpsellPopupWidget> {
                 padding: const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
-                    Navigator.pop(context);
+                    if (widget.dismissOnTap) {
+                      Navigator.pop(context);
+                    }
                     context.pushNamed(DHCLIENTPlanesPageWidget.routeName);
                   },
                   text: 'Adquiere el plan Dovia Premium',

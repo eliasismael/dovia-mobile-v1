@@ -52,12 +52,17 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   Timer? _debounce;
   List<Map<String, dynamic>> _suggestions = [];
 
-  /// Zonas con cobertura operativa de DOVIA. Alimentan el desplegable y son el
-  /// criterio del Coverage Check. Si el endpoint falla se usa [_fallbackZones]
-  /// para no bloquear el flujo, y la validación se delega al backend al crear la
-  /// dirección.
+  /// Zonas con cobertura operativa de DOVIA. Son el criterio del Coverage
+  /// Check. Si el endpoint falla, el desplegable se alimenta de
+  /// [_fallbackZones] para que el cliente pueda ir completando el formulario,
+  /// pero la validación **no** se da por buena: [_verifyCoverageAndSave]
+  /// reintenta el endpoint y sin zonas autorizadas no deja registrar.
   List<String> _workableZones = [];
   bool _zonesLoaded = false;
+
+  /// Si [_workableZones] viene del backend. Sólo entonces el Coverage Check del
+  /// front es una verificación real.
+  bool get _zonesAreAuthoritative => _workableZones.isNotEmpty;
 
   /// Direcciones de servicio ya registradas ("Ubicaciones anteriores").
   List<Map<String, dynamic>> _previousAddresses = [];
@@ -98,6 +103,41 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   List<String> get _zoneOptions =>
       _workableZones.isNotEmpty ? _workableZones : _fallbackZones;
 
+  /// Zonas operables tal como las devuelve el endpoint, que puede mandar
+  /// strings o objetos `{ name/zone/label/code }`.
+  List<String> _zonesFrom(dynamic jsonBody) {
+    final raw = DOVIAAPIDoviaHomeContextGroup.listWorkableZonesCall
+            .zonesList(jsonBody) ??
+        [];
+    final zones = <String>[];
+    for (final zone in raw) {
+      final name = zone is Map
+          ? (_str(zone['name']) ??
+              _str(zone['zone']) ??
+              _str(zone['label']) ??
+              _str(zone['code']))
+          : _str(zone);
+      if (name != null && !zones.contains(name)) {
+        zones.add(name);
+      }
+    }
+    return zones;
+  }
+
+  /// Reintenta traer las zonas operables. Se usa antes de validar cuando la
+  /// carga inicial falló: sin zonas del backend no hay Coverage Check posible.
+  Future<bool> _refreshWorkableZones() async {
+    final response = await DOVIAAPIDoviaHomeContextGroup.listWorkableZonesCall
+        .call(authToken: currentAuthenticationToken ?? '');
+    if (!mounted) return false;
+
+    final zones = response.succeeded ? _zonesFrom(response.jsonBody) : <String>[];
+    if (zones.isNotEmpty) {
+      safeSetState(() => _workableZones = zones);
+    }
+    return zones.isNotEmpty;
+  }
+
   /// Carga zonas operables y direcciones previas del cliente en paralelo.
   Future<void> _loadCoverageData() async {
     final token = currentAuthenticationToken ?? '';
@@ -111,24 +151,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
     final zonesRes = results[0];
     final addressesRes = results[1];
 
-    final zones = <String>[];
-    if (zonesRes.succeeded) {
-      final raw = DOVIAAPIDoviaHomeContextGroup.listWorkableZonesCall
-              .zonesList(zonesRes.jsonBody) ??
-          [];
-      for (final zone in raw) {
-        // El endpoint puede devolver strings o objetos { name/zone/label }.
-        final name = zone is Map
-            ? (_str(zone['name']) ??
-                _str(zone['zone']) ??
-                _str(zone['label']) ??
-                _str(zone['code']))
-            : _str(zone);
-        if (name != null && !zones.contains(name)) {
-          zones.add(name);
-        }
-      }
-    }
+    final zones = zonesRes.succeeded ? _zonesFrom(zonesRes.jsonBody) : <String>[];
 
     final addresses = <Map<String, dynamic>>[];
     if (addressesRes.succeeded) {
@@ -180,14 +203,11 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
     _returnWithAddress(addressId, _addressLabel(match.first));
   }
 
-  /// ¿La zona elegida está dentro del área de servicio de DOVIA?
-  /// Si no se pudieron cargar las zonas del backend se deja pasar y la
-  /// validación definitiva queda en el POST de la dirección.
-  bool _isZoneCovered(String zone) {
-    if (_workableZones.isEmpty) return true;
-    return _workableZones
-        .any((z) => z.toLowerCase().trim() == zone.toLowerCase().trim());
-  }
+  /// ¿La zona elegida está dentro del área de servicio de DOVIA? Se compara
+  /// siempre contra las zonas del backend; llamar a este método sin ellas no
+  /// tiene sentido, por eso [_verifyCoverageAndSave] las asegura antes.
+  bool _isZoneCovered(String zone) => _workableZones
+      .any((z) => z.toLowerCase().trim() == zone.toLowerCase().trim());
 
   /// Coverage Check + alta de la dirección. Sólo cuando la zona está cubierta y
   /// el backend acepta la dirección se continúa al flujo pendiente.
@@ -199,17 +219,34 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
     final lng = _model.selectedLng;
     if (zone == null || street.isEmpty || lat == null || lng == null) return;
 
-    // Regla de cobertura: fuera del área de servicio no se permite la solicitud.
-    if (!_isZoneCovered(zone)) {
-      context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
-      return;
-    }
-
-    final fullAddress = altura.isNotEmpty ? '$street $altura, $zone' : '$street, $zone';
-    final instructions = (_model.textController2?.text ?? '').trim();
-
     safeSetState(() => _isSaving = true);
     try {
+      // Sin las zonas del backend no se puede afirmar que haya cobertura: se
+      // reintenta y, si sigue sin haberlas, no se registra la dirección en vez
+      // de dejarla pasar a ciegas.
+      if (!_zonesAreAuthoritative && !await _refreshWorkableZones()) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'No pudimos verificar la cobertura ahora mismo. Revisa tu conexión e intenta de nuevo.'),
+          ),
+        );
+        return;
+      }
+      if (!mounted) return;
+
+      // Regla de cobertura: fuera del área de servicio no se permite la
+      // solicitud.
+      if (!_isZoneCovered(zone)) {
+        context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
+        return;
+      }
+
+      final fullAddress =
+          altura.isNotEmpty ? '$street $altura, $zone' : '$street, $zone';
+      final instructions = (_model.textController2?.text ?? '').trim();
+
       final response =
           await DOVIAAPIDoviaHomeContextGroup.createServiceAddressCall.call(
         address: fullAddress,
@@ -1096,13 +1133,12 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             child: FFButtonWidget(
                               // Valida cobertura y registra la dirección antes
                               // de continuar el flujo que pidió la ubicación.
+                              // La altura no se exige: hay direcciones sin
+                              // número, y el punto exacto ya sale del mapa.
                               onPressed: (!_zonesLoaded ||
                                       _isSaving ||
                                       _model.dropDownValue == null ||
                                       (_model.textController1?.text ?? '')
-                                          .trim()
-                                          .isEmpty ||
-                                      (_model.alturaController?.text ?? '')
                                           .trim()
                                           .isEmpty ||
                                       _model.selectedLat == null ||

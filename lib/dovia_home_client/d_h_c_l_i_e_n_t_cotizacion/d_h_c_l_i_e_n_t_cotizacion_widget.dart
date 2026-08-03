@@ -14,9 +14,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
+import '/core/result.dart';
+import '/repositories/payments_repository.dart';
 
 import 'd_h_c_l_i_e_n_t_cotizacion_model.dart';
 export 'd_h_c_l_i_e_n_t_cotizacion_model.dart';
@@ -69,6 +72,10 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
   /// `addressId` elegido. Null = ninguno, por lo que [Enviar] queda inactivo.
   String? _selectedAddressId;
 
+  /// No se pudo consultar el estado de suscripción (no es lo mismo que "no
+  /// tiene plan"): la pantalla ofrece reintentar en vez de bloquear ni asumir.
+  bool _premiumCheckFailed = false;
+
   /// Dirección recién dada de alta en esta sesión. Se conserva como respaldo por
   /// si el listado del backend todavía no la refleja, para que el cliente no vea
   /// desaparecer la ubicación que acaba de agregar.
@@ -86,7 +93,23 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
 
     _loadAddresses();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _resolvePremium();
+      safeSetState(() {});
+    });
+  }
+
+  /// La cotización es una función exclusiva de Premium: el estado de
+  /// suscripción se resuelve también cuando se llega por deep link, no sólo
+  /// desde la tarjeta del Dashboard.
+  Future<void> _resolvePremium() async {
+    safeSetState(() => _premiumCheckFailed = false);
+    final result =
+        await context.read<PaymentsRepository>().loadCurrentSubscription();
+    if (!mounted) return;
+    // Sin respuesta no se puede decidir: se ofrece reintentar en vez de dejar
+    // la pantalla cargando para siempre.
+    safeSetState(() => _premiumCheckFailed = result.isFailure);
   }
 
   @override
@@ -182,6 +205,10 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     DHCLIENTUbicacionWidget.pendingNextRoute =
         DHCLIENTCotizacionWidget.routeName;
     await context.pushNamed(DHCLIENTUbicacionWidget.routeName);
+    // La ruta pendiente se consume al registrar la dirección; si el cliente
+    // canceló queda seteada, así que se limpia siempre al volver para que no
+    // desvíe una entrada posterior a Ubicación.
+    DHCLIENTUbicacionWidget.pendingNextRoute = null;
     if (!mounted) return;
 
     final verifiedId = DHCLIENTCotizacionWidget.verifiedAddressId;
@@ -204,10 +231,12 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
   }
 
   Future<void> _pickPhotos() async {
-    // Selector nativo: Cámara / Galería.
+    // Selector nativo: Cámara / Galería. Desde la galería se pueden elegir
+    // varias fotos de una sola vez; con la cámara, una por captura.
     final selectedMedia = await selectMediaWithSourceBottomSheet(
       context: context,
       allowPhoto: true,
+      multiImage: true,
       pickerFontFamily: 'Public Sans',
     );
     if (selectedMedia == null ||
@@ -233,17 +262,31 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     }
   }
 
-  /// Sube la evidencia a S3 con el flujo presign → PUT → confirm. Es best-effort:
-  /// la solicitud ya existe, así que un fallo de fotos no invalida la cotización.
-  Future<void> _uploadPhotos(String serviceRequestId) async {
+  /// Tipo de contenido real de la foto. El presign firma la URL para este valor
+  /// exacto, así que enviar siempre `image/jpeg` rompía la subida de PNG y GIF
+  /// (los otros formatos que acepta [validateFileFormat]).
+  String _contentTypeFor(String? fileName) {
+    final name = (fileName ?? '').toLowerCase();
+    if (name.endsWith('.png')) return 'image/png';
+    if (name.endsWith('.gif')) return 'image/gif';
+    return 'image/jpeg';
+  }
+
+  /// Sube la evidencia a S3 con el flujo presign → PUT → confirm.
+  ///
+  /// Devuelve cuántas fotos quedaron efectivamente adjuntas a la solicitud: 0 si
+  /// falló el presign o el confirm (sin confirmar, las fotos subidas no cuentan
+  /// como evidencia). La solicitud ya existe, así que un fallo acá no la
+  /// invalida, pero [_submit] se lo dice al cliente en vez de darlo por hecho.
+  Future<int> _uploadPhotos(String serviceRequestId) async {
     final photos = _model.uploadedPhotos;
-    if (photos.isEmpty) return;
+    if (photos.isEmpty) return 0;
 
     final uploads = <Map<String, dynamic>>[];
     for (var i = 0; i < photos.length; i++) {
       uploads.add({
         'clientUploadId': 'upload_$i',
-        'contentType': 'image/jpeg',
+        'contentType': _contentTypeFor(photos[i].name),
         'fileName': photos[i].name ?? 'foto_$i.jpg',
       });
     }
@@ -254,11 +297,11 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       uploads: uploads,
       authToken: currentAuthenticationToken ?? '',
     );
-    if (!presignRes.succeeded) return;
+    if (!presignRes.succeeded) return 0;
 
     final items = DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall
         .items(presignRes.jsonBody);
-    if (items == null || items.isEmpty) return;
+    if (items == null || items.isEmpty) return 0;
 
     final storageKeys = <String>[];
     for (final item in items) {
@@ -273,24 +316,43 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       final bytes = photos[index].bytes;
       if (bytes == null) continue;
 
-      final putRes = await http.put(
-        Uri.parse(uploadUrl),
-        headers: {'Content-Type': 'image/jpeg'},
-        body: bytes,
-      );
-      if (putRes.statusCode >= 200 &&
-          putRes.statusCode < 300 &&
-          storageKey != null) {
-        storageKeys.add(storageKey);
+      try {
+        final putRes = await http.put(
+          Uri.parse(uploadUrl),
+          headers: {'Content-Type': _contentTypeFor(photos[index].name)},
+          body: bytes,
+        );
+        if (putRes.statusCode >= 200 &&
+            putRes.statusCode < 300 &&
+            storageKey != null) {
+          storageKeys.add(storageKey);
+        }
+      } catch (_) {
+        // Se sigue con el resto: cada foto se adjunta o no por separado.
       }
     }
 
-    if (storageKeys.isEmpty) return;
-    await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestImagesCall.call(
+    if (storageKeys.isEmpty) return 0;
+    final confirmRes =
+        await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestImagesCall.call(
       serviceRequestId: serviceRequestId,
       storageKeys: storageKeys,
       authToken: currentAuthenticationToken ?? '',
     );
+    return confirmRes.succeeded ? storageKeys.length : 0;
+  }
+
+  /// Mensaje del popup de éxito. La solicitud siempre se envió; lo que cambia
+  /// es si la evidencia llegó con ella, para que el cliente no crea que los
+  /// proveedores están viendo fotos que en realidad no se adjuntaron.
+  String _successMessage({required int attached, required int selected}) {
+    const sent =
+        'Enviamos tu requerimiento a la red de proveedores DOVIA. Recibirás las propuestas en la plataforma.';
+    if (selected == 0 || attached == selected) return sent;
+    if (attached == 0) {
+      return '$sent No pudimos adjuntar las fotos: puedes enviarlas por el chat de soporte.';
+    }
+    return '$sent Sólo pudimos adjuntar $attached de $selected fotos: puedes enviar el resto por el chat de soporte.';
   }
 
   /// Crea la solicitud de cotización: queda en "Pendiente de Cotización" y se
@@ -298,7 +360,11 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
   Future<void> _submit() async {
     final addressId = _selectedAddressId;
     if (addressId == null) return;
+    // El formulario sólo se renderiza para Premium, pero el envío se vuelve a
+    // verificar para que ninguna carrera de estado cree una cotización sin plan.
+    if (!context.read<PaymentsRepository>().hasActiveSubscription) return;
 
+    final selectedPhotos = _model.uploadedPhotos.length;
     safeSetState(() => _model.isSubmitting = true);
     try {
       final response =
@@ -323,9 +389,10 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       final serviceRequestId = DOVIAAPIDoviaHomeContextGroup
           .createQuoteServiceRequestCall
           .id(response.jsonBody);
-      if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
-        await _uploadPhotos(serviceRequestId);
-      }
+      final attachedPhotos =
+          (serviceRequestId != null && serviceRequestId.isNotEmpty)
+              ? await _uploadPhotos(serviceRequestId)
+              : 0;
 
       if (!mounted) return;
 
@@ -347,12 +414,14 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
         barrierDismissible: true,
         context: context,
         builder: (context) {
-          return const Dialog(
+          return Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(horizontal: 20.0),
+            insetPadding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: DHCLIENTExitoProgramarAgendaWidget(
-              message:
-                  'Enviamos tu requerimiento a la red de proveedores DOVIA. Recibirás las propuestas en la plataforma.',
+              message: _successMessage(
+                attached: attachedPhotos,
+                selected: selectedPhotos,
+              ),
             ),
           );
         },
@@ -369,6 +438,15 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Cotizar es un beneficio del plan Premium. El Dashboard sólo muestra la
+    // tarjeta a quien tiene plan, pero la ruta es alcanzable por deep link, así
+    // que el formulario se renderiza únicamente con suscripción activa. Mientras
+    // el estado no se resolvió no se muestra ni el formulario ni el bloqueo,
+    // para no negarle la función a un cliente que sí paga.
+    final payments = context.watch<PaymentsRepository>();
+    final premiumResolved = payments.subscriptionLoaded;
+    final hasPremium = payments.hasActiveSubscription;
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -398,40 +476,27 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                       showCurrency: false,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 24.0, 20.0, 120.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _sectionLabel('Cuéntanos que necesitas'),
-                        const SizedBox(height: 12.0),
-                        _descriptionField(),
-                        const SizedBox(height: 18.0),
-                        _sectionLabel('Agregar fotos'),
-                        const SizedBox(height: 10.0),
-                        Text(
-                          'Las imágenes nos ayudan a asignarte el técnico adecuado y darte un mejor servicio.',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(),
-                                    color: const Color(0xFF00444B),
-                                    fontSize: 14.0,
-                                    letterSpacing: 0.28,
-                                  ),
-                        ),
-                        const SizedBox(height: 12.0),
-                        _photoDropZone(),
-                        if (_model.uploadedPhotos.isNotEmpty)
-                          _buildPhotoThumbnails(),
-                        const SizedBox(height: 24.0),
-                        _locationSelector(),
-                        const SizedBox(height: 30.0),
-                        _submitButton(),
-                      ],
-                    ),
-                  ),
+                  if (!premiumResolved)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 60.0, 20.0, 120.0),
+                      child: _premiumCheckFailed
+                          ? _premiumCheckRetry()
+                          : const CircularProgressIndicator(
+                              color: Color(0xFF007376),
+                            ),
+                    )
+                  else if (!hasPremium)
+                    const Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          20.0, 40.0, 20.0, 120.0),
+                      // Bloqueo embebido en el cuerpo (no un diálogo): el
+                      // cliente sin plan ve por qué no puede cotizar y el CTA a
+                      // los planes, y puede volver con la flecha del header.
+                      child: PremiumUpsellPopupWidget(dismissOnTap: false),
+                    )
+                  else
+                    _requirementForm(),
                 ],
               ),
             ),
@@ -470,6 +535,80 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
   // ---------------------------------------------------------------------------
   // Formulario de requerimientos.
   // ---------------------------------------------------------------------------
+
+  /// La consulta de suscripción falló: ni formulario ni bloqueo por plan, que
+  /// serían las dos conclusiones erróneas posibles. Sólo reintentar.
+  Widget _premiumCheckRetry() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'No pudimos verificar tu plan. Revisa tu conexión e intenta de nuevo.',
+          textAlign: TextAlign.center,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.publicSans(),
+                color: const Color(0xFF00444B),
+                fontSize: 16.0,
+                letterSpacing: 0.32,
+              ),
+        ),
+        const SizedBox(height: 20.0),
+        FFButtonWidget(
+          onPressed: () async => _resolvePremium(),
+          text: 'Reintentar',
+          options: FFButtonOptions(
+            width: double.infinity,
+            height: 50.0,
+            color: const Color(0xFF007376),
+            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 17.0,
+                  letterSpacing: 0.34,
+                ),
+            elevation: 0.0,
+            borderRadius: BorderRadius.circular(100.0),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Levantamiento del requerimiento: descripción (obligatoria), evidencia
+  /// (opcional) y lugar del servicio. Sólo se renderiza para Premium.
+  Widget _requirementForm() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 120.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionLabel('Cuéntanos que necesitas'),
+          const SizedBox(height: 12.0),
+          _descriptionField(),
+          const SizedBox(height: 18.0),
+          _sectionLabel('Agregar fotos'),
+          const SizedBox(height: 10.0),
+          Text(
+            'Las imágenes nos ayudan a asignarte el técnico adecuado y darte un mejor servicio.',
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(),
+                  color: const Color(0xFF00444B),
+                  fontSize: 14.0,
+                  letterSpacing: 0.28,
+                ),
+          ),
+          const SizedBox(height: 12.0),
+          _photoDropZone(),
+          if (_model.uploadedPhotos.isNotEmpty) _buildPhotoThumbnails(),
+          const SizedBox(height: 24.0),
+          _locationSelector(),
+          const SizedBox(height: 30.0),
+          _submitButton(),
+        ],
+      ),
+    );
+  }
 
   Widget _sectionLabel(String text) {
     return Text(

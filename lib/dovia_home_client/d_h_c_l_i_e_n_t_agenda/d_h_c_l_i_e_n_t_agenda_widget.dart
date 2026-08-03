@@ -194,6 +194,10 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
   Future<void> _addOtherLocation() async {
     DHCLIENTUbicacionWidget.pendingNextRoute = DHCLIENTAgendaWidget.routeName;
     await context.pushNamed(DHCLIENTUbicacionWidget.routeName);
+    // La ruta pendiente se consume al registrar la dirección; si el cliente
+    // canceló queda seteada, así que se limpia siempre al volver para que no
+    // desvíe una entrada posterior a Ubicación.
+    DHCLIENTUbicacionWidget.pendingNextRoute = null;
     if (!mounted) return;
 
     final verifiedId = DHCLIENTAgendaWidget.verifiedAddressId;

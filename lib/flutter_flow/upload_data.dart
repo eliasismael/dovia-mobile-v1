@@ -58,6 +58,9 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
   Color backgroundColor = const Color(0xFFF5F5F5),
   bool includeDimensions = false,
   bool includeBlurHash = false,
+  /// Permite elegir varias imágenes de una sola vez. Sólo aplica a la galería:
+  /// la cámara devuelve una foto por captura.
+  bool multiImage = false,
 }) async {
   ListTile createUploadMediaListTile(String label, MediaSource mediaSource) =>
       ListTile(
@@ -90,7 +93,7 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                 child: ListTile(
                   title: Text(
-                    'Choose Source',
+                    'Elegir origen',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.getFont(
                       pickerFontFamily,
@@ -107,27 +110,27 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
             ],
             if (allowPhoto && allowVideo) ...[
               createUploadMediaListTile(
-                'Gallery (Photo)',
+                'Galería (Foto)',
                 MediaSource.photoGallery,
               ),
               const Divider(),
               createUploadMediaListTile(
-                'Gallery (Video)',
+                'Galería (Video)',
                 MediaSource.videoGallery,
               ),
             ] else if (allowPhoto)
               createUploadMediaListTile(
-                'Gallery',
+                'Galería',
                 MediaSource.photoGallery,
               )
             else
               createUploadMediaListTile(
-                'Gallery',
+                'Galería',
                 MediaSource.videoGallery,
               ),
             if (!kIsWeb) ...[
               const Divider(),
-              createUploadMediaListTile('Camera', MediaSource.camera),
+              createUploadMediaListTile('Cámara', MediaSource.camera),
               const Divider(),
             ],
             const SizedBox(height: 10),
@@ -145,6 +148,9 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
     isVideo: mediaSource == MediaSource.videoGallery ||
         (mediaSource == MediaSource.camera && allowVideo && !allowPhoto),
     mediaSource: mediaSource,
+    // La selección múltiple sólo existe en la galería de fotos; pedirla con la
+    // cámara abriría el selector de galería en vez de la cámara.
+    multiImage: multiImage && mediaSource == MediaSource.photoGallery,
     includeDimensions: includeDimensions,
     includeBlurHash: includeBlurHash,
   );
