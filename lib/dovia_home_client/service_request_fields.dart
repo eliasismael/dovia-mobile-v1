@@ -71,6 +71,27 @@ String srServiceName(Map<String, dynamic> data) {
       'Servicio';
 }
 
+/// Retorna el asset del icono correspondiente al servicio.
+String srServiceIconAsset(String serviceName) {
+  switch (serviceName) {
+    case 'Plomería':
+      return 'assets/images/IconoServicioPlomeria.svg';
+    case 'Eléctrico':
+      return 'assets/images/IconoServicioElectrico.svg';
+    case 'Albañilería':
+      return 'assets/images/IconoServicioAlbaileria.svg';
+    case 'Pintura':
+      return 'assets/images/IconServicioPintura.svg';
+    case 'Instalación':
+      return 'assets/images/IconServicioInstalacion.svg';
+    case 'Servicio de emergencia':
+    case 'Servicio de\nemergencia':
+      return 'assets/images/warning-triangle.svg';
+    default:
+      return 'assets/images/IconoCaja.svg';
+  }
+}
+
 /// Fecha de la visita agendada. Null mientras la solicitud no tenga fecha (Ej:
 /// una cotización esperando propuestas). Deliberadamente **no** cae a
 /// `createdAt`: pintar la fecha de creación en el lugar de la fecha de visita

@@ -302,6 +302,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
                                       date: '${visit.date} · ${visit.time}',
                                       status: visit.status,
                                       isEmergency: visit.isEmergency,
+                                      icom: srServiceIconAsset(visit.service),
                                     ),
                                   ),
                                 ),
@@ -319,6 +320,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
                                         status: status,
                                         isEmergency: srIsEmergency(data),
                                         showRedDot: status == 'Confirmar',
+                                        icom: srServiceIconAsset(srServiceName(data)),
                                       ),
                                     ),
                                   );
@@ -423,7 +425,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
           controller: _model.typeController ??=
               FormFieldController<String>(_model.typeFilter),
           options: typeOptions,
-          hint: 'Selecciona la transacción',
+          hint: 'Tipo de trabajo',
           onChanged: (val) => safeSetState(() => _model.typeFilter = val),
         ),
         const SizedBox(height: 16.0),

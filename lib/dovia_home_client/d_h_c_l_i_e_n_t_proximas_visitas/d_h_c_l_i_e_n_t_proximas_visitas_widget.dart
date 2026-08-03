@@ -114,7 +114,7 @@ class _DHCLIENTProximasVisitasWidgetState
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: SvgPicture.asset(
-                  'assets/images/IconoCaja.svg',
+                  widget.icom ?? 'assets/images/IconoCaja.svg',
                   width: 200.0,
                   height: 200.0,
                   fit: BoxFit.none,
