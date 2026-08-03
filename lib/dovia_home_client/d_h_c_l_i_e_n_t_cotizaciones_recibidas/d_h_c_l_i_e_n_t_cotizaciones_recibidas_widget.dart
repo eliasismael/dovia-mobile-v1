@@ -397,9 +397,12 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                       showCurrency: false,
                     ),
                   ),
+                  // El padding horizontal lo pone cada bloque: el carrusel de
+                  // tarjetas sangra hasta el borde para que se vea que sigue
+                  // scrolleando.
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 24.0, 20.0, 120.0),
+                        0.0, 24.0, 0.0, 120.0),
                     child: FutureBuilder<ApiCallResponse>(
                       future: _proposalsFuture,
                       builder: (context, snapshot) {
@@ -416,35 +419,42 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                             : <Map<String, dynamic>>[];
 
                         if (proposals.isEmpty) {
-                          return _emptyState(response.succeeded);
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: _emptyState(response.succeeded),
+                          );
                         }
 
                         return Column(
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Compara las propuestas y elige la que prefieras.',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.publicSans(),
-                                    color: const Color(0xFF00444B),
-                                    fontSize: 14.0,
-                                    letterSpacing: 0.28,
-                                  ),
-                            ),
-                            const SizedBox(height: 16.0),
-                            ...List.generate(
-                              proposals.length,
-                              (index) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
-                                child: _proposalCard(
-                                    proposals[index], index, isPremium),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Text(
+                                proposals.length == 1
+                                    ? 'Revisa la propuesta y continúa si te sirve.'
+                                    : 'Desliza para comparar las propuestas y elige la que prefieras.',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.publicSans(),
+                                      color: const Color(0xFF00444B),
+                                      fontSize: 14.0,
+                                      letterSpacing: 0.28,
+                                    ),
                               ),
                             ),
+                            const SizedBox(height: 16.0),
+                            _proposalsCarousel(proposals, isPremium),
                             const SizedBox(height: 18.0),
-                            _continueButton(proposals, isPremium),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: _continueButton(proposals, isPremium),
+                            ),
                           ],
                         );
                       },
@@ -500,6 +510,44 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                 fontSize: 14.0,
                 lineHeight: 1.4,
               ),
+        ),
+      ),
+    );
+  }
+
+  /// Tarjetas de propuestas en scroll horizontal, como en el diseño (una fila
+  /// de cotizaciones a comparar) adaptado a mobile: en pantalla angosta entran
+  /// de a una y la siguiente asoma para que se note que hay más.
+  ///
+  /// [IntrinsicHeight] las iguala a la más alta, que es lo que hace comparables
+  /// campo contra campo dos propuestas con textos de distinto largo.
+  Widget _proposalsCarousel(
+      List<Map<String, dynamic>> proposals, bool isPremium) {
+    const horizontalPadding = 20.0;
+    const gap = 12.0;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    // Con una sola propuesta no hay nada que deslizar: ocupa el ancho completo.
+    final cardWidth = proposals.length == 1
+        ? screenWidth - horizontalPadding * 2
+        : (screenWidth * 0.78).clamp(240.0, 340.0).toDouble();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < proposals.length; i++)
+              Padding(
+                padding: EdgeInsets.only(
+                    right: i == proposals.length - 1 ? 0.0 : gap),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: _proposalCard(proposals[i], i, isPremium),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -563,8 +611,13 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                             ),
                       ),
                     const SizedBox(height: 8.0),
+                    // El alcance se acota a 4 líneas: con descripciones largas
+                    // las tarjetas dejaban de ser comparables de un vistazo.
                     _proposalField(
-                        'Trabajo a realizar:', _workDescription(proposal)),
+                      'Trabajo a realizar:',
+                      _workDescription(proposal),
+                      maxLines: 4,
+                    ),
                     _proposalField('Tiempo estimado del trabajo:',
                         _estimatedTime(proposal)),
                     _priceField(_price(proposal, isPremium)),
@@ -606,7 +659,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     );
   }
 
-  Widget _proposalField(String label, String value) {
+  Widget _proposalField(String label, String value, {int? maxLines}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
@@ -623,6 +676,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
           ),
           Text(
             value,
+            maxLines: maxLines,
+            overflow: maxLines == null ? null : TextOverflow.ellipsis,
             style: FlutterFlowTheme.of(context).bodySmall.override(
                   font: GoogleFonts.publicSans(),
                   color: const Color(0xFF007376),

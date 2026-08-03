@@ -106,9 +106,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
       status: 'FINISHED',
       limit: 2,
     );
+    // Se piden varias porque el carrusel agrupa por solicitud: dos proveedores
+    // que cotizaron el mismo trabajo son una sola tarjeta.
     _proposalsFuture = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.call(
       authToken: token,
-      limit: 2,
+      limit: 20,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -495,22 +497,131 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     );
   }
 
+  /// Título de la solicitud a la que pertenece la propuesta. El catálogo la
+  /// etiqueta en `serviceDetail.label`; se prueban las otras claves porque el
+  /// endpoint de propuestas no siempre anida el detalle completo.
+  String _proposalRequestTitle(Map<String, dynamic> proposal) {
+    final request = proposal['serviceRequest'];
+    final requestMap = request is Map ? Map<String, dynamic>.from(request) : null;
+    final detail = requestMap?['serviceDetail'];
+    return _str(detail is Map ? detail['label'] : null) ??
+        _str(requestMap?['title']) ??
+        _str(requestMap?['serviceName']) ??
+        _str(proposal['serviceName']) ??
+        'Cotización de servicio';
+  }
+
+  /// Solicitud a la que pertenece la propuesta: es la que abre la pantalla de
+  /// comparación al tocar la tarjeta.
+  String? _proposalRequestId(Map<String, dynamic> proposal) {
+    final request = proposal['serviceRequest'];
+    return _str(proposal['serviceRequestId']) ??
+        _str(request is Map ? request['id'] : null);
+  }
+
+  /// Píldora de la tarjeta. Mientras el cliente no acepte ninguna propuesta la
+  /// cotización sigue "Pendiente" para él, aunque el proveedor ya la haya
+  /// enviado.
+  String _proposalStatusLabel(Map<String, dynamic> proposal) {
+    switch ((_str(proposal['status']) ?? '').toUpperCase()) {
+      case 'ACCEPTED':
+        return 'Aceptada';
+      case 'REJECTED':
+        return 'Rechazada';
+      case 'EXPIRED':
+        return 'Vencida';
+      default:
+        return 'Pendiente';
+    }
+  }
+
+  /// Fecha en la que se recibió la propuesta, con el formato del diseño
+  /// (DD/MM/AAAA).
+  String _proposalDate(Map<String, dynamic> proposal) {
+    final raw = _str(proposal['createdAt']) ?? _str(proposal['sentAt']);
+    final parsed = raw == null ? null : DateTime.tryParse(raw)?.toLocal();
+    if (parsed == null) return 'DD/MM/AAAA';
+    final day = parsed.day.toString().padLeft(2, '0');
+    final month = parsed.month.toString().padLeft(2, '0');
+    return '$day/$month/${parsed.year}';
+  }
+
   /// Seccion "Cotizaciones recibidas" (exclusivo Premium): diagnosticos de
   /// trabajos fuera de alcance que la red de proveedores cotizo para el cliente.
   ///
-  /// TODO: Poblar con el listado real (GET /dovia-home/proposals o fuera de
-  /// alcance) cuando se conecte el flujo; por ahora es un placeholder.
+  /// Las tarjetas van en scroll horizontal, como en el diseño: se muestra una
+  /// por solicitud (no una por propuesta, que repetiría la misma cotización
+  /// tantas veces como proveedores respondieron) y al tocarla se abre la
+  /// pantalla de comparación de esa solicitud.
+  ///
+  /// El encabezado se pinta siempre —igual que "Visitas Finalizadas"—: la
+  /// sección tiene que existir en el Dashboard aunque todavía no haya
+  /// cotizaciones, si no el cliente no sabe que el espacio está ahí.
   Widget _buildCotizacionesRecibidas() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Cotizaciones recibidas',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                    fontSize: 16.0,
+                    color: FlutterFlowTheme.of(context).primary,
+                  ),
+            ),
+            FFButtonWidget(
+              onPressed: () {
+                // Sin solicitud fijada la pantalla lista todas las propuestas
+                // recibidas por el cliente.
+                DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
+                context
+                    .pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
+              },
+              text: 'Ver todo',
+              options: FFButtonOptions(
+                height: 30.0,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                color: const Color(0xFFCCE3E4),
+                textStyle: GoogleFonts.publicSans(
+                    color: FlutterFlowTheme.of(context).primary,
+                    fontSize: 14.0),
+                borderRadius: BorderRadius.circular(24.0),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Cotizaciones generadas a partir de diagnósticos',
+          style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              color: FlutterFlowTheme.of(context).secondaryText),
+        ),
+        const SizedBox(height: 12),
+        _buildQuotesContent(),
+      ],
+    );
+  }
+
+  /// Contenido de la sección: el carrusel de cotizaciones o, mientras no haya
+  /// ninguna, una línea que explica por qué está vacía.
+  Widget _buildQuotesContent() {
     return FutureBuilder<ApiCallResponse>(
       future: _proposalsFuture,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         final response = snapshot.data!;
         if (!response.succeeded) {
-          return const SizedBox.shrink(); // No mostrar si hay error
+          return _quotesPlaceholder(
+              'No pudimos cargar tus cotizaciones. Intenta de nuevo más tarde.');
         }
 
         // `proposalsList` resuelve un JsonPath sobre el JSON decodificado, no
@@ -518,101 +629,141 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
         final proposals = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall
                 .proposalsList(response.jsonBody) ??
             [];
-        if (proposals.isEmpty) {
-          return const SizedBox.shrink();
+
+        // Una tarjeta por solicitud cotizada: varias propuestas de la misma
+        // solicitud son la *misma* cotización para el cliente, y al tocarla las
+        // compara todas en la pantalla de cotizaciones recibidas.
+        final cards = <Map<String, dynamic>>[];
+        final seenRequestIds = <String>{};
+        for (final proposal in proposals.whereType<Map>()) {
+          final data = Map<String, dynamic>.from(proposal);
+          // Si el backend no informa la solicitud la propuesta se muestra
+          // igual (al tocarla se abre el listado completo), pero entonces no
+          // hay con qué agruparla: se la trata como una cotización aparte.
+          final key = _proposalRequestId(data) ??
+              _str(data['id']) ??
+              'proposal_${cards.length}';
+          if (!seenRequestIds.add(key)) continue;
+          cards.add(data);
+          if (cards.length == 5) break;
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Cotizaciones recibidas',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                        fontSize: 16.0,
-                        color: FlutterFlowTheme.of(context).primary,
-                      ),
-                ),
-                FFButtonWidget(
-                  onPressed: () {
-                    // Sin solicitud fijada la pantalla lista todas las
-                    // propuestas recibidas por el cliente.
-                    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
-                    context.pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
-                  },
-                  text: 'Ver todo',
-                  options: FFButtonOptions(
-                    height: 30.0,
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    color: const Color(0xFFCCE3E4),
-                    textStyle: GoogleFonts.publicSans(
-                        color: FlutterFlowTheme.of(context).primary, fontSize: 14.0),
-                    borderRadius: BorderRadius.circular(24.0),
-                    elevation: 0,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Cotizaciones generadas a partir de diagnósticos',
-              style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                  color: FlutterFlowTheme.of(context).secondaryText),
-            ),
-            const SizedBox(height: 12),
-            ...proposals.take(2).map((proposal) {
-              final data = proposal as Map<String, dynamic>;
-              final title = data['serviceRequest']?['serviceName'] ?? 'Cotización de servicio';
-              final dateStr = data['createdAt'] as String? ?? '';
-              final date = dateStr.isNotEmpty ? dateStr.split('T').first : 'DD/MM/AAAA';
-              
-              // Abre las propuestas de esa solicitud para compararlas y aceptar
-              // una.
-              final requestId = _str(data['serviceRequestId']) ??
-                  (data['serviceRequest'] is Map
-                      ? _str((data['serviceRequest'] as Map)['id'])
-                      : null);
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: InkWell(
-                  onTap: () {
-                    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId =
-                        requestId;
-                    context
-                        .pushNamed(
-                            DHCLIENTCotizacionesRecibidasWidget.routeName)
-                        .then((_) => safeSetState(() {}));
-                  },
-                  borderRadius: BorderRadius.circular(16.0),
-                  child: _buildQuoteResultCard(
-                    title: title,
-                    subtitle: 'Diagnóstico generado',
-                    date: date,
-                    status: data['status'] ?? 'Pendiente',
-                  ),
-                ),
-              );
-            }).toList(),
-          ],
-        );
+        if (cards.isEmpty) {
+          return _quotesPlaceholder(
+              'Todavía no recibiste cotizaciones. Te avisaremos cuando los proveedores envíen sus propuestas.');
+        }
+        return _buildQuotesCarousel(cards);
       },
     );
   }
 
-  /// Tarjeta de una cotizacion recibida (titulo, estado de la visita, fecha y
-  /// pill de estatus).
+  Widget _quotesPlaceholder(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border:
+            Border.all(color: FlutterFlowTheme.of(context).alternate, width: 1),
+      ),
+      child: Text(
+        message,
+        style: GoogleFonts.inter(
+          fontSize: 12,
+          height: 1.4,
+          color: FlutterFlowTheme.of(context).secondaryText,
+        ),
+      ),
+    );
+  }
+
+  /// Scroll horizontal de las cotizaciones recibidas (diseño del Dashboard).
+  /// La fila sangra hasta el borde derecho —el padding lo pone el propio
+  /// scroll— para que se vea que hay más tarjetas.
+  Widget _buildQuotesCarousel(List<Map<String, dynamic>> cards) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    // Con una sola cotización no hay nada que deslizar: ancho completo.
+    final cardWidth = cards.length == 1
+        ? screenWidth - 40.0
+        : (screenWidth * 0.82).clamp(260.0, 340.0).toDouble();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      // Todas las tarjetas quedan del alto de la más alta, para que la fila se
+      // lea pareja.
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < cards.length; i++)
+              Padding(
+                padding:
+                    EdgeInsets.only(right: i == cards.length - 1 ? 0.0 : 12.0),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: InkWell(
+                    onTap: () {
+                      DHCLIENTCotizacionesRecibidasWidget.serviceRequestId =
+                          _proposalRequestId(cards[i]);
+                      context
+                          .pushNamed(
+                              DHCLIENTCotizacionesRecibidasWidget.routeName)
+                          .then((_) => safeSetState(() {}));
+                    },
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: _buildQuoteResultCard(
+                      title: _proposalRequestTitle(cards[i]),
+                      subtitle: 'Visita realizada',
+                      date: _proposalDate(cards[i]),
+                      status: _proposalStatusLabel(cards[i]),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Colores de la píldora de estatus, con el mismo criterio que las tarjetas
+  /// de visitas ([DHCLIENTProximasVisitasWidget]).
+  Color _quotePillBackground(String status) {
+    switch (status) {
+      case 'Aceptada':
+        return const Color(0xFFDCF5E3);
+      case 'Rechazada':
+      case 'Vencida':
+        return const Color(0xFFFFE5E5);
+      default:
+        return const Color(0xFFFFE3D2);
+    }
+  }
+
+  Color _quotePillText(String status) {
+    switch (status) {
+      case 'Aceptada':
+        return const Color(0xFF1E7A46);
+      case 'Rechazada':
+      case 'Vencida':
+        return Colors.red;
+      default:
+        return const Color(0xFFC2410C);
+    }
+  }
+
+  /// Tarjeta de una cotizacion recibida: icono del servicio, titulo del
+  /// trabajo, estado de la visita, fecha y pill de estatus abajo a la derecha
+  /// (diseño del Dashboard).
   Widget _buildQuoteResultCard({
     required String title,
     required String subtitle,
     required String date,
     String status = 'Pendiente',
   }) {
+    final secondaryText = FlutterFlowTheme.of(context).secondaryText;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -622,6 +773,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             Border.all(color: FlutterFlowTheme.of(context).alternate, width: 1),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 40,
@@ -632,8 +784,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: SvgPicture.asset(
-                  'assets/images/IconoServicioPlomeria.svg'),
+              child:
+                  SvgPicture.asset(srServiceIconAsset(title)),
             ),
           ),
           const SizedBox(width: 16),
@@ -641,36 +793,58 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: GoogleFonts.publicSans(
-                        fontWeight: FontWeight.w600, fontSize: 14)),
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.publicSans(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
                 const SizedBox(height: 4),
                 Text(subtitle,
-                    style: GoogleFonts.inter(
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        fontSize: 12)),
+                    style:
+                        GoogleFonts.inter(color: secondaryText, fontSize: 12)),
                 const SizedBox(height: 4),
-                Text(date,
-                    style: GoogleFonts.inter(
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        fontSize: 12)),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today_outlined,
+                        size: 13.0, color: secondaryText),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        date,
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('Estatus',
+                        style: GoogleFonts.inter(
+                            color: secondaryText, fontSize: 12)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 6.0),
+                      decoration: BoxDecoration(
+                        color: _quotePillBackground(status),
+                        borderRadius: BorderRadius.circular(100.0),
+                      ),
+                      child: Text(
+                        status,
+                        style: GoogleFonts.publicSans(
+                            fontWeight: FontWeight.w600,
+                            color: _quotePillText(status),
+                            fontSize: 12.0),
+                      ),
+                    ),
+                  ],
+                ),
               ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFDECC8),
-              borderRadius: BorderRadius.circular(100.0),
-            ),
-            child: Text(
-              status,
-              style: GoogleFonts.publicSans(
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF9A6700),
-                  fontSize: 12.0),
             ),
           ),
         ],
