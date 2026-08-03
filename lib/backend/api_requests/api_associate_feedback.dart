@@ -1,11 +1,11 @@
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
+import 'api_config.dart';
 
 /// Start DOVIA API - Associate Feedback Context Group Code
 
 class DOVIAAPIAssociateFeedbackContextGroup {
-  static String getBaseUrl() =>
-      'https://fqjwdfvbi2.execute-api.us-east-2.amazonaws.com/dev';
+  static String getBaseUrl() => kApiBaseUrl;
   static Map<String, String> headers = {};
 
   static CreateVisitAssociateRatingCall createVisitAssociateRatingCall =

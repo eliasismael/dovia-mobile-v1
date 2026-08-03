@@ -78,7 +78,19 @@
       "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dart format lib/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_servicios lib/dovia_home_associate/associate_service_categories.dart lib/backend/api_requests/api_associate_specialties.dart)",
       "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $out = dart analyze 2>&1 | Out-String; $out -split \"`n\" | Select-String -Pattern \"servicios|specialties|associate_service\")",
       "PowerShell(flutter analyze lib/dovia_home_associate 2>&1)",
-      "Bash(flutter build *)"
+      "Bash(flutter build *)",
+      "PowerShell(dart analyze lib/backend/api_requests 2>&1)",
+      "PowerShell(git -C \"c:\\\\Users\\\\El�as\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\" status --short -- lib/backend/api_requests vercel.json)",
+      "PowerShell(git -C \"c:\\\\Users\\\\El�as\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\" diff --stat -- lib/backend/api_requests vercel.json)",
+      "PowerShell(git -C \"c:\\\\Users\\\\El�as\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\" diff -- vercel.json)",
+      "WebSearch",
+      "WebFetch(domain:vercel.com)",
+      "PowerShell(git -C $p rev-parse --show-toplevel)",
+      "PowerShell(git -C $p remote -v)",
+      "PowerShell(git -C $p rev-parse --abbrev-ref HEAD)",
+      "PowerShell(git -C $p rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null)",
+      "PowerShell(git -C $p ls-files --full-name vercel.json)",
+      "PowerShell($p = \"c:\\\\Users\\\\El�as\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\")"
     ]
   }
 }

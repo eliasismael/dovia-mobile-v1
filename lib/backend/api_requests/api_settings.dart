@@ -1,10 +1,10 @@
 import 'api_manager.dart';
+import 'api_config.dart';
 
 /// Start DOVIA API - Settings Context Group Code
 
 class DOVIAAPISettingsContextGroup {
-  static String getBaseUrl() =>
-      'https://fqjwdfvbi2.execute-api.us-east-2.amazonaws.com/dev';
+  static String getBaseUrl() => kApiBaseUrl;
   static Map<String, String> headers = {};
   static ListSettingsCall listSettingsCall = ListSettingsCall();
   static GetSettingByKeyCall getSettingByKeyCall = GetSettingByKeyCall();

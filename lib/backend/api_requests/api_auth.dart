@@ -1,5 +1,6 @@
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
+import 'api_config.dart';
 import 'api_helpers.dart';
 
 /// Start DOVIA API - Auth Context Group Code
@@ -8,7 +9,7 @@ class DOVIAAPIAuthContextGroup {
   static String getBaseUrl({
     String? email = '',
   }) =>
-      'https://fqjwdfvbi2.execute-api.us-east-2.amazonaws.com/dev';
+      kApiBaseUrl;
   static Map<String, String> headers = {};
   static SignUpStepNEWCall signUpStepNEWCall = SignUpStepNEWCall();
   static VerifyCodeStepNEWCall verifyCodeStepNEWCall = VerifyCodeStepNEWCall();

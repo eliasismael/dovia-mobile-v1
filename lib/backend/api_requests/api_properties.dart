@@ -1,12 +1,12 @@
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
+import 'api_config.dart';
 import 'api_helpers.dart';
 
 /// Start DOVIA API - Property Context Group Code
 
 class DOVIAAPIPropertyContextGroup {
-  static String getBaseUrl() =>
-      'https://fqjwdfvbi2.execute-api.us-east-2.amazonaws.com/dev';
+  static String getBaseUrl() => kApiBaseUrl;
   static Map<String, String> headers = {};
   static UploadPropertyOwnerIDDocumentCall uploadPropertyOwnerIDDocumentCall =
       UploadPropertyOwnerIDDocumentCall();

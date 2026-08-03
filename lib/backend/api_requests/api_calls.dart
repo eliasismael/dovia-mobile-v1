@@ -2,6 +2,7 @@
 // Import this file from anywhere in the app as before:
 //   import '/backend/api_requests/api_calls.dart';
 
+export 'api_config.dart';
 export 'api_helpers.dart';
 export 'api_auth.dart';
 export 'api_favorites.dart';

@@ -1,12 +1,12 @@
 import '/flutter_flow/flutter_flow_util.dart';
 import 'api_manager.dart';
+import 'api_config.dart';
 import 'api_helpers.dart';
 
 /// Start DOVIA API - Visit Context Group Code
 
 class DOVIAAPIVisitContextGroup {
-  static String getBaseUrl() =>
-      'https://fqjwdfvbi2.execute-api.us-east-2.amazonaws.com/dev';
+  static String getBaseUrl() => kApiBaseUrl;
   static Map<String, String> headers = {};
   static CreateVisitRequestCall createVisitRequestCall =
       CreateVisitRequestCall();

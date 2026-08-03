@@ -1,10 +1,10 @@
 import 'api_manager.dart';
+import 'api_config.dart';
 
 /// Start DOVIA API - Metrics Context Group Code
 
 class DOVIAAPIMetricsContextGroup {
-  static String getBaseUrl() =>
-      'https://fqjwdfvbi2.execute-api.us-east-2.amazonaws.com/dev';
+  static String getBaseUrl() => kApiBaseUrl;
   static Map<String, String> headers = {};
   static TrackPropertyViewCall trackPropertyViewCall = TrackPropertyViewCall();
   static TrackPropertyInteractionCall trackPropertyInteractionCall =
