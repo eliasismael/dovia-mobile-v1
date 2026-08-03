@@ -16,10 +16,10 @@ class DHASSOCIATEServiciosModel
   // Model for DH_ASSOCIATE_Header component.
   late DHASSOCIATEHeaderModel dHASSOCIATEHeaderModel;
 
-  /// Categoría elegida para la solicitud. Es un único id y no un set: el flujo
-  /// exige "1 formulario por especialización", así que el selector se comporta
-  /// como un radio button.
-  String? selectedCategoryId;
+  /// Especialidad elegida para la solicitud. Es un único id y no un set: el
+  /// flujo exige "1 formulario por especialización", así que el selector se
+  /// comporta como un radio button.
+  String? selectedSpecialtyId;
 
   // State field(s) for the "experiencia" TextField.
   FocusNode? experienceFocusNode;
@@ -34,15 +34,14 @@ class DHASSOCIATEServiciosModel
   /// Evita reenvíos mientras el POST está en vuelo.
   bool isSubmitting = false;
 
-  /// Categorías que este asociado ya solicitó **en esta sesión**. Se atenúan en
-  /// el selector para que no mande dos veces la misma solicitud apenas ve el
-  /// modal de éxito: la categoría no sale del catálogo hasta que el Backoffice
-  /// aprueba, así que sin esto seguiría tappable.
+  /// Especialidades que este asociado ya solicitó **en esta sesión**. Se atenúan
+  /// en el selector para que no mande dos veces la misma solicitud apenas ve el
+  /// modal de éxito.
   ///
-  /// Es memoria de pantalla, no estado del servidor: al recargar vuelve a
-  /// aparecer habilitada. La defensa definitiva contra duplicados es del
-  /// backend.
-  final Set<String> requestedCategoryIds = {};
+  /// Se superpone a las pendientes que devuelve `GET /users/me/specialties`, y
+  /// no las reemplaza: cubre la ventana entre el envío y la recarga del listado.
+  /// La defensa definitiva contra duplicados es del backend.
+  final Set<String> requestedSpecialtyIds = {};
 
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
@@ -51,7 +50,7 @@ class DHASSOCIATEServiciosModel
 
   /// Deja el formulario como recién abierto, después de un envío exitoso.
   void resetForm() {
-    selectedCategoryId = null;
+    selectedSpecialtyId = null;
     experienceController?.clear();
     certificate = null;
   }

@@ -90,7 +90,11 @@
       "PowerShell(git -C $p rev-parse --abbrev-ref HEAD)",
       "PowerShell(git -C $p rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null)",
       "PowerShell(git -C $p ls-files --full-name vercel.json)",
-      "PowerShell($p = \"c:\\\\Users\\\\El�as\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\")"
+      "PowerShell($p = \"c:\\\\Users\\\\El�as\\\\Desktop\\\\dev\\\\work\\\\dovia\\\\code-from-flutterflow\\\\dovia\")",
+      "Bash(grep -E \"error|dovia_home_associate\\\\\\\\\\\\\\\\associate_|api_associate_specialties|servicios\")",
+      "Bash(flutter test *)",
+      "Bash(git stash *)",
+      "Bash(cp \"C:/Users/ELAS~1/AppData/Local/Temp/claude/c--Users-El-as-Desktop-dev-work-dovia-code-from-flutterflow-dovia/91e5e68d-97c4-488f-a539-f9d3ba81ad82/scratchpad/tmp_specialties_check_test.dart\" test/tmp_specialties_check_test.dart)"
     ]
   }
 }

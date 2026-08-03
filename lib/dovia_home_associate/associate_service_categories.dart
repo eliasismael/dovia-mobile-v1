@@ -31,20 +31,50 @@ class AssociateServiceCategory {
 /// tiene asset propio: se prefiere un ícono genérico a no pintar la tarjeta.
 const String _fallbackIcon = 'assets/images/IconoCaja.svg';
 
-/// Íconos por código de catálogo. Las claves son los códigos del backend y, como
-/// respaldo, la etiqueta normalizada (el catálogo de `dev` no siempre trae
-/// `code`).
-const Map<String, String> _iconByKey = {
-  'PLUMBING': 'assets/images/IconoServicioPlomeria.svg',
+/// Oficio al que pertenece cada código o etiqueta normalizada.
+///
+/// Existe porque **los dos catálogos del backend no comparten vocabulario**: los
+/// servicios (`GET /dovia-home/catalog/services`) nombran el rubro y las
+/// especialidades (`GET /users/me/specialties`) nombran el oficio, con ids
+/// distintos en cada uno.
+///
+///     servicio  PLOMERIA / "Plomería"      ←→ especialidad PLOMERO / "Plomero"
+///     servicio  ELECTRICO / "Eléctrico"    ←→ especialidad ELECTRICISTA
+///     servicio  ALBANILERIA                ←→ especialidad ALBANILERIA
+///     servicio  PINTURA                    ←→ especialidad PINTURA
+///     servicio  INSTALACION                ←→ (todavía sin especialidad)
+///
+/// Sin este puente, un asociado aprobado como `PLOMERO` no cruzaría contra el
+/// servicio `PLOMERIA` y el filtro "Tipo de Trabajo" le quedaría vacío. Se
+/// incluyen también los códigos en inglés que aparecían en versiones anteriores
+/// del catálogo.
+const Map<String, String> _familyByKey = {
+  'PLOMERIA': 'PLOMERIA',
+  'PLOMERO': 'PLOMERIA',
+  'PLUMBING': 'PLOMERIA',
+  'ELECTRICO': 'ELECTRICIDAD',
+  'ELECTRICIDAD': 'ELECTRICIDAD',
+  'ELECTRICISTA': 'ELECTRICIDAD',
+  'ELECTRICAL': 'ELECTRICIDAD',
+  'ELECTRICITY': 'ELECTRICIDAD',
+  'ALBANILERIA': 'ALBANILERIA',
+  'ALBANIL': 'ALBANILERIA',
+  'MASONRY': 'ALBANILERIA',
+  'PINTURA': 'PINTURA',
+  'PINTOR': 'PINTURA',
+  'PAINTING': 'PINTURA',
+  'INSTALACION': 'INSTALACION',
+  'INSTALADOR': 'INSTALACION',
+  'INSTALLATION': 'INSTALACION',
+};
+
+/// Íconos por oficio. El payload no trae assets, así que el ícono se resuelve
+/// desde el código y, como respaldo, desde la etiqueta.
+const Map<String, String> _iconByFamily = {
   'PLOMERIA': 'assets/images/IconoServicioPlomeria.svg',
-  'ELECTRICAL': 'assets/images/IconoServicioElectrico.svg',
-  'ELECTRICITY': 'assets/images/IconoServicioElectrico.svg',
-  'ELECTRICO': 'assets/images/IconoServicioElectrico.svg',
-  'MASONRY': 'assets/images/IconoServicioAlbaileria.svg',
+  'ELECTRICIDAD': 'assets/images/IconoServicioElectrico.svg',
   'ALBANILERIA': 'assets/images/IconoServicioAlbaileria.svg',
-  'PAINTING': 'assets/images/IconServicioPintura.svg',
   'PINTURA': 'assets/images/IconServicioPintura.svg',
-  'INSTALLATION': 'assets/images/IconServicioInstalacion.svg',
   'INSTALACION': 'assets/images/IconServicioInstalacion.svg',
 };
 
@@ -64,8 +94,32 @@ String _key(String value) {
   return out.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
 }
 
-String _iconFor(String? code, String label) =>
-    _iconByKey[_key(code ?? '')] ?? _iconByKey[_key(label)] ?? _fallbackIcon;
+/// Clave normalizada (sin acentos, mayúsculas, sólo alfanumérico) con la que se
+/// cruzan catálogo, especialidades y solicitudes: los tres payloads escriben lo
+/// mismo de maneras distintas ("Albañilería", "ALBANILERIA", "albanileria").
+String associateCategoryKey(String value) => _key(value);
+
+/// Todas las claves con las que se reconoce a [value]: la normalizada y, cuando
+/// el oficio es conocido, la de su familia ([_familyByKey]). Dos referencias al
+/// mismo oficio se cruzan si comparten cualquiera de las dos.
+Set<String> associateCategoryKeys(String value) {
+  final key = _key(value);
+  final family = _familyByKey[key];
+  return family == null ? {key} : {key, family};
+}
+
+/// Ícono de una categoría a partir de su código de catálogo o, como respaldo, de
+/// su etiqueta. Lo usa también el listado de especialidades, que trae los mismos
+/// oficios sin assets.
+String associateCategoryIcon(String? code, String label) {
+  for (final value in [code ?? '', label]) {
+    for (final key in associateCategoryKeys(value)) {
+      final icon = _iconByFamily[key];
+      if (icon != null) return icon;
+    }
+  }
+  return _fallbackIcon;
+}
 
 /// Convierte el listado de `GET /dovia-home/catalog/services` en categorías del
 /// carrusel.
@@ -97,87 +151,46 @@ List<AssociateServiceCategory> parseAssociateCategories(List<dynamic> raw) {
       id: asrString(data['id']) ?? code ?? label,
       code: code ?? _key(label),
       label: label,
-      iconPath: _iconFor(code, label),
+      iconPath: associateCategoryIcon(code, label),
     ));
   }
   return categories;
 }
 
-/// Estados de una especialidad que **no** habilitan a operar: una solicitud en
-/// auditoría o rechazada no es una especialidad aprobada, y pintarla entre los
-/// "Servicios actuales" le haría creer al asociado que ya puede tomar esos
-/// trabajos.
+/// Claves de las especialidades **aprobadas** del asociado, tal como las
+/// devuelve `GET /users/me/specialties` en `currentSpecialties`: ítems planos
+/// `{ id, code, label }`.
 ///
-/// Se compara por lista negra y no por lista blanca a propósito: si el endpoint
-/// devuelve un estado nuevo que no conocemos, o directamente no manda `status`
-/// (ya devuelve sólo las aprobadas), la especialidad cuenta como aprobada. El
-/// caso opuesto —esconder una especialidad real— dejaría al asociado pidiendo
-/// de nuevo algo que ya tiene.
-const Set<String> _kUnapprovedStatuses = {
-  'PENDING',
-  'IN_REVIEW',
-  'REJECTED',
-  'REVOKED',
-  'EXPIRED',
-  'INACTIVE',
-};
-
-/// Claves normalizadas de las especialidades **aprobadas** del asociado, tal
-/// como las devuelve `GET /dovia-home/associate/specialties`.
-///
-/// Se guardan todas las referencias que trae cada ítem (id de catálogo, código
-/// y etiqueta) porque no está confirmado con cuál de las tres apunta el payload
-/// a la categoría; alcanza con que una coincida ([categoryIsApproved]).
+/// Se guardan las tres referencias con sus familias de oficio porque el id de
+/// una especialidad **no** es el del servicio equivalente del catálogo: el cruce
+/// real es por familia ([categoryIsApproved]).
 Set<String> parseApprovedSpecialtyKeys(List<dynamic> raw) {
   final keys = <String>{};
   for (final item in raw) {
-    // Un listado de strings sueltos (Ej: ["PLUMBING"]) también es válido.
-    if (item is String) {
-      if (item.trim().isNotEmpty) keys.add(_key(item));
-      continue;
-    }
     if (item is! Map) continue;
     final data = Map<String, dynamic>.from(item);
 
-    final status = asrString(data['status']) ?? asrString(data['state']);
-    if (status != null && _kUnapprovedStatuses.contains(status.toUpperCase())) {
-      continue;
-    }
-
-    // El servicio puede venir plano o anidado, igual que en el marketplace.
-    final service = data['service'] is Map
-        ? Map<String, dynamic>.from(data['service'] as Map)
-        : (data['serviceDetail'] is Map
-            ? Map<String, dynamic>.from(data['serviceDetail'] as Map)
-            : const <String, dynamic>{});
-
-    for (final candidate in [
-      data['serviceId'],
-      data['id'],
-      data['code'],
-      data['label'],
-      data['name'],
-      service['id'],
-      service['code'],
-      service['label'],
-      service['name'],
-    ]) {
+    for (final candidate in [data['id'], data['code'], data['label']]) {
       final value = asrString(candidate);
-      if (value != null) keys.add(_key(value));
+      if (value != null) keys.addAll(associateCategoryKeys(value));
     }
   }
   return keys;
 }
 
-/// ¿El asociado ya está aprobado para operar esta categoría? Se cruza por id de
-/// catálogo, por código y por etiqueta normalizada.
+/// ¿El asociado ya está aprobado para operar esta categoría del catálogo de
+/// servicios?
+///
+/// Se cruza por familia de oficio además de por id, código y etiqueta: el
+/// asociado aprobado como `PLOMERO` opera el servicio `PLOMERIA` aunque no
+/// compartan ni id ni código.
 bool categoryIsApproved(
   AssociateServiceCategory category,
   Set<String> approvedKeys,
 ) =>
-    approvedKeys.contains(_key(category.id)) ||
-    approvedKeys.contains(_key(category.code)) ||
-    approvedKeys.contains(_key(category.label));
+    [category.id, category.code, category.label]
+        .expand(associateCategoryKeys)
+        .any(approvedKeys.contains);
 
 /// ¿La solicitud pertenece a la categoría seleccionada? Compara por código de
 /// catálogo y, si el payload no lo trae, por etiqueta.

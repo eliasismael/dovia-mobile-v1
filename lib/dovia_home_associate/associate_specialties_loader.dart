@@ -1,12 +1,15 @@
 /// Carga del catálogo de Dovia Home cruzado contra las especialidades
 /// aprobadas del asociado.
 ///
-/// Lo comparten las dos pantallas que necesitan esa distinción:
-///   - **Servicios**: pinta las aprobadas arriba y ofrece las restantes para
-///     solicitar.
-///   - **Trabajos disponibles**: el filtro "Tipo de Trabajo" se puebla **sólo**
-///     con las aprobadas, para que no pueda filtrar por un oficio que no está
-///     habilitado a trabajar.
+/// Lo usan los dos tableros de trabajo —**Trabajos disponibles** y **Próximos
+/// trabajos**—, donde el filtro "Tipo de Trabajo" se puebla **sólo** con las
+/// aprobadas, para que no pueda filtrar por un oficio que no está habilitado a
+/// trabajar. El cruce sigue haciéndose contra el catálogo porque es el catálogo
+/// el que comparte códigos con las tarjetas de trabajo.
+///
+/// La pantalla de **Servicios** no pasa por acá: `GET /users/me/specialties` ya
+/// le devuelve resueltas las aprobadas, las solicitables y las pendientes
+/// (`loadAssociateSpecialties`).
 library;
 
 import '/backend/api_requests/api_associate_specialties.dart';
@@ -60,11 +63,13 @@ class AssociateCategories {
 Future<AssociateCategories> loadAssociateCategories({
   required String authToken,
 }) async {
+  final specialtiesCall =
+      DOVIAAPIAssociateSpecialtiesContextGroup.getMySpecialtiesCall;
+
   final responses = await Future.wait([
     DOVIAAPIDoviaHomeContextGroup.listCatalogServicesCall
         .call(authToken: authToken),
-    DOVIAAPIAssociateSpecialtiesContextGroup.listAssociateSpecialtiesCall
-        .call(authToken: authToken),
+    specialtiesCall.call(authToken: authToken),
   ]);
 
   final catalogRes = responses[0];
@@ -87,8 +92,7 @@ Future<AssociateCategories> loadAssociateCategories({
 
   final approvedKeys = specialtiesRes.succeeded
       ? parseApprovedSpecialtyKeys(
-          DOVIAAPIAssociateSpecialtiesContextGroup.listAssociateSpecialtiesCall
-                  .specialtiesList(specialtiesRes.jsonBody) ??
+          specialtiesCall.currentSpecialties(specialtiesRes.jsonBody) ??
               const [],
         )
       : <String>{};

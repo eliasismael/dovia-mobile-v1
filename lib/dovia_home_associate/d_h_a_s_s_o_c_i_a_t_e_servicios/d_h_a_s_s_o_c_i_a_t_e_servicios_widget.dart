@@ -1,7 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_associate_specialties.dart';
-import '/dovia_home_associate/associate_service_categories.dart';
-import '/dovia_home_associate/associate_specialties_loader.dart';
+import '/dovia_home_associate/associate_specialties.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -12,6 +11,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_servicios_model.dart';
@@ -26,19 +26,32 @@ const Color _kCardSurface = Color(0xFFF7F7F7);
 /// Aqua/60 del diseño: el cuadrado que envuelve al ícono de cada categoría.
 const Color _kIconSurface = Color(0xFF70ACAD);
 
+/// Límites del certificado, tal como los valida
+/// `POST /users/me/specialty-requests`. Se chequean acá para que el asociado se
+/// entere antes de esperar un upload que el backend va a rechazar.
+const int _kMaxCertificateBytes = 5 * 1024 * 1024;
+const List<String> _kCertificateExtensions = [
+  'pdf',
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+];
+
 /// Especialidades del Dovia Home Associate, adaptado a mobile desde el diseño
 /// de escritorio.
 ///
 /// Dos bloques bien separados, porque hacen cosas distintas:
-///   - **Servicios actuales**: las categorías en las que ya está aprobado.
+///   - **Servicios actuales**: las especialidades en las que ya está aprobado.
 ///     Son informativas y deliberadamente **no** son tappables — no filtran ni
 ///     abren nada; que respondan al toque haría creer que se pueden editar.
-///   - **Solicitar un servicio nuevo**: catálogo + evidencia. El flujo exige
-///     "1 formulario por especialización", así que el selector se comporta como
-///     un radio button: elegir otra categoría desmarca la anterior.
+///   - **Solicitar un servicio nuevo**: especialidades solicitables + evidencia.
+///     El flujo exige "1 formulario por especialización", así que el selector se
+///     comporta como un radio button: elegir otra desmarca la anterior.
 ///
-/// Las categorías ya aprobadas se ocultan del selector de abajo para que no
-/// pueda pedir dos veces lo mismo.
+/// Las dos listas y las solicitudes en auditoría salen resueltas de
+/// `GET /users/me/specialties`: el backend ya descuenta del selector las
+/// especialidades aprobadas, para que no pueda pedir dos veces lo mismo.
 ///
 /// El envío no habilita nada por sí solo: genera el pendiente de auditoría en
 /// el Backoffice de DOVIA, y la categoría recién aparece arriba cuando un admin
@@ -60,7 +73,7 @@ class _DHASSOCIATEServiciosWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Future<AssociateCategories> _serviciosFuture;
+  late Future<AssociateSpecialties> _serviciosFuture;
 
   @override
   void initState() {
@@ -71,7 +84,7 @@ class _DHASSOCIATEServiciosWidgetState
     _model.experienceFocusNode ??= FocusNode();
 
     _serviciosFuture =
-        loadAssociateCategories(authToken: currentAuthenticationToken ?? '');
+        loadAssociateSpecialties(authToken: currentAuthenticationToken ?? '');
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -87,11 +100,11 @@ class _DHASSOCIATEServiciosWidgetState
   // Formulario.
   // ---------------------------------------------------------------------------
 
-  /// Bloqueo preventivo del botón: categoría + experiencia + certificado. Las
+  /// Bloqueo preventivo del botón: especialidad + experiencia + certificado. Las
   /// tres son obligatorias porque el Backoffice audita con la evidencia, no con
   /// la buena fe.
   bool get _canSubmit =>
-      _model.selectedCategoryId != null &&
+      _model.selectedSpecialtyId != null &&
       (_model.experienceController?.text.trim().isNotEmpty ?? false) &&
       _model.certificate != null &&
       !_model.isSubmitting;
@@ -159,7 +172,7 @@ class _DHASSOCIATEServiciosWidgetState
           await selectMedia(mediaSource: MediaSource.photoGallery),
         _CertificateSource.file => await selectFiles(
             multiFile: false,
-            allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
+            allowedExtensions: _kCertificateExtensions,
           ),
       };
 
@@ -177,9 +190,20 @@ class _DHASSOCIATEServiciosWidgetState
       // porque la extensión es lo que define el Content-Type del upload.
       final timestampedName = media.storagePath.split('/').last;
       final originalName = media.originalFilename;
+      final name = originalName.contains('.') ? originalName : timestampedName;
+
+      final rejection = _certificateRejection(name, media.bytes);
+      if (rejection != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(rejection)));
+        }
+        return;
+      }
+
       safeSetState(() {
         _model.certificate = FFUploadedFile(
-          name: originalName.contains('.') ? originalName : timestampedName,
+          name: name,
           bytes: media.bytes,
           originalFilename: originalName,
         );
@@ -187,6 +211,26 @@ class _DHASSOCIATEServiciosWidgetState
     } finally {
       if (mounted) safeSetState(() => _model.isPickingCertificate = false);
     }
+  }
+
+  /// Por qué no sirve este archivo como certificado, o null si sirve.
+  ///
+  /// Reproduce las reglas del endpoint (formato, no vacío y hasta 5 MB) para
+  /// explicarle el problema apenas elige el archivo, en vez de hacerle completar
+  /// el formulario y comerse el rechazo recién al enviar.
+  String? _certificateRejection(String name, Uint8List? bytes) {
+    final extension = name.split('.').last.toLowerCase();
+    if (!_kCertificateExtensions.contains(extension)) {
+      return 'El certificado tiene que ser un PDF o una imagen '
+          '(JPG, PNG o WEBP).';
+    }
+    if (bytes == null || bytes.isEmpty) {
+      return 'No pudimos leer el archivo. Probá de nuevo o elegí otro.';
+    }
+    if (bytes.length > _kMaxCertificateBytes) {
+      return 'El certificado no puede pesar más de 5 MB.';
+    }
+    return null;
   }
 
   Widget _sourceTile(
@@ -208,19 +252,34 @@ class _DHASSOCIATEServiciosWidgetState
         onTap: () => Navigator.pop(sheetContext, source),
       );
 
+  /// Mensaje de error que mandó el backend, si es que mandó uno legible.
+  ///
+  /// La API envuelve todo en `{ success, message, data, errors }`, con `message`
+  /// en castellano y apto para mostrar. Se descarta lo que no sea texto útil
+  /// —un body vacío por caída de red, o el `message` genérico de éxito— para no
+  /// pasarle al asociado un cartel que no le dice nada.
+  String? _errorMessage(dynamic body) {
+    for (final path in [r'''$.errors[0].message''', r'''$.message''']) {
+      final value = getJsonField(body, path);
+      if (value is String && value.trim().isNotEmpty) return value.trim();
+    }
+    return null;
+  }
+
   /// Emite la solicitud al Backoffice de DOVIA para auditoría.
   Future<void> _submit() async {
-    final categoryId = _model.selectedCategoryId;
+    final specialtyId = _model.selectedSpecialtyId;
     final experience = _model.experienceController?.text.trim() ?? '';
     final certificate = _model.certificate;
-    if (categoryId == null || experience.isEmpty || certificate == null) return;
+    if (specialtyId == null || experience.isEmpty || certificate == null)
+      return;
 
     safeSetState(() => _model.isSubmitting = true);
     try {
       final response = await DOVIAAPIAssociateSpecialtiesContextGroup
-          .createAssociateSpecialtyRequestCall
+          .createSpecialtyRequestCall
           .call(
-        serviceId: categoryId,
+        specialtyId: specialtyId,
         experience: experience,
         file: certificate,
         authToken: currentAuthenticationToken ?? '',
@@ -232,10 +291,17 @@ class _DHASSOCIATEServiciosWidgetState
         // El formulario conserva lo cargado: hacerle escribir de nuevo la
         // experiencia y volver a buscar el certificado por un error de red
         // sería castigarlo por algo que no hizo.
+        //
+        // Se prefiere el mensaje del backend cuando viene: "ya tenés una
+        // solicitud en revisión" o "el archivo supera el tamaño permitido" le
+        // dicen qué corregir, cosa que un "intentá de nuevo" no hace.
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-                'No se pudo enviar la solicitud. Intentá de nuevo en un momento.'),
+              _errorMessage(response.jsonBody) ??
+                  'No se pudo enviar la solicitud. Intentá de nuevo en un '
+                      'momento.',
+            ),
           ),
         );
         return;
@@ -249,18 +315,27 @@ class _DHASSOCIATEServiciosWidgetState
           backgroundColor: Colors.transparent,
           alignment: const AlignmentDirectional(0.0, 0.0)
               .resolve(Directionality.of(context)),
-          child: const PopupExitoWidget(
+          child: PopupExitoWidget(
             title: 'Solicitud enviada con éxito',
             text: 'El equipo de DOVIA revisará tu documentación. Te avisaremos '
                 'cuando la especialidad quede habilitada en tu perfil.',
+            continueText: 'Entendido',
+            onContinue: () => Navigator.pop(dialogContext),
           ),
         ),
       );
 
       if (!mounted) return;
+      // La solicitud ya existe del lado del backend: se recarga el listado para
+      // que la especialidad aparezca como pendiente con el estado real, y
+      // mientras tanto se la marca localmente para que no quede tappable entre
+      // el modal de éxito y la respuesta de la recarga.
       safeSetState(() {
-        _model.requestedCategoryIds.add(categoryId);
+        _model.requestedSpecialtyIds.add(specialtyId);
         _model.resetForm();
+        _serviciosFuture = loadAssociateSpecialties(
+          authToken: currentAuthenticationToken ?? '',
+        );
       });
     } finally {
       if (mounted) safeSetState(() => _model.isSubmitting = false);
@@ -310,10 +385,10 @@ class _DHASSOCIATEServiciosWidgetState
         ),
       );
 
-  /// Tarjeta de categoría del diseño. `onTap` en null la deja informativa, que
-  /// es como se pintan los servicios ya aprobados.
+  /// Tarjeta de especialidad del diseño. `onTap` en null la deja informativa,
+  /// que es como se pintan los servicios ya aprobados.
   Widget _categoryCard(
-    AssociateServiceCategory category, {
+    AssociateSpecialty category, {
     bool isSelected = false,
     bool isPending = false,
     VoidCallback? onTap,
@@ -422,6 +497,11 @@ class _DHASSOCIATEServiciosWidgetState
         focusNode: _model.experienceFocusNode,
         autofocus: false,
         obscureText: false,
+        // Tope duro en el máximo que acepta el endpoint. Se corta al escribir y
+        // no se muestra contador: el campo es de texto libre y llegar a 2000
+        // caracteres redactando un párrafo de experiencia es improbable, pero
+        // pegar un CV entero y comerse un 400 al enviar no lo es.
+        inputFormatters: [LengthLimitingTextInputFormatter(2000)],
         // El botón [Solicitar] se reevalúa con cada tecla.
         onChanged: (_) => safeSetState(() {}),
         decoration: InputDecoration(
@@ -585,49 +665,63 @@ class _DHASSOCIATEServiciosWidgetState
         ),
       );
 
-  /// Cuerpo de la pantalla una vez resuelto el catálogo.
-  Widget _buildContent(AssociateCategories data) {
-    if (data.catalogFailed) return _hint(data.catalogErrorMessage);
+  /// Cuerpo de la pantalla una vez resueltas las especialidades.
+  Widget _buildContent(AssociateSpecialties data) {
+    if (data.failed) return _hint(data.errorMessage);
+
+    // Con solicitud en auditoría: las que el backend reporta como pendientes,
+    // más las enviadas en esta sesión y todavía no reflejadas en el listado.
+    bool isPending(AssociateSpecialty specialty) =>
+        data.isPending(specialty) ||
+        _model.requestedSpecialtyIds.contains(specialty.id);
+
+    // Las solicitables, y las que sólo se pueden mirar porque ya están en
+    // revisión. Las pendientes que el backend descuenta de `available` se
+    // agregan al final para que la solicitud recién enviada siga a la vista.
+    final selectable =
+        data.available.where((s) => !isPending(s)).toList(growable: false);
+    final pendingCards = [
+      ...data.available.where(isPending),
+      ...data.pendingOutsideAvailable,
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionTitle('Servicios actuales'),
         const SizedBox(height: 14.0),
-        if (data.approved.isEmpty)
+        if (data.current.isEmpty)
           _hint('Todavía no tenés especialidades aprobadas. Solicitá la '
               'primera acá abajo y el equipo de DOVIA revisará tu '
               'documentación.')
         else
           _categoryGrid([
-            for (final category in data.approved) _categoryCard(category),
+            for (final specialty in data.current) _categoryCard(specialty),
           ]),
         const SizedBox(height: 30.0),
         _sectionTitle('Solicita agregar un nuevo servicio en tu perfil'),
         const SizedBox(height: 14.0),
-        if (data.available.isEmpty)
-          _hint('Ya estás aprobado en todas las categorías disponibles del '
-              'catálogo.')
+        if (selectable.isEmpty && pendingCards.isEmpty)
+          _hint('No hay nuevas especialidades para solicitar por ahora.')
         else ...[
           _categoryGrid([
-            for (final category in data.available)
-              if (_model.requestedCategoryIds.contains(category.id))
-                _categoryCard(category, isPending: true)
-              else
-                _categoryCard(
-                  category,
-                  isSelected: _model.selectedCategoryId == category.id,
-                  // Radio button: elegir otra desmarca la anterior, y volver a
-                  // tocar la elegida limpia la selección.
-                  onTap: () => safeSetState(() {
-                    _model.selectedCategoryId =
-                        _model.selectedCategoryId == category.id
-                            ? null
-                            : category.id;
-                  }),
-                ),
+            for (final specialty in selectable)
+              _categoryCard(
+                specialty,
+                isSelected: _model.selectedSpecialtyId == specialty.id,
+                // Radio button: elegir otra desmarca la anterior, y volver a
+                // tocar la elegida limpia la selección.
+                onTap: () => safeSetState(() {
+                  _model.selectedSpecialtyId =
+                      _model.selectedSpecialtyId == specialty.id
+                          ? null
+                          : specialty.id;
+                }),
+              ),
+            for (final specialty in pendingCards)
+              _categoryCard(specialty, isPending: true),
           ]),
-          if (_model.requestedCategoryIds.isNotEmpty) ...[
+          if (pendingCards.isNotEmpty) ...[
             const SizedBox(height: 10.0),
             Text(
               'Las categorías atenuadas ya tienen una solicitud en revisión.',
@@ -639,39 +733,49 @@ class _DHASSOCIATEServiciosWidgetState
                   ),
             ),
           ],
-          const SizedBox(height: 24.0),
-          _fieldLabel('Escribe la experiencia en este nuevo servicio'),
-          const SizedBox(height: 12.0),
-          _buildExperienceField(),
-          const SizedBox(height: 18.0),
-          _fieldLabel('Carga el certificado o titulo'),
-          const SizedBox(height: 12.0),
-          _buildCertificateZone(),
-          const SizedBox(height: 30.0),
-          FFButtonWidget(
-            onPressed: _canSubmit ? _submit : null,
-            text: _model.isSubmitting ? 'Enviando...' : 'Solicitar',
-            options: FFButtonOptions(
-              width: double.infinity,
-              height: 42.0,
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
-              iconPadding:
-                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-              color: FlutterFlowTheme.of(context).primary,
-              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w600,
-                  ),
-              disabledColor: FlutterFlowTheme.of(context).alternate,
-              disabledTextColor: FlutterFlowTheme.of(context).secondaryText,
-              elevation: 0.0,
-              borderRadius: BorderRadius.circular(25.0),
+          // Sin nada que elegir no hay formulario que completar: el bloqueo del
+          // botón nunca se podría levantar y sólo mostraría campos muertos.
+          if (selectable.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 24.0),
+              child: _hint('Todas las especialidades que podés sumar ya tienen '
+                  'una solicitud en revisión.'),
+            )
+          else ...[
+            const SizedBox(height: 24.0),
+            _fieldLabel('Escribe la experiencia en este nuevo servicio'),
+            const SizedBox(height: 12.0),
+            _buildExperienceField(),
+            const SizedBox(height: 18.0),
+            _fieldLabel('Carga el certificado o titulo'),
+            const SizedBox(height: 12.0),
+            _buildCertificateZone(),
+            const SizedBox(height: 30.0),
+            FFButtonWidget(
+              onPressed: _canSubmit ? _submit : null,
+              text: _model.isSubmitting ? 'Enviando...' : 'Solicitar',
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 42.0,
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    20.0, 10.0, 20.0, 10.0),
+                iconPadding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                color: FlutterFlowTheme.of(context).primary,
+                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                      color: Colors.white,
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                disabledColor: FlutterFlowTheme.of(context).alternate,
+                disabledTextColor: FlutterFlowTheme.of(context).secondaryText,
+                elevation: 0.0,
+                borderRadius: BorderRadius.circular(25.0),
+              ),
             ),
-          ),
+          ],
         ],
       ],
     );
@@ -711,7 +815,7 @@ class _DHASSOCIATEServiciosWidgetState
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 30.0, 20.0, 140.0),
-                      child: FutureBuilder<AssociateCategories>(
+                      child: FutureBuilder<AssociateSpecialties>(
                         future: _serviciosFuture,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
