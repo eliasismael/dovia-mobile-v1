@@ -76,7 +76,9 @@
       "PowerShell($OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dart analyze)",
       "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dart analyze 2>&1 | Select-String -Pattern \"d_h_a_s_s_o_c_i_a_t_e_servicios|api_associate_specialties|associate_service_categories\")",
       "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; dart format lib/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_servicios lib/dovia_home_associate/associate_service_categories.dart lib/backend/api_requests/api_associate_specialties.dart)",
-      "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $out = dart analyze 2>&1 | Out-String; $out -split \"`n\" | Select-String -Pattern \"servicios|specialties|associate_service\")"
+      "PowerShell([Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $out = dart analyze 2>&1 | Out-String; $out -split \"`n\" | Select-String -Pattern \"servicios|specialties|associate_service\")",
+      "PowerShell(flutter analyze lib/dovia_home_associate 2>&1)",
+      "Bash(flutter build *)"
     ]
   }
 }

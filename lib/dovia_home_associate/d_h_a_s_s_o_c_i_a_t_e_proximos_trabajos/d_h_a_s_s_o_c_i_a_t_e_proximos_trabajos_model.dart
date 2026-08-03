@@ -1,6 +1,7 @@
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_proximos_trabajos_widget.dart'
@@ -17,9 +18,22 @@ class DHASSOCIATEProximosTrabajosModel
   /// Búsqueda por palabras clave sobre la agenda.
   String searchQuery = '';
 
-  /// Incluir los trabajos ya finalizados en el listado. Por defecto la agenda
-  /// muestra sólo lo que el asociado tiene por delante.
-  bool includeFinished = false;
+  /// Filtro "Tipo de Trabajo". Es el id de catálogo de una de las
+  /// **especialidades aprobadas** del asociado, o null para no filtrar. El
+  /// desplegable nunca ofrece categorías que no tenga habilitadas.
+  String? categoryId;
+  FormFieldController<String>? categoryController;
+
+  /// Filtro "Estado del trabajo": null = Todo, true = sólo Urgente
+  /// (emergencias), false = sólo Estándar.
+  bool? urgentOnly;
+  FormFieldController<String>? statusController;
+
+  /// Filtro "Fecha del trabajo", como clave de mes (`2026-08`) o null para
+  /// todos los meses. Agrupar por mes es lo que pide el diseño para planificar
+  /// a mediano plazo.
+  String? monthKey;
+  FormFieldController<String>? monthController;
 
   // Model for DH_ASSOCIATE_Header component.
   late DHASSOCIATEHeaderModel dHASSOCIATEHeaderModel;

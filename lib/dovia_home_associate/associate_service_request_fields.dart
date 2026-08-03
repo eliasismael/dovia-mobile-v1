@@ -178,6 +178,29 @@ String? asrAccessInstructions(Map<String, dynamic> data) {
 String asrStatus(Map<String, dynamic> data) =>
     (asrString(data['status']) ?? 'PENDING').toUpperCase();
 
+/// El trabajo ya se ejecutó y se cerró. Es lo que parte la agenda del asociado
+/// en sus dos secciones: lo que todavía tiene que hacer ("Trabajos aceptados")
+/// y su historial ("Trabajos terminados").
+bool asrIsFinished(Map<String, dynamic> data) => asrStatus(data) == 'FINISHED';
+
+/// Descripción del trabajo realizado que cargó el asociado al finalizar.
+///
+/// Se leen las mismas claves que consume el registro del cliente: el shape del
+/// detalle todavía no está cerrado del lado del backend.
+String? asrCompletionDescription(Map<String, dynamic> data) => _firstString([
+      data['completionDescription'],
+      data['workDoneDescription'],
+      data['completionNotes'],
+    ]);
+
+/// Recomendaciones que el asociado le dejó al cliente al cerrar el trabajo.
+String? asrCompletionRecommendations(Map<String, dynamic> data) =>
+    _firstString([
+      data['clientRecommendations'],
+      data['recommendations'],
+      data['completionRecommendations'],
+    ]);
+
 /// Estados en los que la solicitud ya tiene dueño y no se puede tomar.
 const Set<String> _kClaimedStatuses = {'TAKEN', 'IN_PROGRESS', 'FINISHED'};
 

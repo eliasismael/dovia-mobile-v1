@@ -1,10 +1,10 @@
+import '/dovia_home_associate/associate_job_filters.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_card/d_h_a_s_s_o_c_i_a_t_e_trabajo_card_widget.dart';
-import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
@@ -20,14 +20,6 @@ import '/backend/api_requests/api_dovia_home.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_trabajos_disponibles_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_trabajos_disponibles_model.dart';
-
-/// Valor centinela de la opción "Todo" de cada desplegable. Es un valor y no
-/// `null` porque `FlutterFlowDropDown` usa null para "nada elegido" y ahí
-/// pintaría el placeholder en vez de decir que no está filtrando.
-const String _kAllOption = '__ALL__';
-
-const String _kUrgentOption = 'URGENT';
-const String _kStandardOption = 'STANDARD';
 
 /// Bolsa completa de oportunidades del asociado. Se abre desde el "Ver más" de
 /// la sección "Trabajos disponibles" del panel.
@@ -56,9 +48,6 @@ class DHASSOCIATETrabajosDisponiblesWidget extends StatefulWidget {
   State<DHASSOCIATETrabajosDisponiblesWidget> createState() =>
       _DHASSOCIATETrabajosDisponiblesWidgetState();
 }
-
-/// Un mes con trabajos, para el desplegable de fecha.
-typedef _MonthOption = ({String key, String label});
 
 /// Todo lo que la pantalla necesita resuelto: las especialidades que pueblan el
 /// filtro de tipo y la bolsa de trabajos.
@@ -170,16 +159,16 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
   /// asociado vería la bolsa vacía y un desplegable que dice que no está
   /// filtrando nada. Se corre fuera del build, al resolver la carga.
   void _reconcileFilters(_Board board) {
-    final months = _monthOptions(board.jobs).map((m) => m.key).toSet();
+    final months = associateMonthOptions(board.jobs).map((m) => m.key).toSet();
     if (_model.monthKey != null && !months.contains(_model.monthKey)) {
       _model.monthKey = null;
-      _model.monthController?.value = _kAllOption;
+      _model.monthController?.value = kAssociateFilterAll;
     }
 
     final approved = board.categories.approved.map((c) => c.id).toSet();
     if (_model.categoryId != null && !approved.contains(_model.categoryId)) {
       _model.categoryId = null;
-      _model.categoryController?.value = _kAllOption;
+      _model.categoryController?.value = kAssociateFilterAll;
     }
   }
 
@@ -209,19 +198,6 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
         .where((data) =>
             _model.monthKey == null || asrMonthKey(data) == _model.monthKey)
         .toList();
-  }
-
-  /// Meses con trabajos, ordenados cronológicamente. Sale de la bolsa completa
-  /// para que el desplegable no se vacíe a medida que el asociado filtra.
-  List<_MonthOption> _monthOptions(List<Map<String, dynamic>> jobs) {
-    final labelsByKey = <String, String>{};
-    for (final job in jobs) {
-      final key = asrMonthKey(job);
-      final label = asrMonthLabel(job);
-      if (key != null && label != null) labelsByKey[key] = label;
-    }
-    final keys = labelsByKey.keys.toList()..sort();
-    return [for (final key in keys) (key: key, label: labelsByKey[key]!)];
   }
 
   void _openOpportunity(Map<String, dynamic> data) {
@@ -294,116 +270,57 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
     );
   }
 
-  /// Desplegable del diseño: etiqueta arriba, campo blanco redondeado con la
-  /// flecha a la derecha. En escritorio los tres van en fila; en mobile no
-  /// entran, así que se apilan.
-  Widget _buildDropdown({
-    required String label,
-    required String hintText,
-    required FormFieldController<String> controller,
-    required List<String> options,
-    required List<String> optionLabels,
-    required void Function(String?) onChanged,
-    bool disabled = false,
-  }) {
-    final theme = FlutterFlowTheme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: theme.bodyMedium.override(
-            font: GoogleFonts.publicSans(),
-            color: theme.primaryText,
-            fontSize: 16.0,
-            letterSpacing: 0.32,
-          ),
-        ),
-        const SizedBox(height: 8.0),
-        FlutterFlowDropDown<String>(
-          controller: controller,
-          options: options,
-          optionLabels: optionLabels,
-          onChanged: onChanged,
-          width: double.infinity,
-          height: 48.0,
-          hintText: hintText,
-          disabled: disabled,
-          textStyle: theme.bodyMedium.override(
-            font: GoogleFonts.publicSans(),
-            color: disabled ? theme.secondaryText : theme.primaryText,
-            fontSize: 15.0,
-            letterSpacing: 0.3,
-          ),
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: theme.secondaryText,
-            size: 24.0,
-          ),
-          fillColor: theme.secondaryBackground,
-          elevation: 2.0,
-          borderColor: Colors.transparent,
-          borderWidth: 0.0,
-          borderRadius: 10.0,
-          margin: const EdgeInsetsDirectional.fromSTEB(16.0, 4.0, 12.0, 4.0),
-          hidesUnderline: true,
-          isOverButton: false,
-          isSearchable: false,
-          isMultiSelect: false,
-        ),
-      ],
-    );
-  }
-
   /// Tipo de Trabajo. **Sólo las especialidades aprobadas del asociado**: si es
   /// Plomero y Electricista, esas dos y nada más.
   Widget _buildCategoryFilter(AssociateCategories categories) {
     final approved = categories.approved;
 
     if (approved.isEmpty) {
-      // Sin especialidades aprobadas no hay nada legítimo que ofrecer. Se deja
-      // el desplegable visible pero inerte, y se dice por qué: esconderlo haría
-      // parecer que la pantalla está rota.
-      return _buildDropdown(
+      // Sin especialidades aprobadas no hay nada legítimo que ofrecer, y se
+      // dice por qué en vez de dejar un desplegable vacío sin explicación.
+      return AssociateJobFilterDropdown(
         label: 'Tipo de Trabajo',
         hintText: 'Sin especialidades aprobadas',
         controller: _model.categoryController ??=
-            FormFieldController<String>(_kAllOption),
-        options: const [_kAllOption],
+            FormFieldController<String>(kAssociateFilterAll),
+        options: const [kAssociateFilterAll],
         optionLabels: const ['Sin especialidades aprobadas'],
         onChanged: (_) {},
         disabled: true,
       );
     }
 
-    return _buildDropdown(
+    return AssociateJobFilterDropdown(
       label: 'Tipo de Trabajo',
       hintText: 'Selecciona la especialidad',
       controller: _model.categoryController ??=
-          FormFieldController<String>(_kAllOption),
-      options: [_kAllOption, ...approved.map((c) => c.id)],
+          FormFieldController<String>(kAssociateFilterAll),
+      options: [kAssociateFilterAll, ...approved.map((c) => c.id)],
       optionLabels: ['Todas', ...approved.map((c) => c.label)],
       onChanged: (value) => safeSetState(() {
         _model.categoryId =
-            (value == null || value == _kAllOption) ? null : value;
+            (value == null || value == kAssociateFilterAll) ? null : value;
       }),
     );
   }
 
   /// Estado del trabajo: las tres opciones fijas del diseño.
   Widget _buildStatusFilter() {
-    return _buildDropdown(
+    return AssociateJobFilterDropdown(
       label: 'Estado del trabajo',
       hintText: 'Selecciona el estado',
       controller: _model.statusController ??=
-          FormFieldController<String>(_kAllOption),
-      options: const [_kAllOption, _kUrgentOption, _kStandardOption],
+          FormFieldController<String>(kAssociateFilterAll),
+      options: const [
+        kAssociateFilterAll,
+        kAssociateFilterUrgent,
+        kAssociateFilterStandard,
+      ],
       optionLabels: const ['Todo', 'Urgente', 'Estándar'],
       onChanged: (value) => safeSetState(() {
         _model.urgentOnly = switch (value) {
-          _kUrgentOption => true,
-          _kStandardOption => false,
+          kAssociateFilterUrgent => true,
+          kAssociateFilterStandard => false,
           _ => null,
         };
       }),
@@ -411,18 +328,18 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
   }
 
   /// Fecha del trabajo, agrupada por mes.
-  Widget _buildMonthFilter(List<_MonthOption> months) {
-    return _buildDropdown(
+  Widget _buildMonthFilter(List<AssociateMonthOption> months) {
+    return AssociateJobFilterDropdown(
       label: 'Fecha del trabajo',
       hintText: 'Selecciona el mes',
       controller: _model.monthController ??=
-          FormFieldController<String>(_kAllOption),
-      options: [_kAllOption, ...months.map((m) => m.key)],
+          FormFieldController<String>(kAssociateFilterAll),
+      options: [kAssociateFilterAll, ...months.map((m) => m.key)],
       optionLabels: ['Todos los meses', ...months.map((m) => m.label)],
       disabled: months.isEmpty,
       onChanged: (value) => safeSetState(() {
         _model.monthKey =
-            (value == null || value == _kAllOption) ? null : value;
+            (value == null || value == kAssociateFilterAll) ? null : value;
       }),
     );
   }
@@ -520,7 +437,8 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
                             const SizedBox(height: 16.0),
                             _buildStatusFilter(),
                             const SizedBox(height: 16.0),
-                            _buildMonthFilter(_monthOptions(board.jobs)),
+                            _buildMonthFilter(
+                                associateMonthOptions(board.jobs)),
                             const SizedBox(height: 24.0),
                             _buildBoard(board),
                           ],
