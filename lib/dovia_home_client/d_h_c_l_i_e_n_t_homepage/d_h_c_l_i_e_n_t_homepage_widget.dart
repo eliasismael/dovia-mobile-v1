@@ -982,18 +982,14 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             _buildServiceCard('Servicio de\nemergencia',
                                 'assets/images/warning-triangle.svg',
                                 isEmergency: true, onTap: () {
-                              if (hasSubscription) {
-                                DHCLIENTUbicacionWidget.pendingNextRoute =
-                                    DHCLIENTEmergenciasWidget.routeName;
-                                context.pushNamed(
-                                    DHCLIENTUbicacionWidget.routeName);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Este servicio es solo para usuarios con suscripción.')),
-                                );
-                              }
+                              // Abierto a todos los clientes: el estatus de la
+                              // cuenta se resuelve más adelante, en el paso de
+                              // cobro (descuento Premium vs. pago regular +
+                              // upsell para Free).
+                              DHCLIENTUbicacionWidget.pendingNextRoute =
+                                  DHCLIENTEmergenciasWidget.routeName;
+                              context
+                                  .pushNamed(DHCLIENTUbicacionWidget.routeName);
                             }),
                           ],
                         ),

@@ -98,7 +98,9 @@
       "PowerShell(flutter analyze lib/dovia_home_client/d_h_c_l_i_e_n_t_cotizacion lib/dovia_home_client/d_h_c_l_i_e_n_t_ubicacion lib/dovia_home_client/d_h_c_l_i_e_n_t_agenda lib/shared_components/premium_upsell_popup lib/flutter_flow/upload_data.dart)",
       "PowerShell(flutter analyze lib 2>&1)",
       "Bash(curl -sL -o lista.png \"https://www.figma.com/api/mcp/asset/0c594630-ed3b-46b7-8605-4d322bfb32c8\")",
-      "Bash(curl -sL -o detalle.png \"https://www.figma.com/api/mcp/asset/8ab2813f-35ce-451a-9901-0f17d3f07ed8\")"
+      "Bash(curl -sL -o detalle.png \"https://www.figma.com/api/mcp/asset/8ab2813f-35ce-451a-9901-0f17d3f07ed8\")",
+      "Bash(curl -sL -o fig1.png \"https://www.figma.com/api/mcp/asset/ea93110c-45e9-4e6c-a11b-8b522a12dccc\")",
+      "Bash(curl -sL -o fig2.png \"https://www.figma.com/api/mcp/asset/2cdab526-e066-4a6b-8335-227447620fd4\")"
     ]
   }
 }

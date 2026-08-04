@@ -290,7 +290,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
       highlightColor: Colors.transparent,
       onTap: () async {
         DHCLIENTUbicacionWidget.pendingNextRoute =
-            'DC_Forma_Pago_Suscripcion1';
+            DCFormaPagoSuscripcion1Widget.routeName;
         context.pushNamed(DHCLIENTUbicacionWidget.routeName);
       },
       child: Container(
