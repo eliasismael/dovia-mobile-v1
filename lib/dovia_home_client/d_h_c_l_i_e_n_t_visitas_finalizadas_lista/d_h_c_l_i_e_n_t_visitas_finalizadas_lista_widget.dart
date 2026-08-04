@@ -12,7 +12,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
-import '/backend/api_requests/api_manager.dart';
 
 import 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
 export 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
@@ -41,15 +40,35 @@ class DHCLIENTVisitasFinalizadasListaWidget extends StatefulWidget {
       _DHCLIENTVisitasFinalizadasListaWidgetState();
 }
 
+/// Resultado de leer el historial completo (todas las páginas).
+class _HistoryResult {
+  const _HistoryResult({required this.visits, required this.failed});
+
+  final List<Map<String, dynamic>> visits;
+
+  /// La lectura falló sin traer nada. Si una página intermedia falla se
+  /// devuelve lo acumulado con `failed: false` (mejor un historial parcial que
+  /// una pantalla de error).
+  final bool failed;
+}
+
 class _DHCLIENTVisitasFinalizadasListaWidgetState
     extends State<DHCLIENTVisitasFinalizadasListaWidget> {
   late DHCLIENTVisitasFinalizadasListaModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Future<ApiCallResponse> _visitsFuture;
+  late Future<_HistoryResult> _visitsFuture;
 
   static const String _allOption = 'Todos';
+
+  /// Tamaño de página pedido al backend.
+  static const int _pageSize = 50;
+
+  /// Tope de páginas a recorrer. Es una guarda contra un backend que ignorara
+  /// `page` y devolviera siempre la misma página llena (loop infinito), no un
+  /// límite de negocio: 40 páginas cubren 2000 servicios.
+  static const int _maxPages = 40;
 
   /// Estatus que componen el historial. La llamada ya filtra por FINISHED
   /// server-side; este set queda como guarda defensiva por si el backend
@@ -62,26 +81,63 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
     super.initState();
     _model = createModel(context, () => DHCLIENTVisitasFinalizadasListaModel());
 
-    final token = currentAuthenticationToken ?? '';
-    // El historial se acota a un único estatus (FINISHED), así que se filtra
-    // server-side: el endpoint valida `status` contra el enum
-    // PENDING/TAKEN/IN_PROGRESS/FINISHED y acepta un valor único. (La pantalla
-    // hermana "Próximas visitas" necesita varios estatus a la vez —un string
-    // multi-valor devuelve 400 "status invalido"—, por eso ella sí filtra
-    // client-side; acá no aplica.)
-    //
-    // Filtrar en el server además es lo correcto para un historial: pidiendo el
-    // listado sin filtro, `limit` se consume con solicitudes de cualquier
-    // estatus y las finalizadas pueden quedar fuera de la página a medida que
-    // el cliente acumula solicitudes activas.
-    _visitsFuture =
-        DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
-      authToken: token,
-      status: 'FINISHED',
-      limit: 50,
-    );
+    _visitsFuture = _fetchHistory();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  /// Lee el historial **completo** recorriendo las páginas del endpoint.
+  ///
+  /// El AC pide "un historial completo": con una sola llamada de `limit: 50` el
+  /// cliente que acumula servicios deja de ver los más viejos sin ningún aviso.
+  /// Se pagina en el fetch (no en la UI) para no introducir un control de
+  /// "cargar más" que el diseño no tiene.
+  ///
+  /// El historial se acota a un único estatus (FINISHED), así que se filtra
+  /// server-side: el endpoint valida `status` contra el enum
+  /// PENDING/TAKEN/IN_PROGRESS/FINISHED y acepta un valor único. (La pantalla
+  /// hermana "Próximas visitas" necesita varios estatus a la vez —un string
+  /// multi-valor devuelve 400 "status invalido"—, por eso ella sí filtra
+  /// client-side; acá no aplica.)
+  ///
+  /// Filtrar en el server además es lo correcto para un historial: pidiendo el
+  /// listado sin filtro, `limit` se consume con solicitudes de cualquier
+  /// estatus y las finalizadas pueden quedar fuera de la página a medida que el
+  /// cliente acumula solicitudes activas.
+  Future<_HistoryResult> _fetchHistory() async {
+    final token = currentAuthenticationToken ?? '';
+    final all = <Map<String, dynamic>>[];
+
+    // `page` es 1-based (mismo criterio que el resto de listados del API).
+    for (var page = 1; page <= _maxPages; page++) {
+      final response =
+          await DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+        authToken: token,
+        status: 'FINISHED',
+        page: page,
+        limit: _pageSize,
+      );
+      if (!response.succeeded) {
+        return _HistoryResult(visits: all, failed: all.isEmpty);
+      }
+
+      // El parser corre sobre `jsonBody`: pasarle el ApiCallResponse deja a
+      // JsonPath sin nada que recorrer y devuelve null en silencio (listado
+      // siempre vacío).
+      final raw = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall
+              .requestsList(response.jsonBody) ??
+          [];
+      final pageItems = raw
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+      all.addAll(pageItems);
+
+      // Página incompleta = última página.
+      if (pageItems.length < _pageSize) break;
+    }
+
+    return _HistoryResult(visits: all, failed: false);
   }
 
   @override
@@ -255,27 +311,15 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
                 children: [
                   _buildHeader(),
                   Expanded(
-                    child: FutureBuilder<ApiCallResponse>(
+                    child: FutureBuilder<_HistoryResult>(
                       future: _visitsFuture,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(
                               child: CircularProgressIndicator());
                         }
-                        final response = snapshot.data!;
-                        // El parser corre sobre `jsonBody`: pasarle el
-                        // ApiCallResponse deja a JsonPath sin nada que recorrer
-                        // y devuelve null en silencio (listado siempre vacío).
-                        final rawList = response.succeeded
-                            ? (DOVIAAPIDoviaHomeContextGroup
-                                    .listServiceRequestsCall
-                                    .requestsList(response.jsonBody) ??
-                                [])
-                            : [];
-                        final visits = rawList
-                            .whereType<Map>()
-                            .map((e) => Map<String, dynamic>.from(e))
-                            .toList();
+                        final result = snapshot.data!;
+                        final visits = result.visits;
 
                         final typeOptions = <String>{
                           _allOption,
@@ -292,7 +336,7 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
                             children: [
                               _buildFilters(typeOptions),
                               const SizedBox(height: 20.0),
-                              if (!response.succeeded)
+                              if (result.failed)
                                 _emptyState(
                                     'No se pudieron cargar tus servicios.')
                               else if (visits.isEmpty)

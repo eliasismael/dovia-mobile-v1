@@ -118,6 +118,7 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
 
       if (!response.succeeded) {
         safeSetState(() => _model.loadFailed = true);
+        _notifyLoadFailure();
         return;
       }
 
@@ -129,10 +130,35 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
         _serviceData = {...?_serviceData, ...detail};
       });
     } catch (_) {
-      if (mounted) safeSetState(() => _model.loadFailed = true);
+      if (mounted) {
+        safeSetState(() => _model.loadFailed = true);
+        _notifyLoadFailure();
+      }
     } finally {
       if (mounted) safeSetState(() => _model.isLoading = false);
     }
+  }
+
+  /// Avisa que el detalle no se pudo leer y ofrece reintentar.
+  ///
+  /// Sin esto el fallo es silencioso: la pantalla queda con los placeholders de
+  /// foto y el texto de "sin descripción", indistinguible de un trabajo que
+  /// realmente no tiene evidencia cargada.
+  void _notifyLoadFailure() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text('No se pudo cargar el detalle del trabajo.'),
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: 'Reintentar',
+            textColor: Colors.white,
+            onPressed: _loadDetail,
+          ),
+        ),
+      );
   }
 
   // ---------------------------------------------------------------------------
@@ -410,7 +436,9 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
                             ? _workDone
                             : (_model.isLoading
                                 ? ''
-                                : 'Sin descripción registrada.')),
+                                : (_model.loadFailed
+                                    ? 'No se pudo cargar el detalle del trabajo.'
+                                    : 'Sin descripción registrada.'))),
                         if (_hasLeftover) ...[
                           const SizedBox(height: 18.0),
                           _sectionLabel(_leftoverLocation.isNotEmpty
