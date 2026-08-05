@@ -50,10 +50,12 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
   final VoidCallback? onViewDetail;
 
   static const Color _cardBackground = Color(0xFFF3F3EF);
-  static const Color _urgentBackground = Color(0xFFFBE0E0);
-  static const Color _urgentText = Color(0xFFD1453B);
-  static const Color _standardBackground = Color(0xFFFDECC8);
-  static const Color _standardText = Color(0xFFB07D2B);
+  // Píldoras del diseño: el color del oficio al 20% de fondo y pleno en el
+  // texto (`rgba(232,93,117,0.2)` / `rgba(246,166,35,0.2)`).
+  static const Color _urgentText = Color(0xFFE85D75);
+  static const Color _urgentBackground = Color(0x33E85D75);
+  static const Color _standardText = Color(0xFFF6A623);
+  static const Color _standardBackground = Color(0x33F6A623);
   static const Color _eyeBackground = Color(0xFFCCE3E4);
 
   @override
@@ -80,7 +82,7 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
                     title,
                     style: theme.bodyMedium.override(
                       font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                      color: theme.primaryText,
+                      color: theme.primary,
                       fontSize: 14.0,
                       letterSpacing: 0.0,
                     ),
@@ -138,7 +140,7 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
                         timeLabel,
                         style: theme.bodyMedium.override(
                           font: GoogleFonts.inter(),
-                          color: theme.primary,
+                          color: theme.primaryText,
                           fontSize: 12.0,
                           letterSpacing: 0.0,
                         ),

@@ -1,5 +1,6 @@
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
+import '/dovia_home_associate/associate_specialties_loader.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_card/d_h_a_s_s_o_c_i_a_t_e_trabajo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -23,6 +24,9 @@ export 'd_h_a_s_s_o_c_i_a_t_e_home_page_model.dart';
 /// mobile desde el diseño de escritorio.
 ///
 /// Reúne en una sola pantalla las dos caras de su trabajo:
+///   - **Servicios**: el carrusel de filtros rápidos, poblado **sólo con los
+///     oficios que tiene aprobados** ([loadAssociateCategories]); el botón de
+///     la sección dice "Agregar" y lleva a pedir especialidades nuevas.
 ///   - **Trabajos disponibles**: la bolsa de solicitudes pagadas que todavía no
 ///     tomó ningún técnico. Cada tarjeta dice cuánto va a cobrar neto antes de
 ///     postularse, y esconde la dirección exacta hasta que acepta el trabajo.
@@ -56,7 +60,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
 
   late Future<ApiCallResponse> _availableJobsFuture;
   late Future<ApiCallResponse> _myJobsFuture;
-  late Future<ApiCallResponse> _categoriesFuture;
+  late Future<AssociateCategories> _categoriesFuture;
 
   @override
   void initState() {
@@ -67,12 +71,17 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
     _model.searchFocusNode ??= FocusNode();
 
     _loadFeeds();
-    _categoriesFuture =
-        DOVIAAPIDoviaHomeContextGroup.listCatalogServicesCall.call(
-      authToken: currentAuthenticationToken ?? '',
-    );
+    _loadCategories();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  /// Catálogo cruzado contra las especialidades aprobadas del asociado. Se
+  /// vuelve a pedir al volver de "Agregar": si sumó una especialidad, tiene que
+  /// aparecer en el carrusel sin recargar la app a mano.
+  void _loadCategories() {
+    _categoriesFuture =
+        loadAssociateCategories(authToken: currentAuthenticationToken ?? '');
   }
 
   /// (Re)dispara los dos listados. Se vuelve a llamar al regresar del detalle:
@@ -311,13 +320,13 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
     );
   }
 
-  /// Carrusel horizontal de categorías. El botón de la sección dice "Agregar":
-  /// desde acá el asociado suma especialidades a su perfil, no navega a un
-  /// catálogo de compra.
+  /// Carrusel horizontal de los oficios **aprobados para este asociado**. El
+  /// botón de la sección dice "Agregar": desde acá suma especialidades a su
+  /// perfil, no navega a un catálogo de compra.
   Widget _buildCategoriesCarousel(List<AssociateServiceCategory> categories) {
     if (categories.isEmpty) {
       return Text(
-        'Todavía no tenés categorías habilitadas. Agregá las que sabés hacer '
+        'Todavía no tenés servicios habilitados. Agregá los que sabés hacer '
         'para empezar a recibir trabajos.',
         style: FlutterFlowTheme.of(context).bodyMedium.override(
               font: GoogleFonts.inter(),
@@ -495,16 +504,14 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
               ),
               // El catálogo envuelve al resto del panel: las categorías
               // habilitadas también definen contra qué filtra el carrusel.
-              FutureBuilder<ApiCallResponse>(
+              FutureBuilder<AssociateCategories>(
                 future: _categoriesFuture,
                 builder: (context, snapshot) {
-                  final response = snapshot.data;
-                  final categories = (response != null && response.succeeded)
-                      ? parseAssociateCategories(DOVIAAPIDoviaHomeContextGroup
-                              .listCatalogServicesCall
-                              .servicesList(response.jsonBody) ??
-                          const [])
-                      : const <AssociateServiceCategory>[];
+                  // Sólo los oficios que el asociado tiene aprobados: el
+                  // carrusel no puede ofrecerle filtrar por un trabajo que no
+                  // está habilitado a tomar.
+                  final categories = snapshot.data?.approved ??
+                      const <AssociateServiceCategory>[];
 
                   return SingleChildScrollView(
                     child: Column(
@@ -525,7 +532,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                 onAction: () => context
                                     .pushNamed(
                                         DHASSOCIATEServiciosWidget.routeName)
-                                    .then((_) => safeSetState(() {})),
+                                    .then((_) => safeSetState(_loadCategories)),
                               ),
                               const SizedBox(height: 14.0),
                               if (snapshot.connectionState ==
@@ -535,6 +542,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                   child: Center(
                                       child: CircularProgressIndicator()),
                                 )
+                              else if (snapshot.data?.failed ?? false)
+                                _buildEmptyState(snapshot.data!.errorMessage)
                               else
                                 _buildCategoriesCarousel(categories),
                               const SizedBox(height: 32.0),
@@ -554,7 +563,12 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                     .listAvailableAssociateServiceRequestsCall
                                     .requestsList,
                                 categories: categories,
-                                extraFilter: (_) => true,
+                                // La bolsa es sólo lo que nadie tomó todavía.
+                                // El endpoint acepta `status` como filtro
+                                // opcional y admite TAKEN entre sus valores,
+                                // así que sin este descarte una solicitud ya
+                                // asignada podría quedar visible.
+                                extraFilter: asrIsTakeable,
                                 onViewDetail: _openOpportunity,
                                 emptyMessage:
                                     'Por ahora no hay trabajos disponibles en '

@@ -38,6 +38,13 @@ class DHCLIENTUbicacionWidget extends StatefulWidget {
 
   static String? pendingNextRoute;
 
+  /// Última dirección validada en este paso, para los flujos que continúan en
+  /// una pantalla nueva (Ej: emergencias) y no tienen una rama propia en
+  /// [_DHCLIENTUbicacionWidgetState._returnWithAddress]. Se publica siempre, así
+  /// el próximo flujo que use Coverage Check no necesita tocar esta pantalla.
+  static String? lastVerifiedAddressId;
+  static String? lastVerifiedAddressLabel;
+
   @override
   State<DHCLIENTUbicacionWidget> createState() =>
       _DHCLIENTUbicacionWidgetState();
@@ -289,6 +296,11 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   void _returnWithAddress(String? addressId, String label) {
     final nextRoute = DHCLIENTUbicacionWidget.pendingNextRoute;
     DHCLIENTUbicacionWidget.pendingNextRoute = null;
+
+    // La dirección validada queda publicada para cualquier flujo, no sólo para
+    // los que tienen rama propia más abajo.
+    DHCLIENTUbicacionWidget.lastVerifiedAddressId = addressId;
+    DHCLIENTUbicacionWidget.lastVerifiedAddressLabel = label;
 
     if (nextRoute == DHCLIENTCotizacionWidget.routeName) {
       DHCLIENTCotizacionWidget.verifiedAddressId = addressId;

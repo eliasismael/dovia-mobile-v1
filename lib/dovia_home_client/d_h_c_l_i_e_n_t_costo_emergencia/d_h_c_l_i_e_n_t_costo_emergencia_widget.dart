@@ -60,12 +60,6 @@ class DHCLIENTCostoEmergenciaWidget extends StatefulWidget {
   /// Precio estándar completo (Free, pago por uso).
   static const String regularPrice = 'Q449';
 
-  /// Bandera que la pantalla de planes activa al volver tras contratar el plan.
-  /// Propaga el estado "suscrito"/"pagado" de regreso a este paso, ya que la
-  /// navegación recrea la instancia (mismo patrón que
-  /// [DHCLIENTValorVisitaPageWidget.returnedFromSubscription]).
-  static bool returnedFromSubscription = false;
-
   @override
   State<DHCLIENTCostoEmergenciaWidget> createState() =>
       _DHCLIENTCostoEmergenciaWidgetState();
@@ -78,7 +72,12 @@ class _DHCLIENTCostoEmergenciaWidgetState
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   /// Cómo se pagó (sólo aplica al escenario Free): null = sin pagar,
-  /// 'direct' = pago por uso, 'subscription' = pagado tras suscribirse.
+  /// 'direct' = pago por uso. Sólo se setea contra una respuesta de cobro
+  /// exitosa: nunca se anticipa un pago que todavía no ocurrió.
+  ///
+  /// El caso "se suscribió" no vive acá: al volver de Planes se re-consulta la
+  /// suscripción y, si quedó activa, la pantalla pasa al escenario Premium, que
+  /// ya habilita [Siguiente] por sí solo.
   String? _paidMethod;
 
   bool get _isPaid => _paidMethod != null;
@@ -97,13 +96,6 @@ class _DHCLIENTCostoEmergenciaWidgetState
       context.read<PaymentsRepository>().loadCurrentSubscription();
       safeSetState(() {});
     });
-
-    // El cliente regresó desde la contratación del plan: ya es Premium, así que
-    // se desbloquea [Siguiente], que cobra el precio con descuento.
-    if (DHCLIENTCostoEmergenciaWidget.returnedFromSubscription) {
-      DHCLIENTCostoEmergenciaWidget.returnedFromSubscription = false;
-      _paidMethod = 'subscription';
-    }
   }
 
   @override
@@ -157,10 +149,16 @@ class _DHCLIENTCostoEmergenciaWidgetState
     return id;
   }
 
-  /// Dirección de servicio a la que se envía el técnico. El levantamiento de la
-  /// emergencia no pide ubicación (es urgente), así que se usa la primera
-  /// dirección registrada del cliente.
+  /// Dirección de servicio a la que se envía el técnico: la que el cliente
+  /// validó en el paso de Ubicación al entrar al flujo. El levantamiento de la
+  /// emergencia no vuelve a pedirla (es urgente).
+  ///
+  /// Sólo si no hay ninguna verificada (Ej: se llegó acá sin pasar por
+  /// Ubicación) se cae a la primera dirección registrada del cliente.
   Future<String?> _resolveAddressId(String token) async {
+    final verified = DHCLIENTUbicacionWidget.lastVerifiedAddressId;
+    if (verified != null && verified.trim().isNotEmpty) return verified.trim();
+
     final response =
         await DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall.call(
       authToken: token,
@@ -273,11 +271,12 @@ class _DHCLIENTCostoEmergenciaWidgetState
   }
 
   /// Escenario Free — [Subscribirse]: abre el flujo de adquisición del plan
-  /// DOVIA Home. Al volver se re-consulta la suscripción: si quedó activa, la
-  /// pantalla pasa al escenario Premium (tarjeta de descuento).
+  /// DOVIA Home. Al volver se re-consulta la suscripción contra el backend: si
+  /// quedó activa, la pantalla pasa al escenario Premium (tarjeta de descuento)
+  /// y [Siguiente] se habilita. Si el cliente omitió la compra, no pasa nada:
+  /// el paso sigue bloqueado hasta que pague.
   Future<void> _goToSubscription() async {
     if (_isPaid || _model.isSubmitting) return;
-    DHCLIENTCostoEmergenciaWidget.returnedFromSubscription = true;
     // Sin esto, "Omitir" en Planes deriva al flujo de visita estándar (con paso
     // de calendario), que es justo el que la emergencia debe saltear.
     DHCLIENTPlanesPageWidget.pendingReturnRoute =
@@ -286,10 +285,6 @@ class _DHCLIENTCostoEmergenciaWidgetState
     if (!mounted) return;
     DHCLIENTPlanesPageWidget.pendingReturnRoute = null;
 
-    // El cliente volvió a esta misma instancia: si hubiera contratado el plan,
-    // la bandera ya la habría consumido una instancia nueva. Se limpia para que
-    // no marque como pagada una emergencia futura.
-    DHCLIENTCostoEmergenciaWidget.returnedFromSubscription = false;
     await context
         .read<PaymentsRepository>()
         .loadCurrentSubscription(forceRefresh: true);
@@ -323,6 +318,10 @@ class _DHCLIENTCostoEmergenciaWidgetState
       );
       DHCLIENTCostoEmergenciaWidget.description = null;
       DHCLIENTCostoEmergenciaWidget.photos = [];
+      // El flujo terminó: la dirección verificada no debe quedar pegada a una
+      // emergencia futura que se levante sin pasar por Ubicación.
+      DHCLIENTUbicacionWidget.lastVerifiedAddressId = null;
+      DHCLIENTUbicacionWidget.lastVerifiedAddressLabel = null;
 
       await showDialog(
         barrierDismissible: true,
@@ -348,7 +347,12 @@ class _DHCLIENTCostoEmergenciaWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final isPremium = context.watch<PaymentsRepository>().hasActiveSubscription;
+    // `hasActiveSubscription` es false mientras el estado no se resolvió:
+    // hasta saberlo no se renderiza ninguna de las dos tarjetas, para no
+    // mostrarle el upsell de Premium a un cliente que sí paga.
+    final payments = context.watch<PaymentsRepository>();
+    final premiumResolved = payments.subscriptionLoaded;
+    final isPremium = payments.hasActiveSubscription;
 
     return GestureDetector(
       onTap: () {
@@ -380,12 +384,22 @@ class _DHCLIENTCostoEmergenciaWidgetState
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         20.0, 30.0, 20.0, 0.0),
-                    child: isPremium ? _premiumCard() : _freeCard(),
+                    child: !premiumResolved
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 60.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        : isPremium
+                            ? _premiumCard()
+                            : _freeCard(),
                   ),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         20.0, 30.0, 20.0, 110.0),
-                    child: _nextButton(isPremium),
+                    child: _nextButton(
+                      isPremium: isPremium,
+                      premiumResolved: premiumResolved,
+                    ),
                   ),
                 ],
               ),
@@ -596,9 +610,10 @@ class _DHCLIENTCostoEmergenciaWidgetState
           const SizedBox(height: 12.0),
           _priceLine(DHCLIENTCostoEmergenciaWidget.discountedPrice, '/el día'),
           const SizedBox(height: 20.0),
+          // Nunca queda en estado "Pagado": si la contratación prospera, la
+          // pantalla pasa al escenario Premium y esta tarjeta deja de verse.
           _softButton(
             'Subscribirse',
-            paid: _paidMethod == 'subscription',
             onTap: _goToSubscription,
           ),
         ],
@@ -685,8 +700,11 @@ class _DHCLIENTCostoEmergenciaWidgetState
   /// - Premium: siempre habilitado (cobra a la tarjeta guardada).
   /// - Free: bloqueado hasta que el usuario complete el pago (contratando
   ///   directo o suscribiéndose).
-  Widget _nextButton(bool isPremium) {
-    final enabled = (isPremium || _isPaid) && !_model.isSubmitting;
+  /// - Mientras no se sepa si es Premium: bloqueado, para no dejar avanzar
+  ///   sobre un escenario todavía sin resolver.
+  Widget _nextButton({required bool isPremium, required bool premiumResolved}) {
+    final enabled =
+        premiumResolved && (isPremium || _isPaid) && !_model.isSubmitting;
     return FFButtonWidget(
       onPressed: enabled ? () async => _confirmAndSchedule() : null,
       text: 'Siguiente',

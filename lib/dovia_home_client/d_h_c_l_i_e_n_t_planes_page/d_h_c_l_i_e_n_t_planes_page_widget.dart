@@ -44,6 +44,10 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
 
   @override
   void dispose() {
+    // Con esta pantalla fuera de la pila el "a dónde volver" ya no aplica: si
+    // quedara seteado, un ingreso posterior a Planes desde otro flujo se
+    // llevaría el destino viejo.
+    DHCLIENTPlanesPageWidget.pendingReturnRoute = null;
     _model.dispose();
 
     super.dispose();
@@ -91,10 +95,18 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                         20.0, 20.0, 20.0, 80.0),
                     child: FFButtonWidget(
                       onPressed: () async {
-                        final returnRoute =
-                            DHCLIENTPlanesPageWidget.pendingReturnRoute;
-                        DHCLIENTPlanesPageWidget.pendingReturnRoute = null;
-                        context.pushNamed(returnRoute ??
+                        // El cliente omitió la contratación del plan. Si vino
+                        // desde un flujo (Ej: el costo de una emergencia) se
+                        // vuelve a esa pantalla, que quedó en la pila esperando
+                        // el resultado: apilar una instancia nueva la dejaría
+                        // sin saber que no hubo compra. Sin flujo previo se
+                        // mantiene el destino histórico.
+                        if (DHCLIENTPlanesPageWidget.pendingReturnRoute !=
+                            null) {
+                          context.safePop();
+                          return;
+                        }
+                        context.pushNamed(
                             DHCLIENTValorVisitaPageWidget.routeName);
                       },
                       text: 'Omitir',

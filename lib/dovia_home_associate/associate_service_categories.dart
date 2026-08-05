@@ -1,13 +1,13 @@
-/// Categorías de servicio del catálogo de Dovia Home, tal como las pinta el
-/// carrusel de filtros rápidos del panel del asociado.
+/// Oficios con los que filtra el asociado, tal como los pinta el carrusel de
+/// filtros rápidos de su panel.
 ///
-/// El catálogo lo sirve `GET /dovia-home/catalog/services`; acá sólo vive el
-/// mapeo de cada servicio a su ícono, porque el payload no trae assets.
+/// Salen de `GET /users/me/specialties` (ver [loadAssociateCategories]); acá
+/// vive el mapeo de cada oficio a su ícono, porque el payload no trae assets.
 library;
 
 import 'associate_service_request_fields.dart';
 
-/// Una categoría del carrusel.
+/// Un oficio del carrusel.
 class AssociateServiceCategory {
   const AssociateServiceCategory({
     required this.id,
@@ -16,38 +16,35 @@ class AssociateServiceCategory {
     required this.iconPath,
   });
 
-  /// Id del catálogo. Es lo que se manda al backend cuando aplica.
+  /// Id de la especialidad. Es con lo que cruzan las solicitudes, que declaran
+  /// `serviceDetail.requiredSpecialtyIds`.
   final String id;
 
-  /// Código del catálogo (Ej: `PLUMBING`). Se cruza contra
-  /// [asrServiceCode] para filtrar las tarjetas.
+  /// Código del oficio (Ej: `ALBANILERIA`). Sólo se usa como respaldo del cruce
+  /// cuando la solicitud no declara especialidades.
   final String code;
 
   final String label;
   final String iconPath;
 }
 
-/// Ícono por defecto cuando el catálogo agrega una categoría que todavía no
-/// tiene asset propio: se prefiere un ícono genérico a no pintar la tarjeta.
+/// Ícono por defecto cuando aparece un oficio que todavía no tiene asset
+/// propio: se prefiere un ícono genérico a no pintar la tarjeta.
 const String _fallbackIcon = 'assets/images/IconoCaja.svg';
 
 /// Oficio al que pertenece cada código o etiqueta normalizada.
 ///
-/// Existe porque **los dos catálogos del backend no comparten vocabulario**: los
-/// servicios (`GET /dovia-home/catalog/services`) nombran el rubro y las
-/// especialidades (`GET /users/me/specialties`) nombran el oficio, con ids
-/// distintos en cada uno.
+/// Existe porque **el nombre del oficio no es el nombre del rubro**: la
+/// especialidad se llama `PLOMERO` y el ícono del rubro es el de `PLOMERIA`.
+/// Sin este puente, el chip "Plomero" caería al ícono genérico.
 ///
-///     servicio  PLOMERIA / "Plomería"      ←→ especialidad PLOMERO / "Plomero"
-///     servicio  ELECTRICO / "Eléctrico"    ←→ especialidad ELECTRICISTA
-///     servicio  ALBANILERIA                ←→ especialidad ALBANILERIA
-///     servicio  PINTURA                    ←→ especialidad PINTURA
-///     servicio  INSTALACION                ←→ (todavía sin especialidad)
+///     especialidad PLOMERO / "Plomero"   →  ícono PLOMERIA
+///     especialidad ELECTRICISTA          →  ícono ELECTRICIDAD
+///     especialidad ALBANILERIA           →  ícono ALBANILERIA
+///     especialidad PINTURA               →  ícono PINTURA
 ///
-/// Sin este puente, un asociado aprobado como `PLOMERO` no cruzaría contra el
-/// servicio `PLOMERIA` y el filtro "Tipo de Trabajo" le quedaría vacío. Se
-/// incluyen también los códigos en inglés que aparecían en versiones anteriores
-/// del catálogo.
+/// Se incluyen también los códigos en inglés que aparecían en versiones
+/// anteriores del backend.
 const Map<String, String> _familyByKey = {
   'PLOMERIA': 'PLOMERIA',
   'PLOMERO': 'PLOMERIA',
@@ -121,83 +118,25 @@ String associateCategoryIcon(String? code, String label) {
   return _fallbackIcon;
 }
 
-/// Convierte el listado de `GET /dovia-home/catalog/services` en categorías del
-/// carrusel.
+/// ¿La solicitud le corresponde al oficio seleccionado?
 ///
-/// **Sólo se muestran las categorías habilitadas para el perfil**: se descartan
-/// las que el catálogo marca como inactivas (`active` / `enabled` / `isActive`
-/// en false). El endpoint responde el catálogo que el backend expone al usuario
-/// autenticado, así que ese flag es hoy la única señal de habilitación.
+/// El criterio es `serviceDetail.requiredSpecialtyIds`: son ids de especialidad
+/// y [AssociateServiceCategory.id] también, así que el cruce es exacto. Es lo
+/// único que resuelve los servicios cuyo nombre no es un oficio — `INSTALACION`
+/// o `EMERGENCIA` no cruzarían por texto contra "Albañilería", pero sí declaran
+/// qué especialidades habilitan a tomarlos.
 ///
-/// Este listado es el catálogo **completo** de la plataforma. Para separar lo
-/// que el asociado ya tiene aprobado de lo que todavía puede pedir, cruzarlo
-/// contra [parseApprovedSpecialtyKeys] con [categoryIsApproved].
-List<AssociateServiceCategory> parseAssociateCategories(List<dynamic> raw) {
-  final categories = <AssociateServiceCategory>[];
-  for (final item in raw) {
-    if (item is! Map) continue;
-    final data = Map<String, dynamic>.from(item);
-
-    final enabled = data['active'] ?? data['enabled'] ?? data['isActive'];
-    if (enabled == false) continue;
-
-    final label = asrString(data['label']) ??
-        asrString(data['name']) ??
-        asrString(data['title']);
-    if (label == null) continue;
-
-    final code = asrString(data['code'])?.toUpperCase();
-    categories.add(AssociateServiceCategory(
-      id: asrString(data['id']) ?? code ?? label,
-      code: code ?? _key(label),
-      label: label,
-      iconPath: associateCategoryIcon(code, label),
-    ));
-  }
-  return categories;
-}
-
-/// Claves de las especialidades **aprobadas** del asociado, tal como las
-/// devuelve `GET /users/me/specialties` en `currentSpecialties`: ítems planos
-/// `{ id, code, label }`.
-///
-/// Se guardan las tres referencias con sus familias de oficio porque el id de
-/// una especialidad **no** es el del servicio equivalente del catálogo: el cruce
-/// real es por familia ([categoryIsApproved]).
-Set<String> parseApprovedSpecialtyKeys(List<dynamic> raw) {
-  final keys = <String>{};
-  for (final item in raw) {
-    if (item is! Map) continue;
-    final data = Map<String, dynamic>.from(item);
-
-    for (final candidate in [data['id'], data['code'], data['label']]) {
-      final value = asrString(candidate);
-      if (value != null) keys.addAll(associateCategoryKeys(value));
-    }
-  }
-  return keys;
-}
-
-/// ¿El asociado ya está aprobado para operar esta categoría del catálogo de
-/// servicios?
-///
-/// Se cruza por familia de oficio además de por id, código y etiqueta: el
-/// asociado aprobado como `PLOMERO` opera el servicio `PLOMERIA` aunque no
-/// compartan ni id ni código.
-bool categoryIsApproved(
-  AssociateServiceCategory category,
-  Set<String> approvedKeys,
-) =>
-    [category.id, category.code, category.label]
-        .expand(associateCategoryKeys)
-        .any(approvedKeys.contains);
-
-/// ¿La solicitud pertenece a la categoría seleccionada? Compara por código de
-/// catálogo y, si el payload no lo trae, por etiqueta.
+/// Si la solicitud no declara especialidades se cae a comparar por código de
+/// catálogo y, en última instancia, por etiqueta.
 bool associateRequestMatchesCategory(
   Map<String, dynamic> request,
   AssociateServiceCategory category,
 ) {
+  final required = asrRequiredSpecialtyIds(request);
+  if (required.isNotEmpty) {
+    return required.any((id) => _key(id) == _key(category.id));
+  }
+
   final code = asrServiceCode(request);
   if (code != null && _key(code) == _key(category.code)) return true;
   return _key(asrServiceName(request)) == _key(category.label);

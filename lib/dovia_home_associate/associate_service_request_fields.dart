@@ -115,6 +115,21 @@ String? asrServiceCode(Map<String, dynamic> data) {
   ])?.toUpperCase();
 }
 
+/// Especialidades que el servicio de la solicitud exige
+/// (`serviceDetail.requiredSpecialtyIds`). Son ids del mismo catálogo que
+/// devuelve `GET /users/me/specialties`, así que es el cruce exacto entre una
+/// tarjeta y los oficios del asociado — y el único que funciona para servicios
+/// cuyo nombre no es un oficio (`INSTALACION`, `EMERGENCIA`).
+Set<String> asrRequiredSpecialtyIds(Map<String, dynamic> data) {
+  final detail = _asMap(data['serviceDetail']) ?? _asMap(data['service']);
+  final raw = detail?['requiredSpecialtyIds'];
+  if (raw is! List) return const {};
+  return {
+    for (final id in raw)
+      if (asrString(id) != null) asrString(id)!,
+  };
+}
+
 Map<String, dynamic>? _addressOf(Map<String, dynamic> data) =>
     _asMap(data['address']) ?? _asMap(data['serviceAddress']);
 

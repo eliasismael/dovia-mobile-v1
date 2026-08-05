@@ -144,6 +144,9 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
           .map((e) => Map<String, dynamic>.from(e))
           // Perfil Independiente: sin cotizaciones ni trabajos fuera de alcance.
           .where(asrIsWorkableByIndependent)
+          // Y sólo lo que nadie tomó: `status` es un filtro opcional del
+          // endpoint y TAKEN es uno de sus valores válidos.
+          .where(asrIsTakeable)
           .toList(),
     );
     _reconcileFilters(board);
