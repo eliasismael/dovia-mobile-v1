@@ -259,11 +259,12 @@ class _DHCLIENTReportarProblemaWidgetState
 
       if (response != null && !response.succeeded) {
         if (mounted) {
+          final message = associateFeedbackErrorMessage(
+            response,
+            fallback: 'No se pudo enviar el reporte. Intenta de nuevo.',
+          );
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content:
-                  Text('No se pudo enviar el reporte. Intenta de nuevo.'),
-            ),
+            SnackBar(content: Text(message)),
           );
         }
         return;
@@ -342,7 +343,10 @@ class _DHCLIENTReportarProblemaWidgetState
                         const SizedBox(height: 12.0),
                         _buildDescripcion(),
                         const SizedBox(height: 18.0),
-                        _fieldLabel('Sube imágenes o videos si es necesario'),
+                        // El diseño dice "imágenes o videos", pero el presign
+                        // de reportes sólo acepta imágenes: prometer video
+                        // terminaría en un adjunto rechazado.
+                        _fieldLabel('Sube imágenes si es necesario'),
                         const SizedBox(height: 12.0),
                         _buildDropZone(),
                         if (_model.uploadedMedia.isNotEmpty)

@@ -319,8 +319,13 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
   /// el vencimiento de la garantía respecto del trabajo real.
   ///
   /// Si el backend todavía no expone la fecha de finalización, se habilita
-  /// (fail-open, a favor del cliente): el backend es el gate real del reclamo, y
-  /// bloquear aquí le negaría al cliente una garantía vigente.
+  /// (fail-open, a favor del cliente): bloquear aquí le negaría al cliente una
+  /// garantía vigente.
+  ///
+  /// OJO: esta ventana **sólo existe en el cliente**. Los endpoints de reportes
+  /// aceptan múltiples reclamos sobre un servicio finalizado sin límite
+  /// temporal, así que este gate es de UX, no de negocio. Si la caducidad debe
+  /// ser real, tiene que validarla el backend.
   bool get _canReport {
     final finished = _finishedAtReal;
     if (finished == null) return true;

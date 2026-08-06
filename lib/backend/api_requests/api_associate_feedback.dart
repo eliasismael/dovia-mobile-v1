@@ -26,6 +26,42 @@ class DOVIAAPIAssociateFeedbackContextGroup {
       ConfirmDoviaHomeReportImagesCall();
 }
 
+/// Traduce el código de error del contexto a un mensaje para el cliente.
+///
+/// Sin este mapeo todos los fallos caen en el mismo texto genérico y el usuario
+/// no distingue un problema de permisos de un servicio aún no finalizado o de
+/// una calificación que ya había enviado. [fallback] cubre los códigos no
+/// contemplados y los fallos de red (sin body).
+String associateFeedbackErrorMessage(
+  ApiCallResponse response, {
+  required String fallback,
+}) {
+  final code = (getJsonField(response.jsonBody, r'''$.errorCode''') ??
+              getJsonField(response.jsonBody, r'''$.code'''))
+          ?.toString() ??
+      '';
+  switch (code) {
+    case 'ASSOCIATE_FEEDBACK_DUPLICATE_RATING':
+      return 'Ya calificaste este servicio.';
+    case 'ASSOCIATE_FEEDBACK_SOURCE_NOT_COMPLETED':
+      return 'Solo puedes calificar cuando el trabajo haya finalizado.';
+    case 'ASSOCIATE_FEEDBACK_AUTHOR_NOT_ALLOWED':
+      return 'No tienes permiso para calificar o reportar este servicio.';
+    case 'ASSOCIATE_FEEDBACK_TARGET_NOT_ASSIGNED':
+      return 'No hay un asociado asignado a este servicio.';
+    case 'ASSOCIATE_FEEDBACK_TARGET_ROLE_NOT_ALLOWED':
+      return 'Este asociado no participa en el servicio indicado.';
+    case 'ASSOCIATE_FEEDBACK_INVALID_STARS':
+      return 'La calificación debe estar entre 1 y 5 estrellas.';
+    case 'ASSOCIATE_FEEDBACK_EMPTY_REPORT_MESSAGE':
+      return 'El texto del reporte es obligatorio.';
+    case 'ASSOCIATE_FEEDBACK_SOURCE_NOT_FOUND':
+      return 'No se encontró el servicio a calificar o reportar.';
+    default:
+      return fallback;
+  }
+}
+
 /// POST /associate-feedback/visits/{visitId}/ratings
 /// Crea una calificación inmutable de un asociado relacionado con una visita.
 /// targetRole: CLIENT_VISIT -> SHOWING_AGENT; OPERATIVE_LISTER_VISIT -> LISTER_HQ | OPERATIVE_LISTER

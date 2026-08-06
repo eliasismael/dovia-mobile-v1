@@ -133,10 +133,15 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
 
       if (response != null && !response.succeeded) {
         if (mounted) {
-          // 409: la calificación es inmutable y única por cliente + servicio.
-          final message = response.statusCode == 409
-              ? 'Ya calificaste este servicio.'
-              : 'No se pudo enviar la calificación. Intenta de nuevo.';
+          final message = associateFeedbackErrorMessage(
+            response,
+            // El 409 no siempre viaja con código de error, y el duplicado es el
+            // único conflicto posible aquí: la calificación es inmutable y
+            // única por cliente + servicio.
+            fallback: response.statusCode == 409
+                ? 'Ya calificaste este servicio.'
+                : 'No se pudo enviar la calificación. Intenta de nuevo.',
+          );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(message)),
           );
