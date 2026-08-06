@@ -57,6 +57,59 @@ class ScheduledVisit {
   final String? id;
 }
 
+/// Tarjeta del carrusel "Cotizaciones recibidas". Unifica las dos cosas que
+/// llegan ahí —una propuesta recibida y un diagnóstico fuera de alcance— para
+/// que se pinten iguales aunque cada una salga de un endpoint distinto y abra
+/// una pantalla distinta.
+class _QuoteCard {
+  const _QuoteCard({
+    required this.title,
+    required this.date,
+    required this.status,
+    required this.onTap,
+    this.serviceRequestId,
+  });
+
+  final String title;
+  final String date;
+  final String status;
+  final VoidCallback onTap;
+
+  /// Solicitud que representa la tarjeta, cuando se conoce. Sirve para no
+  /// pintar dos veces el mismo trabajo cuando llega por las dos fuentes.
+  final String? serviceRequestId;
+}
+
+/// Diagnóstico fuera de alcance vivo: el id con el que se abre, la píldora que
+/// le corresponde y la solicitud desde la que se pinta la tarjeta.
+class _OutOfScopeDiagnosis {
+  const _OutOfScopeDiagnosis({
+    required this.id,
+    required this.statusLabel,
+    required this.source,
+    this.childServiceRequestId,
+  });
+
+  final String id;
+  final String statusLabel;
+
+  /// Solicitud de servicio de la que salen el nombre del servicio y la fecha de
+  /// la visita: siempre la raíz cuando está disponible.
+  final Map<String, dynamic> source;
+
+  /// Hijo `OUT_OF_SCOPE` creado al autorizar, cuando ya existe. Es el id con el
+  /// que las propuestas de este trabajo llegan en `/dovia-home/proposals`.
+  final String? childServiceRequestId;
+}
+
+/// Las dos fuentes de "Cotizaciones recibidas", resueltas juntas.
+class _QuotesData {
+  const _QuotesData({required this.proposals, required this.diagnoses});
+
+  final ApiCallResponse proposals;
+  final List<_OutOfScopeDiagnosis> diagnoses;
+}
+
 class DHCLIENTHomepageWidget extends StatefulWidget {
   const DHCLIENTHomepageWidget({super.key});
 
@@ -97,32 +150,19 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   late Future<ApiCallResponse> _completedVisitsFuture;
   late Future<ApiCallResponse> _proposalsFuture;
 
+  /// "Cotizaciones recibidas" se arma con dos fuentes: las propuestas que ya
+  /// llegaron y los diagnósticos fuera de alcance que el asociado cargó, que
+  /// se referencian desde las solicitudes del cliente (no hay un listado propio
+  /// de diagnósticos). Se resuelven juntas para que el carrusel no aparezca
+  /// primero con la mitad de las tarjetas.
+  late Future<_QuotesData> _quotesSectionFuture;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTHomepageModel());
-    
-    final token = currentAuthenticationToken ?? '';
-    // El endpoint valida `status` contra el enum PENDING/TAKEN/IN_PROGRESS/
-    // FINISHED y acepta un único valor (un string multi-valor devuelve 400
-    // "status invalido"). Para "Próximas visitas" (varios estados) se traen
-    // todas sin filtro y se excluye FINISHED client-side; para las finalizadas
-    // se filtra directamente por FINISHED.
-    _upcomingVisitsFuture = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
-      authToken: token,
-      limit: 20,
-    );
-    _completedVisitsFuture = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
-      authToken: token,
-      status: 'FINISHED',
-      limit: 2,
-    );
-    // Se piden varias porque el carrusel agrupa por solicitud: dos proveedores
-    // que cotizaron el mismo trabajo son una sola tarjeta.
-    _proposalsFuture = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.call(
-      authToken: token,
-      limit: 20,
-    );
+
+    _loadDashboardData();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Carga el estado de suscripcion (Recurrente) para decidir que UI mostrar.
@@ -130,6 +170,53 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
       context.read<PaymentsRepository>().loadCurrentSubscription();
       safeSetState(() {});
     });
+  }
+
+  /// (Re)lanza las consultas del Dashboard. Se vuelve a llamar al volver de una
+  /// pantalla que pudo cambiarlas (Ej: decidir sobre un diagnóstico fuera de
+  /// alcance), porque los `FutureBuilder` releen el Future, no la API.
+  void _loadDashboardData() {
+    final token = currentAuthenticationToken ?? '';
+    // El endpoint valida `status` contra el enum PENDING/TAKEN/IN_PROGRESS/
+    // FINISHED y acepta un único valor (un string multi-valor devuelve 400
+    // "status invalido"). Para "Próximas visitas" (varios estados) se traen
+    // todas sin filtro y se excluye FINISHED client-side; para las finalizadas
+    // se filtra directamente por FINISHED.
+    _upcomingVisitsFuture =
+        DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+      authToken: token,
+      limit: 20,
+    );
+    _completedVisitsFuture =
+        DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+      authToken: token,
+      status: 'FINISHED',
+      limit: 2,
+    );
+    // Se piden varias porque el carrusel agrupa por solicitud: dos proveedores
+    // que cotizaron el mismo trabajo son una sola tarjeta.
+    _proposalsFuture =
+        DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.call(
+      authToken: token,
+      limit: 20,
+    );
+    // Se pasa el Future en vez de leer el campo: una segunda recarga lo
+    // reasigna, y esperarlo por campo mezclaría los de dos cargas distintas.
+    _quotesSectionFuture = _loadQuotesSection(_proposalsFuture, token);
+  }
+
+  /// Resuelve las dos fuentes de "Cotizaciones recibidas" en un solo Future:
+  /// las propuestas recibidas y los diagnósticos fuera de alcance vivos. Las
+  /// dos consultas arrancan a la vez.
+  Future<_QuotesData> _loadQuotesSection(
+    Future<ApiCallResponse> proposalsFuture,
+    String token,
+  ) async {
+    final diagnosesFuture = _loadDiagnoses(token);
+    return _QuotesData(
+      proposals: await proposalsFuture,
+      diagnoses: await diagnosesFuture,
+    );
   }
 
   @override
@@ -539,126 +626,316 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     }
   }
 
-  /// Fecha en la que se recibió la propuesta, con el formato del diseño
-  /// (DD/MM/AAAA).
-  String _proposalDate(Map<String, dynamic> proposal) {
-    final raw = _str(proposal['createdAt']) ?? _str(proposal['sentAt']);
-    final parsed = raw == null ? null : DateTime.tryParse(raw)?.toLocal();
-    if (parsed == null) return 'DD/MM/AAAA';
-    final day = parsed.day.toString().padLeft(2, '0');
-    final month = parsed.month.toString().padLeft(2, '0');
-    return '$day/$month/${parsed.year}';
+  /// Fecha con el formato del diseño (DD/MM/AAAA). Sin fecha se deja el
+  /// placeholder en vez de inventar una.
+  String _shortDate(DateTime? date) {
+    if (date == null) return 'DD/MM/AAAA';
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    return '$day/$month/${date.year}';
   }
 
-  /// Seccion "Cotizaciones recibidas" (exclusivo Premium): diagnosticos de
-  /// trabajos fuera de alcance que la red de proveedores cotizo para el cliente.
+  DateTime? _parseDate(String? raw) =>
+      raw == null ? null : DateTime.tryParse(raw)?.toLocal();
+
+  /// Fecha en la que se recibió la propuesta.
+  String _proposalDate(Map<String, dynamic> proposal) => _shortDate(
+      _parseDate(_str(proposal['createdAt']) ?? _str(proposal['sentAt'])));
+
+  /// Subestados de la solicitud que delatan un trabajo fuera de alcance vivo,
+  /// con la píldora que le corresponde a cada uno.
+  ///
+  /// El cliente no tiene un listado de diagnósticos: lo que sí expone el
+  /// backend es el subestado de la solicitud de servicio. Al crear el
+  /// diagnóstico la raíz queda en `OUT_OF_SCOPE_ACCEPTANCE_PENDING` esperando
+  /// la decisión del cliente, y al autorizarlo tanto la raíz como el hijo
+  /// pasan a `OUT_OF_SCOPE_QUOTING`.
+  ///
+  /// Más adelante (`OUT_OF_SCOPE_PAYMENT_PENDING`, `..._EXECUTION_ACTIVE`) ya
+  /// hay una propuesta aceptada, así que el trabajo llega por el listado de
+  /// propuestas y no hace falta buscarlo acá.
+  static const Map<String, String> _outOfScopeSubStatuses = {
+    'OUT_OF_SCOPE_ACCEPTANCE_PENDING': 'Pendiente',
+    'OUT_OF_SCOPE_QUOTING': kPendingQuoteStatusLabel,
+  };
+
+  /// Diagnósticos fuera de alcance vivos del cliente.
+  ///
+  /// Se consulta un subestado por llamada porque el endpoint acepta un único
+  /// valor (igual que el filtro de `status` en "Próximas visitas").
+  Future<List<_OutOfScopeDiagnosis>> _loadDiagnoses(String token) async {
+    final responses = await Future.wait(_outOfScopeSubStatuses.keys.map(
+        (subStatus) => DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall
+            .call(authToken: token, subStatus: subStatus, limit: 20)));
+
+    // Índice por id de solicitud: una vez autorizado el diagnóstico, la raíz y
+    // el hijo vuelven los dos en la misma respuesta. El hijo es el que trae el
+    // id del diagnóstico; la raíz, el nombre real del servicio y la fecha de la
+    // visita (el hijo se etiqueta "Trabajo fuera de alcance" y llega sin
+    // `scheduledAt`), así que hace falta cruzarlos.
+    final requests = <String, Map<String, dynamic>>{};
+    final order = <String>[];
+    for (final response in responses) {
+      if (!response.succeeded) continue;
+      final list = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall
+              .requestsList(response.jsonBody) ??
+          [];
+      for (final item in list.whereType<Map>()) {
+        final data = Map<String, dynamic>.from(item);
+        final id = srId(data);
+        if (id.isEmpty || requests.containsKey(id)) continue;
+        requests[id] = data;
+        order.add(id);
+      }
+    }
+
+    final diagnoses = <String, _OutOfScopeDiagnosis>{};
+    for (final id in order) {
+      final data = requests[id]!;
+      final statusLabel = _outOfScopeSubStatuses[
+          (_str(data['subStatus']) ?? '').toUpperCase()];
+      if (statusLabel == null) continue;
+
+      final diagnosisId = _diagnosisIdOf(data);
+      // Sin el id del diagnóstico la tarjeta no tendría qué abrir.
+      if (diagnosisId == null) continue;
+
+      // Raíz e hijo describen el mismo diagnóstico: gana el hijo, que es el
+      // único que aporta el id de la solicitud hija. La tarjeta se pinta con la
+      // raíz en los dos casos.
+      final isChild = srRequestType(data) == 'OUT_OF_SCOPE';
+      if (diagnoses.containsKey(diagnosisId) && !isChild) continue;
+
+      final rootId = _str(data['rootServiceRequestId']);
+      diagnoses[diagnosisId] = _OutOfScopeDiagnosis(
+        id: diagnosisId,
+        statusLabel: statusLabel,
+        source: (rootId == null ? null : requests[rootId]) ?? data,
+        childServiceRequestId: isChild ? id : null,
+      );
+    }
+    return diagnoses.values.toList();
+  }
+
+  /// Id de la solicitud fuera de alcance asociada a una solicitud de servicio.
+  ///
+  /// El hijo `OUT_OF_SCOPE` lo expone directo en `outOfScopeRequestId`. La raíz
+  /// no —ahí los campos de relación llegan en `null`—, así que mientras el
+  /// diagnóstico espera la decisión del cliente el único lugar donde puede
+  /// venir es `activeAdditionalFlow`, el bloqueo que la raíz mantiene sobre la
+  /// unidad mientras hay un flujo adicional activo.
+  String? _diagnosisIdOf(Map<String, dynamic> data) {
+    final direct = _str(data['outOfScopeRequestId']);
+    if (direct != null) return direct;
+
+    final flow = data['activeAdditionalFlow'];
+    if (flow is! Map) return null;
+    // El bloqueo también lo usan los materiales extras: si declara de qué flujo
+    // es, se descarta el que no corresponde.
+    final type = (_str(flow['type']) ?? '').toUpperCase();
+    if (type.isNotEmpty && !type.contains('OUT_OF_SCOPE')) return null;
+    for (final key in [
+      'outOfScopeRequestId',
+      'requestId',
+      'referenceId',
+      'id'
+    ]) {
+      final value = _str(flow[key]);
+      if (value != null) return value;
+    }
+    return null;
+  }
+
+  /// Seccion "Cotizaciones recibidas": diagnosticos de trabajos fuera de
+  /// alcance que la red de proveedores cotizo para el cliente.
   ///
   /// Las tarjetas van en scroll horizontal, como en el diseño: se muestra una
   /// por solicitud (no una por propuesta, que repetiría la misma cotización
-  /// tantas veces como proveedores respondieron) y al tocarla se abre la
-  /// pantalla de comparación de esa solicitud.
+  /// tantas veces como proveedores respondieron).
   ///
-  /// El encabezado se pinta siempre —igual que "Visitas Finalizadas"—: la
-  /// sección tiene que existir en el Dashboard aunque todavía no haya
-  /// cotizaciones, si no el cliente no sabe que el espacio está ahí.
-  Widget _buildCotizacionesRecibidas() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Cotizaciones recibidas',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                    fontSize: 16.0,
-                    color: FlutterFlowTheme.of(context).primary,
-                  ),
-            ),
-            FFButtonWidget(
-              onPressed: () {
-                // Sin solicitud fijada la pantalla lista todas las propuestas
-                // recibidas por el cliente.
-                DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
-                context
-                    .pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
-              },
-              text: 'Ver todo',
-              options: FFButtonOptions(
-                height: 30.0,
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                color: const Color(0xFFCCE3E4),
-                textStyle: GoogleFonts.publicSans(
-                    color: FlutterFlowTheme.of(context).primary,
-                    fontSize: 14.0),
-                borderRadius: BorderRadius.circular(24.0),
-                elevation: 0,
+  /// El encabezado se pinta siempre que la sección se muestre —igual que
+  /// "Visitas Finalizadas"—: tiene que existir en el Dashboard aunque todavía
+  /// no haya cotizaciones, si no el cliente no sabe que el espacio está ahí.
+  Widget _quotesSection(Widget content) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 50.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Cotizaciones recibidas',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                      fontSize: 16.0,
+                      color: FlutterFlowTheme.of(context).primary,
+                    ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Cotizaciones generadas a partir de diagnósticos',
-          style: GoogleFonts.inter(
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-              color: FlutterFlowTheme.of(context).secondaryText),
-        ),
-        const SizedBox(height: 12),
-        _buildQuotesContent(),
-      ],
+              FFButtonWidget(
+                onPressed: () {
+                  // Sin solicitud fijada la pantalla lista todas las propuestas
+                  // recibidas por el cliente.
+                  _openProposals(null);
+                },
+                text: 'Ver todo',
+                options: FFButtonOptions(
+                  height: 30.0,
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  color: const Color(0xFFCCE3E4),
+                  textStyle: GoogleFonts.publicSans(
+                      color: FlutterFlowTheme.of(context).primary,
+                      fontSize: 14.0),
+                  borderRadius: BorderRadius.circular(24.0),
+                  elevation: 0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Cotizaciones generadas a partir de diagnósticos',
+            style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                color: FlutterFlowTheme.of(context).secondaryText),
+          ),
+          const SizedBox(height: 12),
+          content,
+        ],
+      ),
     );
   }
 
-  /// Contenido de la sección: el carrusel de cotizaciones o, mientras no haya
-  /// ninguna, una línea que explica por qué está vacía.
-  Widget _buildQuotesContent() {
-    return FutureBuilder<ApiCallResponse>(
-      future: _proposalsFuture,
+  /// Sección completa, con su contenido resuelto.
+  ///
+  /// La sección es exclusiva de Premium **salvo** cuando hay un diagnóstico
+  /// fuera de alcance esperando decisión: esa tarjeta es el único acceso del
+  /// cliente sin plan a la pantalla del diagnóstico, donde puede finalizar el
+  /// servicio o suscribirse. El bloqueo de Premium vive dentro de esa pantalla,
+  /// al pedir la cotización; ocultarle la tarjeta lo dejaría sin ninguna de las
+  /// dos salidas.
+  Widget _buildCotizacionesRecibidas(bool hasSubscription) {
+    return FutureBuilder<_QuotesData>(
+      future: _quotesSectionFuture,
       builder: (context, snapshot) {
+        Widget onlyForSubscribers(Widget content) =>
+            hasSubscription ? _quotesSection(content) : const SizedBox.shrink();
+
+        if (snapshot.hasError) {
+          return onlyForSubscribers(_quotesPlaceholder(
+              'No pudimos cargar tus cotizaciones. Intenta de nuevo más tarde.'));
+        }
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return onlyForSubscribers(
+              const Center(child: CircularProgressIndicator()));
         }
 
-        final response = snapshot.data!;
-        if (!response.succeeded) {
-          return _quotesPlaceholder(
-              'No pudimos cargar tus cotizaciones. Intenta de nuevo más tarde.');
-        }
-
-        // `proposalsList` resuelve un JsonPath sobre el JSON decodificado, no
-        // sobre el ApiCallResponse: hay que pasarle `jsonBody`.
-        final proposals = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall
-                .proposalsList(response.jsonBody) ??
-            [];
-
-        // Una tarjeta por solicitud cotizada: varias propuestas de la misma
-        // solicitud son la *misma* cotización para el cliente, y al tocarla las
-        // compara todas en la pantalla de cotizaciones recibidas.
-        final cards = <Map<String, dynamic>>[];
-        final seenRequestIds = <String>{};
-        for (final proposal in proposals.whereType<Map>()) {
-          final data = Map<String, dynamic>.from(proposal);
-          // Si el backend no informa la solicitud la propuesta se muestra
-          // igual (al tocarla se abre el listado completo), pero entonces no
-          // hay con qué agruparla: se la trata como una cotización aparte.
-          final key = _proposalRequestId(data) ??
-              _str(data['id']) ??
-              'proposal_${cards.length}';
-          if (!seenRequestIds.add(key)) continue;
-          cards.add(data);
-          if (cards.length == 5) break;
-        }
+        final data = snapshot.data!;
+        final proposalCards = _proposalCards(data.proposals);
+        // Los diagnósticos van primero: son los únicos que le piden una
+        // decisión al cliente, y el carrusel corta en 5 tarjetas.
+        final cards = [
+          ..._outOfScopeCards(
+            data.diagnoses,
+            proposalCards
+                .map((card) => card.serviceRequestId)
+                .whereType<String>()
+                .toSet(),
+          ),
+          ...proposalCards,
+        ];
 
         if (cards.isEmpty) {
-          return _quotesPlaceholder(
-              'Todavía no recibiste cotizaciones. Te avisaremos cuando los proveedores envíen sus propuestas.');
+          return onlyForSubscribers(_quotesPlaceholder(data.proposals.succeeded
+              ? 'Todavía no recibiste cotizaciones. Te avisaremos cuando los proveedores envíen sus propuestas.'
+              : 'No pudimos cargar tus cotizaciones. Intenta de nuevo más tarde.'));
         }
-        return _buildQuotesCarousel(cards);
+        return _quotesSection(_buildQuotesCarousel(cards.take(5).toList()));
       },
     );
+  }
+
+  /// Tarjetas de las propuestas recibidas. Una por solicitud cotizada: varias
+  /// propuestas de la misma solicitud son la *misma* cotización para el
+  /// cliente, y al tocarla las compara todas en la pantalla de cotizaciones
+  /// recibidas.
+  List<_QuoteCard> _proposalCards(ApiCallResponse response) {
+    if (!response.succeeded) return [];
+    // `proposalsList` resuelve un JsonPath sobre el JSON decodificado, no sobre
+    // el ApiCallResponse: hay que pasarle `jsonBody`.
+    final proposals = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall
+            .proposalsList(response.jsonBody) ??
+        [];
+
+    final cards = <_QuoteCard>[];
+    final seenRequestIds = <String>{};
+    for (final proposal in proposals.whereType<Map>()) {
+      final data = Map<String, dynamic>.from(proposal);
+      final requestId = _proposalRequestId(data);
+      // Si el backend no informa la solicitud la propuesta se muestra igual (al
+      // tocarla se abre el listado completo), pero entonces no hay con qué
+      // agruparla: se la trata como una cotización aparte.
+      final key =
+          requestId ?? _str(data['id']) ?? 'proposal_${cards.length}';
+      if (!seenRequestIds.add(key)) continue;
+      cards.add(_QuoteCard(
+        title: _proposalRequestTitle(data),
+        date: _proposalDate(data),
+        status: _proposalStatusLabel(data),
+        onTap: () => _openProposals(requestId),
+        serviceRequestId: requestId,
+      ));
+    }
+    return cards;
+  }
+
+  /// Tarjetas de los diagnósticos fuera de alcance.
+  ///
+  /// Son el aviso de que un asociado catalogó el trabajo como fuera de alcance:
+  /// al tocarla el cliente ve el diagnóstico y decide si quiere que la red se
+  /// lo cotice.
+  ///
+  /// [quotedRequestIds] son los trabajos que ya tienen propuesta: para esos la
+  /// tarjeta de la propuesta dice más ("Pendiente de Cotización" cuando ya hay
+  /// algo que comparar sería un paso atrás), así que no se duplican.
+  List<_QuoteCard> _outOfScopeCards(
+      List<_OutOfScopeDiagnosis> diagnoses, Set<String> quotedRequestIds) {
+    return [
+      for (final diagnosis in diagnoses)
+        if (!quotedRequestIds.contains(diagnosis.childServiceRequestId))
+          _QuoteCard(
+            title: srServiceName(diagnosis.source),
+            // La visita ya ocurrió: es en ella donde el asociado levantó el
+            // diagnóstico. Si la solicitud no trae fecha agendada se cae a la
+            // de creación.
+            date: _shortDate(srScheduledAt(diagnosis.source) ??
+                srCreatedAt(diagnosis.source)),
+            status: diagnosis.statusLabel,
+            onTap: () => _openOutOfScopeDiagnosis(diagnosis.id),
+            serviceRequestId: diagnosis.childServiceRequestId,
+          ),
+    ];
+  }
+
+  /// Abre la comparación de propuestas. Sin solicitud se listan todas las
+  /// recibidas por el cliente.
+  void _openProposals(String? serviceRequestId) {
+    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = serviceRequestId;
+    context
+        .pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName)
+        .then((_) => safeSetState(_loadDashboardData));
+  }
+
+  /// Abre el diagnóstico fuera de alcance para que el cliente decida si quiere
+  /// que la red le cotice el trabajo. Al volver se recargan los datos: autorizar
+  /// o finalizar cambia el estado de la tarjeta.
+  void _openOutOfScopeDiagnosis(String requestId) {
+    DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId = requestId;
+    context
+        .pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName)
+        .then((_) => safeSetState(_loadDashboardData));
   }
 
   Widget _quotesPlaceholder(String message) {
@@ -685,7 +962,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// Scroll horizontal de las cotizaciones recibidas (diseño del Dashboard).
   /// La fila sangra hasta el borde derecho —el padding lo pone el propio
   /// scroll— para que se vea que hay más tarjetas.
-  Widget _buildQuotesCarousel(List<Map<String, dynamic>> cards) {
+  Widget _buildQuotesCarousel(List<_QuoteCard> cards) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     // Con una sola cotización no hay nada que deslizar: ancho completo.
     final cardWidth = cards.length == 1
@@ -707,20 +984,13 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                 child: SizedBox(
                   width: cardWidth,
                   child: InkWell(
-                    onTap: () {
-                      DHCLIENTCotizacionesRecibidasWidget.serviceRequestId =
-                          _proposalRequestId(cards[i]);
-                      context
-                          .pushNamed(
-                              DHCLIENTCotizacionesRecibidasWidget.routeName)
-                          .then((_) => safeSetState(() {}));
-                    },
+                    onTap: cards[i].onTap,
                     borderRadius: BorderRadius.circular(16.0),
                     child: _buildQuoteResultCard(
-                      title: _proposalRequestTitle(cards[i]),
+                      title: cards[i].title,
                       subtitle: 'Visita realizada',
-                      date: _proposalDate(cards[i]),
-                      status: _proposalStatusLabel(cards[i]),
+                      date: cards[i].date,
+                      status: cards[i].status,
                     ),
                   ),
                 ),
@@ -1327,11 +1597,10 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                         ),
                         const SizedBox(height: 50),
 
-                        // Cotizaciones recibidas (exclusivo Premium)
-                        if (hasSubscription) ...[
-                          _buildCotizacionesRecibidas(),
-                          const SizedBox(height: 50),
-                        ],
+                        // Cotizaciones recibidas. Exclusiva de Premium, salvo
+                        // que haya un diagnóstico fuera de alcance esperando la
+                        // decisión del cliente.
+                        _buildCotizacionesRecibidas(hasSubscription),
 
                         // Footer Confianza
                         _buildTrustItem(

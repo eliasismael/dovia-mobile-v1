@@ -161,12 +161,18 @@ class _DHCLIENTFueraDeAlcanceWidgetState
     return null;
   }
 
-  /// Fotos que el asociado subió al catalogar el trabajo. El backend las
-  /// devuelve en `images` (mismo nombre con el que confirma la subida); se
-  /// aceptan tanto URLs sueltas como items con la URL anidada.
+  /// Fotos que el asociado subió al catalogar el trabajo. `OutOfScopeRequestDto`
+  /// las expone en `images` como `[{ url, storageKey }]`; los otros nombres se
+  /// toleran por si el payload llega aplanado a URLs sueltas.
   List<String> _imageUrlsOf(Map<String, dynamic>? data) {
     if (data == null) return [];
-    for (final key in ['images', 'photos', 'media']) {
+    for (final key in [
+      'images',
+      'imageUrls',
+      'requestImageUrls',
+      'photos',
+      'media'
+    ]) {
       final value = data[key];
       if (value is! List) continue;
       final urls = value.map(_imageUrlOf).whereType<String>().toList();
