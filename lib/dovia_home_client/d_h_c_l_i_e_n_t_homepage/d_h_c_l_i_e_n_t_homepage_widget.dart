@@ -71,8 +71,19 @@ class DHCLIENTHomepageWidget extends StatefulWidget {
   /// Se maneja client-side porque aún no existe endpoint de confirmación en el
   /// backend; al confirmar en la pantalla de detalle se agrega aquí el id y la
   /// tarjeta pierde el punto rojo y pasa de "Confirmar" a "Programada".
+  ///
+  /// Respaldado por [FFAppState] para que la confirmación sobreviva al
+  /// reinicio de la app. Sigue siendo local al dispositivo: el mismo cliente
+  /// en otro teléfono volverá a ver "Confirmar".
   /// TODO: derivar el estatus del backend cuando exista el endpoint.
-  static final Set<String> confirmedVisitIds = {};
+  static Set<String> get confirmedVisitIds =>
+      FFAppState().confirmedServiceRequests.toSet();
+
+  /// Marca la visita como confirmada por el cliente.
+  static void markVisitConfirmed(String serviceRequestId) {
+    if (serviceRequestId.isEmpty) return;
+    FFAppState().addToConfirmedServiceRequests(serviceRequestId);
+  }
 
   @override
   State<DHCLIENTHomepageWidget> createState() => _DHCLIENTHomepageWidgetState();
@@ -217,16 +228,9 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// hay una visita tomada por un asociado pendiente de confirmar. Al volver
   /// refresca el Dashboard.
   void _openVisitDetail(Map<String, dynamic> data) {
-    final address = data['address'];
     DHCLIENTCasaAWidget.requestData = data;
-    DHCLIENTCasaAWidget.houseName = (address is Map
-            ? _str(address['name']) ??
-                _str(address['label']) ??
-                _str(address['nickname']) ??
-                _str(address['alias'])
-            : null) ??
-        'Casa A';
-    final id = (data['id'] ?? data['serviceRequestId'])?.toString() ?? '';
+    DHCLIENTCasaAWidget.houseName = srHouseName(data);
+    final id = srId(data);
     // Desde el Dashboard sí se confirma la visita (no es modo consulta).
     DHCLIENTCasaAWidget.readOnly = false;
     DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);

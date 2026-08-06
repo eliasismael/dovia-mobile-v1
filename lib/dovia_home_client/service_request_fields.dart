@@ -127,9 +127,42 @@ String srFormattedDate(Map<String, dynamic> data) {
   return 'Solicitada el ${created.day} de ${_monthsEs[created.month - 1]}';
 }
 
+/// Nombre de la propiedad para la cabecera del detalle (Ej: "Casa A").
+///
+/// El backend arma `address.label` como "<nombre> - <dirección>" (Ej:
+/// `"casa - 12 Calle 3-45 Zona 10, Guatema"`, truncado), así que pintarlo tal
+/// cual llena la cabecera con la dirección. Se corta en el primer `" - "` para
+/// quedarse con el nombre que puso el cliente.
+String srHouseName(Map<String, dynamic> data) {
+  final address = data['address'];
+  final raw = address is Map
+      ? srString(address['name']) ??
+          srString(address['nickname']) ??
+          srString(address['alias']) ??
+          srString(address['label'])
+      : null;
+  if (raw == null) return 'Casa A';
+  final name = raw.split(' - ').first.trim();
+  if (name.isEmpty) return 'Casa A';
+  return name[0].toUpperCase() + name.substring(1);
+}
+
+/// Tipos de solicitud que piden la confirmación de la visita al cliente.
+///
+/// Solo aplica cuando **el sistema** asigna un Home Associate persona. En
+/// `QUOTE` y `OUT_OF_SCOPE` el cliente ya eligió y aprobó al proveedor
+/// aceptando una propuesta (y en out-of-scope además la pagó), así que el
+/// backend las deja en `TAKEN` sin que quede nada por autorizar: volver a
+/// pedirle "Confirmar" sería pedir dos veces la misma decisión.
+const Set<String> kConfirmableRequestTypes = {'SERVICE', 'EMERGENCY'};
+
+/// Si la solicitud puede pedirle al cliente que confirme la visita.
+bool srIsConfirmable(Map<String, dynamic> data) =>
+    kConfirmableRequestTypes.contains(srRequestType(data));
+
 /// Píldora de estatus que ve el cliente.
 ///
-/// Reglas, en orden: una solicitud tomada por un asociado y no confirmada aún
+/// Reglas, en orden: un servicio tomado por un asociado y no confirmado aún
 /// pide acción ("Confirmar"); una cotización en curso reporta su `subStatus`
 /// (con `status` en `PENDING`, decir "Pendiente" escondería que la solicitud ya
 /// está circulando entre proveedores); el resto sale del enum `status`
@@ -138,7 +171,9 @@ String srStatusLabel(Map<String, dynamic> data, Set<String> confirmedIds) {
   final status = (srString(data['status']) ?? 'PENDING').toUpperCase();
   final subStatus = (srString(data['subStatus']) ?? '').toUpperCase();
 
-  if (status == 'TAKEN' && !confirmedIds.contains(srId(data))) {
+  if (status == 'TAKEN' &&
+      srIsConfirmable(data) &&
+      !confirmedIds.contains(srId(data))) {
     return 'Confirmar';
   }
   if (subStatus.startsWith('QUOTE')) return kPendingQuoteStatusLabel;

@@ -110,9 +110,40 @@ class _DHCLIENTProveedorCardWidgetState
     }
   }
 
-  /// Descarga / abre en pantalla completa el documento de identidad verificado
-  /// del asociado. Si hay un [onDownloadId] se delega en él; si no, se intenta
-  /// abrir [idDocumentUrl] con el visor externo.
+  /// "Sobre mi": el diseño lo pide siempre visible como enlace, aunque el
+  /// asociado no haya escrito nada.
+  void _showAbout() {
+    final about = widget.about ?? '';
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          widget.fullName ?? 'Sobre mi',
+          style: GoogleFonts.publicSans(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: const Color(0xFF00444B),
+          ),
+        ),
+        content: Text(
+          about.isNotEmpty
+              ? about
+              : 'El asociado todavía no compartió información sobre él.',
+          style: GoogleFonts.inter(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Abre el documento de identidad verificado del asociado. Las imágenes se
+  /// muestran en un visor a pantalla completa dentro de la app; el resto
+  /// (Ej: PDF) se delega al visor externo del sistema.
   Future<void> _downloadId() async {
     if (widget.onDownloadId != null) {
       widget.onDownloadId!();
@@ -120,8 +151,8 @@ class _DHCLIENTProveedorCardWidgetState
     }
     final url = widget.idDocumentUrl ?? '';
     if (url.isEmpty) {
-      // TODO: conectar con el endpoint del documento de identidad del asociado
-      // cuando exista. Por ahora solo se notifica al usuario.
+      // El contrato ya expone `associateProfile.identificationDocumentUrl`,
+      // pero hoy llega null en las solicitudes de prueba.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Documento de identidad no disponible')),
@@ -129,6 +160,14 @@ class _DHCLIENTProveedorCardWidgetState
       }
       return;
     }
+
+    final path = Uri.tryParse(url)?.path.toLowerCase() ?? url.toLowerCase();
+    const imageExts = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic'];
+    if (imageExts.any(path.endsWith)) {
+      _openIdViewer(url);
+      return;
+    }
+
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
@@ -137,6 +176,46 @@ class _DHCLIENTProveedorCardWidgetState
         );
       }
     }
+  }
+
+  /// Visor a pantalla completa del documento de identidad, con zoom.
+  void _openIdViewer(String url) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (dialogContext) => Dialog.fullscreen(
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: Text(
+                      'No se pudo cargar el documento',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -308,15 +387,53 @@ class _DHCLIENTProveedorCardWidgetState
 
         const SizedBox(height: 4),
 
+        // Variante del cliente (confirmación de visita): el diseño centra la
+        // edad y ofrece "Sobre mi" como enlace, siempre visible.
+        if (widget.showDownloadId) ...[
+          if (widget.age != null && widget.age!.isNotEmpty)
+            Text(
+              '${widget.age} años',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(),
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                    fontSize: 14.0,
+                    letterSpacing: 0.07,
+                  ),
+            ),
+          const SizedBox(height: 6),
+          InkWell(
+            onTap: _showAbout,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                'Sobre mi',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.publicSans(),
+                      color: primaryColor,
+                      fontSize: 14.0,
+                      letterSpacing: 0.07,
+                      decoration: TextDecoration.underline,
+                    ),
+              ),
+            ),
+          ),
+        ],
+
         // Details column (Edad, Sobre mi, Programada, Fecha/Hora)
         Align(
           alignment: Alignment.centerLeft,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.age != null && widget.age!.isNotEmpty)
+              if (!widget.showDownloadId &&
+                  widget.age != null &&
+                  widget.age!.isNotEmpty)
                 _detailRow('Edad', '${widget.age} años'),
-              if (widget.about != null && widget.about!.isNotEmpty)
+              if (!widget.showDownloadId &&
+                  widget.about != null &&
+                  widget.about!.isNotEmpty)
                 _detailRow('Sobre mi', widget.about!),
               if (widget.visitDate != null && widget.visitDate!.isNotEmpty)
                 _detailRow('Programada', widget.visitDate!),

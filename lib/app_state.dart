@@ -52,6 +52,11 @@ class FFAppState extends ChangeNotifier {
       _routeStartedVisits =
           prefs.getStringList('ff_routeStartedVisits') ?? _routeStartedVisits;
     });
+    _safeInit(() {
+      _confirmedServiceRequests =
+          prefs.getStringList('ff_confirmedServiceRequests') ??
+              _confirmedServiceRequests;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -144,6 +149,33 @@ class FFAppState extends ChangeNotifier {
   void removeFromRouteStartedVisits(String value) {
     _routeStartedVisits.remove(value);
     prefs.setStringList('ff_routeStartedVisits', _routeStartedVisits);
+  }
+
+  /// Ids de solicitudes de Dovia Home cuya visita el cliente ya confirmó.
+  ///
+  /// El backend todavía no expone la confirmación del cliente (el detalle no
+  /// trae ningún `confirmedAt` ni `subStatus` para eso), así que el estatus
+  /// "Programada" se sostiene localmente. Persistirlo evita que la tarjeta
+  /// vuelva a pedir "Confirmar" cada vez que se reinicia la app.
+  /// TODO: borrar esto en cuanto exista el endpoint de confirmación.
+  List<String> _confirmedServiceRequests = [];
+  List<String> get confirmedServiceRequests => _confirmedServiceRequests;
+  set confirmedServiceRequests(List<String> value) {
+    _confirmedServiceRequests = value;
+    prefs.setStringList('ff_confirmedServiceRequests', value);
+  }
+
+  void addToConfirmedServiceRequests(String value) {
+    if (_confirmedServiceRequests.contains(value)) return;
+    _confirmedServiceRequests.add(value);
+    prefs.setStringList(
+        'ff_confirmedServiceRequests', _confirmedServiceRequests);
+  }
+
+  void removeFromConfirmedServiceRequests(String value) {
+    _confirmedServiceRequests.remove(value);
+    prefs.setStringList(
+        'ff_confirmedServiceRequests', _confirmedServiceRequests);
   }
 }
 

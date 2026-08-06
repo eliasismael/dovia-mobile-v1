@@ -182,15 +182,8 @@ class _DHCLIENTProximasVisitasListaWidgetState
   /// Abre el detalle de la solicitud en **modo consulta** (solo lectura). Sin
   /// botón "Aceptar" y sin edición de campos: es estrictamente un registro.
   void _openDetail(Map<String, dynamic> data) {
-    final address = data['address'];
     DHCLIENTCasaAWidget.requestData = data;
-    DHCLIENTCasaAWidget.houseName = (address is Map
-            ? srString(address['name']) ??
-                srString(address['label']) ??
-                srString(address['nickname']) ??
-                srString(address['alias'])
-            : null) ??
-        'Casa A';
+    DHCLIENTCasaAWidget.houseName = srHouseName(data);
     // Modo consulta: este listado es un registro, no el flujo de confirmación,
     // así que el detalle nunca muestra el botón "Aceptar". La tarjeta del
     // asociado se muestra/oculta dentro del detalle según el estatus.

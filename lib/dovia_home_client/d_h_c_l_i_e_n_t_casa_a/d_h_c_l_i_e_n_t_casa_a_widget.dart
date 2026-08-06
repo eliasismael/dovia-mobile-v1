@@ -1,6 +1,7 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
+import '/dovia_home_client/service_request_fields.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proveedor_card/d_h_c_l_i_e_n_t_proveedor_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -116,19 +117,29 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   }
 
   // ---------------------------------------------------------------------------
-  // Extracción best-effort de los datos de la solicitud. El shape del backend
-  // aún es incierto para varios campos, por eso cada getter prueba varias claves
-  // y cae a un fallback vacío para que la pantalla renderice siempre.
+  // Extracción de los datos de la solicitud, contra el contrato de
+  // `GET /dovia-home/service-requests/{id}`. Los getters conservan claves
+  // alternativas como respaldo (el listado manda un resumen más pobre), pero la
+  // primera candidata de cada uno es siempre el campo real del contrato.
   // ---------------------------------------------------------------------------
 
   Map<String, dynamic>? get _data => _serviceData;
 
   Map? get _address => _data?['address'] is Map ? _data!['address'] as Map : null;
 
+  /// Asignación del trabajo: `{ userId, assignedAt }`. **No trae el perfil**;
+  /// los datos del profesional viven en [_associateProfile].
   Map? get _associate {
     final a =
         _data?['associate'] ?? _data?['assignedAssociate'] ?? _data?['homeAssociate'];
     return a is Map ? a : null;
+  }
+
+  /// Perfil del Home Associate asignado (`associateProfile`): nombre, edad,
+  /// avatar, teléfono y documento de identidad.
+  Map? get _associateProfile {
+    final p = _data?['associateProfile'] ?? _data?['associateDetail'];
+    return p is Map ? p : null;
   }
 
   String? _firstString(List<dynamic> candidates) {
@@ -140,15 +151,20 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   String get _exactAddress =>
       _firstString([
+        _address?['address'],
         _address?['exactAddress'],
         _address?['fullAddress'],
         _address?['line1'],
-        _address?['address'],
         _data?['exactAddress'],
         _data?['addressLine'],
       ]) ??
       '';
 
+  /// El contrato actual **no** distingue las instrucciones para llegar de las
+  /// de ingreso: `address` solo trae `accessInstructions`, que se muestra en
+  /// [_entryInstructions]. Este campo queda vacío hasta que el backend lo
+  /// separe.
+  /// TODO: mapear cuando exista el campo de instrucciones de llegada.
   String get _arrivalInstructions =>
       _firstString([
         _address?['arrivalInstructions'],
@@ -159,6 +175,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   String get _entryInstructions =>
       _firstString([
+        _address?['accessInstructions'],
         _address?['entryInstructions'],
         _data?['entryInstructions'],
         _address?['howToEnter'],
@@ -187,7 +204,9 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   }
 
   List<String> get _imageUrls {
-    final imgs = _data?['images'];
+    // El contrato entrega `requestImageUrls` (lista de strings). `images` se
+    // conserva por si el resumen del listado usa esa forma.
+    final imgs = _data?['requestImageUrls'] ?? _data?['images'];
     if (imgs is! List) return [];
     final urls = <String>[];
     for (final it in imgs) {
@@ -202,7 +221,20 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
     return urls;
   }
 
+  /// Plan con el que se tarificó la solicitud (`price.plan`). `SUBSCRIBED`
+  /// significa que el cliente pagó el precio de suscriptor.
+  String get _pricePlan {
+    final price = _data?['price'];
+    return _firstString([price is Map ? price['plan'] : null])?.toUpperCase() ??
+        '';
+  }
+
   /// Monto ahorrado por el cliente (suscripción / descuento). null si no aplica.
+  ///
+  /// El contrato solo trae la fila de precio ya aplicada (`price.price`), no el
+  /// precio regular contra el que compararla, así que hoy esto casi siempre es
+  /// null y el banner sale sin cifra.
+  /// TODO: usar `savings` cuando el backend lo exponga.
   String? get _savingsAmount {
     final payment = _data?['payment'];
     final raw = _data?['savings'] ??
@@ -220,27 +252,39 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   bool get _hasSavings {
     if (_data == null) return true;
     if (_savingsAmount != null) return true;
+    if (_pricePlan == 'SUBSCRIBED') return true;
     final used = _data?['usedIncludedService'] ?? _data?['includedServiceUsed'];
     final discount = _data?['discountApplied'] ?? _data?['hasDiscount'];
     return used == true || discount == true;
   }
 
   String get _associateName {
-    final direct = _firstString([_associate?['fullName'], _associate?['name']]);
+    final direct = _firstString([
+      _associateProfile?['fullName'],
+      _associateProfile?['name'],
+      _associate?['fullName'],
+      _associate?['name'],
+    ]);
     if (direct != null) return direct;
-    final first = _firstString([_associate?['firstName']]) ?? '';
-    final last = _firstString([_associate?['lastName']]) ?? '';
+    final first =
+        _firstString([_associateProfile?['firstName'], _associate?['firstName']]) ??
+            '';
+    final last =
+        _firstString([_associateProfile?['lastName'], _associate?['lastName']]) ??
+            '';
     return '$first $last'.trim();
   }
 
   String get _associateAge {
-    final a = _associate?['age'];
+    final a = _associateProfile?['age'] ?? _associate?['age'];
     if (a is num) return a.toString();
-    return _firstString([_associate?['age']]) ?? '';
+    return _firstString([a]) ?? '';
   }
 
   String get _associateAvatar =>
       _firstString([
+        _associateProfile?['avatar'],
+        _associateProfile?['avatarUrl'],
         _associate?['avatarUrl'],
         _associate?['photoUrl'],
         _associate?['profileImageUrl'],
@@ -248,28 +292,50 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
       ]) ??
       '';
 
-  String get _associatePhone =>
+  /// El perfil entrega el teléfono partido (`{ countryCode, number }`); el
+  /// resumen del listado a veces lo manda plano.
+  String get _associatePhone {
+    final phone = _associateProfile?['phone'] ?? _associate?['phone'];
+    if (phone is Map) {
+      final code = _firstString([phone['countryCode']]) ?? '';
+      final number = _firstString([phone['number']]) ?? '';
+      final composed = '$code$number'.trim();
+      if (composed.isNotEmpty) return composed;
+    }
+    return _firstString([
+          phone,
+          _associateProfile?['phoneNumber'],
+          _associate?['phoneNumber'],
+          _associate?['mobile'],
+          _data?['associatePhone'],
+        ]) ??
+        '';
+  }
+
+  /// Biografía del asociado. El contrato aún no la expone, así que hoy siempre
+  /// llega vacía y el enlace "Sobre mi" avisa que no hay información.
+  /// TODO: mapear cuando `associateProfile` incluya la bio.
+  String get _associateAbout =>
       _firstString([
-        _associate?['phoneNumber'],
-        _associate?['phone'],
-        _associate?['mobile'],
-        _data?['associatePhone'],
+        _associateProfile?['about'],
+        _associateProfile?['bio'],
+        _associate?['about'],
+        _associate?['bio'],
       ]) ??
       '';
 
-  String get _associateAbout =>
-      _firstString([_associate?['about'], _associate?['bio']]) ?? '';
-
   String get _associateId =>
       _firstString([
+        _associate?['userId'],
+        _associateProfile?['id'],
         _associate?['id'],
         _associate?['associateId'],
-        _associate?['userId'],
       ]) ??
       '';
 
   String get _associateIdDoc =>
       _firstString([
+        _associateProfile?['identificationDocumentUrl'],
         _associate?['idDocumentUrl'],
         _associate?['documentUrl'],
         _associate?['idUrl'],
@@ -312,12 +378,20 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
     return decided.contains(status) ? null : materials;
   }
 
+  /// Hay una persona concreta que mostrar en la tarjeta de seguridad. Cuando el
+  /// proveedor es una empresa el contrato no entrega `associateProfile`, así que
+  /// no hay foto, edad ni documento que renderizar.
+  bool get _hasAssociatePersonProfile =>
+      _associateProfile != null && _associateName.trim().isNotEmpty;
+
   /// Regla de renderizado del asociado: la tarjeta del profesional solo se
   /// muestra cuando alguien ya tomó el trabajo (solicitud "Programada"/asignada
   /// o con datos del asociado). Si nadie lo ha tomado ("Pendiente") se oculta y
   /// se muestra el placeholder "Buscando al profesional ideal...".
   bool get _associateAssigned {
-    if (_associate != null &&
+    // `associate.assignedAt` es la señal explícita del contrato.
+    if (_firstString([_associate?['assignedAt']]) != null) return true;
+    if ((_associate != null || _associateProfile != null) &&
         (_associateName.trim().isNotEmpty || _associateId.isNotEmpty)) {
       return true;
     }
@@ -327,12 +401,22 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
     return assignedStatuses.contains(_status.toUpperCase());
   }
 
+  String get _requestType =>
+      (_firstString([_data?['requestType']]) ?? 'SERVICE').toUpperCase();
+
   /// Hay algo que confirmar solo cuando un Home Associate ya tomó el trabajo
   /// (TAKEN). Con la solicitud aún "Pendiente" nadie la tomó, así que no hay
   /// visita que aceptar. Sin datos (ruta directa / modo diseño) se muestra el
   /// botón para no romper el mockup.
-  bool get _awaitsConfirmation =>
-      _data == null || _status.toUpperCase() == 'TAKEN';
+  ///
+  /// Las cotizaciones y los trabajos fuera de alcance quedan fuera: ahí el
+  /// cliente ya aprobó al proveedor al aceptar la propuesta
+  /// ([kConfirmableRequestTypes]).
+  bool get _awaitsConfirmation {
+    if (_data == null) return true;
+    if (_status.toUpperCase() != 'TAKEN') return false;
+    return kConfirmableRequestTypes.contains(_requestType);
+  }
 
   // ---------------------------------------------------------------------------
   // Contacto con el asociado (cabecera).
@@ -372,22 +456,22 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   /// Confirma la visita: marca la solicitud como confirmada (client-side),
   /// muestra el modal de éxito y regresa al Dashboard.
   Future<void> _confirmVisit() async {
-    final id = _requestId;
-    if (id.isNotEmpty) {
-      // TODO: reemplazar por la confirmación real en el backend cuando exista el
-      // endpoint (hoy no hay "cliente confirma la visita"). Se marca client-side
-      // para reflejar el cambio de estatus a "Programada" en el Dashboard.
-      DHCLIENTHomepageWidget.confirmedVisitIds.add(id);
-    }
+    final id = _requestId.isNotEmpty ? _requestId : (_serviceRequestId ?? '');
+    // TODO: reemplazar por la confirmación real en el backend cuando exista el
+    // endpoint (hoy no hay "cliente confirma la visita"). Se marca client-side
+    // para reflejar el cambio de estatus a "Programada" en el Dashboard.
+    DHCLIENTHomepageWidget.markVisitConfirmed(id);
 
-    await showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: false,
+    // Pop-up central (no bottom sheet): el diseño lo pide sobre la pantalla.
+    await showDialog(
       context: context,
-      builder: (context) {
-        return Padding(
-          padding: MediaQuery.viewInsetsOf(context),
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0.0,
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
           child: DHCLIENTExitoProgramarAgendaWidget(
             houseName: DHCLIENTCasaAWidget.houseName,
             message:
@@ -478,6 +562,19 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   Widget _photosRow() {
     final urls = _imageUrls;
+    // Con datos reales y sin fotos se dice que no hay: los cuadros grises del
+    // diseño son del mockup y aquí harían parecer que hay adjuntos.
+    if (urls.isEmpty && _data != null) {
+      return Text(
+        'Sin fotos adjuntas',
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.inter(),
+              fontSize: 14.0,
+              letterSpacing: 0.0,
+              color: FlutterFlowTheme.of(context).secondaryText,
+            ),
+      );
+    }
     final count = urls.isEmpty ? 5 : urls.length;
     return SizedBox(
       height: 60.0,
@@ -566,15 +663,69 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
           ),
           padding: const EdgeInsets.all(16.0),
           child: Text(
+            // Sin monto (el contrato no expone el ahorro ni el precio regular)
+            // se afirma el beneficio sin inventar una cifra; el literal del
+            // mockup "$ (Precio de servicio...)" parecería un error en
+            // producción.
             _savingsAmount != null
                 ? 'Ahorraste:\n\$${_savingsAmount!} que no pagas por tener suscripción'
-                : 'Ahorraste:\n\$ (Precio de servicio que no paga por tener suscripción)',
+                : 'Ahorraste el precio de este servicio por tener tu suscripción.',
             style: FlutterFlowTheme.of(context).bodyMedium.override(
                   font: GoogleFonts.inter(),
                   letterSpacing: 0.0,
                   lineHeight: 1.2,
                 ),
           ),
+        ),
+      );
+
+  /// Trabajo ya asignado pero sin perfil de persona que mostrar: pasa cuando el
+  /// proveedor es una empresa (cotización / fuera de alcance), donde el
+  /// contrato no entrega foto, edad ni documento.
+  ///
+  /// No se reutiliza [_searchingAssociatePlaceholder] porque diría que se está
+  /// buscando a alguien cuando el trabajo ya tiene dueño.
+  Widget _assignedProviderPlaceholder() => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 28.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6.0),
+          border: Border.all(
+            color: FlutterFlowTheme.of(context).primary,
+            width: 1.0,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.verified_user_outlined,
+              size: 48.0,
+              color: FlutterFlowTheme.of(context).primary,
+            ),
+            const SizedBox(height: 12.0),
+            Text(
+              'Proveedor asignado',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                    letterSpacing: 0.0,
+                  ),
+            ),
+            const SizedBox(height: 6.0),
+            Text(
+              'Te compartiremos los datos del profesional que realizará el '
+              'trabajo antes de la visita.',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.inter(),
+                    fontSize: 13.0,
+                    letterSpacing: 0.0,
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                  ),
+            ),
+          ],
         ),
       );
 
@@ -789,12 +940,16 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),
-                            // Regla de renderizado del asociado: si nadie tomó
-                            // el trabajo ("Pendiente") se oculta la tarjeta del
-                            // profesional y se muestra un placeholder de
-                            // búsqueda.
-                            child: _associateAssigned
-                                ? wrapWithModel(
+                            // Regla de renderizado del asociado: con perfil de
+                            // persona va la tarjeta de seguridad; asignado sin
+                            // perfil (proveedor empresa) va el aviso de
+                            // proveedor asignado; y si nadie tomó el trabajo
+                            // ("Pendiente"), el placeholder de búsqueda.
+                            child: !_hasAssociatePersonProfile
+                                ? (_associateAssigned
+                                    ? _assignedProviderPlaceholder()
+                                    : _searchingAssociatePlaceholder())
+                                : wrapWithModel(
                                     model: _model.dHCLIENTProveedorCardModel,
                                     updateCallback: () => safeSetState(() {}),
                                     child: DHCLIENTProveedorCardWidget(
@@ -811,8 +966,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                                       showDownloadId: true,
                                       idDocumentUrl: _associateIdDoc,
                                     ),
-                                  )
-                                : _searchingAssociatePlaceholder(),
+                                  ),
                           ),
                           const SizedBox(height: 20.0),
                         ],
