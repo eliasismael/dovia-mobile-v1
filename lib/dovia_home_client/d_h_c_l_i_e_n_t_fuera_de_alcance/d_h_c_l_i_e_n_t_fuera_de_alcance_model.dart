@@ -33,6 +33,11 @@ class DHCLIENTFueraDeAlcanceModel
   /// cerrada si el cliente la finalizó). Null si todavía no se leyó.
   String? requestStatus;
 
+  /// Servicio hijo `OUT_OF_SCOPE` que crea la autorización. Es el id contra el
+  /// que se consultan las propuestas del trabajo extra; null mientras el cliente
+  /// no haya autorizado, porque el hijo todavía no existe.
+  String? childServiceRequestId;
+
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
   // Model for DH_CLIENT_Navbar component.

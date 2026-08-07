@@ -9,6 +9,19 @@ import 'package:flutter/material.dart';
 
 class DHASSOCIATETrabajoFinalizadoModel
     extends FlutterFlowModel<DHASSOCIATETrabajoFinalizadoWidget> {
+  /// Fotos del trabajo realizado (categoría `WORK`). Son opcionales: el cierre
+  /// no las exige.
+  List<FFUploadedFile> uploadedMedia = [];
+
+  /// Fotos de dónde quedaron los materiales sobrantes (categoría
+  /// `LEFTOVER_MATERIALS`). Van en su propia tanda de presign/confirm porque el
+  /// contrato las categoriza aparte.
+  List<FFUploadedFile> leftoverMedia = [];
+
+  /// True mientras se sube la evidencia y se cierra el trabajo, para que el
+  /// botón no dispare dos cierres.
+  bool isSubmitting = false;
+
   ///  State fields for stateful widgets in this page.
 
   // Model for CornerGradientBackground component.

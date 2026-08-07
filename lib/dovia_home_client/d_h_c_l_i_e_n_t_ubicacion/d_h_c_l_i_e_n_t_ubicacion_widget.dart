@@ -270,17 +270,24 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
       if (!mounted) return;
 
       if (!response.succeeded) {
-        // El backend rechaza las direcciones fuera de cobertura: se deriva a la
-        // pantalla de fuera de alcance en ese caso y se avisa en el resto.
-        if (response.statusCode == 422 || response.statusCode == 409) {
+        // El alta de direcciones responde 400 para todos sus errores de
+        // validación y los distingue por `errorCode`, así que la decisión se
+        // toma sobre el código y no sobre el status: una zona sin cobertura y
+        // una dirección malformada llegan las dos como 400.
+        if (doviaHomeErrorCode(response) == kDoviaHomeInvalidZoneCode) {
           // Igual que arriba: es la zona la que quedó fuera, no hay diagnóstico.
           DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId = null;
           context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content:
-                  Text('No se pudo registrar la ubicación. Intenta de nuevo.'),
+            SnackBar(
+              content: Text(
+                doviaHomeAddressErrorMessage(
+                  response,
+                  fallback:
+                      'No se pudo registrar la ubicación. Intenta de nuevo.',
+                ),
+              ),
             ),
           );
         }

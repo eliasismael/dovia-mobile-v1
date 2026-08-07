@@ -1,5 +1,5 @@
 import '/dovia_home_associate/associate_job_filters.dart';
-import '/dovia_home_associate/associate_requests_loader.dart';
+import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
@@ -131,7 +131,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
     // los trabajos que todavía hay que hacer.
     final call =
         DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall;
-    final jobsRequest = loadAllAssociateRequests(
+    final jobsRequest = loadAllDoviaHomePages(
       fetchPage: (page, limit) =>
           call.call(authToken: token, page: page, limit: limit),
       extractList: call.requestsList,
@@ -152,7 +152,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
 
     final agenda = _Agenda(
       categories: categories,
-      jobs: jobs.requests,
+      jobs: jobs.items,
       jobsTruncated: jobs.truncated,
     );
     _reconcileFilters(agenda);
@@ -505,7 +505,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
       children: [
         if (agenda.jobsTruncated) ...[
           _buildMessage(
-            'Estamos mostrando tus primeros $kAssociateRequestsMaxItems '
+            'Estamos mostrando tus primeros $kDoviaHomeMaxItems '
             'trabajos. Puede que falte parte de tu historial.',
           ),
           const SizedBox(height: 8.0),

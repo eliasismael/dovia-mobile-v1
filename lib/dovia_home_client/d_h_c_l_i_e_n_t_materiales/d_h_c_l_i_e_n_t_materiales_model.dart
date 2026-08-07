@@ -30,17 +30,32 @@ class DHCLIENTMaterialesModel
   /// Descripción del material que el Home Associate cargó desde su app.
   String? materialText;
 
-  /// Precio de referencia ingresado por el asociado, ya formateado con su
-  /// moneda (Ej: "Q350.00"). Null cuando el backend todavía no lo envía.
+  /// Monto de la cotización de DOVIA, ya formateado en GTQ (Ej: "Q350"). Null
+  /// mientras la solicitud siga en `QUOTE_PENDING`: recién con la cotización
+  /// cargada hay un monto que mostrar.
   String? estimatedPrice;
+
+  /// Desglose que HQ escribió junto al PDF de la cotización.
+  String? quoteDetails;
+
+  /// PDF de la cotización. Es lo que el cliente tiene que leer antes de aceptar
+  /// el cobro, así que la pantalla lo ofrece cuando existe.
+  String? quoteDocumentUrl;
 
   /// Fotos que el asociado tomó como evidencia de dónde se usará el material.
   List<String> imageUrls = [];
 
-  /// Estatus de la solicitud de materiales extra (`PENDING` mientras espera la
-  /// decisión del cliente; `ACCEPTED`/`REJECTED` una vez decidida). Null si
+  /// Estatus de la solicitud de materiales extra. El enum del contrato es
+  /// `QUOTE_PENDING | QUOTE_SENT | PAYMENT_PENDING | PAID | REJECTED`; null si
   /// todavía no se leyó.
   String? materialsStatus;
+
+  /// Solicitud de materiales vigente, para las rutas que la piden por id.
+  String? extraMaterialsId;
+
+  /// Orden de pago creada al aceptar la cotización. Es la que se reanuda con
+  /// `POST /payments/{paymentOrderId}/resume` cuando el checkout queda a medias.
+  String? paymentOrderId;
 
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;

@@ -128,6 +128,13 @@ class _DHCLIENTFueraDeAlcanceWidgetState
         _model.diagnosisText = _diagnosisTextOf(data);
         _model.diagnosisImagesUrls = _imageUrlsOf(data);
         _model.requestStatus = _statusOf(data);
+        // El hijo que crea la autorización es contra quien se consultan las
+        // propuestas: la solicitud fuera de alcance no las expone. Null hasta
+        // que el cliente autoriza, así que no se pisa lo ya conocido con vacío.
+        final childId = data?['childServiceRequestId'];
+        if (childId is String && childId.trim().isNotEmpty) {
+          _model.childServiceRequestId = childId.trim();
+        }
       });
     } catch (_) {
       if (mounted) safeSetState(() => _model.diagnosisLoadFailed = true);
@@ -170,6 +177,40 @@ class _DHCLIENTFueraDeAlcanceWidgetState
   bool get _isClosed => _model.requestStatus == 'CLOSED';
 
   bool get _isAuthorized => _decisionTaken && !_isClosed;
+
+  /// Hay propuestas que consultar: la solicitud se autorizó y el backend ya
+  /// entregó el hijo contra el que se piden.
+  bool get _canSeeProposals =>
+      _isAuthorized && (_model.childServiceRequestId?.isNotEmpty ?? false);
+
+  /// Lleva a comparar las propuestas del trabajo extra. Reusa la pantalla de
+  /// cotizaciones recibidas, que ya sabe aceptar y rechazar las dos familias de
+  /// propuesta; se le inyecta el hijo por el campo específico de fuera de
+  /// alcance porque la ruta del listado no es la de cotizaciones.
+  Widget _viewProposalsButton() => FFButtonWidget(
+        onPressed: () {
+          DHCLIENTCotizacionesRecibidasWidget.outOfScopeServiceRequestId =
+              _model.childServiceRequestId;
+          context.pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName);
+        },
+        text: 'Ver propuestas recibidas',
+        options: FFButtonOptions(
+          width: MediaQuery.sizeOf(context).width * 1.0,
+          height: 42.0,
+          padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+          iconPadding:
+              const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+          color: FlutterFlowTheme.of(context).primary,
+          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                color: Colors.white,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+          elevation: 0.0,
+          borderRadius: BorderRadius.circular(25.0),
+        ),
+      );
 
   Map<String, dynamic>? _asMap(dynamic value) =>
       value is Map ? Map<String, dynamic>.from(value) : null;
@@ -320,11 +361,16 @@ class _DHCLIENTFueraDeAlcanceWidgetState
       // recibirá las propuestas de la red y la que el cliente verá en sus
       // cotizaciones. La operación es idempotente, así que reintentar devuelve
       // siempre la misma hija.
+      final authorizeCall =
+          DOVIAAPIDoviaHomeContextGroup.authorizeOutOfScopeRequestCall;
       safeSetState(() {
-        _model.requestStatus = DOVIAAPIDoviaHomeContextGroup
-                .authorizeOutOfScopeRequestCall
-                .status(response.jsonBody) ??
-            'QUOTING';
+        _model.requestStatus =
+            authorizeCall.status(response.jsonBody) ?? 'QUOTING';
+        // La respuesta devuelve el hijo en `serviceRequestId`: es el que hay que
+        // usar para consultar sus propuestas.
+        _model.childServiceRequestId =
+            authorizeCall.serviceRequestId(response.jsonBody) ??
+                _model.childServiceRequestId;
       });
 
       await showDialog(
@@ -602,7 +648,7 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                               ),
                             ),
                           ),
-                        if (_decisionTaken)
+                        if (_decisionTaken) ...[
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 12.0, 0.0, 0.0),
@@ -618,8 +664,18 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                                     letterSpacing: 0.0,
                                   ),
                             ),
-                          )
-                        else ...[
+                          ),
+                          // Autorizada la solicitud, las propuestas llegan
+                          // contra el hijo que creó la autorización. Sin ese id
+                          // no hay a qué apuntar, así que el acceso sólo
+                          // aparece cuando el backend ya lo entregó.
+                          if (_canSeeProposals)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 12.0, 0.0, 0.0),
+                              child: _viewProposalsButton(),
+                            ),
+                        ] else ...[
                           FFButtonWidget(
                             onPressed: _model.isSubmitting
                                 ? null

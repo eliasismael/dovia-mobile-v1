@@ -1,6 +1,8 @@
+import '/dovia_home_client/checkout_launcher.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_agenda/d_h_c_l_i_e_n_t_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_instalacion/d_h_c_l_i_e_n_t_instalacion_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
+import '/dovia_home_client/proposal_fields.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -19,12 +21,22 @@ import '/backend/api_requests/api_manager.dart';
 import 'd_h_c_l_i_e_n_t_cotizaciones_recibidas_model.dart';
 export 'd_h_c_l_i_e_n_t_cotizaciones_recibidas_model.dart';
 
-/// Propuestas de trabajo a medida que la red de empresas proveedoras envió para
-/// las solicitudes de cotización del cliente.
+/// Propuestas que los proveedores enviaron al cliente.
 ///
-/// El cliente compara las cotizaciones (trabajo a realizar, tiempo estimado,
-/// precio y garantía), marca una y con [Continuar] la acepta: la solicitud
-/// avanza con ese proveedor.
+/// Con una solicitud fijada muestra el historial de esa cotización
+/// (`QuoteProposalResponseDto`); sin ella, el listado unificado
+/// (`DoviaHomeUnifiedProposalDto`), que mezcla propuestas `QUOTE` y
+/// `OUT_OF_SCOPE`. El cliente compara descripción, precio y PDF, marca una y la
+/// acepta o la rechaza.
+///
+/// **La aceptación no es la misma para las dos familias** y por eso se ramifica
+/// por `proposalType`: una `QUOTE` cierra el marketplace sin cobro y sigue al
+/// agendamiento, mientras que una `OUT_OF_SCOPE` crea una orden y abre el
+/// checkout de Recurrente.
+///
+/// El precio se muestra tal cual lo cotizó el proveedor. El contrato no expone
+/// precio de lista ni descuento de plan, así que la pantalla no calcula
+/// ninguno: en `OUT_OF_SCOPE` se cobra exactamente ese monto.
 class DHCLIENTCotizacionesRecibidasWidget extends StatefulWidget {
   const DHCLIENTCotizacionesRecibidasWidget({super.key});
 
@@ -36,27 +48,20 @@ class DHCLIENTCotizacionesRecibidasWidget extends StatefulWidget {
   /// null se listan todas las propuestas recibidas por el cliente.
   static String? serviceRequestId;
 
-  /// Descuento del plan Dovia Home aplicado al costo del proyecto.
-  static const double premiumDiscountRate = 0.35;
-
-  /// Etiqueta del descuento en la tarjeta (misma que el resto del flujo).
-  static const String premiumDiscountLabel = '35% OFF';
+  /// Hijo `OUT_OF_SCOPE` cuyas propuestas de trabajo extra se muestran.
+  ///
+  /// Va en un campo aparte de [serviceRequestId] porque, con el mismo tipo de
+  /// dato, la ruta es otra: las propuestas de un trabajo fuera de alcance no
+  /// salen de `/quote-proposals`. Debe ser el id del **hijo**, no el de la raíz
+  /// ni el de la solicitud fuera de alcance —con cualquiera de esos dos el
+  /// backend responde `DOVIA_HOME_SERVICE_REQUEST_NOT_FOUND`—.
+  static String? outOfScopeServiceRequestId;
 
   @override
   State<DHCLIENTCotizacionesRecibidasWidget> createState() =>
       _DHCLIENTCotizacionesRecibidasWidgetState();
 }
 
-/// Precio ya resuelto para la tarjeta: lo que el cliente pagará y, cuando
-/// aplica el beneficio Premium, el precio de lista que queda tachado.
-class _ProposalPrice {
-  const _ProposalPrice({required this.finalLabel, this.baseLabel});
-
-  final String finalLabel;
-  final String? baseLabel;
-
-  bool get hasDiscount => baseLabel != null;
-}
 
 class _DHCLIENTCotizacionesRecibidasWidgetState
     extends State<DHCLIENTCotizacionesRecibidasWidget> {
@@ -70,25 +75,27 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   /// el parseo de la respuesta no cambie si el campo estático se limpia.
   String? _requestId;
 
+  /// Si [_requestId] es un hijo `OUT_OF_SCOPE` en vez de una cotización. Decide
+  /// qué listado se pide: son dos rutas distintas sobre el mismo path param.
+  bool _outOfScope = false;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTCotizacionesRecibidasModel());
 
-    final token = currentAuthenticationToken ?? '';
-    _requestId = DHCLIENTCotizacionesRecibidasWidget.serviceRequestId;
-    // Con una solicitud concreta se piden sus propuestas; sin ella se listan
-    // todas las recibidas por el cliente.
-    _proposalsFuture = _hasRequestId
-        ? DOVIAAPIDoviaHomeContextGroup.listQuoteProposalsCall.call(
-            serviceRequestId: _requestId,
-            authToken: token,
-            limit: 20,
-          )
-        : DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.call(
-            authToken: token,
-            limit: 20,
-          );
+    // Los dos estáticos se consumen al abrir: quedan amarrados a esta instancia
+    // y se limpian, para que una entrada posterior no herede la solicitud de la
+    // anterior.
+    final outOfScopeId =
+        DHCLIENTCotizacionesRecibidasWidget.outOfScopeServiceRequestId;
+    _outOfScope = outOfScopeId != null && outOfScopeId.isNotEmpty;
+    _requestId = _outOfScope
+        ? outOfScopeId
+        : DHCLIENTCotizacionesRecibidasWidget.serviceRequestId;
+    DHCLIENTCotizacionesRecibidasWidget.outOfScopeServiceRequestId = null;
+
+    _proposalsFuture = _buildProposalsFuture();
 
     // El estatus de suscripción decide si la tarjeta refleja el descuento
     // Premium sobre el costo del proyecto (queda cacheado en el repo).
@@ -96,6 +103,33 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
       context.read<PaymentsRepository>().loadCurrentSubscription();
       safeSetState(() {});
     });
+  }
+
+  /// Pide el listado que corresponde:
+  /// - hijo `OUT_OF_SCOPE` → sus propuestas de trabajo extra;
+  /// - cotización concreta → su historial de propuestas;
+  /// - sin solicitud → el listado unificado de todo lo recibido.
+  Future<ApiCallResponse> _buildProposalsFuture() {
+    final token = currentAuthenticationToken ?? '';
+    if (_outOfScope) {
+      return DOVIAAPIDoviaHomeContextGroup.listClientOutOfScopeProposalsCall
+          .call(
+        serviceRequestId: _requestId,
+        authToken: token,
+        limit: 20,
+      );
+    }
+    if (_hasRequestId) {
+      return DOVIAAPIDoviaHomeContextGroup.listQuoteProposalsCall.call(
+        serviceRequestId: _requestId,
+        authToken: token,
+        limit: 20,
+      );
+    }
+    return DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall.call(
+      authToken: token,
+      limit: 20,
+    );
   }
 
   @override
@@ -108,192 +142,60 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   bool get _hasRequestId => (_requestId?.isNotEmpty) ?? false;
 
   // ---------------------------------------------------------------------------
-  // Extracción best-effort de los campos de la propuesta: el shape del backend
-  // aún no está fijo, por eso cada getter prueba varias claves y cae a '-' para
-  // que la tarjeta renderice siempre.
+  // Campos de la propuesta. Se leen con `proposal_fields.dart`, que cubre los
+  // dos contratos que consume esta pantalla (`DoviaHomeUnifiedProposalDto` y
+  // `QuoteProposalResponseDto`).
   // ---------------------------------------------------------------------------
-
-  String? _str(dynamic value) =>
-      (value is String && value.trim().isNotEmpty) ? value.trim() : null;
-
-  String? _firstValue(List<dynamic> candidates) {
-    for (final candidate in candidates) {
-      final value = _str(candidate);
-      if (value != null) return value;
-      if (candidate is num) return candidate.toString();
-    }
-    return null;
-  }
-
-  Map? _asMap(dynamic value) => value is Map ? value : null;
-
-  String _proposalId(Map<String, dynamic> proposal) =>
-      _firstValue([proposal['id'], proposal['proposalId']]) ?? '';
 
   /// Solicitud a la que pertenece la propuesta: la fijada al abrir la pantalla
   /// o, si se listaron todas, la que venga en el propio objeto.
-  String? _requestIdOf(Map<String, dynamic> proposal) {
-    if (_hasRequestId) return _requestId;
-    return _firstValue([
-      proposal['serviceRequestId'],
-      _asMap(proposal['serviceRequest'])?['id'],
-    ]);
-  }
+  ///
+  /// En una propuesta `OUT_OF_SCOPE` este id es el del **hijo** creado al
+  /// autorizar el trabajo extra, no el de la raíz.
+  String? _requestIdOf(Map<String, dynamic> proposal) =>
+      _hasRequestId ? _requestId : proposalServiceRequestId(proposal);
 
-  String _workDescription(Map<String, dynamic> proposal) =>
-      _firstValue([
-        proposal['workDescription'],
-        proposal['description'],
-        proposal['scopeOfWork'],
-        _asMap(proposal['serviceRequest'])?['description'],
-      ]) ??
-      '-';
-
-  String _estimatedTime(Map<String, dynamic> proposal) =>
-      _firstValue([
-        proposal['estimatedTime'],
-        proposal['estimatedDuration'],
-        proposal['duration'],
-      ]) ??
-      '-';
-
-  /// Monto numérico de la primera clave que traiga un número usable. Tolera que
-  /// el backend mande el precio como texto ("Q1,200.00").
-  num? _amount(List<dynamic> candidates) {
-    for (final candidate in candidates) {
-      if (candidate is num) return candidate;
-      if (candidate is String) {
-        final cleaned =
-            candidate.replaceAll(RegExp(r'[^0-9.\-]'), '').replaceAll(',', '');
-        final parsed = num.tryParse(cleaned);
-        if (parsed != null) return parsed;
-      }
-    }
-    return null;
-  }
-
-  /// El backend ya descontó el beneficio del plan sobre el precio enviado, así
-  /// que la pantalla no debe volver a aplicarlo.
-  bool _discountAlreadyApplied(Map<String, dynamic> proposal) =>
-      proposal['premiumDiscountApplied'] == true ||
-      proposal['discountApplied'] == true;
-
-  String _formatAmount(num amount, String currency) {
-    final rounded = (amount * 100).round() / 100;
-    final fixed = rounded.toStringAsFixed(2);
-    final parts = fixed.split('.');
-    final grouped = parts[0].replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+$)'),
-      (m) => '${m[1]},',
-    );
-    final body = parts[1] == '00' ? grouped : '$grouped.${parts[1]}';
-    return currency.toUpperCase() == 'GTQ' ? 'Q$body' : '$currency $body';
-  }
-
-  /// Costo final del proyecto. Si al cliente le corresponde el descuento del
-  /// 35% por su plan Dovia Home, la tarjeta muestra el precio de lista tachado
-  /// y el monto real a pagar.
-  _ProposalPrice _price(Map<String, dynamic> proposal, bool isPremium) {
-    final currency = _firstValue([proposal['currency']]) ?? 'GTQ';
-
-    // `totalAmount` es el campo con el que la empresa proveedora envía el costo
-    // del proyecto (POST .../quote-proposals, multipart file + totalAmount).
-    final listPriceKeys = [
-      proposal['totalAmount'],
-      proposal['price'],
-      proposal['amount'],
-      proposal['totalPrice'],
-      proposal['total'],
-    ];
-    // Precio final cuando el backend ya calculó el beneficio del plan.
-    final discounted = _amount([
-      proposal['finalPrice'],
-      proposal['discountedPrice'],
-      proposal['priceWithDiscount'],
-      proposal['premiumPrice'],
-    ]);
-    final listed = _amount(listPriceKeys);
-
-    if (listed == null && discounted == null) {
-      // Sin monto interpretable se respeta el texto tal cual llegó.
-      return _ProposalPrice(finalLabel: _firstValue(listPriceKeys) ?? '-');
-    }
-
-    if (discounted != null && listed != null && discounted < listed) {
-      return _ProposalPrice(
-        finalLabel: _formatAmount(discounted, currency),
-        baseLabel: _formatAmount(listed, currency),
-      );
-    }
-
-    final amount = discounted ?? listed!;
-    if (isPremium && discounted == null && !_discountAlreadyApplied(proposal)) {
-      return _ProposalPrice(
-        finalLabel: _formatAmount(
-          amount *
-              (1 - DHCLIENTCotizacionesRecibidasWidget.premiumDiscountRate),
-          currency,
-        ),
-        baseLabel: _formatAmount(amount, currency),
-      );
-    }
-    return _ProposalPrice(finalLabel: _formatAmount(amount, currency));
-  }
+  /// Costo del proyecto tal cual lo cotizó el proveedor.
+  ///
+  /// No se aplica ningún descuento acá: el contrato no expone precio de lista ni
+  /// beneficio de plan, y en `OUT_OF_SCOPE` el checkout cobra exactamente
+  /// `totalAmount`. Calcular un descuento del lado del cliente mostraría un
+  /// número que no es el que se va a cobrar.
+  String _priceLabel(Map<String, dynamic> proposal) =>
+      proposalAmountLabel(proposal) ?? '-';
 
   /// Nombre del servicio con el que la solicitud queda registrada al agendar.
+  /// El contrato de propuestas no trae el nombre del servicio, así que se usa la
+  /// descripción del trabajo cuando existe.
   String _serviceTitle(Map<String, dynamic> proposal) =>
-      _firstValue([
-        _asMap(proposal['serviceRequest'])?['title'],
-        _asMap(proposal['serviceRequest'])?['serviceName'],
-        proposal['serviceName'],
-      ]) ??
-      'Trabajo cotizado';
-
-  String _warranty(Map<String, dynamic> proposal) =>
-      _firstValue([
-        proposal['warranty'],
-        proposal['warrantyDescription'],
-        proposal['guarantee'],
-      ]) ??
-      '-';
+      proposalDescription(proposal) ?? 'Trabajo cotizado';
 
   /// Nombre de la cotización: se rotulan por orden de llegada siguiendo el
-  /// diseño ("Cotización A", "Cotización B", …).
-  String _proposalTitle(int index) =>
-      'Cotización ${String.fromCharCode(65 + index)}';
+  /// diseño ("Cotización A", "Cotización B", …). Cuando el proveedor mandó más
+  /// de una versión se aclara cuál es, porque el listado las devuelve todas.
+  String _proposalTitle(Map<String, dynamic> proposal, int index) {
+    final label = 'Cotización ${String.fromCharCode(65 + index)}';
+    final version = proposalVersion(proposal);
+    return (version == null || version <= 1) ? label : '$label · v$version';
+  }
 
-  /// Empresa proveedora que envió la propuesta. Se muestra debajo del rótulo
-  /// sólo cuando el backend la informa.
-  String? _providerName(Map<String, dynamic> proposal) => _firstValue([
-        _asMap(proposal['company'])?['name'],
-        proposal['companyName'],
-        _asMap(proposal['provider'])?['name'],
-      ]);
-
-  /// Normaliza el listado según el endpoint usado. Los listados de la API
-  /// pueden venir como `data: [...]` o paginados como `data: { items: [...] }`,
-  /// así que se desenvuelve el sobre antes de mapear.
+  /// Extrae el listado según el endpoint usado. Los tres son paginados y ponen
+  /// el arreglo directamente en `data`; la metadata va aparte, en
+  /// `meta.pagination`.
   List<Map<String, dynamic>> _extractProposals(ApiCallResponse response) {
-    final raw = _hasRequestId
-        ? DOVIAAPIDoviaHomeContextGroup.listQuoteProposalsCall
-            .proposalsList(response.jsonBody)
-        : DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall
-            .proposalsList(response.jsonBody);
-
-    final items = <dynamic>[];
-    for (final entry in raw ?? const []) {
-      final page = _asMap(entry);
-      final paged = page == null
-          ? null
-          : (page['items'] ?? page['results'] ?? page['data']);
-      if (paged is List) {
-        items.addAll(paged);
-      } else {
-        items.add(entry);
-      }
+    final List? raw;
+    if (_outOfScope) {
+      raw = DOVIAAPIDoviaHomeContextGroup.listClientOutOfScopeProposalsCall
+          .proposalsList(response.jsonBody);
+    } else if (_hasRequestId) {
+      raw = DOVIAAPIDoviaHomeContextGroup.listQuoteProposalsCall
+          .proposalsList(response.jsonBody);
+    } else {
+      raw = DOVIAAPIDoviaHomeContextGroup.listClientProposalsCall
+          .proposalsList(response.jsonBody);
     }
 
-    return items
+    return (raw ?? const [])
         .whereType<Map>()
         .map((e) => Map<String, dynamic>.from(e))
         .toList();
@@ -301,68 +203,172 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
 
   /// Selección única (radio button): marcar una cotización desmarca la
   /// anterior. Volver a tapear la marcada la deja marcada.
-  void _selectProposal(String proposalId) {
-    if (_model.selectedProposalId == proposalId) return;
-    safeSetState(() => _model.selectedProposalId = proposalId);
+  void _selectProposal(String id) {
+    if (_model.selectedProposalId == id) return;
+    safeSetState(() => _model.selectedProposalId = id);
   }
 
-  /// Acepta la propuesta marcada. Al confirmarse, la solicitud avanza con esa
-  /// empresa proveedora y el cliente pasa al agendamiento/pago, donde el
-  /// proyecto se cristaliza con fecha y hora.
+  /// Propuesta actualmente marcada, o null si no hay ninguna.
+  Map<String, dynamic>? _selected(List<Map<String, dynamic>> proposals) {
+    final id = _model.selectedProposalId;
+    if (id == null) return null;
+    for (final proposal in proposals) {
+      if (proposalId(proposal) == id) return proposal;
+    }
+    return null;
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  /// Acepta la propuesta marcada.
+  ///
+  /// Las dos familias de propuesta terminan en rutas distintas y con
+  /// consecuencias distintas, así que se ramifica por `proposalType`:
+  /// - `QUOTE`: la aceptación es terminal y **no cobra** por la plataforma. La
+  ///   solicitud pasa a `TAKEN` con la empresa asignada y el cliente sigue al
+  ///   agendamiento.
+  /// - `OUT_OF_SCOPE`: la aceptación crea una orden y devuelve un checkout de
+  ///   Recurrente que hay que abrir. El trabajo no queda reservado hasta que el
+  ///   pago se confirma.
   Future<void> _acceptSelected(
     List<Map<String, dynamic>> proposals,
     bool isPremium,
   ) async {
-    final proposalId = _model.selectedProposalId;
-    if (proposalId == null) return;
-
-    final index = proposals.indexWhere((p) => _proposalId(p) == proposalId);
-    if (index < 0) return;
-    final accepted = proposals[index];
-
-    final requestId = _requestIdOf(accepted);
-    if (requestId == null || requestId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('No se pudo identificar la solicitud de la cotización.'),
-        ),
-      );
-      return;
-    }
+    final accepted = _selected(proposals);
+    if (accepted == null) return;
 
     safeSetState(() => _model.isAccepting = true);
     try {
-      final response =
-          await DOVIAAPIDoviaHomeContextGroup.acceptQuoteProposalCall.call(
-        serviceRequestId: requestId,
-        proposalId: proposalId,
-        authToken: currentAuthenticationToken ?? '',
-      );
-      if (!mounted) return;
-
-      if (!response.succeeded) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('No se pudo aceptar la cotización. Intenta de nuevo.'),
-          ),
-        );
-        return;
+      if (proposalIsOutOfScope(accepted)) {
+        await _acceptOutOfScope(accepted);
+      } else {
+        await _acceptQuote(accepted, isPremium);
       }
-
-      // Propuesta aceptada: el proyecto se cristaliza con esa empresa en el
-      // paso de agendamiento (el cobro va contra el plan del cliente Premium).
-      DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
-      DHCLIENTInstalacionWidget.serviceTitle = _serviceTitle(accepted);
-      // Anticipación mínima para agendar: 24h con plan, 36h sin él.
-      DHCLIENTAgendaWidget.minAdvanceHours = isPremium ? 24 : 36;
-      context.pushNamed(DHCLIENTAgendaWidget.routeName);
     } finally {
       if (mounted) {
         safeSetState(() => _model.isAccepting = false);
       }
     }
+  }
+
+  Future<void> _acceptQuote(
+    Map<String, dynamic> accepted,
+    bool isPremium,
+  ) async {
+    final requestId = _requestIdOf(accepted);
+    if (requestId == null || requestId.isEmpty) {
+      _showError('No se pudo identificar la solicitud de la cotización.');
+      return;
+    }
+
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.acceptQuoteProposalCall.call(
+      serviceRequestId: requestId,
+      proposalId: proposalId(accepted),
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted) return;
+
+    if (!response.succeeded) {
+      _showError('No se pudo aceptar la cotización. Intenta de nuevo.');
+      return;
+    }
+
+    // Propuesta aceptada: la solicitud queda TAKEN con esa empresa y el cliente
+    // sigue al agendamiento. Este flujo no abre ningún cobro.
+    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
+    DHCLIENTInstalacionWidget.serviceTitle = _serviceTitle(accepted);
+    // Anticipación mínima para agendar: 24h con plan, 36h sin él.
+    DHCLIENTAgendaWidget.minAdvanceHours = isPremium ? 24 : 36;
+    context.pushNamed(DHCLIENTAgendaWidget.routeName);
+  }
+
+  /// Acepta una propuesta de trabajo fuera de alcance. La ruta va por
+  /// `proposalId` solamente: el hijo sobre el que se aplica ya está amarrado a
+  /// la propuesta del lado del backend.
+  Future<void> _acceptOutOfScope(Map<String, dynamic> accepted) async {
+    final call = DOVIAAPIDoviaHomeContextGroup.acceptOutOfScopeProposalCall;
+    final response = await call.call(
+      proposalId: proposalId(accepted),
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted) return;
+
+    if (!response.succeeded) {
+      _showError('No se pudo aceptar la propuesta. Intenta de nuevo.');
+      return;
+    }
+
+    final opened =
+        await launchDoviaHomeCheckout(call.checkoutUrl(response.jsonBody));
+    if (!mounted) return;
+
+    if (!opened) {
+      _showError(
+        'Aceptaste la propuesta, pero no pudimos abrir el pago. '
+        'Retómalo desde el detalle del trabajo.',
+      );
+      return;
+    }
+    // El trabajo queda reservado recién cuando el pago se confirma, así que la
+    // pantalla sólo se sale de en medio: no anuncia un trabajo ya agendado.
+    Navigator.pop(context);
+  }
+
+  /// Rechaza la propuesta marcada. No cierra la solicitud: el proveedor puede
+  /// enviar una versión posterior y las demás propuestas siguen disponibles.
+  Future<void> _rejectSelected(List<Map<String, dynamic>> proposals) async {
+    final rejected = _selected(proposals);
+    if (rejected == null) return;
+
+    safeSetState(() => _model.isAccepting = true);
+    try {
+      final ApiCallResponse response;
+      if (proposalIsOutOfScope(rejected)) {
+        response =
+            await DOVIAAPIDoviaHomeContextGroup.rejectOutOfScopeProposalCall
+                .call(
+          proposalId: proposalId(rejected),
+          authToken: currentAuthenticationToken ?? '',
+        );
+      } else {
+        final requestId = _requestIdOf(rejected);
+        if (requestId == null || requestId.isEmpty) {
+          _showError('No se pudo identificar la solicitud de la cotización.');
+          return;
+        }
+        response =
+            await DOVIAAPIDoviaHomeContextGroup.rejectQuoteProposalCall.call(
+          serviceRequestId: requestId,
+          proposalId: proposalId(rejected),
+          authToken: currentAuthenticationToken ?? '',
+        );
+      }
+      if (!mounted) return;
+
+      if (!response.succeeded) {
+        _showError('No se pudo rechazar la propuesta. Intenta de nuevo.');
+        return;
+      }
+
+      _showError('Rechazaste la propuesta. Le avisamos al proveedor.');
+      safeSetState(() => _model.selectedProposalId = null);
+      _reloadProposals();
+    } finally {
+      if (mounted) {
+        safeSetState(() => _model.isAccepting = false);
+      }
+    }
+  }
+
+  /// Vuelve a pedir el listado: tras un rechazo cambia el estado de la versión y
+  /// puede aparecer una nueva.
+  void _reloadProposals() {
+    safeSetState(() => _proposalsFuture = _buildProposalsFuture());
   }
 
   @override
@@ -544,7 +550,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                     right: i == proposals.length - 1 ? 0.0 : gap),
                 child: SizedBox(
                   width: cardWidth,
-                  child: _proposalCard(proposals[i], i, isPremium),
+                  child: _proposalCard(proposals[i], i),
                 ),
               ),
           ],
@@ -554,11 +560,12 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   }
 
   /// Tarjeta de una cotización recibida con su radio button de selección.
-  Widget _proposalCard(
-      Map<String, dynamic> proposal, int index, bool isPremium) {
-    final id = _proposalId(proposal);
+  Widget _proposalCard(Map<String, dynamic> proposal, int index) {
+    final id = proposalId(proposal);
     final selected = id.isNotEmpty && _model.selectedProposalId == id;
-    final providerName = _providerName(proposal);
+    final providerName = proposalProviderName(proposal);
+    final description = proposalDescription(proposal);
+    final documentUrl = proposalDocumentUrl(proposal);
 
     return Semantics(
       // Grupo de selección única: sólo una cotización puede quedar marcada.
@@ -593,7 +600,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _proposalTitle(index),
+                      _proposalTitle(proposal, index),
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.publicSans(
                                 fontWeight: FontWeight.w600),
@@ -612,16 +619,19 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                       ),
                     const SizedBox(height: 8.0),
                     // El alcance se acota a 4 líneas: con descripciones largas
-                    // las tarjetas dejaban de ser comparables de un vistazo.
-                    _proposalField(
-                      'Trabajo a realizar:',
-                      _workDescription(proposal),
-                      maxLines: 4,
-                    ),
-                    _proposalField('Tiempo estimado del trabajo:',
-                        _estimatedTime(proposal)),
-                    _priceField(_price(proposal, isPremium)),
-                    _proposalField('Garantía:', _warranty(proposal)),
+                    // las tarjetas dejaban de ser comparables de un vistazo. El
+                    // historial por servicio no trae descripción; ahí el PDF es
+                    // todo el detalle que hay.
+                    if (description != null)
+                      _proposalField(
+                        'Trabajo a realizar:',
+                        description,
+                        maxLines: 4,
+                      ),
+                    _priceField(_priceLabel(proposal)),
+                    // El PDF es la propuesta en sí: sin abrirlo el cliente no
+                    // tiene sobre qué decidir.
+                    if (documentUrl != null) _documentLink(documentUrl),
                   ],
                 ),
               ),
@@ -690,108 +700,94 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     );
   }
 
-  /// Precio del proyecto. Con el beneficio Premium se muestra el precio de
-  /// lista tachado, el monto real a pagar y la etiqueta del descuento.
-  Widget _priceField(_ProposalPrice price) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Precio:',
+  /// Precio del proyecto, tal cual lo cotizó el proveedor.
+  Widget _priceField(String label) => _proposalField('Precio:', label);
+
+  /// Acceso al PDF de la propuesta.
+  Widget _documentLink(String url) => Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: InkWell(
+          onTap: () => _openDocument(url),
+          child: Text(
+            'Ver propuesta (PDF)',
             style: FlutterFlowTheme.of(context).bodySmall.override(
-                  font: GoogleFonts.publicSans(),
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                   color: const Color(0xFF007376),
                   fontSize: 12.0,
+                  decoration: TextDecoration.underline,
                 ),
           ),
-          if (price.hasDiscount)
-            Text(
-              price.baseLabel!,
-              style: FlutterFlowTheme.of(context).bodySmall.override(
-                    font: GoogleFonts.publicSans(),
-                    color: const Color(0xFF6A7282),
-                    fontSize: 12.0,
-                    decoration: TextDecoration.lineThrough,
-                  ),
-            ),
-          Text(
-            price.finalLabel,
-            style: FlutterFlowTheme.of(context).bodySmall.override(
-                  font: GoogleFonts.publicSans(
-                    fontWeight:
-                        price.hasDiscount ? FontWeight.w700 : FontWeight.normal,
-                  ),
-                  color: const Color(0xFF007376),
-                  fontSize: price.hasDiscount ? 14.0 : 12.0,
-                  lineHeight: 1.3,
-                ),
-          ),
-          if (price.hasDiscount)
-            Padding(
-              padding: const EdgeInsets.only(top: 6.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFCCE3E4),
-                  borderRadius: BorderRadius.circular(100.0),
-                ),
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(10.0, 4.0, 10.0, 4.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      DHCLIENTCotizacionesRecibidasWidget.premiumDiscountLabel,
-                      style: GoogleFonts.publicSans(
-                        color: const Color(0xFF007376),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10.0,
-                      ),
-                    ),
-                    const SizedBox(width: 6.0),
-                    Text(
-                      'DOVIA PREMIUM',
-                      style: GoogleFonts.publicSans(
-                        color: const Color(0xFF6A7282),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 9.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
+        ),
+      );
+
+  Future<void> _openDocument(String url) async {
+    if (await launchDoviaHomeDocument(url)) return;
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('No se pudo abrir la propuesta.')),
     );
   }
 
   /// [Continuar]: inactivo hasta que el cliente marque una cotización.
+  ///
+  /// Debajo se ofrece rechazarla, que es la otra mitad de la decisión del
+  /// contrato: rechazar no cierra la solicitud, deja esa versión fuera y habilita
+  /// al proveedor a mandar otra.
   Widget _continueButton(List<Map<String, dynamic>> proposals, bool isPremium) {
-    final enabled = _model.selectedProposalId != null && !_model.isAccepting;
-    return FFButtonWidget(
-      onPressed:
-          enabled ? () async => _acceptSelected(proposals, isPremium) : null,
-      text: _model.isAccepting ? 'Aceptando…' : 'Continuar',
-      options: FFButtonOptions(
-        width: double.infinity,
-        height: 50.0,
-        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-        iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-        color: const Color(0xFF007376),
-        disabledColor: const Color(0xFFDFDFDF),
-        disabledTextColor: const Color(0xFF6A6A6A),
-        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-              color: Colors.white,
-              fontSize: 17.0,
-              letterSpacing: 0.34,
-            ),
-        elevation: 0.0,
-        borderRadius: BorderRadius.circular(100.0),
-      ),
+    final selected = _selected(proposals);
+    // Sólo una propuesta viva admite decisión: una ya aceptada o rechazada se
+    // sigue mostrando en el historial, pero no se vuelve a operar.
+    final actionable =
+        selected != null && proposalIsActionable(selected) && !_model.isAccepting;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FFButtonWidget(
+          onPressed:
+              actionable ? () async => _acceptSelected(proposals, isPremium) : null,
+          text: _model.isAccepting ? 'Aceptando…' : 'Continuar',
+          options: FFButtonOptions(
+            width: double.infinity,
+            height: 50.0,
+            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+            iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+            color: const Color(0xFF007376),
+            disabledColor: const Color(0xFFDFDFDF),
+            disabledTextColor: const Color(0xFF6A6A6A),
+            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 17.0,
+                  letterSpacing: 0.34,
+                ),
+            elevation: 0.0,
+            borderRadius: BorderRadius.circular(100.0),
+          ),
+        ),
+        const SizedBox(height: 12.0),
+        FFButtonWidget(
+          onPressed: actionable ? () async => _rejectSelected(proposals) : null,
+          text: 'Rechazar propuesta',
+          options: FFButtonOptions(
+            width: double.infinity,
+            height: 50.0,
+            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+            iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+            color: Colors.transparent,
+            disabledColor: Colors.transparent,
+            disabledTextColor: const Color(0xFF6A6A6A),
+            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: const Color(0xFF007376),
+                  fontSize: 17.0,
+                  letterSpacing: 0.34,
+                ),
+            elevation: 0.0,
+            borderSide: const BorderSide(color: Color(0xFF007376), width: 1.0),
+            borderRadius: BorderRadius.circular(100.0),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
+import '/dovia_home_client/extra_materials_fields.dart';
 import '/dovia_home_client/service_request_fields.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proveedor_card/d_h_c_l_i_e_n_t_proveedor_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -348,34 +349,18 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   String get _status => _firstString([_data?['status']]) ?? '';
 
   /// Solicitud de materiales adicionales que el asociado envió desde su app y
-  /// que sigue esperando la decisión del cliente. Mientras exista, el detalle
-  /// del servicio ofrece el acceso directo a la pantalla de revisión.
+  /// que todavía tiene algo por delante. Mientras exista, el detalle del
+  /// servicio ofrece el acceso directo a la pantalla de revisión.
+  ///
+  /// "Pendiente" abarca los tres estados no terminales del contrato: esperando
+  /// la cotización de DOVIA, esperando la decisión del cliente y esperando el
+  /// pago. En los dos últimos el cliente tiene algo que hacer, y en el primero
+  /// necesita poder consultar qué pidió el asociado. Sólo `PAID` y `REJECTED`
+  /// cierran el asunto.
   Map<String, dynamic>? get _pendingExtraMaterials {
-    final raw = _data?['extraMaterials'] ??
-        _data?['extraMaterialsRequest'] ??
-        _data?['extraMaterialsRequests'] ??
-        _data?['materialsRequest'];
-    final Map<String, dynamic>? materials = raw is Map
-        ? Map<String, dynamic>.from(raw)
-        : (raw is List && raw.isNotEmpty && raw.last is Map
-            ? Map<String, dynamic>.from(raw.last as Map)
-            : null);
+    final materials = emLatestRequest(_data);
     if (materials == null) return null;
-
-    final status =
-        _firstString([materials['materialsStatus'], materials['status']])
-            ?.toUpperCase();
-    // Sin estatus legible se asume pendiente, para no ocultarle al cliente una
-    // solicitud que el asociado sí envió.
-    const decided = {
-      'ACCEPTED',
-      'APPROVED',
-      'PAID',
-      'REJECTED',
-      'CANCELLED',
-      'COMPLETED',
-    };
-    return decided.contains(status) ? null : materials;
+    return emIsSettled(materials) ? null : materials;
   }
 
   /// Hay una persona concreta que mostrar en la tarjeta de seguridad. Cuando el
@@ -403,6 +388,74 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   String get _requestType =>
       (_firstString([_data?['requestType']]) ?? 'SERVICE').toUpperCase();
+
+  String get _subStatus =>
+      (_firstString([_data?['subStatus']]) ?? '').toUpperCase();
+
+  /// La cotización sigue abierta y el cliente puede cerrarla.
+  ///
+  /// El contrato lo permite sólo en `PENDING / QUOTE_QUOTING`: una vez aceptada
+  /// una propuesta la solicitud pasa a `TAKEN` y ya no hay marketplace que
+  /// cerrar.
+  bool get _canCloseQuote =>
+      _requestType == 'QUOTE' &&
+      _status.toUpperCase() == 'PENDING' &&
+      _subStatus == 'QUOTE_QUOTING';
+
+  /// Cierra la cotización: el servicio queda `FINISHED` y las propuestas
+  /// activas se desactivan. No se puede deshacer, así que se confirma antes.
+  Future<void> _closeQuote() async {
+    final id = _requestId.isNotEmpty ? _requestId : (_serviceRequestId ?? '');
+    if (id.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Cerrar la solicitud de cotización'),
+        content: const Text(
+          'Se dará por terminada y las propuestas recibidas quedarán sin '
+          'efecto. Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Volver'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Cerrar solicitud'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    safeSetState(() => _isClosingQuote = true);
+    try {
+      final response =
+          await DOVIAAPIDoviaHomeContextGroup.closeQuoteCall.call(
+        serviceRequestId: id,
+        authToken: currentAuthenticationToken ?? '',
+      );
+      if (!mounted) return;
+
+      if (!response.succeeded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo cerrar la solicitud. Intenta de nuevo.'),
+          ),
+        );
+        return;
+      }
+      Navigator.pop(context);
+    } finally {
+      if (mounted) safeSetState(() => _isClosingQuote = false);
+    }
+  }
+
+  /// True mientras se cierra la cotización, para que el botón no dispare dos
+  /// cierres.
+  bool _isClosingQuote = false;
 
   /// Hay algo que confirmar solo cuando un Home Associate ya tomó el trabajo
   /// (TAKEN). Con la solicitud aún "Pendiente" nadie la tomó, así que no hay
@@ -850,6 +903,13 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
         !DHCLIENTCasaAWidget.alreadyConfirmed &&
         _awaitsConfirmation;
 
+    // Una cotización todavía circulando entre proveedores se puede cerrar. Es
+    // la acción opuesta a aceptar una propuesta y ocupa el mismo lugar, así que
+    // sólo aparece cuando no hay visita que confirmar.
+    final showCerrarCotizacion = !DHCLIENTCasaAWidget.readOnly &&
+        !showAceptar &&
+        _canCloseQuote;
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -881,7 +941,37 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                   ),
                 ),
               )
-            : null,
+            : showCerrarCotizacion
+                ? SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 8.0, 20.0, 12.0),
+                      child: FFButtonWidget(
+                        onPressed: _isClosingQuote ? null : _closeQuote,
+                        text: _isClosingQuote
+                            ? 'Cerrando…'
+                            : 'Cerrar solicitud de cotización',
+                        options: FFButtonOptions(
+                          width: double.infinity,
+                          height: 43.0,
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          textStyle: GoogleFonts.publicSans(
+                            color: FlutterFlowTheme.of(context).primary,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          elevation: 0.0,
+                          borderSide: BorderSide(
+                            color: FlutterFlowTheme.of(context).primary,
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
         body: Stack(
           children: [
             wrapWithModel(

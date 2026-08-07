@@ -127,23 +127,24 @@ String srFormattedDate(Map<String, dynamic> data) {
   return 'Solicitada el ${created.day} de ${_monthsEs[created.month - 1]}';
 }
 
-/// Nombre de la propiedad para la cabecera del detalle (Ej: "Casa A").
+/// Nombre de la propiedad para la cabecera del detalle.
 ///
-/// El backend arma `address.label` como "<nombre> - <dirección>" (Ej:
-/// `"casa - 12 Calle 3-45 Zona 10, Guatema"`, truncado), así que pintarlo tal
-/// cual llena la cabecera con la dirección. Se corta en el primer `" - "` para
-/// quedarse con el nombre que puso el cliente.
+/// **El contrato no tiene un nombre de casa que el cliente pueda poner.**
+/// `DoviaHomeClientAddressResponseDto` expone `label`, y el backend lo genera
+/// solo como `"casa - "` + los primeros 30 caracteres de `address`;
+/// `CreateServiceAddressRequestDto` ni siquiera acepta `label`. Por eso se corta
+/// en el primer `" - "`: lo que queda es ese prefijo fijo, no un alias.
+///
+/// Se conserva la función —y no se pinta `label` crudo— porque pintarlo entero
+/// llenaría la cabecera con la dirección truncada a mitad de palabra. Si el
+/// producto quiere un nombre real por vivienda, hay que pedirlo como campo
+/// nuevo del backend: desde la app no hay dónde tomarlo.
 String srHouseName(Map<String, dynamic> data) {
   final address = data['address'];
-  final raw = address is Map
-      ? srString(address['name']) ??
-          srString(address['nickname']) ??
-          srString(address['alias']) ??
-          srString(address['label'])
-      : null;
-  if (raw == null) return 'Casa A';
+  final raw = address is Map ? srString(address['label']) : null;
+  if (raw == null) return 'Casa';
   final name = raw.split(' - ').first.trim();
-  if (name.isEmpty) return 'Casa A';
+  if (name.isEmpty) return 'Casa';
   return name[0].toUpperCase() + name.substring(1);
 }
 

@@ -1,5 +1,6 @@
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
+import '/dovia_home_client/proposal_fields.dart';
 import '/dovia_home_client/service_request_fields.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -610,21 +611,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
         _str(request is Map ? request['id'] : null);
   }
 
-  /// Píldora de la tarjeta. Mientras el cliente no acepte ninguna propuesta la
-  /// cotización sigue "Pendiente" para él, aunque el proveedor ya la haya
+  /// Píldora de la tarjeta. El enum de la propuesta es
+  /// `SUBMITTED | REJECTED | ACCEPTED`: mientras el cliente no decida queda en
+  /// `SUBMITTED`, que para él es "Pendiente" aunque el proveedor ya la haya
   /// enviado.
-  String _proposalStatusLabel(Map<String, dynamic> proposal) {
-    switch ((_str(proposal['status']) ?? '').toUpperCase()) {
-      case 'ACCEPTED':
-        return 'Aceptada';
-      case 'REJECTED':
-        return 'Rechazada';
-      case 'EXPIRED':
-        return 'Vencida';
-      default:
-        return 'Pendiente';
-    }
-  }
+  String _proposalStatusLabel(Map<String, dynamic> proposal) =>
+      proposalStatusLabel(proposal);
 
   /// Fecha con el formato del diseño (DD/MM/AAAA). Sin fecha se deja el
   /// placeholder en vez de inventar una.

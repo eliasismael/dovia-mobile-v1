@@ -15,6 +15,10 @@ class DHASSOCIATETuTrabajoModel
   /// marketplace no expone.
   Map<String, dynamic>? detail;
 
+  /// True mientras se notifica la llegada, para que el botón no dispare dos
+  /// veces el inicio del trabajo.
+  bool isStarting = false;
+
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // State field(s) for TextField widget.

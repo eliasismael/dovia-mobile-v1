@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
+import '/backend/api_requests/dovia_home_paginated_loader.dart';
 
 import 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
 export 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
@@ -62,14 +63,6 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
 
   static const String _allOption = 'Todos';
 
-  /// Tamaño de página pedido al backend.
-  static const int _pageSize = 50;
-
-  /// Tope de páginas a recorrer. Es una guarda contra un backend que ignorara
-  /// `page` y devolviera siempre la misma página llena (loop infinito), no un
-  /// límite de negocio: 40 páginas cubren 2000 servicios.
-  static const int _maxPages = 40;
-
   /// Estatus que componen el historial. La llamada ya filtra por FINISHED
   /// server-side; este set queda como guarda defensiva por si el backend
   /// ignorara el parámetro `status`.
@@ -106,38 +99,19 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
   /// cliente acumula solicitudes activas.
   Future<_HistoryResult> _fetchHistory() async {
     final token = currentAuthenticationToken ?? '';
-    final all = <Map<String, dynamic>>[];
+    final call = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall;
 
-    // `page` es 1-based (mismo criterio que el resto de listados del API).
-    for (var page = 1; page <= _maxPages; page++) {
-      final response =
-          await DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+    final page = await loadAllDoviaHomePages(
+      fetchPage: (page, limit) => call.call(
         authToken: token,
         status: 'FINISHED',
         page: page,
-        limit: _pageSize,
-      );
-      if (!response.succeeded) {
-        return _HistoryResult(visits: all, failed: all.isEmpty);
-      }
+        limit: limit,
+      ),
+      extractList: call.requestsList,
+    );
 
-      // El parser corre sobre `jsonBody`: pasarle el ApiCallResponse deja a
-      // JsonPath sin nada que recorrer y devuelve null en silencio (listado
-      // siempre vacío).
-      final raw = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall
-              .requestsList(response.jsonBody) ??
-          [];
-      final pageItems = raw
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
-      all.addAll(pageItems);
-
-      // Página incompleta = última página.
-      if (pageItems.length < _pageSize) break;
-    }
-
-    return _HistoryResult(visits: all, failed: false);
+    return _HistoryResult(visits: page.items, failed: page.failed);
   }
 
   @override

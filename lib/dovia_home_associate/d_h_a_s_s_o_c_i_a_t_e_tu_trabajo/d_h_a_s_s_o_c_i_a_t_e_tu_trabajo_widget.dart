@@ -1,5 +1,6 @@
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -109,6 +110,52 @@ class _DHASSOCIATETuTrabajoWidgetState
     if (instructions != null && (_model.textController2?.text ?? '').isEmpty) {
       _model.textController2?.text = instructions;
     }
+  }
+
+  /// Notifica que el asociado llegó al punto y arranca el trabajo
+  /// (`POST .../start`): la solicitud pasa de `TAKEN` a
+  /// `IN_PROGRESS / WORKING` y el cliente ve el cambio en su detalle.
+  ///
+  /// El endpoint acepta `coordinates` opcional y el backend lo toma como null si
+  /// no viene. La app no pide permisos de ubicación en ningún flujo, así que se
+  /// envía sin coordenadas en vez de sumar un permiso nuevo por un campo que el
+  /// contrato no exige.
+  Future<void> _startWork() async {
+    final data = _request;
+    final id = data == null ? '' : asrId(data);
+    if (id.isEmpty) {
+      _showMessage('No se encontró el trabajo a iniciar.');
+      return;
+    }
+
+    safeSetState(() => _model.isStarting = true);
+    try {
+      final response =
+          await DOVIAAPIDoviaHomeContextGroup.startServiceRequestCall.call(
+        serviceRequestId: id,
+        authToken: currentAuthenticationToken ?? '',
+      );
+      if (!mounted) return;
+
+      if (!response.succeeded) {
+        _showMessage('No se pudo notificar tu llegada. Intenta de nuevo.');
+        return;
+      }
+
+      // El trabajo ya está en curso: la pantalla de cierre opera sobre la misma
+      // solicitud, así que se le pasa el detalle que ya tenemos en mano.
+      DHASSOCIATETrabajoFinalizadoWidget.requestData = data;
+      _showMessage('Le avisamos al cliente que ya llegaste.');
+      context.pushNamed(DHASSOCIATETrabajoFinalizadoWidget.routeName);
+    } finally {
+      if (mounted) safeSetState(() => _model.isStarting = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -1286,10 +1333,10 @@ class _DHASSOCIATETuTrabajoWidgetState
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 12.0, 0.0, 158.0),
                             child: FFButtonWidget(
-                              onPressed: () {
-                                print('Button pressed ...');
-                              },
-                              text: 'Enviar mi ubicación y notificar',
+                              onPressed: _model.isStarting ? null : _startWork,
+                              text: _model.isStarting
+                                  ? 'Notificando…'
+                                  : 'Enviar mi ubicación y notificar',
                               options: FFButtonOptions(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 42.0,

@@ -1,5 +1,9 @@
+import '/dovia_home_client/checkout_launcher.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_material_aprobado/d_h_c_l_i_e_n_t_material_aprobado_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
+import '/dovia_home_client/extra_materials_fields.dart';
+import '/repositories/payments_repository.dart';
+import 'package:provider/provider.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -9,6 +13,7 @@ import '/shared_components/dovia_support/dovia_support_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
+import '/core/result.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,17 +32,25 @@ const Color _kInfoBanner = Color(0x3570ACAD);
 /// Solicitud de materiales adicionales que el Home Associate cargó desde su
 /// app, en **modo lectura** para el Cliente con un servicio en curso.
 ///
-/// El cliente ve qué material se necesita, su precio de referencia y las fotos
-/// de dónde se usará, y decide:
-/// - [Rechazar] → `POST /dovia-home/service-requests/{id}/extra-materials/reject`
-///   (el asociado evalúa si puede terminar el trabajo sin el material).
-/// - [Pagar] → `POST /dovia-home/service-requests/{id}/extra-materials/accept`.
-///   Es una **pre-autorización**: el cliente acepta el recargo futuro, que DOVIA
-///   ejecuta recién después de validar la factura que suba el asociado. Por eso
-///   no se abre ningún checkout aunque el endpoint devuelva una orden de pago.
+/// La pantalla sigue el estado de la solicitud
+/// (`QUOTE_PENDING → QUOTE_SENT → PAYMENT_PENDING → PAID`, o `REJECTED`), porque
+/// cada uno habilita una cosa distinta:
+/// - `QUOTE_PENDING`: el asociado ya pidió el material pero DOVIA todavía no lo
+///   cotizó. No hay nada que decidir.
+/// - `QUOTE_SENT`: **el único estado con decisión del cliente.** Ya está el PDF
+///   de la cotización, el detalle y el monto.
+///   - [Rechazar] → `POST /dovia-home/service-requests/{id}/extra-materials/reject`
+///     (el asociado evalúa si puede terminar el trabajo sin el material).
+///   - [Pagar] → `POST /dovia-home/service-requests/{id}/extra-materials/accept`,
+///     que **crea la orden y devuelve un checkout de Recurrente que hay que
+///     abrir**. Aceptar no cobra: deja la solicitud en `PAYMENT_PENDING` hasta
+///     que el webhook confirme el pago.
+/// - `PAYMENT_PENDING`: hay una orden sin completar. Se reanuda con
+///   `POST /payments/{paymentOrderId}/resume`; **no** se repite `accept`.
+/// - `PAID` / `REJECTED`: terminales, sólo lectura.
 ///
-/// Los datos se leen best-effort (el shape del backend es incierto) para que la
-/// pantalla renderice siempre lo que el asociado sí envió.
+/// Los campos se leen con [extra_materials_fields.dart], que es la única fuente
+/// de verdad del contrato para esta pantalla y para el detalle del servicio.
 class DHCLIENTMaterialesWidget extends StatefulWidget {
   const DHCLIENTMaterialesWidget({super.key, this.serviceRequestId});
 
@@ -144,62 +157,40 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
   /// Vuelca sobre el modelo la solicitud de materiales contenida en el detalle
   /// del servicio. No pisa lo ya cargado con vacíos: si una lectura posterior
   /// no trae un campo, se conserva el anterior.
+  ///
+  /// El estado sí se pisa siempre que llegue una solicitud: es el dato que
+  /// decide qué acciones se ofrecen, y conservar el anterior dejaría botones
+  /// vivos sobre una solicitud que ya avanzó.
   void _applyData(Map<String, dynamic>? data) {
     if (data != null) _serviceData = data;
 
-    final materials = _extraMaterialsOf(data);
+    final materials = emLatestRequest(data);
     if (materials == null) return;
 
-    final text = _firstString([
-      materials['requestedMaterials'],
-      materials['materials'],
-      materials['description'],
-      materials['details'],
-      materials['notes'],
-    ]);
+    _model.materialsStatus = emStatus(materials);
+    _model.extraMaterialsId = emId(materials);
+    _model.paymentOrderId = emPaymentOrderId(materials);
+
+    final text = emRequestedMaterials(materials);
     if (text != null) _model.materialText = text;
 
-    final price = _formattedPrice(materials);
+    // Sólo hay monto, detalle y PDF a partir de QUOTE_SENT: antes `quote` es
+    // null y estos tres quedan como estaban (null en la primera lectura).
+    final price = emQuoteAmountLabel(materials);
     if (price != null) _model.estimatedPrice = price;
 
-    final urls = _imageUrlsOf(materials);
-    if (urls.isNotEmpty) _model.imageUrls = urls;
+    final details = emQuoteDetails(materials);
+    if (details != null) _model.quoteDetails = details;
 
-    final status = _firstString([
-      materials['materialsStatus'],
-      materials['status'],
-      materials['subStatus'],
-    ]);
-    if (status != null) _model.materialsStatus = status.toUpperCase();
+    final documentUrl = emQuoteDocumentUrl(materials);
+    if (documentUrl != null) _model.quoteDocumentUrl = documentUrl;
+
+    final urls = emInstallationImageUrls(materials);
+    if (urls.isNotEmpty) _model.imageUrls = urls;
   }
 
   Map<String, dynamic>? _asMap(dynamic value) =>
       value is Map ? Map<String, dynamic>.from(value) : null;
-
-  /// Bloque de materiales extra dentro del detalle del servicio. El backend lo
-  /// puede anidar bajo varias claves y, cuando manda un historial, la vigente es
-  /// la última. Si el Map recibido ya es la solicitud en sí (Ej: lo inyectó la
-  /// notificación), se usa tal cual.
-  Map<String, dynamic>? _extraMaterialsOf(Map<String, dynamic>? data) {
-    if (data == null) return null;
-    for (final key in [
-      'extraMaterials',
-      'extraMaterialsRequest',
-      'extraMaterialsRequests',
-      'materialsRequest',
-      'materials',
-    ]) {
-      final value = data[key];
-      final map = _asMap(value);
-      if (map != null) return map;
-      if (value is List && value.isNotEmpty) {
-        final last = _asMap(value.last);
-        if (last != null) return last;
-      }
-    }
-    // Fallback: el propio Map es la solicitud de materiales.
-    return data.containsKey('requestedMaterials') ? data : null;
-  }
 
   String? _firstString(List<dynamic> candidates) {
     for (final c in candidates) {
@@ -208,96 +199,27 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
     return null;
   }
 
-  /// Monto numérico de la primera clave usable. Tolera que el backend mande el
-  /// precio como texto ("Q1,200.00").
-  num? _amount(List<dynamic> candidates) {
-    for (final candidate in candidates) {
-      if (candidate is num) return candidate;
-      if (candidate is String) {
-        final cleaned =
-            candidate.replaceAll(RegExp(r'[^0-9.\-]'), '').replaceAll(',', '');
-        final parsed = num.tryParse(cleaned);
-        if (parsed != null) return parsed;
-      }
-    }
-    return null;
-  }
-
-  /// Precio de referencia con su moneda. Los materiales extra se cotizan en GTQ
-  /// (ver `AdminQuoteExtraMaterialsCall`), así que es el default.
-  String? _formattedPrice(Map<String, dynamic> materials) {
-    final amount = _amount([
-      materials['estimatedAmount'],
-      materials['estimatedPrice'],
-      materials['estimatedCost'],
-      materials['totalAmount'],
-      materials['amount'],
-      materials['price'],
-    ]);
-    if (amount == null) return null;
-    final currency = _firstString([materials['currency']]) ?? 'GTQ';
-    return _formatAmount(amount, currency);
-  }
-
-  String _formatAmount(num amount, String currency) {
-    final rounded = (amount * 100).round() / 100;
-    final fixed = rounded.toStringAsFixed(2);
-    final parts = fixed.split('.');
-    final grouped = parts[0].replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+$)'),
-      (m) => '${m[1]},',
-    );
-    final body = parts[1] == '00' ? grouped : '$grouped.${parts[1]}';
-    return currency.toUpperCase() == 'GTQ' ? 'Q$body' : '$currency $body';
-  }
-
-  /// Fotos que el asociado subió al pedir el material. El backend las devuelve
-  /// en `images` (mismo nombre con el que confirma la subida); se aceptan tanto
-  /// URLs sueltas como items con la URL anidada.
-  List<String> _imageUrlsOf(Map<String, dynamic> materials) {
-    for (final key in ['images', 'imageUrls', 'photos', 'media']) {
-      final value = materials[key];
-      if (value is! List) continue;
-      final urls = value.map(_imageUrlOf).whereType<String>().toList();
-      if (urls.isNotEmpty) return urls;
-    }
-    return [];
-  }
-
-  String? _imageUrlOf(dynamic item) {
-    if (item is String) return item.trim().isEmpty ? null : item.trim();
-    final map = _asMap(item);
-    if (map == null) return null;
-    return _firstString([
-      map['url'],
-      map['imageUrl'],
-      map['signedUrl'],
-      map['downloadUrl'],
-      map['publicUrl'],
-    ]);
-  }
-
   // ---------------------------------------------------------------------------
   // Estado de la decisión.
+  //
+  // Se resuelve contra el enum real de la solicitud de materiales. Mientras el
+  // estatus no se leyó (null) se asume `QUOTE_PENDING`, que es el estado inicial
+  // y el que menos supone: no habilita decidir ni da la solicitud por cerrada.
   // ---------------------------------------------------------------------------
 
-  /// Estatus en los que la solicitud sigue esperando al cliente. Cualquier otro
-  /// (aceptada, rechazada, pagada) deja la pantalla como consulta, sin volver a
-  /// ofrecer los botones. Mientras el estatus no se leyó (null) se asume
-  /// pendiente, para no bloquear al cliente por una lectura fallida.
-  static const Set<String> _pendingStatuses = {
-    'PENDING',
-    'REQUESTED',
-    'CLIENT_APPROVAL_PENDING',
-    'QUOTED',
-    'AWAITING_CLIENT',
-  };
+  Map<String, dynamic> get _statusHolder => {
+        'status': _model.materialsStatus ?? kExtraMaterialsQuotePending,
+      };
 
-  bool get _decisionTaken =>
-      _model.materialsStatus != null &&
-      !_pendingStatuses.contains(_model.materialsStatus);
+  /// El cliente tiene la cotización sobre la mesa y le toca decidir. Es el único
+  /// estado con botones.
+  bool get _canDecide => emIsDecidable(_statusHolder);
 
-  bool get _isRejected => (_model.materialsStatus ?? '').contains('REJECT');
+  /// Aceptó y quedó una orden a medio pagar: lo que corresponde es retomar ese
+  /// checkout, no volver a aceptar.
+  bool get _awaitingPayment => emIsAwaitingPayment(_statusHolder);
+
+  bool get _isRejected => emIsRejected(_statusHolder);
 
   // ---------------------------------------------------------------------------
   // Acciones.
@@ -327,7 +249,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
         return;
       }
 
-      safeSetState(() => _model.materialsStatus = 'REJECTED');
+      // El rechazo finaliza el servicio; la solicitud queda REJECTED.
+      safeSetState(() => _model.materialsStatus = kExtraMaterialsRejected);
       _showMessage('Rechazaste la compra. Le avisamos al asociado.');
       // Vuelve al estado del servicio en curso.
       Navigator.pop(context);
@@ -336,8 +259,10 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
     }
   }
 
-  /// El cliente pre-autoriza la compra: acepta el recargo futuro a su método de
-  /// pago, que se ejecuta cuando DOVIA valide la factura del asociado.
+  /// El cliente acepta la cotización. Esto **no** cobra: crea una orden
+  /// `EXTRA_MATERIALS` en GTQ y devuelve su checkout de Recurrente, que es lo
+  /// que hay que abrir. La solicitud queda en `PAYMENT_PENDING` y sólo el
+  /// webhook la lleva a `PAID` —por eso no se marca nada como pagado acá—.
   Future<void> _pagar() async {
     final serviceRequestId = _serviceRequestId;
     if (serviceRequestId == null) {
@@ -347,8 +272,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
 
     safeSetState(() => _model.isSubmitting = true);
     try {
-      final response =
-          await DOVIAAPIDoviaHomeContextGroup.acceptExtraMaterialsCall.call(
+      final call = DOVIAAPIDoviaHomeContextGroup.acceptExtraMaterialsCall;
+      final response = await call.call(
         serviceRequestId: serviceRequestId,
         authToken: currentAuthenticationToken ?? '',
       );
@@ -359,13 +284,70 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
         return;
       }
 
-      safeSetState(() => _model.materialsStatus = 'ACCEPTED');
+      // Aceptada: a partir de acá la solicitud está esperando el pago, exista o
+      // no checkout abierto. Guardarlo antes de abrir el navegador deja la
+      // pantalla en el estado correcto aunque el cliente no complete el pago.
+      safeSetState(() {
+        _model.materialsStatus = kExtraMaterialsPaymentPending;
+        _model.paymentOrderId = call.paymentOrderId(response.jsonBody);
+      });
 
-      // El pop-up se cierra solo; al cerrarse, el asociado ya tiene luz verde
-      // para ir a comprar y el cliente vuelve al estado de su servicio.
+      final opened =
+          await launchDoviaHomeCheckout(call.checkoutUrl(response.jsonBody));
+      if (!mounted) return;
+
+      if (!opened) {
+        _showMessage(
+          'Aprobaste el material, pero no pudimos abrir el pago. '
+          'Vuelve a intentarlo desde aquí.',
+        );
+        return;
+      }
+
+      // El pop-up se cierra solo; al cerrarse, el cliente vuelve al estado de su
+      // servicio y el pago sigue su curso en el navegador.
       await _showAprobadoPopup();
       if (!mounted) return;
       Navigator.pop(context);
+    } finally {
+      if (mounted) safeSetState(() => _model.isSubmitting = false);
+    }
+  }
+
+  /// Retoma un checkout que quedó a medias (expirado, fallido o cancelado).
+  ///
+  /// Se reanuda la orden, **no** se repite `accept`: aceptar de nuevo una
+  /// solicitud que ya está en `PAYMENT_PENDING` es un estado inválido. La
+  /// reanudación crea una sucesora y reemplaza sólo el `paymentOrderId`; un
+  /// éxito tardío de la orden anterior el backend lo ignora.
+  Future<void> _reanudarPago() async {
+    final paymentOrderId = _model.paymentOrderId;
+    if (paymentOrderId == null || paymentOrderId.isEmpty) {
+      // Sin la orden no hay nada que reanudar: se recarga para tomarla del
+      // detalle en vez de crear un cobro nuevo por las dudas.
+      _showMessage('No encontramos el pago pendiente. Actualizando…');
+      await _loadRequest();
+      return;
+    }
+
+    safeSetState(() => _model.isSubmitting = true);
+    try {
+      final result = await context
+          .read<PaymentsRepository>()
+          .resumePayment(paymentOrderId: paymentOrderId);
+      if (!mounted) return;
+
+      switch (result) {
+        case Success(:final data):
+          safeSetState(() => _model.paymentOrderId = data.id);
+          final opened = await launchDoviaHomeCheckout(data.checkoutUrl);
+          if (!mounted) return;
+          if (!opened) {
+            _showMessage('No pudimos abrir el pago. Intenta de nuevo.');
+          }
+        case Failure(:final message):
+          _showMessage(message);
+      }
     } finally {
       if (mounted) safeSetState(() => _model.isSubmitting = false);
     }
@@ -450,6 +432,13 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
+  }
+
+  /// Abre el PDF de la cotización en el visor del sistema.
+  Future<void> _openUrl(String? url) async {
+    if (await launchDoviaHomeDocument(url)) return;
+    if (!mounted) return;
+    _showMessage('No se pudo abrir la cotización.');
   }
 
   /// Abre una foto de la evidencia en pantalla completa (pinch para acercar,
@@ -550,12 +539,24 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                           const SizedBox(height: 12.0),
                           _readOnlyBox(_model.materialText, hint: _materialHint),
                           const SizedBox(height: 18.0),
-                          _sectionLabel('Precio estimado'),
+                          _sectionLabel('Precio cotizado'),
                           const SizedBox(height: 12.0),
                           _readOnlyBox(
                             _model.estimatedPrice,
-                            hint: 'Sin precio de referencia',
+                            hint: 'DOVIA todavía no cotizó estos materiales',
                           ),
+                          if (_model.quoteDetails != null) ...[
+                            const SizedBox(height: 18.0),
+                            _sectionLabel('Detalle de la cotización'),
+                            const SizedBox(height: 12.0),
+                            _readOnlyBox(_model.quoteDetails, hint: ''),
+                          ],
+                          // El PDF es el documento sobre el que el cliente
+                          // decide: se ofrece en cuanto DOVIA lo carga.
+                          if (_model.quoteDocumentUrl != null) ...[
+                            const SizedBox(height: 12.0),
+                            _quoteDocumentLink(),
+                          ],
                           const SizedBox(height: 18.0),
                           _sectionLabel(
                               'Fotografía de donde se usará el material'),
@@ -565,7 +566,7 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                         const SizedBox(height: 18.0),
                         _infoBanner(),
                         const SizedBox(height: 30.0),
-                        if (_decisionTaken) _decisionTakenNotice() else _actions(),
+                        _decisionArea(),
                       ],
                     ),
                   ),
@@ -820,12 +821,90 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
     );
   }
 
-  /// Con la decisión ya tomada la pantalla queda como consulta, sin volver a
-  /// ofrecer los botones.
-  Widget _decisionTakenNotice() => Text(
-        _isRejected
-            ? 'Rechazaste esta compra de materiales. El asociado ya fue notificado.'
-            : 'Aprobaste el material extra: el asociado ya puede comprarlo para completar el trabajo.',
+  /// Botón primario a ancho completo, con el mismo estilo que [Pagar].
+  Widget _primaryAction({required String text, required VoidCallback? onPressed}) =>
+      FFButtonWidget(
+        onPressed: onPressed,
+        text: text,
+        options: FFButtonOptions(
+          width: double.infinity,
+          height: 42.0,
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
+          iconPadding:
+              const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+          color: FlutterFlowTheme.of(context).primary,
+          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                color: Colors.white,
+                fontSize: 16.0,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+          elevation: 0.0,
+          borderSide: BorderSide(
+            color: FlutterFlowTheme.of(context).primary,
+            width: 1.0,
+          ),
+          borderRadius: BorderRadius.circular(25.0),
+        ),
+      );
+
+  /// Acceso al PDF de la cotización que cargó DOVIA.
+  Widget _quoteDocumentLink() => Align(
+        alignment: const AlignmentDirectional(-1.0, 0.0),
+        child: InkWell(
+          onTap: () => _openUrl(_model.quoteDocumentUrl),
+          child: Text(
+            'Ver cotización (PDF)',
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: FlutterFlowTheme.of(context).primary,
+                  fontSize: 16.0,
+                  letterSpacing: 0.32,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                ),
+          ),
+        ),
+      );
+
+  /// Qué se le ofrece al cliente según el estado de la solicitud. Cada estado
+  /// habilita exactamente una cosa, y sólo `QUOTE_SENT` tiene decisión.
+  Widget _decisionArea() {
+    if (_canDecide) return _actions();
+    if (_awaitingPayment) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _notice(
+            'Aprobaste la compra y el pago quedó pendiente. Retómalo para que '
+            'el asociado pueda comprar los materiales.',
+          ),
+          const SizedBox(height: 12.0),
+          _primaryAction(
+            text: _model.isSubmitting ? 'Abriendo…' : 'Continuar con el pago',
+            onPressed: _model.isSubmitting ? null : _reanudarPago,
+          ),
+        ],
+      );
+    }
+    return _notice(_settledMessage);
+  }
+
+  /// Texto de los estados sin acción por delante.
+  String get _settledMessage {
+    if (_isRejected) {
+      return 'Rechazaste esta compra de materiales. El asociado ya fue notificado.';
+    }
+    if (emIsPaid(_statusHolder)) {
+      return 'Pagaste los materiales: el asociado ya puede comprarlos para completar el trabajo.';
+    }
+    // QUOTE_PENDING: el asociado pidió el material y DOVIA todavía no lo cotizó.
+    return 'DOVIA está preparando la cotización de estos materiales. Te avisamos apenas esté lista.';
+  }
+
+  Widget _notice(String text) => Text(
+        text,
         style: FlutterFlowTheme.of(context).bodyMedium.override(
               font: GoogleFonts.publicSans(),
               color: FlutterFlowTheme.of(context).secondaryText,

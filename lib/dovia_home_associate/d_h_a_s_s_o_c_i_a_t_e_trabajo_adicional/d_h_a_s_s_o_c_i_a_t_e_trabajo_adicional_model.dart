@@ -11,6 +11,14 @@ class DHASSOCIATETrabajoAdicionalModel
     extends FlutterFlowModel<DHASSOCIATETrabajoAdicionalWidget> {
   ///  State fields for stateful widgets in this page.
 
+  /// Fotos de dónde se usará el material. Son opcionales y se adjuntan después
+  /// de crear la solicitud, porque el POST no las recibe.
+  List<FFUploadedFile> uploadedMedia = [];
+
+  /// True mientras se crea la solicitud y se suben las fotos, para que el botón
+  /// no dispare dos solicitudes (el backend rechaza la segunda como activa).
+  bool isSubmitting = false;
+
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for DH_ASSOCIATE_Header component.

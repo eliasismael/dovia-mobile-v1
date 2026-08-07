@@ -1,5 +1,5 @@
 import '/dovia_home_associate/associate_job_filters.dart';
-import '/dovia_home_associate/associate_requests_loader.dart';
+import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
@@ -128,7 +128,7 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
     // resultado que parece completo y no lo es.
     final call = DOVIAAPIDoviaHomeContextGroup
         .listAvailableAssociateServiceRequestsCall;
-    final jobsRequest = loadAllAssociateRequests(
+    final jobsRequest = loadAllDoviaHomePages(
       fetchPage: (page, limit) =>
           call.call(authToken: token, page: page, limit: limit),
       extractList: call.requestsList,
@@ -153,7 +153,7 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
 
     final board = _Board(
       categories: categories,
-      jobs: jobs.requests,
+      jobs: jobs.items,
       jobsTruncated: jobs.truncated,
     );
     _reconcileFilters(board);
@@ -380,7 +380,7 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
       children: [
         if (board.jobsTruncated) ...[
           _buildMessage(
-            'Estamos mostrando las primeras $kAssociateRequestsMaxItems '
+            'Estamos mostrando las primeras $kDoviaHomeMaxItems '
             'oportunidades. Puede que haya más trabajos disponibles.',
           ),
           const SizedBox(height: 8.0),

@@ -17,6 +17,27 @@ import 'api_config.dart';
 ///
 /// Todos los endpoints requieren Bearer token. El userId se resuelve del claim
 /// `custom:id` del JWT en el backend. `page`/`limit` viajan como query params.
+///
+/// **Endpoints definidos y todavía sin pantalla.** No es un olvido: la app no
+/// tiene dónde ponerlos, y agregarlos es trabajo de diseño, no de cableado.
+///   - Marketplace de empresa (5): `/dovia-home/company/...`. Requiere rol
+///     `HOME_ASSOCIATE_COMPANY`, que no tiene ninguna pantalla propia.
+///   - Marketplace de fuera de alcance del proveedor (4):
+///     `associate/out-of-scope-requests` (listado y detalle),
+///     `.../proposals` (enviar) y `associate/out-of-scope-proposals/{id}`.
+///     Con esto un proveedor podría cotizar trabajos extra; hoy sólo el cliente
+///     participa del flujo.
+///   - Reporte de fuera de alcance del asociado (3):
+///     `POST .../out-of-scope-requests` + sus imágenes. La pantalla
+///     "Trabajo adicional" es de materiales, no de esto.
+///   - Administración de materiales (2): `/admin/dovia-home/...`, de `HQ_ADMIN`.
+///     Probablemente back-office web y no esta app.
+///   - Gestión de direcciones (3): `GET {id}`, `PATCH` y `DELETE`. Falta una
+///     pantalla de "Mis direcciones"; hoy sólo se dan de alta y se listan.
+///   - `GET /dovia-home/associate/proposals`: historial de propuestas enviadas
+///     por el proveedor.
+///   - `POST /dovia-home/testing/payment-orders/{id}/refund`: temporal por
+///     contrato, no se cablea; se borra al terminar el E2E de Recurrente.
 
 class DOVIAAPIDoviaHomeContextGroup {
   static String getBaseUrl() => kApiBaseUrl;
@@ -145,6 +166,73 @@ class DOVIAAPIDoviaHomeContextGroup {
       ListClientProposalsCall();
   static ListAssociateProposalsCall listAssociateProposalsCall =
       ListAssociateProposalsCall();
+}
+
+/// Código de error de dominio de la respuesta, o cadena vacía si no trae uno
+/// (Ej: un fallo de red, que llega sin body).
+///
+/// Dovia Home responde `400` para **todos** los errores de validación de
+/// dominio y los distingue por este código, así que mirar sólo el status HTTP
+/// no alcanza para decidir qué hacer: una zona sin cobertura y una dirección
+/// malformada llegan las dos como 400.
+String doviaHomeErrorCode(ApiCallResponse response) =>
+    (getJsonField(response.jsonBody, r'''$.errorCode''') ??
+                getJsonField(response.jsonBody, r'''$.code'''))
+            ?.toString() ??
+        '';
+
+/// Zona que el cliente eligió pero DOVIA no atiende. Es el único error del alta
+/// de direcciones que no se resuelve corrigiendo el formulario: la pantalla
+/// deriva a "fuera de alcance" en vez de mostrar un mensaje.
+const String kDoviaHomeInvalidZoneCode = 'DOVIA_HOME_INVALID_ZONE';
+
+// ---------------------------------------------------------------------------
+// Paginación
+//
+// Todos los listados paginados del contexto entregan el arreglo directamente en
+// `data` y la metadata en `meta.pagination`. Los getters van sueltos y no por
+// clase porque el sobre es el mismo para los doce listados; duplicarlos en cada
+// call sólo abre lugar a que se desincronicen.
+// ---------------------------------------------------------------------------
+
+/// Si el backend declara que hay otra página. Null cuando la respuesta no trae
+/// metadata: ahí quien llama decide cómo seguir en vez de asumir que terminó.
+bool? doviaHomeHasNextPage(dynamic responseBody) => castToType<bool>(
+      getJsonField(responseBody, r'''$.meta.pagination.hasNextPage'''),
+    );
+
+/// Total de páginas del listado.
+int? doviaHomeTotalPages(dynamic responseBody) => castToType<int>(
+      getJsonField(responseBody, r'''$.meta.pagination.totalPages'''),
+    );
+
+/// Total de elementos del listado, en todas sus páginas.
+int? doviaHomeTotalItems(dynamic responseBody) => castToType<int>(
+      getJsonField(responseBody, r'''$.meta.pagination.totalItems'''),
+    );
+
+/// Traduce el código de error del alta/edición de direcciones a un mensaje para
+/// el cliente.
+///
+/// No cubre [kDoviaHomeInvalidZoneCode] a propósito: ese caso no se comunica con
+/// un texto sino derivando de pantalla. [fallback] cubre los códigos no
+/// contemplados y los fallos de red (sin body).
+String doviaHomeAddressErrorMessage(
+  ApiCallResponse response, {
+  required String fallback,
+}) {
+  switch (doviaHomeErrorCode(response)) {
+    case 'DOVIA_HOME_WORKABLE_ZONES_NOT_CONFIGURED':
+      return 'No pudimos verificar la cobertura ahora mismo. Intenta de nuevo en unos minutos.';
+    case 'DOVIA_HOME_INVALID_ADDRESS':
+      return 'Revisa la dirección: no pudimos registrarla como está escrita.';
+    case 'DOVIA_HOME_INVALID_COORDINATES':
+      return 'Marca de nuevo la ubicación en el mapa: el punto seleccionado no es válido.';
+    case 'DOVIA_HOME_ADDRESS_NOT_FOUND':
+      return 'Esta ubicación ya no está disponible.';
+    default:
+      return fallback;
+  }
 }
 
 // ===========================================================================
