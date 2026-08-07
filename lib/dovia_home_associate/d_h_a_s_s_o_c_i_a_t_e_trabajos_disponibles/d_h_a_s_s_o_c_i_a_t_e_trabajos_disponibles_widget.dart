@@ -1,4 +1,5 @@
 import '/dovia_home_associate/associate_job_filters.dart';
+import '/dovia_home_associate/associate_requests_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
@@ -56,6 +57,7 @@ class _Board {
     required this.categories,
     required this.jobs,
     this.jobsErrorStatus,
+    this.jobsTruncated = false,
   });
 
   final AssociateCategories categories;
@@ -66,6 +68,10 @@ class _Board {
   final List<Map<String, dynamic>> jobs;
 
   final int? jobsErrorStatus;
+
+  /// La bolsa no entró entera en el tope de páginas. Se avisa en pantalla en
+  /// vez de recortar en silencio.
+  final bool jobsTruncated;
 
   bool get jobsFailed => jobsErrorStatus != null;
 
@@ -117,37 +123,38 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
     final token = currentAuthenticationToken ?? '';
 
     final categoriesRequest = loadAssociateCategories(authToken: token);
-    final jobsRequest = DOVIAAPIDoviaHomeContextGroup
-        .listAvailableAssociateServiceRequestsCall
-        .call(authToken: token, limit: 50);
+    // Se pagina hasta el final: los filtros corren client-side sobre lo que se
+    // trajo, así que con una sola página filtrar por mes u oficio daría un
+    // resultado que parece completo y no lo es.
+    final call = DOVIAAPIDoviaHomeContextGroup
+        .listAvailableAssociateServiceRequestsCall;
+    final jobsRequest = loadAllAssociateRequests(
+      fetchPage: (page, limit) =>
+          call.call(authToken: token, page: page, limit: limit),
+      extractList: call.requestsList,
+      keep: (data) =>
+          // Perfil Independiente: sin cotizaciones ni trabajos fuera de alcance.
+          asrIsWorkableByIndependent(data) &&
+          // Y sólo lo que nadie tomó: `status` es un filtro opcional del
+          // endpoint y TAKEN es uno de sus valores válidos.
+          asrIsTakeable(data),
+    );
 
     final categories = await categoriesRequest;
-    final jobsResponse = await jobsRequest;
+    final jobs = await jobsRequest;
 
-    if (!jobsResponse.succeeded) {
+    if (jobs.failed) {
       return _Board(
         categories: categories,
         jobs: const [],
-        jobsErrorStatus: jobsResponse.statusCode,
+        jobsErrorStatus: jobs.errorStatus,
       );
     }
 
-    final raw = DOVIAAPIDoviaHomeContextGroup
-            .listAvailableAssociateServiceRequestsCall
-            .requestsList(jobsResponse.jsonBody) ??
-        const [];
-
     final board = _Board(
       categories: categories,
-      jobs: raw
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          // Perfil Independiente: sin cotizaciones ni trabajos fuera de alcance.
-          .where(asrIsWorkableByIndependent)
-          // Y sólo lo que nadie tomó: `status` es un filtro opcional del
-          // endpoint y TAKEN es uno de sus valores válidos.
-          .where(asrIsTakeable)
-          .toList(),
+      jobs: jobs.requests,
+      jobsTruncated: jobs.truncated,
     );
     _reconcileFilters(board);
     return board;
@@ -369,23 +376,31 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
     }
 
     return Column(
-      children: jobs
-          .map(
-            (data) => Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: DHASSOCIATETrabajoCardWidget(
-                title: asrServiceName(data),
-                addressLabel: asrZoneLabel(data),
-                dateLabel: asrFormattedDate(data),
-                timeLabel: asrTimeLabel(data),
-                payoutLabel: asrPayoutLabel(data),
-                priorityLabel: asrPriorityLabel(data),
-                isUrgent: asrIsEmergency(data),
-                onViewDetail: () => _openOpportunity(data),
-              ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (board.jobsTruncated) ...[
+          _buildMessage(
+            'Estamos mostrando las primeras $kAssociateRequestsMaxItems '
+            'oportunidades. Puede que haya más trabajos disponibles.',
+          ),
+          const SizedBox(height: 8.0),
+        ],
+        ...jobs.map(
+          (data) => Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: DHASSOCIATETrabajoCardWidget(
+              title: asrServiceName(data),
+              addressLabel: asrZoneLabel(data),
+              dateLabel: asrFormattedDate(data),
+              timeLabel: asrTimeLabel(data),
+              payoutLabel: asrPayoutLabel(data),
+              priorityLabel: asrPriorityLabel(data),
+              isUrgent: asrIsEmergency(data),
+              onViewDetail: () => _openOpportunity(data),
             ),
-          )
-          .toList(),
+          ),
+        ),
+      ],
     );
   }
 

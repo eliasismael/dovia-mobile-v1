@@ -246,6 +246,10 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
       // Regla de cobertura: fuera del área de servicio no se permite la
       // solicitud.
       if (!_isZoneCovered(zone)) {
+        // Acá "fuera de alcance" es la zona, no un diagnóstico: no hay
+        // solicitud que revisar y se dice explícitamente, para no reusar la que
+        // hubiera quedado inyectada por una visita anterior.
+        DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId = null;
         context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
         return;
       }
@@ -269,6 +273,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         // El backend rechaza las direcciones fuera de cobertura: se deriva a la
         // pantalla de fuera de alcance en ese caso y se avisa en el resto.
         if (response.statusCode == 422 || response.statusCode == 409) {
+          // Igual que arriba: es la zona la que quedó fuera, no hay diagnóstico.
+          DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId = null;
           context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

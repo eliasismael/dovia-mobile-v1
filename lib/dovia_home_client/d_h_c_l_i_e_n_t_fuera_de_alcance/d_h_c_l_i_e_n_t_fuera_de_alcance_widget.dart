@@ -35,6 +35,14 @@ class DHCLIENTFueraDeAlcanceWidget extends StatefulWidget {
   /// navegar, porque go_router navega sólo por nombre (misma convención que
   /// [DHCLIENTCotizacionesRecibidasWidget.serviceRequestId]). Tiene prioridad
   /// el valor del constructor cuando la página se instancia directamente.
+  ///
+  /// **Se consume al abrir la pantalla** (ver `initState`): el valor queda
+  /// amarrado a esa instancia y el campo vuelve a null. Es un estático
+  /// compartido y esta pantalla tiene más de una entrada —[DHCLIENTUbicacionWidget]
+  /// la usa para avisar que una dirección quedó fuera de la zona de cobertura,
+  /// sin ninguna solicitud detrás—, así que sin limpiarlo la segunda entrada
+  /// heredaría el diagnóstico de la primera y sus botones actuarían sobre una
+  /// solicitud que el cliente no está mirando.
   static String? outOfScopeRequestId;
 
   @override
@@ -48,10 +56,31 @@ class _DHCLIENTFueraDeAlcanceWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Solicitud que revisa **esta** instancia, resuelta una sola vez al abrir.
+  ///
+  /// Se fija acá y no se vuelve a leer el estático: si se consultara en cada
+  /// uso, una entrada posterior por otro camino podría cambiarlo por debajo
+  /// mientras la pantalla sigue en pantalla.
+  String? _resolvedRequestId;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTFueraDeAlcanceModel());
+
+    // Se toma el valor inyectado y se limpia el estático en el acto: a partir
+    // de acá, quien abra la pantalla sin inyectar nada obtiene "sin solicitud"
+    // —el estado vacío correcto— y no el diagnóstico de la visita anterior.
+    for (final candidate in [
+      widget.requestId,
+      DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId,
+    ]) {
+      if (candidate != null && candidate.isNotEmpty) {
+        _resolvedRequestId = candidate;
+        break;
+      }
+    }
+    DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId = null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // El estatus de suscripción decide si "Sí quiero que me coticen" autoriza
@@ -63,17 +92,10 @@ class _DHCLIENTFueraDeAlcanceWidgetState
     });
   }
 
-  /// Solicitud a consultar: la del constructor si la página se instanció
-  /// directamente, si no la inyectada antes de navegar.
-  String? get _requestId {
-    for (final candidate in [
-      widget.requestId,
-      DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId,
-    ]) {
-      if (candidate != null && candidate.isNotEmpty) return candidate;
-    }
-    return null;
-  }
+  /// Solicitud a consultar, resuelta al abrir la pantalla. Null cuando se llegó
+  /// sin inyectar ninguna —Ej: el aviso de dirección fuera de cobertura—, y ahí
+  /// la pantalla se queda en estado vacío en vez de operar sobre otra.
+  String? get _requestId => _resolvedRequestId;
 
   Future<void> _loadDiagnosisData() async {
     final requestId = _requestId;

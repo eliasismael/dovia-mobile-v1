@@ -1,4 +1,5 @@
 import '/dovia_home_associate/associate_job_filters.dart';
+import '/dovia_home_associate/associate_requests_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
@@ -52,6 +53,7 @@ class _Agenda {
     required this.categories,
     required this.jobs,
     this.jobsErrorStatus,
+    this.jobsTruncated = false,
   });
 
   final AssociateCategories categories;
@@ -62,6 +64,10 @@ class _Agenda {
   final List<Map<String, dynamic>> jobs;
 
   final int? jobsErrorStatus;
+
+  /// La agenda no entró entera en el tope de páginas. Se avisa en pantalla: un
+  /// historial recortado en silencio se lee como historial completo.
+  final bool jobsTruncated;
 
   bool get jobsFailed => jobsErrorStatus != null;
 
@@ -79,13 +85,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
 
   late Future<_Agenda> _agendaFuture;
 
-  /// Ancho de tarjeta del diseño de escritorio.
-  static const double _cardWidth = 285.0;
-  static const double _gridGap = 14.0;
-
-  /// A partir de acá entran al menos dos columnas de tarjetas y la fila de
-  /// filtros del diseño; por debajo se apila todo.
-  static const double _wideBreakpoint = 700.0;
+  /// Separación entre tarjetas, la del diseño.
+  static const double _cardGap = 14.0;
 
   @override
   void initState() {
@@ -124,35 +125,35 @@ class _DHASSOCIATEProximosTrabajosWidgetState
     // varios (TAKEN, IN_PROGRESS, FINISHED). La separación en secciones se hace
     // client-side, que además es lo que necesita el diseño para pintar las dos
     // a la vez.
-    final jobsRequest =
-        DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall.call(
-      authToken: token,
-      limit: 50,
+    //
+    // Y se pagina hasta el final: aceptados y terminados comparten este
+    // listado, así que con una sola página el historial le comería el cupo a
+    // los trabajos que todavía hay que hacer.
+    final call =
+        DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall;
+    final jobsRequest = loadAllAssociateRequests(
+      fetchPage: (page, limit) =>
+          call.call(authToken: token, page: page, limit: limit),
+      extractList: call.requestsList,
+      // Perfil Independiente: sin cotizaciones ni trabajos fuera de alcance.
+      keep: asrIsWorkableByIndependent,
     );
 
     final categories = await categoriesRequest;
-    final jobsResponse = await jobsRequest;
+    final jobs = await jobsRequest;
 
-    if (!jobsResponse.succeeded) {
+    if (jobs.failed) {
       return _Agenda(
         categories: categories,
         jobs: const [],
-        jobsErrorStatus: jobsResponse.statusCode,
+        jobsErrorStatus: jobs.errorStatus,
       );
     }
 
-    final raw = DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall
-            .requestsList(jobsResponse.jsonBody) ??
-        const [];
-
     final agenda = _Agenda(
       categories: categories,
-      jobs: raw
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          // Perfil Independiente: sin cotizaciones ni trabajos fuera de alcance.
-          .where(asrIsWorkableByIndependent)
-          .toList(),
+      jobs: jobs.requests,
+      jobsTruncated: jobs.truncated,
     );
     _reconcileFilters(agenda);
     return agenda;
@@ -403,28 +404,18 @@ class _DHASSOCIATEProximosTrabajosWidgetState
     );
   }
 
-  /// Los tres desplegables. En escritorio van en fila como el diseño; en mobile
-  /// no entran tres columnas legibles, así que se apilan.
-  Widget _buildFilters(_Agenda agenda, double maxWidth) {
-    final filters = [
-      _buildCategoryFilter(agenda.categories),
-      _buildStatusFilter(),
-      _buildMonthFilter(associateMonthOptions(agenda.jobs)),
-    ];
-
-    if (maxWidth < _wideBreakpoint) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: filters.divide(const SizedBox(height: 16.0)),
-      );
-    }
-
-    return Row(
+  /// Los tres desplegables. En el diseño de escritorio van en una fila de tres
+  /// columnas; en mobile no entran tres campos legibles al lado del otro, así
+  /// que se apilan —el mismo orden y el mismo alto de toque que en la bolsa de
+  /// oportunidades.
+  Widget _buildFilters(_Agenda agenda) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: filters
-          .map<Widget>((filter) => Expanded(child: filter))
-          .toList()
-          .divide(const SizedBox(width: 24.0)),
+      children: [
+        _buildCategoryFilter(agenda.categories),
+        _buildStatusFilter(),
+        _buildMonthFilter(associateMonthOptions(agenda.jobs)),
+      ].divide(const SizedBox(height: 16.0)),
     );
   }
 
@@ -449,45 +440,30 @@ class _DHASSOCIATEProximosTrabajosWidgetState
             ),
       );
 
-  /// Cuadrícula de tarjetas. En escritorio se acomodan tantas columnas de
-  /// ~285px como entren; en mobile queda una sola, que es la misma cuadrícula
-  /// con una columna.
-  Widget _buildGrid(
-    List<Map<String, dynamic>> jobs,
-    double maxWidth, {
+  /// Las tarjetas de una sección. La cuadrícula de tres columnas del diseño de
+  /// escritorio es, en mobile, una sola columna a ancho de pantalla: la misma
+  /// tarjeta y el mismo orden, apilados.
+  Widget _buildCards(
+    List<Map<String, dynamic>> jobs, {
     required void Function(Map<String, dynamic>) onViewDetail,
   }) {
-    Widget card(Map<String, dynamic> data) => DHASSOCIATETrabajoCardWidget(
-          title: asrServiceName(data),
-          addressLabel: asrZoneLabel(data),
-          dateLabel: asrFormattedDate(data),
-          timeLabel: asrTimeLabel(data),
-          payoutLabel: asrPayoutLabel(data),
-          priorityLabel: asrPriorityLabel(data),
-          isUrgent: asrIsEmergency(data),
-          onViewDetail: () => onViewDetail(data),
-        );
-
-    if (maxWidth < _wideBreakpoint) {
-      return Column(
-        children: jobs
-            .map((data) => Padding(
-                  padding: const EdgeInsets.only(bottom: _gridGap),
-                  child: card(data),
-                ))
-            .toList(),
-      );
-    }
-
-    final columns =
-        ((maxWidth + _gridGap) / (_cardWidth + _gridGap)).floor().clamp(1, 4);
-    final columnWidth = (maxWidth - _gridGap * (columns - 1)) / columns;
-
-    return Wrap(
-      spacing: _gridGap,
-      runSpacing: _gridGap,
+    return Column(
       children: jobs
-          .map((data) => SizedBox(width: columnWidth, child: card(data)))
+          .map(
+            (data) => Padding(
+              padding: const EdgeInsets.only(bottom: _cardGap),
+              child: DHASSOCIATETrabajoCardWidget(
+                title: asrServiceName(data),
+                addressLabel: asrZoneLabel(data),
+                dateLabel: asrFormattedDate(data),
+                timeLabel: asrTimeLabel(data),
+                payoutLabel: asrPayoutLabel(data),
+                priorityLabel: asrPriorityLabel(data),
+                isUrgent: asrIsEmergency(data),
+                onViewDetail: () => onViewDetail(data),
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -496,7 +472,6 @@ class _DHASSOCIATEProximosTrabajosWidgetState
     required String title,
     required List<Map<String, dynamic>> jobs,
     required String emptyMessage,
-    required double maxWidth,
     required void Function(Map<String, dynamic>) onViewDetail,
   }) {
     return Column(
@@ -507,12 +482,12 @@ class _DHASSOCIATEProximosTrabajosWidgetState
         if (jobs.isEmpty)
           _buildMessage(emptyMessage)
         else
-          _buildGrid(jobs, maxWidth, onViewDetail: onViewDetail),
+          _buildCards(jobs, onViewDetail: onViewDetail),
       ],
     );
   }
 
-  Widget _buildAgenda(_Agenda agenda, double maxWidth) {
+  Widget _buildAgenda(_Agenda agenda) {
     if (agenda.jobsFailed) return _buildMessage(agenda.jobsErrorMessage);
 
     final accepted = _acceptedJobs(agenda);
@@ -528,10 +503,16 @@ class _DHASSOCIATEProximosTrabajosWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (agenda.jobsTruncated) ...[
+          _buildMessage(
+            'Estamos mostrando tus primeros $kAssociateRequestsMaxItems '
+            'trabajos. Puede que falte parte de tu historial.',
+          ),
+          const SizedBox(height: 8.0),
+        ],
         _buildSection(
           title: 'Trabajos aceptados',
           jobs: accepted,
-          maxWidth: maxWidth,
           emptyMessage: filtering
               ? 'No hay trabajos aceptados con estos filtros.'
               : 'Todavía no aceptaste ningún trabajo. Postulate a los que '
@@ -542,7 +523,6 @@ class _DHASSOCIATEProximosTrabajosWidgetState
         _buildSection(
           title: 'Trabajos terminados',
           jobs: finished,
-          maxWidth: maxWidth,
           emptyMessage: filtering
               ? 'No hay trabajos terminados con estos filtros.'
               : 'Todavía no terminaste ningún trabajo.',
@@ -583,33 +563,26 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         20.0, 24.0, 20.0, 120.0),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final maxWidth = constraints.maxWidth;
+                    child: FutureBuilder<_Agenda>(
+                      future: _agendaFuture,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 40.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        final agenda = snapshot.data!;
 
-                        return FutureBuilder<_Agenda>(
-                          future: _agendaFuture,
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 40.0),
-                                child:
-                                    Center(child: CircularProgressIndicator()),
-                              );
-                            }
-                            final agenda = snapshot.data!;
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildSearchBar(),
-                                const SizedBox(height: 20.0),
-                                _buildFilters(agenda, maxWidth),
-                                const SizedBox(height: 28.0),
-                                _buildAgenda(agenda, maxWidth),
-                              ],
-                            );
-                          },
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSearchBar(),
+                            const SizedBox(height: 20.0),
+                            _buildFilters(agenda),
+                            const SizedBox(height: 28.0),
+                            _buildAgenda(agenda),
+                          ],
                         );
                       },
                     ),

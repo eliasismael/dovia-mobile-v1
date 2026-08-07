@@ -8,9 +8,9 @@ import 'package:google_fonts/google_fonts.dart';
 /// nadie tomó) y para "Próximos trabajos" (los que este asociado ya aceptó): en
 /// el diseño son idénticas y sólo cambia a dónde lleva el ícono de "Ojo".
 ///
-/// En el diseño de escritorio son dos columnas de 285px; en mobile la tarjeta
-/// ocupa el ancho de la pantalla y el bloque de datos se apila a la izquierda
-/// del botón de ver detalle.
+/// En el diseño de escritorio son columnas de 285px; acá la tarjeta ocupa el
+/// ancho de la pantalla y el bloque de datos queda a la izquierda del botón de
+/// ver detalle.
 class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
   const DHASSOCIATETrabajoCardWidget({
     super.key,

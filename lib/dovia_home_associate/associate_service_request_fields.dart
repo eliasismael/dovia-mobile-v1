@@ -88,6 +88,15 @@ String asrPriorityLabel(Map<String, dynamic> data) =>
 /// Trabajos que puede tomar un asociado con `Role = Independent`: sólo servicios
 /// estándar y emergencias. Las cotizaciones (QUOTE) y los trabajos fuera de
 /// alcance (OUT_OF_SCOPE) son de la red de empresas y no se listan para él.
+///
+/// **Revisar al implementar el reporte de fuera de alcance del asociado**
+/// (`POST /dovia-home/associate/service-requests/{id}/out-of-scope-requests`,
+/// que hoy ninguna pantalla llama). Ese endpoint acepta
+/// `executionMode: REPORTER_CAN_EXECUTE | OTHER_PROVIDER_REQUIRED`: con el
+/// primero, el fuera de alcance vuelve como trabajo del propio asociado que lo
+/// reportó, y descartarlo acá lo dejaría fuera de su agenda —un compromiso suyo
+/// que no ve en "Próximos trabajos"—. El descarte de OUT_OF_SCOPE sólo es
+/// correcto mientras todos vayan a otro proveedor.
 bool asrIsWorkableByIndependent(Map<String, dynamic> data) {
   const workable = {'SERVICE', 'EMERGENCY'};
   return workable.contains(asrRequestType(data));
@@ -188,14 +197,22 @@ String? asrAccessInstructions(Map<String, dynamic> data) {
   ]);
 }
 
-/// Estado del ciclo de vida de la solicitud (PENDING / TAKEN / IN_PROGRESS /
-/// FINISHED).
+/// Estado del ciclo de vida de la solicitud.
+///
+/// El enum es **cerrado y son estos cuatro**: PENDING / TAKEN / IN_PROGRESS /
+/// FINISHED. El controller valida contra ellos el filtro `status` de los
+/// listados, y no existe ningún estado de cancelación —Dovia Home tampoco
+/// expone un endpoint para cancelar una solicitud—.
 String asrStatus(Map<String, dynamic> data) =>
     (asrString(data['status']) ?? 'PENDING').toUpperCase();
 
 /// El trabajo ya se ejecutó y se cerró. Es lo que parte la agenda del asociado
 /// en sus dos secciones: lo que todavía tiene que hacer ("Trabajos aceptados")
 /// y su historial ("Trabajos terminados").
+///
+/// Que FINISHED sea el **único** estado terminal es lo que hace correcto
+/// definir los aceptados por descarte (`!asrIsFinished`): no hay un quinto
+/// estado que pudiera colarse ahí como si fuera un compromiso vigente.
 bool asrIsFinished(Map<String, dynamic> data) => asrStatus(data) == 'FINISHED';
 
 /// Descripción del trabajo realizado que cargó el asociado al finalizar.
