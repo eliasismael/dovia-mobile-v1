@@ -1,17 +1,20 @@
+import 'dart:async';
+
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/dovia_home_image_upload.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_home_page/d_h_a_s_s_o_c_i_a_t_e_home_page_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional_widget.dart';
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_realizado/d_h_a_s_s_o_c_i_a_t_e_trabajo_realizado_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,13 +22,17 @@ import 'd_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_model.dart';
 
 /// Cierre del trabajo: el asociado carga la evidencia de lo que hizo y sus
-/// recomendaciones para el cliente.
+/// recomendaciones para el cliente. Se llega desde "Finalizar trabajos/visitas"
+/// con el trabajo en curso.
 ///
-/// La misma pantalla sirve de **registro en solo lectura** una vez que la
-/// solicitud quedó FINISHED — es a donde lleva el "Ojo" de la sección "Trabajos
-/// terminados" de la agenda. No hace falta un flag aparte: si el trabajo ya
-/// terminó no hay nada que cargar, así que el estado de la solicitud
-/// ([requestData]) es lo que decide, y no puede quedar desincronizado.
+/// Al confirmar se muestra el modal de éxito y el asociado vuelve al panel. El
+/// **registro en solo lectura** de un trabajo ya cerrado —con la calificación
+/// del cliente— es otra pantalla ([DHASSOCIATETrabajoRealizadoWidget]), a la
+/// que se llega desde las tarjetas de "Trabajos terminados" de la agenda.
+///
+/// El modo solo lectura de acá queda como defensa por si igual se entra con una
+/// solicitud FINISHED: lo decide el estado de [requestData], así que no puede
+/// quedar desincronizado.
 class DHASSOCIATETrabajoFinalizadoWidget extends StatefulWidget {
   const DHASSOCIATETrabajoFinalizadoWidget({super.key});
 
@@ -188,15 +195,28 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
 
   /// Cierra el trabajo.
   ///
-  /// El orden importa: las imágenes se confirman **antes** del finish, porque
-  /// `finish` no recibe imágenes y una vez finalizada la solicitud ya no se le
-  /// adjunta evidencia. La evidencia es opcional, así que un fallo de subida no
-  /// impide cerrar: se avisa y se cierra igual.
+  /// Evidencia del trabajo (fotos + descripción) es obligatoria para cerrar:
+  /// sin ellas no hay con qué armar el reporte que se le manda al cliente. Los
+  /// materiales sobrantes y las recomendaciones, en cambio, son opcionales — no
+  /// todo trabajo deja materiales ni necesita una recomendación aparte.
+  ///
+  /// El orden de ejecución importa: las imágenes se confirman **antes** del
+  /// finish, porque `finish` no recibe imágenes y una vez finalizada la
+  /// solicitud ya no se le puede adjuntar evidencia. Una vez pasada la
+  /// validación de que haya al menos una foto, un fallo de *subida* ya no
+  /// bloquea el cierre: se avisa y se cierra igual.
   Future<void> _finish() async {
     final data = _request;
     final id = data == null ? '' : asrId(data);
     if (id.isEmpty) {
       _showMessage('No se encontró el trabajo a cerrar.');
+      return;
+    }
+
+    if (_model.uploadedMedia.isEmpty) {
+      _showMessage(
+          'Agrega al menos una foto de los trabajos realizados para poder '
+          'cerrar.');
       return;
     }
 
@@ -234,21 +254,45 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
         return;
       }
 
-      _showMessage(partial
-          ? 'Trabajo cerrado, pero algunas fotos no se pudieron subir.'
-          : 'Trabajo cerrado. ¡Gracias!');
+      await _showSuccessDialog(partial: partial);
+      if (!mounted) return;
 
-      // Cerrado el trabajo, se pasa al registro de lo que se le envió al
-      // cliente. Reemplaza esta pantalla en la pila (`pushReplacement`) para
-      // que el "volver" del resumen no traiga de vuelta el formulario de un
-      // trabajo que ya se cerró.
-      final finished = {...?_request, 'status': 'FINISHED'};
-      DHASSOCIATETrabajoRealizadoWidget.requestData = finished;
-      context.pushReplacementNamed(
-          DHASSOCIATETrabajoRealizadoWidget.routeName);
+      // Cerrado el trabajo, el asociado vuelve al panel. Se usa `goNamed` y no
+      // `push` para no dejar en la pila el formulario de un trabajo que ya se
+      // cerró: desde el panel llega a este trabajo por "Trabajos terminados".
+      context.goNamed(DHASSOCIATEHomePageWidget.routeName);
     } finally {
       if (mounted) safeSetState(() => _model.isSubmitting = false);
     }
+  }
+
+  /// Modal de cierre exitoso. El diseño no le pone botón, así que se cierra
+  /// solo y el flujo sigue al panel; igual se puede tocar afuera para saltearlo.
+  ///
+  /// Cuando alguna foto no subió se lo dice acá: es el único aviso que va a
+  /// ver, porque enseguida se navega y un SnackBar se perdería en la
+  /// transición.
+  Future<void> _showSuccessDialog({required bool partial}) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        elevation: 0,
+        insetPadding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        alignment: const AlignmentDirectional(0.0, 0.0)
+            .resolve(Directionality.of(context)),
+        child: _AutoCloseDialogContent(
+          child: PopupExitoWidget(
+            title: 'Se envió con éxito',
+            text: partial
+                ? 'Tu trabajo ya fue cerrado con éxito, se informará al '
+                    'cliente. Algunas fotos no se pudieron subir.'
+                : 'Tu trabajo ya fue cerrado con éxito, se informará al '
+                    'cliente.',
+          ),
+        ),
+      ),
+    );
   }
 
   /// Sube una tanda de evidencia con el ciclo presign → PUT → confirm.
@@ -1030,4 +1074,46 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
       ),
     );
   }
+}
+
+/// Envoltorio que cierra el diálogo solo después de [duration].
+///
+/// El modal de éxito del diseño no tiene botón, así que sin esto quedaría
+/// trabado. Vive acá y no dentro de `PopupExitoWidget` porque ese componente
+/// lo comparten pantallas que sí cierran con un botón.
+class _AutoCloseDialogContent extends StatefulWidget {
+  const _AutoCloseDialogContent({required this.child});
+
+  /// Lo suficiente para leer el mensaje sin que la espera moleste.
+  static const Duration duration = Duration(seconds: 2);
+
+  final Widget child;
+
+  @override
+  State<_AutoCloseDialogContent> createState() =>
+      _AutoCloseDialogContentState();
+}
+
+class _AutoCloseDialogContentState extends State<_AutoCloseDialogContent> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(_AutoCloseDialogContent.duration, () {
+      // `canPop` cubre que el usuario ya lo haya cerrado tocando afuera.
+      if (mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
