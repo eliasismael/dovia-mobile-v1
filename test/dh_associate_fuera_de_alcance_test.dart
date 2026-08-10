@@ -17,7 +17,7 @@ Future<void> _pump(WidgetTester tester, {String? serviceRequestId}) async {
 Future<void> _tapSubmit(WidgetTester tester) async {
   final button = tester.widget<ElevatedButton>(
     find.ancestor(
-      of: find.text('Enviar reporte'),
+      of: find.text('Enviar'),
       matching: find.byType(ElevatedButton),
     ),
   );
@@ -32,21 +32,20 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
   });
 
-  testWidgets('pide descripción, quién ejecuta y fotos', (tester) async {
+  testWidgets('muestra los dos campos del diseño', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
 
     await _pump(tester, serviceRequestId: 'req-1');
 
-    expect(find.text('Trabajos adicionales', findRichText: true),
-        findsOneWidget);
-    expect(find.text('¿Qué trabajo adicional hace falta?'), findsOneWidget);
-    expect(find.text('¿Quién puede hacerlo?'), findsOneWidget);
-    // Los dos executionMode del contrato, cada uno con su consecuencia.
-    expect(find.text('Lo puedo hacer yo'), findsOneWidget);
-    expect(find.text('Necesita otro proveedor'), findsOneWidget);
-    expect(find.text('Enviar reporte'), findsOneWidget);
+    expect(find.text('Trabajo adicional', findRichText: true), findsOneWidget);
+    expect(find.text('Trabajos a cotizar'), findsOneWidget);
+    expect(find.text('Sube las imágenes'), findsOneWidget);
+    expect(find.text('Enviar'), findsOneWidget);
+    // El selector de executionMode ya no existe: el reporte siempre se deriva.
+    expect(find.text('¿Quién puede hacerlo?'), findsNothing);
+    expect(find.byIcon(Icons.radio_button_unchecked), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -63,33 +62,7 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('con descripción pero sin executionMode tampoco envía',
-      (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 3.0;
-    addTearDown(tester.view.reset);
-
-    await _pump(tester, serviceRequestId: 'req-1');
-
-    await tester.enterText(
-        find.byType(TextFormField), 'Hay que romper más pared.');
-    await _tapSubmit(tester);
-
-    // executionMode es obligatorio en el contrato: no se elige por defecto.
-    expect(find.text('Indicá si vos podés hacer el trabajo extra.'),
-        findsOneWidget);
-  });
-
-  testWidgets('el modo de ejecución se puede seleccionar', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 3.0;
-    addTearDown(tester.view.reset);
-
-    await _pump(tester, serviceRequestId: 'req-1');
-
-    expect(find.byIcon(Icons.radio_button_checked), findsNothing);
-    await tester.tap(find.text('Lo puedo hacer yo'));
-    await tester.pump();
-    expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
+  test('el reporte siempre sale como trabajo para otro proveedor', () {
+    expect(kOutOfScopeExecutionMode, 'OTHER_PROVIDER_REQUIRED');
   });
 }

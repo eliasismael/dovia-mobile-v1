@@ -18,8 +18,7 @@ export 'd_h_a_s_s_o_c_i_a_t_e_trabajo_adicional_model.dart';
 
 /// Solicitud de **materiales extra** que el asociado levanta durante el trabajo.
 ///
-/// Pese al título de la pantalla ("Trabajo adicional"), lo que pide es material:
-/// el formulario es "escribe el material adicional que necesitas" + fotos de
+/// El formulario es "escribe el material adicional que necesitas" + fotos de
 /// dónde se usará, que es exactamente
 /// `POST /dovia-home/associate/service-requests/{id}/extra-materials` con
 /// `{requestedMaterials}` y su evidencia en `installationImageUrls`.
@@ -272,7 +271,7 @@ class _DHASSOCIATETrabajoAdicionalWidgetState
                       model: _model.dHASSOCIATEHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const DHASSOCIATEHeaderWidget(
-                        tittleText: 'Trabajo adicional',
+                        tittleText: 'Materiales adicionales',
                       ),
                     ),
                     Padding(

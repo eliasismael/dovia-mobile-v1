@@ -18,16 +18,15 @@ export 'd_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_model.dart';
 
 /// Reporte de **trabajo fuera de alcance** que el asociado levanta durante la
 /// ejecución: tareas que no estaban en el pedido original y aparecieron al
-/// abrir la pared, destapar el caño, etc.
+/// abrir la pared, destapar el caño, etc. Se deriva al sistema de
+/// cotizaciones de DOVIA sin frenar el trabajo en curso.
 ///
 /// Es `POST /dovia-home/associate/service-requests/{id}/out-of-scope-requests`
 /// con `{description, executionMode}` y su evidencia en imágenes.
 ///
-/// `executionMode` es la decisión importante del formulario y por eso se pide
-/// explícita:
-///   - `REPORTER_CAN_EXECUTE`: el propio asociado puede hacerlo, y el trabajo
-///     extra vuelve a él como un compromiso nuevo.
-///   - `OTHER_PROVIDER_REQUIRED`: excede su oficio y va a la red de empresas.
+/// `executionMode` del contrato. La pantalla ya no lo pregunta: todo lo que se
+/// reporta acá excede el alcance del asociado (el perfil Independiente no
+/// cotiza), así que siempre se deriva a la red de empresas.
 ///
 /// Las imágenes **no** viajan en el body: se adjuntan después con
 /// presign → PUT → confirm, que necesitan el id del reporte ya creado.
@@ -47,19 +46,10 @@ class DHASSOCIATEFueraDeAlcanceWidget extends StatefulWidget {
       _DHASSOCIATEFueraDeAlcanceWidgetState();
 }
 
-/// Opciones de `executionMode` con el texto que ve el asociado.
-const List<({String value, String label, String help})> _kExecutionModes = [
-  (
-    value: 'REPORTER_CAN_EXECUTE',
-    label: 'Lo puedo hacer yo',
-    help: 'El trabajo extra vuelve a vos como un nuevo compromiso.',
-  ),
-  (
-    value: 'OTHER_PROVIDER_REQUIRED',
-    label: 'Necesita otro proveedor',
-    help: 'Excede tu oficio: DOVIA lo deriva a la red de empresas.',
-  ),
-];
+/// `executionMode` del contrato. La pantalla ya no lo elige: el reporte
+/// siempre sale como "excede mi oficio" y DOVIA lo deriva a la red de
+/// empresas.
+const String kOutOfScopeExecutionMode = 'OTHER_PROVIDER_REQUIRED';
 
 class _DHASSOCIATEFueraDeAlcanceWidgetState
     extends State<DHASSOCIATEFueraDeAlcanceWidget> {
@@ -140,12 +130,6 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
       return;
     }
 
-    final executionMode = _model.executionMode;
-    if (executionMode == null) {
-      _showMessage('Indicá si vos podés hacer el trabajo extra.');
-      return;
-    }
-
     safeSetState(() => _model.isSubmitting = true);
     try {
       final token = currentAuthenticationToken ?? '';
@@ -153,7 +137,7 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
       final response = await call.call(
         serviceRequestId: serviceRequestId,
         description: description,
-        executionMode: executionMode,
+        executionMode: kOutOfScopeExecutionMode,
         authToken: token,
       );
       if (!mounted) return;
@@ -231,101 +215,34 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
     );
   }
 
-  Widget _label(String text) => Align(
+  /// Rótulo de campo. El diseño usa 14/0.28 sobre el textarea y 16/0.32 sobre
+  /// las imágenes: el tracking es siempre el 2% del cuerpo, así que se deriva.
+  Widget _label(String text, {double fontSize = 16.0}) => Align(
         alignment: const AlignmentDirectional(-1.0, 0.0),
         child: Text(
           text,
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.publicSans(),
-                fontSize: 16.0,
-                letterSpacing: 0.32,
+                fontSize: fontSize,
+                letterSpacing: fontSize * 0.02,
               ),
         ),
       );
 
-  /// Selector de `executionMode`. Son dos caminos de negocio distintos, así que
-  /// se muestran con su consecuencia escrita en vez de un rótulo suelto.
-  Widget _buildExecutionModePicker() {
-    return Column(
-      children: [
-        for (final mode in _kExecutionModes)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10.0),
-              onTap: () => safeSetState(() => _model.executionMode = mode.value),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(
-                    color: _model.executionMode == mode.value
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).alternate,
-                    width: 1.5,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _model.executionMode == mode.value
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_unchecked,
-                      color: FlutterFlowTheme.of(context).primary,
-                      size: 20.0,
-                    ),
-                    const SizedBox(width: 10.0),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            mode.label,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w600),
-                                  fontSize: 14.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                          Text(
-                            mode.help,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.inter(),
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  fontSize: 12.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// Contenido de la caja de carga: las miniaturas elegidas o el placeholder
-  /// del diseño mientras no haya ninguna.
+  /// Contenido de la caja de carga: las miniaturas elegidas o el ícono del
+  /// diseño mientras no haya ninguna.
   Widget _mediaPreview() {
     final media = _model.uploadedMedia;
     if (media.isEmpty) {
-      return SvgPicture.asset(
-        'assets/images/AddMediaImage.svg',
-        width: 200.0,
-        height: 200.0,
-        fit: BoxFit.cover,
+      // AddMediaImage.svg es un lienzo 350x104 con su propio fondo: no sirve
+      // como ícono de 24x24 acá, se ve como un manchón gris ilegible.
+      return Center(
+        child: SvgPicture.asset(
+          'assets/images/media-image-list.svg',
+          width: 24.0,
+          height: 24.0,
+          fit: BoxFit.contain,
+        ),
       );
     }
     return ListView.separated(
@@ -356,154 +273,184 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: Stack(
-          children: [
-            wrapWithModel(
-              model: _model.cornerGradientBackgroundModel,
-              updateCallback: () => safeSetState(() {}),
-              child: const CornerGradientBackgroundWidget(),
-            ),
-            SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  wrapWithModel(
-                    model: _model.dHASSOCIATEHeaderModel,
-                    updateCallback: () => safeSetState(() {}),
-                    child: const DHASSOCIATEHeaderWidget(
-                      tittleText: 'Trabajos adicionales',
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 35.0, 20.0, 140.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _label('¿Qué trabajo adicional hace falta?'),
-                        const SizedBox(height: 12.0),
-                        TextFormField(
-                          controller: _model.textController,
-                          focusNode: _model.textFieldFocusNode,
-                          maxLines: 5,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            hintText: 'Ej: al reparar la tubería se descubrió '
-                                'que hay que romper más pared de lo previsto.',
-                            hintStyle: FlutterFlowTheme.of(context)
-                                .labelMedium
-                                .override(
-                                  font: GoogleFonts.inter(),
-                                  fontSize: 12.0,
-                                  letterSpacing: 0.0,
-                                ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                  color: Color(0x00000000), width: 1.0),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                  color: Color(0x00000000), width: 1.0),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            filled: true,
-                            fillColor:
-                                FlutterFlowTheme.of(context).secondaryBackground,
-                          ),
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.publicSans(),
-                                fontSize: 13.0,
-                                letterSpacing: 0.0,
-                              ),
-                          validator: _model.textControllerValidator
-                              .asValidator(context),
-                        ),
-                        const SizedBox(height: 21.0),
-                        _label('¿Quién puede hacerlo?'),
-                        const SizedBox(height: 12.0),
-                        _buildExecutionModePicker(),
-                        const SizedBox(height: 11.0),
-                        _label('Fotos del hallazgo (opcional)'),
-                        const SizedBox(height: 12.0),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(10.0),
-                          onTap: _pickMedia,
-                          child: Container(
-                            width: double.infinity,
-                            height: 120.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: _mediaPreview(),
-                          ),
-                        ),
-                        const SizedBox(height: 21.0),
-                        FFButtonWidget(
-                          onPressed: _model.isSubmitting ? null : () => _submit(),
-                          text: _model.isSubmitting
-                              ? 'Enviando…'
-                              : 'Enviar reporte',
-                          options: FFButtonOptions(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: 42.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                20.0, 10.0, 20.0, 10.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: FlutterFlowTheme.of(context).primary,
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w600),
-                                  color: Colors.white,
-                                  letterSpacing: 0.0,
-                                ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(25.0),
-                            disabledColor:
-                                FlutterFlowTheme.of(context).alternate,
-                            disabledTextColor:
-                                FlutterFlowTheme.of(context).secondaryText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+        body: SafeArea(
+          top: true,
+          child: Stack(
+            children: [
+              wrapWithModel(
+                model: _model.cornerGradientBackgroundModel,
+                updateCallback: () => safeSetState(() {}),
+                child: const CornerGradientBackgroundWidget(),
               ),
-            ),
-            Align(
-              alignment: const AlignmentDirectional(0.0, 1.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Align(
-                    alignment: const AlignmentDirectional(1.0, 0.0),
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 0.0, 15.0, 5.0),
-                      child: wrapWithModel(
-                        model: _model.fixedDoviaIconModel,
-                        updateCallback: () => safeSetState(() {}),
-                        child: const FixedDoviaIconWidget(),
+              SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    wrapWithModel(
+                      model: _model.dHASSOCIATEHeaderModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: const DHASSOCIATEHeaderWidget(
+                        tittleText: 'Trabajo adicional',
                       ),
                     ),
-                  ),
-                  wrapWithModel(
-                    model: _model.dHASSOCIATENavbarModel,
-                    updateCallback: () => safeSetState(() {}),
-                    child: const DHASSOCIATENavbarWidget(),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 35.0, 20.0, 140.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _label('Trabajos a cotizar', fontSize: 14.0),
+                          const SizedBox(height: 12.0),
+                          // 150 de alto fijo: el bloque del diseño mide 179
+                          // con su rótulo y los 12 de separación.
+                          SizedBox(
+                            height: 150.0,
+                            child: TextFormField(
+                              controller: _model.textController,
+                              focusNode: _model.textFieldFocusNode,
+                              maxLines: null,
+                              minLines: null,
+                              expands: true,
+                              textAlignVertical: TextAlignVertical.top,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.newline,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                hintText: 'Escribe aquí',
+                                hintStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .override(
+                                      font: GoogleFonts.inter(),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText
+                                          .withValues(alpha: 0.5),
+                                      fontSize: 14.0,
+                                      letterSpacing: 0.0,
+                                    ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Color(0x00000000), width: 1.0),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Color(0x00000000), width: 1.0),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color:
+                                          FlutterFlowTheme.of(context).error,
+                                      width: 1.0),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color:
+                                          FlutterFlowTheme.of(context).error,
+                                      width: 1.0),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                filled: true,
+                                fillColor:
+                                    FlutterFlowTheme.of(context).alternate,
+                                contentPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 14.0, 16.0, 14.0),
+                              ),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.publicSans(),
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.0,
+                                  ),
+                              cursorColor:
+                                  FlutterFlowTheme.of(context).primaryText,
+                              validator: _model.textControllerValidator
+                                  .asValidator(context),
+                            ),
+                          ),
+                          const SizedBox(height: 18.0),
+                          _label('Sube las imágenes', fontSize: 16.0),
+                          const SizedBox(height: 12.0),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(10.0),
+                            onTap: _pickMedia,
+                            child: Container(
+                              width: double.infinity,
+                              height: 168.0,
+                              clipBehavior: Clip.antiAlias,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).alternate,
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: _mediaPreview(),
+                            ),
+                          ),
+                          const SizedBox(height: 18.0),
+                          FFButtonWidget(
+                            onPressed: _model.isSubmitting ? null : _submit,
+                            text:
+                                _model.isSubmitting ? 'Enviando…' : 'Enviar',
+                            options: FFButtonOptions(
+                              width: double.infinity,
+                              height: 42.0,
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  16.0, 0.0, 16.0, 0.0),
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 0.0),
+                              color: FlutterFlowTheme.of(context).primary,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                    letterSpacing: 0.0,
+                                  ),
+                              elevation: 0.0,
+                              borderRadius: BorderRadius.circular(25.0),
+                              disabledColor:
+                                  FlutterFlowTheme.of(context).alternate,
+                              disabledTextColor:
+                                  FlutterFlowTheme.of(context).secondaryText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Align(
+                alignment: const AlignmentDirectional(0.0, 1.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: const AlignmentDirectional(1.0, 0.0),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 5.0),
+                        child: wrapWithModel(
+                          model: _model.fixedDoviaIconModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: const FixedDoviaIconWidget(),
+                        ),
+                      ),
+                    ),
+                    wrapWithModel(
+                      model: _model.dHASSOCIATENavbarModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: const DHASSOCIATENavbarWidget(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

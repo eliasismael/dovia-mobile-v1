@@ -15,12 +15,6 @@ class DHASSOCIATEFueraDeAlcanceModel
   /// reporte, porque el POST no las recibe.
   List<FFUploadedFile> uploadedMedia = [];
 
-  /// Quién puede ejecutar el trabajo extra. Es obligatorio en el contrato
-  /// (`REPORTER_CAN_EXECUTE` | `OTHER_PROVIDER_REQUIRED`) y cambia a dónde va
-  /// el trabajo: al propio asociado que lo reportó, o a la red de empresas.
-  /// Arranca sin elegir para que sea una decisión explícita.
-  String? executionMode;
-
   /// True mientras se crea el reporte y se suben las fotos, para que el botón
   /// no dispare dos reportes del mismo hallazgo.
   bool isSubmitting = false;
