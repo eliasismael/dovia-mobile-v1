@@ -185,6 +185,31 @@ String? asrExactAddress(Map<String, dynamic> data) {
   ]);
 }
 
+/// Coordenadas del domicilio de la visita, para centrar el mapa del asociado
+/// una vez que tomó el trabajo. Viajan anidadas en `address.coordinates`, el
+/// mismo contrato que arma `CreateServiceAddressCall` al cargar la dirección.
+double? asrLatitude(Map<String, dynamic> data) {
+  final address = _addressOf(data);
+  final coordinates = _asMap(address?['coordinates']);
+  return _firstNum([
+    coordinates?['latitude'],
+    coordinates?['lat'],
+    address?['latitude'],
+    data['latitude'],
+  ])?.toDouble();
+}
+
+double? asrLongitude(Map<String, dynamic> data) {
+  final address = _addressOf(data);
+  final coordinates = _asMap(address?['coordinates']);
+  return _firstNum([
+    coordinates?['longitude'],
+    coordinates?['lng'],
+    address?['longitude'],
+    data['longitude'],
+  ])?.toDouble();
+}
+
 /// Instrucciones para llegar / ingresar que dejó el cliente.
 String? asrAccessInstructions(Map<String, dynamic> data) {
   final address = _addressOf(data);
@@ -194,6 +219,27 @@ String? asrAccessInstructions(Map<String, dynamic> data) {
     address?['reference'],
     data['accessInstructions'],
     data['arrivalInstructions'],
+  ]);
+}
+
+/// Qué tiene que llevar el asociado a la visita (sección "Debes llevar" del
+/// diseño): herramientas, repuestos o materiales que el trabajo exige.
+///
+/// **El contrato todavía no expone este dato.** Lo único que hay de materiales
+/// en Dovia Home es `requestedMaterials`, que es el flujo inverso —el asociado
+/// pidiendo materiales *extra* una vez en sitio
+/// (`POST .../extra-materials`)— y no sirve para esto. Se prueban las claves
+/// plausibles y ante la duda devuelve null, para que la pantalla diga que no
+/// hay indicaciones en vez de inventarlas.
+String? asrWhatToBring(Map<String, dynamic> data) {
+  final detail = _asMap(data['serviceDetail']) ?? _asMap(data['service']);
+  return _firstString([
+    data['whatToBring'],
+    data['requiredMaterials'],
+    data['requiredTools'],
+    data['materials'],
+    detail?['whatToBring'],
+    detail?['requiredMaterials'],
   ]);
 }
 

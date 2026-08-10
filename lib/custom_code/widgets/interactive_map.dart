@@ -18,6 +18,7 @@ class InteractiveMap extends StatefulWidget {
     this.startLat = -34.6037,
     this.startLng = -58.3816,
     this.onLocationSelected,
+    this.readOnly = false,
   });
 
   final double? width;
@@ -28,6 +29,12 @@ class InteractiveMap extends StatefulWidget {
 
   /// Called every time the user picks/changes the point on the map.
   final Future Function(double latitude, double longitude)? onLocationSelected;
+
+  /// Display-only map: the pin marks a fixed location the user is meant to
+  /// look at, not choose. Tapping no longer moves it and the "pick a point"
+  /// hint is hidden; panning and zooming stay on so the point can still be
+  /// explored in context.
+  final bool readOnly;
 
   @override
   _InteractiveMapState createState() => _InteractiveMapState();
@@ -113,7 +120,9 @@ class _InteractiveMapState extends State<InteractiveMap> {
                   interactionOptions: const InteractionOptions(
                     flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                   ),
-                  onTap: (tapPosition, point) => _updatePoint(point),
+                  onTap: widget.readOnly
+                      ? null
+                      : (tapPosition, point) => _updatePoint(point),
                 ),
                 children: [
                   TileLayer(
@@ -181,26 +190,27 @@ class _InteractiveMapState extends State<InteractiveMap> {
               ),
             ),
             // Hint so the user knows the map is interactive.
-            Positioned(
-              left: 10,
-              top: 10,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'Toca el mapa para elegir el punto',
-                  style: TextStyle(
-                    color: Color(0xFF00444B),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+            if (!widget.readOnly)
+              Positioned(
+                left: 10,
+                top: 10,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Toca el mapa para elegir el punto',
+                    style: TextStyle(
+                      color: Color(0xFF00444B),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

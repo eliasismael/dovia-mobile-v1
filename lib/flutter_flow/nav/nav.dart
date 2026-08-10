@@ -216,6 +216,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               const DHASSOCIATETrabajoAdicionalWidget(),
         ),
         FFRoute(
+          name: DHASSOCIATEFueraDeAlcanceWidget.routeName,
+          path: DHASSOCIATEFueraDeAlcanceWidget.routePath,
+          builder: (context, params) =>
+              const DHASSOCIATEFueraDeAlcanceWidget(),
+        ),
+        FFRoute(
           name: DHCLIENTBienvenidaWidget.routeName,
           path: DHCLIENTBienvenidaWidget.routePath,
           builder: (context, params) => const DHCLIENTBienvenidaWidget(),

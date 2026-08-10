@@ -5,6 +5,7 @@ import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional_widget.dart';
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_realizado/d_h_a_s_s_o_c_i_a_t_e_trabajo_realizado_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -236,8 +237,15 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
       _showMessage(partial
           ? 'Trabajo cerrado, pero algunas fotos no se pudieron subir.'
           : 'Trabajo cerrado. ¡Gracias!');
-      // La agenda se recarga al volver y el trabajo aparece en "terminados".
-      Navigator.pop(context);
+
+      // Cerrado el trabajo, se pasa al registro de lo que se le envió al
+      // cliente. Reemplaza esta pantalla en la pila (`pushReplacement`) para
+      // que el "volver" del resumen no traiga de vuelta el formulario de un
+      // trabajo que ya se cerró.
+      final finished = {...?_request, 'status': 'FINISHED'};
+      DHASSOCIATETrabajoRealizadoWidget.requestData = finished;
+      context.pushReplacementNamed(
+          DHASSOCIATETrabajoRealizadoWidget.routeName);
     } finally {
       if (mounted) safeSetState(() => _model.isSubmitting = false);
     }

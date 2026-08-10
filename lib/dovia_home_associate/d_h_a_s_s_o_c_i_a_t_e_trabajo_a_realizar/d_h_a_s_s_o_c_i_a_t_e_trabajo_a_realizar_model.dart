@@ -22,9 +22,20 @@ class DHASSOCIATETrabajoARealizarModel
   /// trabajo con un doble tap.
   bool isTaking = false;
 
-  /// El asociado ya tomó este trabajo en esta pantalla. Evita ofrecerle
-  /// postularse de nuevo antes de que vuelva al panel.
+  /// El asociado ya tomó este trabajo en esta pantalla. Se usa para pintar la
+  /// sección de dirección/mapa/check-in de inmediato, en el instante entre
+  /// tomar el trabajo y que la relectura del detalle confirme el estado
+  /// TAKEN del backend.
   bool taken = false;
+
+  /// Notificación de llegada (check-in) en curso: bloquea el botón para no
+  /// disparar dos veces el aviso al cliente con un doble tap.
+  bool isStarting = false;
+
+  /// El asociado ya avisó su llegada en esta pantalla. Igual que [taken],
+  /// cubre el instante hasta que la relectura del detalle confirme el estado
+  /// IN_PROGRESS.
+  bool checkedIn = false;
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;

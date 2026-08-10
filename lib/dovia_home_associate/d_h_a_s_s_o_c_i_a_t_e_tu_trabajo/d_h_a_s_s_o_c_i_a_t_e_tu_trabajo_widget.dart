@@ -9,6 +9,7 @@ import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -112,14 +113,61 @@ class _DHASSOCIATETuTrabajoWidgetState
     }
   }
 
+  /// Centro por defecto del mapa: Ciudad de Guatemala, el mismo fallback que
+  /// usa el selector de dirección del cliente. Sólo se usa si la solicitud
+  /// todavía no trae coordenadas propias.
+  static const double _kDefaultLat = 14.634915;
+  static const double _kDefaultLng = -90.506882;
+
+  double get _mapLatitude {
+    final data = _request;
+    return (data == null ? null : asrLatitude(data)) ?? _kDefaultLat;
+  }
+
+  double get _mapLongitude {
+    final data = _request;
+    return (data == null ? null : asrLongitude(data)) ?? _kDefaultLng;
+  }
+
+  /// Ubicación GPS actual del asociado para el check-in. El backend verifica
+  /// con esto que esté en el radio del domicilio antes de avisarle al
+  /// cliente, así que sin coordenadas el check-in no se manda: se le pide el
+  /// permiso de ubicación en el momento en vez de asumirlo concedido.
+  Future<Position?> _captureCurrentPosition() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      _showMessage(
+          'Activá la ubicación del dispositivo para notificar tu llegada.');
+      return null;
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      _showMessage(
+          'Necesitamos permiso de ubicación para notificar tu llegada.');
+      return null;
+    }
+
+    try {
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+    } catch (_) {
+      _showMessage('No pudimos obtener tu ubicación. Intentá de nuevo.');
+      return null;
+    }
+  }
+
   /// Notifica que el asociado llegó al punto y arranca el trabajo
-  /// (`POST .../start`): la solicitud pasa de `TAKEN` a
-  /// `IN_PROGRESS / WORKING` y el cliente ve el cambio en su detalle.
-  ///
-  /// El endpoint acepta `coordinates` opcional y el backend lo toma como null si
-  /// no viene. La app no pide permisos de ubicación en ningún flujo, así que se
-  /// envía sin coordenadas en vez de sumar un permiso nuevo por un campo que el
-  /// contrato no exige.
+  /// (`POST .../start`): la solicitud pasa de `TAKEN` a `IN_PROGRESS`
+  /// ("En Sitio") y el backend le dispara al cliente el push de que el
+  /// técnico está en la puerta.
   Future<void> _startWork() async {
     final data = _request;
     final id = data == null ? '' : asrId(data);
@@ -130,9 +178,14 @@ class _DHASSOCIATETuTrabajoWidgetState
 
     safeSetState(() => _model.isStarting = true);
     try {
+      final position = await _captureCurrentPosition();
+      if (position == null) return;
+
       final response =
           await DOVIAAPIDoviaHomeContextGroup.startServiceRequestCall.call(
         serviceRequestId: id,
+        latitude: position.latitude,
+        longitude: position.longitude,
         authToken: currentAuthenticationToken ?? '',
       );
       if (!mounted) return;
@@ -915,8 +968,11 @@ class _DHASSOCIATETuTrabajoWidgetState
                                       height: 200.0,
                                       accessToken:
                                           FFAppConstants.MapboxAccessToken,
-                                      startLat: -34.45,
-                                      startLng: -58.45,
+                                      startLat: _mapLatitude,
+                                      startLng: _mapLongitude,
+                                      // El pin marca el domicilio del
+                                      // cliente: se mira, no se elige.
+                                      readOnly: true,
                                     ),
                                   ),
                                 ],
