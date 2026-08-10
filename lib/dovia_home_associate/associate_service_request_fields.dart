@@ -233,6 +233,132 @@ String? asrCompletionRecommendations(Map<String, dynamic> data) =>
       data['completionRecommendations'],
     ]);
 
+/// URLs de imágenes de una lista cuyo item puede ser un String suelto o un Map
+/// con la URL en alguna de las claves conocidas.
+List<String> _urlsFrom(dynamic list) {
+  if (list is! List) return const [];
+  final urls = <String>[];
+  for (final item in list) {
+    final direct = asrString(item);
+    if (direct != null) {
+      urls.add(direct);
+      continue;
+    }
+    final map = _asMap(item);
+    if (map == null) continue;
+    final url = _firstString([
+      map['url'],
+      map['signedUrl'],
+      map['downloadUrl'],
+      map['storageKey'],
+    ]);
+    if (url != null) urls.add(url);
+  }
+  return urls;
+}
+
+/// Imágenes de completado agrupadas por categoría.
+///
+/// El asociado las sube contra `completion-images/confirm` con
+/// `category: WORK | LEFTOVER_MATERIALS`, así que el detalle puede devolverlas
+/// como un Map indexado por esa categoría. Mismo criterio que usa el registro
+/// del cliente sobre el mismo dato.
+List<String> _categorizedCompletionImages(
+  Map<String, dynamic> data,
+  String category,
+) {
+  for (final key in const [
+    'completionImages',
+    'completionImagesByCategory',
+    'images',
+  ]) {
+    final node = _asMap(data[key]);
+    if (node == null) continue;
+    final urls = _urlsFrom(node[category] ?? node[category.toLowerCase()]);
+    if (urls.isNotEmpty) return urls;
+  }
+  return const [];
+}
+
+/// Fotos de evidencia que el asociado le mandó al cliente al cerrar el trabajo.
+///
+/// El shape del detalle todavía no está cerrado del lado del backend: se
+/// prueban la forma categorizada y las variantes planas conocidas, y ante la
+/// duda se devuelve vacío (la pantalla dice que no hay evidencia en vez de
+/// inventar una).
+List<String> asrCompletionImages(Map<String, dynamic> data) {
+  final categorized = _categorizedCompletionImages(data, 'WORK');
+  if (categorized.isNotEmpty) return categorized;
+  return _urlsFrom(
+    data['completionImages'] ??
+        data['workImages'] ??
+        data['completedImages'] ??
+        data['evidenceImages'] ??
+        data['finishImages'],
+  );
+}
+
+/// Nodo con la calificación que el cliente le dejó al asociado por este
+/// trabajo, si el detalle la trae anidada.
+Map<String, dynamic>? _clientRatingNode(Map<String, dynamic> data) {
+  for (final key in const [
+    'associateRating',
+    'clientRating',
+    'rating',
+    'associateFeedback',
+    'feedback',
+    'review',
+  ]) {
+    final node = _asMap(data[key]);
+    if (node != null) return node;
+  }
+  return null;
+}
+
+/// Estrellas (1 a 5) que el cliente le puso al asociado, o null si todavía no
+/// calificó.
+///
+/// **Depende de que el detalle del servicio traiga la calificación**: el
+/// contexto `associate-feedback` sólo expone endpoints de creación
+/// (`POST .../ratings`), no hay un GET para leer lo recibido. Mientras el
+/// backend no lo devuelva acá, esto responde null y la pantalla muestra el
+/// estado "sin calificación" en vez de estrellas inventadas.
+double? asrClientRatingStars(Map<String, dynamic> data) {
+  final node = _clientRatingNode(data);
+  final stars = _firstNum([
+    data['ratingStars'],
+    data['stars'],
+    data['ratingValue'],
+    data['rating'],
+    node?['stars'],
+    node?['rating'],
+    node?['value'],
+    node?['score'],
+  ]);
+  if (stars == null) return null;
+  return stars.toDouble().clamp(0.0, 5.0);
+}
+
+/// Comentario en texto libre que el cliente dejó con su calificación.
+///
+/// Hoy suele venir vacío: la pantalla de calificar del cliente captura el
+/// comentario pero los endpoints de ratings sólo aceptan `stars`, así que no
+/// hay dónde persistirlo. Se lee igual para que la pantalla lo muestre en
+/// cuanto el contrato lo soporte.
+String? asrClientRatingComment(Map<String, dynamic> data) {
+  final node = _clientRatingNode(data);
+  return _firstString([
+    data['ratingComment'],
+    data['clientComment'],
+    data['reviewComment'],
+    node?['comment'],
+    node?['message'],
+    node?['review'],
+    node?['text'],
+    node?['description'],
+  ]);
+}
+
 /// Estados en los que la solicitud ya tiene dueño y no se puede tomar.
 const Set<String> _kClaimedStatuses = {'TAKEN', 'IN_PROGRESS', 'FINISHED'};
 

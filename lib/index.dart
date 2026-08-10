@@ -42,6 +42,8 @@ export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar/d_h_a_s_s
     show DHASSOCIATETrabajoARealizarWidget;
 export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_widget.dart'
     show DHASSOCIATETrabajoFinalizadoWidget;
+export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_realizado/d_h_a_s_s_o_c_i_a_t_e_trabajo_realizado_widget.dart'
+    show DHASSOCIATETrabajoRealizadoWidget;
 export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional_widget.dart'
     show DHASSOCIATETrabajoAdicionalWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_bienvenida/d_h_c_l_i_e_n_t_bienvenida_widget.dart'
@@ -262,5 +264,7 @@ export '/listing_hq/l_i_s_t_i_n_g_h_q_review_operative_notes/l_i_s_t_i_n_g_h_q_r
     show LISTINGHQReviewOperativeNotesWidget;
 export '/showing/s_h_o_w_i_n_g_propiedades_a_mostrar/s_h_o_w_i_n_g_propiedades_a_mostrar_widget.dart'
     show SHOWINGPropiedadesAMostrarWidget;
-export '/dovia_home_client/d_h_c_l_i_e_n_t_visitas_finalizadas_lista/d_h_c_l_i_e_n_t_visitas_finalizadas_lista_widget.dart' show DHCLIENTVisitasFinalizadasListaWidget;
-export '/shared_components/premium_upsell_popup/premium_upsell_popup_widget.dart' show PremiumUpsellPopupWidget;
+export '/dovia_home_client/d_h_c_l_i_e_n_t_visitas_finalizadas_lista/d_h_c_l_i_e_n_t_visitas_finalizadas_lista_widget.dart'
+    show DHCLIENTVisitasFinalizadasListaWidget;
+export '/shared_components/premium_upsell_popup/premium_upsell_popup_widget.dart'
+    show PremiumUpsellPopupWidget;

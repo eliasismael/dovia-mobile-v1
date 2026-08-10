@@ -28,9 +28,9 @@ export 'd_h_a_s_s_o_c_i_a_t_e_proximos_trabajos_model.dart';
 /// Son compromisos ya adquiridos, partidos en las dos secciones del diseño:
 ///   - **Trabajos aceptados**: los que ya tomó y todavía no ejecutó. El ícono de
 ///     "Ojo" abre el flujo de tránsito/ejecución ([DHASSOCIATETuTrabajoWidget]).
-///   - **Trabajos terminados**: su historial. Ahí el "Ojo" abre el registro del
-///     trabajo en **solo lectura** ([DHASSOCIATETrabajoFinalizadoWidget], que se
-///     pone inerte cuando la solicitud ya está FINISHED).
+///   - **Trabajos terminados**: su historial. Ahí el "Ojo" abre el resumen del
+///     trabajo en **solo lectura** ([DHASSOCIATETrabajoRealizadoWidget]): el
+///     informe y la evidencia que mandó, más el feedback del cliente.
 ///
 /// Los tres filtros son los mismos de la bolsa de oportunidades y aplican a las
 /// **dos secciones a la vez**, como pide el diseño: cambiar un desplegable
@@ -258,12 +258,12 @@ class _DHASSOCIATEProximosTrabajosWidgetState
         .then((_) => safeSetState(_loadAgenda));
   }
 
-  /// Trabajo terminado: registro en solo lectura. La pantalla se pone inerte
-  /// sola al ver que la solicitud está FINISHED.
+  /// Trabajo terminado: resumen en solo lectura —informe, evidencia enviada y
+  /// feedback del cliente—.
   void _openFinishedJob(Map<String, dynamic> data) {
-    DHASSOCIATETrabajoFinalizadoWidget.requestData = data;
+    DHASSOCIATETrabajoRealizadoWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETrabajoFinalizadoWidget.routeName)
+        .pushNamed(DHASSOCIATETrabajoRealizadoWidget.routeName)
         .then((_) => safeSetState(_loadAgenda));
   }
 

@@ -187,6 +187,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               const DHASSOCIATEProximosTrabajosWidget(),
         ),
         FFRoute(
+          name: DHASSOCIATETrabajoRealizadoWidget.routeName,
+          path: DHASSOCIATETrabajoRealizadoWidget.routePath,
+          builder: (context, params) =>
+              const DHASSOCIATETrabajoRealizadoWidget(),
+        ),
+        FFRoute(
           name: DHASSOCIATETuTrabajoWidget.routeName,
           path: DHASSOCIATETuTrabajoWidget.routePath,
           builder: (context, params) => const DHASSOCIATETuTrabajoWidget(),

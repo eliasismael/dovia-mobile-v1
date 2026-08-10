@@ -96,48 +96,56 @@ class _DHASSOCIATEHeaderWidgetState extends State<DHASSOCIATEHeaderWidget> {
               ].divide(const SizedBox(width: 8.0)),
             ),
           ),
-          RichText(
-            textScaler: MediaQuery.of(context).textScaler,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: valueOrDefault<String>(
-                    widget.tittleText,
-                    '[tittle]',
-                  ),
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.publicSans(
+          // Flexible: un título largo ("Tu trabajo realizado") no entra al lado
+          // de los dos grupos de íconos en una pantalla angosta. Sin esto la
+          // fila desborda y el título queda cortado tras las rayas amarillas.
+          Flexible(
+            child: RichText(
+              textScaler: MediaQuery.of(context).textScaler,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: valueOrDefault<String>(
+                      widget.tittleText,
+                      '[tittle]',
+                    ),
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.publicSans(
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .fontStyle,
+                          ),
+                          fontSize: 18.0,
+                          letterSpacing: 0.0,
                           fontWeight: FontWeight.w600,
                           fontStyle:
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                          lineHeight: 1.4,
                         ),
-                        fontSize: 18.0,
-                        letterSpacing: 0.0,
+                  )
+                ],
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontStyle:
                             FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        lineHeight: 1.4,
                       ),
-                )
-              ],
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
+                      fontSize: 18.0,
+                      letterSpacing: 0.0,
                       fontWeight: FontWeight.w600,
                       fontStyle:
                           FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                      lineHeight: 1.4,
                     ),
-                    fontSize: 18.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w600,
-                    fontStyle:
-                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                    lineHeight: 1.4,
-                  ),
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
           Row(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
