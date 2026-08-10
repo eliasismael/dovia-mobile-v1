@@ -1,5 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_associate_specialties.dart';
+import '/dovia_home_associate/associate_role.dart';
 import '/dovia_home_associate/associate_specialties.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
@@ -38,6 +39,62 @@ const List<String> _kCertificateExtensions = [
   'webp',
 ];
 
+/// Textos que cambian según quién está pidiendo la especialidad.
+///
+/// La pantalla es la misma para el profesional independiente y para la empresa:
+/// mismo endpoint, misma evidencia, misma auditoría del Backoffice. Lo que no es
+/// lo mismo es **qué se le pide a cada uno**. Al independiente se le pregunta
+/// por su trayectoria y su título; a una empresa, por la trayectoria del equipo
+/// y por los permisos, patentes o certificaciones comerciales que la habilitan
+/// en el rubro. Pedirle "tu título" a una empresa la deja sin saber qué
+/// adjuntar, y es justamente el adjunto lo que decide la auditoría.
+class _ServiciosCopy {
+  const _ServiciosCopy({
+    required this.emptyCurrent,
+    required this.experienceHint,
+    required this.certificateHelp,
+    required this.successText,
+  });
+
+  /// Cuando todavía no hay ninguna especialidad aprobada.
+  final String emptyCurrent;
+
+  /// Placeholder del área de experiencia: es el ejemplo que fija el tono de lo
+  /// que espera leer el auditor.
+  final String experienceHint;
+
+  /// Qué documento sirve como respaldo, debajo del rótulo de carga.
+  final String certificateHelp;
+
+  /// Cuerpo del modal de éxito.
+  final String successText;
+
+  /// Profesional independiente (`HOME_ASSOCIATE`).
+  static const associate = _ServiciosCopy(
+    emptyCurrent: 'Todavía no tenés especialidades aprobadas. Solicitá la '
+        'primera acá abajo y el equipo de DOVIA revisará tu documentación.',
+    experienceHint:
+        'Ej: Tengo 5 años de experiencia instalando tableros eléctricos...',
+    certificateHelp: 'Adjuntá el título, certificado o matrícula que respalde '
+        'tu experiencia en el rubro.',
+    successText: 'El equipo de DOVIA revisará tu documentación. Te avisaremos '
+        'cuando la especialidad quede habilitada en tu perfil.',
+  );
+
+  /// Empresa asociada (`HOME_ASSOCIATE_COMPANY`).
+  static const company = _ServiciosCopy(
+    emptyCurrent: 'Tu empresa todavía no tiene especialidades aprobadas. '
+        'Solicitá la primera acá abajo y el equipo de DOVIA revisará la '
+        'documentación.',
+    experienceHint: 'Ej: La empresa lleva 8 años ejecutando instalaciones '
+        'eléctricas en obra nueva, con un equipo de 6 técnicos matriculados...',
+    certificateHelp: 'Adjuntá el permiso, la patente o la certificación '
+        'comercial que habilita a tu empresa en el rubro.',
+    successText: 'El equipo de DOVIA revisará la documentación. Te avisaremos '
+        'cuando la especialidad quede habilitada en el perfil de tu empresa.',
+  );
+}
+
 /// Especialidades del Dovia Home Associate, adaptado a mobile desde el diseño
 /// de escritorio.
 ///
@@ -56,11 +113,24 @@ const List<String> _kCertificateExtensions = [
 /// El envío no habilita nada por sí solo: genera el pendiente de auditoría en
 /// el Backoffice de DOVIA, y la categoría recién aparece arriba cuando un admin
 /// aprueba la documentación.
+///
+/// La misma pantalla sirve al profesional independiente y a la empresa: las dos
+/// rutas cuelgan de `/users/me/...` y resuelven al asociado desde el JWT, así
+/// que la solicitud queda vinculada al Company ID sin que la UI mande ningún id.
+/// Lo único que cambia por rol son los textos ([_ServiciosCopy]) y el menú
+/// inferior, que con rol Empresa suma el ítem de Cotizaciones.
 class DHASSOCIATEServiciosWidget extends StatefulWidget {
   const DHASSOCIATEServiciosWidget({super.key});
 
   static String routeName = 'DH_ASSOCIATE_Servicios';
   static String routePath = '/dHASSOCIATEServicios';
+
+  /// De dónde salen las especialidades. En producción es
+  /// `GET /users/me/specialties`; los tests la sustituyen para poder ejercitar
+  /// las dos grillas y el formulario, que de otro modo nunca se pintan porque el
+  /// `FutureBuilder` resuelve siempre en error sin red.
+  @visibleForTesting
+  static Future<AssociateSpecialties> Function()? specialtiesLoader;
 
   @override
   State<DHASSOCIATEServiciosWidget> createState() =>
@@ -75,19 +145,31 @@ class _DHASSOCIATEServiciosWidgetState
 
   late Future<AssociateSpecialties> _serviciosFuture;
 
+  /// Textos del rol en sesión. Se fija una sola vez: el rol no cambia mientras
+  /// la pantalla está abierta, y releerlo en cada `build` sólo abriría la puerta
+  /// a que el formulario cambie de voz a mitad de la carga.
+  late final _ServiciosCopy _copy;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHASSOCIATEServiciosModel());
 
+    _copy = isHomeAssociateCompany()
+        ? _ServiciosCopy.company
+        : _ServiciosCopy.associate;
+
     _model.experienceController ??= TextEditingController();
     _model.experienceFocusNode ??= FocusNode();
 
-    _serviciosFuture =
-        loadAssociateSpecialties(authToken: currentAuthenticationToken ?? '');
+    _serviciosFuture = _loadSpecialties();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
+
+  Future<AssociateSpecialties> _loadSpecialties() =>
+      DHASSOCIATEServiciosWidget.specialtiesLoader?.call() ??
+      loadAssociateSpecialties(authToken: currentAuthenticationToken ?? '');
 
   @override
   void dispose() {
@@ -317,8 +399,7 @@ class _DHASSOCIATEServiciosWidgetState
               .resolve(Directionality.of(context)),
           child: PopupExitoWidget(
             title: 'Solicitud enviada con éxito',
-            text: 'El equipo de DOVIA revisará tu documentación. Te avisaremos '
-                'cuando la especialidad quede habilitada en tu perfil.',
+            text: _copy.successText,
             continueText: 'Entendido',
             onContinue: () => Navigator.pop(dialogContext),
           ),
@@ -333,9 +414,7 @@ class _DHASSOCIATEServiciosWidgetState
       safeSetState(() {
         _model.requestedSpecialtyIds.add(specialtyId);
         _model.resetForm();
-        _serviciosFuture = loadAssociateSpecialties(
-          authToken: currentAuthenticationToken ?? '',
-        );
+        _serviciosFuture = _loadSpecialties();
       });
     } finally {
       if (mounted) safeSetState(() => _model.isSubmitting = false);
@@ -364,6 +443,17 @@ class _DHASSOCIATEServiciosWidgetState
               color: FlutterFlowTheme.of(context).primaryText,
               fontSize: 16.0,
               letterSpacing: 0.32,
+            ),
+      );
+
+  /// Aclaración al pie de un rótulo: qué se espera en ese campo.
+  Widget _fieldHelp(String text) => Text(
+        text,
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.inter(),
+              color: FlutterFlowTheme.of(context).secondaryText,
+              fontSize: 12.0,
+              letterSpacing: 0.0,
             ),
       );
 
@@ -506,8 +596,10 @@ class _DHASSOCIATEServiciosWidgetState
         onChanged: (_) => safeSetState(() {}),
         decoration: InputDecoration(
           isDense: true,
-          hintText: 'Ej: Tengo 5 años de experiencia instalando tableros '
-              'eléctricos...',
+          hintText: _copy.experienceHint,
+          // El ejemplo de la empresa es más largo que el del independiente: se
+          // acota para que no desborde los 104 px del campo.
+          hintMaxLines: 3,
           hintStyle: FlutterFlowTheme.of(context).labelMedium.override(
                 font: GoogleFonts.publicSans(),
                 fontSize: 14.0,
@@ -691,9 +783,7 @@ class _DHASSOCIATEServiciosWidgetState
         _sectionTitle('Servicios actuales'),
         const SizedBox(height: 14.0),
         if (data.current.isEmpty)
-          _hint('Todavía no tenés especialidades aprobadas. Solicitá la '
-              'primera acá abajo y el equipo de DOVIA revisará tu '
-              'documentación.')
+          _hint(_copy.emptyCurrent)
         else
           _categoryGrid([
             for (final specialty in data.current) _categoryCard(specialty),
@@ -748,6 +838,11 @@ class _DHASSOCIATEServiciosWidgetState
             _buildExperienceField(),
             const SizedBox(height: 18.0),
             _fieldLabel('Carga el certificado o titulo'),
+            const SizedBox(height: 6.0),
+            // El rótulo del diseño sirve para un título personal, pero no le
+            // dice a una empresa que lo que se audita son sus permisos o
+            // certificaciones comerciales. Se aclara sin tocar el rótulo.
+            _fieldHelp(_copy.certificateHelp),
             const SizedBox(height: 12.0),
             _buildCertificateZone(),
             const SizedBox(height: 30.0),
