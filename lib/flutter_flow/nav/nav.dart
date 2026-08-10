@@ -222,6 +222,22 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               const DHASSOCIATEFueraDeAlcanceWidget(),
         ),
         FFRoute(
+          name: DHASSOCIATEEmpresaHomePageWidget.routeName,
+          path: DHASSOCIATEEmpresaHomePageWidget.routePath,
+          builder: (context, params) =>
+              const DHASSOCIATEEmpresaHomePageWidget(),
+        ),
+        FFRoute(
+          name: DHASSOCIATECotizacionesWidget.routeName,
+          path: DHASSOCIATECotizacionesWidget.routePath,
+          builder: (context, params) => const DHASSOCIATECotizacionesWidget(),
+        ),
+        FFRoute(
+          name: DHASSOCIATECotizacionWidget.routeName,
+          path: DHASSOCIATECotizacionWidget.routePath,
+          builder: (context, params) => const DHASSOCIATECotizacionWidget(),
+        ),
+        FFRoute(
           name: DHCLIENTBienvenidaWidget.routeName,
           path: DHCLIENTBienvenidaWidget.routePath,
           builder: (context, params) => const DHCLIENTBienvenidaWidget(),

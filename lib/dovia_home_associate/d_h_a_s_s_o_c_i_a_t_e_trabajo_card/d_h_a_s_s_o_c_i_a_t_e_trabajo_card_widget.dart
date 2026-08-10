@@ -19,8 +19,8 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
     required this.dateLabel,
     required this.timeLabel,
     required this.payoutLabel,
-    required this.priorityLabel,
-    required this.isUrgent,
+    this.priorityLabel,
+    this.isUrgent = false,
     this.onViewDetail,
   });
 
@@ -41,7 +41,11 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
   final String payoutLabel;
 
   /// Texto de la píldora de prioridad: `ESTANDAR` o `URGENTE`.
-  final String priorityLabel;
+  ///
+  /// Null la esconde. Es lo que usa el panel de la empresa: una cotización
+  /// nunca es una emergencia, así que la píldora diría siempre "ESTANDAR" y el
+  /// diseño de sus tarjetas no la incluye.
+  final String? priorityLabel;
 
   /// Emergencia: píldora roja. Servicio estándar: píldora ámbar.
   final bool isUrgent;
@@ -88,23 +92,25 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8.0),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  decoration: BoxDecoration(
-                    color: isUrgent ? _urgentBackground : _standardBackground,
-                    borderRadius: BorderRadius.circular(100.0),
-                  ),
-                  child: Text(
-                    priorityLabel,
-                    style: GoogleFonts.publicSans(
-                      color: isUrgent ? _urgentText : _standardText,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11.0,
+                if (priorityLabel != null) ...[
+                  const SizedBox(width: 8.0),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 5.0),
+                    decoration: BoxDecoration(
+                      color: isUrgent ? _urgentBackground : _standardBackground,
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                    child: Text(
+                      priorityLabel!,
+                      style: GoogleFonts.publicSans(
+                        color: isUrgent ? _urgentText : _standardText,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11.0,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 6.0),

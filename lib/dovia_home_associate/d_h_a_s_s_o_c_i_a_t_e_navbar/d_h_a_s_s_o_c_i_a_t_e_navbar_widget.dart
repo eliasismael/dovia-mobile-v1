@@ -1,3 +1,4 @@
+import '/dovia_home_associate/associate_role.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
@@ -6,6 +7,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_navbar_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_navbar_model.dart';
 
+/// Barra de navegación del Dovia Home Associate.
+///
+/// Es el equivalente mobile del menú lateral del diseño de escritorio, y como
+/// él **depende del rol**: con `Role = HOME_ASSOCIATE_COMPANY` se inyecta el
+/// ítem "Cotizaciones" —que en el menú lateral va encima de Servicios— y el
+/// ítem de inicio lleva al panel de la empresa en vez del panel del
+/// profesional independiente. Un independiente no ve ninguno de los dos: los
+/// endpoints de cotizaciones son de empresa y le responderían 403.
 class DHASSOCIATENavbarWidget extends StatefulWidget {
   const DHASSOCIATENavbarWidget({super.key});
 
@@ -38,8 +47,33 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
     super.dispose();
   }
 
+  /// Ítem de la barra: un ícono que navega. Se extrajo del `build` porque con
+  /// el ítem de empresa la barra pasó a tener un número variable de ellos.
+  Widget _navItem({
+    required String asset,
+    required VoidCallback onTap,
+  }) =>
+      InkWell(
+        splashColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: SvgPicture.asset(
+            asset,
+            width: 24.0,
+            height: 24.0,
+            fit: BoxFit.none,
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
+    final isCompany = isHomeAssociateCompany();
+
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
       height: 69.0,
@@ -63,59 +97,26 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(DHASSOCIATEHomePageWidget.routeName);
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: SvgPicture.asset(
-                  'assets/images/DH_icono-navbar-home.svg',
-                  width: 24.0,
-                  height: 24.0,
-                  fit: BoxFit.none,
-                ),
-              ),
+            _navItem(
+              asset: 'assets/images/DH_icono-navbar-home.svg',
+              onTap: () => context.pushNamed(isCompany
+                  ? DHASSOCIATEEmpresaHomePageWidget.routeName
+                  : DHASSOCIATEHomePageWidget.routeName),
             ),
-            InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(DHASSOCIATENotificacionesWidget.routeName);
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: SvgPicture.asset(
-                  'assets/images/DH_icono-navbar-notificaciones.svg',
-                  width: 24.0,
-                  height: 24.0,
-                  fit: BoxFit.none,
-                ),
+            if (isCompany)
+              _navItem(
+                asset: 'assets/images/page-edit.svg',
+                onTap: () =>
+                    context.pushNamed(DHASSOCIATECotizacionesWidget.routeName),
               ),
+            _navItem(
+              asset: 'assets/images/DH_icono-navbar-notificaciones.svg',
+              onTap: () =>
+                  context.pushNamed(DHASSOCIATENotificacionesWidget.routeName),
             ),
-            InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(DHASSOCIATEAjustesWidget.routeName);
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: SvgPicture.asset(
-                  'assets/images/DH_icono-navbar-ajustes.svg',
-                  width: 24.0,
-                  height: 24.0,
-                  fit: BoxFit.none,
-                ),
-              ),
+            _navItem(
+              asset: 'assets/images/DH_icono-navbar-ajustes.svg',
+              onTap: () => context.pushNamed(DHASSOCIATEAjustesWidget.routeName),
             ),
           ],
         ),

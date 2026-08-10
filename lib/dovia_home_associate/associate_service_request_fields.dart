@@ -139,6 +139,21 @@ Set<String> asrRequiredSpecialtyIds(Map<String, dynamic> data) {
   };
 }
 
+/// Trabajos que puede trabajar un asociado con `Role = HOME_ASSOCIATE_COMPANY`:
+/// **sólo cotizaciones**. La bolsa de servicios estándar y emergencias es del
+/// perfil Independiente, y el panel de la empresa está armado alrededor del
+/// pipeline de presupuestos.
+bool asrIsWorkableByCompany(Map<String, dynamic> data) => asrIsQuote(data);
+
+/// Descripción libre que el cliente escribió al pedir la cotización. Es, junto
+/// con las fotos ([asrRequestImages]), lo único con lo que la empresa arma su
+/// presupuesto antes de visitar.
+String? asrDescription(Map<String, dynamic> data) => _firstString([
+      data['description'],
+      data['clientDescription'],
+      data['notes'],
+    ]);
+
 Map<String, dynamic>? _addressOf(Map<String, dynamic> data) =>
     _asMap(data['address']) ?? _asMap(data['serviceAddress']);
 
@@ -343,6 +358,17 @@ List<String> asrCompletionImages(Map<String, dynamic> data) {
         data['finishImages'],
   );
 }
+
+/// Fotos que **el cliente** adjuntó al pedir el trabajo.
+///
+/// El contrato las entrega en `requestImageUrls` (mismo campo que lee el
+/// detalle del cliente); `images` e `imageUrls` se contemplan porque el
+/// marketplace de empresa y el listado unificado de propuestas usan esa forma.
+/// Son la evidencia con la que la empresa cotiza sin haber visitado, así que
+/// ante la duda se devuelve vacío y la pantalla lo dice.
+List<String> asrRequestImages(Map<String, dynamic> data) => _urlsFrom(
+      data['requestImageUrls'] ?? data['imageUrls'] ?? data['images'],
+    );
 
 /// Nodo con la calificación que el cliente le dejó al asociado por este
 /// trabajo, si el detalle la trae anidada.

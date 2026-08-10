@@ -599,6 +599,10 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 'OPERATIVE_LISTER',
                                 'LISTER_HQ',
                                 'HOME_ASSOCIATE',
+                                // Asociado tipo Empresa: mismo contexto Dovia
+                                // Home, pero su panel es el pipeline de
+                                // cotizaciones y no la bolsa de trabajos.
+                                'HOME_ASSOCIATE_COMPANY',
                                 'LEGAL_ASSOCIATE',
                                 'LEGAL_OFFICER',
                                 'HQ_ADMIN',
@@ -728,6 +732,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                                       userRole == 'LEGAL_OFFICER') {
                                     context.pushNamedAuth(
                                         LegalAssociateHomeWidget.routeName,
+                                        context.mounted);
+                                  } else if (userRole ==
+                                      'HOME_ASSOCIATE_COMPANY') {
+                                    // La empresa no tiene bolsa de trabajos:
+                                    // su panel es el pipeline de cotizaciones.
+                                    context.pushNamedAuth(
+                                        DHASSOCIATEEmpresaHomePageWidget
+                                            .routeName,
                                         context.mounted);
                                   } else {
                                     // HOME_ASSOCIATE / HQ_ADMIN

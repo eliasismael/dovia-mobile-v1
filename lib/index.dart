@@ -48,6 +48,12 @@ export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional/d_h_a_s_s_
     show DHASSOCIATETrabajoAdicionalWidget;
 export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance/d_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_widget.dart'
     show DHASSOCIATEFueraDeAlcanceWidget;
+export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_empresa_home_page/d_h_a_s_s_o_c_i_a_t_e_empresa_home_page_widget.dart'
+    show DHASSOCIATEEmpresaHomePageWidget;
+export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_cotizaciones/d_h_a_s_s_o_c_i_a_t_e_cotizaciones_widget.dart'
+    show DHASSOCIATECotizacionesWidget;
+export '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_cotizacion/d_h_a_s_s_o_c_i_a_t_e_cotizacion_widget.dart'
+    show DHASSOCIATECotizacionWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_bienvenida/d_h_c_l_i_e_n_t_bienvenida_widget.dart'
     show DHCLIENTBienvenidaWidget;
 export '/dovia_home_client/d_h_c_l_i_e_n_t_planes_page/d_h_c_l_i_e_n_t_planes_page_widget.dart'
