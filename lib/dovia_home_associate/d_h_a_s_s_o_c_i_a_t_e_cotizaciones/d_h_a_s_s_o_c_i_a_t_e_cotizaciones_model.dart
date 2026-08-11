@@ -12,23 +12,19 @@ class DHASSOCIATECotizacionesModel
     extends FlutterFlowModel<DHASSOCIATECotizacionesWidget> {
   ///  State fields for stateful widgets in this page.
 
-  FocusNode? searchFocusNode;
-  TextEditingController? searchController;
-
-  String searchQuery = '';
-
-  /// Filtro "Rubro": id de una de las especialidades **habilitadas** de la
-  /// empresa, o null para no filtrar.
+  /// Filtro "Tipo de Trabajo": id de una de las especialidades **habilitadas**
+  /// de la empresa, o null para no filtrar.
   String? categoryId;
   FormFieldController<String>? categoryController;
 
-  /// Filtro "Estatus": null muestra los tres carriles; con un valor elegido se
-  /// muestra sólo ese ([kQuoteFilterActive] / [kQuoteFilterSubmitted] /
-  /// [kQuoteFilterApproved]).
+  /// Filtro "Estado del trabajo": null muestra los cuatro carriles; con un valor
+  /// elegido se muestra sólo ese ([kQuoteFilterActive] / [kQuoteFilterSubmitted]
+  /// / [kQuoteFilterApproved] / [kQuoteFilterRejected]).
   String? statusFilter;
   FormFieldController<String>? statusController;
 
-  /// Filtro "Mes", como clave ordenable (`2026-08`) o null para todos.
+  /// Filtro "Fecha del trabajo", como clave de mes ordenable (`2026-08`) o null
+  /// para todos.
   String? monthKey;
   FormFieldController<String>? monthController;
 
@@ -54,8 +50,6 @@ class DHASSOCIATECotizacionesModel
 
   @override
   void dispose() {
-    searchFocusNode?.dispose();
-    searchController?.dispose();
     dHASSOCIATEHeaderModel.dispose();
     cornerGradientBackgroundModel.dispose();
     fixedDoviaIconModel.dispose();

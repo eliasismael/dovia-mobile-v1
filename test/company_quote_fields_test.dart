@@ -19,17 +19,19 @@ Map<String, dynamic> _quote({
 
 Map<String, dynamic> _proposal({
   String id = 'prop-1',
-  String serviceRequestId = 'req-1',
+  String? serviceRequestId = 'req-1',
   String status = 'SUBMITTED',
   String? proposalType = 'QUOTE',
   String? description,
+  int? version,
 }) =>
     {
       'id': id,
-      'serviceRequestId': serviceRequestId,
+      if (serviceRequestId != null) 'serviceRequestId': serviceRequestId,
       'status': status,
       if (proposalType != null) 'proposalType': proposalType,
       if (description != null) 'description': description,
+      if (version != null) 'version': version,
     };
 
 void main() {
@@ -131,6 +133,60 @@ void main() {
       ]);
 
       expect(submitted, isEmpty);
+    });
+  });
+
+  group('cqRejectedQuoteProposals', () {
+    test('sólo las que el cliente rechazó', () {
+      final rejected = cqRejectedQuoteProposals([
+        _proposal(id: 'p1'),
+        _proposal(id: 'p2', serviceRequestId: 'req-2', status: 'ACCEPTED'),
+        _proposal(id: 'p3', serviceRequestId: 'req-3', status: 'REJECTED'),
+      ]);
+
+      expect(rejected.map((p) => p['id']), ['p3']);
+    });
+
+    test('de cada servicio deja la última versión rechazada', () {
+      // Tras un rechazo la empresa manda otra versión; si también la rechazan,
+      // las viejas no aportan nada a una tarjeta que sólo muestra el trabajo.
+      final rejected = cqRejectedQuoteProposals([
+        _proposal(id: 'v1', status: 'REJECTED', version: 1),
+        _proposal(id: 'v2', status: 'REJECTED', version: 2),
+      ]);
+
+      expect(rejected.map((p) => p['id']), ['v2']);
+    });
+
+    test('mantiene las de servicios distintos', () {
+      final rejected = cqRejectedQuoteProposals([
+        _proposal(id: 'p1', status: 'REJECTED'),
+        _proposal(id: 'p2', serviceRequestId: 'req-2', status: 'REJECTED'),
+      ]);
+
+      expect(rejected.map((p) => p['id']), ['p1', 'p2']);
+    });
+
+    test('conserva las que no declaran servicio en vez de perderlas', () {
+      final rejected = cqRejectedQuoteProposals([
+        _proposal(id: 'p1', serviceRequestId: null, status: 'REJECTED'),
+        _proposal(id: 'p2', serviceRequestId: null, status: 'REJECTED'),
+      ]);
+
+      expect(rejected.map((p) => p['id']), ['p1', 'p2']);
+    });
+
+    test('ignora las de trabajo fuera de alcance', () {
+      final rejected = cqRejectedQuoteProposals([
+        {
+          'id': 'p1',
+          'serviceRequestId': 'req-1',
+          'status': 'REJECTED',
+          'outOfScopeRequestId': 'oos-1',
+        },
+      ]);
+
+      expect(rejected, isEmpty);
     });
   });
 

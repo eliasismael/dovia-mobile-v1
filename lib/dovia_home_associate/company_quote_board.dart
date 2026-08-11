@@ -1,5 +1,6 @@
-/// Arma el pipeline de cotizaciones de la empresa, ya partido en los tres
-/// carriles del diseño.
+/// Arma el pipeline de cotizaciones de la empresa, ya partido en los carriles
+/// del diseño: los tres del panel (activas, enviadas, aprobadas) más el de
+/// rechazadas, que sólo lista el historial.
 ///
 /// Vive fuera de las pantallas porque el panel y el historial ("Ver más")
 /// muestran **lo mismo** con distinto recorte: el panel las primeras tarjetas de
@@ -46,6 +47,7 @@ class CompanyQuoteBoard {
     required this.active,
     required this.submitted,
     required this.approved,
+    required this.rejected,
     this.marketplaceErrorStatus,
     this.proposalsErrorStatus,
     this.approvedErrorStatus,
@@ -64,6 +66,11 @@ class CompanyQuoteBoard {
 
   /// Carril 3: proyectos ganados, pendientes de ejecutar.
   final List<Map<String, dynamic>> approved;
+
+  /// Carril 4: propuestas que el cliente rechazó. Es historial de venta —no
+  /// pipeline—, así que sólo lo lista la pantalla de "Cotizaciones". Llega en el
+  /// mismo listado que [submitted], por lo que comparte su estado de error.
+  final List<CompanyQuoteSubmission> rejected;
 
   final int? marketplaceErrorStatus;
   final int? proposalsErrorStatus;
@@ -145,14 +152,17 @@ Future<CompanyQuoteBoard> loadCompanyQuoteBoard({
       .toList()
     ..sort(_bySoonest);
 
-  final submitted = [
-    for (final proposal in cqSubmittedQuoteProposals(proposals.items))
-      (
-        proposal: proposal,
-        title: cqProposalTitle(proposal, requestsById),
-        request: requestsById[proposalServiceRequestId(proposal) ?? ''],
-      ),
-  ];
+  List<CompanyQuoteSubmission> cross(List<Map<String, dynamic>> proposals) => [
+        for (final proposal in proposals)
+          (
+            proposal: proposal,
+            title: cqProposalTitle(proposal, requestsById),
+            request: requestsById[proposalServiceRequestId(proposal) ?? ''],
+          ),
+      ];
+
+  final submitted = cross(cqSubmittedQuoteProposals(proposals.items));
+  final rejected = cross(cqRejectedQuoteProposals(proposals.items));
 
   final approved = [...ownJobs.items]..sort(_bySoonest);
 
@@ -161,6 +171,7 @@ Future<CompanyQuoteBoard> loadCompanyQuoteBoard({
     active: active,
     submitted: submitted,
     approved: approved,
+    rejected: rejected,
     marketplaceErrorStatus: marketplace.errorStatus,
     proposalsErrorStatus: proposals.errorStatus,
     approvedErrorStatus: ownJobs.errorStatus,

@@ -4,20 +4,18 @@ import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
 import '/dovia_home_associate/company_quote_board.dart';
-import '/dovia_home_associate/company_quote_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_cotizacion/d_h_a_s_s_o_c_i_a_t_e_cotizacion_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_cotizacion_enviada_card/d_h_a_s_s_o_c_i_a_t_e_cotizacion_enviada_card_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_propuesta_enviada/d_h_a_s_s_o_c_i_a_t_e_propuesta_enviada_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar_widget.dart';
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_card/d_h_a_s_s_o_c_i_a_t_e_trabajo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -25,27 +23,33 @@ import '/auth/custom_auth/auth_util.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_cotizaciones_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_cotizaciones_model.dart';
 
-/// Valores del filtro "Estatus", uno por carril del pipeline.
+/// Valores del filtro "Estado del trabajo", uno por carril del ciclo de venta.
 const String kQuoteFilterActive = 'ACTIVE';
 const String kQuoteFilterSubmitted = 'SUBMITTED';
 const String kQuoteFilterApproved = 'APPROVED';
+const String kQuoteFilterRejected = 'REJECTED';
 
 /// Historial completo de cotizaciones de la empresa. Se abre desde el "Ver más"
 /// de la sección Cotizaciones del panel.
 ///
-/// Muestra los **mismos tres carriles** que el panel —sale del mismo
-/// [loadCompanyQuoteBoard], para que las dos pantallas no puedan discrepar— pero
-/// sin el recorte a las primeras tarjetas y con los tres filtros del diseño:
+/// Sale del mismo [loadCompanyQuoteBoard] que el panel —para que las dos
+/// pantallas no puedan discrepar—, pero sin el recorte a las primeras tarjetas y
+/// con el ciclo de venta completo: al pipeline vivo se le suma el carril de
+/// **rechazadas**, que es historial y en el panel no tiene lugar.
 ///
-///   - **Rubro**: sólo las especialidades habilitadas de la empresa.
-///   - **Estatus**: uno de los carriles, o los tres.
-///   - **Mes**: agrupa por mes de la visita pedida, para revisar el pipeline
-///     hacia atrás y hacia adelante.
+/// Los tres desplegables son **la única herramienta de navegación** de esta
+/// pantalla: no hay barra de búsqueda por texto. Filtrar por rubro, estado y mes
+/// es lo que ordena el trabajo; escribir un nombre no ayuda a revisar un
+/// pipeline que se mira por bloques.
 ///
-/// Los tres filtran del lado del cliente sobre lo ya cargado: el marketplace no
-/// acepta estos parámetros y, sobre todo, el reparto en carriles ya se resuelve
-/// cruzando propuestas contra solicitudes, así que volver al servidor por cada
-/// desplegable no ganaría nada.
+///   - **Tipo de Trabajo**: sólo las especialidades habilitadas de la empresa.
+///   - **Estado del trabajo**: uno de los carriles, o todos.
+///   - **Fecha del trabajo**: agrupación por mes de la visita pedida.
+///
+/// Los tres combinan y filtran del lado del cliente sobre lo ya cargado: el
+/// marketplace no acepta estos parámetros y, sobre todo, el reparto en carriles
+/// ya se resuelve cruzando propuestas contra solicitudes, así que volver al
+/// servidor por cada desplegable no ganaría nada.
 class DHASSOCIATECotizacionesWidget extends StatefulWidget {
   const DHASSOCIATECotizacionesWidget({super.key});
 
@@ -69,9 +73,6 @@ class _DHASSOCIATECotizacionesWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => DHASSOCIATECotizacionesModel());
-
-    _model.searchController ??= TextEditingController();
-    _model.searchFocusNode ??= FocusNode();
 
     _loadBoard();
 
@@ -101,9 +102,8 @@ class _DHASSOCIATECotizacionesWidgetState
   /// empresa vería la lista vacía y un desplegable que dice que no está
   /// filtrando nada.
   void _reconcileFilters(CompanyQuoteBoard board) {
-    final months = associateMonthOptions(_datedRequests(board))
-        .map((m) => m.key)
-        .toSet();
+    final months =
+        associateMonthOptions(_datedRequests(board)).map((m) => m.key).toSet();
     if (_model.monthKey != null && !months.contains(_model.monthKey)) {
       _model.monthKey = null;
       _model.monthController?.value = kAssociateFilterAll;
@@ -116,13 +116,13 @@ class _DHASSOCIATECotizacionesWidgetState
     }
   }
 
-  /// Todas las solicitudes del pipeline, **sin** los filtros de la UI aplicados:
-  /// de acá salen las opciones del desplegable de mes, que no deben cambiar
-  /// según lo que la empresa tenga filtrado.
+  /// Todas las solicitudes del historial, **sin** los filtros de la UI
+  /// aplicados: de acá salen las opciones del desplegable de fecha, que no deben
+  /// cambiar según lo que la empresa tenga filtrado.
   List<Map<String, dynamic>> _datedRequests(CompanyQuoteBoard board) => [
         ...board.active,
         ...board.approved,
-        for (final submission in board.submitted)
+        for (final submission in [...board.submitted, ...board.rejected])
           if (submission.request != null) submission.request!,
       ];
 
@@ -144,7 +144,6 @@ class _DHASSOCIATECotizacionesWidgetState
     Map<String, dynamic> request,
     AssociateServiceCategory? category,
   ) {
-    if (!asrMatchesQuery(request, _model.searchQuery)) return false;
     if (category != null &&
         !associateRequestMatchesCategory(request, category)) {
       return false;
@@ -161,10 +160,10 @@ class _DHASSOCIATECotizacionesWidgetState
   ) =>
       requests.where((r) => _matchesRequest(r, category)).toList();
 
-  /// Una propuesta enviada se filtra por la solicitud que cotiza. Sin ella
-  /// —cotización ya cerrada por el cliente— sólo se puede evaluar el texto: con
-  /// rubro o mes elegidos queda fuera, porque no hay con qué afirmar que
-  /// corresponde al filtro.
+  /// Una propuesta se filtra por la solicitud que cotiza. Sin ella —cotización
+  /// ya cerrada por el cliente— no hay rubro ni fecha que evaluar: con cualquiera
+  /// de los dos filtros elegidos queda fuera, porque no se puede afirmar que
+  /// corresponda. Sin filtros se muestra igual: es parte de su historial.
   List<CompanyQuoteSubmission> _filterSubmissions(
     List<CompanyQuoteSubmission> submissions,
     AssociateServiceCategory? category,
@@ -172,9 +171,7 @@ class _DHASSOCIATECotizacionesWidgetState
     return submissions.where((submission) {
       final request = submission.request;
       if (request != null) return _matchesRequest(request, category);
-      if (category != null || _model.monthKey != null) return false;
-      final query = _model.searchQuery.trim().toLowerCase();
-      return query.isEmpty || submission.title.toLowerCase().contains(query);
+      return category == null && _model.monthKey == null;
     }).toList();
   }
 
@@ -182,9 +179,12 @@ class _DHASSOCIATECotizacionesWidgetState
       _model.statusFilter == null || _model.statusFilter == lane;
 
   // ---------------------------------------------------------------------------
-  // Navegación.
+  // Navegación: el [Ver trabajo] de la tarjeta lleva a un lugar distinto según
+  // el estado, porque en cada uno lo que sigue es otra cosa.
   // ---------------------------------------------------------------------------
 
+  /// Activa: todavía no presupuestó. Abre el requerimiento del cliente, que es
+  /// donde arma y envía la propuesta económica.
   void _openOpportunity(Map<String, dynamic> data) {
     DHASSOCIATECotizacionWidget.requestData = data;
     context
@@ -192,6 +192,18 @@ class _DHASSOCIATECotizacionesWidgetState
         .then((_) => safeSetState(_loadBoard));
   }
 
+  /// Enviada o rechazada: no hay nada que operar, sólo releer lo que ofreció.
+  void _openSubmission(CompanyQuoteSubmission submission) {
+    DHASSOCIATEPropuestaEnviadaWidget.proposalData = submission.proposal;
+    DHASSOCIATEPropuestaEnviadaWidget.requestData = submission.request;
+    context
+        .pushNamed(DHASSOCIATEPropuestaEnviadaWidget.routeName)
+        .then((_) => safeSetState(_loadBoard));
+  }
+
+  /// Aprobada: es un proyecto ganado y entra al flujo operativo estándar
+  /// (notificar tránsito, iniciar el trabajo, cerrarlo), el mismo del perfil
+  /// Independiente.
   void _openWonProject(Map<String, dynamic> data) {
     DHASSOCIATETrabajoARealizarWidget.requestData = data;
     context
@@ -203,65 +215,6 @@ class _DHASSOCIATECotizacionesWidgetState
   // Bloques de UI.
   // ---------------------------------------------------------------------------
 
-  Widget _buildSearchBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(32.0),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 8.0,
-            color: Color(0x1A000000),
-            offset: Offset(0.0, 2.0),
-          )
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(18.0, 4.0, 18.0, 4.0),
-        child: Row(
-          children: [
-            SvgPicture.asset(
-              'assets/images/search.svg',
-              width: 20.0,
-              height: 20.0,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(width: 12.0),
-            Expanded(
-              child: TextFormField(
-                controller: _model.searchController,
-                focusNode: _model.searchFocusNode,
-                textInputAction: TextInputAction.search,
-                onChanged: (value) =>
-                    safeSetState(() => _model.searchQuery = value),
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  hintText: 'Búsqueda con IA',
-                  hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(),
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        fontSize: 14.0,
-                        letterSpacing: 0.0,
-                      ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                ),
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.inter(),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontSize: 14.0,
-                      letterSpacing: 0.0,
-                    ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   /// Rubro. **Sólo las especialidades habilitadas de la empresa**: no tiene
   /// sentido ofrecerle filtrar por un rubro en el que no puede operar.
   Widget _buildCategoryFilter(AssociateCategories categories) {
@@ -269,7 +222,7 @@ class _DHASSOCIATECotizacionesWidgetState
 
     if (approved.isEmpty) {
       return AssociateJobFilterDropdown(
-        label: 'Rubro',
+        label: 'Tipo de Trabajo',
         hintText: 'Sin rubros habilitados',
         controller: _model.categoryController ??=
             FormFieldController<String>(kAssociateFilterAll),
@@ -281,8 +234,8 @@ class _DHASSOCIATECotizacionesWidgetState
     }
 
     return AssociateJobFilterDropdown(
-      label: 'Rubro',
-      hintText: 'Selecciona el rubro',
+      label: 'Tipo de Trabajo',
+      hintText: 'Selecciona el tipo de trabajo',
       controller: _model.categoryController ??=
           FormFieldController<String>(kAssociateFilterAll),
       options: [kAssociateFilterAll, ...approved.map((c) => c.id)],
@@ -294,11 +247,11 @@ class _DHASSOCIATECotizacionesWidgetState
     );
   }
 
-  /// Estatus: los tres carriles del pipeline.
+  /// Estado: los cuatro momentos del ciclo de venta.
   Widget _buildStatusFilter() {
     return AssociateJobFilterDropdown(
-      label: 'Estatus',
-      hintText: 'Selecciona el estatus',
+      label: 'Estado del trabajo',
+      hintText: 'Selecciona el estado',
       controller: _model.statusController ??=
           FormFieldController<String>(kAssociateFilterAll),
       options: const [
@@ -306,8 +259,15 @@ class _DHASSOCIATECotizacionesWidgetState
         kQuoteFilterActive,
         kQuoteFilterSubmitted,
         kQuoteFilterApproved,
+        kQuoteFilterRejected,
       ],
-      optionLabels: const ['Todas', 'Activas', 'Enviadas', 'Aprobadas'],
+      optionLabels: const [
+        'Todas',
+        'Activas',
+        'Enviadas',
+        'Aprobadas',
+        'Rechazadas',
+      ],
       onChanged: (value) => safeSetState(() {
         _model.statusFilter =
             (value == null || value == kAssociateFilterAll) ? null : value;
@@ -317,8 +277,8 @@ class _DHASSOCIATECotizacionesWidgetState
 
   Widget _buildMonthFilter(List<AssociateMonthOption> months) {
     return AssociateJobFilterDropdown(
-      label: 'Mes',
-      hintText: 'Selecciona el mes',
+      label: 'Fecha del trabajo',
+      hintText: 'Selecciona la fecha',
       controller: _model.monthController ??=
           FormFieldController<String>(kAssociateFilterAll),
       options: [kAssociateFilterAll, ...months.map((m) => m.key)],
@@ -342,6 +302,10 @@ class _DHASSOCIATECotizacionesWidgetState
         ),
       );
 
+  /// Título del bloque de cada estado. El diseño no los lleva —muestra una
+  /// grilla pareja de tarjetas— pero con el filtro en "Todas" son lo único que
+  /// dice en qué punto del ciclo está cada tarjeta, y la tarjeta sólo tiene
+  /// lugar para el nombre del trabajo.
   Widget _buildLaneTitle(String title) => Padding(
         padding: const EdgeInsets.only(bottom: 14.0),
         child: Text(
@@ -355,11 +319,27 @@ class _DHASSOCIATECotizacionesWidgetState
         ),
       );
 
+  Widget _buildCard({
+    required String title,
+    required String iconPath,
+    required VoidCallback onViewWork,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 10.0),
+        child: DHASSOCIATECotizacionEnviadaCardWidget(
+          title: title,
+          iconPath: iconPath,
+          onViewWork: onViewWork,
+        ),
+      );
+
+  /// Carril de solicitudes (activas y aprobadas). Sólo cambia a dónde lleva el
+  /// [Ver trabajo].
   Widget _buildRequestLane({
     required List<Map<String, dynamic>> requests,
     required bool failed,
     required int? errorStatus,
-    required void Function(Map<String, dynamic>) onViewDetail,
+    required void Function(Map<String, dynamic>) onViewWork,
     required String emptyMessage,
   }) {
     if (failed) {
@@ -368,57 +348,51 @@ class _DHASSOCIATECotizacionesWidgetState
     if (requests.isEmpty) return _buildMessage(emptyMessage);
 
     return Column(
-      children: requests
-          .map(
-            (data) => Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: DHASSOCIATETrabajoCardWidget(
-                title: asrServiceName(data),
-                addressLabel: asrZoneLabel(data),
-                dateLabel: asrFormattedDate(data),
-                timeLabel: asrTimeLabel(data),
-                payoutLabel: cqEarningsLabel(data),
-                onViewDetail: () => onViewDetail(data),
-              ),
+      children: [
+        for (final data in requests)
+          _buildCard(
+            title: asrServiceName(data),
+            iconPath: associateCategoryIcon(
+              asrServiceCode(data),
+              asrServiceName(data),
             ),
-          )
-          .toList(),
+            onViewWork: () => onViewWork(data),
+          ),
+      ],
     );
   }
 
-  Widget _buildSubmittedLane(
-    CompanyQuoteBoard board,
-    List<CompanyQuoteSubmission> submissions,
-  ) {
+  /// Carril de propuestas (enviadas y rechazadas): las dos llevan a la vista de
+  /// sólo lectura del presupuesto.
+  Widget _buildSubmissionLane({
+    required CompanyQuoteBoard board,
+    required List<CompanyQuoteSubmission> submissions,
+    required String emptyMessage,
+  }) {
     if (board.proposalsFailed) {
       return _buildMessage(
           CompanyQuoteBoard.errorMessage(board.proposalsErrorStatus));
     }
-    if (submissions.isEmpty) {
-      return _buildMessage('No hay presupuestos enviados con estos filtros.');
-    }
+    if (submissions.isEmpty) return _buildMessage(emptyMessage);
 
     return Column(
-      children: submissions
-          .map(
-            (submission) => Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: DHASSOCIATECotizacionEnviadaCardWidget(
-                title: submission.title,
-                iconPath: submission.request == null
-                    ? associateCategoryIcon(null, submission.title)
-                    : associateCategoryIcon(
-                        asrServiceCode(submission.request!),
-                        asrServiceName(submission.request!),
-                      ),
-              ),
-            ),
-          )
-          .toList(),
+      children: [
+        for (final submission in submissions)
+          _buildCard(
+            title: submission.title,
+            iconPath: submission.request == null
+                ? associateCategoryIcon(null, submission.title)
+                : associateCategoryIcon(
+                    asrServiceCode(submission.request!),
+                    asrServiceName(submission.request!),
+                  ),
+            onViewWork: () => _openSubmission(submission),
+          ),
+      ],
     );
   }
 
-  Widget _buildBoard(CompanyQuoteBoard board) {
+  Widget _buildResults(CompanyQuoteBoard board) {
     final category = _selectedCategory(board.categories.approved);
 
     return Column(
@@ -437,15 +411,18 @@ class _DHASSOCIATECotizacionesWidgetState
             requests: _filterRequests(board.active, category),
             failed: board.marketplaceFailed,
             errorStatus: board.marketplaceErrorStatus,
-            onViewDetail: _openOpportunity,
+            onViewWork: _openOpportunity,
             emptyMessage: 'No hay oportunidades abiertas con estos filtros.',
           ),
           const SizedBox(height: 24.0),
         ],
         if (_showsLane(kQuoteFilterSubmitted)) ...[
           _buildLaneTitle('Cotizaciones enviadas:'),
-          _buildSubmittedLane(
-              board, _filterSubmissions(board.submitted, category)),
+          _buildSubmissionLane(
+            board: board,
+            submissions: _filterSubmissions(board.submitted, category),
+            emptyMessage: 'No hay presupuestos enviados con estos filtros.',
+          ),
           const SizedBox(height: 24.0),
         ],
         if (_showsLane(kQuoteFilterApproved)) ...[
@@ -454,8 +431,17 @@ class _DHASSOCIATECotizacionesWidgetState
             requests: _filterRequests(board.approved, category),
             failed: board.approvedFailed,
             errorStatus: board.approvedErrorStatus,
-            onViewDetail: _openWonProject,
+            onViewWork: _openWonProject,
             emptyMessage: 'No hay proyectos ganados con estos filtros.',
+          ),
+          const SizedBox(height: 24.0),
+        ],
+        if (_showsLane(kQuoteFilterRejected)) ...[
+          _buildLaneTitle('Cotizaciones rechazadas:'),
+          _buildSubmissionLane(
+            board: board,
+            submissions: _filterSubmissions(board.rejected, category),
+            emptyMessage: 'No hay cotizaciones rechazadas con estos filtros.',
           ),
         ],
       ],
@@ -507,8 +493,6 @@ class _DHASSOCIATECotizacionesWidgetState
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildSearchBar(),
-                            const SizedBox(height: 20.0),
                             _buildCategoryFilter(board.categories),
                             const SizedBox(height: 16.0),
                             _buildStatusFilter(),
@@ -516,7 +500,7 @@ class _DHASSOCIATECotizacionesWidgetState
                             _buildMonthFilter(
                                 associateMonthOptions(_datedRequests(board))),
                             const SizedBox(height: 24.0),
-                            _buildBoard(board),
+                            _buildResults(board),
                           ],
                         );
                       },

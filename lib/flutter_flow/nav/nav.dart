@@ -238,6 +238,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const DHASSOCIATECotizacionWidget(),
         ),
         FFRoute(
+          name: DHASSOCIATEPropuestaEnviadaWidget.routeName,
+          path: DHASSOCIATEPropuestaEnviadaWidget.routePath,
+          builder: (context, params) =>
+              const DHASSOCIATEPropuestaEnviadaWidget(),
+        ),
+        FFRoute(
           name: DHCLIENTBienvenidaWidget.routeName,
           path: DHCLIENTBienvenidaWidget.routePath,
           builder: (context, params) => const DHCLIENTBienvenidaWidget(),

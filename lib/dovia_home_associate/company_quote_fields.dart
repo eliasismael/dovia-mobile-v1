@@ -24,10 +24,16 @@
 ///   2. **Enviadas** — sus propuestas `SUBMITTED`, esperando la decisión del
 ///      cliente ([cqSubmittedQuoteProposals]).
 ///   3. **Aprobadas** — los proyectos que ganó ([cqIsWonProject]).
+///   4. **Rechazadas** — los proyectos que perdió ([cqRejectedQuoteProposals]).
+///      Es historial de venta y sólo lo lista la pantalla de "Cotizaciones"; el
+///      panel muestra los tres carriles del pipeline vivo.
 ///
-/// Un mismo servicio nunca puede estar en dos carriles: en cuanto la empresa
-/// manda su propuesta sale de "activas", y en cuanto el cliente la acepta el
-/// servicio deja de estar en el marketplace y aparece en su agenda.
+/// Un mismo servicio nunca puede estar en dos carriles del pipeline vivo: en
+/// cuanto la empresa manda su propuesta sale de "activas", y en cuanto el
+/// cliente la acepta el servicio deja de estar en el marketplace y aparece en su
+/// agenda. El carril de rechazadas **sí** puede coincidir con "activas": tras un
+/// rechazo la oportunidad vuelve a estar abierta para una versión nueva, y las
+/// dos cosas son ciertas a la vez.
 library;
 
 import '/dovia_home_client/proposal_fields.dart';
@@ -95,6 +101,43 @@ List<Map<String, dynamic>> cqQuoteProposals(List<Map<String, dynamic>> raw) =>
 List<Map<String, dynamic>> cqSubmittedQuoteProposals(
         List<Map<String, dynamic>> raw) =>
     cqQuoteProposals(raw).where(proposalIsActionable).toList();
+
+/// Propuestas que el cliente **rechazó**: los proyectos perdidos.
+///
+/// El enum de estados no tiene `EXPIRED` —son estos tres y nada más—, así que
+/// una cotización que venció llega igual como `REJECTED`: en el historial
+/// "perdidas" y "expiradas" son el mismo carril porque el contrato no las
+/// distingue.
+///
+/// De cada servicio queda **la última versión rechazada**. El contrato versiona
+/// las propuestas y tras un rechazo la empresa puede mandar otra, así que un
+/// mismo trabajo puede acumular varias; la tarjeta del historial sólo muestra su
+/// nombre, y las versiones viejas se verían como tarjetas repetidas sin nada que
+/// las distinga. Las que no declaran servicio no se pueden agrupar, así que se
+/// listan tal cual: perder una del historial es peor que mostrarla suelta.
+List<Map<String, dynamic>> cqRejectedQuoteProposals(
+    List<Map<String, dynamic>> raw) {
+  final latestByRequest = <String, Map<String, dynamic>>{};
+  final withoutRequest = <Map<String, dynamic>>[];
+
+  for (final proposal in cqQuoteProposals(raw)) {
+    if (proposalStatus(proposal) != kProposalRejected) continue;
+
+    final id = proposalServiceRequestId(proposal);
+    if (id == null) {
+      withoutRequest.add(proposal);
+      continue;
+    }
+
+    final current = latestByRequest[id];
+    if (current == null ||
+        (proposalVersion(proposal) ?? 0) >= (proposalVersion(current) ?? 0)) {
+      latestByRequest[id] = proposal;
+    }
+  }
+
+  return [...latestByRequest.values, ...withoutRequest];
+}
 
 /// Servicios sobre los que la empresa **ya se pronunció**: mandó una propuesta
 /// que sigue viva o que el cliente aceptó.

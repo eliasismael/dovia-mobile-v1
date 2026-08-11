@@ -3,22 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Tarjeta de "Cotizaciones enviadas" del panel de la empresa.
+/// Tarjeta de cotización con la píldora [Ver trabajo]: fondo blanco con borde,
+/// ícono del rubro y el nombre del trabajo.
 ///
-/// Es la tarjeta **de diseño diferenciado** del carril 2: fondo blanco con
-/// borde, en vez del beige de las tarjetas accionables. Esa diferencia visual es
-/// la que comunica el estado — el presupuesto ya salió y ahora decide el
-/// cliente, que lo compara contra los de otras empresas en su propia app.
+/// La usan dos pantallas con intenciones distintas:
 ///
-/// Por eso la píldora [Ver trabajo] es **informativa y no responde al toque**:
-/// no hay ninguna acción disponible hasta que el cliente acepte o rechace. Se
-/// pinta como un rótulo y no como un botón deshabilitado a propósito: un botón
-/// gris invita a insistir sobre algo que no depende de la empresa.
+///   - El **panel** la pinta en "Cotizaciones enviadas" sin [onViewWork]. Ahí la
+///     píldora es un rótulo y no responde al toque: el presupuesto ya salió y no
+///     hay nada que hacer hasta que el cliente decida. Se deja como rótulo y no
+///     como botón deshabilitado a propósito: un botón gris invita a insistir
+///     sobre algo que no depende de la empresa.
+///   - El **historial de "Cotizaciones"** la pinta para los cuatro estados con
+///     [onViewWork], que es la acción del diseño: lleva a cotizar, a leer el
+///     presupuesto enviado o a ejecutar el proyecto según en qué estado esté.
 class DHASSOCIATECotizacionEnviadaCardWidget extends StatelessWidget {
   const DHASSOCIATECotizacionEnviadaCardWidget({
     super.key,
     required this.title,
     required this.iconPath,
+    this.onViewWork,
   });
 
   /// Trabajo cotizado (Ej: "Instalación de TV").
@@ -26,6 +29,9 @@ class DHASSOCIATECotizacionEnviadaCardWidget extends StatelessWidget {
 
   /// Ícono del rubro, resuelto con el mismo mapeo que el carrusel de servicios.
   final String iconPath;
+
+  /// Acción de la píldora [Ver trabajo]. Null la deja como rótulo informativo.
+  final VoidCallback? onViewWork;
 
   static const Color _border = Color(0xFFE5E7EB);
   static const Color _iconSurface = Color(0xFFF3F3EF);
@@ -80,20 +86,26 @@ class DHASSOCIATECotizacionEnviadaCardWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8.0),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: _pillSurface,
-                    borderRadius: BorderRadius.circular(100.0),
-                  ),
-                  child: Text(
-                    'Ver trabajo',
-                    style: theme.bodyMedium.override(
-                      font: GoogleFonts.publicSans(),
-                      color: theme.primary,
-                      fontSize: 12.0,
-                      letterSpacing: 0.0,
+                InkWell(
+                  onTap: onViewWork,
+                  borderRadius: BorderRadius.circular(100.0),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: _pillSurface,
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                    child: Text(
+                      'Ver trabajo',
+                      style: theme.bodyMedium.override(
+                        font: GoogleFonts.publicSans(),
+                        color: theme.primary,
+                        fontSize: 12.0,
+                        letterSpacing: 0.0,
+                      ),
                     ),
                   ),
                 ),
