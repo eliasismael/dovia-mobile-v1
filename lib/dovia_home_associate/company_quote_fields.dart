@@ -40,6 +40,20 @@ import '/dovia_home_client/proposal_fields.dart';
 
 import 'associate_service_request_fields.dart';
 
+Map<String, dynamic>? _asMap(dynamic value) =>
+    value is Map ? Map<String, dynamic>.from(value) : null;
+
+String? _str(dynamic value) =>
+    (value is String && value.trim().isNotEmpty) ? value.trim() : null;
+
+String? _firstStr(List<dynamic> candidates) {
+  for (final candidate in candidates) {
+    final value = _str(candidate);
+    if (value != null) return value;
+  }
+  return null;
+}
+
 /// `subStatus` de una cotización con el marketplace abierto: el cliente ya pidió
 /// el presupuesto y las empresas pueden proponer. Es el mismo valor contra el
 /// que el cliente decide si todavía puede cerrar la cotización.
@@ -186,3 +200,67 @@ Map<String, Map<String, dynamic>> cqRequestsById(
   }
   return byId;
 }
+
+/// Fecha en la que el cliente pidió la cotización ("Fecha de la solicitud" del
+/// diseño). Es `createdAt` y **no** la fecha de visita: la sección
+/// "Información del inmueble" del detalle quiere decir cuándo llegó el pedido,
+/// no cuándo sería la visita.
+String cqRequestDateLabel(Map<String, dynamic> data) {
+  final created = asrCreatedAt(data);
+  return created == null ? 'Fecha por confirmar' : asrLongDateFor(created);
+}
+
+/// Perfil del cliente que pidió la solicitud, si el detalle lo trae anidado.
+///
+/// El contrato de `GET .../company/service-requests/{id}` no está
+/// documentado para este campo, así que se prueban las claves plausibles —
+/// mismo criterio que el resto de accessors sobre contratos todavía abiertos
+/// (Ej: [asrWhatToBring]).
+Map<String, dynamic>? cqExtractClientProfile(Map<String, dynamic> data) {
+  for (final key in const [
+    'clientProfile',
+    'client',
+    'requesterProfile',
+    'requester',
+    'customerProfile',
+    'customer',
+  ]) {
+    final node = _asMap(data[key]);
+    if (node != null) return node;
+  }
+  return null;
+}
+
+/// Nombre completo del cliente, para el modal "Datos del cliente". Se cae a
+/// nombre + apellido sueltos y, en última instancia, a una etiqueta genérica:
+/// el modal tiene que decir algo aunque el perfil llegue incompleto.
+String cqClientName(Map<String, dynamic> clientProfile) {
+  final full = _firstStr([clientProfile['fullName'], clientProfile['name']]);
+  if (full != null) return full;
+  final first = _str(clientProfile['firstName']) ?? '';
+  final last = _str(clientProfile['lastName']) ?? '';
+  final combined = '$first $last'.trim();
+  return combined.isEmpty ? 'Cliente' : combined;
+}
+
+/// Teléfono del cliente. El perfil puede entregarlo partido
+/// (`{ countryCode, number }`) o plano, mismo criterio que ya usa el cliente
+/// para leer el teléfono del proveedor.
+String? cqClientPhone(Map<String, dynamic> clientProfile) {
+  final phone = clientProfile['phone'];
+  if (phone is Map) {
+    final code = _str(phone['countryCode']) ?? '';
+    final number = _str(phone['number']) ?? '';
+    final composed = '$code $number'.trim();
+    if (composed.isNotEmpty) return composed;
+  }
+  return _firstStr([
+    phone,
+    clientProfile['phoneNumber'],
+    clientProfile['mobile'],
+  ]);
+}
+
+/// Correo del cliente, para el mismo modal.
+String? cqClientEmail(Map<String, dynamic> clientProfile) =>
+    _firstStr([clientProfile['email'], clientProfile['emailAddress']]);

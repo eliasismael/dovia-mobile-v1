@@ -14,12 +14,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_propuesta_enviada_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_propuesta_enviada_model.dart';
 
-/// Vista de **sólo lectura** del presupuesto que la empresa ya envió.
+/// Vista de **sólo lectura** de una propuesta que el cliente **rechazó**.
 ///
-/// Es el [Ver trabajo] de las cotizaciones "Enviadas" y "Rechazadas" del
-/// historial. No hay nada que operar acá y por eso no ofrece ninguna acción: una
-/// propuesta enviada la decide el cliente, y una rechazada ya se decidió. Lo que
-/// sí hace falta es poder releer **qué se ofreció** —monto y PDF— antes de
+/// Es el [Ver trabajo] de "Cotizaciones rechazadas" del historial. Las
+/// enviadas y las aprobadas ya no pasan por acá: [DHASSOCIATECotizacionWidget]
+/// se volvió dinámica y las muestra en su Estado 2/3, con banner y (aprobada)
+/// el botón de datos del cliente. Una rechazada no tiene ningún estado
+/// dinámico que seguir —ya se decidió—, así que se queda en esta vista fija.
+///
+/// No hay nada que operar acá y por eso no ofrece ninguna acción. Lo que sí
+/// hace falta es poder releer **qué se ofreció** —monto y PDF— antes de
 /// llamar al cliente o de armar una versión nueva.
 ///
 /// Todo sale de la propuesta que ya trajo el listado

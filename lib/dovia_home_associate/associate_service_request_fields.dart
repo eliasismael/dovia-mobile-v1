@@ -477,12 +477,18 @@ String asrFormattedDate(Map<String, dynamic> data) {
   return '${_two(scheduled.day)}/${_two(scheduled.month)}/${scheduled.year}';
 }
 
+/// Fecha en formato largo ("14 de agosto de 2026"). Vive suelta de
+/// [asrLongDate] para que otras pantallas formateen así una fecha que no es la
+/// de la visita (Ej: cuándo se creó la solicitud) sin duplicar la tabla de
+/// meses.
+String asrLongDateFor(DateTime date) =>
+    '${date.day} de ${_monthsEs[date.month - 1]} de ${date.year}';
+
 /// Fecha en formato largo, para el detalle y los listados completos.
 String asrLongDate(Map<String, dynamic> data) {
   final scheduled = asrScheduledAt(data);
   if (scheduled == null) return 'Fecha por confirmar';
-  return '${scheduled.day} de ${_monthsEs[scheduled.month - 1]} de '
-      '${scheduled.year}';
+  return asrLongDateFor(scheduled);
 }
 
 /// Mes al que pertenece la solicitud, como clave ordenable (`2026-08`).

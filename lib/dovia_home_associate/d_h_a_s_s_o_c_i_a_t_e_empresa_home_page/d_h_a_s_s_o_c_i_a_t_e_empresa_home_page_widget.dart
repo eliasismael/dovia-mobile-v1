@@ -33,7 +33,8 @@ export 'd_h_a_s_s_o_c_i_a_t_e_empresa_home_page_model.dart';
 ///      presupuesto a medida. El "Ojo" abre el requerimiento completo (fotos y
 ///      texto del cliente) para armar y enviar la propuesta.
 ///   2. **Cotizaciones enviadas** — lo que ya presupuestó y el cliente está
-///      comparando. Tarjetas bloqueadas: no hay acción hasta que decida.
+///      comparando. El "Ver trabajo" lleva a la misma pantalla de la
+///      cotización, en su Estado 2 (sólo lectura + banner de espera).
 ///   3. **Cotizaciones aprobadas** — los proyectos que ganó. El "Ojo" vuelve a
 ///      ser accionable y entra al flujo de trabajo estándar (tránsito, aviso de
 ///      llegada y ejecución), el mismo que usa el perfil Independiente.
@@ -151,6 +152,17 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   /// empresa arma y envía su propuesta económica.
   void _openOpportunity(Map<String, dynamic> data) {
     DHASSOCIATECotizacionWidget.requestData = data;
+    context
+        .pushNamed(DHASSOCIATECotizacionWidget.routeName)
+        .then((_) => safeSetState(_loadBoard));
+  }
+
+  /// "Cotizaciones enviadas": la misma pantalla que arma la propuesta, ahora
+  /// en Estado 2 (sólo lectura + banner de espera) — la empresa puede releer
+  /// qué presupuesto mandó sin tener que abrir el historial.
+  void _openSubmission(CompanyQuoteSubmission submission) {
+    DHASSOCIATECotizacionWidget.requestData = submission.request;
+    DHASSOCIATECotizacionWidget.proposalData = submission.proposal;
     context
         .pushNamed(DHASSOCIATECotizacionWidget.routeName)
         .then((_) => safeSetState(_loadBoard));
@@ -481,7 +493,10 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
     );
   }
 
-  /// Carril 2: presupuestos ya enviados, en tarjetas bloqueadas.
+  /// Carril 2: presupuestos ya enviados. La píldora ahora lleva a la misma
+  /// pantalla de la cotización, en Estado 2 (sólo lectura + banner de
+  /// espera): antes no había nada que ver ahí, pero ahora sí hay un
+  /// presupuesto propio para releer.
   Widget _buildSubmittedLane(CompanyQuoteBoard board,
       List<CompanyQuoteSubmission> submissions) {
     if (board.proposalsFailed) {
@@ -503,6 +518,7 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
               child: DHASSOCIATECotizacionEnviadaCardWidget(
                 title: submission.title,
                 iconPath: associateCategoryIcon(null, submission.title),
+                onViewWork: () => _openSubmission(submission),
               ),
             ),
           )

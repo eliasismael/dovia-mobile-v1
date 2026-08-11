@@ -164,6 +164,29 @@ List<String> proposalImageUrls(Map<String, dynamic> proposal) {
   return raw.map(_str).whereType<String>().toList();
 }
 
+/// Fecha en que el cliente decidió la propuesta (aceptó o rechazó), si el
+/// contrato la trae. El sobre unificado no documenta un campo fijo para esto,
+/// así que se prueban las claves plausibles; sin ninguna, la pantalla que la
+/// use omite la fecha en vez de inventarla.
+DateTime? proposalDecidedAt(Map<String, dynamic> proposal) {
+  final raw = _firstStr([
+    proposal['decidedAt'],
+    proposal['respondedAt'],
+    proposal['acceptedAt'],
+    proposal['statusUpdatedAt'],
+    proposal['updatedAt'],
+  ]);
+  return raw == null ? null : DateTime.tryParse(raw)?.toLocal();
+}
+
+/// [proposalDecidedAt] en el formato `dd/mm/aaaa` del banner de aprobación.
+String? proposalDecidedDateLabel(Map<String, dynamic> proposal) {
+  final date = proposalDecidedAt(proposal);
+  if (date == null) return null;
+  String two(int v) => v.toString().padLeft(2, '0');
+  return '${two(date.day)}/${two(date.month)}/${date.year}';
+}
+
 String proposalFormatAmount(num amount, String currency) {
   final fixed = ((amount * 100).round() / 100).toStringAsFixed(2);
   final parts = fixed.split('.');

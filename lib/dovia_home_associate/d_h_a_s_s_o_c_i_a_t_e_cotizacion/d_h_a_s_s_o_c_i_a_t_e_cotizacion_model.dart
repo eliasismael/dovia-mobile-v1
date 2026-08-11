@@ -29,10 +29,23 @@ class DHASSOCIATECotizacionModel
   bool submitted = false;
 
   /// Detalle del requerimiento tal como lo devuelve
-  /// `GET /dovia-home/company/service-requests/{id}`: es lo que trae las fotos
-  /// y el texto completo del cliente, que el listado del marketplace resume.
+  /// `GET /dovia-home/company/service-requests/{id}` (Activa/Enviada) o
+  /// `GET /dovia-home/associate/service-requests/{id}` (Aprobada): es lo que
+  /// trae las fotos y el texto completo del cliente, que el listado del
+  /// marketplace resume.
   Map<String, dynamic>? detail;
   bool isLoadingDetail = false;
+
+  /// Propuesta ya existente para esta solicitud, inyectada al abrir la
+  /// pantalla desde "Cotizaciones enviadas" o "Cotizaciones aprobadas". Null
+  /// significa que la empresa todavía no cotizó (Estado 1 - Activa).
+  Map<String, dynamic>? proposal;
+
+  /// Perfil del cliente que pidió la solicitud, si el detalle lo trae. Sólo se
+  /// muestra una vez que el proyecto es de la empresa (Estado 3 - Aprobada):
+  /// antes de ganarlo, no se revela el contacto de un cliente que todavía no
+  /// la contrató.
+  Map<String, dynamic>? clientProfile;
 
   // Model for DH_ASSOCIATE_Header component.
   late DHASSOCIATEHeaderModel dHASSOCIATEHeaderModel;

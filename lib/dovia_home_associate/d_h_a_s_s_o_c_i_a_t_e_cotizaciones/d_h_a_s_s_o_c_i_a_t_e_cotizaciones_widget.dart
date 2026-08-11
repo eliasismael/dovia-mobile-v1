@@ -192,8 +192,20 @@ class _DHASSOCIATECotizacionesWidgetState
         .then((_) => safeSetState(_loadBoard));
   }
 
-  /// Enviada o rechazada: no hay nada que operar, sólo releer lo que ofreció.
-  void _openSubmission(CompanyQuoteSubmission submission) {
+  /// Enviada: la misma pantalla de la cotización, en Estado 2 (sólo lectura +
+  /// banner de espera) — no hay nada que operar hasta que el cliente decida,
+  /// pero sí algo que releer.
+  void _openSubmittedQuote(CompanyQuoteSubmission submission) {
+    DHASSOCIATECotizacionWidget.requestData = submission.request;
+    DHASSOCIATECotizacionWidget.proposalData = submission.proposal;
+    context
+        .pushNamed(DHASSOCIATECotizacionWidget.routeName)
+        .then((_) => safeSetState(_loadBoard));
+  }
+
+  /// Rechazada: la decisión ya se tomó y no hay estado dinámico que mostrar,
+  /// así que queda en su propia vista de sólo lectura.
+  void _openRejectedQuote(CompanyQuoteSubmission submission) {
     DHASSOCIATEPropuestaEnviadaWidget.proposalData = submission.proposal;
     DHASSOCIATEPropuestaEnviadaWidget.requestData = submission.request;
     context
@@ -362,12 +374,15 @@ class _DHASSOCIATECotizacionesWidgetState
     );
   }
 
-  /// Carril de propuestas (enviadas y rechazadas): las dos llevan a la vista de
-  /// sólo lectura del presupuesto.
+  /// Carril de propuestas (enviadas y rechazadas). Comparten tarjeta; a dónde
+  /// lleva el [Ver trabajo] lo decide quien llama, porque una releé el
+  /// presupuesto en su pantalla dinámica y la otra en la vista fija de
+  /// rechazadas.
   Widget _buildSubmissionLane({
     required CompanyQuoteBoard board,
     required List<CompanyQuoteSubmission> submissions,
     required String emptyMessage,
+    required void Function(CompanyQuoteSubmission) onViewWork,
   }) {
     if (board.proposalsFailed) {
       return _buildMessage(
@@ -386,7 +401,7 @@ class _DHASSOCIATECotizacionesWidgetState
                     asrServiceCode(submission.request!),
                     asrServiceName(submission.request!),
                   ),
-            onViewWork: () => _openSubmission(submission),
+            onViewWork: () => onViewWork(submission),
           ),
       ],
     );
@@ -422,6 +437,7 @@ class _DHASSOCIATECotizacionesWidgetState
             board: board,
             submissions: _filterSubmissions(board.submitted, category),
             emptyMessage: 'No hay presupuestos enviados con estos filtros.',
+            onViewWork: _openSubmittedQuote,
           ),
           const SizedBox(height: 24.0),
         ],
@@ -442,6 +458,7 @@ class _DHASSOCIATECotizacionesWidgetState
             board: board,
             submissions: _filterSubmissions(board.rejected, category),
             emptyMessage: 'No hay cotizaciones rechazadas con estos filtros.',
+            onViewWork: _openRejectedQuote,
           ),
         ],
       ],
