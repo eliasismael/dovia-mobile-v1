@@ -278,6 +278,36 @@ class PaymentsRepository extends ChangeNotifier {
     return Success(PaymentOrder.fromJson(body));
   }
 
+  /// Espera a que una orden deje de estar en curso y devuelve su estado final.
+  ///
+  /// Abrir el checkout no cobra: el cobro lo confirma Recurrente contra el
+  /// webhook del backend, que recién ahí mueve la orden a `SUCCEEDED` y crea la
+  /// suscripción. Volver del navegador no es señal de nada, así que la UI tiene
+  /// que sondear en vez de asumir.
+  ///
+  /// Devuelve la orden ya resuelta, o `null` si se agotó [timeout] sin que
+  /// saliera de `PENDING`/`IN_PROCESS` — que no significa que el pago falló,
+  /// sino que todavía no se sabe. Los fallos de consulta (red caída) no cortan
+  /// el sondeo: se reintenta hasta el timeout.
+  Future<PaymentOrder?> awaitPaymentResolution(
+    String paymentOrderId, {
+    Duration interval = const Duration(seconds: 3),
+    Duration timeout = const Duration(minutes: 3),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+
+    while (DateTime.now().isBefore(deadline)) {
+      final result = await getPaymentStatus(paymentOrderId: paymentOrderId);
+      final order = result.dataOrNull;
+      if (order != null && !_isInFlight(order.status)) return order;
+      await Future<void>.delayed(interval);
+    }
+    return null;
+  }
+
+  static bool _isInFlight(String status) =>
+      status == PaymentStatus.pending || status == PaymentStatus.inProcess;
+
   // ---------------------------------------------------------------------------
   // Admin (HQ_ADMIN)
   // ---------------------------------------------------------------------------
@@ -443,7 +473,18 @@ class PaymentsRepository extends ChangeNotifier {
   }
 
   /// Limpia el estado cacheado (llamar al cerrar sesion).
+  ///
+  /// Sin nada que limpiar no notifica: se invoca desde el stream de auth, que
+  /// puede emitir en medio de un build, y un `notifyListeners()` de más ahí
+  /// provocaría un rebuild durante el build.
   void clear() {
+    final isEmpty = _plans.isEmpty &&
+        _currentSubscription == null &&
+        !_subscriptionLoaded &&
+        _payments.isEmpty &&
+        _error == null;
+    if (isEmpty) return;
+
     _plans = [];
     _currentSubscription = null;
     _subscriptionLoaded = false;

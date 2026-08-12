@@ -2,12 +2,14 @@ import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/repositories/payments_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_valor_visita_page_model.dart';
 export 'd_h_c_l_i_e_n_t_valor_visita_page_model.dart';
 
@@ -24,16 +26,6 @@ class DHCLIENTValorVisitaPageWidget extends StatefulWidget {
 
   /// Precio del servicio con descuento al suscribirse a Dovia Home.
   static const String discountedPrice = 'Q314.99';
-
-  /// Bandera que la pantalla de planes activa al volver a este paso tras
-  /// contratar una suscripción. Como la navegación crea una nueva instancia de
-  /// esta página, usamos un campo estático para propagar el estado "suscrito"
-  /// de regreso (mismo patrón que [DHCLIENTUbicacionWidget.pendingNextRoute]).
-  ///
-  /// TODO: Cuando exista la pasarela de pago, esta bandera debe activarse solo
-  /// tras confirmar la compra del plan y procesar (o eximir con el 1er servicio
-  /// incluido) el cobro del servicio a precio con descuento.
-  static bool returnedFromSubscription = false;
 
   @override
   State<DHCLIENTValorVisitaPageWidget> createState() =>
@@ -60,14 +52,25 @@ class _DHCLIENTValorVisitaPageWidgetState
     super.initState();
     _model = createModel(context, () => DHCLIENTValorVisitaPageModel());
 
-    // El cliente regresó desde la contratación del plan: el servicio queda
-    // pagado con descuento (simulado hasta integrar la pasarela).
-    if (DHCLIENTValorVisitaPageWidget.returnedFromSubscription) {
-      DHCLIENTValorVisitaPageWidget.returnedFromSubscription = false;
-      _paidMethod = 'subscription';
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _resolveSubscription();
+      safeSetState(() {});
+    });
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  /// Marca el servicio como cubierto si el cliente tiene plan activo.
+  ///
+  /// Se consulta al backend en vez de confiar en una bandera de navegación: la
+  /// compra del plan puede haber pasado en esta misma sesión (y entonces esta
+  /// página se monta de nuevo, sin pila que traiga el resultado) o venir de
+  /// antes. El plan incluye el servicio, así que con suscripción activa no hay
+  /// nada que cobrar acá.
+  Future<void> _resolveSubscription() async {
+    await context.read<PaymentsRepository>().loadCurrentSubscription();
+    if (!mounted) return;
+    if (context.read<PaymentsRepository>().hasActiveSubscription) {
+      safeSetState(() => _paidMethod = 'subscription');
+    }
   }
 
   /// Pago por uso a precio regular. Al tapear "Contratar" se abriría la
@@ -75,18 +78,28 @@ class _DHCLIENTValorVisitaPageWidgetState
   /// se habilita "Siguiente".
   Future<void> _payDirect() async {
     if (_isPaid) return;
-    // TODO: Abrir la pasarela de pagos (tarjetas guardadas o nueva tarjeta) por
-    // DHCLIENTValorVisitaPageWidget.regularPrice. Marcar como pagado solo tras
-    // confirmar el cobro. Mientras no esté integrada, simulamos el éxito.
+    // TODO: Abrir la pasarela de pagos por el precio regular con
+    // `PaymentsRepository.createCustomCheckout(paymentType: NORMAL_SERVICE)`,
+    // igual que hace la suscripción. Marcar como pagado sólo tras confirmar el
+    // cobro. Mientras no esté integrada, simulamos el éxito.
     safeSetState(() => _paidMethod = 'direct');
   }
 
-  /// Flujo de upsell: redirige a la selección y pago del plan. La pantalla de
-  /// planes regresa a este paso marcando el servicio como pagado con descuento.
-  void _goToSubscription() {
+  /// Flujo de upsell: deriva a la selección y pago del plan. Al volver se
+  /// re-consulta la suscripción contra el backend; si quedó activa el servicio
+  /// pasa a estar cubierto y se habilita "Siguiente". Si el cliente omitió la
+  /// compra, el paso sigue bloqueado.
+  Future<void> _goToSubscription() async {
     if (_isPaid) return;
-    DHCLIENTValorVisitaPageWidget.returnedFromSubscription = true;
-    context.pushNamed(DHCLIENTPlanesPageWidget.routeName);
+    await context.pushNamed(DHCLIENTPlanesPageWidget.routeName);
+    if (!mounted) return;
+    await context
+        .read<PaymentsRepository>()
+        .loadCurrentSubscription(forceRefresh: true);
+    if (!mounted) return;
+    if (context.read<PaymentsRepository>().hasActiveSubscription) {
+      safeSetState(() => _paidMethod = 'subscription');
+    }
   }
 
   @override

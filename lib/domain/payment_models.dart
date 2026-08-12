@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 // Domain models for Payments & Subscriptions (Recurrente).
 //
 // Los estados/tipos se mantienen como String crudo (consistente con el resto
@@ -180,6 +182,42 @@ class SubscriptionPlan {
       recurrenteProductId: data['recurrenteProductId'] as String?,
       active: data['active'] as bool? ?? true,
     );
+  }
+}
+
+/// Cómo se muestra un plan en pantalla.
+///
+/// Vive acá y no en un widget porque el catálogo se muestra en dos lugares
+/// —las tarjetas de Planes y el resumen del checkout— y los montos tienen que
+/// coincidir exactamente entre los dos.
+extension SubscriptionPlanDisplay on SubscriptionPlan {
+  /// Sufijo del precio, o `null` si el intervalo no es uno que se venda.
+  ///
+  /// El catálogo incluye planes de prueba con intervalos no comerciales (hoy
+  /// uno diario) que no deben llegarle a un cliente; devolver `null` es lo que
+  /// permite filtrarlos por intervalo en vez de por una lista de `code`, y así
+  /// dejar entrar cualquier plan nuevo que agregue backend.
+  String? get periodLabel {
+    switch (interval?.toLowerCase()) {
+      case 'month':
+        return ' /mes';
+      case 'year':
+        return ' /año';
+      default:
+        return null;
+    }
+  }
+
+  /// Un cliente puede contratarlo.
+  bool get isSellable => active && periodLabel != null;
+
+  /// Monto listo para mostrar (Ej: `Q2,999.99`).
+  ///
+  /// El formato se fija explícitamente porque Guatemala escribe los montos al
+  /// estilo estadounidense y el locale del dispositivo no tiene por qué serlo.
+  String get formattedAmount {
+    final symbol = currency == PaymentCurrency.usd ? '\$' : 'Q';
+    return '$symbol${NumberFormat('#,##0.00', 'en_US').format(amount ?? 0)}';
   }
 }
 

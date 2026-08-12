@@ -83,6 +83,14 @@ class _MyAppState extends State<MyApp> {
     userStream = doviaAuthUserStream()
       ..listen((user) {
         _appStateNotifier.update(user);
+        // Cerrar sesión no pasa por un solo lugar: cada vertical tiene su
+        // propia pantalla de ajustes con su propio botón. Este stream sí es
+        // común a todos, así que el estado de pagos se limpia acá. Dejarlo con
+        // la suscripción del usuario anterior le daría beneficios Premium a
+        // quien inicie sesión después en el mismo dispositivo.
+        if (!user.loggedIn && mounted) {
+          context.read<PaymentsRepository>().clear();
+        }
       });
 
     Future.delayed(

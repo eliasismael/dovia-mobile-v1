@@ -7,50 +7,63 @@ import 'package:flutter/material.dart';
 
 // import '/flutter_flow/custom_functions.dart'; // <--- ELIMINADO PARA QUE NO DE ERROR
 
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/gestures.dart';
 
+/// Resumen del plan y confirmación antes de ir a pagar.
+///
+/// **No recolecta datos de pago.** El cobro ocurre en el checkout hospedado de
+/// Recurrente, que es también el que pide tarjeta, correo y NIT: replicar esos
+/// campos acá obligaría a la app a manipular datos de tarjeta, que es
+/// justamente lo que el checkout hospedado existe para evitar. Por eso la
+/// pantalla se limita a mostrar qué se contrata, pedir la aceptación de los
+/// términos y disparar la apertura del checkout.
 class SubscriptionPayment extends StatefulWidget {
   final double? width;
   final double? height;
+
+  /// Nombre del plan, tal como lo devuelve `GET /subscriptions/plans`.
+  final String planName;
+
+  /// Monto ya formateado (Ej: `Q299.99`).
+  final String planPrice;
+
+  /// Sufijo del monto (Ej: ` /mes`).
+  final String planPeriod;
+
+  /// Abre el checkout. La pantalla que lo pasa es la que crea la orden.
   final Future<dynamic> Function() onActionPressed;
   final Future<dynamic> Function()? onSeeTerms;
 
-  final String paypalLogo;
-  final String applePayLogo;
-  final String visaLogo;
-  final String mastercardLogo;
-  final String amexLogo;
+  /// Hay una operación en curso: el botón se bloquea para no crear dos órdenes
+  /// con un doble tap.
+  final bool isBusy;
 
   const SubscriptionPayment({
     super.key,
     this.width,
     this.height,
+    required this.planName,
+    required this.planPrice,
+    required this.planPeriod,
     required this.onActionPressed,
     this.onSeeTerms,
-    this.paypalLogo = 'assets/images/paypal_logo.png',
-    this.applePayLogo = 'assets/images/apple_pay_logo.png',
-    this.visaLogo = 'assets/images/visa_logo.png',
-    this.mastercardLogo = 'assets/images/mastercard_logo.png',
-    this.amexLogo = 'assets/images/amex_logo.png',
+    this.isBusy = false,
   });
 
   @override
-  _SubscriptionPaymentState createState() => _SubscriptionPaymentState();
+  State<SubscriptionPayment> createState() => _SubscriptionPaymentState();
 }
 
 class _SubscriptionPaymentState extends State<SubscriptionPayment> {
   static const Color primaryColor = Color(0xFF007376);
   static const Color darkTextColor = Color(0xFF004D4F);
 
-  // ignore: unused_field
-  static const Color pageBackgroundColor = Color(0xFFF8FAFB);
-
-  int _selectedMethod = 0;
   bool _termsAccepted = false;
 
   @override
   Widget build(BuildContext context) {
+    final canContinue = _termsAccepted && !widget.isBusy;
+
     return Container(
       width: widget.width,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -61,57 +74,17 @@ class _SubscriptionPaymentState extends State<SubscriptionPayment> {
           _buildPlanCard(),
           const SizedBox(height: 24),
 
-          // Payment Methods
-          _buildPaymentMethods(),
-          const SizedBox(height: 24),
-
-          // Card Form
-          if (_selectedMethod == 0) ...[
-            _buildLabel("Número de tarjeta"),
-            const SizedBox(height: 8),
-            _buildCardNumberInput(),
-            const SizedBox(height: 16),
-            _buildLabel("Nombre y Apellido que aparece en la tarjeta"),
-            const SizedBox(height: 8),
-            _buildTextInput("Nombre y Apellido"),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel("Expira"),
-                      const SizedBox(height: 8),
-                      _buildTextInput("MM / YY", centered: true),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel("CVC"),
-                      const SizedBox(height: 8),
-                      _buildTextInput("CVC", centered: true),
-                    ],
-                  ),
-                ),
-              ],
+          // Qué va a pasar al continuar. Se dice explícitamente porque el
+          // cobro ocurre fuera de la app y el cliente tiene que esperarlo.
+          const Text(
+            'Te llevaremos al pago seguro de Recurrente para completar la '
+            'compra. Volvé a la app cuando termines.',
+            style: TextStyle(
+              color: darkTextColor,
+              fontSize: 13,
+              height: 1.4,
             ),
-            const SizedBox(height: 16),
-          ],
-
-          // Additional Fields
-          _buildLabel("Introduce tu correo electrónico"),
-          const SizedBox(height: 8),
-          _buildTextInput("Introduce tu correo electrónico"),
-          const SizedBox(height: 16),
-
-          _buildLabel("Introduce el NIT"),
-          const SizedBox(height: 8),
-          _buildTextInput("Introduce el NIT"),
+          ),
           const SizedBox(height: 24),
 
           // --- SECCIÓN CHECKBOX Y TÉRMINOS ---
@@ -128,7 +101,9 @@ class _SubscriptionPaymentState extends State<SubscriptionPayment> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   side: const BorderSide(color: primaryColor, width: 1.5),
-                  onChanged: (v) => setState(() => _termsAccepted = v ?? false),
+                  onChanged: widget.isBusy
+                      ? null
+                      : (v) => setState(() => _termsAccepted = v ?? false),
                 ),
               ),
               const SizedBox(width: 12),
@@ -170,7 +145,7 @@ class _SubscriptionPaymentState extends State<SubscriptionPayment> {
           SizedBox(
             height: 52,
             child: ElevatedButton(
-              onPressed: _termsAccepted
+              onPressed: canContinue
                   ? () async {
                       await widget.onActionPressed();
                     }
@@ -184,10 +159,20 @@ class _SubscriptionPaymentState extends State<SubscriptionPayment> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                "Acceder al plan",
-                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 16),
-              ),
+              child: widget.isBusy
+                  ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      "Acceder al plan",
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 16),
+                    ),
             ),
           ),
           const SizedBox(height: 40),
@@ -211,256 +196,36 @@ class _SubscriptionPaymentState extends State<SubscriptionPayment> {
           ),
         ],
       ),
-      child: const Column(
+      child: Column(
         children: [
           Text(
-            "DOVIA BASIC",
+            widget.planName.toUpperCase(),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.5,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            "\$30/mes",
+            '${widget.planPrice}${widget.planPeriod}',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            "Primer cobro: Hoy (DD/MM/AAAA)",
+          const SizedBox(height: 8),
+          const Text(
+            "Primer cobro hoy. Se renueva automáticamente.",
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildPaymentMethods() {
-    return Row(
-      children: [
-        Expanded(child: _buildMethodCard(0, "Tarjeta", Icons.credit_card)),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildMethodCard(
-            1,
-            "PayPal",
-            null,
-            imagePath: widget.paypalLogo,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildMethodCard(
-            2,
-            "ApplePay",
-            null,
-            imagePath: widget.applePayLogo,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMethodCard(
-    int index,
-    String label,
-    IconData? icon, {
-    String? imagePath,
-  }) {
-    final isSelected = _selectedMethod == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedMethod = index),
-      child: Container(
-        height: 64,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? primaryColor : Colors.grey.shade200,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (imagePath != null && imagePath.isNotEmpty)
-              _buildResponsiveImage(imagePath, height: 24)
-            else
-              Icon(
-                icon ?? Icons.help_outline,
-                color: isSelected ? primaryColor : const Color(0xFF004D4F),
-                size: 24,
-              ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? primaryColor : Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.bold,
-        color: darkTextColor,
-      ),
-    );
-  }
-
-  Widget _buildTextInput(String hint, {bool centered = false}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        textAlign: centered ? TextAlign.center : TextAlign.start,
-        style: const TextStyle(color: darkTextColor, fontSize: 14),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardNumberInput() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        keyboardType: TextInputType.number,
-        style: const TextStyle(color: darkTextColor, fontSize: 14),
-        decoration: InputDecoration(
-          hintText: "1234 1234 1234 1234",
-          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          suffixIcon: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildCardAsset(widget.visaLogo),
-                const SizedBox(width: 6),
-                _buildCardAsset(widget.mastercardLogo),
-                const SizedBox(width: 6),
-                _buildCardAsset(widget.amexLogo),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardAsset(String path) {
-    if (path.isEmpty) return const SizedBox.shrink();
-    return Container(
-      width: 32,
-      height: 20,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(2),
-        border: Border.all(color: Colors.grey.shade200, width: 1),
-      ),
-      child: _buildResponsiveImage(path),
-    );
-  }
-
-  Widget _buildResponsiveImage(String path, {double? height}) {
-    final bool isNetwork = path.startsWith('http');
-    final bool isSvg = path.toLowerCase().endsWith('.svg');
-
-    if (isSvg) {
-      if (isNetwork) {
-        return SvgPicture.network(
-          path,
-          height: height,
-          fit: BoxFit.contain,
-          placeholderBuilder: (BuildContext context) =>
-              const Icon(Icons.refresh, size: 20, color: Colors.grey),
-        );
-      } else {
-        return SvgPicture.asset(
-          path,
-          height: height,
-          fit: BoxFit.contain,
-          placeholderBuilder: (BuildContext context) =>
-              const Icon(Icons.refresh, size: 20, color: Colors.grey),
-        );
-      }
-    }
-
-    if (isNetwork) {
-      return Image.network(
-        path,
-        height: height,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.broken_image, size: 20, color: Colors.grey),
-      );
-    } else {
-      return Image.asset(
-        path,
-        height: height,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.image_not_supported, size: 20, color: Colors.grey),
-      );
-    }
   }
 }

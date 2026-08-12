@@ -1,6 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_c_l_i_e_n_t_no_tiene_plan_model.dart';
@@ -53,7 +54,7 @@ class _DHCLIENTNoTienePlanWidgetState extends State<DHCLIENTNoTienePlanWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
-              'No puedes ver esta información porque no tienes el plan Dovia Basic',
+              'No puedes ver esta información porque no tienes el plan Dovia Premium',
               textAlign: TextAlign.center,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     font: GoogleFonts.publicSans(
@@ -71,10 +72,9 @@ class _DHCLIENTNoTienePlanWidgetState extends State<DHCLIENTNoTienePlanWidget> {
                   ),
             ),
             FFButtonWidget(
-              onPressed: () {
-                print('Button pressed ...');
-              },
-              text: 'Adquiere el plan Dovia Basic',
+              onPressed: () =>
+                  context.pushNamed(DHCLIENTPlanesPageWidget.routeName),
+              text: 'Adquiere el plan Dovia Premium',
               options: FFButtonOptions(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 height: 42.0,

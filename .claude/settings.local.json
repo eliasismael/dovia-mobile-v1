@@ -103,7 +103,10 @@
       "Bash(curl -sL -o fig2.png \"https://www.figma.com/api/mcp/asset/2cdab526-e066-4a6b-8335-227447620fd4\")",
       "Bash(grep -vE \"^ClientException|^$\")",
       "Bash(grep -n \"^String\\\\|^bool\\\\|^List\\\\|^Map\\\\|^num\\\\|^DateTime\\\\|^int\\\\|^Set\\\\|///\" lib/dovia_home_associate/associate_service_request_fields.dart)",
-      "Bash(grep -v \"^.*:///\")"
+      "Bash(grep -v \"^.*:///\")",
+      "PowerShell(git stash pop)",
+      "PowerShell(git checkout -- .claude/settings.local.json)",
+      "PowerShell(flutter test test/dh_client_planes_test.dart 2>&1)"
     ]
   }
 }

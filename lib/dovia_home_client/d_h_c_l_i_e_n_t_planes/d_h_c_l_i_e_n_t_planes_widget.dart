@@ -1,15 +1,35 @@
+import '/core/result.dart';
+import '/domain/payment_models.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/repositories/payments_repository.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_planes_model.dart';
 export 'd_h_c_l_i_e_n_t_planes_model.dart';
 
+/// Tarjetas de los planes de DOVIA Home Premium.
+///
+/// Nombre, precio e intervalo salen de `GET /subscriptions/plans`; el `id` del
+/// plan tapeado es lo que después se cobra. Los beneficios que lista cada
+/// tarjeta siguen siendo texto fijo: son copy de marketing y el backend no los
+/// modela.
+///
+/// El bloque se embebe en [DHCLIENTPlanesPageWidget] y en
+/// [DCFormaPagoSuscripcion1Widget], así que no trae scaffold propio.
 class DHCLIENTPlanesWidget extends StatefulWidget {
   const DHCLIENTPlanesWidget({super.key});
+
+  /// Plan que el cliente tapeó, para que la pantalla de pago sepa qué cobrar.
+  ///
+  /// Va en un campo estático porque la navegación de la app es sólo por nombre
+  /// de ruta y no lleva argumentos; es el mismo mecanismo de
+  /// [DHCLIENTPlanesPageWidget.pendingReturnRoute] y
+  /// [DHCLIENTUbicacionWidget.pendingNextRoute].
+  static SubscriptionPlan? selectedPlan;
 
   @override
   State<DHCLIENTPlanesWidget> createState() => _DHCLIENTPlanesWidgetState();
@@ -17,6 +37,11 @@ class DHCLIENTPlanesWidget extends StatefulWidget {
 
 class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
   late DHCLIENTPlanesModel _model;
+
+  /// Todavía no se sabe qué planes hay. Arranca en `true` para no parpadear un
+  /// estado de error antes de la primera respuesta.
+  bool _loading = true;
+  bool _failed = false;
 
   @override
   void setState(VoidCallback callback) {
@@ -28,7 +53,10 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTPlanesModel());
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPlans();
+      safeSetState(() {});
+    });
   }
 
   @override
@@ -36,6 +64,31 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
     _model.maybeDispose();
     super.dispose();
   }
+
+  Future<void> _loadPlans() async {
+    safeSetState(() {
+      _loading = true;
+      _failed = false;
+    });
+    final result = await context.read<PaymentsRepository>().loadPlans();
+    if (!mounted) return;
+    safeSetState(() {
+      _loading = false;
+      _failed = result.isFailure;
+    });
+  }
+
+  /// Los planes que un cliente puede contratar, en el orden del diseño
+  /// (mensual y después anual). El orden no depende del que use el backend.
+  List<SubscriptionPlan> _sellablePlans(List<SubscriptionPlan> plans) {
+    final sellable = plans.where((p) => p.isSellable).toList();
+    sellable
+        .sort((a, b) => _intervalRank(a.interval) - _intervalRank(b.interval));
+    return sellable;
+  }
+
+  static int _intervalRank(String? interval) =>
+      interval?.toLowerCase() == 'month' ? 0 : 1;
 
   Widget _buildBullet(String text) {
     return Padding(
@@ -277,6 +330,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
   }
 
   Widget _buildPlanCard({
+    required SubscriptionPlan plan,
     required String title,
     required String price,
     required String period,
@@ -289,6 +343,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
       onTap: () async {
+        // La pantalla de pago lee esto para saber qué plan cobrar.
+        DHCLIENTPlanesWidget.selectedPlan = plan;
         DHCLIENTUbicacionWidget.pendingNextRoute =
             DCFormaPagoSuscripcion1Widget.routeName;
         context.pushNamed(DHCLIENTUbicacionWidget.routeName);
@@ -423,51 +479,117 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
     );
   }
 
+  /// Lo que incluye cualquier plan. Es el mismo texto en mensual y anual.
+  static const List<String> _includes = [
+    '1 servicios mensuales',
+    'Acceso a cotizaciones',
+    'Atención programada con minimo de 24 horas',
+    '10% de descuento en cualquier cotización adicional',
+    'Acceso a servicios de emergencia',
+    'Garantía DOVIA en todos los trabajos',
+  ];
+
+  /// Los beneficios adicionales sí cambian: el anual regala meses de
+  /// renovación donde el mensual ofrece descuento.
+  static List<String> _additionalsFor(String? interval) => [
+        'Prioridad en reservas',
+        if (interval?.toLowerCase() == 'year')
+          '2 meses gratis en tu renovacion'
+        else
+          'Descuento en tus servicios',
+        'Historial detallado de servicios',
+      ];
+
+  /// No se pudo traer el catálogo. No se muestran tarjetas: los precios viven
+  /// en el backend, así que cualquier monto que pusiéramos acá sería inventado
+  /// y el cliente no tendría un plan real que contratar.
+  Widget _plansUnavailable() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'No pudimos cargar los planes. Revisa tu conexión e intenta de nuevo.',
+          textAlign: TextAlign.center,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.publicSans(),
+                color: const Color(0xFF00444B),
+                fontSize: 16.0,
+                letterSpacing: 0.32,
+              ),
+        ),
+        const SizedBox(height: 20.0),
+        FFButtonWidget(
+          onPressed: () async => _loadPlans(),
+          text: 'Reintentar',
+          options: FFButtonOptions(
+            width: double.infinity,
+            height: 44.0,
+            color: FlutterFlowTheme.of(context).primary,
+            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 16.0,
+                ),
+            elevation: 0.0,
+            borderRadius: BorderRadius.circular(25.0),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final plans = _sellablePlans(context.watch<PaymentsRepository>().plans);
+
+    if (_loading && plans.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 60.0),
+        child: Center(
+          child: CircularProgressIndicator(color: Color(0xFF007376)),
+        ),
+      );
+    }
+
+    if (plans.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        child: _plansUnavailable(),
+      );
+    }
+
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildPlanCard(
-            title: 'DOVIA PREMIUM',
-            price: 'Q299.99',
-            period: ' /mes',
-            includes: [
-              '1 servicios mensuales',
-              'Acceso a cotizaciones',
-              'Atención programada con minimo de 24 horas',
-              '10% de descuento en cualquier cotización adicional',
-              'Acceso a servicios de emergencia',
-              'Garantía DOVIA en todos los trabajos',
-            ],
-            additionals: [
-              'Prioridad en reservas',
-              'Descuento en tus servicios',
-              'Historial detallado de servicios',
-            ],
-          ),
-          const SizedBox(height: 24.0),
-          _buildPlanCard(
-            title: 'DOVIA PREMIUM',
-            price: 'Q2,999.99',
-            period: ' /año',
-            includes: [
-              '1 servicios mensuales',
-              'Acceso a cotizaciones',
-              'Atención programada con minimo de 24 horas',
-              '10% de descuento en cualquier cotización adicional',
-              'Acceso a servicios de emergencia',
-              'Garantía DOVIA en todos los trabajos',
-            ],
-            additionals: [
-              'Prioridad en reservas',
-              '2 meses gratis en tu renovacion',
-              'Historial detallado de servicios',
-            ],
-          ),
-          const SizedBox(height: 24.0),
+          for (final plan in plans) ...[
+            _buildPlanCard(
+              plan: plan,
+              title: plan.name,
+              price: plan.formattedAmount,
+              // Non-null: `isSellable` ya descartó los intervalos sin etiqueta.
+              period: plan.periodLabel!,
+              includes: _includes,
+              additionals: _additionalsFor(plan.interval),
+            ),
+            const SizedBox(height: 24.0),
+          ],
+          // El fallo posterior a un primer catálogo cargado no borra las
+          // tarjetas que ya se están mostrando; sólo lo dice.
+          if (_failed)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: Text(
+                'No pudimos actualizar los planes.',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodySmall.override(
+                      font: GoogleFonts.publicSans(),
+                      color: const Color(0xFF00444B),
+                      fontSize: 13.0,
+                    ),
+              ),
+            ),
         ],
       ),
     );
