@@ -29,6 +29,12 @@ class OperativeListingProfile extends StatefulWidget {
   final Future Function()? onLogout;
   final Future Function()? onSaveInfo;
 
+  /// Texto de la píldora bajo el avatar (p. ej. "Dovia Operative Listing").
+  /// Cada vertical/rol que reutiliza este componente pasa el suyo; si no lo
+  /// hace, se mantiene el texto original para no romper a los consumidores
+  /// existentes.
+  final String? roleLabel;
+
   const OperativeListingProfile({
     super.key,
     this.width,
@@ -39,6 +45,7 @@ class OperativeListingProfile extends StatefulWidget {
     this.onSupport,
     this.onLogout,
     this.onSaveInfo,
+    this.roleLabel,
   });
 
   @override
@@ -329,9 +336,9 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               color: aqua,
               borderRadius: BorderRadius.circular(100),
             ),
-            child: const Text(
-              'Dovia Operative Listing',
-              style: TextStyle(
+            child: Text(
+              widget.roleLabel ?? 'Dovia Operative Listing',
+              style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 14,
                 fontWeight: FontWeight.normal,
