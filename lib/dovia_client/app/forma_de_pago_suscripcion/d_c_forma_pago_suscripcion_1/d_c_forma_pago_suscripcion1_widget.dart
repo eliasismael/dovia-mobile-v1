@@ -85,7 +85,15 @@ class _DCFormaPagoSuscripcion1WidgetState
                             child: wrapWithModel(
                               model: _model.dHCLIENTPlanesModel,
                               updateCallback: () => safeSetState(() {}),
-                              child: const DHCLIENTPlanesWidget(),
+                              // Acá la dirección ya se verificó, así que elegir
+                              // un plan sigue derecho al pago. Con el
+                              // comportamiento por defecto del bloque volvería
+                              // a pedir ubicación, que devuelve a esta misma
+                              // pantalla: un ciclo del que no se sale.
+                              child: DHCLIENTPlanesWidget(
+                                onPlanSelected: (_) => context.pushNamed(
+                                    DCFormaPagoSuscripcion2Widget.routeName),
+                              ),
                             ),
                           ),
                           Padding(

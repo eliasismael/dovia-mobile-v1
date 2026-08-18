@@ -84,16 +84,17 @@ Future<void> _pumpPlanes(
   WidgetTester tester,
   PaymentsRepository repo, {
   bool settle = true,
+  void Function(SubscriptionPlan plan)? onPlanSelected,
 }) async {
   final router = GoRouter(
     routes: [
       GoRoute(
         path: '/',
-        builder: (_, __) => const Scaffold(
+        builder: (_, __) => Scaffold(
           // Mismo encuadre que las pantallas que lo embeben.
           body: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: DHCLIENTPlanesWidget(),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: DHCLIENTPlanesWidget(onPlanSelected: onPlanSelected),
           ),
         ),
       ),
@@ -120,7 +121,12 @@ Future<void> _pumpPlanes(
 void main() {
   setUpAll(TestWidgetsFlutterBinding.ensureInitialized);
 
-  setUp(() => DHCLIENTPlanesWidget.selectedPlan = null);
+  // El paso de datos entre pantallas es por campos estáticos, así que sin
+  // limpiarlos un test arrastra el estado del anterior.
+  setUp(() {
+    DHCLIENTPlanesWidget.selectedPlan = null;
+    DHCLIENTUbicacionWidget.pendingNextRoute = null;
+  });
 
   testWidgets('mientras carga el catálogo no muestra tarjetas', (tester) async {
     tester.view.physicalSize = _viewport;
@@ -227,5 +233,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(DHCLIENTPlanesWidget.selectedPlan?.id, 'plan-anual');
+  });
+
+  testWidgets('sin callback, elegir un plan manda a verificar la dirección',
+      (tester) async {
+    tester.view.physicalSize = _viewport;
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+
+    await _pumpPlanes(
+      tester,
+      _FakePaymentsRepository(const [_monthly]),
+    );
+
+    await tester.tap(find.text('Dovia Home Premium Mensual'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ubicacion'), findsOneWidget);
+  });
+
+  testWidgets(
+      'con callback no vuelve a pedir dirección: quien embebe decide el paso',
+      (tester) async {
+    tester.view.physicalSize = _viewport;
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
+
+    SubscriptionPlan? elegido;
+    await _pumpPlanes(
+      tester,
+      _FakePaymentsRepository(const [_monthly]),
+      onPlanSelected: (plan) => elegido = plan,
+    );
+
+    await tester.tap(find.text('Dovia Home Premium Mensual'));
+    await tester.pumpAndSettle();
+
+    expect(elegido?.id, 'plan-mensual');
+    // El ciclo del que no se salía: en el paso de pago la dirección ya está
+    // verificada y volver a pedirla devuelve a esa misma pantalla.
+    expect(find.text('ubicacion'), findsNothing);
+    expect(DHCLIENTUbicacionWidget.pendingNextRoute, isNull);
   });
 }

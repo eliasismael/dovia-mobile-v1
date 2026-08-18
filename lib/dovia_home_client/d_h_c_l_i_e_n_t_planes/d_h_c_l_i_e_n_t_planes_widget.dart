@@ -21,7 +21,16 @@ export 'd_h_c_l_i_e_n_t_planes_model.dart';
 /// El bloque se embebe en [DHCLIENTPlanesPageWidget] y en
 /// [DCFormaPagoSuscripcion1Widget], así que no trae scaffold propio.
 class DHCLIENTPlanesWidget extends StatefulWidget {
-  const DHCLIENTPlanesWidget({super.key});
+  const DHCLIENTPlanesWidget({super.key, this.onPlanSelected});
+
+  /// Qué hacer cuando el cliente elige un plan.
+  ///
+  /// Lo decide la pantalla que embebe el bloque porque el paso siguiente
+  /// depende de dónde esté parado el cliente: entrando por Planes hay que
+  /// verificar la dirección antes de cobrar, pero en el paso de pago eso ya
+  /// pasó y volver a pedirla deja al cliente dando vueltas sin poder
+  /// contratar. Sin callback se asume la entrada por Planes.
+  final void Function(SubscriptionPlan plan)? onPlanSelected;
 
   /// Plan que el cliente tapeó, para que la pantalla de pago sepa qué cobrar.
   ///
@@ -345,6 +354,15 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
       onTap: () async {
         // La pantalla de pago lee esto para saber qué plan cobrar.
         DHCLIENTPlanesWidget.selectedPlan = plan;
+
+        final onSelected = widget.onPlanSelected;
+        if (onSelected != null) {
+          onSelected(plan);
+          return;
+        }
+
+        // Entrada por Planes: antes de cobrar hay que saber dónde se va a
+        // prestar el servicio.
         DHCLIENTUbicacionWidget.pendingNextRoute =
             DCFormaPagoSuscripcion1Widget.routeName;
         context.pushNamed(DHCLIENTUbicacionWidget.routeName);
