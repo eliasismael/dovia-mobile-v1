@@ -35,6 +35,11 @@ class DHCLIENTCostoEmergenciaWidget extends StatefulWidget {
   static String routeName = 'DH_CLIENT_CostoEmergencia';
   static String routePath = '/dHCLIENTCostoEmergencia';
 
+  /// Categoría de emergencia elegida en la pantalla de Emergencias. Es
+  /// obligatoria: el backend resuelve con ella el servicio de emergencia
+  /// activo, así que sin categoría no hay solicitud que crear.
+  static String? categoryId;
+
   /// Descripción del problema capturada en la pantalla de Emergencias.
   static String? description;
 
@@ -117,6 +122,12 @@ class _DHCLIENTCostoEmergenciaWidgetState
   Future<String?> _ensureServiceRequest() async {
     if (_serviceRequestId != null) return _serviceRequestId;
 
+    final categoryId = DHCLIENTCostoEmergenciaWidget.categoryId;
+    if (categoryId == null || categoryId.isEmpty) {
+      _showError('Elige el tipo de emergencia para continuar.');
+      return null;
+    }
+
     final token = currentAuthenticationToken ?? '';
     final addressId = await _resolveAddressId(token);
     if (addressId == null) {
@@ -128,12 +139,14 @@ class _DHCLIENTCostoEmergenciaWidgetState
     final response =
         await DOVIAAPIDoviaHomeContextGroup.createEmergencyServiceRequestCall
             .call(
+      categoryId: categoryId,
       description: DHCLIENTCostoEmergenciaWidget.description ?? '',
       addressId: addressId,
       authToken: token,
     );
     if (!response.succeeded) {
-      _showError('No se pudo registrar la emergencia. Intenta de nuevo.');
+      _showError(doviaHomeErrorMessage(response) ??
+          'No se pudo registrar la emergencia. Intenta de nuevo.');
       return null;
     }
 
@@ -316,6 +329,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
           isEmergency: true,
         ),
       );
+      DHCLIENTCostoEmergenciaWidget.categoryId = null;
       DHCLIENTCostoEmergenciaWidget.description = null;
       DHCLIENTCostoEmergenciaWidget.photos = [];
       // El flujo terminó: la dirección verificada no debe quedar pegada a una

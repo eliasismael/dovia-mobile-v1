@@ -71,6 +71,22 @@ String srServiceName(Map<String, dynamic> data) {
       'Servicio';
 }
 
+/// Categoría que el cliente eligió dentro del servicio, con el alcance que el
+/// catálogo le adjunta ("Reparación de fugas: en tuberías o conexiones
+/// visibles, de 2 a 3 fugas por visita").
+///
+/// **Null en las solicitudes anteriores al cambio de contrato**: el backend
+/// las devuelve con `categoryId` y `selectedCategory` en null, así que la
+/// pantalla omite el dato en vez de inventarle una categoría.
+String? srCategoryLabel(Map<String, dynamic> data) {
+  final selected = data['selectedCategory'];
+  if (selected is! Map) return null;
+  final name = srString(selected['name']);
+  if (name == null) return null;
+  final description = srString(selected['description']);
+  return description == null ? name : '$name: $description';
+}
+
 /// Retorna el asset del icono correspondiente al servicio.
 String srServiceIconAsset(String serviceName) {
   switch (serviceName) {

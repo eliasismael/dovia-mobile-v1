@@ -4,11 +4,12 @@ import 'api_config.dart';
 
 /// Start DOVIA API - Dovia Home Context Group Code
 ///
-/// Cubre los 57 endpoints del contexto Dovia Home, distribuidos en 6
+/// Cubre los 59 endpoints del contexto Dovia Home, distribuidos en 6
 /// controllers:
 ///   - Address (6): zonas trabajables + CRUD de direcciones de servicio.
-///   - Service Request (17): catalogo, creacion SERVICE/EMERGENCY, listados,
-///     imagenes, pago fake, marketplace de associate y ciclo de trabajo.
+///   - Service Request (19): catalogo (servicios y categorias), creacion
+///     SERVICE/EMERGENCY, listados, imagenes, pago fake, marketplace de
+///     associate y ciclo de trabajo.
 ///   - Extra Materials (7): solicitud/cotizacion/aceptacion de materiales extra.
 ///   - Quote (11): flujo de cotizaciones centrado en ServiceRequest (cliente y
 ///     empresa).
@@ -55,9 +56,13 @@ class DOVIAAPIDoviaHomeContextGroup {
   static DeleteServiceAddressCall deleteServiceAddressCall =
       DeleteServiceAddressCall();
 
-  // --- Service Request controller (17) ---
+  // --- Service Request controller (19) ---
   static ListCatalogServicesCall listCatalogServicesCall =
       ListCatalogServicesCall();
+  static ListServiceCategoriesCall listServiceCategoriesCall =
+      ListServiceCategoriesCall();
+  static ListEmergencyCategoriesCall listEmergencyCategoriesCall =
+      ListEmergencyCategoriesCall();
   static CreateServiceRequestCall createServiceRequestCall =
       CreateServiceRequestCall();
   static CreateEmergencyServiceRequestCall createEmergencyServiceRequestCall =
@@ -177,14 +182,39 @@ class DOVIAAPIDoviaHomeContextGroup {
 /// malformada llegan las dos como 400.
 String doviaHomeErrorCode(ApiCallResponse response) =>
     (getJsonField(response.jsonBody, r'''$.errorCode''') ??
-                getJsonField(response.jsonBody, r'''$.code'''))
+                getJsonField(response.jsonBody, r'''$.code''') ??
+                getJsonField(response.jsonBody, r'''$.errors[0].code'''))
             ?.toString() ??
         '';
+
+/// Mensaje de dominio que acompaña al rechazo, o null si la respuesta no trae
+/// uno (Ej: un fallo de red). El sobre de error de Dovia Home lo entrega en
+/// `errors[]`; se contemplan también las formas planas de los errores de
+/// validación del framework, donde `message` puede venir como lista.
+String? doviaHomeErrorMessage(ApiCallResponse response) {
+  final raw = getJsonField(response.jsonBody, r'''$.errors[0].message''') ??
+      getJsonField(response.jsonBody, r'''$.message''') ??
+      getJsonField(response.jsonBody, r'''$.error''');
+  if (raw is List) {
+    final joined =
+        raw.map((e) => e.toString().trim()).where((e) => e.isNotEmpty);
+    return joined.isEmpty ? null : joined.join(', ');
+  }
+  final message = raw?.toString().trim();
+  return (message == null || message.isEmpty) ? null : message;
+}
 
 /// Zona que el cliente eligió pero DOVIA no atiende. Es el único error del alta
 /// de direcciones que no se resuelve corrigiendo el formulario: la pantalla
 /// deriva a "fuera de alcance" en vez de mostrar un mensaje.
 const String kDoviaHomeInvalidZoneCode = 'DOVIA_HOME_INVALID_ZONE';
+
+/// La categoría enviada no pertenece al servicio de la solicitud. Sólo se
+/// llega acá con un catálogo desactualizado en pantalla (Ej: la categoría se
+/// dio de baja mientras el cliente completaba el formulario), así que la
+/// pantalla recarga las categorías en vez de repetir el envío.
+const String kDoviaHomeServiceCategoryNotFoundCode =
+    'DOVIA_HOME_SERVICE_CATEGORY_NOT_FOUND';
 
 // ---------------------------------------------------------------------------
 // Paginación
@@ -532,14 +562,116 @@ class ListCatalogServicesCall {
 }
 
 // ---------------------------------------------------------------------------
+// GET /dovia-home/catalog/services/{serviceId}/categories
+// Permiso: DOVIA_HOME_CATALOG_READ. Path: serviceId. Sin body.
+// Devuelve el alcance del servicio: categorias solicitables, que lleva el
+// tecnico y que no incluye la visita.
+// ---------------------------------------------------------------------------
+
+class ListServiceCategoriesCall {
+  Future<ApiCallResponse> call({
+    String? serviceId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIDoviaHomeContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'List Service Categories',
+      apiUrl: '$baseUrl/dovia-home/catalog/services/$serviceId/categories',
+      callType: ApiCallType.GET,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  List? categoriesList(dynamic response) =>
+      (getJsonField(response, r'''$.data.categories''', true) ??
+          getJsonField(response, r'''$.categories''', true)) as List?;
+
+  List? technicianBrings(dynamic response) =>
+      (getJsonField(response, r'''$.data.technicianBrings''', true) ??
+          getJsonField(response, r'''$.technicianBrings''', true)) as List?;
+
+  List? notIncluded(dynamic response) =>
+      (getJsonField(response, r'''$.data.notIncluded''', true) ??
+          getJsonField(response, r'''$.notIncluded''', true)) as List?;
+
+  String? serviceId(dynamic response) => castToType<String>(
+        getJsonField(response, r'''$.data.serviceId''') ??
+            getJsonField(response, r'''$.serviceId'''),
+      );
+}
+
+// ---------------------------------------------------------------------------
+// GET /dovia-home/catalog/emergencies/categories
+// Permiso: DOVIA_HOME_CATALOG_READ. Sin path ni body.
+// Mismo sobre que las categorias de un servicio normal, pero del servicio
+// activo de tipo EMERGENCY: el `serviceId` lo resuelve el backend.
+// ---------------------------------------------------------------------------
+
+class ListEmergencyCategoriesCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIDoviaHomeContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'List Emergency Categories',
+      apiUrl: '$baseUrl/dovia-home/catalog/emergencies/categories',
+      callType: ApiCallType.GET,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  List? categoriesList(dynamic response) =>
+      (getJsonField(response, r'''$.data.categories''', true) ??
+          getJsonField(response, r'''$.categories''', true)) as List?;
+
+  List? technicianBrings(dynamic response) =>
+      (getJsonField(response, r'''$.data.technicianBrings''', true) ??
+          getJsonField(response, r'''$.technicianBrings''', true)) as List?;
+
+  List? notIncluded(dynamic response) =>
+      (getJsonField(response, r'''$.data.notIncluded''', true) ??
+          getJsonField(response, r'''$.notIncluded''', true)) as List?;
+
+  String? serviceId(dynamic response) => castToType<String>(
+        getJsonField(response, r'''$.data.serviceId''') ??
+            getJsonField(response, r'''$.serviceId'''),
+      );
+}
+
+// ---------------------------------------------------------------------------
 // POST /dovia-home/service-requests
 // Permiso: DOVIA_HOME_SERVICE_CREATE.
-// Body: { serviceId, description, scheduledAt, addressId } (strings no vacios).
+// Body: { serviceId, categoryId, description, scheduledAt, addressId }
+// (strings no vacios). `categoryId` tiene que pertenecer a `serviceId`: si no,
+// el backend responde 400 con [kDoviaHomeServiceCategoryNotFoundCode].
 // ---------------------------------------------------------------------------
 
 class CreateServiceRequestCall {
   Future<ApiCallResponse> call({
     String? serviceId = '',
+    String? categoryId = '',
     String? description = '',
     String? scheduledAt = '',
     String? addressId = '',
@@ -549,6 +681,7 @@ class CreateServiceRequestCall {
 
     final payload = <String, dynamic>{
       'serviceId': serviceId,
+      'categoryId': categoryId,
       'description': description,
       'scheduledAt': scheduledAt,
       'addressId': addressId,
@@ -584,11 +717,14 @@ class CreateServiceRequestCall {
 // ---------------------------------------------------------------------------
 // POST /dovia-home/service-requests/emergencies
 // Permiso: DOVIA_HOME_SERVICE_CREATE.
-// Body: { description, addressId } SOLAMENTE (campos extra son rechazados).
+// Body: { categoryId, description, addressId } SOLAMENTE (campos extra son
+// rechazados: ni `serviceId` ni `scheduledAt`). El servicio activo de tipo
+// EMERGENCY lo resuelve el backend a partir de `categoryId`.
 // ---------------------------------------------------------------------------
 
 class CreateEmergencyServiceRequestCall {
   Future<ApiCallResponse> call({
+    String? categoryId = '',
     String? description = '',
     String? addressId = '',
     String? authToken = '',
@@ -596,6 +732,7 @@ class CreateEmergencyServiceRequestCall {
     final baseUrl = DOVIAAPIDoviaHomeContextGroup.getBaseUrl();
 
     final payload = <String, dynamic>{
+      'categoryId': categoryId,
       'description': description,
       'addressId': addressId,
     };

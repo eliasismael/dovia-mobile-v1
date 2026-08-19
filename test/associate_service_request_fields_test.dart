@@ -33,4 +33,56 @@ void main() {
       expect(asrLongitude(data), isNull);
     });
   });
+
+  group('asrCategoryName / asrCategoryScope', () {
+    test('lee la categoria elegida por el cliente', () {
+      final data = {
+        'selectedCategory': {
+          'id': '018f6f11-0001-7000-8000-000000000001',
+          'name': 'Reparacion de fugas',
+          'description': 'en tuberias o conexiones visibles, de 2 a 3 fugas.',
+        },
+      };
+
+      expect(asrCategoryName(data), 'Reparacion de fugas');
+      expect(
+        asrCategoryScope(data),
+        'Reparacion de fugas: en tuberias o conexiones visibles, de 2 a 3 fugas.',
+      );
+    });
+
+    test('null en las solicitudes anteriores al cambio de contrato', () {
+      final data = {'categoryId': null, 'selectedCategory': null};
+
+      expect(asrCategoryName(data), isNull);
+      expect(asrCategoryScope(data), isNull);
+    });
+  });
+
+  group('asrWhatToBring', () {
+    test('arma la lista con lo que el catalogo dice que lleva el tecnico', () {
+      final data = {
+        'serviceDetail': {
+          'technicianBrings': [
+            'Herramientas manuales para trabajos de plomeria.',
+            'Equipo para diagnostico de fugas.',
+          ],
+        },
+      };
+
+      expect(
+        asrWhatToBring(data),
+        '- Herramientas manuales para trabajos de plomeria.\n'
+        '- Equipo para diagnostico de fugas.',
+      );
+    });
+
+    test('null cuando el servicio no declara que llevar', () {
+      final data = {
+        'serviceDetail': {'technicianBrings': <dynamic>[]},
+      };
+
+      expect(asrWhatToBring(data), isNull);
+    });
+  });
 }

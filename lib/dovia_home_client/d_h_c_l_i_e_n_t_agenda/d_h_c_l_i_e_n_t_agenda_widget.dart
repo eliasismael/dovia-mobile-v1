@@ -1,6 +1,8 @@
+import '/dovia_home_client/category_picker.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
+import '/dovia_home_client/service_catalog.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -80,12 +82,20 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
   /// todavía no la refleja (mismo resguardo que en la pantalla de cotización).
   Map<String, dynamic>? _justAddedAddress;
 
+  /// Alcance del servicio elegido: su `serviceId` y las categorías que se
+  /// pueden pedir dentro de él. El POST exige las dos cosas, así que la
+  /// pantalla no puede enviar nada hasta tenerlo resuelto.
+  DoviaHomeServiceScope? _scope;
+  bool _isLoadingScope = true;
+  String? _selectedCategoryId;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTAgendaModel());
 
     _loadAddresses();
+    _loadScope();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -97,8 +107,10 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
     super.dispose();
   }
 
-  /// Enviar exige fecha, hora y lugar del servicio (los tres van en el POST).
+  /// Enviar exige tipo de trabajo, fecha, hora y lugar del servicio (los cuatro
+  /// van en el POST).
   bool get _canContinue =>
+      _selectedCategoryId != null &&
       _model.selectedDate != null &&
       _model.timeChosen &&
       _selectedAddressId != null &&
@@ -121,6 +133,65 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
     if (isPm && hour != 12) hour += 12;
     if (!isPm && hour == 12) hour = 0;
     return DateTime(date.year, date.month, date.day, hour, minute);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Tipo de trabajo (categoría del servicio).
+  // ---------------------------------------------------------------------------
+
+  /// Categorías del servicio elegido en el Dashboard. Sin esto no hay
+  /// `categoryId` que mandar, y el backend rechaza la solicitud.
+  Future<void> _loadScope() async {
+    final scope = await loadDoviaHomeServiceScope(
+      serviceTitle: DHCLIENTInstalacionWidget.serviceTitle,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted) return;
+
+    safeSetState(() {
+      _scope = scope;
+      _isLoadingScope = false;
+      // Con una sola categoría no tiene sentido preguntar.
+      final categories = scope?.categories ?? const [];
+      if (categories.length == 1) _selectedCategoryId = categories.first.id;
+      if (scope?.categoryById(_selectedCategoryId) == null) {
+        _selectedCategoryId = null;
+      }
+    });
+  }
+
+  String? get _selectedCategoryLabel =>
+      _scope?.categoryById(_selectedCategoryId)?.name;
+
+  /// Etiqueta de la fila: distingue el catálogo cargando del servicio que no
+  /// se pudo resolver, porque ahí no hay nada que elegir y el envío va a
+  /// fallar hasta que se recargue.
+  String get _categoryRowLabel {
+    if (_isLoadingScope) return 'Cargando tipos de trabajo...';
+    if (_scope == null) return 'No se pudo cargar el tipo de trabajo';
+    return _selectedCategoryLabel ?? 'Selecciona el tipo de trabajo';
+  }
+
+  Future<void> _pickCategory() async {
+    if (_isLoadingScope) return;
+    // El servicio no se resolvió (Ej: se entró directo a la ruta o falló la
+    // red): se reintenta acá en vez de dejar la fila muerta.
+    if (_scope == null) {
+      safeSetState(() => _isLoadingScope = true);
+      await _loadScope();
+      if (!mounted || _scope == null) return;
+    }
+
+    final category = await pickDoviaHomeCategory(
+      context: context,
+      title: 'Tipo de trabajo',
+      categories: _scope?.categories ?? const [],
+      selectedId: _selectedCategoryId,
+      emptyMessage: 'Este servicio todavía no tiene tipos de trabajo '
+          'disponibles.',
+    );
+    if (category == null || !mounted) return;
+    safeSetState(() => _selectedCategoryId = category.id);
   }
 
   // ---------------------------------------------------------------------------
@@ -251,76 +322,6 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Motivo del rechazo que devolvió el backend (Ej: "serviceId invalido"). Sin
-  /// esto un 400 se ve igual que un problema de red y no hay forma de saber qué
-  /// campo falló.
-  String? _apiErrorMessage(dynamic body) {
-    if (body is Map) {
-      final message = body['message'] ?? body['error'] ?? body['detail'];
-      if (message is String && message.trim().isNotEmpty) return message.trim();
-      if (message is List && message.isNotEmpty) return message.join(', ');
-    }
-    return null;
-  }
-
-  /// Normaliza para comparar nombres de servicio sin depender de mayúsculas ni
-  /// acentos ("Albañilería" vs "albanileria").
-  String _normalize(String value) {
-    const accents = {
-      'á': 'a',
-      'é': 'e',
-      'í': 'i',
-      'ó': 'o',
-      'ú': 'u',
-      'ü': 'u',
-      'ñ': 'n',
-    };
-    var result = value.toLowerCase().trim();
-    accents.forEach((from, to) => result = result.replaceAll(from, to));
-    return result.replaceAll(RegExp(r'\s+'), ' ');
-  }
-
-  /// Resuelve el `serviceId` del catálogo a partir de la categoría elegida en el
-  /// Dashboard (que hoy es solo un título). Se compara por nombre normalizado y,
-  /// si no hay coincidencia exacta, por contención en cualquier sentido.
-  Future<String?> _resolveServiceId(String token) async {
-    final response =
-        await DOVIAAPIDoviaHomeContextGroup.listCatalogServicesCall.call(
-      authToken: token,
-    );
-    if (!response.succeeded) return null;
-
-    final services = DOVIAAPIDoviaHomeContextGroup.listCatalogServicesCall
-            .servicesList(response.jsonBody) ??
-        [];
-    final target = _normalize(DHCLIENTInstalacionWidget.serviceTitle);
-
-    String? partialMatch;
-    for (final service in services.whereType<Map>()) {
-      // Un servicio dado de baja no se puede solicitar: el POST lo rechazaría.
-      if (service['active'] == false) continue;
-
-      final id = _str(service['id']) ?? _str(service['serviceId']);
-      // El catálogo etiqueta los servicios con `label` (Ej: "Plomería") y los
-      // identifica con `code` (Ej: "PLOMERIA"); `name`/`title` no existen en la
-      // respuesta y leer sólo esos dejaba el id sin resolver, así que la
-      // solicitud moría antes del POST con "No se pudo identificar el servicio".
-      final name = _str(service['label']) ??
-          _str(service['name']) ??
-          _str(service['title']) ??
-          _str(service['code']);
-      if (id == null || name == null) continue;
-
-      final normalized = _normalize(name);
-      if (normalized == target) return id;
-      if (partialMatch == null &&
-          (normalized.contains(target) || target.contains(normalized))) {
-        partialMatch = id;
-      }
-    }
-    return partialMatch;
-  }
-
   /// Sube las fotos del levantamiento con el flujo presign → PUT → confirm. Es
   /// best-effort: la solicitud ya existe, así que un fallo de fotos no la anula.
   Future<void> _uploadPhotos(String serviceRequestId, String token) async {
@@ -404,8 +405,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
     try {
       final token = currentAuthenticationToken ?? '';
 
-      final serviceId = await _resolveServiceId(token);
-      if (serviceId == null) {
+      final scope = _scope;
+      final categoryId = _selectedCategoryId;
+      if (scope == null || categoryId == null) {
         _showSnack(
             'No se pudo identificar el servicio en el catálogo. Intenta de nuevo.');
         return;
@@ -419,14 +421,30 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
 
       final response =
           await DOVIAAPIDoviaHomeContextGroup.createServiceRequestCall.call(
-        serviceId: serviceId,
+        serviceId: scope.serviceId,
+        categoryId: categoryId,
         description: description,
         scheduledAt: scheduledAt.toUtc().toIso8601String(),
         addressId: addressId,
         authToken: token,
       );
       if (!response.succeeded) {
-        _showSnack(_apiErrorMessage(response.jsonBody) ??
+        // La categoría dejó de pertenecer al servicio (el catálogo cambió
+        // mientras el cliente completaba el formulario): se recarga la lista y
+        // se le pide que elija de nuevo, porque reenviar lo mismo vuelve a
+        // fallar.
+        if (doviaHomeErrorCode(response) ==
+            kDoviaHomeServiceCategoryNotFoundCode) {
+          safeSetState(() {
+            _selectedCategoryId = null;
+            _isLoadingScope = true;
+          });
+          await _loadScope();
+          _showSnack(
+              'El tipo de trabajo que elegiste ya no está disponible. Elige otro.');
+          return;
+        }
+        _showSnack(doviaHomeErrorMessage(response) ??
             'No se pudo enviar la solicitud. Intenta de nuevo.');
         return;
       }
@@ -506,54 +524,8 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
     required String label,
     required bool expanded,
     required VoidCallback onTap,
-  }) {
-    return InkWell(
-      splashColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 48.0,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.0),
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 7.0,
-              color: Color(0x21000000),
-              offset: Offset(0.0, 0.0),
-            )
-          ],
-        ),
-        padding: const EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 12.0, 0.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                      color: const Color(0xFF00444B),
-                      fontSize: 16.0,
-                    ),
-              ),
-            ),
-            Icon(
-              expanded
-                  ? Icons.keyboard_arrow_up_rounded
-                  : Icons.chevron_right_rounded,
-              color: const Color(0xFF00444B),
-              size: 24.0,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  }) =>
+      DoviaHomeSelectorRow(label: label, expanded: expanded, onTap: onTap);
 
   Widget _buildTimeWheel() {
     return Container(
@@ -713,6 +685,14 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Tipo de trabajo: el backend exige un
+                                // `categoryId` que pertenezca al servicio.
+                                _buildSelectorRow(
+                                  label: _categoryRowLabel,
+                                  expanded: false,
+                                  onTap: _pickCategory,
+                                ),
+                                const SizedBox(height: 13.0),
                                 // Lugar del servicio: el backend exige un
                                 // `addressId` para crear la solicitud.
                                 _buildSelectorRow(

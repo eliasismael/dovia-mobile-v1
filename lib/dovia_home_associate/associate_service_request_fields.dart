@@ -113,6 +113,27 @@ String asrServiceName(Map<String, dynamic> data) {
       'Servicio';
 }
 
+/// Categoría que el cliente eligió dentro del servicio (Ej: "Reparación de
+/// fugas"). Es lo que acota el trabajo: el servicio dice el oficio, la
+/// categoría dice qué se va a hacer y hasta dónde.
+///
+/// **Null en las solicitudes anteriores al cambio de contrato**, que viajan
+/// con `selectedCategory` en null.
+String? asrCategoryName(Map<String, dynamic> data) {
+  final selected = _asMap(data['selectedCategory']);
+  return _firstString([selected?['name'], selected?['label']]);
+}
+
+/// La categoría con el alcance que el catálogo le adjunta ("de 2 a 3 fugas por
+/// visita"), que es el límite de lo que la visita cubre.
+String? asrCategoryScope(Map<String, dynamic> data) {
+  final name = asrCategoryName(data);
+  if (name == null) return null;
+  final description =
+      _firstString([_asMap(data['selectedCategory'])?['description']]);
+  return description == null ? name : '$name: $description';
+}
+
 /// Código de catálogo del servicio (Ej: `PLUMBING`). Es con lo que se cruza la
 /// tarjeta contra el filtro de categoría.
 String? asrServiceCode(Map<String, dynamic> data) {
@@ -240,14 +261,24 @@ String? asrAccessInstructions(Map<String, dynamic> data) {
 /// Qué tiene que llevar el asociado a la visita (sección "Debes llevar" del
 /// diseño): herramientas, repuestos o materiales que el trabajo exige.
 ///
-/// **El contrato todavía no expone este dato.** Lo único que hay de materiales
-/// en Dovia Home es `requestedMaterials`, que es el flujo inverso —el asociado
-/// pidiendo materiales *extra* una vez en sitio
-/// (`POST .../extra-materials`)— y no sirve para esto. Se prueban las claves
-/// plausibles y ante la duda devuelve null, para que la pantalla diga que no
-/// hay indicaciones en vez de inventarlas.
+/// Sale del catálogo, en `serviceDetail.technicianBrings`: es la misma lista
+/// que ve el cliente al pedir el servicio, así que los dos lados esperan lo
+/// mismo del técnico. Se conservan las claves planas por si el resumen del
+/// listado entrega el dato ya armado, y ante la duda devuelve null para que la
+/// pantalla diga que no hay indicaciones en vez de inventarlas.
+///
+/// No cubre `requestedMaterials`, que es el flujo inverso —el asociado pidiendo
+/// materiales *extra* una vez en sitio (`POST .../extra-materials`)—.
 String? asrWhatToBring(Map<String, dynamic> data) {
   final detail = _asMap(data['serviceDetail']) ?? _asMap(data['service']);
+  final brings = detail?['technicianBrings'];
+  if (brings is List) {
+    final items = <String>[
+      for (final item in brings)
+        if (asrString(item) != null) '- ${asrString(item)!}',
+    ];
+    if (items.isNotEmpty) return items.join('\n');
+  }
   return _firstString([
     data['whatToBring'],
     data['requiredMaterials'],

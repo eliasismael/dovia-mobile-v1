@@ -1,4 +1,6 @@
+import '/dovia_home_client/category_picker.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
+import '/dovia_home_client/service_catalog.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -10,6 +12,9 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '/auth/custom_auth/auth_util.dart';
+
 import 'd_h_c_l_i_e_n_t_emergencias_model.dart';
 export 'd_h_c_l_i_e_n_t_emergencias_model.dart';
 
@@ -29,6 +34,12 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Categorías de emergencia del catálogo. El POST exige `categoryId`, y de
+  /// ahí sale el servicio de emergencia activo del lado del backend.
+  DoviaHomeServiceScope? _scope;
+  bool _isLoadingScope = true;
+  String? _selectedCategoryId;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +49,8 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
     _model.textFieldFocusNode ??= FocusNode();
     // Rehabilita el botón [Enviar] en tiempo real según haya descripción.
     _model.textController!.addListener(_onDescriptionChanged);
+
+    _loadScope();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -53,9 +66,60 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
   void _onDescriptionChanged() => safeSetState(() {});
 
   /// El botón [Enviar] se habilita únicamente cuando el usuario ingresó una
-  /// descripción en el campo de texto.
+  /// descripción en el campo de texto y eligió el tipo de emergencia: los dos
+  /// datos son obligatorios para crear la solicitud.
+  bool get _canSubmit => _hasDescription && _selectedCategoryId != null;
+
   bool get _hasDescription =>
       (_model.textController?.text.trim().isNotEmpty) ?? false;
+
+  /// Trae las categorías de emergencia. No recibe servicio: el backend
+  /// resuelve cuál es el de tipo `EMERGENCY` vigente.
+  Future<void> _loadScope() async {
+    final scope = await loadDoviaHomeEmergencyScope(
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted) return;
+
+    safeSetState(() {
+      _scope = scope;
+      _isLoadingScope = false;
+      final categories = scope?.categories ?? const [];
+      // Con una sola categoría no tiene sentido preguntar.
+      if (categories.length == 1) _selectedCategoryId = categories.first.id;
+      if (scope?.categoryById(_selectedCategoryId) == null) {
+        _selectedCategoryId = null;
+      }
+    });
+  }
+
+  String get _categoryRowLabel {
+    if (_isLoadingScope) return 'Cargando tipos de emergencia...';
+    if (_scope == null) return 'No se pudo cargar el tipo de emergencia';
+    return _scope?.categoryById(_selectedCategoryId)?.name ??
+        'Selecciona el tipo de emergencia';
+  }
+
+  Future<void> _pickCategory() async {
+    if (_isLoadingScope) return;
+    // El catálogo no cargó (Ej: falló la red): se reintenta acá en vez de
+    // dejar la fila muerta.
+    if (_scope == null) {
+      safeSetState(() => _isLoadingScope = true);
+      await _loadScope();
+      if (!mounted || _scope == null) return;
+    }
+
+    final category = await pickDoviaHomeCategory(
+      context: context,
+      title: 'Tipo de emergencia',
+      categories: _scope?.categories ?? const [],
+      selectedId: _selectedCategoryId,
+      emptyMessage: 'No hay tipos de emergencia disponibles en este momento.',
+    );
+    if (category == null || !mounted) return;
+    safeSetState(() => _selectedCategoryId = category.id);
+  }
 
   /// Zona de carga de fotografías: selector nativo Cámara / Galería. Las fotos
   /// son opcionales, se adjuntan a la solicitud al confirmar el pago.
@@ -196,6 +260,17 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.w700,
                                 ),
+                          ),
+                        ),
+                        // Tipo de emergencia: el backend exige el
+                        // `categoryId` para crear la solicitud.
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 16.0),
+                          child: DoviaHomeSelectorRow(
+                            label: _categoryRowLabel,
+                            expanded: false,
+                            onTap: _pickCategory,
                           ),
                         ),
                         Align(
@@ -442,12 +517,15 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 150.0, 0.0, 0.0),
                             child: FFButtonWidget(
-                              // Sólo se habilita con una descripción cargada.
-                              onPressed: _hasDescription
+                              // Sólo se habilita con el tipo de emergencia y
+                              // la descripción cargados.
+                              onPressed: _canSubmit
                                   ? () async {
                                       // El levantamiento viaja al paso de cobro,
                                       // que crea la solicitud de emergencia y
                                       // adjunta las fotos al confirmar el pago.
+                                      DHCLIENTCostoEmergenciaWidget.categoryId =
+                                          _selectedCategoryId;
                                       DHCLIENTCostoEmergenciaWidget
                                               .description =
                                           _model.textController!.text.trim();

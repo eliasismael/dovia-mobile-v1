@@ -226,7 +226,14 @@ class _DHASSOCIATETuTrabajoWidgetState
     if (data == null) return 'x\n';
     switch (index) {
       case 0:
-        return '${asrServiceName(data)}\n';
+        // El servicio dice el oficio y la categoría qué se va a hacer:
+        // sin ella el asociado no sabe si va a destapar un drenaje o a
+        // reparar una fuga. Las solicitudes previas al cambio de
+        // contrato no la traen, y ahí la línea queda como estaba.
+        final category = asrCategoryName(data);
+        return category == null
+            ? '${asrServiceName(data)}\n'
+            : '${asrServiceName(data)} · $category\n';
       case 1:
         return '${asrLongDate(data)} · ${asrTimeLabel(data)}\n';
       default:

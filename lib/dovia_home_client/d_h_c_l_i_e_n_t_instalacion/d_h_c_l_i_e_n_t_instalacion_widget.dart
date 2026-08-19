@@ -1,4 +1,5 @@
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
+import '/dovia_home_client/service_catalog.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -10,6 +11,9 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '/auth/custom_auth/auth_util.dart';
+
 import 'd_h_c_l_i_e_n_t_instalacion_model.dart';
 export 'd_h_c_l_i_e_n_t_instalacion_model.dart';
 
@@ -26,8 +30,11 @@ class DHCLIENTInstalacionWidget extends StatefulWidget {
   /// [DHCLIENTUbicacionWidget.pendingNextRoute]).
   static String serviceTitle = 'Instalación';
 
-  /// Listado de alcanzables que incluye la categoría. Idealmente proviene del
-  /// backend; si viene vacío se muestran los placeholders del diseño.
+  /// Alcance del servicio: las categorías que se pueden pedir dentro de él,
+  /// con el límite que el catálogo le pone a cada una ("de 2 a 3 fugas por
+  /// visita"). Sale de
+  /// `GET /dovia-home/catalog/services/{serviceId}/categories`; si la consulta
+  /// falla se muestran los placeholders del diseño.
   static List<String> alcanzables = [];
 
   /// Levantamiento del trabajo (descripción + fotos) que viaja hasta la pantalla
@@ -62,6 +69,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
+    _loadAlcanzables();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -70,6 +79,24 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Trae del catálogo lo que cubre el servicio elegido. Es informativo: la
+  /// categoría concreta se elige recién en Agenda, que es donde se crea la
+  /// solicitud, pero el cliente necesita saber el alcance antes de describir
+  /// el trabajo.
+  Future<void> _loadAlcanzables() async {
+    final scope = await loadDoviaHomeServiceScope(
+      serviceTitle: DHCLIENTInstalacionWidget.serviceTitle,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted || scope == null) return;
+
+    safeSetState(() {
+      DHCLIENTInstalacionWidget.alcanzables = [
+        for (final category in scope.categories) category.scopeLine,
+      ];
+    });
   }
 
   /// La descripción tiene texto y hay al menos una foto cargada.

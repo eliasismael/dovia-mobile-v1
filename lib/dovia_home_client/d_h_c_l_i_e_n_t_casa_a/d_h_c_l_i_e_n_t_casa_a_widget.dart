@@ -185,6 +185,13 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   String get _workDescription => _firstString([_data?['description']]) ?? '';
 
+  /// Categoría elegida al pedir el servicio. Vacía en las solicitudes creadas
+  /// antes de que el contrato la exigiera.
+  String get _categoryLabel {
+    final data = _data;
+    return (data == null ? null : srCategoryLabel(data)) ?? '';
+  }
+
   String get _mustHaveReady =>
       _firstString([
         _data?['associateNotes'],
@@ -1008,6 +1015,18 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                if (_categoryLabel.isNotEmpty) ...[
+                                  Text(
+                                    'Categoría:\n$_categoryLabel',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(),
+                                          letterSpacing: 0.0,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 12.0),
+                                ],
                                 if (_workDescription.isNotEmpty) ...[
                                   Text(
                                     'Descripción:\n$_workDescription',
