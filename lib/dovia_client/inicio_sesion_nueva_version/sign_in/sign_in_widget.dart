@@ -728,8 +728,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     context.pushNamedAuth(
                                         LISTINGHQHomeWidget.routeName,
                                         context.mounted);
-                                  } else if (userRole == 'LEGAL_ASSOCIATE' ||
-                                      userRole == 'LEGAL_OFFICER') {
+                                  } else if (userRole == 'LEGAL_OFFICER') {
+                                    // Legal HQ audita y supervisa: su panel es
+                                    // el tablero de expedientes, no la bolsa
+                                    // de trabajo del asociado.
+                                    context.pushNamedAuth(
+                                        LEGALHQHomeWidget.routeName,
+                                        context.mounted);
+                                  } else if (userRole == 'LEGAL_ASSOCIATE') {
                                     context.pushNamedAuth(
                                         LegalAssociateHomeWidget.routeName,
                                         context.mounted);

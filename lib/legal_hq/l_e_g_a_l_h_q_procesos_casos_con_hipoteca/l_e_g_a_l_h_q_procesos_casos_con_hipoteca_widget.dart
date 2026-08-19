@@ -9,7 +9,13 @@ import 'l_e_g_a_l_h_q_procesos_casos_con_hipoteca_model.dart';
 export 'l_e_g_a_l_h_q_procesos_casos_con_hipoteca_model.dart';
 
 class LEGALHQProcesosCasosConHipotecaWidget extends StatefulWidget {
-  const LEGALHQProcesosCasosConHipotecaWidget({super.key});
+  const LEGALHQProcesosCasosConHipotecaWidget({
+    super.key,
+    this.processId,
+  });
+
+  /// Expediente hipotecario cuya gestión bancaria se va a trabajar.
+  final String? processId;
 
   static String routeName = 'LEGAL_HQ_Procesos_CasosConHipoteca';
   static String routePath = '/lEGALHQProcesosCasosConHipoteca';

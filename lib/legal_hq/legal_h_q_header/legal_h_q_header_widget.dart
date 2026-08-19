@@ -153,15 +153,10 @@ class _LegalHQHeaderWidgetState extends State<LegalHQHeaderWidget> {
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () async {
-                    context.pushNamed(
-                      LEGALHQDocumentoWidget.routeName,
-                      queryParameters: {
-                        'nombreDocumento': serializeParam(
-                          '',
-                          ParamType.String,
-                        ),
-                      }.withoutNulls,
-                    );
+                    // El visor necesita un documento concreto, así que el
+                    // acceso rápido lleva al listado de expedientes por
+                    // revisar, que es de donde se abre cada documento.
+                    context.pushNamed(LEGALHQProcesosWidget.routeName);
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(0.0),

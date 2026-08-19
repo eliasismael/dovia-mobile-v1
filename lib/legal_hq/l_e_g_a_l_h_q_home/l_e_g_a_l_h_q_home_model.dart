@@ -10,6 +10,9 @@ class LEGALHQHomeModel extends FlutterFlowModel<LEGALHQHomeWidget> {
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
+  // State field for the search bar (ID de inmueble / dirección).
+  FocusNode? textFieldFocusNode;
+  TextEditingController? textController;
   // Model for Legal_HQ_Header component.
   late LegalHQHeaderModel legalHQHeaderModel;
   // Model for LEGAL_HQ_Navbar component.
@@ -26,6 +29,8 @@ class LEGALHQHomeModel extends FlutterFlowModel<LEGALHQHomeWidget> {
   @override
   void dispose() {
     cornerGradientBackgroundModel.dispose();
+    textFieldFocusNode?.dispose();
+    textController?.dispose();
     legalHQHeaderModel.dispose();
     lEGALHQNavbarModel.dispose();
   }

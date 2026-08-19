@@ -1,13 +1,77 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
-import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
+import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
+import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
+import '/legal_hq/legal_hq_process_data.dart';
+import '/legal_hq/l_e_g_a_l_h_q_post_venta/l_e_g_a_l_h_q_post_venta_widget.dart';
+import '/legal_hq/l_e_g_a_l_h_q_procesos_casos_con_hipoteca/l_e_g_a_l_h_q_procesos_casos_con_hipoteca_widget.dart';
+import '/legal_hq/l_e_g_a_l_h_q_revision_documentos_propiedades/l_e_g_a_l_h_q_revision_documentos_propiedades_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_h_q_procesos_model.dart';
 export 'l_e_g_a_l_h_q_procesos_model.dart';
+
+/// Filtros del listado, tal como los chips del diseño.
+enum _ProcesosFilter { todos, propiedades, hipotecas, postVenta, aprobados }
+
+extension _ProcesosFilterX on _ProcesosFilter {
+  String get label {
+    switch (this) {
+      case _ProcesosFilter.todos:
+        return 'Todos';
+      case _ProcesosFilter.propiedades:
+        return 'Propiedades';
+      case _ProcesosFilter.hipotecas:
+        return 'Hipotecas';
+      case _ProcesosFilter.postVenta:
+        return 'Post-venta';
+      case _ProcesosFilter.aprobados:
+        return 'Aprobados';
+    }
+  }
+
+  /// Parámetro `category` que se manda al backend ('' = sin filtrar).
+  String get category {
+    switch (this) {
+      case _ProcesosFilter.propiedades:
+        return kCategoryPublication;
+      case _ProcesosFilter.hipotecas:
+        return kCategoryMortgage;
+      default:
+        return '';
+    }
+  }
+
+  /// Parámetro `status`.
+  String get status {
+    switch (this) {
+      case _ProcesosFilter.aprobados:
+        return kClosedStatuses;
+      case _ProcesosFilter.postVenta:
+        // El backend no modela la post-venta como categoría propia; lo más
+        // cercano son los expedientes ya finalizados.
+        return 'FINISHED';
+      default:
+        return '';
+    }
+  }
+
+  String get emptyMessage {
+    switch (this) {
+      case _ProcesosFilter.propiedades:
+        return 'No hay propiedades pendientes de revisión';
+      case _ProcesosFilter.hipotecas:
+        return 'No hay trámites hipotecarios';
+      case _ProcesosFilter.postVenta:
+        return 'No hay expedientes de post-venta';
+      case _ProcesosFilter.aprobados:
+        return 'Todavía no hay expedientes aprobados';
+      case _ProcesosFilter.todos:
+        return 'No hay expedientes para revisar';
+    }
+  }
+}
 
 class LEGALHQProcesosWidget extends StatefulWidget {
   const LEGALHQProcesosWidget({super.key});
@@ -24,10 +88,23 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  late Future<List<LegalHqProcess>> _processesFuture;
+
+  _ProcesosFilter _filter = _ProcesosFilter.todos;
+  String _query = '';
+  String? _claimingProcessId;
+
+  static const Color _aqua = Color(0xFF007376);
+  static const Color _textDark = Color(0xFF00444B);
+  static const Color _chipIdleBg = Color(0xFFCCE3E4);
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => LEGALHQProcesosModel());
+    _model.textController ??= TextEditingController();
+    _model.textFieldFocusNode ??= FocusNode();
+    _loadData();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -37,6 +114,32 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  void _loadData() {
+    _processesFuture = LegalHqProcessApi.fetchBoth(
+      status: _filter.status,
+      category: _filter.category,
+    );
+  }
+
+  void _selectFilter(_ProcesosFilter filter) {
+    if (_filter == filter) return;
+    safeSetState(() {
+      _filter = filter;
+      _loadData();
+    });
+  }
+
+  List<LegalHqProcess> _applySearch(List<LegalHqProcess> processes) {
+    final query = _query.trim().toLowerCase();
+    if (query.isEmpty) return processes;
+    return processes
+        .where((process) =>
+            process.propertyId.toLowerCase().contains(query) ||
+            process.address.toLowerCase().contains(query) ||
+            process.propertyName.toLowerCase().contains(query))
+        .toList();
   }
 
   @override
@@ -63,484 +166,18 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     wrapWithModel(
-                      model: _model.legalAssociateHeaderModel,
+                      model: _model.legalHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const LegalAssociateHeaderWidget(
-                        titleText: 'Procesos',
+                      child: const LegalHQHeaderWidget(
+                        text: 'Procesos',
                       ),
                     ),
+                    _buildSearchBar(context),
+                    _buildFilterChips(context),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 0.0),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  FFButtonWidget(
-                                    onPressed: () {
-                                      print('Button pressed ...');
-                                    },
-                                    text: 'Todos',
-                                    options: FFButtonOptions(
-                                      height: 30.0,
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              16.0, 0.0, 16.0, 0.0),
-                                      iconPadding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color:
-                                          FlutterFlowTheme.of(context).accent1,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.normal,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontStyle,
-                                            ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            fontSize: 14.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                      elevation: 0.0,
-                                      borderRadius: BorderRadius.circular(24.0),
-                                    ),
-                                  ),
-                                  FFButtonWidget(
-                                    onPressed: () {
-                                      print('Button pressed ...');
-                                    },
-                                    text: 'Propiedades',
-                                    options: FFButtonOptions(
-                                      height: 30.0,
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              16.0, 0.0, 16.0, 0.0),
-                                      iconPadding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color:
-                                          FlutterFlowTheme.of(context).accent1,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.normal,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontStyle,
-                                            ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            fontSize: 14.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                      elevation: 0.0,
-                                      borderRadius: BorderRadius.circular(24.0),
-                                    ),
-                                  ),
-                                  FFButtonWidget(
-                                    onPressed: () {
-                                      print('Button pressed ...');
-                                    },
-                                    text: 'Hipotecas',
-                                    options: FFButtonOptions(
-                                      height: 30.0,
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              16.0, 0.0, 16.0, 0.0),
-                                      iconPadding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color:
-                                          FlutterFlowTheme.of(context).accent1,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.normal,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontStyle,
-                                            ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            fontSize: 14.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                      elevation: 0.0,
-                                      borderRadius: BorderRadius.circular(24.0),
-                                    ),
-                                  ),
-                                ].divide(const SizedBox(width: 10.0)),
-                              ),
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 20.0, 0.0, 0.0),
-                                child: Container(
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            10.0, 10.0, 10.0, 10.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Container(
-                                          width:
-                                              MediaQuery.sizeOf(context).width *
-                                                  1.0,
-                                          height: 150.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            child: Image.asset(
-                                              'assets/images/casa_card_sobreMiVisita.png',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                          child: Container(
-                                            width: MediaQuery.sizeOf(context)
-                                                    .width *
-                                                1.0,
-                                            decoration: const BoxDecoration(),
-                                            child: IntrinsicWidth(
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Align(
-                                                    alignment:
-                                                        const AlignmentDirectional(
-                                                            -1.0, 0.0),
-                                                    child: RichText(
-                                                      textScaler:
-                                                          MediaQuery.of(context)
-                                                              .textScaler,
-                                                      text: TextSpan(
-                                                        children: [
-                                                          TextSpan(
-                                                            text:
-                                                                'Orchad House\n',
-                                                            style: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  font:
-                                                                      GoogleFonts
-                                                                          .inter(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  fontSize:
-                                                                      16.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                                ),
-                                                          ),
-                                                          TextSpan(
-                                                            text: 'Tipo\n',
-                                                            style: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  font:
-                                                                      GoogleFonts
-                                                                          .inter(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .normal,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  fontSize:
-                                                                      12.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                                ),
-                                                          ),
-                                                          const TextSpan(
-                                                            text:
-                                                                'Propietario:',
-                                                            style: TextStyle(),
-                                                          )
-                                                        ],
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .publicSans(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                                  lineHeight:
-                                                                      1.5,
-                                                                ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        'Estatus',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  font:
-                                                                      GoogleFonts
-                                                                          .inter(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                                ),
-                                                      ),
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: const Color(
-                                                              0xFFFFE69F),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      24.0),
-                                                        ),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsetsDirectional
-                                                                  .fromSTEB(
-                                                                  16.0,
-                                                                  4.0,
-                                                                  16.0,
-                                                                  4.0),
-                                                          child: Text(
-                                                            'Pendiente',
-                                                            style: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .publicSans(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w600,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  color: const Color(
-                                                                      0xFFD59E08),
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                                ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 12.0,
-                                                            0.0, 0.0),
-                                                    child: FFButtonWidget(
-                                                      onPressed: () {
-                                                        print(
-                                                            'Button pressed ...');
-                                                      },
-                                                      text: 'Revisar',
-                                                      options: FFButtonOptions(
-                                                        width:
-                                                            MediaQuery.sizeOf(
-                                                                        context)
-                                                                    .width *
-                                                                1.0,
-                                                        height: 30.0,
-                                                        padding:
-                                                            const EdgeInsetsDirectional
-                                                                .fromSTEB(16.0,
-                                                                0.0, 16.0, 0.0),
-                                                        iconPadding:
-                                                            const EdgeInsetsDirectional
-                                                                .fromSTEB(0.0,
-                                                                0.0, 0.0, 0.0),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primary,
-                                                        textStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .titleSmall
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .publicSans(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .normal,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .titleSmall
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontSize:
-                                                                      14.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .titleSmall
-                                                                      .fontStyle,
-                                                                ),
-                                                        elevation: 0.0,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(24.0),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                      child: _buildList(context),
                     ),
                   ],
                 ),
@@ -552,9 +189,9 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     wrapWithModel(
-                      model: _model.lEGALASSOCAITENavbarModel,
+                      model: _model.lEGALHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const LEGALASSOCAITENavbarWidget(),
+                      child: const LEGALHQNavbarWidget(),
                     ),
                   ],
                 ),
@@ -564,5 +201,380 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
         ),
       ),
     );
+  }
+
+  // ── Búsqueda ──────────────────────────────────────────────────────────────
+
+  Widget _buildSearchBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 0.0),
+      child: Container(
+        width: double.infinity,
+        height: 48.0,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(100.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(15.0, 0.0, 15.0, 0.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search,
+                color: FlutterFlowTheme.of(context).secondaryText,
+                size: 24.0,
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: TextField(
+                  controller: _model.textController,
+                  focusNode: _model.textFieldFocusNode,
+                  textInputAction: TextInputAction.search,
+                  onChanged: (value) => safeSetState(() => _query = value),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    hintText: 'Buscar por ID o dirección',
+                    hintStyle: GoogleFonts.publicSans(
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  style: GoogleFonts.publicSans(
+                    color: _textDark,
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
+              if (_query.isNotEmpty)
+                InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () {
+                    _model.textController?.clear();
+                    safeSetState(() => _query = '');
+                  },
+                  child: Icon(
+                    Icons.close,
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                    size: 20.0,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Chips de filtro ───────────────────────────────────────────────────────
+
+  Widget _buildFilterChips(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: _ProcesosFilter.values.map((filter) {
+            final isSelected = filter == _filter;
+            return Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
+              child: GestureDetector(
+                onTap: () => _selectFilter(filter),
+                child: Container(
+                  height: 40.0,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isSelected ? _aqua : _chipIdleBg,
+                    borderRadius: BorderRadius.circular(100.0),
+                  ),
+                  child: Text(
+                    filter.label,
+                    style: GoogleFonts.publicSans(
+                      color: isSelected ? Colors.white : _aqua,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // ── Listado ───────────────────────────────────────────────────────────────
+
+  Widget _buildList(BuildContext context) {
+    return FutureBuilder<List<LegalHqProcess>>(
+      future: _processesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 60.0),
+            child: Center(child: CircularProgressIndicator(color: _aqua)),
+          );
+        }
+
+        final items = _applySearch(snapshot.data ?? []);
+
+        if (items.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 60.0),
+            child: Center(
+              child: Text(
+                _query.trim().isEmpty
+                    ? _filter.emptyMessage
+                    : 'Sin resultados para "${_query.trim()}"',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.publicSans(
+                  color: _textDark,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final process in items)
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 15.0),
+                child: _buildProcessCard(context, process),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ── Tarjeta ───────────────────────────────────────────────────────────────
+
+  Widget _buildProcessCard(BuildContext context, LegalHqProcess process) {
+    final statusStyle = legalHqStatusStyle(process.status);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Imagen de portada
+          SizedBox(
+            width: double.infinity,
+            height: 139.0,
+            child: _buildPropertyImage(process.imageUrl),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  process.title,
+                  style: GoogleFonts.publicSans(
+                    color: _textDark,
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8.0),
+                _cardLine('Tipo: ${legalHqOperationLabel(process.category)}'),
+                if (process.clientName.isNotEmpty) ...[
+                  const SizedBox(height: 8.0),
+                  _cardLine('Cliente: ${process.clientName}'),
+                ],
+                if (process.ownerName.isNotEmpty) ...[
+                  const SizedBox(height: 8.0),
+                  _cardLine('Propietario: ${process.ownerName}'),
+                ],
+                if (process.legalAssociateName.isNotEmpty) ...[
+                  const SizedBox(height: 8.0),
+                  _cardLine(
+                      'Legal Associate asignado: ${process.legalAssociateName}'),
+                ],
+                const SizedBox(height: 8.0),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Estado actual',
+                      style: GoogleFonts.publicSans(
+                        color: _aqua,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    const SizedBox(width: 10.0),
+                    Expanded(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Container(
+                          height: 23.0,
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 14.0),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: statusStyle.background,
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Text(
+                            statusStyle.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.publicSans(
+                              color: statusStyle.foreground,
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12.0),
+                SizedBox(
+                  width: double.infinity,
+                  height: 31.0,
+                  child: ElevatedButton(
+                    onPressed: _claimingProcessId != null
+                        ? null
+                        : () => _openProcess(process),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _aqua,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: _aqua.withValues(alpha: 0.5),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        side: const BorderSide(color: _aqua),
+                      ),
+                    ),
+                    child: _claimingProcessId == process.id
+                        ? const SizedBox(
+                            width: 14.0,
+                            height: 14.0,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'Revisar',
+                            style: GoogleFonts.publicSans(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _cardLine(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.publicSans(
+        color: _textDark,
+        fontSize: 14.0,
+        fontWeight: FontWeight.normal,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildPropertyImage(String imageUrl) {
+    const fallback = Image(
+      image: AssetImage('assets/images/casa_card_sobreMiVisita.png'),
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: 139.0,
+    );
+
+    if (imageUrl.isEmpty) return fallback;
+
+    return Image.network(
+      imageUrl,
+      width: double.infinity,
+      height: 139.0,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => fallback,
+    );
+  }
+
+  // ── Abrir expediente ──────────────────────────────────────────────────────
+
+  /// Igual que en la Home: si el expediente no tiene Legal HQ, primero se
+  /// reclama, porque el detalle exige ser el HQ asignado.
+  Future<void> _openProcess(LegalHqProcess process) async {
+    if (!process.isAssignedToMe) {
+      safeSetState(() => _claimingProcessId = process.id);
+      final response = await LegalHqProcessApi.accept(process.id);
+      if (!mounted) return;
+      safeSetState(() => _claimingProcessId = null);
+
+      if (!response.succeeded) {
+        final message = response.statusCode == 409
+            ? 'Otro Legal HQ ya tomó este expediente'
+            : 'No se pudo tomar el expediente. Intentá de nuevo';
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+        safeSetState(_loadData);
+        return;
+      }
+      safeSetState(_loadData);
+    }
+
+    if (!mounted) return;
+
+    // Un expediente ya aprobado o finalizado se audita desde el cierre de
+    // operación; los hipotecarios se trabajan desde la gestión bancaria; el
+    // resto entra a la revisión documental del expediente.
+    final String routeName;
+    if (process.status == 'APPROVED' || process.status == 'FINISHED') {
+      routeName = LEGALHQPostVentaWidget.routeName;
+    } else if (process.category == kCategoryMortgage) {
+      routeName = LEGALHQProcesosCasosConHipotecaWidget.routeName;
+    } else {
+      routeName = LEGALHQRevisionDocumentosPropiedadesWidget.routeName;
+    }
+
+    await context.pushNamed(
+      routeName,
+      queryParameters: {
+        'processId': serializeParam(process.id, ParamType.String),
+      }.withoutNulls,
+    );
+
+    // Al volver puede haber cambiado el estado del expediente.
+    if (mounted) safeSetState(_loadData);
   }
 }

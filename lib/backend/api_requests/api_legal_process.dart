@@ -12,6 +12,10 @@ class DOVIAAPILegalProcessContextGroup {
       ListLegalProcessesAssociateCall();
   static ListLegalProcessesHQCall listLegalProcessesHQCall =
       ListLegalProcessesHQCall();
+  static ListLegalProcessesHQUnassignedCall listLegalProcessesHQUnassignedCall =
+      ListLegalProcessesHQUnassignedCall();
+  static AcceptLegalHQProcessCall acceptLegalHQProcessCall =
+      AcceptLegalHQProcessCall();
   static ListLegalHQDocumentsCall listLegalHQDocumentsCall =
       ListLegalHQDocumentsCall();
   static ListLegalProcessesListerHQCall listLegalProcessesListerHQCall =
@@ -123,6 +127,74 @@ class ListLegalProcessesHQCall {
         if (status != null && status.isNotEmpty) 'status': status,
         if (category != null && category.isNotEmpty) 'category': category,
       },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// GET /legal-processes/legal-hq/unassigned
+/// Roles: LEGAL_OFFICER — procesos todavía sin `legalHqId` que el HQ puede
+/// reclamar con `POST /legal-processes/{processId}/legal-hq/accept`.
+class ListLegalProcessesHQUnassignedCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+    String? page = '',
+    String? limit = '',
+    String? status = '',
+    String? category = '',
+  }) async {
+    final baseUrl = DOVIAAPILegalProcessContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'List Legal Processes (HQ Unassigned)',
+      apiUrl: '$baseUrl/legal-processes/legal-hq/unassigned',
+      callType: ApiCallType.GET,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (category != null && category.isNotEmpty) 'category': category,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// POST /legal-processes/{processId}/legal-hq/accept
+/// Roles: LEGAL_OFFICER — autoasigna el proceso al HQ autenticado. Sin este
+/// paso el HQ recibe 403 USER_NOT_RELATED_TO_PROCESS al abrir el expediente.
+/// 409 LEGAL_PROCESS_LEGAL_HQ_ALREADY_ASSIGNED si otro HQ lo reclamó antes.
+class AcceptLegalHQProcessCall {
+  Future<ApiCallResponse> call({
+    String? processId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPILegalProcessContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Accept Legal HQ Process',
+      apiUrl: '$baseUrl/legal-processes/$processId/legal-hq/accept',
+      callType: ApiCallType.POST,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

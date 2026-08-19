@@ -927,8 +927,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: LEGALHQProcesosCasosConHipotecaWidget.routeName,
           path: LEGALHQProcesosCasosConHipotecaWidget.routePath,
-          builder: (context, params) =>
-              const LEGALHQProcesosCasosConHipotecaWidget(),
+          builder: (context, params) => LEGALHQProcesosCasosConHipotecaWidget(
+            processId: params.getParam(
+              'processId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: LEGALHQAjustesWidget.routeName,
@@ -949,7 +953,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: LEGALHQRevisionDocumentosPropiedadesWidget.routeName,
           path: LEGALHQRevisionDocumentosPropiedadesWidget.routePath,
           builder: (context, params) =>
-              const LEGALHQRevisionDocumentosPropiedadesWidget(),
+              LEGALHQRevisionDocumentosPropiedadesWidget(
+            processId: params.getParam(
+              'processId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: LEGALHQDocumentoWidget.routeName,
@@ -959,12 +968,41 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'nombreDocumento',
               ParamType.String,
             ),
+            processId: params.getParam(
+              'processId',
+              ParamType.String,
+            ),
+            documentId: params.getParam(
+              'documentId',
+              ParamType.String,
+            ),
+            documentUrl: params.getParam(
+              'documentUrl',
+              ParamType.String,
+            ),
+            propertyName: params.getParam(
+              'propertyName',
+              ParamType.String,
+            ),
+            category: params.getParam(
+              'category',
+              ParamType.String,
+            ),
+            readOnly: params.getParam(
+              'readOnly',
+              ParamType.bool,
+            ),
           ),
         ),
         FFRoute(
           name: LEGALHQPostVentaWidget.routeName,
           path: LEGALHQPostVentaWidget.routePath,
-          builder: (context, params) => const LEGALHQPostVentaWidget(),
+          builder: (context, params) => LEGALHQPostVentaWidget(
+            processId: params.getParam(
+              'processId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesVenderRentarWidget.routeName,

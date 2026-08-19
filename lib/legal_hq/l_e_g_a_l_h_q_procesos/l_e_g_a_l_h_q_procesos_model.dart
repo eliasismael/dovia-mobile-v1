@@ -1,6 +1,6 @@
 import '/flutter_flow/flutter_flow_util.dart';
-import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
-import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
+import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
+import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'l_e_g_a_l_h_q_procesos_widget.dart' show LEGALHQProcesosWidget;
 import 'package:flutter/material.dart';
@@ -10,25 +10,28 @@ class LEGALHQProcesosModel extends FlutterFlowModel<LEGALHQProcesosWidget> {
 
   // Model for CornerGradientBackground component.
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
-  // Model for LegalAssociate_Header component.
-  late LegalAssociateHeaderModel legalAssociateHeaderModel;
-  // Model for LEGAL_ASSOCAITE_Navbar component.
-  late LEGALASSOCAITENavbarModel lEGALASSOCAITENavbarModel;
+  // State field for the search bar (ID de inmueble / dirección).
+  FocusNode? textFieldFocusNode;
+  TextEditingController? textController;
+  // Model for Legal_HQ_Header component.
+  late LegalHQHeaderModel legalHQHeaderModel;
+  // Model for LEGAL_HQ_Navbar component.
+  late LEGALHQNavbarModel lEGALHQNavbarModel;
 
   @override
   void initState(BuildContext context) {
     cornerGradientBackgroundModel =
         createModel(context, () => CornerGradientBackgroundModel());
-    legalAssociateHeaderModel =
-        createModel(context, () => LegalAssociateHeaderModel());
-    lEGALASSOCAITENavbarModel =
-        createModel(context, () => LEGALASSOCAITENavbarModel());
+    legalHQHeaderModel = createModel(context, () => LegalHQHeaderModel());
+    lEGALHQNavbarModel = createModel(context, () => LEGALHQNavbarModel());
   }
 
   @override
   void dispose() {
     cornerGradientBackgroundModel.dispose();
-    legalAssociateHeaderModel.dispose();
-    lEGALASSOCAITENavbarModel.dispose();
+    textFieldFocusNode?.dispose();
+    textController?.dispose();
+    legalHQHeaderModel.dispose();
+    lEGALHQNavbarModel.dispose();
   }
 }
