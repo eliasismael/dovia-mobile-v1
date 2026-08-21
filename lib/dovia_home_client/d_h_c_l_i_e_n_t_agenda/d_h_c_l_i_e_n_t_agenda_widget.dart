@@ -151,6 +151,10 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
     safeSetState(() {
       _scope = scope;
       _isLoadingScope = false;
+      // La categoría se elige en el levantamiento del trabajo, que es donde
+      // el cliente ve qué incluye y qué lleva el técnico. Acá sólo se
+      // recoge; la fila queda para corregirla sin volver atrás.
+      _selectedCategoryId ??= DHCLIENTInstalacionWidget.selectedCategoryId;
       // Con una sola categoría no tiene sentido preguntar.
       final categories = scope?.categories ?? const [];
       if (categories.length == 1) _selectedCategoryId = categories.first.id;

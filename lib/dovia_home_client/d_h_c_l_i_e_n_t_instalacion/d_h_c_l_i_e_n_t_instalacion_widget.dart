@@ -1,3 +1,4 @@
+import '/dovia_home_client/category_picker.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/service_catalog.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -30,23 +31,23 @@ class DHCLIENTInstalacionWidget extends StatefulWidget {
   /// [DHCLIENTUbicacionWidget.pendingNextRoute]).
   static String serviceTitle = 'Instalación';
 
-  /// Alcance del servicio: las categorías que se pueden pedir dentro de él,
-  /// con el límite que el catálogo le pone a cada una ("de 2 a 3 fugas por
-  /// visita"). Sale de
-  /// `GET /dovia-home/catalog/services/{serviceId}/categories`; si la consulta
-  /// falla se muestran los placeholders del diseño.
-  static List<String> alcanzables = [];
-
-  /// Levantamiento del trabajo (descripción + fotos) que viaja hasta la pantalla
-  /// de Agenda, donde recién se crea la solicitud en el backend (el POST
-  /// necesita la fecha, que se elige allí). Se usan campos estáticos por la
-  /// misma razón que [serviceTitle]: go_router navega solo por nombre.
+  /// Levantamiento del trabajo (categoría + descripción + fotos) que viaja
+  /// hasta la pantalla de Agenda, donde recién se crea la solicitud en el
+  /// backend (el POST necesita la fecha, que se elige allí). Se usan campos
+  /// estáticos por la misma razón que [serviceTitle]: go_router navega solo
+  /// por nombre.
+  ///
+  /// La categoría se elige **acá**, no en Agenda: es lo que decide qué incluye
+  /// la visita y qué lleva el técnico, y el cliente necesita esa claridad
+  /// antes de avanzar al pago. Agenda la recibe ya elegida.
+  static String? selectedCategoryId;
   static String description = '';
   static List<FFUploadedFile> photos = [];
 
   /// Limpia el levantamiento anterior. Se llama al iniciar una solicitud nueva
   /// y al terminar de enviarla, para que no se filtre entre solicitudes.
   static void resetDraft() {
+    selectedCategoryId = null;
     description = '';
     photos = [];
   }
@@ -69,7 +70,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
-    _loadAlcanzables();
+    _loadScope();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -81,28 +82,75 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     super.dispose();
   }
 
-  /// Trae del catálogo lo que cubre el servicio elegido. Es informativo: la
-  /// categoría concreta se elige recién en Agenda, que es donde se crea la
-  /// solicitud, pero el cliente necesita saber el alcance antes de describir
-  /// el trabajo.
-  Future<void> _loadAlcanzables() async {
+  /// Alcance del servicio elegido en el homepage: las categorías que se pueden
+  /// pedir dentro de él, lo que lleva el técnico y lo que la visita no cubre.
+  /// Sale de `GET /dovia-home/catalog/services/{serviceId}/categories`.
+  DoviaHomeServiceScope? _scope;
+  bool _isLoadingScope = true;
+  String? _selectedCategoryId;
+
+  Future<void> _loadScope() async {
     final scope = await loadDoviaHomeServiceScope(
       serviceTitle: DHCLIENTInstalacionWidget.serviceTitle,
       authToken: currentAuthenticationToken ?? '',
     );
-    if (!mounted || scope == null) return;
+    if (!mounted) return;
 
     safeSetState(() {
-      DHCLIENTInstalacionWidget.alcanzables = [
-        for (final category in scope.categories) category.scopeLine,
-      ];
+      _scope = scope;
+      _isLoadingScope = false;
+      // Con una sola categoría no hay nada que preguntar: se elige sola y los
+      // recuadros informativos aparecen de entrada, que es lo que el cliente
+      // necesita ver.
+      final categories = scope?.categories ?? const [];
+      if (categories.length == 1) _selectedCategoryId = categories.first.id;
+      if (scope?.categoryById(_selectedCategoryId) == null) {
+        _selectedCategoryId = null;
+      }
     });
   }
 
-  /// La descripción tiene texto y hay al menos una foto cargada.
-  bool get _canContinue =>
-      (_model.textController?.text.trim().isNotEmpty ?? false) &&
-      _model.uploadedPhotos.isNotEmpty;
+  /// Categoría elegida, o null mientras el cliente no haya elegido ninguna.
+  /// Es lo que gobierna los dos recuadros informativos y el botón.
+  DoviaHomeServiceCategory? get _selectedCategory =>
+      _scope?.categoryById(_selectedCategoryId);
+
+  /// Etiqueta del selector: distingue el catálogo cargando del servicio que no
+  /// se pudo resolver, porque ahí no hay nada que elegir y el flujo no puede
+  /// avanzar hasta que se recargue.
+  String get _categoryRowLabel {
+    if (_isLoadingScope) return 'Cargando categorías...';
+    if (_scope == null) return 'No se pudieron cargar las categorías';
+    return _selectedCategory?.name ??
+        'Selecciona que categoria del servicio seleccionado';
+  }
+
+  Future<void> _pickCategory() async {
+    if (_isLoadingScope) return;
+    // El servicio no se resolvió (Ej: se entró directo a la ruta o falló la
+    // red): se reintenta acá en vez de dejar la fila muerta.
+    if (_scope == null) {
+      safeSetState(() => _isLoadingScope = true);
+      await _loadScope();
+      if (!mounted || _scope == null) return;
+    }
+
+    final category = await pickDoviaHomeCategory(
+      context: context,
+      title: 'Categoría del servicio',
+      categories: _scope?.categories ?? const [],
+      selectedId: _selectedCategoryId,
+      emptyMessage:
+          'Este servicio todavía no tiene categorías disponibles.',
+    );
+    if (category == null || !mounted) return;
+    safeSetState(() => _selectedCategoryId = category.id);
+  }
+
+  /// Avanzar sólo exige haber elegido una categoría del catálogo: es el único
+  /// dato que el POST necesita de esta pantalla. La descripción y las fotos
+  /// son aportes opcionales del cliente y no bloquean el flujo.
+  bool get _canContinue => _selectedCategoryId != null;
 
   Future<void> _pickPhotos() async {
     final selectedMedia = await selectMediaWithSourceBottomSheet(
@@ -131,6 +179,133 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     } finally {
       safeSetState(() => _model.isPhotoUploading = false);
     }
+  }
+
+  /// Selector de categoría del catálogo. Es el primer control de la pantalla
+  /// porque de él dependen los dos recuadros informativos y el botón.
+  Widget _buildCategorySelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Selecciona especificamente en que te podemos ayudar dentro del '
+          'servicio',
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.publicSans(
+                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                ),
+                fontSize: 16.0,
+                letterSpacing: 0.32,
+                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+              ),
+        ),
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+          child: DoviaHomeSelectorRow(
+            label: _categoryRowLabel,
+            expanded: false,
+            onTap: _pickCategory,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Recuadro informativo celeste del diseño: un título en negrita y sus
+  /// líneas debajo, con un segundo bloque opcional para el "No incluye:" del
+  /// recuadro del técnico.
+  ///
+  /// Los dos recuadros **no se pintan hasta que hay categoría elegida**: antes
+  /// de eso no hay alcance que mostrar, y una caja celeste vacía se lee como
+  /// contenido que no cargó.
+  Widget _buildInfoBanner({
+    required String title,
+    required List<String> lines,
+    String? secondTitle,
+    List<String> secondLines = const [],
+  }) {
+    final theme = FlutterFlowTheme.of(context);
+    final bodyStyle = theme.bodyMedium.override(
+      font: GoogleFonts.publicSans(),
+      color: const Color(0xFF00444B),
+      fontSize: 14.0,
+      letterSpacing: 0.0,
+      lineHeight: 1.35,
+    );
+    final titleStyle = bodyStyle.override(
+      font: GoogleFonts.publicSans(fontWeight: FontWeight.w700),
+      fontWeight: FontWeight.w700,
+    );
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color(0x3370ACAD),
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: titleStyle),
+            for (final line in lines)
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
+                child: Text(line, style: bodyStyle),
+              ),
+            if (secondTitle != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                child: Text(secondTitle, style: titleStyle),
+              ),
+            for (final line in secondLines)
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
+                child: Text(line, style: bodyStyle),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Recuadro superior: el alcance exacto que el catálogo le adjunta a la
+  /// categoría elegida.
+  Widget _buildScopeBanner() {
+    final category = _selectedCategory;
+    if (category == null) return const SizedBox.shrink();
+    return _buildInfoBanner(
+      title: 'Qué incluye esta categoría:',
+      lines: [
+        category.description.isNotEmpty
+            ? category.description
+            : 'El catálogo todavía no detalla el alcance de esta categoría.',
+      ],
+    );
+  }
+
+  /// Recuadro inferior: las herramientas base que trae el técnico y lo que la
+  /// visita explícitamente no cubre. Los dos datos son del servicio, no de la
+  /// categoría, pero sólo tienen sentido una vez que el cliente eligió qué
+  /// necesita, así que siguen la misma regla de aparición.
+  Widget _buildTechnicianBanner() {
+    if (_selectedCategory == null) return const SizedBox.shrink();
+    final brings = _scope?.technicianBrings ?? const <String>[];
+    final notIncluded = _scope?.notIncluded ?? const <String>[];
+    if (brings.isEmpty && notIncluded.isEmpty) return const SizedBox.shrink();
+
+    return _buildInfoBanner(
+      title: '¿Qué lleva el técnico?',
+      lines: brings.isNotEmpty
+          ? brings
+          : const ['El catálogo no detalla las herramientas de este servicio.'],
+      secondTitle: notIncluded.isEmpty ? null : 'No incluye:',
+      secondLines: notIncluded,
+    );
   }
 
   Widget _buildPhotoThumbnails() {
@@ -226,7 +401,12 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Align(
+                        _buildCategorySelector(),
+                        _buildScopeBanner(),
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 18.0, 0.0, 0.0),
+                          child: Align(
                           alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
                             'Cuéntanos que necesitas ',
@@ -249,6 +429,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                       .bodyMedium
                                       .fontStyle,
                                 ),
+                          ),
                           ),
                         ),
                         Padding(
@@ -285,7 +466,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                           .fontStyle,
                                     ),
                                 hintText:
-                                    'Describe el problema o el trabajo que deseas realizar.  Mientras más claro, mejor pordemos ayudarte',
+                                    'Describe el problema o el trabajo que deseas realizar.  Trata de ser específico',
                                 hintStyle: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
@@ -463,76 +644,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                         ),
                         if (_model.uploadedPhotos.isNotEmpty)
                           _buildPhotoThumbnails(),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 12.0, 0.0, 0.0),
-                          child: Container(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            decoration: BoxDecoration(
-                              color: const Color(0x3570ACAD),
-                              borderRadius: BorderRadius.circular(16.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 16.0, 16.0, 16.0),
-                              child: RichText(
-                                textScaler: MediaQuery.of(context).textScaler,
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          'Recuerda que los alcanzables en ${DHCLIENTInstalacionWidget.serviceTitle.toLowerCase()} consiste en:\n${DHCLIENTInstalacionWidget.alcanzables.isEmpty ? '-\n-\n-' : DHCLIENTInstalacionWidget.alcanzables.map((e) => '- $e').join('\n')}\nCualquier trabajo adicional se te cotizara y lo recibirás en la plataforma',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                    )
-                                  ],
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        _buildTechnicianBanner(),
                         Align(
                           alignment: const AlignmentDirectional(0.0, 1.0),
                           child: Padding(
@@ -543,7 +655,12 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                   ? () async {
                                       // El levantamiento viaja al paso de
                                       // Agenda, que es donde se crea la
-                                      // solicitud en el backend.
+                                      // solicitud en el backend. La categoría
+                                      // va con él: Agenda ya no la vuelve a
+                                      // preguntar.
+                                      DHCLIENTInstalacionWidget
+                                              .selectedCategoryId =
+                                          _selectedCategoryId;
                                       DHCLIENTInstalacionWidget.description =
                                           _model.textController!.text.trim();
                                       DHCLIENTInstalacionWidget.photos =

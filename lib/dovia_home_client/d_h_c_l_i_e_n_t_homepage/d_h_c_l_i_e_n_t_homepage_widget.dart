@@ -295,8 +295,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// cliente sin suscripción avanza a la pantalla de valor de la visita.
   void _openServiceDetail(String serviceTitle) {
     DHCLIENTInstalacionWidget.serviceTitle = serviceTitle;
-    DHCLIENTInstalacionWidget.alcanzables = [];
-    // Solicitud nueva: descarta el levantamiento de una anterior sin enviar.
+    // Solicitud nueva: descarta el levantamiento de una anterior sin enviar
+    // (categoría, descripción y fotos).
     DHCLIENTInstalacionWidget.resetDraft();
     context.pushNamed(DHCLIENTInstalacionWidget.routeName);
   }
