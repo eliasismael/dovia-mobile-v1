@@ -139,8 +139,9 @@ class _DHASSOCIATETrabajoARealizarWidgetState
     );
   }
 
-  /// Postulación: toma atómica de la solicitud. El backend rechaza la segunda
-  /// toma, así que un 409 no es un error del asociado sino que otro llegó
+  /// Aceptación del trabajo: toma atómica de la solicitud. No hay paso de
+  /// aprobación intermedio —quien acepta queda asignado—, y el backend rechaza
+  /// la segunda toma: un 409 no es un error del asociado sino que otro llegó
   /// primero, y se le dice con esas palabras.
   ///
   /// Al confirmar, la pantalla se queda donde está: es la misma vista de
@@ -163,7 +164,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
       if (!response.succeeded) {
         _showMessage(response.statusCode == 409
             ? 'Otro asociado tomó este trabajo antes que vos.'
-            : 'No pudimos postularte a este trabajo. Intentá de nuevo.');
+            : 'No pudimos asignarte este trabajo. Intentá de nuevo.');
         return;
       }
 
@@ -174,7 +175,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
       // marketplace no expone.
       await _loadDetail();
     } catch (_) {
-      _showMessage('No pudimos postularte a este trabajo. Intentá de nuevo.');
+      _showMessage('No pudimos asignarte este trabajo. Intentá de nuevo.');
     } finally {
       if (mounted) safeSetState(() => _model.isTaking = false);
     }
@@ -295,6 +296,101 @@ class _DHASSOCIATETrabajoARealizarWidgetState
         'Sin indicaciones de materiales para esta visita.';
   }
 
+  /// Alcance oficial de la visita: qué cubre la categoría del catálogo que
+  /// eligió el cliente ("Armado de 1 a 2 muebles listos para ensamblar"). Es
+  /// el dato que le dice al asociado hasta dónde llega el trabajo que está por
+  /// aceptar, y lo pone el catálogo — no el cliente.
+  ///
+  /// Las solicitudes anteriores al cambio de contrato viajan sin categoría
+  /// (ver [asrCategoryScope]); ahí se lo dice explícitamente en vez de dejar
+  /// la caja vacía, que se lee como un error de carga.
+  String get _categoryScopeText {
+    final data = _request;
+    final scope = data == null ? null : asrCategoryScope(data);
+    if (scope != null) return scope;
+    return _model.isLoadingDetail
+        ? 'Cargando el alcance de la categoría…'
+        : 'Esta solicitud no trae el detalle de la categoría del catálogo.';
+  }
+
+  /// Detalle libre que escribió el cliente, o null si no escribió ninguno.
+  ///
+  /// El campo es **opcional** para el cliente, pero el endpoint de creación
+  /// rechaza strings vacíos: cuando lo deja en blanco, su app manda
+  /// `Solicitud de <servicio>` como relleno (ver `DHCLIENTAgendaWidget`). Ese
+  /// texto lo generó el sistema, no el cliente, así que acá cuenta como "sin
+  /// detalle" — mostrarlo le haría creer al asociado que el cliente aportó
+  /// contexto que no aportó.
+  String? get _clientDetail {
+    final data = _request;
+    if (data == null) return null;
+    final description = asrDescription(data)?.trim();
+    if (description == null || description.isEmpty) return null;
+    final generated = 'Solicitud de ${asrServiceName(data)}'.trim();
+    return description.toLowerCase() == generated.toLowerCase()
+        ? null
+        : description;
+  }
+
+  /// Fotos y videos que el cliente adjuntó al pedir el trabajo. Junto con el
+  /// alcance del catálogo son con lo que el asociado juzga si puede hacerlo
+  /// antes de comprometerse, así que sin evidencia se lo dice en vez de dejar
+  /// una fila vacía.
+  Widget _buildClientPhotos() {
+    final data = _request;
+    final urls = data == null ? const <String>[] : asrRequestImages(data);
+
+    if (urls.isEmpty) {
+      return _buildInfoBox(
+        'Imágenes o video del trabajo a realizar',
+        _model.isLoadingDetail
+            ? 'Cargando las imágenes del cliente…'
+            : 'El cliente no adjuntó imágenes del trabajo a realizar.',
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Imágenes o video del trabajo a realizar',
+              style: _sectionLabelStyle),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+            child: SizedBox(
+              height: 92.0,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                itemCount: urls.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 15.0),
+                itemBuilder: (_, index) => ClipRRect(
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: Image.network(
+                    urls[index],
+                    width: 92.0,
+                    height: 92.0,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 92.0,
+                      height: 92.0,
+                      color: FlutterFlowTheme.of(context).alternate,
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Oportunidad todavía libre: se muestra la ficha de la visita con la
   /// dirección **enmascarada**. Es el estado del diseño previo a aceptar: el
   /// asociado ve qué trabajo es y qué necesita llevar, pero la dirección
@@ -341,7 +437,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
         .then((_) => _loadDetail());
   }
 
-  /// Botón de postulación. Sólo aparece para una oportunidad todavía libre: en
+  /// Botón de aceptación. Sólo aparece para una oportunidad todavía libre: en
   /// un trabajo ya tomado la pantalla queda con las acciones de ejecución.
   Widget _buildApplyButton() {
     return Padding(
@@ -350,7 +446,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
         // FFButtonWidget espera el Future y muestra su propio indicador; el
         // guard sólo evita que un segundo tap dispare otra toma.
         onPressed: _model.isTaking ? null : () => _applyToJob(),
-        text: 'Postularme a este trabajo',
+        text: 'Aceptar trabajo',
         options: FFButtonOptions(
           width: MediaQuery.sizeOf(context).width * 1.0,
           height: 42.0,
@@ -371,6 +467,21 @@ class _DHASSOCIATETrabajoARealizarWidgetState
     );
   }
 
+  /// Etiqueta de sección del diseño. El mock es de escritorio y alterna 14/16
+  /// según la sección; en el ancho del teléfono esa diferencia no se lee y sí
+  /// se nota la inconsistencia, así que todas las secciones comparten el 16.
+  TextStyle get _sectionLabelStyle =>
+      FlutterFlowTheme.of(context).bodyMedium.override(
+            font: GoogleFonts.publicSans(
+              fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+              fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+            ),
+            fontSize: 16.0,
+            letterSpacing: 0.32,
+            fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+          );
+
   /// Etiqueta + caja de sólo lectura, el mismo estilo que ya usa "Trabajos a
   /// realizar" para mostrar datos de la visita.
   Widget _buildInfoBox(String label, String value) {
@@ -379,19 +490,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(
-                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                  ),
-                  fontSize: 16.0,
-                  letterSpacing: 0.32,
-                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                  fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                ),
-          ),
+          Text(label, style: _sectionLabelStyle),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
             child: Container(
@@ -569,6 +668,35 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
+                          // Encabezado de la ficha: todo lo que sigue es lo
+                          // que se sabe del trabajo *antes* de aceptarlo.
+                          Align(
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 21.0),
+                              child: Text(
+                                'Información preliminar',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      fontSize: 16.0,
+                                      letterSpacing: 0.3,
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                      lineHeight: 1.3,
+                                    ),
+                              ),
+                            ),
+                          ),
                           Container(
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             decoration: const BoxDecoration(),
@@ -762,114 +890,23 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 21.0, 0.0, 0.0),
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Align(
-                                    alignment:
-                                        const AlignmentDirectional(-1.0, 0.0),
-                                    child: Text(
-                                      'Imagenes o video del trabajo',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .primary,
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment:
-                                        const AlignmentDirectional(-1.0, 0.0),
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 12.0, 0.0, 0.0),
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/806/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/177/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/201/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/353/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ].divide(const SizedBox(width: 15.0)),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          // Lo que el cliente contrató, en dos bloques que no
+                          // se mezclan: primero el alcance que fija el
+                          // catálogo —el compromiso real— y después lo que el
+                          // cliente agregó de su puño, que es contexto y no
+                          // amplía el trabajo.
+                          _buildInfoBox(
+                            'Que incluye la categoria seleccionada:',
+                            _categoryScopeText,
                           ),
+                          _buildInfoBox(
+                            'Detalle incluido por el cliente:',
+                            _clientDetail ??
+                                'El cliente no añadió detalles adicionales.',
+                          ),
+                          _buildClientPhotos(),
                           // Oportunidad todavía libre: lo único que puede hacer
-                          // el asociado es postularse. Tomado y sin
+                          // el asociado es aceptarla. Tomado y sin
                           // check-in todavía, se desoculta la dirección/mapa
                           // y el aviso de llegada. Ya en sitio, las acciones
                           // de ejecución (materiales, trabajos adicionales,
