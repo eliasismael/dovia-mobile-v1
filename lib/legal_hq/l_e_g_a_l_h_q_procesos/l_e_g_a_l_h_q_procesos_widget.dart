@@ -555,14 +555,15 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
 
     if (!mounted) return;
 
-    // Un expediente ya aprobado o finalizado se audita desde el cierre de
-    // operación; los hipotecarios se trabajan desde la gestión bancaria; el
-    // resto entra a la revisión documental del expediente.
+    // Los hipotecarios se trabajan de punta a punta desde la gestión bancaria,
+    // que ya cubre el cierre aprobado y el rechazado; el resto de expedientes
+    // ya aprobados o finalizados se auditan desde el cierre de operación, y
+    // los demás entran a la revisión documental.
     final String routeName;
-    if (process.status == 'APPROVED' || process.status == 'FINISHED') {
-      routeName = LEGALHQPostVentaWidget.routeName;
-    } else if (process.category == kCategoryMortgage) {
+    if (process.category == kCategoryMortgage) {
       routeName = LEGALHQProcesosCasosConHipotecaWidget.routeName;
+    } else if (process.status == 'APPROVED' || process.status == 'FINISHED') {
+      routeName = LEGALHQPostVentaWidget.routeName;
     } else {
       routeName = LEGALHQRevisionDocumentosPropiedadesWidget.routeName;
     }

@@ -8,6 +8,15 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
+    <!-- Android 11+ oculta las apps instaladas: sin esta consulta url_launcher
+         no resuelve los `tel:` del tap-to-call. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
+    </queries>
+
     <application
         android:label="DOVIA"
         tools:replace="android:label"

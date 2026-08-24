@@ -14,6 +14,18 @@ class LEGALHQProcesosCasosConHipotecaModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for Legal_HQ_Header component.
   late LegalHQHeaderModel legalHQHeaderModel;
+  // State field(s) for the "Datos del gestor bancario" form.
+  FocusNode? bankFocusNode;
+  TextEditingController? bankController;
+  FocusNode? phoneFocusNode;
+  TextEditingController? phoneController;
+  FocusNode? agentNameFocusNode;
+  TextEditingController? agentNameController;
+  FocusNode? emailFocusNode;
+  TextEditingController? emailController;
+  // State field(s) for the "Nota:" textarea of the evaluation follow-up.
+  FocusNode? noteFocusNode;
+  TextEditingController? noteController;
   // Model for LEGAL_HQ_Navbar component.
   late LEGALHQNavbarModel lEGALHQNavbarModel;
 
@@ -29,6 +41,16 @@ class LEGALHQProcesosCasosConHipotecaModel
   void dispose() {
     cornerGradientBackgroundModel.dispose();
     legalHQHeaderModel.dispose();
+    bankFocusNode?.dispose();
+    bankController?.dispose();
+    phoneFocusNode?.dispose();
+    phoneController?.dispose();
+    agentNameFocusNode?.dispose();
+    agentNameController?.dispose();
+    emailFocusNode?.dispose();
+    emailController?.dispose();
+    noteFocusNode?.dispose();
+    noteController?.dispose();
     lEGALHQNavbarModel.dispose();
   }
 }
