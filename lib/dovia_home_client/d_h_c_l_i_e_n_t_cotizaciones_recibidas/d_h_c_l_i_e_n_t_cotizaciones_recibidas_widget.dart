@@ -246,7 +246,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
       if (proposalIsOutOfScope(accepted)) {
         await _acceptOutOfScope(accepted);
       } else {
-        await _acceptQuote(accepted, isPremium);
+        await _acceptQuote(accepted);
       }
     } finally {
       if (mounted) {
@@ -255,10 +255,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     }
   }
 
-  Future<void> _acceptQuote(
-    Map<String, dynamic> accepted,
-    bool isPremium,
-  ) async {
+  Future<void> _acceptQuote(Map<String, dynamic> accepted) async {
     final requestId = _requestIdOf(accepted);
     if (requestId == null || requestId.isEmpty) {
       _showError('No se pudo identificar la solicitud de la cotización.');
@@ -279,11 +276,10 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     }
 
     // Propuesta aceptada: la solicitud queda TAKEN con esa empresa y el cliente
-    // sigue al agendamiento. Este flujo no abre ningún cobro.
+    // sigue al agendamiento. Este flujo no abre ningún cobro. La anticipación
+    // mínima (24h con plan, 36h sin él) la resuelve Agenda por su cuenta.
     DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
     DHCLIENTInstalacionWidget.serviceTitle = _serviceTitle(accepted);
-    // Anticipación mínima para agendar: 24h con plan, 36h sin él.
-    DHCLIENTAgendaWidget.minAdvanceHours = isPremium ? 24 : 36;
     context.pushNamed(DHCLIENTAgendaWidget.routeName);
   }
 

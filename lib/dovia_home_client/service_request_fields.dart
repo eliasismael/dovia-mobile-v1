@@ -177,6 +177,104 @@ const Set<String> kConfirmableRequestTypes = {'SERVICE', 'EMERGENCY'};
 bool srIsConfirmable(Map<String, dynamic> data) =>
     kConfirmableRequestTypes.contains(srRequestType(data));
 
+Map<String, dynamic>? _asMap(dynamic value) =>
+    value is Map ? Map<String, dynamic>.from(value) : null;
+
+num? _firstNum(List<dynamic> candidates) {
+  for (final value in candidates) {
+    if (value is num) return value;
+  }
+  return null;
+}
+
+/// Estado del pago de la solicitud (`payment.status`). No confundir con
+/// `status`/`subStatus` de la solicitud: una solicitud puede estar `TAKEN` y
+/// seguir sin pagarse (Ej: se creó en Agenda y el cliente todavía no cobró en
+/// ValorVisita).
+bool srIsPaid(Map<String, dynamic> data) {
+  final payment = _asMap(data['payment']) ?? _asMap(data['paymentOrder']);
+  final status = srString(payment?['status']) ?? '';
+  return status.toUpperCase() == 'PAID' || status.toUpperCase() == 'SUCCEEDED';
+}
+
+/// Monto a cobrar por el servicio (`price.price.gtq`), que es el mismo monto
+/// que `POST /payments/custom-checkout` exige recibir en `amount`. Se sondea
+/// de forma defensiva porque el contrato anida el monto distinto según de
+/// dónde viene la solicitud (Ej: `price.price.gtq` vs `price.gtq`).
+num? srPriceAmount(Map<String, dynamic> data) {
+  final price = _asMap(data['price']);
+  final nestedPrice = _asMap(price?['price']);
+  return _firstNum([
+    nestedPrice?['gtq'],
+    price?['gtq'],
+    price?['amount'],
+    data['amount'],
+  ]);
+}
+
+String srPriceCurrency(Map<String, dynamic> data) {
+  final price = _asMap(data['price']);
+  final nestedPrice = _asMap(price?['price']);
+  return srString(nestedPrice?['currency']) ??
+      srString(price?['currency']) ??
+      srString(data['currency']) ??
+      'GTQ';
+}
+
+/// Monto con descuento que se le cobraría a un suscriptor. `null` cuando el
+/// payload no lo trae: no se pinta un monto inventado (mismo criterio que el
+/// catálogo de planes, que sólo muestra precios que el backend confirma).
+num? srSubscriberPriceAmount(Map<String, dynamic> data) {
+  final price = _asMap(data['price']);
+  return _firstNum([
+    price?['subscriberGtq'],
+    price?['discountedGtq'],
+    _asMap(price?['subscriberPrice'])?['gtq'],
+  ]);
+}
+
+/// Precio de lista, **antes** del descuento del plan. Es el monto tachado de la
+/// tarjeta Premium; [srPriceAmount] es lo que se cobra de verdad.
+///
+/// `null` cuando el payload no lo distingue del precio aplicable: sin él no hay
+/// descuento que anunciar y la tarjeta muestra sólo el monto a cobrar, en vez
+/// de inventar un "antes" que haga parecer más grande el ahorro.
+num? srBasePriceAmount(Map<String, dynamic> data) {
+  final price = _asMap(data['price']);
+  return _firstNum([
+    price?['baseGtq'],
+    price?['listGtq'],
+    _asMap(price?['basePrice'])?['gtq'],
+    _asMap(price?['listPrice'])?['gtq'],
+  ]);
+}
+
+/// Descuento del plan sobre esta solicitud: cuánto se ahorra y qué porcentaje
+/// representa. `null` si el backend no expone un precio de lista mayor al que
+/// se cobra — no hay nada verificable que anunciar.
+({num savings, int percentOff})? srPlanDiscount(Map<String, dynamic> data) {
+  final base = srBasePriceAmount(data);
+  final amount = srPriceAmount(data);
+  if (base == null || amount == null || base <= amount || base <= 0) {
+    return null;
+  }
+  final savings = base - amount;
+  return (savings: savings, percentOff: ((savings / base) * 100).round());
+}
+
+/// Mismo formato de moneda que el resto de Dovia Home (`GTQ` → `Q449.99`).
+String srFormatAmount(num amount, String currency) {
+  final rounded = (amount * 100).round() / 100;
+  final fixed = rounded.toStringAsFixed(2);
+  final parts = fixed.split('.');
+  final grouped = parts[0].replaceAllMapped(
+    RegExp(r'(\d)(?=(\d{3})+$)'),
+    (m) => '${m[1]},',
+  );
+  final body = parts[1] == '00' ? grouped : '$grouped.${parts[1]}';
+  return currency.toUpperCase() == 'GTQ' ? 'Q$body' : '$currency $body';
+}
+
 /// Píldora de estatus que ve el cliente.
 ///
 /// Reglas, en orden: un servicio tomado por un asociado y no confirmado aún

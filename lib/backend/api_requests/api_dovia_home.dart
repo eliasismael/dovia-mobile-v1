@@ -854,6 +854,14 @@ class GetServiceRequestCall {
         getJsonField(response, r'''$.data.id''') ??
             getJsonField(response, r'''$.id'''),
       );
+
+  /// Cuerpo de la solicitud, sin el envoltorio `{ "data": ... }` cuando lo
+  /// hay. Todas las pantallas del cliente leen este mapa con
+  /// `service_request_fields.dart`.
+  Map<String, dynamic>? data(dynamic response) {
+    final raw = getJsonField(response, r'''$.data''') ?? response;
+    return raw is Map ? Map<String, dynamic>.from(raw) : null;
+  }
 }
 
 // ---------------------------------------------------------------------------

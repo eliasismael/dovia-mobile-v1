@@ -14,9 +14,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
+import '/repositories/payments_repository.dart';
 
 import 'd_h_c_l_i_e_n_t_agenda_model.dart';
 export 'd_h_c_l_i_e_n_t_agenda_model.dart';
@@ -28,9 +30,20 @@ class DHCLIENTAgendaWidget extends StatefulWidget {
   static String routePath = '/dHCLIENTAgenda';
 
   /// Anticipación mínima (en horas) para agendar una visita: 36h para pago por
-  /// uso sin plan, 24h para clientes con suscripción. Lo fija el paso previo
-  /// (valor de la visita) según cómo se pagó el servicio.
+  /// uso sin plan, 24h para clientes con suscripción. Se recalcula en
+  /// [_DHCLIENTAgendaWidgetState.initState] contra la suscripción actual, así
+  /// que el valor de acá es sólo el default antes de esa resolución.
   static int minAdvanceHours = 36;
+
+  /// Ruta a la que ir tras crear la solicitud, en vez del modal de éxito +
+  /// Dashboard de siempre. La setea quien empuja esta pantalla.
+  ///
+  /// El wizard estándar (Instalación → Agenda → ValorVisita) la usa para
+  /// derivar al cobro: el pago custom exige un `serviceId`, que recién existe
+  /// después de este paso. El flujo de cotización aceptada no cobra acá y la
+  /// deja en `null`, conservando el comportamiento de siempre (éxito +
+  /// Dashboard).
+  static String? nextRouteAfterSubmit;
 
   /// Dirección devuelta por el flujo de "Otra ubicación"
   /// ([DHCLIENTUbicacionWidget]) una vez que pasó el Coverage Check. Mismo
@@ -96,8 +109,23 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
 
     _loadAddresses();
     _loadScope();
+    _resolveMinAdvanceHours();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  /// 36h de anticipación para pago por uso, 24h con suscripción activa. Se
+  /// resuelve acá (y no la fija quien empuja la pantalla) porque es la misma
+  /// regla en los dos caminos que llegan a Agenda: el wizard estándar y la
+  /// aceptación de una cotización.
+  Future<void> _resolveMinAdvanceHours() async {
+    final payments = context.read<PaymentsRepository>();
+    await payments.loadCurrentSubscription();
+    if (!mounted) return;
+    safeSetState(() {
+      DHCLIENTAgendaWidget.minAdvanceHours =
+          payments.hasActiveSubscription ? 24 : 36;
+    });
   }
 
   @override
@@ -458,6 +486,18 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
           .id(response.jsonBody);
       if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
         await _uploadPhotos(serviceRequestId, token);
+      }
+
+      // El wizard estándar deriva al cobro: la solicitud existe pero todavía
+      // no está pagada, así que ni se anuncia en el Dashboard ni se muestra el
+      // modal de éxito. Eso pasa recién cuando ValorVisita confirma el pago.
+      final nextRoute = DHCLIENTAgendaWidget.nextRouteAfterSubmit;
+      if (nextRoute != null) {
+        DHCLIENTAgendaWidget.nextRouteAfterSubmit = null;
+        DHCLIENTValorVisitaPageWidget.serviceRequestId = serviceRequestId;
+        if (!mounted) return;
+        context.pushNamed(nextRoute);
+        return;
       }
 
       // La solicitud ya existe en el backend: se pinta de inmediato en el

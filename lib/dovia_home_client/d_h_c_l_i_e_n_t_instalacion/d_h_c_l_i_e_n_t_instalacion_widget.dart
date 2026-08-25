@@ -665,9 +665,15 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                           _model.textController!.text.trim();
                                       DHCLIENTInstalacionWidget.photos =
                                           List.of(_model.uploadedPhotos);
-                                      context.pushNamed(
+                                      // Agenda crea la solicitud y de ahí
+                                      // deriva al cobro (ValorVisita): el pago
+                                      // custom exige un serviceId que todavía
+                                      // no existe.
+                                      DHCLIENTAgendaWidget.nextRouteAfterSubmit =
                                           DHCLIENTValorVisitaPageWidget
-                                              .routeName);
+                                              .routeName;
+                                      context.pushNamed(
+                                          DHCLIENTAgendaWidget.routeName);
                                     }
                                   : null,
                               text: 'Siguiente',

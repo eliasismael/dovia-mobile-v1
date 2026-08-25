@@ -523,7 +523,14 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                                   ? () async {
                                       // El levantamiento viaja al paso de cobro,
                                       // que crea la solicitud de emergencia y
-                                      // adjunta las fotos al confirmar el pago.
+                                      // le adjunta las fotos.
+                                      //
+                                      // Se limpia la solicitud anterior: si un
+                                      // intento previo quedó sin pagar, su id
+                                      // sigue en el estático y esta emergencia
+                                      // nueva se cobraría contra aquélla.
+                                      DHCLIENTCostoEmergenciaWidget
+                                          .serviceRequestId = null;
                                       DHCLIENTCostoEmergenciaWidget.categoryId =
                                           _selectedCategoryId;
                                       DHCLIENTCostoEmergenciaWidget

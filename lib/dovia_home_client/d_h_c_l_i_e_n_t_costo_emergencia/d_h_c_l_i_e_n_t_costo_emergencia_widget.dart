@@ -1,6 +1,10 @@
+import '/core/result.dart';
+import '/domain/payment_models.dart';
+import '/dovia_home_client/checkout_launcher.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
+import '/dovia_home_client/service_request_fields.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -22,8 +26,20 @@ export 'd_h_c_l_i_e_n_t_costo_emergencia_model.dart';
 
 /// Pasarela de cobro condicional del servicio de emergencia ("Costo fijo mínimo
 /// del trabajo"). Según el estatus de la cuenta renderiza:
-/// - Premium (suscripción activa): tarjeta de descuento (35% OFF).
+/// - Premium (suscripción activa): tarjeta de descuento.
 /// - Free (sin suscripción): tarjeta de pago regular + upsell.
+///
+/// **Los montos salen del backend**, no de la app: el precio, el descuento del
+/// plan y el ahorro se leen de la solicitud
+/// (`serviceRequest.price`), que es además el monto exacto que
+/// `POST /payments/custom-checkout` exige recibir. Por eso la solicitud se crea
+/// al montar la pantalla y no al cobrar: sin ella no hay precio que mostrar ni
+/// `serviceId` con el que abrir el checkout.
+///
+/// El cobro es un checkout hospedado de Recurrente que se abre en el navegador;
+/// la app nunca toca datos de tarjeta. Volver de esa pestaña no prueba nada:
+/// quien confirma el pago es el webhook contra el backend, así que la pantalla
+/// sondea la orden en vez de darla por cobrada.
 ///
 /// Al confirmar el pago se **omite la selección de fecha/hora** (bypass de
 /// calendario): se lanza directamente el modal de éxito y se redirige al
@@ -47,66 +63,178 @@ class DHCLIENTCostoEmergenciaWidget extends StatefulWidget {
   /// solicitud (presign → PUT → confirm) una vez creada.
   static List<FFUploadedFile> photos = [];
 
-  /// Moneda del cobro. Todo el catálogo de DOVIA Home está en quetzales.
-  static const String currency = 'GTQ';
+  /// Moneda del cobro. Los pagos custom de Dovia Home sólo aceptan quetzales.
+  static const String currency = PaymentCurrency.gtq;
 
-  /// Precio base del servicio de emergencia (sin descuento).
-  static const String basePrice = 'Q600';
-
-  /// Precio final con descuento de suscripción (Premium).
-  static const String discountedPrice = 'Q390';
-
-  /// Porcentaje de descuento del plan.
-  static const String discountLabel = '35% OFF';
-
-  /// Ahorro exacto para la píldora informativa (Premium).
-  static const String savingsAmount = 'Q210';
-
-  /// Precio estándar completo (Free, pago por uso).
-  static const String regularPrice = 'Q449';
+  /// Solicitud de emergencia ya creada en el backend, si la hay.
+  ///
+  /// Es estática y no del `State` porque la pantalla se remonta de cero al
+  /// volver de comprar el plan (`DC_FormaPagoSuscripcion_2` cierra con
+  /// `goNamed`, que reemplaza la pila). Con el id en el `State` ese regreso
+  /// levantaría una segunda emergencia por el mismo problema.
+  static String? serviceRequestId;
 
   @override
   State<DHCLIENTCostoEmergenciaWidget> createState() =>
       _DHCLIENTCostoEmergenciaWidgetState();
 }
 
+/// En qué punto del cobro está la pantalla. Mismo idioma que ValorVisita y que
+/// `DC_FormaPagoSuscripcion_2`: el checkout de Recurrente se abre afuera, así
+/// que la pantalla no puede dar el pago por hecho al volver.
+enum _CheckoutPhase { idle, creating, waiting, failed }
+
 class _DHCLIENTCostoEmergenciaWidgetState
-    extends State<DHCLIENTCostoEmergenciaWidget> {
+    extends State<DHCLIENTCostoEmergenciaWidget> with WidgetsBindingObserver {
   late DHCLIENTCostoEmergenciaModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  /// Cómo se pagó (sólo aplica al escenario Free): null = sin pagar,
-  /// 'direct' = pago por uso. Sólo se setea contra una respuesta de cobro
-  /// exitosa: nunca se anticipa un pago que todavía no ocurrió.
-  ///
-  /// El caso "se suscribió" no vive acá: al volver de Planes se re-consulta la
-  /// suscripción y, si quedó activa, la pantalla pasa al escenario Premium, que
-  /// ya habilita [Siguiente] por sí solo.
+  /// Cómo se cubrió la emergencia: null = sin pagar, 'direct' = pago por uso,
+  /// 'subscription' = cubierta por el plan. Sólo se setea cuando el backend
+  /// confirma el cobro: nunca se anticipa un pago que todavía no ocurrió.
   String? _paidMethod;
 
   bool get _isPaid => _paidMethod != null;
 
-  /// Id de la solicitud de emergencia creada en el backend. Se crea una sola
-  /// vez (al cobrar) y se reutiliza para adjuntar fotos y confirmar el pago.
-  String? _serviceRequestId;
+  bool _isLoadingRequest = true;
+  String? _loadError;
+  Map<String, dynamic>? _requestData;
+
+  _CheckoutPhase _phase = _CheckoutPhase.idle;
+  String? _paymentOrderId;
+  String? _pendingMethod;
+  String? _failureMessage;
+  bool _polling = false;
+
+  /// El cobro se lanzó desde [Siguiente] (escenario Premium), así que al
+  /// confirmarse hay que cerrar el flujo sin pedir otro tap. Desde [Contratar]
+  /// queda en false: ahí el pago sólo desbloquea el botón inferior.
+  bool _finishWhenPaid = false;
+
+  num? get _amount => _requestData == null ? null : srPriceAmount(_requestData!);
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTCostoEmergenciaModel());
+    WidgetsBinding.instance.addObserver(this);
 
-    // Asegura el estado de suscripción cargado (cacheado en el repo).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PaymentsRepository>().loadCurrentSubscription();
-      safeSetState(() {});
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _model.dispose();
     super.dispose();
+  }
+
+  /// Volver del navegador es la señal más temprana de que el cliente terminó
+  /// de pagar.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        _phase == _CheckoutPhase.waiting) {
+      _pollUntilResolved();
+    }
+  }
+
+  /// Deja la pantalla lista para cobrar: estado de suscripción, solicitud
+  /// creada y su precio leído del backend.
+  Future<void> _bootstrap() async {
+    final payments = context.read<PaymentsRepository>();
+    await payments.loadCurrentSubscription();
+    if (!mounted) return;
+
+    final id = await _ensureServiceRequest();
+    if (!mounted || id == null) {
+      safeSetState(() {
+        _isLoadingRequest = false;
+        _loadError ??= 'No se pudo registrar la emergencia.';
+      });
+      return;
+    }
+
+    await _loadServiceRequest(id);
+    if (!mounted || _requestData == null) return;
+    await _resolvePaymentState(payments);
+  }
+
+  /// Relee la solicitud para tomar su precio y su estado de pago. El backend ya
+  /// aplica el descuento del plan, así que el monto que devuelve es el que hay
+  /// que cobrar.
+  Future<void> _loadServiceRequest(String serviceRequestId) async {
+    safeSetState(() {
+      _isLoadingRequest = true;
+      _loadError = null;
+    });
+
+    final call = DOVIAAPIDoviaHomeContextGroup.getServiceRequestCall;
+    final response = await call.call(
+      serviceRequestId: serviceRequestId,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted) return;
+
+    final data = response.succeeded ? call.data(response.jsonBody) : null;
+    if (data == null || srPriceAmount(data) == null) {
+      safeSetState(() {
+        _isLoadingRequest = false;
+        _loadError = 'No se pudo cargar el precio del servicio.';
+      });
+      return;
+    }
+
+    safeSetState(() {
+      _requestData = data;
+      _isLoadingRequest = false;
+    });
+  }
+
+  /// Con qué estado abrir: ya pagada / cubierta por el plan, o con una orden de
+  /// un intento anterior que hay que retomar en vez de crear un cobro nuevo.
+  Future<void> _resolvePaymentState(PaymentsRepository payments) async {
+    final data = _requestData;
+    final serviceRequestId = DHCLIENTCostoEmergenciaWidget.serviceRequestId;
+    if (data == null || serviceRequestId == null) return;
+
+    final method = payments.hasActiveSubscription ? 'subscription' : 'direct';
+
+    if (srIsPaid(data) || (srPriceAmount(data) ?? 0) <= 0) {
+      safeSetState(() => _paidMethod = method);
+      return;
+    }
+
+    final result = await payments.getPaymentStatus(serviceId: serviceRequestId);
+    if (!mounted) return;
+    final order = result.dataOrNull;
+    if (order == null) return;
+
+    if (order.isPaid) {
+      safeSetState(() => _paidMethod = method);
+      return;
+    }
+    if (order.status == PaymentStatus.pending ||
+        order.status == PaymentStatus.inProcess) {
+      safeSetState(() {
+        _paymentOrderId = order.id;
+        _pendingMethod = method;
+        _phase = _CheckoutPhase.waiting;
+      });
+      _pollUntilResolved();
+      return;
+    }
+    if (order.isResumable) {
+      safeSetState(() {
+        _paymentOrderId = order.id;
+        _pendingMethod = method;
+        _phase = _CheckoutPhase.failed;
+        _failureMessage = order.failureReason?.isNotEmpty == true
+            ? order.failureReason
+            : 'El pago no se completó.';
+      });
+    }
   }
 
   void _showError(String message) {
@@ -120,7 +248,8 @@ class _DHCLIENTCostoEmergenciaWidgetState
   /// dirección de servicio del cliente, y le adjunta las fotos. Idempotente:
   /// si ya se creó en este paso devuelve el mismo id.
   Future<String?> _ensureServiceRequest() async {
-    if (_serviceRequestId != null) return _serviceRequestId;
+    final existing = DHCLIENTCostoEmergenciaWidget.serviceRequestId;
+    if (existing != null) return existing;
 
     final categoryId = DHCLIENTCostoEmergenciaWidget.categoryId;
     if (categoryId == null || categoryId.isEmpty) {
@@ -157,7 +286,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
       return null;
     }
 
-    _serviceRequestId = id;
+    DHCLIENTCostoEmergenciaWidget.serviceRequestId = id;
     await _uploadPhotos(id, token);
     return id;
   }
@@ -248,48 +377,159 @@ class _DHCLIENTCostoEmergenciaWidgetState
     );
   }
 
-  /// Cobra la solicitud (`POST /service-requests/{id}/payment/confirm`).
-  /// - Premium: se cobra el precio con descuento a la tarjeta guardada.
-  /// - Free: se cobra el monto total al contratar.
-  Future<bool> _chargeRequest() async {
-    final serviceRequestId = await _ensureServiceRequest();
-    if (serviceRequestId == null) return false;
-
-    final response =
-        await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestPaymentCall
-            .call(
-      serviceRequestId: serviceRequestId,
-      currency: DHCLIENTCostoEmergenciaWidget.currency,
-      authToken: currentAuthenticationToken ?? '',
-    );
-    if (!response.succeeded) {
-      _showError('No se pudo procesar el cobro. Intenta de nuevo.');
-      return false;
+  /// Abre el cobro de la emergencia por Recurrente
+  /// (`POST /payments/custom-checkout`, `EMERGENCY_SERVICE`).
+  ///
+  /// El monto sale de la solicitud, no de la app: el backend rechaza el
+  /// checkout si `amount` no coincide con `serviceRequest.price.price.gtq`, que
+  /// es además donde ya está aplicado el descuento del plan.
+  Future<void> _startCheckout({required bool finishWhenPaid}) async {
+    if (_isPaid ||
+        _phase == _CheckoutPhase.creating ||
+        _phase == _CheckoutPhase.waiting) {
+      return;
     }
-    return true;
+
+    final serviceRequestId = DHCLIENTCostoEmergenciaWidget.serviceRequestId;
+    final amount = _amount;
+    if (serviceRequestId == null || amount == null) {
+      _showError('No se pudo cargar el precio del servicio. Intenta de nuevo.');
+      return;
+    }
+
+    final payments = context.read<PaymentsRepository>();
+    _finishWhenPaid = finishWhenPaid;
+    safeSetState(() {
+      _phase = _CheckoutPhase.creating;
+      _failureMessage = null;
+    });
+
+    final result = await payments.createCustomCheckout(
+      paymentType: PaymentType.emergencyService,
+      amount: amount,
+      currency: DHCLIENTCostoEmergenciaWidget.currency,
+      serviceId: serviceRequestId,
+      description: 'Servicio de emergencia',
+    );
+    if (!mounted) return;
+
+    switch (result) {
+      case Success(:final data):
+        await _openCheckout(
+          data,
+          method: payments.hasActiveSubscription ? 'subscription' : 'direct',
+        );
+      case Failure(:final message):
+        safeSetState(() => _phase = _CheckoutPhase.idle);
+        _showError(message);
+    }
+  }
+
+  Future<void> _openCheckout(PaymentOrder order,
+      {required String method}) async {
+    _pendingMethod = method;
+    final opened = await launchDoviaHomeCheckout(order.checkoutUrl);
+    if (!mounted) return;
+
+    if (!opened) {
+      safeSetState(() {
+        _phase = _CheckoutPhase.failed;
+        _paymentOrderId = order.id;
+        _failureMessage =
+            'No pudimos abrir el pago en tu navegador. Intentá de nuevo.';
+      });
+      return;
+    }
+
+    safeSetState(() {
+      _phase = _CheckoutPhase.waiting;
+      _paymentOrderId = order.id;
+    });
+    _pollUntilResolved();
+  }
+
+  /// Reanuda una orden caída. Nunca se crea un checkout nuevo: `resume` genera
+  /// una sucesora de la orden existente.
+  Future<void> _resumeCheckout() async {
+    final orderId = _paymentOrderId;
+    if (orderId == null) return;
+
+    safeSetState(() {
+      _phase = _CheckoutPhase.creating;
+      _failureMessage = null;
+    });
+
+    final result = await context
+        .read<PaymentsRepository>()
+        .resumePayment(paymentOrderId: orderId);
+    if (!mounted) return;
+
+    switch (result) {
+      case Success(:final data):
+        await _openCheckout(data, method: _pendingMethod ?? 'direct');
+      case Failure(:final message):
+        safeSetState(() => _phase = _CheckoutPhase.failed);
+        _showError(message);
+    }
+  }
+
+  /// Sondea hasta que el backend resuelva la orden: abrir el checkout no cobra,
+  /// lo confirma el webhook de Recurrente.
+  Future<void> _pollUntilResolved() async {
+    final orderId = _paymentOrderId;
+    if (orderId == null || _polling) return;
+
+    _polling = true;
+    try {
+      final order = await context
+          .read<PaymentsRepository>()
+          .awaitPaymentResolution(orderId);
+      if (!mounted) return;
+
+      // Se agotó la espera sin novedad: no es un fallo, el pago puede seguir
+      // procesándose.
+      if (order == null) {
+        _showError(
+            'Seguimos procesando tu pago. Te avisamos apenas se confirme.');
+        safeSetState(() => _phase = _CheckoutPhase.idle);
+        return;
+      }
+
+      if (order.isPaid) {
+        safeSetState(() {
+          _paidMethod = _pendingMethod ?? 'direct';
+          _phase = _CheckoutPhase.idle;
+        });
+        if (_finishWhenPaid) await _finish();
+        return;
+      }
+
+      safeSetState(() {
+        _phase = _CheckoutPhase.failed;
+        _failureMessage = order.failureReason?.isNotEmpty == true
+            ? order.failureReason
+            : 'El pago no se completó.';
+      });
+    } finally {
+      _polling = false;
+    }
   }
 
   /// Escenario Free — [Contratar]: cobra el monto total. Sólo al confirmarse el
   /// cobro se desbloquea el botón inferior [Siguiente].
-  Future<void> _payDirect() async {
-    if (_isPaid || _model.isSubmitting) return;
-    safeSetState(() => _model.isSubmitting = true);
-    try {
-      final charged = await _chargeRequest();
-      if (!mounted || !charged) return;
-      safeSetState(() => _paidMethod = 'direct');
-    } finally {
-      if (mounted) safeSetState(() => _model.isSubmitting = false);
-    }
-  }
+  Future<void> _payDirect() => _startCheckout(finishWhenPaid: false);
 
   /// Escenario Free — [Subscribirse]: abre el flujo de adquisición del plan
-  /// DOVIA Home. Al volver se re-consulta la suscripción contra el backend: si
-  /// quedó activa, la pantalla pasa al escenario Premium (tarjeta de descuento)
-  /// y [Siguiente] se habilita. Si el cliente omitió la compra, no pasa nada:
-  /// el paso sigue bloqueado hasta que pague.
+  /// DOVIA Home. Al volver se re-consulta la suscripción y se relee la
+  /// solicitud: el backend le aplica el descuento del plan, así que la pantalla
+  /// pasa al escenario Premium con el precio ya recalculado. Si el cliente
+  /// omitió la compra, el paso sigue bloqueado hasta que pague.
   Future<void> _goToSubscription() async {
-    if (_isPaid || _model.isSubmitting) return;
+    if (_isPaid ||
+        _phase == _CheckoutPhase.creating ||
+        _phase == _CheckoutPhase.waiting) {
+      return;
+    }
     // Sin esto, "Omitir" en Planes deriva al flujo de visita estándar (con paso
     // de calendario), que es justo el que la emergencia debe saltear.
     DHCLIENTPlanesPageWidget.pendingReturnRoute =
@@ -298,10 +538,15 @@ class _DHCLIENTCostoEmergenciaWidgetState
     if (!mounted) return;
     DHCLIENTPlanesPageWidget.pendingReturnRoute = null;
 
-    await context
-        .read<PaymentsRepository>()
-        .loadCurrentSubscription(forceRefresh: true);
-    if (mounted) safeSetState(() {});
+    final payments = context.read<PaymentsRepository>();
+    await payments.loadCurrentSubscription(forceRefresh: true);
+    if (!mounted) return;
+
+    final id = DHCLIENTCostoEmergenciaWidget.serviceRequestId;
+    if (id == null) return;
+    await _loadServiceRequest(id);
+    if (!mounted || _requestData == null) return;
+    await _resolvePaymentState(payments);
   }
 
   /// Confirma la solicitud de emergencia. **Omite el calendario**: no hay paso
@@ -309,19 +554,27 @@ class _DHCLIENTCostoEmergenciaWidgetState
   /// registra la solicitud en "Próximas visitas" con alta prioridad, lanza el
   /// modal de éxito y redirige al Dashboard.
   Future<void> _confirmAndSchedule() async {
+    // Premium llega acá sin haber pagado: [Siguiente] es su botón de cobro. El
+    // modal de éxito lo lanza el sondeo cuando el webhook confirma, vía
+    // `_finishWhenPaid`; anunciarlo antes sería dar por agendada una
+    // emergencia que nadie pagó.
+    if (!_isPaid) {
+      await _startCheckout(finishWhenPaid: true);
+      return;
+    }
+    await _finish();
+  }
+
+  /// Cierra el flujo con el pago ya confirmado: registra la emergencia en el
+  /// Dashboard con alta prioridad, lanza el modal de éxito y redirige.
+  Future<void> _finish() async {
     if (_model.isSubmitting) return;
     safeSetState(() => _model.isSubmitting = true);
     try {
-      // Sólo [Contratar] cobra por adelantado; en el resto de los casos
-      // (Premium, o Free que acaba de suscribirse) el cobro se procesa acá
-      // contra la tarjeta guardada, al precio que resuelve el backend.
-      final charged = _paidMethod == 'direct' ? true : await _chargeRequest();
-      if (!mounted || !charged) return;
-
       DHCLIENTHomepageWidget.upcomingVisits.insert(
         0,
         ScheduledVisit(
-          id: _serviceRequestId,
+          id: DHCLIENTCostoEmergenciaWidget.serviceRequestId,
           service: 'Servicio de emergencia',
           date: 'Atención prioritaria',
           time: 'respuesta < 18h',
@@ -332,6 +585,9 @@ class _DHCLIENTCostoEmergenciaWidgetState
       DHCLIENTCostoEmergenciaWidget.categoryId = null;
       DHCLIENTCostoEmergenciaWidget.description = null;
       DHCLIENTCostoEmergenciaWidget.photos = [];
+      // La emergencia quedó cerrada: dejar el id pegado haría que la próxima
+      // entrada a esta pantalla intente cobrar la solicitud anterior.
+      DHCLIENTCostoEmergenciaWidget.serviceRequestId = null;
       // El flujo terminó: la dirección verificada no debe quedar pegada a una
       // emergencia futura que se levante sin pasar por Ubicación.
       DHCLIENTUbicacionWidget.lastVerifiedAddressId = null;
@@ -398,14 +654,19 @@ class _DHCLIENTCostoEmergenciaWidgetState
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
                         20.0, 30.0, 20.0, 0.0),
-                    child: !premiumResolved
+                    // Además del estatus de la cuenta hace falta el precio: las
+                    // dos tarjetas lo pintan y sale de la solicitud, no de la
+                    // app.
+                    child: (!premiumResolved || _isLoadingRequest)
                         ? const Padding(
                             padding: EdgeInsets.symmetric(vertical: 60.0),
                             child: Center(child: CircularProgressIndicator()),
                           )
-                        : isPremium
-                            ? _premiumCard()
-                            : _freeCard(),
+                        : _requestData == null
+                            ? _loadErrorCard()
+                            : isPremium
+                                ? _premiumCard()
+                                : _freeCard(),
                   ),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
@@ -455,6 +716,11 @@ class _DHCLIENTCostoEmergenciaWidgetState
   // ---------------------------------------------------------------------------
 
   Widget _premiumCard() {
+    final data = _requestData!;
+    final amount = srPriceAmount(data)!;
+    final base = srBasePriceAmount(data);
+    final discount = srPlanDiscount(data);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -485,58 +751,57 @@ class _DHCLIENTCostoEmergenciaWidgetState
                 ),
           ),
           const SizedBox(height: 8.0),
-          // Precio base tachado.
-          _priceLine(
-            DHCLIENTCostoEmergenciaWidget.basePrice,
-            '/el día',
-            struck: true,
-          ),
-          const SizedBox(height: 18.0),
-          // Etiqueta central de descuento.
-          _premiumPill(
-            leading: Text(
-              DHCLIENTCostoEmergenciaWidget.discountLabel,
-              style: GoogleFonts.publicSans(
-                color: const Color(0xFF007376),
-                fontWeight: FontWeight.w700,
-                fontSize: 15.0,
+          // Precio base tachado, etiqueta de descuento y ahorro: los tres sólo
+          // se pintan si el backend expone un precio de lista mayor al que se
+          // cobra. Sin ese dato no hay descuento verificable que anunciar, y
+          // fabricarlo sería inflar un ahorro inventado.
+          if (discount != null) ...[
+            _priceLine(_formatAmount(base!), '/el día', struck: true),
+            const SizedBox(height: 18.0),
+            _premiumPill(
+              leading: Text(
+                '${discount.percentOff}% OFF',
+                style: GoogleFonts.publicSans(
+                  color: const Color(0xFF007376),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15.0,
+                ),
               ),
+              trailing: 'DOVIA PREMIUM',
             ),
-            trailing: 'DOVIA PREMIUM',
-          ),
-          const SizedBox(height: 18.0),
+            const SizedBox(height: 18.0),
+          ],
           // Precio final a cobrar.
-          _priceLine(
-            DHCLIENTCostoEmergenciaWidget.discountedPrice,
-            '/el día',
-          ),
-          const SizedBox(height: 18.0),
-          // Píldora informativa del ahorro exacto.
-          _premiumPill(
-            leading: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'AHORRO DEL SERVICIO  ',
-                    style: GoogleFonts.publicSans(
-                      color: const Color(0xFF6A7282),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 10.0,
+          _priceLine(_formatAmount(amount), '/el día'),
+          if (discount != null) ...[
+            const SizedBox(height: 18.0),
+            _premiumPill(
+              leading: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'AHORRO DEL SERVICIO  ',
+                      style: GoogleFonts.publicSans(
+                        color: const Color(0xFF6A7282),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10.0,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: DHCLIENTCostoEmergenciaWidget.savingsAmount,
-                    style: GoogleFonts.publicSans(
-                      color: const Color(0xFF007376),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14.0,
+                    TextSpan(
+                      text: _formatAmount(discount.savings),
+                      style: GoogleFonts.publicSans(
+                        color: const Color(0xFF007376),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14.0,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              trailing: 'DOVIA PREMIUM',
             ),
-            trailing: 'DOVIA PREMIUM',
-          ),
+          ],
+          _checkoutStatus(),
         ],
       ),
     );
@@ -572,6 +837,10 @@ class _DHCLIENTCostoEmergenciaWidgetState
   // ---------------------------------------------------------------------------
 
   Widget _freeCard() {
+    final data = _requestData!;
+    final amount = srPriceAmount(data)!;
+    final subscriberAmount = srSubscriberPriceAmount(data);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -602,7 +871,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
                 ),
           ),
           const SizedBox(height: 8.0),
-          _priceLine(DHCLIENTCostoEmergenciaWidget.regularPrice, '/el día'),
+          _priceLine(_formatAmount(amount), '/el día'),
           const SizedBox(height: 20.0),
           _softButton(
             'Contratar',
@@ -621,8 +890,13 @@ class _DHCLIENTCostoEmergenciaWidgetState
                   lineHeight: 1.4,
                 ),
           ),
-          const SizedBox(height: 12.0),
-          _priceLine(DHCLIENTCostoEmergenciaWidget.discountedPrice, '/el día'),
+          // Sin precio de suscriptor en el payload no se pinta monto: el
+          // incentivo se sostiene solo, y un número inventado acá sería el que
+          // el cliente espera que le cobren después.
+          if (subscriberAmount != null) ...[
+            const SizedBox(height: 12.0),
+            _priceLine(_formatAmount(subscriberAmount), '/el día'),
+          ],
           const SizedBox(height: 20.0),
           // Nunca queda en estado "Pagado": si la contratación prospera, la
           // pantalla pasa al escenario Premium y esta tarjeta deja de verse.
@@ -630,6 +904,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
             'Subscribirse',
             onTap: _goToSubscription,
           ),
+          _checkoutStatus(),
         ],
       ),
     );
@@ -638,6 +913,127 @@ class _DHCLIENTCostoEmergenciaWidgetState
   // ---------------------------------------------------------------------------
   // Helpers compartidos.
   // ---------------------------------------------------------------------------
+
+  /// La solicitud no se pudo registrar o no trajo precio. No se ofrece ningún
+  /// botón de cobro: sin monto confirmado no hay nada que cobrar.
+  Widget _loadErrorCard() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(26.0),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.0),
+      ),
+      padding: const EdgeInsetsDirectional.fromSTEB(24.0, 32.0, 24.0, 32.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _loadError ?? 'No se pudo cargar el precio del servicio.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.publicSans(
+              color: const Color(0xFF00444B),
+              fontSize: 14.0,
+            ),
+          ),
+          TextButton(
+            onPressed: _bootstrap,
+            child: Text(
+              'Reintentar',
+              style: GoogleFonts.publicSans(
+                color: const Color(0xFF007376),
+                fontWeight: FontWeight.w600,
+                fontSize: 14.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatAmount(num amount) => srFormatAmount(
+        amount,
+        _requestData == null
+            ? DHCLIENTCostoEmergenciaWidget.currency
+            : srPriceCurrency(_requestData!),
+      );
+
+  /// Retroalimentación del checkout externo. Sin esto el cliente no tiene cómo
+  /// saber que el pago sigue procesándose (Recurrente abre en otra pestaña) ni
+  /// cómo retomar una orden caída.
+  Widget _checkoutStatus() {
+    switch (_phase) {
+      case _CheckoutPhase.waiting:
+        return Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
+                ),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                'Estamos confirmando tu pago…',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.publicSans(
+                  color: const Color(0xFF00444B),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.0,
+                ),
+              ),
+              TextButton(
+                onPressed: _pollUntilResolved,
+                child: Text(
+                  'Ya completé el pago',
+                  style: GoogleFonts.publicSans(
+                    color: const Color(0xFF007376),
+                    fontSize: 13.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      case _CheckoutPhase.failed:
+        return Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _failureMessage ?? 'El pago no se completó.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.publicSans(
+                  color: const Color(0xFFD92D20),
+                  fontSize: 13.0,
+                ),
+              ),
+              TextButton(
+                onPressed: _resumeCheckout,
+                child: Text(
+                  'Reintentar el pago',
+                  style: GoogleFonts.publicSans(
+                    color: const Color(0xFF007376),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      case _CheckoutPhase.idle:
+      case _CheckoutPhase.creating:
+        return const SizedBox.shrink();
+    }
+  }
 
   Widget _priceLine(String amount, String period, {bool struck = false}) {
     return RichText(
@@ -678,7 +1074,12 @@ class _DHCLIENTCostoEmergenciaWidgetState
       focusColor: Colors.transparent,
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
-      onTap: (paid || _model.isSubmitting) ? null : onTap,
+      onTap: (paid ||
+              _model.isSubmitting ||
+              _phase == _CheckoutPhase.creating ||
+              _phase == _CheckoutPhase.waiting)
+          ? null
+          : onTap,
       child: Container(
         width: double.infinity,
         height: 52.0,
@@ -711,14 +1112,20 @@ class _DHCLIENTCostoEmergenciaWidgetState
   }
 
   /// Botón inferior [Siguiente].
-  /// - Premium: siempre habilitado (cobra a la tarjeta guardada).
+  /// - Premium: habilitado apenas hay precio; es su botón de cobro (abre el
+  ///   checkout y cierra el flujo cuando el webhook confirma).
   /// - Free: bloqueado hasta que el usuario complete el pago (contratando
   ///   directo o suscribiéndose).
-  /// - Mientras no se sepa si es Premium: bloqueado, para no dejar avanzar
-  ///   sobre un escenario todavía sin resolver.
+  /// - Mientras no se sepa si es Premium, no haya precio, o un checkout esté
+  ///   en curso: bloqueado.
   Widget _nextButton({required bool isPremium, required bool premiumResolved}) {
-    final enabled =
-        premiumResolved && (isPremium || _isPaid) && !_model.isSubmitting;
+    final busy = _model.isSubmitting ||
+        _phase == _CheckoutPhase.creating ||
+        _phase == _CheckoutPhase.waiting;
+    final enabled = premiumResolved &&
+        _requestData != null &&
+        (isPremium || _isPaid) &&
+        !busy;
     return FFButtonWidget(
       onPressed: enabled ? () async => _confirmAndSchedule() : null,
       text: 'Siguiente',
