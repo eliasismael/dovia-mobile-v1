@@ -49,6 +49,11 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
   String? _errorMessage;
   bool _isEconomicDropdownOpen = false;
 
+  /// [Rechazar] no rechaza de una: despliega el motivo obligatorio al pie y
+  /// recién ahí se confirma. Mismo comportamiento que ve el comprador.
+  bool _isRejecting = false;
+  final TextEditingController _rejectReasonCtrl = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -62,6 +67,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
 
   @override
   void dispose() {
+    _rejectReasonCtrl.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -138,93 +144,20 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
 
   Future<void> _rejectOffer() async {
     if (widget.offerId == null) return;
-    final reasonCtrl = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('¿Por qué rechazas la oferta?',
-                  style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: _primaryDark)),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFAFAFA),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFDFDFDF)),
-                ),
-                child: TextField(
-                  controller: reasonCtrl,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    hintText: 'Escribe el motivo aquí...',
-                    hintStyle: GoogleFonts.inter(
-                        color: const Color(0xFF888888), fontSize: 14),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.all(14),
-                  ),
-                  style: GoogleFonts.inter(fontSize: 14, color: _primaryDark),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: _primary),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: Text('Cancelar',
-                          style: GoogleFonts.inter(
-                              color: _primary, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: _errorRed,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: () {
-                        if (reasonCtrl.text.trim().isEmpty) return;
-                        Navigator.pop(ctx, true);
-                      },
-                      child: Text('Confirmar',
-                          style:
-                              GoogleFonts.inter(fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (confirmed != true) {
-      reasonCtrl.dispose();
+
+    final reason = _rejectReasonCtrl.text.trim();
+    final messenger = ScaffoldMessenger.of(context);
+    if (reason.isEmpty) {
+      messenger.showSnackBar(SnackBar(
+        content: const Text('Indica el motivo del rechazo.'),
+        backgroundColor: _errorRed,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ));
       return;
     }
-    final reason = reasonCtrl.text.trim();
-    reasonCtrl.dispose();
 
     safeSetState(() => _isActioning = true);
-    final messenger = ScaffoldMessenger.of(context);
     final res = await DOVIAAPIOfferContextGroup.rejectOfferCall.call(
       offerId: widget.offerId,
       authToken: currentAuthenticationToken,
@@ -233,14 +166,12 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     if (!mounted) return;
     safeSetState(() => _isActioning = false);
     if (res.succeeded) {
-      if (!mounted) return;
-      safeSetState(() => _isActioning = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      messenger.showSnackBar(const SnackBar(
         content: Text('Oferta rechazada.'),
         backgroundColor: Color(0xFF555555),
         behavior: SnackBarBehavior.floating,
       ));
-      // Volver al dashboard para que se recargue
+      // Volver al listado para que recargue: la oferta pasa a "Rechazadas".
       context.pop();
     } else {
       messenger.showSnackBar(SnackBar(
@@ -650,9 +581,13 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
           // ── Action buttons / counter-offer state ─────────────────────────
           if (_isCounterOfferSent())
             _counterOfferSentCard(amount, currencySymbol)
-          else if (canAct)
-            _actionButtons()
-          else
+          else if (canAct) ...[
+            _actionButtons(),
+            if (_isRejecting) ...[
+              const SizedBox(height: 24),
+              _rejectReasonForm(),
+            ],
+          ] else
             _statusMessage(),
 
           // ── Rejection reason (only when owner rejected) ───────────────────
@@ -863,7 +798,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
-          onPressed: _isActioning ? null : _rejectOffer,
+          onPressed: _isActioning
+              ? null
+              : () => safeSetState(() => _isRejecting = true),
           child: Text('Rechazar',
               style: GoogleFonts.inter(
                   fontSize: 15, fontWeight: FontWeight.w600, color: _primary)),
@@ -1042,6 +979,87 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  /// Motivo obligatorio del rechazo. Se despliega al pie al tocar [Rechazar],
+  /// con el trilema todavía a la vista para poder cambiar de idea.
+  Widget _rejectReasonForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('¿Por qué rechazas la oferta?',
+            style: GoogleFonts.inter(fontSize: 16, color: _primaryDark)),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAFAFA),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFDFDFDF)),
+          ),
+          child: TextField(
+            controller: _rejectReasonCtrl,
+            maxLines: 4,
+            onChanged: (_) => safeSetState(() {}),
+            decoration: InputDecoration(
+              hintText: 'Escribe aquí...',
+              hintStyle: GoogleFonts.inter(
+                  color: const Color(0xFF888888), fontSize: 14),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(14),
+            ),
+            style: GoogleFonts.inter(fontSize: 14, color: _primaryDark),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(children: [
+          Expanded(
+              child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: _primary),
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            onPressed: _isActioning
+                ? null
+                : () => safeSetState(() {
+                      _isRejecting = false;
+                      _rejectReasonCtrl.clear();
+                    }),
+            child: Text('Cancelar',
+                style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: _primary)),
+          )),
+          const SizedBox(width: 12),
+          Expanded(
+              child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: _errorRed,
+              disabledBackgroundColor: _errorRed.withOpacity(0.4),
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            onPressed: _isActioning || _rejectReasonCtrl.text.trim().isEmpty
+                ? null
+                : _rejectOffer,
+            child: _isActioning
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white))
+                : Text('Confirmar rechazo',
+                    style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
+          )),
+        ]),
       ],
     );
   }

@@ -718,7 +718,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                       height: 20,
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white))
-                  : Text('Aceptar y enviar',
+                  : Text('Enviar oferta',
                       style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
