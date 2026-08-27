@@ -176,6 +176,47 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                 ),
               ),
             ),
+            // Mis ofertas: las propuestas que el usuario envió como cliente.
+            Builder(
+              builder: (context) => InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  if (FFAppState().UserRole != 'VISITOR') {
+                    context.pushNamed(DOVIACLIENTMisOfertasWidget.routeName);
+                  } else {
+                    await showDialog(
+                      context: context,
+                      builder: (dialogContext) {
+                        return Dialog(
+                          elevation: 0,
+                          insetPadding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          alignment: const AlignmentDirectional(0.0, 0.0)
+                              .resolve(Directionality.of(context)),
+                          child: const VisitorRestrictionPopupWidget(),
+                        );
+                      },
+                    );
+                  }
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(0.0),
+                  child: SvgPicture.asset(
+                    'assets/images/IconoMisOfertas.svg',
+                    width: 24.0,
+                    height: 24.0,
+                    fit: BoxFit.none,
+                    colorFilter:
+                        _isActive(DOVIACLIENTMisOfertasWidget.routeName)
+                            ? _activeFilter(context)
+                            : null,
+                  ),
+                ),
+              ),
+            ),
             Builder(
               builder: (context) => InkWell(
                 splashColor: Colors.transparent,

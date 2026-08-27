@@ -5,6 +5,8 @@
 // receiving side: Ofertas (new proposals), Contraoferta (negotiations already
 // countered) and Oferta aceptada (closed deals that moved on to Legal HQ).
 
+import 'offer_json.dart';
+
 /// Days the owner has to answer a proposal before it expires.
 ///
 /// The backend is the one that flips an unanswered offer to
@@ -227,62 +229,62 @@ class OwnerProposal {
     Map<String, dynamic> json, {
     Map<String, dynamic>? property,
   }) {
-    final active = _asMap(json['activeOfferData']);
-    final original = _asMap(json['originalOfferData']) ?? _asMap(json['offerData']);
-    final counter = _asMap(json['counterOfferData']) ?? _asMap(json['counterOffer']);
-    final propertyJson = _asMap(json['property']) ?? _asMap(property);
+    final active = offerAsMap(json['activeOfferData']);
+    final original = offerAsMap(json['originalOfferData']) ?? offerAsMap(json['offerData']);
+    final counter = offerAsMap(json['counterOfferData']) ?? offerAsMap(json['counterOffer']);
+    final propertyJson = offerAsMap(json['property']) ?? offerAsMap(property);
 
     String pick(String key) =>
-        _str(active?[key]) ??
-        _str(counter?[key]) ??
-        _str(original?[key]) ??
-        _str(json[key]) ??
+        offerStr(active?[key]) ??
+        offerStr(counter?[key]) ??
+        offerStr(original?[key]) ??
+        offerStr(json[key]) ??
         '';
 
     return OwnerProposal(
-      offerId: _str(json['offerId']) ?? _str(json['id']) ?? _str(json['_id']) ?? '',
-      propertyId: _str(propertyJson?['id']) ??
-          _str(json['propertyId']) ??
-          _str(propertyJson?['_id']) ??
+      offerId: offerStr(json['offerId']) ?? offerStr(json['id']) ?? offerStr(json['_id']) ?? '',
+      propertyId: offerStr(propertyJson?['id']) ??
+          offerStr(json['propertyId']) ??
+          offerStr(propertyJson?['_id']) ??
           '',
-      propertyName: _str(propertyJson?['name']) ??
-          _str(propertyJson?['title']) ??
-          _str(json['propertyName']) ??
+      propertyName: offerStr(propertyJson?['name']) ??
+          offerStr(propertyJson?['title']) ??
+          offerStr(json['propertyName']) ??
           'Propiedad',
-      propertyImageUrl: _firstPhotoUrl(propertyJson) ?? '',
-      offerType: (_str(json['offerType']) ?? '').toUpperCase(),
+      propertyImageUrl: firstPropertyPhotoUrl(propertyJson) ?? '',
+      offerType: (offerStr(json['offerType']) ?? '').toUpperCase(),
       paymentMethod: pick('paymentMethod'),
       offerStatus:
-          (_str(json['offerStatus']) ?? _str(json['status']) ?? '').toUpperCase(),
-      processStatus: (_str(json['processStatus']) ??
-              _str(_asMap(json['legalProcess'])?['status']) ??
+          (offerStr(json['offerStatus']) ?? offerStr(json['status']) ?? '').toUpperCase(),
+      processStatus: (offerStr(json['processStatus']) ??
+              offerStr(offerAsMap(json['legalProcess'])?['status']) ??
               '')
           .toLowerCase(),
-      lastOfferBy: (_str(json['lastOfferBy']) ?? '').toUpperCase(),
+      lastOfferBy: (offerStr(json['lastOfferBy']) ?? '').toUpperCase(),
       pendingResponseBy:
-          (_str(json['pendingResponseBy']) ?? '').toUpperCase(),
-      proposedAmount: _num(active?['proposedAmount']) ??
-          _num(counter?['proposedAmount']) ??
-          _num(original?['proposedAmount']) ??
-          _num(json['proposedAmount']) ??
-          _num(json['amount']),
+          (offerStr(json['pendingResponseBy']) ?? '').toUpperCase(),
+      proposedAmount: offerNum(active?['proposedAmount']) ??
+          offerNum(counter?['proposedAmount']) ??
+          offerNum(original?['proposedAmount']) ??
+          offerNum(json['proposedAmount']) ??
+          offerNum(json['amount']),
       currency: (pick('currency').isEmpty ? 'USD' : pick('currency')).toUpperCase(),
-      buyerName: _str(_asMap(active?['buyerInfo'])?['name']) ??
-          _str(_asMap(original?['buyerInfo'])?['name']) ??
-          _str(_asMap(json['client'])?['name']) ??
+      buyerName: offerStr(offerAsMap(active?['buyerInfo'])?['name']) ??
+          offerStr(offerAsMap(original?['buyerInfo'])?['name']) ??
+          offerStr(offerAsMap(json['client'])?['name']) ??
           '',
       hasCounterOffer: counter != null && counter.isNotEmpty,
       contractSigned: json['contractSigned'] == true ||
-          _str(json['contractSigned'])?.toLowerCase() == 'true',
+          offerStr(json['contractSigned'])?.toLowerCase() == 'true',
       isRated: json['isRated'] == true ||
           json['rated'] == true ||
           json['hasRating'] == true ||
-          _str(json['ratedAt']) != null ||
-          _asMap(json['rating']) != null ||
+          offerStr(json['ratedAt']) != null ||
+          offerAsMap(json['rating']) != null ||
           (json['ratings'] is List && (json['ratings'] as List).isNotEmpty),
-      createdAt: DateTime.tryParse(_str(json['createdAt']) ?? ''),
+      createdAt: DateTime.tryParse(offerStr(json['createdAt']) ?? ''),
       updatedAt: DateTime.tryParse(
-          _str(json['updatedAt']) ?? _str(json['lastOfferAt']) ?? ''),
+          offerStr(json['updatedAt']) ?? offerStr(json['lastOfferAt']) ?? ''),
     );
   }
 
@@ -482,11 +484,11 @@ class OwnerProposalsBoard {
     final aceptadas = <OwnerProposal>[];
 
     for (final raw in offers) {
-      final map = _asMap(raw);
+      final map = offerAsMap(raw);
       if (map == null) continue;
       final proposal = OwnerProposal.fromJson(
         map,
-        property: propertiesById[_str(map['propertyId']) ?? ''],
+        property: propertiesById[offerStr(map['propertyId']) ?? ''],
       );
       if (proposal.offerId.isEmpty) continue;
       switch (proposal.lane) {
@@ -521,41 +523,4 @@ List<OwnerProposal> _newestFirst(Iterable<OwnerProposal> proposals) {
       return bDate.compareTo(aDate);
     });
   return items;
-}
-
-// ── JSON helpers ───────────────────────────────────────────────────────────
-
-Map<String, dynamic>? _asMap(dynamic value) {
-  if (value is Map<String, dynamic>) return value.isEmpty ? null : value;
-  if (value is Map) {
-    final map = Map<String, dynamic>.from(value);
-    return map.isEmpty ? null : map;
-  }
-  return null;
-}
-
-String? _str(dynamic value) {
-  if (value == null) return null;
-  final s = value.toString().trim();
-  return s.isEmpty ? null : s;
-}
-
-num? _num(dynamic value) {
-  if (value == null) return null;
-  if (value is num) return value;
-  return num.tryParse(value.toString());
-}
-
-String? _firstPhotoUrl(Map<String, dynamic>? property) {
-  if (property == null) return null;
-  for (final key in const ['photos', 'images']) {
-    final list = property[key];
-    if (list is List && list.isNotEmpty) {
-      final first = list.first;
-      if (first is Map) return _str(first['url']) ?? _str(first['uri']);
-      final direct = _str(first);
-      if (direct != null) return direct;
-    }
-  }
-  return _str(property['imageUrl']) ?? _str(property['coverPhoto']);
 }

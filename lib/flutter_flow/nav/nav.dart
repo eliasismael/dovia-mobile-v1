@@ -576,6 +576,21 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: DOVIACLIENTMisOfertasWidget.routeName,
+          path: DOVIACLIENTMisOfertasWidget.routePath,
+          builder: (context, params) => const DOVIACLIENTMisOfertasWidget(),
+        ),
+        FFRoute(
+          name: DOVIACLIENTMisOfertasListaWidget.routeName,
+          path: DOVIACLIENTMisOfertasListaWidget.routePath,
+          builder: (context, params) => DOVIACLIENTMisOfertasListaWidget(
+            lane: params.getParam(
+              'lane',
+              ParamType.String,
+            ),
+          ),
+        ),
+        FFRoute(
           name: DOVIACLIENTPropuestasRecientesWidget.routeName,
           path: DOVIACLIENTPropuestasRecientesWidget.routePath,
           builder: (context, params) =>

@@ -65,6 +65,10 @@ class FFAppState extends ChangeNotifier {
       _seenOwnerProposals =
           prefs.getStringList('ff_seenOwnerProposals') ?? _seenOwnerProposals;
     });
+    _safeInit(() {
+      _seenClientOffers =
+          prefs.getStringList('ff_seenClientOffers') ?? _seenClientOffers;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -219,6 +223,34 @@ class FFAppState extends ChangeNotifier {
           _seenOwnerProposals.sublist(_seenOwnerProposals.length - 200);
     }
     prefs.setStringList('ff_seenOwnerProposals', _seenOwnerProposals);
+  }
+
+  /// Lo mismo que [seenOwnerProposals] pero del otro lado del mostrador:
+  /// firmas (`ClientOffer.seenSignature`) de las ofertas que el usuario envió
+  /// y ya revisó. Sostienen el punto rojo del carril "Contraoferta" de
+  /// "Mis Ofertas".
+  ///
+  /// Se guarda aparte porque son negociaciones distintas: en unas el usuario
+  /// es el dueño y en otras el comprador.
+  List<String> _seenClientOffers = [];
+  List<String> get seenClientOffers => _seenClientOffers;
+  set seenClientOffers(List<String> value) {
+    _seenClientOffers = value;
+    prefs.setStringList('ff_seenClientOffers', value);
+  }
+
+  bool hasSeenClientOffer(String signature) =>
+      _seenClientOffers.contains(signature);
+
+  void addToSeenClientOffers(String signature) {
+    if (signature.isEmpty || _seenClientOffers.contains(signature)) return;
+    _seenClientOffers.add(signature);
+    // Sólo interesa el estado reciente: se acota para no crecer sin límite.
+    if (_seenClientOffers.length > 200) {
+      _seenClientOffers =
+          _seenClientOffers.sublist(_seenClientOffers.length - 200);
+    }
+    prefs.setStringList('ff_seenClientOffers', _seenClientOffers);
   }
 }
 

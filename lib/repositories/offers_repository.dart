@@ -3,6 +3,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_offers.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/core/result.dart';
+import '/domain/client_offer_models.dart';
 import '/domain/owner_proposal_models.dart';
 
 class OffersRepository extends ChangeNotifier {
@@ -58,6 +59,101 @@ class OffersRepository extends ChangeNotifier {
       final property = Map<String, dynamic>.from(raw);
       final id = property['id']?.toString() ?? property['_id']?.toString();
       if (id != null && id.isNotEmpty) result[id] = property;
+    }
+    return result;
+  }
+
+  /// Ofertas que el usuario envió como cliente sobre propiedades ajenas — lo
+  /// que alimenta el panel "Mis Ofertas".
+  ///
+  /// `/offers/my-offers` sólo devuelve `propertyId`, y aquí las propiedades no
+  /// son del usuario, así que no sirve `/properties/my-properties`: se resuelve
+  /// cada inmueble distinto con `GET /properties/{id}`, que es el único
+  /// endpoint que además trae la foto principal. Si una propiedad no se puede
+  /// resolver, la oferta se muestra igual con el placeholder de la tarjeta.
+  Future<Result<ClientOffersBoard>> loadMyOffers({
+    int page = 1,
+    int limit = 50,
+  }) async {
+    final token = currentAuthenticationToken ?? '';
+    final response = await DOVIAAPIOfferContextGroup.listMyOffersCall.call(
+      authToken: token,
+      page: page.toString(),
+      limit: limit.toString(),
+    );
+
+    if (!response.succeeded) {
+      return Failure(
+        response.jsonBody?['message']?.toString() ??
+            'Error al cargar tus ofertas',
+        statusCode: response.statusCode,
+      );
+    }
+
+    final offers = _extractItems(response.jsonBody);
+    return Success(ClientOffersBoard.fromOffers(
+      offers,
+      propertiesById: await _loadPropertiesByIds(
+        offers
+            .map((o) => o is Map ? o['propertyId']?.toString() ?? '' : '')
+            .where((id) => id.isNotEmpty)
+            .toSet(),
+      ),
+    ));
+  }
+
+  /// Retira una oferta enviada por el cliente.
+  ///
+  /// El backend no tiene un endpoint propio de cancelación: retirar es
+  /// rechazar la negociación desde el lado del cliente, igual que ya lo hace
+  /// la pantalla de detalle del comprador.
+  Future<Result<bool>> withdrawMyOffer({
+    required String offerId,
+    required String reason,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final response = await DOVIAAPIOfferContextGroup.rejectOfferCall.call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+      rejectedBy: 'CLIENT',
+      reason: reason,
+    );
+
+    _isLoading = false;
+    notifyListeners();
+
+    if (response.succeeded) return const Success(true);
+    return Failure(
+      response.jsonBody?['message']?.toString() ??
+          'No pudimos retirar tu oferta',
+      statusCode: response.statusCode,
+    );
+  }
+
+  /// Resuelve varias propiedades por id, en paralelo. Las que fallen quedan
+  /// simplemente fuera del mapa.
+  Future<Map<String, Map<String, dynamic>>> _loadPropertiesByIds(
+    Set<String> ids,
+  ) async {
+    if (ids.isEmpty) return const {};
+
+    final responses = await Future.wait(ids.map((id) async {
+      final response =
+          await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
+        propertyId: id,
+      );
+      return MapEntry(id, response);
+    }));
+
+    final result = <String, Map<String, dynamic>>{};
+    for (final entry in responses) {
+      if (!entry.value.succeeded) continue;
+      final data = entry.value.jsonBody is Map
+          ? (entry.value.jsonBody as Map)['data']
+          : null;
+      if (data is Map) result[entry.key] = Map<String, dynamic>.from(data);
     }
     return result;
   }
