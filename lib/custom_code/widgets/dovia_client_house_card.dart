@@ -23,6 +23,9 @@ class DoviaClientHouseCard extends StatefulWidget {
   final int? constructionArea;
   final Future<void> Function()? onAddToFavorites;
   final Future<void> Function()? onRemoveFromFavorites;
+  final bool? hasDiscount;
+  final String? originalPrice;
+  final String? propertyType;
 
   const DoviaClientHouseCard({
     super.key,
@@ -42,6 +45,9 @@ class DoviaClientHouseCard extends StatefulWidget {
     this.bedrooms,
     this.bathrooms,
     this.constructionArea,
+    this.hasDiscount,
+    this.originalPrice,
+    this.propertyType,
   });
 
   @override
@@ -183,10 +189,31 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   ),
                 ),
 
+                // Typology Icon
+                if (widget.propertyType != null)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        (widget.propertyType!.toLowerCase().contains('departamento') || widget.propertyType!.toLowerCase().contains('edificio')) 
+                            ? Icons.apartment 
+                            : Icons.house,
+                        color: const Color(0xFF00444B),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+
                 // Heart Button Logic
                 Positioned(
                   top: 12,
-                  left: 12,
+                  right: 12, // Moved to right since typology icon is on left
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -253,6 +280,34 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      widget.price ?? "",
+                      style: GoogleFonts.raleway(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF007376),
+                      ),
+                    ),
+                    if (widget.hasDiscount == true && widget.originalPrice != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          widget.originalPrice!,
+                          style: GoogleFonts.raleway(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
                 Text(
                   (widget.name == null || widget.name!.isEmpty)
                       ? "Propiedad sin nombre"
@@ -271,14 +326,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                     color: Colors.black87,
                   ),
                 ),
-                Text(
-                  widget.price ?? "",
-                  style: GoogleFonts.raleway(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF007376),
-                  ),
-                ),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

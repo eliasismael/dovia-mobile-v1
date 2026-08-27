@@ -57,6 +57,10 @@ class FFAppState extends ChangeNotifier {
           prefs.getStringList('ff_confirmedServiceRequests') ??
               _confirmedServiceRequests;
     });
+    _safeInit(() {
+      _hasSeenWelcomeBanner =
+          prefs.getBool('ff_hasSeenWelcomeBanner') ?? _hasSeenWelcomeBanner;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -92,6 +96,13 @@ class FFAppState extends ChangeNotifier {
   set onboardingCompleted(bool value) {
     _onboardingCompleted = value;
     prefs.setBool('ff_onboardingCompleted', value);
+  }
+
+  bool _hasSeenWelcomeBanner = false;
+  bool get hasSeenWelcomeBanner => _hasSeenWelcomeBanner;
+  set hasSeenWelcomeBanner(bool value) {
+    _hasSeenWelcomeBanner = value;
+    prefs.setBool('ff_hasSeenWelcomeBanner', value);
   }
 
   UserDataFromRegisterFormStruct _UserData = UserDataFromRegisterFormStruct();

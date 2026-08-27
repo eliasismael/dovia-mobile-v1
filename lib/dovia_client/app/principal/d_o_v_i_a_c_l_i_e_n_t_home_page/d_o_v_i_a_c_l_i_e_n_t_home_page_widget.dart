@@ -124,10 +124,18 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     });
   }
 
+  bool _showWelcomeBanner = false;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DOVIACLIENTHomePageModel());
+
+    _showWelcomeBanner = !FFAppState().hasSeenWelcomeBanner;
+    if (_showWelcomeBanner) {
+      // Mark as seen so next time it won't show
+      FFAppState().hasSeenWelcomeBanner = true;
+    }
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
@@ -143,6 +151,32 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _handleRestrictedAction(Function() action) async {
+    if (FFAppState().UserRole == 'VISITOR') {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return Dialog(
+            elevation: 0,
+            insetPadding: EdgeInsets.zero,
+            backgroundColor: Colors.transparent,
+            alignment: const AlignmentDirectional(0.0, 0.0)
+                .resolve(Directionality.of(context)),
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(dialogContext).unfocus();
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: const VisitorRestrictionPopupWidget(),
+            ),
+          );
+        },
+      );
+    } else {
+      action();
+    }
   }
 
   @override
@@ -168,13 +202,28 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
               ),
               SingleChildScrollView(
                 child: Column(
-                  mainAxisSize: MainAxisSize.max,
                   children: [
+                    if (_showWelcomeBanner)
+                      Container(
+                        width: double.infinity,
+                        color: const Color(0xFF007376),
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                        child: Text(
+                          "Encuentra tu próximo hogar sin complicaciones. Explora propiedades con información clara y toma decisiones con confianza.",
+                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(),
+                            color: Colors.white,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+
                     Align(
                       alignment: const AlignmentDirectional(0.0, -1.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: 200.0,
+                        height: FFAppState().UserRole == 'VISITOR' ? 260.0 : 200.0,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [Color(0xFF007376), Color(0xFF70ACAD)],
@@ -304,92 +353,125 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           ),
                                         ),
                                       ),
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          context.pushNamed(
-                                              DOVIACLIENTNotificacionesWidget
-                                                  .routeName);
-                                        },
-                                        child: Container(
-                                          width: 40.0,
-                                          height: 40.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(0.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/DH_icono-navbar-notificaciones.svg',
-                                              width: 24.0,
-                                              height: 24.0,
-                                              fit: BoxFit.none,
+                                      if (FFAppState().UserRole != 'VISITOR') ...[
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            context.pushNamed(
+                                                DOVIACLIENTNotificacionesWidget
+                                                    .routeName);
+                                          },
+                                          child: Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: BoxDecoration(
+                                              color: FlutterFlowTheme.of(context)
+                                                  .secondaryBackground,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(0.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/DH_icono-navbar-notificaciones.svg',
+                                                width: 24.0,
+                                                height: 24.0,
+                                                fit: BoxFit.none,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          await showModalBottomSheet(
-                                            isScrollControlled: true,
-                                            backgroundColor: Colors.transparent,
-                                            enableDrag: false,
-                                            context: context,
-                                            builder: (context) {
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  FocusScope.of(context)
-                                                      .unfocus();
-                                                  FocusManager
-                                                      .instance.primaryFocus
-                                                      ?.unfocus();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      MediaQuery.viewInsetsOf(
-                                                          context),
-                                                  child:
-                                                      const DoviaSuupportMessagesWidget(),
-                                                ),
-                                              );
-                                            },
-                                          ).then(
-                                              (value) => safeSetState(() {}));
-                                        },
-                                        child: Container(
-                                          width: 40.0,
-                                          height: 40.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/IconoDoviaHomeClienteMensajes.svg',
-                                              width: 8.0,
-                                              height: 8.0,
-                                              fit: BoxFit.none,
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            await showModalBottomSheet(
+                                              isScrollControlled: true,
+                                              backgroundColor: Colors.transparent,
+                                              enableDrag: false,
+                                              context: context,
+                                              builder: (context) {
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    FocusScope.of(context)
+                                                        .unfocus();
+                                                    FocusManager
+                                                        .instance.primaryFocus
+                                                        ?.unfocus();
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        MediaQuery.viewInsetsOf(
+                                                            context),
+                                                    child:
+                                                        const DoviaSuupportMessagesWidget(),
+                                                  ),
+                                                );
+                                              },
+                                            ).then(
+                                                (value) => safeSetState(() {}));
+                                          },
+                                          child: Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: BoxDecoration(
+                                              color: FlutterFlowTheme.of(context)
+                                                  .secondaryBackground,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/IconoDoviaHomeClienteMensajes.svg',
+                                                width: 8.0,
+                                                height: 8.0,
+                                                fit: BoxFit.none,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
+                                      ],
+
                                     ].divide(const SizedBox(width: 8.0)),
                                   ),
                                 ],
                               ),
+                              if (FFAppState().UserRole == 'VISITOR')
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
+                                  child: Align(
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: FFButtonWidget(
+                                      onPressed: () async {
+                                        context.pushNamed('CreateAccount');
+                                      },
+                                      text: 'Conviértete en Asociado',
+                                      options: FFButtonOptions(
+                                        height: 36.0,
+                                        padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                        iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                          font: GoogleFonts.publicSans(
+                                            color: const Color(0xFF007376),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        borderSide: const BorderSide(
+                                          color: Colors.transparent,
+                                          width: 0.0,
+                                        ),
+                                        borderRadius: BorderRadius.circular(24.0),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 30.0, 0.0, 0.0),
@@ -603,8 +685,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    _model.comprarORentar = 'comprar';
-                                    safeSetState(() {});
+                                    _handleRestrictedAction(() {
+                                      _model.comprarORentar = 'comprar';
+                                      safeSetState(() {});
+                                    });
                                   },
                                   child: Container(
                                     width: 144.0,
@@ -696,8 +780,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    _model.comprarORentar = 'rentar';
-                                    safeSetState(() {});
+                                    _handleRestrictedAction(() {
+                                      _model.comprarORentar = 'rentar';
+                                      safeSetState(() {});
+                                    });
                                   },
                                   child: Container(
                                     width: 144.0,
@@ -808,16 +894,18 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               ),
                               FFButtonWidget(
                                 onPressed: () async {
-                                  context.pushNamed(
-                                    DOVIACLIENTVerMasPropiedadesWidget
-                                        .routeName,
-                                    queryParameters: {
-                                      'title': serializeParam(
-                                        'Lo nuevo',
-                                        ParamType.String,
-                                      ),
-                                    }.withoutNulls,
-                                  );
+                                  _handleRestrictedAction(() {
+                                    context.pushNamed(
+                                      DOVIACLIENTVerMasPropiedadesWidget
+                                          .routeName,
+                                      queryParameters: {
+                                        'title': serializeParam(
+                                          'Lo nuevo',
+                                          ParamType.String,
+                                        ),
+                                      }.withoutNulls,
+                                    );
+                                  });
                                 },
                                 text: 'Ver mas',
                                 options: FFButtonOptions(
@@ -906,9 +994,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                             hoverColor: Colors.transparent,
                                             highlightColor: Colors.transparent,
                                             onTap: () async {
-                                              context.pushNamed(
-                                                DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                    .routeName,
+                                              _handleRestrictedAction(() {
+                                                context.pushNamed(
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                      .routeName,
                                                 queryParameters: {
                                                   'propertyId': serializeParam(
                                                     getJsonField(
@@ -918,7 +1007,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                     ParamType.String,
                                                   ),
                                                 }.withoutNulls,
-                                              );
+                                                );
+                                              });
                                             },
                                             onLongPress: () async {
                                               await showDialog(
@@ -977,6 +1067,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 eachHouseItem,
                                                 r'''$.price''',
                                               ).toString(),
+                                              propertyType: getJsonField(eachHouseItem, r'''$.propertyType''')?.toString(),
+                                              hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') == true || getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() == 'true',
+                                              originalPrice: getJsonField(eachHouseItem, r'''$.originalPrice''')?.toString(),
                                               propertyId: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.id''',
@@ -1214,16 +1307,18 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               ),
                               FFButtonWidget(
                                 onPressed: () async {
-                                  context.pushNamed(
-                                    DOVIACLIENTVerMasPropiedadesWidget
-                                        .routeName,
-                                    queryParameters: {
-                                      'title': serializeParam(
-                                        'Recomendado',
-                                        ParamType.String,
-                                      ),
-                                    }.withoutNulls,
-                                  );
+                                  _handleRestrictedAction(() {
+                                    context.pushNamed(
+                                      DOVIACLIENTVerMasPropiedadesWidget
+                                          .routeName,
+                                      queryParameters: {
+                                        'title': serializeParam(
+                                          'Recomendado',
+                                          ParamType.String,
+                                        ),
+                                      }.withoutNulls,
+                                    );
+                                  });
                                 },
                                 text: 'Ver mas',
                                 options: FFButtonOptions(
@@ -1312,19 +1407,21 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                             hoverColor: Colors.transparent,
                                             highlightColor: Colors.transparent,
                                             onTap: () async {
-                                              context.pushNamed(
-                                                DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                    .routeName,
-                                                queryParameters: {
-                                                  'propertyId': serializeParam(
-                                                    getJsonField(
-                                                      eachHouseItem,
-                                                      r'''$.id''',
-                                                    ).toString(),
-                                                    ParamType.String,
-                                                  ),
-                                                }.withoutNulls,
-                                              );
+                                              _handleRestrictedAction(() {
+                                                context.pushNamed(
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                      .routeName,
+                                                  queryParameters: {
+                                                    'propertyId': serializeParam(
+                                                      getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
+                                              });
                                             },
                                             onLongPress: () async {
                                               await showDialog(
@@ -1383,6 +1480,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 eachHouseItem,
                                                 r'''$.price''',
                                               ).toString(),
+                                              propertyType: getJsonField(eachHouseItem, r'''$.propertyType''')?.toString(),
+                                              hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') == true || getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() == 'true',
+                                              originalPrice: getJsonField(eachHouseItem, r'''$.originalPrice''')?.toString(),
                                               propertyId: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.id''',
@@ -1588,6 +1688,117 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       ],
                     ),
                     Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              20.0, 20.0, 20.0, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Proyectos Nuevos',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      letterSpacing: 0.0,
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              ),
+                              FFButtonWidget(
+                                onPressed: () async {
+                                  _handleRestrictedAction(() async {
+                                    await launchURL('https://dovia.app/desarrollos');
+                                  });
+                                },
+                                text: 'Ver mas',
+                                options: FFButtonOptions(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
+                                  color: FlutterFlowTheme.of(context).accent1,
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .override(
+                                        font: GoogleFonts.publicSans(
+                                          fontWeight: FontWeight.normal,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontStyle,
+                                        ),
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                        fontSize: 14.0,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FontWeight.normal,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontStyle,
+                                      ),
+                                  elevation: 0.0,
+                                  borderRadius: BorderRadius.circular(24.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              20.0, 20.0, 20.0, 0.0),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: List.generate(3, (index) {
+                                return Builder(
+                                  builder: (context) =>                                  InkWell(
+                                    splashColor: Colors.transparent,
+                                    focusColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () async {
+                                      _handleRestrictedAction(() async {
+                                        await launchURL('https://dovia.app/desarrollos');
+                                      });
+                                    },
+                                    child: custom_widgets.DoviaClientHouseCard(
+                                      width: 210.0,
+                                      height: 0.0,
+                                      imageUrl: 'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',
+                                      name: 'Desarrollo Especial',
+                                      type: 'Preventa',
+                                      price: '\$ 1,000,000',
+                                      propertyType: 'Edificio',
+                                    ),
+                                  ),
+                                );
+                              }).divide(const SizedBox(width: 16.0)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Padding(
@@ -1621,16 +1832,18 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               ),
                               FFButtonWidget(
                                 onPressed: () async {
-                                  context.pushNamed(
-                                    DOVIACLIENTVerMasPropiedadesWidget
-                                        .routeName,
-                                    queryParameters: {
-                                      'title': serializeParam(
-                                        'Visto recientemente',
-                                        ParamType.String,
-                                      ),
-                                    }.withoutNulls,
-                                  );
+                                  _handleRestrictedAction(() {
+                                    context.pushNamed(
+                                      DOVIACLIENTVerMasPropiedadesWidget
+                                          .routeName,
+                                      queryParameters: {
+                                        'title': serializeParam(
+                                          'Visto recientemente',
+                                          ParamType.String,
+                                        ),
+                                      }.withoutNulls,
+                                    );
+                                  });
                                 },
                                 text: 'Ver mas',
                                 options: FFButtonOptions(
@@ -1719,19 +1932,21 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                             hoverColor: Colors.transparent,
                                             highlightColor: Colors.transparent,
                                             onTap: () async {
-                                              context.pushNamed(
-                                                DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                    .routeName,
-                                                queryParameters: {
-                                                  'propertyId': serializeParam(
-                                                    getJsonField(
-                                                      eachHouseItem,
-                                                      r'''$.id''',
-                                                    ).toString(),
-                                                    ParamType.String,
-                                                  ),
-                                                }.withoutNulls,
-                                              );
+                                              _handleRestrictedAction(() {
+                                                context.pushNamed(
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                      .routeName,
+                                                  queryParameters: {
+                                                    'propertyId': serializeParam(
+                                                      getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
+                                              });
                                             },
                                             onLongPress: () async {
                                               await showDialog(
@@ -1790,6 +2005,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 eachHouseItem,
                                                 r'''$.price''',
                                               ).toString(),
+                                              propertyType: getJsonField(eachHouseItem, r'''$.propertyType''')?.toString(),
+                                              hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') == true || getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() == 'true',
+                                              originalPrice: getJsonField(eachHouseItem, r'''$.originalPrice''')?.toString(),
                                               propertyId: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.id''',
