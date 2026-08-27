@@ -6,6 +6,7 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_offers.dart';
+import '/domain/owner_proposal_models.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_widget.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_widget.dart';
 import 'package:flutter/material.dart';
@@ -331,9 +332,35 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     return _primary;
   }
 
+  /// Estados en los que la negociacion sigue viva con una contraoferta de por
+  /// medio. Quien debe responder lo decide [_ownerOwesCounterResponse].
+  static const Set<String> _counterStatuses = {
+    'COUNTER_OFFERED',
+    'COUNTER_OFFER_SENT',
+    'COUNTERED',
+  };
+
+  String _offerStatusRaw() =>
+      _resolveField([r'''$.offerStatus''', r'''$.status''']).toUpperCase();
+
+  /// Si el comprador respondio la contraoferta del dueno, la pelota vuelve al
+  /// dueno y el trilema tiene que reaparecer. Sin dato del backend se mantiene
+  /// el comportamiento anterior (asumir que la contraoferta la envio el dueno).
+  bool _ownerOwesCounterResponse() {
+    final pending = _resolveField([r'''$.pendingResponseBy''']).toUpperCase();
+    if (pending != '—' && pending.isNotEmpty) {
+      return pending == 'OWNER' || pending == 'SELLER' || pending == 'LANDLORD';
+    }
+    final last = _resolveField([r'''$.lastOfferBy''']).toUpperCase();
+    if (last != '—' && last.isNotEmpty) {
+      return last == 'CLIENT' || last == 'BUYER' || last == 'TENANT';
+    }
+    return false;
+  }
+
   bool _canAct() {
-    final raw =
-        _resolveField([r'''$.offerStatus''', r'''$.status''']).toUpperCase();
+    final raw = _offerStatusRaw();
+    if (_counterStatuses.contains(raw)) return _ownerOwesCounterResponse();
     return raw == 'PENDING' ||
         raw == 'ACTIVE' ||
         raw == 'SENT' ||
@@ -346,13 +373,11 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     return raw == 'REJECTED' || raw == 'REJECTED_BY_OWNER';
   }
 
-  bool _isCounterOfferSent() {
-    final raw =
-        _resolveField([r'''$.offerStatus''', r'''$.status''']).toUpperCase();
-    return raw == 'COUNTER_OFFERED' ||
-        raw == 'COUNTER_OFFER_SENT' ||
-        raw == 'COUNTERED';
-  }
+  /// La contraoferta esta en manos del comprador: se muestra el resumen en vez
+  /// del trilema. Si el comprador ya respondio, manda [_canAct].
+  bool _isCounterOfferSent() =>
+      _counterStatuses.contains(_offerStatusRaw()) &&
+      !_ownerOwesCounterResponse();
 
   num? _resolveCounterOfferAmount() {
     final raw = getJsonField(
@@ -535,6 +560,10 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: _primaryDark)),
+          if (canAct) ...[
+            const SizedBox(height: 10),
+            _responseDeadlineChip(),
+          ],
           const SizedBox(height: 20),
 
           // ── Método de pago (read-only) ────────────────────────────────────
@@ -633,6 +662,47 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
           ],
         ],
       ),
+    );
+  }
+
+  /// Plazo de respuesta del propietario (SLA de [kOwnerProposalSlaDays] días).
+  ///
+  /// El vencimiento lo aplica el backend: al expirar, la oferta pasa a
+  /// "Expirada/Rechazada" y se notifica al comprador. Aquí sólo se muestra el
+  /// tiempo restante para que el dueño decida a tiempo.
+  Widget _responseDeadlineChip() {
+    final started = DateTime.tryParse(
+            _resolveField([r'''$.updatedAt''', r'''$.lastOfferAt''']))
+        ?? DateTime.tryParse(_resolveField([r'''$.createdAt''']));
+    if (started == null) return const SizedBox.shrink();
+
+    final deadline = started.add(const Duration(days: kOwnerProposalSlaDays));
+    final daysLeft = deadline.difference(DateTime.now()).inHours ~/ 24;
+    final overdue = DateTime.now().isAfter(deadline);
+
+    final label = overdue
+        ? 'Plazo de respuesta vencido'
+        : daysLeft <= 0
+            ? 'Último día para responder esta propuesta'
+            : 'Te ${daysLeft == 1 ? "queda" : "quedan"} $daysLeft ${daysLeft == 1 ? "día" : "días"} para responder';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: overdue ? const Color(0x1FE44444) : const Color(0xFFFFDBBC),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.schedule_rounded,
+            size: 16,
+            color: overdue ? _errorRed : const Color(0xFFF57E00)),
+        const SizedBox(width: 6),
+        Text(label,
+            style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: overdue ? _errorRed : const Color(0xFFF57E00))),
+      ]),
     );
   }
 

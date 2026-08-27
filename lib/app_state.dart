@@ -61,6 +61,10 @@ class FFAppState extends ChangeNotifier {
       _hasSeenWelcomeBanner =
           prefs.getBool('ff_hasSeenWelcomeBanner') ?? _hasSeenWelcomeBanner;
     });
+    _safeInit(() {
+      _seenOwnerProposals =
+          prefs.getStringList('ff_seenOwnerProposals') ?? _seenOwnerProposals;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -187,6 +191,34 @@ class FFAppState extends ChangeNotifier {
     _confirmedServiceRequests.remove(value);
     prefs.setStringList(
         'ff_confirmedServiceRequests', _confirmedServiceRequests);
+  }
+
+  /// Firmas (`OwnerProposal.seenSignature`) de las propuestas recibidas que el
+  /// propietario ya abrió. Sostienen el punto rojo de "Propuestas Recientes":
+  /// una oferta nueva, una contraoferta sin leer o un avance del proceso legal
+  /// generan una firma distinta y vuelven a encender el badge.
+  ///
+  /// El backend todavía no expone `readAt` sobre las ofertas; en cuanto exista,
+  /// esta lista puede reemplazarse por ese campo.
+  List<String> _seenOwnerProposals = [];
+  List<String> get seenOwnerProposals => _seenOwnerProposals;
+  set seenOwnerProposals(List<String> value) {
+    _seenOwnerProposals = value;
+    prefs.setStringList('ff_seenOwnerProposals', value);
+  }
+
+  bool hasSeenOwnerProposal(String signature) =>
+      _seenOwnerProposals.contains(signature);
+
+  void addToSeenOwnerProposals(String signature) {
+    if (signature.isEmpty || _seenOwnerProposals.contains(signature)) return;
+    _seenOwnerProposals.add(signature);
+    // Sólo interesa el estado reciente: se acota para no crecer sin límite.
+    if (_seenOwnerProposals.length > 200) {
+      _seenOwnerProposals =
+          _seenOwnerProposals.sublist(_seenOwnerProposals.length - 200);
+    }
+    prefs.setStringList('ff_seenOwnerProposals', _seenOwnerProposals);
   }
 }
 

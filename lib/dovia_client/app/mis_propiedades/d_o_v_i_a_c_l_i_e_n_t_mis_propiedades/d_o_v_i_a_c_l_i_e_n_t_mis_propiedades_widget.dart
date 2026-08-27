@@ -1,6 +1,11 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/backend/schema/enums/enums.dart';
+import '/core/result.dart';
+import '/domain/owner_proposal_models.dart';
+import '/repositories/offers_repository.dart';
+import '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_propuestas_recientes/owner_proposal_navigation.dart';
+import '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_propuestas_recientes/propuesta_reciente_card_widget.dart';
 import '/dovia_client/app/mis_propiedades/mis_propiedades_house_card/mis_propiedades_house_card_widget.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
@@ -15,6 +20,7 @@ import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_model.dart';
 
@@ -34,6 +40,11 @@ class _DOVIACLIENTMisPropiedadesWidgetState
   late DOVIACLIENTMisPropiedadesModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  /// Propuestas recibidas sobre las propiedades del usuario, ya repartidas en
+  /// los tres carriles (Ofertas / Contraoferta / Oferta aceptada).
+  OwnerProposalsBoard _proposalsBoard = const OwnerProposalsBoard.empty();
+  bool _isLoadingProposals = true;
 
   Future<ApiCallResponse> _fetchAllPending() async {
     final draftResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
@@ -89,6 +100,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
     _model = createModel(context, () => DOVIACLIENTMisPropiedadesModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProposals());
 
     // Empty state check: if user has no properties at all, redirect to ComoFunciona
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -201,6 +213,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
+                          _propuestasRecientesSection(),
                           Row(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -854,6 +867,134 @@ class _DOVIACLIENTMisPropiedadesWidgetState
           ),
         ),
       ),
+    );
+  }
+
+  // ── Propuestas Recientes ──────────────────────────────────────────────────
+
+  Future<void> _loadProposals() async {
+    final result =
+        await context.read<OffersRepository>().loadProposalsOnMyProperties();
+    if (!mounted) return;
+    safeSetState(() {
+      _isLoadingProposals = false;
+      if (result case Success(:final data)) {
+        _proposalsBoard = data;
+      }
+    });
+  }
+
+  /// Carrusel superior con las propuestas recibidas más recientes.
+  ///
+  /// El punto rojo del encabezado se enciende cuando hay ofertas nuevas,
+  /// contraofertas sin leer o avances del proceso legal que el propietario
+  /// todavía no abrió.
+  Widget _propuestasRecientesSection() {
+    final proposals = _proposalsBoard.recent();
+    final hasUnread = proposals.any(hasUnreadOwnerProposalUpdate);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 33.0, 0.0, 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Propuestas Recientes',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font:
+                              GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                          fontSize: 17.0,
+                          letterSpacing: 0.33,
+                          fontWeight: FontWeight.w600,
+                          lineHeight: 1.3,
+                        ),
+                  ),
+                  if (hasUnread) ...[
+                    const SizedBox(width: 8.0),
+                    Container(
+                      width: 10.0,
+                      height: 10.0,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFDA0010),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              FFButtonWidget(
+                onPressed: () async {
+                  await context
+                      .pushNamed(DOVIACLIENTPropuestasRecientesWidget.routeName);
+                  if (!mounted) return;
+                  await _loadProposals();
+                },
+                text: 'Ver más',
+                options: FFButtonOptions(
+                  height: 30.0,
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 0.0, 20.0, 0.0),
+                  iconPadding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                  color: const Color(0xFFCCE3E4),
+                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                        font: GoogleFonts.publicSans(),
+                        color: FlutterFlowTheme.of(context).primary,
+                        fontSize: 14.0,
+                        letterSpacing: 0.0,
+                      ),
+                  elevation: 0.0,
+                  borderRadius: BorderRadius.circular(99.0),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_isLoadingProposals)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.0),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (proposals.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Todavía no has recibido propuestas.',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    font: GoogleFonts.inter(),
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                  ),
+            ),
+          )
+        else
+          SizedBox(
+            height: 260.0,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              itemCount: proposals.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12.0),
+              itemBuilder: (context, index) {
+                final proposal = proposals[index];
+                return PropuestaRecienteCardWidget(
+                  proposal: proposal,
+                  hasUnreadUpdate: hasUnreadOwnerProposalUpdate(proposal),
+                  onOpen: () async {
+                    await openOwnerProposal(context, proposal);
+                    if (!mounted) return;
+                    await _loadProposals();
+                  },
+                );
+              },
+            ),
+          ),
+      ],
     );
   }
 }
