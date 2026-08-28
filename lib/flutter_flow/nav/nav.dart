@@ -462,6 +462,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             propuestaState: params.getParam('propuestaState', ParamType.String),
             paymentMethod: params.getParam('paymentMethod', ParamType.String),
             offerId: params.getParam('offerId', ParamType.String),
+            ratedRoles: params.getParam('ratedRoles', ParamType.String),
           ),
         ),
         FFRoute(

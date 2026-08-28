@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_offers.dart';
+import '/backend/api_requests/api_associate_feedback.dart';
+import '/backend/api_requests/api_legal_process.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/core/result.dart';
 import '/domain/client_offer_detail.dart';
 import '/domain/client_offer_models.dart';
+import '/domain/legal_closure_models.dart';
 import '/domain/owner_proposal_models.dart';
 
 class OffersRepository extends ChangeNotifier {
@@ -92,15 +95,58 @@ class OffersRepository extends ChangeNotifier {
     }
 
     final offers = _extractItems(response.jsonBody);
+    final propertyIds = offers
+        .map((o) => o is Map ? o['propertyId']?.toString() ?? '' : '')
+        .where((id) => id.isNotEmpty)
+        .toSet();
+
+    final crossed = await Future.wait([
+      _loadPropertiesByIds(propertyIds),
+      _loadRatingStatusByOffer(token),
+    ]);
+
     return Success(ClientOffersBoard.fromOffers(
       offers,
-      propertiesById: await _loadPropertiesByIds(
-        offers
-            .map((o) => o is Map ? o['propertyId']?.toString() ?? '' : '')
-            .where((id) => id.isNotEmpty)
-            .toSet(),
-      ),
+      propertiesById: crossed[0],
+      ratingStatusByOffer: crossed[1],
     ));
+  }
+
+  /// Estado de calificación de los tratos cerrados, indexado por oferta.
+  ///
+  /// `/offers/my-offers` no dice qué se calificó ya, así que sin este cruce la
+  /// pestaña "Calificadas" quedaría siempre vacía y la pantalla de cierre
+  /// siempre pediría calificar. `GET /offers/accepted` sí lo expone, pero sólo
+  /// en sus dos filtros de calificación: se piden los dos y se unen.
+  ///
+  /// Es información de adorno: si falla, las ofertas se muestran igual y el
+  /// cierre se comporta como si no hubiera calificado nada.
+  Future<Map<String, Map<String, dynamic>>> _loadRatingStatusByOffer(
+    String token,
+  ) async {
+    final responses = await Future.wait(
+      const ['rated', 'pending-rating'].map(
+        (filter) => DOVIAAPIOfferContextGroup.listAcceptedOffersCall.call(
+          authToken: token,
+          filter: filter,
+          page: '1',
+          limit: '100',
+        ),
+      ),
+    );
+
+    final result = <String, Map<String, dynamic>>{};
+    for (final response in responses) {
+      if (!response.succeeded) continue;
+      for (final raw in _extractItems(response.jsonBody)) {
+        if (raw is! Map) continue;
+        final id = raw['offerId']?.toString() ?? raw['id']?.toString() ?? '';
+        final status = raw['ratingStatus'];
+        if (id.isEmpty || status is! Map) continue;
+        result[id] = Map<String, dynamic>.from(status);
+      }
+    }
+    return result;
   }
 
   /// Carga una oferta enviada y la traduce al modelo de detalle de sólo
@@ -146,6 +192,94 @@ class OffersRepository extends ChangeNotifier {
       offerJson,
       propertyJson: propertyJson,
     ));
+  }
+
+  /// Profesionales y documentos del proceso legal de un trato cerrado.
+  ///
+  /// `GET /legal-processes/{processId}` es el único endpoint que el rol CLIENT
+  /// puede leer y que trae a la vez los dos perfiles y el expediente; la oferta
+  /// sola expone el asociado pero no a Legal HQ ni los archivos.
+  Future<Result<LegalProcessClosure>> loadLegalClosure(String processId) async {
+    if (processId.isEmpty) {
+      return const Failure('El trato todavía no tiene proceso legal.');
+    }
+
+    final response =
+        await DOVIAAPILegalProcessContextGroup.getLegalProcessByIDCall.call(
+      processId: processId,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!response.succeeded) {
+      return Failure(
+        response.jsonBody is Map
+            ? (response.jsonBody['message']?.toString() ??
+                'No pudimos cargar tu proceso legal (${response.statusCode}).')
+            : 'No pudimos cargar tu proceso legal (${response.statusCode}).',
+        statusCode: response.statusCode,
+      );
+    }
+
+    if (response.jsonBody is! Map) {
+      return const Failure('El proceso legal no tiene un formato válido.');
+    }
+
+    return Success(LegalProcessClosure.fromJson(
+      Map<String, dynamic>.from(response.jsonBody),
+    ));
+  }
+
+  /// Califica a uno de los profesionales legales del trato.
+  ///
+  /// El backend sólo acepta `stars`: el comentario del diseño se recoge pero
+  /// todavía no tiene dónde guardarse, la misma limitación que ya arrastra la
+  /// pantalla de calificación de Dovia Home.
+  Future<Result<bool>> rateLegalProfessional({
+    required String offerId,
+    required String targetRole,
+    required double stars,
+  }) async {
+    final response =
+        await DOVIAAPIAssociateFeedbackContextGroup.createOfferAssociateRatingCall
+            .call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+      targetRole: targetRole,
+      stars: stars,
+    );
+
+    if (response.succeeded) return const Success(true);
+    return Failure(
+      response.jsonBody is Map
+          ? (response.jsonBody['message']?.toString() ??
+              'No pudimos enviar tu calificación.')
+          : 'No pudimos enviar tu calificación.',
+      statusCode: response.statusCode,
+    );
+  }
+
+  /// Reporta un problema con uno de los profesionales legales.
+  Future<Result<bool>> reportLegalProfessional({
+    required String offerId,
+    required String targetRole,
+    required String message,
+  }) async {
+    final response =
+        await DOVIAAPIAssociateFeedbackContextGroup.createOfferAssociateReportCall
+            .call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+      targetRole: targetRole,
+      message: message,
+    );
+
+    if (response.succeeded) return const Success(true);
+    return Failure(
+      response.jsonBody is Map
+          ? (response.jsonBody['message']?.toString() ??
+              'No pudimos enviar tu reporte.')
+          : 'No pudimos enviar tu reporte.',
+      statusCode: response.statusCode,
+    );
   }
 
   /// Retira una oferta enviada por el cliente.

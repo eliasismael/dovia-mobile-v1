@@ -15,6 +15,8 @@ import '/shared_components/popup_exito/popup_exito_widget.dart';
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 // Force refresh: 2026-05-04 17:15
 
+import '/dovia_client/app/mis_ofertas/cierre_legal/cierre_legal_section_widget.dart';
+
 enum NegotiationState { negotiation, structuring, signing, completed }
 
 enum PaymentMethod { hipoteca, contado, promesa }
@@ -26,6 +28,10 @@ class ProposalScreen extends StatefulWidget {
   final double? height;
   final dynamic offerData;
 
+  /// Roles legales ya calificados, separados por coma. Sus tarjetas nacen sin
+  /// acciones: es lo que distingue "Calificadas" de "Finalizadas".
+  final String ratedRoles;
+
   const ProposalScreen({
     super.key,
     this.width,
@@ -33,6 +39,7 @@ class ProposalScreen extends StatefulWidget {
     required String state,
     required String paymentMethod,
     this.offerData,
+    this.ratedRoles = '',
   })  : stateString = state,
         paymentMethodString = paymentMethod;
 
@@ -397,8 +404,35 @@ class _ProposalScreenState extends State<ProposalScreen> {
         return _buildSigningContent(
             isCompleted: false, isContractSigned: isContractSigned);
       case NegotiationState.completed:
-        return _buildSigningContent(isCompleted: true, isContractSigned: true);
+        return _buildClosureContent();
     }
+  }
+
+  /// Cierre del trámite: los profesionales que lo acompañaron y la bóveda de
+  /// documentos.
+  ///
+  /// Reemplaza al detalle de la firma —que ya no tiene nada que pedirle al
+  /// cliente— por lo que el diseño pone debajo del stepter una vez que Legal
+  /// HQ terminó: calificar, reportar y descargar el expediente.
+  Widget _buildClosureContent() {
+    final data = widget.offerData;
+    final offerId = data is Map ? data['offerId']?.toString() ?? '' : '';
+    final legalProcessId = data is Map
+        ? (data['legalProcessId']?.toString() ??
+            (data['legalProcess'] is Map
+                ? data['legalProcess']['id']?.toString() ?? ''
+                : ''))
+        : '';
+
+    return CierreLegalSectionWidget(
+      offerId: offerId,
+      legalProcessId: legalProcessId,
+      ratedRoles: widget.ratedRoles
+          .split(',')
+          .map((role) => role.trim())
+          .where((role) => role.isNotEmpty)
+          .toList(),
+    );
   }
 
   String _getPaymentLabel(PaymentMethod m) {
