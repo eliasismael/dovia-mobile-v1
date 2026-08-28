@@ -3,6 +3,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_offers.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/core/result.dart';
+import '/domain/client_counter_offer_detail.dart';
 import '/domain/client_offer_detail.dart';
 import '/domain/client_offer_models.dart';
 import '/domain/owner_proposal_models.dart';
@@ -146,6 +147,81 @@ class OffersRepository extends ChangeNotifier {
       offerJson,
       propertyJson: propertyJson,
     ));
+  }
+
+  Future<Result<ClientCounterOfferDetail>> loadClientCounterOfferDetail(
+    String offerId,
+  ) async {
+    if (offerId.isEmpty) {
+      return const Failure('No se especificó el ID de la contraoferta.');
+    }
+
+    final response = await DOVIAAPIOfferContextGroup.getOfferByIDCall.call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!response.succeeded) {
+      return Failure(
+        response.jsonBody is Map
+            ? (response.jsonBody['message']?.toString() ??
+                'No pudimos cargar la contraoferta (${response.statusCode}).')
+            : 'No pudimos cargar la contraoferta (${response.statusCode}).',
+        statusCode: response.statusCode,
+      );
+    }
+
+    final offerJson = _extractObject(response.jsonBody);
+    if (offerJson == null) {
+      return const Failure('La contraoferta recibida no tiene un formato válido.');
+    }
+    return Success(ClientCounterOfferDetail.fromJson(offerJson));
+  }
+
+  Future<Result<bool>> acceptClientCounterOffer(String offerId) async {
+    _isLoading = true;
+    notifyListeners();
+    final response = await DOVIAAPIOfferContextGroup.acceptOfferCall.call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+      acceptedBy: 'CLIENT',
+    );
+    _isLoading = false;
+    notifyListeners();
+
+    if (response.succeeded) return const Success(true);
+    return Failure(
+      response.jsonBody?['message']?.toString() ??
+          'No pudimos aceptar la contraoferta',
+      statusCode: response.statusCode,
+    );
+  }
+
+  Future<Result<bool>> rejectClientCounterOffer({
+    required String offerId,
+    required String reason,
+  }) async {
+    final trimmedReason = reason.trim();
+    if (trimmedReason.isEmpty) {
+      return const Failure('Debes indicar por qué rechazas la oferta.');
+    }
+
+    _isLoading = true;
+    notifyListeners();
+    final response = await DOVIAAPIOfferContextGroup.rejectOfferCall.call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+      rejectedBy: 'CLIENT',
+      reason: trimmedReason,
+    );
+    _isLoading = false;
+    notifyListeners();
+
+    if (response.succeeded) return const Success(true);
+    return Failure(
+      response.jsonBody?['message']?.toString() ??
+          'No pudimos rechazar la contraoferta',
+      statusCode: response.statusCode,
+    );
   }
 
   /// Retira una oferta enviada por el cliente.

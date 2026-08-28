@@ -55,6 +55,7 @@ extension ClientOfferLaneX on ClientOfferLane {
       case ClientOfferLane.realizadas:
         return const [ClientOfferFilter.enviada, ClientOfferFilter.rechazada];
       case ClientOfferLane.contraoferta:
+        return const [ClientOfferFilter.enviada, ClientOfferFilter.rechazada];
       case ClientOfferLane.aceptada:
         return const [];
     }
@@ -101,6 +102,18 @@ extension ClientOfferFilterX on ClientOfferFilter {
       case ClientOfferFilter.rechazada:
         return 'Ninguna de tus ofertas fue rechazada.';
     }
+  }
+
+  String emptyMessageFor(ClientOfferLane lane) {
+    if (lane == ClientOfferLane.contraoferta) {
+      return switch (this) {
+        ClientOfferFilter.enviada =>
+          'No tienes contraofertas pendientes de respuesta.',
+        ClientOfferFilter.rechazada =>
+          'No hay negociaciones rechazadas con contraoferta.',
+      };
+    }
+    return emptyMessage;
   }
 }
 
@@ -331,6 +344,10 @@ class ClientOffer {
     return false;
   }
 
+  /// Una negociación que tuvo al menos una contraoferta y terminó sin trato.
+  bool get isFailedCounterNegotiation =>
+      lane == ClientOfferLane.contraoferta && isTerminal;
+
   /// `contado` | `hipoteca` | `promesa`, el vocabulario que esperan el detalle
   /// y las pantallas legales en su query param `paymentMethod`.
   String get normalizedPaymentMethod {
@@ -408,6 +425,25 @@ class ClientOffersBoard {
               ClientOfferFilter.rechazada => offer.wasRejectedByOwner,
             }),
       );
+
+  /// El mismo toggle se reutiliza en dos carriles, pero su significado depende
+  /// del contexto: ofertas iniciales en `realizadas` y rondas de negociación en
+  /// `contraoferta`.
+  List<ClientOffer> byFilterInLane(
+    ClientOfferLane lane,
+    ClientOfferFilter filter,
+  ) {
+    if (lane == ClientOfferLane.contraoferta) {
+      return _newestFirst(
+        all.where((offer) => switch (filter) {
+              ClientOfferFilter.enviada => offer.awaitsClientResponse,
+              ClientOfferFilter.rechazada =>
+                offer.isFailedCounterNegotiation,
+            }),
+      );
+    }
+    return byFilter(filter);
+  }
 
   /// Lo que va al carrusel del panel: el arranque del carril, acotado.
   List<ClientOffer> recentIn(ClientOfferLane lane, {int limit = 10}) =>

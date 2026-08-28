@@ -262,7 +262,7 @@ class _DOVIACLIENTMisOfertasListaWidgetState
     final query = (_model.searchController?.text ?? '').trim().toLowerCase();
     final inTab = _selectedFilter == null
         ? _board.inLane(_lane)
-        : _board.byFilter(_selectedFilter!);
+        : _board.byFilterInLane(_lane, _selectedFilter!);
     final offers = query.isEmpty
         ? inTab
         : inTab
@@ -274,7 +274,7 @@ class _DOVIACLIENTMisOfertasListaWidgetState
         padding: const EdgeInsets.symmetric(vertical: 40.0),
         child: Text(
           query.isEmpty
-              ? (_selectedFilter?.emptyMessage ?? _lane.emptyMessage)
+              ? (_selectedFilter?.emptyMessageFor(_lane) ?? _lane.emptyMessage)
               : 'Ninguna oferta coincide con tu búsqueda.',
           textAlign: TextAlign.center,
           style: FlutterFlowTheme.of(context).bodyMedium.override(

@@ -9,6 +9,8 @@ Map<String, dynamic> _offer({
   String? reason,
   int counterOfferCount = 0,
   String? processStatus,
+  String? pendingResponseBy,
+  String? lastOfferBy,
 }) =>
     {
       'offerId': id,
@@ -17,6 +19,8 @@ Map<String, dynamic> _offer({
       'offerStatus': status,
       'counterOfferCount': counterOfferCount,
       if (processStatus != null) 'processStatus': processStatus,
+      if (pendingResponseBy != null) 'pendingResponseBy': pendingResponseBy,
+      if (lastOfferBy != null) 'lastOfferBy': lastOfferBy,
       if (rejectedBy != null) 'rejectedBy': rejectedBy,
       if (reason != null) 'rejectionReason': reason,
       'offerData': {'paymentMethod': 'cash', 'currency': 'USD'},
@@ -97,5 +101,51 @@ void main() {
     );
 
     expect(offer.wasRejectedByOwner, isTrue);
+  });
+
+  test('Contraofertas separa pendientes del cliente e historial rechazado', () {
+    final board = ClientOffersBoard.fromOffers([
+      _offer(
+        id: 'espera-cliente',
+        status: 'COUNTER_OFFER',
+        counterOfferCount: 1,
+        pendingResponseBy: 'CLIENT',
+        lastOfferBy: 'OWNER',
+      ),
+      _offer(
+        id: 'espera-dueno',
+        status: 'COUNTER_OFFER',
+        counterOfferCount: 2,
+        pendingResponseBy: 'OWNER',
+        lastOfferBy: 'CLIENT',
+      ),
+      _offer(
+        id: 'negociacion-rechazada',
+        status: 'REJECTED_BY_CLIENT',
+        counterOfferCount: 2,
+        rejectedBy: 'CLIENT',
+        reason: 'Los nuevos términos no me convienen',
+      ),
+      _offer(id: 'rechazo-inicial', status: 'REJECTED'),
+    ]);
+
+    expect(
+      board
+          .byFilterInLane(
+            ClientOfferLane.contraoferta,
+            ClientOfferFilter.enviada,
+          )
+          .map((offer) => offer.offerId),
+      ['espera-cliente'],
+    );
+    expect(
+      board
+          .byFilterInLane(
+            ClientOfferLane.contraoferta,
+            ClientOfferFilter.rechazada,
+          )
+          .map((offer) => offer.offerId),
+      ['negociacion-rechazada'],
+    );
   });
 }

@@ -601,6 +601,17 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: DOVIACLIENTMisOfertasContraofertaDetalleWidget.routeName,
+          path: DOVIACLIENTMisOfertasContraofertaDetalleWidget.routePath,
+          builder: (context, params) =>
+              DOVIACLIENTMisOfertasContraofertaDetalleWidget(
+            offerId: params.getParam(
+              'offerId',
+              ParamType.String,
+            ),
+          ),
+        ),
+        FFRoute(
           name: DOVIACLIENTPropuestasRecientesWidget.routeName,
           path: DOVIACLIENTPropuestasRecientesWidget.routePath,
           builder: (context, params) =>
