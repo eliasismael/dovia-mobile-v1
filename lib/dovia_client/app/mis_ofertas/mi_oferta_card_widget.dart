@@ -19,6 +19,8 @@ class MiOfertaCardWidget extends StatelessWidget {
     required this.onOpen,
     this.onCancel,
     this.hasUnreadUpdate = false,
+    this.tapToOpen = false,
+    this.showActions = true,
     this.width = 260.0,
   });
 
@@ -34,6 +36,12 @@ class MiOfertaCardWidget extends StatelessWidget {
 
   /// Enciende el punto rojo: el dueño contraofertó y el usuario no lo abrió.
   final bool hasUnreadUpdate;
+
+  /// En la grilla completa la tarjeta entera abre el detalle, como en Figma.
+  final bool tapToOpen;
+
+  /// El dashboard conserva sus botones; la grilla usa la tarjeta compacta.
+  final bool showActions;
 
   final double width;
 
@@ -70,7 +78,7 @@ class MiOfertaCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final card = SizedBox(
       width: width,
       child: Stack(
         clipBehavior: Clip.none,
@@ -117,11 +125,13 @@ class MiOfertaCardWidget extends StatelessWidget {
                   const SizedBox(height: 8.0),
                   _terminalChip(),
                 ],
-                const SizedBox(height: 10.0),
-                _openButton(),
-                if (_showsCancel) ...[
+                if (showActions) ...[
                   const SizedBox(height: 10.0),
-                  _cancelButton(),
+                  _openButton(),
+                  if (_showsCancel) ...[
+                    const SizedBox(height: 10.0),
+                    _cancelButton(),
+                  ],
                 ],
               ],
             ),
@@ -142,6 +152,14 @@ class MiOfertaCardWidget extends StatelessWidget {
         ],
       ),
     );
+
+    return tapToOpen
+        ? Semantics(
+            button: true,
+            label: 'Ver oferta de ${offer.propertyName}',
+            child: GestureDetector(onTap: onOpen, child: card),
+          )
+        : card;
   }
 
   Widget _image() {

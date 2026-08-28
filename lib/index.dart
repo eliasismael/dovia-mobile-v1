@@ -154,6 +154,8 @@ export '/dovia_client/app/mis_ofertas/d_o_v_i_a_c_l_i_e_n_t_mis_ofertas/d_o_v_i_
     show DOVIACLIENTMisOfertasWidget;
 export '/dovia_client/app/mis_ofertas/d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista/d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista_widget.dart'
     show DOVIACLIENTMisOfertasListaWidget;
+export '/dovia_client/app/mis_ofertas/d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_detalle/d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_detalle_widget.dart'
+    show DOVIACLIENTMisOfertasDetalleWidget;
 export '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_widget.dart'
     show DOVIACLIENTMisPropiedadesContraofertarWidget;
 export '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_widget.dart'

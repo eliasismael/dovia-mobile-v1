@@ -11,6 +11,9 @@ import 'offer_json.dart';
 /// Carriles del panel, en el orden del diseño.
 enum ClientOfferLane { realizadas, contraoferta, aceptada }
 
+/// Pestañas del listado completo de "Ofertas realizadas".
+enum ClientOfferFilter { enviada, rechazada }
+
 extension ClientOfferLaneX on ClientOfferLane {
   /// Título del carril dentro de "Mis Ofertas".
   String get laneTitle {
@@ -47,6 +50,16 @@ extension ClientOfferLaneX on ClientOfferLane {
     }
   }
 
+  List<ClientOfferFilter> get filters {
+    switch (this) {
+      case ClientOfferLane.realizadas:
+        return const [ClientOfferFilter.enviada, ClientOfferFilter.rechazada];
+      case ClientOfferLane.contraoferta:
+      case ClientOfferLane.aceptada:
+        return const [];
+    }
+  }
+
   /// Valor de la ruta, para viajar como query param.
   String get slug {
     switch (this) {
@@ -67,6 +80,26 @@ extension ClientOfferLaneX on ClientOfferLane {
         return ClientOfferLane.aceptada;
       default:
         return ClientOfferLane.realizadas;
+    }
+  }
+}
+
+extension ClientOfferFilterX on ClientOfferFilter {
+  String get label {
+    switch (this) {
+      case ClientOfferFilter.enviada:
+        return 'Enviado';
+      case ClientOfferFilter.rechazada:
+        return 'Rechazada';
+    }
+  }
+
+  String get emptyMessage {
+    switch (this) {
+      case ClientOfferFilter.enviada:
+        return 'Todavía no has enviado ofertas.';
+      case ClientOfferFilter.rechazada:
+        return 'Ninguna de tus ofertas fue rechazada.';
     }
   }
 }
@@ -96,6 +129,10 @@ const Set<String> _acceptedOfferStatuses = {
   'ACCEPTED_BY_OWNER',
   'ACCEPTED_BY_CLIENT',
 };
+
+/// Estados iniciales de una oferta que el cliente ya envió y para la que
+/// todavía espera la primera respuesta del propietario.
+const Set<String> _sentOfferStatuses = {'SENT', 'PENDING'};
 
 /// Pasos del proceso una vez aceptada la oferta, en orden.
 const List<String> _legalProcessOrder = [
@@ -128,6 +165,8 @@ class ClientOffer {
   final String processStatus;
   final String lastOfferBy; // CLIENT | OWNER
   final String pendingResponseBy; // quién debe responder
+  final String rejectedBy; // CLIENT | OWNER | SYSTEM
+  final String rejectionReason;
   final num? proposedAmount;
   final String currency;
   final int counterOfferCount;
@@ -148,6 +187,8 @@ class ClientOffer {
     required this.processStatus,
     required this.lastOfferBy,
     required this.pendingResponseBy,
+    required this.rejectedBy,
+    required this.rejectionReason,
     required this.proposedAmount,
     required this.currency,
     required this.counterOfferCount,
@@ -205,6 +246,11 @@ class ClientOffer {
       lastOfferBy: (offerStr(json['lastOfferBy']) ?? '').toUpperCase(),
       pendingResponseBy:
           (offerStr(json['pendingResponseBy']) ?? '').toUpperCase(),
+      rejectedBy: (offerStr(json['rejectedBy']) ??
+              offerStr(offerAsMap(json['rejection'])?['rejectedBy']) ??
+              '')
+          .toUpperCase(),
+      rejectionReason: offerRejectionReason(json) ?? '',
       proposedAmount: offerNum(active?['proposedAmount']) ??
           offerNum(counter?['proposedAmount']) ??
           offerNum(original?['proposedAmount']) ??
@@ -250,10 +296,29 @@ class ClientOffer {
 
   bool get isActive => !isTerminal;
 
+  /// Oferta inicial enviada, sin contraoferta ni aceptación posterior.
+  ///
+  /// Se valida también el carril para tolerar payloads inconsistentes donde el
+  /// backend conserva `SENT` aunque ya haya agregado `counterOfferData`.
+  bool get isSentAwaitingOwnerResponse =>
+      _sentOfferStatuses.contains(offerStatus) &&
+      lane == ClientOfferLane.realizadas &&
+      !isTerminal;
+
   /// Sólo se retira lo que todavía está en juego: una vez aceptada la oferta
   /// el trato pasó a Legal HQ y ya no se cancela desde aquí.
   bool get isCancellable =>
       !isTerminal && lane != ClientOfferLane.aceptada && offerId.isNotEmpty;
+
+  /// `true` cuando fue el propietario quien rechazó la negociación.
+  /// Los retiros del cliente y los vencimientos no van en "Rechazada".
+  bool get wasRejectedByOwner {
+    if (!isTerminal) return false;
+    if (rejectedBy.isNotEmpty) return _ownerActors.contains(rejectedBy);
+    return offerStatus == 'REJECTED' ||
+        offerStatus == 'REJECTED_BY_OWNER' ||
+        processStatus == 'rejected';
+  }
 
   /// `true` cuando la pelota está del lado del cliente: el dueño contraofertó
   /// y falta que el comprador acepte, rechace o vuelva a ofertar.
@@ -333,6 +398,16 @@ class ClientOffersBoard {
     if (lane == ClientOfferLane.realizadas) return _newestFirst(all);
     return _newestFirst(all.where((o) => o.lane == lane));
   }
+
+  /// Los retiros del cliente y vencimientos no pertenecen a ninguna pestaña:
+  /// no siguen enviados y tampoco los rechazó el propietario.
+  List<ClientOffer> byFilter(ClientOfferFilter filter) => _newestFirst(
+        all.where((offer) => switch (filter) {
+              ClientOfferFilter.enviada =>
+                offer.isSentAwaitingOwnerResponse,
+              ClientOfferFilter.rechazada => offer.wasRejectedByOwner,
+            }),
+      );
 
   /// Lo que va al carrusel del panel: el arranque del carril, acotado.
   List<ClientOffer> recentIn(ClientOfferLane lane, {int limit = 10}) =>

@@ -16,6 +16,17 @@ Future<void> openClientOffer(BuildContext context, ClientOffer offer) async {
 
   FFAppState().addToSeenClientOffers(offer.seenSignature);
 
+  if (offer.lane == ClientOfferLane.realizadas &&
+      (offer.isActive || offer.wasRejectedByOwner)) {
+    await context.pushNamed(
+      'DOVIA_CLIENT_MisOfertasDetalle',
+      queryParameters: {
+        'offerId': serializeParam(offer.offerId, ParamType.String),
+      }.withoutNulls,
+    );
+    return;
+  }
+
   if (offer.lane == ClientOfferLane.aceptada && offer.isLegalProcessFinished) {
     DHCLIENTCalificarWidget.serviceRequestId = null;
     DHCLIENTCalificarWidget.visitId = null;

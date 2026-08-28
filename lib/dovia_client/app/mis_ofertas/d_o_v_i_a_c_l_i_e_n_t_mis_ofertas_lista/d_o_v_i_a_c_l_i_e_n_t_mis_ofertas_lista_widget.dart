@@ -8,10 +8,10 @@ import '/repositories/offers_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/segmented_filter_bar/segmented_filter_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../cancelar_oferta_modal_widget.dart';
 import '../client_offer_navigation.dart';
 import '../mi_oferta_card_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista_model.dart';
@@ -43,6 +43,7 @@ class _DOVIACLIENTMisOfertasListaWidgetState
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final ClientOfferLane _lane;
+  late ClientOfferFilter? _selectedFilter;
 
   ClientOffersBoard _board = const ClientOffersBoard.empty();
   bool _isLoading = true;
@@ -57,6 +58,7 @@ class _DOVIACLIENTMisOfertasListaWidgetState
     _model.searchFocusNode ??= FocusNode();
 
     _lane = ClientOfferLaneX.fromSlug(widget.lane);
+    _selectedFilter = _lane.filters.isEmpty ? null : _lane.filters.first;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       safeSetState(() {});
@@ -120,11 +122,28 @@ class _DOVIACLIENTMisOfertasListaWidgetState
                         showLogo: false,
                       ),
                     ),
-                    _searchField(),
+                    if (_selectedFilter == null) _searchField(),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
-                      child: _buildBody(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          if (_selectedFilter != null) ...[
+                            SegmentedFilterBarWidget(
+                              labels: _lane.filters
+                                  .map((filter) => filter.label)
+                                  .toList(),
+                              selectedIndex:
+                                  _lane.filters.indexOf(_selectedFilter!),
+                              onSelected: (index) => safeSetState(
+                                  () => _selectedFilter = _lane.filters[index]),
+                            ),
+                            const SizedBox(height: 20.0),
+                          ],
+                          _buildBody(),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -241,10 +260,12 @@ class _DOVIACLIENTMisOfertasListaWidgetState
     }
 
     final query = (_model.searchController?.text ?? '').trim().toLowerCase();
-    final offers = query.isEmpty
+    final inTab = _selectedFilter == null
         ? _board.inLane(_lane)
-        : _board
-            .inLane(_lane)
+        : _board.byFilter(_selectedFilter!);
+    final offers = query.isEmpty
+        ? inTab
+        : inTab
             .where((o) => o.propertyName.toLowerCase().contains(query))
             .toList();
 
@@ -253,7 +274,7 @@ class _DOVIACLIENTMisOfertasListaWidgetState
         padding: const EdgeInsets.symmetric(vertical: 40.0),
         child: Text(
           query.isEmpty
-              ? _lane.emptyMessage
+              ? (_selectedFilter?.emptyMessage ?? _lane.emptyMessage)
               : 'Ninguna oferta coincide con tu búsqueda.',
           textAlign: TextAlign.center,
           style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -292,8 +313,9 @@ class _DOVIACLIENTMisOfertasListaWidgetState
                     hasUnreadUpdate: _lane == ClientOfferLane.contraoferta &&
                         offer.awaitsClientResponse &&
                         hasUnreadClientOfferUpdate(offer),
+                    tapToOpen: true,
+                    showActions: false,
                     onOpen: () => _openOffer(offer),
-                    onCancel: () => _cancelOffer(offer),
                   ))
               .toList(),
         );
@@ -307,31 +329,4 @@ class _DOVIACLIENTMisOfertasListaWidgetState
     await _loadOffers();
   }
 
-  Future<void> _cancelOffer(ClientOffer offer) async {
-    final reason = await showCancelarOfertaModal(context);
-    if (reason == null || !mounted) return;
-
-    final result = await context
-        .read<OffersRepository>()
-        .withdrawMyOffer(offerId: offer.offerId, reason: reason);
-    if (!mounted) return;
-
-    switch (result) {
-      case Success():
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Retiramos tu oferta.'),
-          backgroundColor: Color(0xFF555555),
-          behavior: SnackBarBehavior.floating,
-        ));
-        await _loadOffers();
-        break;
-      case Failure(:final message):
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          backgroundColor: const Color(0xFFE85D75),
-          behavior: SnackBarBehavior.floating,
-        ));
-        break;
-    }
-  }
 }

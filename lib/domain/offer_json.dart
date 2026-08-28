@@ -65,3 +65,29 @@ String? _urlFrom(dynamic value) {
   }
   return offerStr(value);
 }
+
+/// Motivo con el que se cerró la negociación.
+///
+/// `POST /offers/{id}/reject` acepta un `reason` opcional, pero el contrato
+/// publicado no documenta con qué nombre vuelve al leer la oferta: se prueban
+/// los alias conocidos, en la raíz y dentro del objeto de rechazo.
+String? offerRejectionReason(Map<String, dynamic>? json) {
+  if (json == null) return null;
+
+  const keys = [
+    'rejectionReason',
+    'ownerRejectionReason',
+    'rejectReason',
+    'rejectedReason',
+    'reason',
+  ];
+
+  for (final source in [json, offerAsMap(json['rejection'])]) {
+    if (source == null) continue;
+    for (final key in keys) {
+      final value = offerStr(source[key]);
+      if (value != null) return value;
+    }
+  }
+  return null;
+}

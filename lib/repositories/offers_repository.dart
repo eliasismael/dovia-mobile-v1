@@ -3,6 +3,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_offers.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/core/result.dart';
+import '/domain/client_offer_detail.dart';
 import '/domain/client_offer_models.dart';
 import '/domain/owner_proposal_models.dart';
 
@@ -102,6 +103,51 @@ class OffersRepository extends ChangeNotifier {
     ));
   }
 
+  /// Carga una oferta enviada y la traduce al modelo de detalle de sólo
+  /// lectura. La vista recibe datos de dominio y no conoce la forma cruda de
+  /// las respuestas HTTP.
+  Future<Result<ClientOfferDetail>> loadMyOfferDetail(String offerId) async {
+    if (offerId.isEmpty) {
+      return const Failure('No se especificó el ID de la oferta.');
+    }
+
+    final response = await DOVIAAPIOfferContextGroup.getOfferByIDCall.call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!response.succeeded) {
+      return Failure(
+        response.jsonBody is Map
+            ? (response.jsonBody['message']?.toString() ??
+                'No pudimos cargar tu oferta (${response.statusCode}).')
+            : 'No pudimos cargar tu oferta (${response.statusCode}).',
+        statusCode: response.statusCode,
+      );
+    }
+
+    final offerJson = _extractObject(response.jsonBody);
+    if (offerJson == null) {
+      return const Failure('La oferta recibida no tiene un formato válido.');
+    }
+
+    Map<String, dynamic>? propertyJson;
+    final propertyId = offerJson['propertyId']?.toString() ?? '';
+    if (propertyId.isNotEmpty) {
+      final propertyResponse =
+          await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
+        propertyId: propertyId,
+      );
+      if (propertyResponse.succeeded && propertyResponse.jsonBody is Map) {
+        propertyJson = Map<String, dynamic>.from(propertyResponse.jsonBody);
+      }
+    }
+
+    return Success(ClientOfferDetail.fromJson(
+      offerJson,
+      propertyJson: propertyJson,
+    ));
+  }
+
   /// Retira una oferta enviada por el cliente.
   ///
   /// El backend no tiene un endpoint propio de cancelación: retirar es
@@ -167,6 +213,16 @@ class OffersRepository extends ChangeNotifier {
     if (data is Map && data['items'] is List) return data['items'] as List;
     if (jsonBody['items'] is List) return jsonBody['items'] as List;
     return const [];
+  }
+
+  Map<String, dynamic>? _extractObject(dynamic jsonBody) {
+    if (jsonBody is! Map) return null;
+    final body = Map<String, dynamic>.from(jsonBody);
+    final data = body['data'];
+    if (data is Map) return Map<String, dynamic>.from(data);
+    final offer = body['offer'];
+    if (offer is Map) return Map<String, dynamic>.from(offer);
+    return body;
   }
 
   Future<Result<bool>> createCounterOffer({
