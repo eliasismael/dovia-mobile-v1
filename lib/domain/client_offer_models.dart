@@ -11,8 +11,17 @@ import 'offer_json.dart';
 /// Carriles del panel, en el orden del diseño.
 enum ClientOfferLane { realizadas, contraoferta, aceptada }
 
-/// Pestañas del listado completo de "Ofertas realizadas".
-enum ClientOfferFilter { enviada, rechazada }
+/// Pestañas de los listados completos: dos reparten "Ofertas realizadas" y
+/// tres siguen el cierre de las "Ofertas aceptadas".
+enum ClientOfferFilter {
+  enviada,
+  rechazada,
+  contraofertaEnviada,
+  contraofertaRechazada,
+  procesoLegal,
+  finalizada,
+  calificada,
+}
 
 extension ClientOfferLaneX on ClientOfferLane {
   /// Título del carril dentro de "Mis Ofertas".
@@ -35,7 +44,8 @@ extension ClientOfferLaneX on ClientOfferLane {
       case ClientOfferLane.contraoferta:
         return 'Contraofertas';
       case ClientOfferLane.aceptada:
-        return 'Ofertas aceptadas';
+        // Singular, como el header del diseño.
+        return 'Oferta aceptada';
     }
   }
 
@@ -55,9 +65,16 @@ extension ClientOfferLaneX on ClientOfferLane {
       case ClientOfferLane.realizadas:
         return const [ClientOfferFilter.enviada, ClientOfferFilter.rechazada];
       case ClientOfferLane.contraoferta:
-        return const [ClientOfferFilter.enviada, ClientOfferFilter.rechazada];
+        return const [
+          ClientOfferFilter.contraofertaEnviada,
+          ClientOfferFilter.contraofertaRechazada,
+        ];
       case ClientOfferLane.aceptada:
-        return const [];
+        return const [
+          ClientOfferFilter.procesoLegal,
+          ClientOfferFilter.finalizada,
+          ClientOfferFilter.calificada,
+        ];
     }
   }
 
@@ -91,7 +108,16 @@ extension ClientOfferFilterX on ClientOfferFilter {
       case ClientOfferFilter.enviada:
         return 'Enviado';
       case ClientOfferFilter.rechazada:
+      case ClientOfferFilter.contraofertaRechazada:
         return 'Rechazada';
+      case ClientOfferFilter.contraofertaEnviada:
+        return 'Enviado';
+      case ClientOfferFilter.procesoLegal:
+        return 'Proceso Legal';
+      case ClientOfferFilter.finalizada:
+        return 'Finalizadas';
+      case ClientOfferFilter.calificada:
+        return 'Calificadas';
     }
   }
 
@@ -101,20 +127,23 @@ extension ClientOfferFilterX on ClientOfferFilter {
         return 'Todavía no has enviado ofertas.';
       case ClientOfferFilter.rechazada:
         return 'Ninguna de tus ofertas fue rechazada.';
+      case ClientOfferFilter.contraofertaEnviada:
+        return 'No tienes contraofertas esperando tu respuesta.';
+      case ClientOfferFilter.contraofertaRechazada:
+        return 'Ninguna negociación terminó en rechazo.';
+      case ClientOfferFilter.procesoLegal:
+        return 'No tienes trámites en proceso legal.';
+      case ClientOfferFilter.finalizada:
+        return 'No tienes trámites finalizados por calificar.';
+      case ClientOfferFilter.calificada:
+        return 'Todavía no has calificado ningún trámite.';
     }
   }
 
-  String emptyMessageFor(ClientOfferLane lane) {
-    if (lane == ClientOfferLane.contraoferta) {
-      return switch (this) {
-        ClientOfferFilter.enviada =>
-          'No tienes contraofertas pendientes de respuesta.',
-        ClientOfferFilter.rechazada =>
-          'No hay negociaciones rechazadas con contraoferta.',
-      };
-    }
-    return emptyMessage;
-  }
+  /// Cada filtro pertenece a un solo carril, así que el mensaje ya no depende
+  /// del contexto. Se conserva la firma porque la lista la llama con el carril
+  /// a mano.
+  String emptyMessageFor(ClientOfferLane lane) => emptyMessage;
 }
 
 /// La negociación ya no admite respuesta.
@@ -166,6 +195,47 @@ const Set<String> _terminalProcessStatuses = {
 const Set<String> _ownerActors = {'OWNER', 'SELLER', 'LANDLORD'};
 const Set<String> _clientActors = {'CLIENT', 'BUYER', 'TENANT'};
 
+/// Qué le falta calificar al cliente en un trato cerrado.
+///
+/// Sólo lo devuelve `GET /offers/accepted` en sus filtros de calificación;
+/// `/offers/my-offers`, que alimenta el panel, no expone nada de esto. Por eso
+/// el board lo cruza aparte: sin este dato la pestaña "Calificadas" no se
+/// puede distinguir de "Finalizadas".
+class OfferRatingStatus {
+  final bool canRate;
+  final bool hasRatedLegalAssociate;
+  final bool hasRatedLegalHq;
+  final bool isFullyRated;
+
+  const OfferRatingStatus({
+    required this.canRate,
+    required this.hasRatedLegalAssociate,
+    required this.hasRatedLegalHq,
+    required this.isFullyRated,
+  });
+
+  static OfferRatingStatus? fromJson(dynamic json) {
+    final map = offerAsMap(json);
+    if (map == null) return null;
+
+    final associate = map['hasRatedLegalAssociate'] == true;
+    final hq = map['hasRatedLegalHq'] == true;
+    return OfferRatingStatus(
+      canRate: map['canRate'] == true,
+      hasRatedLegalAssociate: associate,
+      hasRatedLegalHq: hq,
+      // El backend ya lo calcula; si no viniera, dos de dos es lo mismo.
+      isFullyRated: map['isFullyRated'] == true || (associate && hq),
+    );
+  }
+
+  /// Roles ya calificados, en el vocabulario de `targetRole`.
+  List<String> get ratedRoles => [
+        if (hasRatedLegalAssociate) 'LEGAL_ASSOCIATE',
+        if (hasRatedLegalHq) 'LEGAL_OFFICER',
+      ];
+}
+
 /// Una oferta enviada por el usuario sobre una propiedad ajena.
 class ClientOffer {
   final String offerId;
@@ -185,7 +255,11 @@ class ClientOffer {
   final int counterOfferCount;
   final bool hasCounterOffer;
   final bool contractSigned;
-  final bool isRated;
+
+  /// Estado de calificación del trato, cuando se pudo cruzar con
+  /// `GET /offers/accepted`. `null` mientras no se conozca.
+  final OfferRatingStatus? ratingStatus;
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -207,7 +281,7 @@ class ClientOffer {
     required this.counterOfferCount,
     required this.hasCounterOffer,
     required this.contractSigned,
-    required this.isRated,
+    required this.ratingStatus,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -215,9 +289,12 @@ class ClientOffer {
   /// [property] llega de `GET /properties/{id}`: el listado de ofertas sólo
   /// devuelve `propertyId`, así que sin ese cruce la tarjeta no tendría ni
   /// nombre ni foto del inmueble.
+  /// [ratingStatus] llega del cruce con `GET /offers/accepted`: el listado que
+  /// alimenta el panel no dice qué se calificó ya.
   factory ClientOffer.fromJson(
     Map<String, dynamic> json, {
     Map<String, dynamic>? property,
+    Map<String, dynamic>? ratingStatus,
   }) {
     final active = offerAsMap(json['activeOfferData']);
     final original =
@@ -275,12 +352,8 @@ class ClientOffer {
       hasCounterOffer: counter != null && counter.isNotEmpty,
       contractSigned: json['contractSigned'] == true ||
           offerStr(json['contractSigned'])?.toLowerCase() == 'true',
-      isRated: json['isRated'] == true ||
-          json['rated'] == true ||
-          json['hasRating'] == true ||
-          offerStr(json['ratedAt']) != null ||
-          offerAsMap(json['rating']) != null ||
-          (json['ratings'] is List && (json['ratings'] as List).isNotEmpty),
+      ratingStatus: OfferRatingStatus.fromJson(json['ratingStatus']) ??
+          OfferRatingStatus.fromJson(ratingStatus),
       createdAt: DateTime.tryParse(offerStr(json['createdAt']) ?? ''),
       updatedAt: DateTime.tryParse(
           offerStr(json['updatedAt']) ?? offerStr(json['lastOfferAt']) ?? ''),
@@ -380,6 +453,25 @@ class ClientOffer {
 
   bool get isLegalProcessFinished => processStatus == 'completed';
 
+  /// El cliente ya calificó a los dos profesionales del trato.
+  bool get isRated => ratingStatus?.isFullyRated ?? false;
+
+  /// Roles ya calificados, para que la pantalla de cierre nazca sin las
+  /// acciones que ya no corresponden.
+  List<String> get ratedRoles => ratingStatus?.ratedRoles ?? const [];
+
+  /// Pestaña de "Ofertas aceptadas" en la que cae el trato.
+  ///
+  /// Las tres reparten el carril entero —cada trato está en una y sólo una—
+  /// porque son etapas sucesivas del cierre: Legal HQ trabajando, Legal HQ
+  /// terminado a la espera de la calificación, y el archivo ya calificado.
+  ClientOfferFilter get acceptedFilter {
+    if (!isLegalProcessFinished) return ClientOfferFilter.procesoLegal;
+    return isRated
+        ? ClientOfferFilter.calificada
+        : ClientOfferFilter.finalizada;
+  }
+
   /// Última señal de vida de la negociación, para ordenar los carriles.
   DateTime? get lastMovementAt => updatedAt ?? createdAt;
 
@@ -416,34 +508,39 @@ class ClientOffersBoard {
     return _newestFirst(all.where((o) => o.lane == lane));
   }
 
-  /// Los retiros del cliente y vencimientos no pertenecen a ninguna pestaña:
-  /// no siguen enviados y tampoco los rechazó el propietario.
+  /// Los retiros del cliente y vencimientos no pertenecen a ninguna pestaña
+  /// de "Ofertas realizadas": no siguen enviados y tampoco los rechazó el
+  /// propietario. Las tres de "Ofertas aceptadas", en cambio, sí reparten su
+  /// carril completo (ver [ClientOffer.acceptedFilter]).
   List<ClientOffer> byFilter(ClientOfferFilter filter) => _newestFirst(
         all.where((offer) => switch (filter) {
               ClientOfferFilter.enviada =>
                 offer.isSentAwaitingOwnerResponse,
               ClientOfferFilter.rechazada => offer.wasRejectedByOwner,
+              // Toda negociación viva, no sólo la que espera respuesta del
+              // cliente: si el cliente ya recontraofertó, la pelota está del
+              // otro lado pero el trato sigue en curso y tiene que verse. De
+              // quién es el turno lo dice el punto rojo de la tarjeta.
+              ClientOfferFilter.contraofertaEnviada =>
+                offer.lane == ClientOfferLane.contraoferta && offer.isActive,
+              ClientOfferFilter.contraofertaRechazada =>
+                offer.lane == ClientOfferLane.contraoferta &&
+                    offer.isTerminal,
+              ClientOfferFilter.procesoLegal ||
+              ClientOfferFilter.finalizada ||
+              ClientOfferFilter.calificada =>
+                offer.lane == ClientOfferLane.aceptada &&
+                    offer.acceptedFilter == filter,
             }),
       );
 
-  /// El mismo toggle se reutiliza en dos carriles, pero su significado depende
-  /// del contexto: ofertas iniciales en `realizadas` y rondas de negociación en
-  /// `contraoferta`.
+  /// Los filtros de "Contraofertas" son propios del carril, así que el reparto
+  /// vive entero en [byFilter]. La lista sigue llamando con el carril a mano.
   List<ClientOffer> byFilterInLane(
     ClientOfferLane lane,
     ClientOfferFilter filter,
-  ) {
-    if (lane == ClientOfferLane.contraoferta) {
-      return _newestFirst(
-        all.where((offer) => switch (filter) {
-              ClientOfferFilter.enviada => offer.awaitsClientResponse,
-              ClientOfferFilter.rechazada =>
-                offer.isFailedCounterNegotiation,
-            }),
-      );
-    }
-    return byFilter(filter);
-  }
+  ) =>
+      byFilter(filter);
 
   /// Lo que va al carrusel del panel: el arranque del carril, acotado.
   List<ClientOffer> recentIn(ClientOfferLane lane, {int limit = 10}) =>
@@ -455,18 +552,25 @@ class ClientOffersBoard {
       inLane(ClientOfferLane.contraoferta)
           .any((o) => o.awaitsClientResponse && isUnread(o));
 
-  /// [propertiesById] son las propiedades ya resueltas, indexadas por id.
+  /// [propertiesById] son las propiedades ya resueltas y [ratingStatusByOffer]
+  /// el cruce con `GET /offers/accepted`, indexados por id.
   factory ClientOffersBoard.fromOffers(
     List<dynamic> offers, {
     Map<String, Map<String, dynamic>> propertiesById = const {},
+    Map<String, Map<String, dynamic>> ratingStatusByOffer = const {},
   }) {
     final items = <ClientOffer>[];
     for (final raw in offers) {
       final map = offerAsMap(raw);
       if (map == null) continue;
+      final id = offerStr(map['offerId']) ??
+          offerStr(map['id']) ??
+          offerStr(map['_id']) ??
+          '';
       final offer = ClientOffer.fromJson(
         map,
         property: propertiesById[offerStr(map['propertyId']) ?? ''],
+        ratingStatus: ratingStatusByOffer[id],
       );
       if (offer.offerId.isEmpty) continue;
       items.add(offer);

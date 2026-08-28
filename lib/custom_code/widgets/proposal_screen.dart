@@ -15,6 +15,10 @@ import '/shared_components/popup_exito/popup_exito_widget.dart';
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 // Force refresh: 2026-05-04 17:15
 
+import '/domain/counter_offer_view.dart';
+import '/dovia_client/app/mis_ofertas/cierre_legal/cierre_legal_section_widget.dart';
+import '/dovia_client/app/mis_ofertas/contraoferta/negociacion_contraoferta_widget.dart';
+
 enum NegotiationState { negotiation, structuring, signing, completed }
 
 enum PaymentMethod { hipoteca, contado, promesa }
@@ -26,6 +30,10 @@ class ProposalScreen extends StatefulWidget {
   final double? height;
   final dynamic offerData;
 
+  /// Roles legales ya calificados, separados por coma. Sus tarjetas nacen sin
+  /// acciones: es lo que distingue "Calificadas" de "Finalizadas".
+  final String ratedRoles;
+
   const ProposalScreen({
     super.key,
     this.width,
@@ -33,6 +41,7 @@ class ProposalScreen extends StatefulWidget {
     required String state,
     required String paymentMethod,
     this.offerData,
+    this.ratedRoles = '',
   })  : stateString = state,
         paymentMethodString = paymentMethod;
 
@@ -46,14 +55,10 @@ class _ProposalScreenState extends State<ProposalScreen> {
   String? _selectedLegalAssociateId;
   bool _isSelectingAssociate = false;
   bool _associateSubmitted = false;
-  bool _isRejecting = false;
-  bool _isActioning = false;
-  late TextEditingController _rejectReasonController;
 
   @override
   void initState() {
     super.initState();
-    _rejectReasonController = TextEditingController();
     _initLegalAssociateState();
   }
 
@@ -110,113 +115,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
 
   @override
   void dispose() {
-    _rejectReasonController.dispose();
     super.dispose();
-  }
-
-  Future<void> _acceptOffer() async {
-    final offerId = widget.offerData?['offerId']?.toString();
-    if (offerId == null) return;
-
-    setState(() => _isActioning = true);
-
-    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
-    final res = await ApiManager.instance.makeApiCall(
-      callName: 'Accept Offer Client',
-      apiUrl: '$baseUrl/offers/$offerId/accept',
-      callType: ApiCallType.POST,
-      headers: {
-        'Authorization': 'Bearer $currentAuthenticationToken',
-      },
-      params: {},
-      body: '{"acceptedBy": "CLIENT"}',
-      bodyType: BodyType.JSON,
-      returnBody: true,
-      encodeBodyUtf8: false,
-      decodeUtf8: false,
-      cache: false,
-      isStreamingApi: false,
-      alwaysAllowBody: false,
-    );
-
-    if (res.succeeded) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Oferta aceptada con éxito!')),
-      );
-      // Recargar datos o navegar
-      if (mounted) context.pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error al aceptar la oferta: ${res.statusCode}')),
-      );
-    }
-    setState(() => _isActioning = false);
-  }
-
-  Future<void> _rejectOffer() async {
-    final offerId = widget.offerData?['offerId']?.toString();
-    if (offerId == null) return;
-
-    final reason = _rejectReasonController.text.trim();
-    if (reason.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Por favor, indica un motivo para el rechazo.')),
-      );
-      return;
-    }
-
-    setState(() => _isActioning = true);
-
-    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
-    final body = jsonEncode({"rejectedBy": "CLIENT", "reason": reason});
-
-    final res = await ApiManager.instance.makeApiCall(
-      callName: 'Reject Offer Client',
-      apiUrl: '$baseUrl/offers/$offerId/reject',
-      callType: ApiCallType.POST,
-      headers: {
-        'Authorization': 'Bearer $currentAuthenticationToken',
-      },
-      params: {},
-      body: body,
-      bodyType: BodyType.JSON,
-      returnBody: true,
-      encodeBodyUtf8: false,
-      decodeUtf8: false,
-      cache: false,
-      isStreamingApi: false,
-      alwaysAllowBody: false,
-    );
-
-    if (res.succeeded) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Oferta rechazada.')),
-      );
-      if (mounted) context.pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error al rechazar la oferta: ${res.statusCode}')),
-      );
-    }
-    setState(() => _isActioning = false);
-  }
-
-  void _counterOffer() {
-    final offerId = widget.offerData?['offerId']?.toString();
-    final propertyId = widget.offerData?['propertyId']?.toString();
-
-    // Navegar a la pantalla de oferta para que el cliente haga una nueva
-    context.pushNamed(
-      'DOVIA_CLIENT_Ofertar',
-      queryParameters: {
-        'propertyId': serializeParam(propertyId, ParamType.String),
-        'isCounterOffer': serializeParam(true, ParamType.bool),
-        'previousOfferId': serializeParam(offerId, ParamType.String),
-      }.withoutNulls,
-    );
   }
 
   NegotiationState get state {
@@ -390,15 +289,65 @@ class _ProposalScreenState extends State<ProposalScreen> {
 
     switch (state) {
       case NegotiationState.negotiation:
-        return _buildNegotiationContent();
+        return _buildNegotiationComparison();
       case NegotiationState.structuring:
         return _buildStructuringContent();
       case NegotiationState.signing:
         return _buildSigningContent(
             isCompleted: false, isContractSigned: isContractSigned);
       case NegotiationState.completed:
-        return _buildSigningContent(isCompleted: true, isContractSigned: true);
+        return _buildClosureContent();
     }
+  }
+
+  /// Las dos propuestas enfrentadas y el trilema que define el rumbo.
+  ///
+  /// El reparto de campos según el método de pago vive en [CounterOfferView],
+  /// así que acá sólo se decide si ya hay datos que comparar.
+  Widget _buildNegotiationComparison() {
+    final data = widget.offerData;
+    if (data is! Map) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: CircularProgressIndicator(color: Color(0xFF007376)),
+        ),
+      );
+    }
+
+    final json = Map<String, dynamic>.from(data);
+    return NegociacionContraofertaWidget(
+      offerId: json['offerId']?.toString() ?? '',
+      view: CounterOfferView.fromJson(json),
+      onResolved: () => context.safePop(),
+    );
+  }
+
+  /// Cierre del trámite: los profesionales que lo acompañaron y la bóveda de
+  /// documentos.
+  ///
+  /// Reemplaza al detalle de la firma —que ya no tiene nada que pedirle al
+  /// cliente— por lo que el diseño pone debajo del stepter una vez que Legal
+  /// HQ terminó: calificar, reportar y descargar el expediente.
+  Widget _buildClosureContent() {
+    final data = widget.offerData;
+    final offerId = data is Map ? data['offerId']?.toString() ?? '' : '';
+    final legalProcessId = data is Map
+        ? (data['legalProcessId']?.toString() ??
+            (data['legalProcess'] is Map
+                ? data['legalProcess']['id']?.toString() ?? ''
+                : ''))
+        : '';
+
+    return CierreLegalSectionWidget(
+      offerId: offerId,
+      legalProcessId: legalProcessId,
+      ratedRoles: widget.ratedRoles
+          .split(',')
+          .map((role) => role.trim())
+          .where((role) => role.isNotEmpty)
+          .toList(),
+    );
   }
 
   String _getPaymentLabel(PaymentMethod m) {
@@ -548,508 +497,6 @@ class _ProposalScreenState extends State<ProposalScreen> {
       width: 30,
       height: 2,
       color: isCompleted ? const Color(0xFF007376) : const Color(0xFFE0E0E0),
-    );
-  }
-
-  // ── Data helpers for negotiation view ─────────────────────────────────────
-
-  dynamic get _originalOfferData =>
-      widget.offerData?['originalOfferData'] ??
-      widget.offerData?['offerData'] ??
-      widget.offerData;
-
-  dynamic get _counterOfferData =>
-      widget.offerData?['counterOfferData'] ??
-      widget.offerData?['counterOffer'];
-
-  bool get _hasCounterOffer => _counterOfferData != null;
-
-  String _extractPaymentLabel(dynamic data) {
-    final raw = data?['paymentMethod']?.toString() ?? '';
-    final s = raw.toLowerCase();
-    if (s.contains('cash') || s.contains('contado')) return 'Contado';
-    if (s.contains('mortgage') || s.contains('hipoteca')) return 'Hipoteca';
-    if (s.contains('purchase_promise') || s.contains('promesa'))
-      return 'Promesa de compra';
-    return raw.isEmpty ? '—' : raw.replaceAll('_', ' ');
-  }
-
-  String _extractAmount(dynamic data) {
-    final val = data?['proposedAmount'];
-    if (val == null) return '—';
-    final num? amount = val is num ? val : num.tryParse(val.toString());
-    if (amount == null) return '—';
-    final currency = data?['currency']?.toString().toUpperCase() ?? 'USD';
-    final prefix = currency == 'USD' ? 'USD ' : '';
-    final formatted = amount.truncateToDouble() == amount
-        ? amount
-            .toInt()
-            .toString()
-            .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+$)'), (m) => '${m[1]},')
-        : amount.toStringAsFixed(2);
-    return '$prefix$formatted';
-  }
-
-  String _field(dynamic data, String key, {String fallback = '—'}) {
-    final v = data?[key]?.toString().trim();
-    return (v != null && v.isNotEmpty) ? v : fallback;
-  }
-
-  // ── Negotiation content (Step 1) ──────────────────────────────────────────
-
-  Widget _buildNegotiationContent() {
-    final orig = _originalOfferData;
-    final counter = _counterOfferData;
-
-    final origPayment = _extractPaymentLabel(orig);
-    final origAmount = _extractAmount(orig);
-    final origBank = _field(orig, 'bankName');
-    final origDown = _field(orig, 'downPaymentPercentage',
-        fallback: _field(orig, 'downPayment'));
-    final origConsiderations = _field(orig, 'considerations');
-    final origIsHipoteca = origPayment == 'Hipoteca';
-    final origCreditStatus = _field(orig, 'creditStatus');
-    final origReservationAmount = _field(orig, 'initialReserve',
-        fallback: _field(orig, 'reservationAmount'));
-    final origFinalPayment = _field(orig, 'finalPayment');
-    final origPromiseTime = _field(orig, 'promiseTimeMonths',
-        fallback: _field(orig, 'promiseTime'));
-
-    final counterPayment = _extractPaymentLabel(counter);
-    final counterAmount = _extractAmount(counter);
-    final counterBank = _field(counter, 'bankName');
-    final counterDown = _field(counter, 'downPaymentPercentage',
-        fallback: _field(counter, 'downPayment'));
-    final counterConsiderations = _field(counter, 'considerations');
-    final counterIsHipoteca = counterPayment == 'Hipoteca';
-    final counterReservationAmount = _field(counter, 'initialReserve',
-        fallback: _field(counter, 'reservationAmount'));
-    final counterFinalPayment = _field(counter, 'finalPayment');
-    final counterPromiseTime = _field(counter, 'promiseTimeMonths',
-        fallback: _field(counter, 'promiseTime'));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Center(
-          child: Text(
-            'Tu propuesta',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF00444B),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-
-        // ── Tu propuesta Inputs ─────────────────────────────────────────────
-        if (origPayment == 'Promesa de compra') ...[
-          _buildInputBox("Método de pago", origPayment,
-              bgColor: const Color(0xFFD9D7D7)),
-          _buildInputBox("Reserva", origReservationAmount,
-              bgColor: const Color(0xFFD9D7D7)),
-          Row(
-            children: [
-              Expanded(
-                  child: _buildInputBox("Pago final", origFinalPayment,
-                      bgColor: const Color(0xFFD9D7D7))),
-              const SizedBox(width: 17),
-              Expanded(
-                  child: _buildInputBox("Tiempo de promesa",
-                      origPromiseTime == '—' ? '—' : '$origPromiseTime meses',
-                      bgColor: const Color(0xFFD9D7D7))),
-            ],
-          ),
-        ] else if (origPayment == 'Hipoteca') ...[
-          Row(
-            children: [
-              Expanded(
-                  child: _buildInputBox("Método de pago", origPayment,
-                      bgColor: const Color(0xFFD9D7D7))),
-              const SizedBox(width: 17),
-              Expanded(
-                  child: _buildInputBox("Banco", origBank,
-                      bgColor: const Color(0xFFD9D7D7))),
-            ],
-          ),
-          _buildInputBox("Propuesta económica", origAmount,
-              bgColor: const Color(0xFFD9D7D7)),
-          _buildInputBox("Enganche", origDown == '—' ? '—' : '$origDown%',
-              bgColor: const Color(0xFFD9D7D7)),
-          _buildInputBox("Estado del crédito", origCreditStatus,
-              bgColor: const Color(0xFFD9D7D7)),
-        ] else ...[
-          _buildInputBox("Método de pago", origPayment,
-              bgColor: const Color(0xFFD9D7D7)),
-          _buildInputBox("Propuesta económica", origAmount,
-              bgColor: const Color(0xFFD9D7D7)),
-        ],
-
-        const Text(
-          "Moneda de pago",
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.normal,
-            color: Color(0xFF00444B),
-            letterSpacing: 0.28,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          height: 42,
-          decoration: BoxDecoration(
-            color: const Color(0xFF70ACAD),
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: const Center(
-            child: Text(
-              "USD",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        _buildInputBox("Solicitud adicional", origConsiderations,
-            isTextArea: true, bgColor: const Color(0xFFD9D7D7)),
-
-        const SizedBox(height: 20),
-
-        // ── Propuesta del propietario ───────────────────────────────────────
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: Color(0xFF007376), width: 1)),
-          ),
-          child: const Center(
-            child: Text(
-              'Propuesta del propietario',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF00444B),
-              ),
-            ),
-          ),
-        ),
-
-        if (_hasCounterOffer) ...[
-          if (counterPayment == 'Promesa de compra') ...[
-            _buildInputBox("Método de pago", counterPayment,
-                bgColor: const Color(0xFFFAFAFA)),
-            _buildInputBox("Reserva", counterReservationAmount,
-                bgColor: const Color(0xFFFAFAFA)),
-            Row(
-              children: [
-                Expanded(
-                    child: _buildInputBox("Pago final", counterFinalPayment,
-                        bgColor: const Color(0xFFFAFAFA))),
-                const SizedBox(width: 17),
-                Expanded(
-                    child: _buildInputBox(
-                        "Tiempo de promesa",
-                        counterPromiseTime == '—'
-                            ? '—'
-                            : '$counterPromiseTime meses',
-                        bgColor: const Color(0xFFFAFAFA))),
-              ],
-            ),
-          ] else if (counterPayment == 'Hipoteca') ...[
-            Row(
-              children: [
-                Expanded(
-                    child: _buildInputBox("Método de pago", counterPayment,
-                        bgColor: const Color(0xFFFAFAFA))),
-                const SizedBox(width: 17),
-                Expanded(
-                    child: _buildInputBox("Banco", counterBank,
-                        bgColor: const Color(0xFFFAFAFA))),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                    child: _buildInputBox("Propuesta económica", counterAmount,
-                        bgColor: const Color(0xFFFAFAFA))),
-                const SizedBox(width: 17),
-                Expanded(
-                    child: _buildInputBox(
-                        "Enganche", counterDown == '—' ? '—' : '$counterDown%',
-                        bgColor: const Color(0xFFFAFAFA))),
-              ],
-            ),
-          ] else ...[
-            _buildInputBox("Método de pago", counterPayment,
-                bgColor: const Color(0xFFFAFAFA)),
-            _buildInputBox("Propuesta económica", counterAmount,
-                bgColor: const Color(0xFFFAFAFA)),
-          ],
-          _buildInputBox("Solicitud adicional", counterConsiderations,
-              isTextArea: true, bgColor: const Color(0xFFFAFAFA)),
-          const SizedBox(height: 18),
-          if (!_isRejecting) ...[
-            // Buttons
-            SizedBox(
-              width: double.infinity,
-              height: 42,
-              child: OutlinedButton(
-                onPressed: _isActioning
-                    ? null
-                    : () {
-                        setState(() {
-                          _isRejecting = true;
-                        });
-                      },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF007376)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: const Text(
-                  "Rechazar",
-                  style: TextStyle(
-                    color: Color(0xFF007376),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              height: 42,
-              child: OutlinedButton(
-                onPressed: _isActioning ? null : _counterOffer,
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF007376)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: const Text(
-                  "Contraoferta",
-                  style: TextStyle(
-                    color: Color(0xFF007376),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              height: 42,
-              child: ElevatedButton(
-                onPressed: _isActioning ? null : _acceptOffer,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF007376),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  elevation: 0,
-                ),
-                child: _isActioning
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
-                    : const Text(
-                        "Aceptar",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-              ),
-            ),
-          ] else ...[
-            const SizedBox(height: 18),
-            _buildRejectReasonBox(),
-          ],
-        ] else ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F9F9),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFDFDFDF)),
-            ),
-            child: const Column(
-              children: [
-                Icon(Icons.hourglass_empty_rounded,
-                    color: Color(0xFF007376), size: 28),
-                SizedBox(height: 8),
-                Text(
-                  'Esperando respuesta del propietario...',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF888888),
-                      fontWeight: FontWeight.normal),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildInputBox(String label, String value,
-      {bool isTextArea = false, Color bgColor = const Color(0xFFD9D7D7)}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.normal,
-            color: Color(0xFF00444B),
-            letterSpacing: 0.28,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          height: isTextArea ? 104 : 42,
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Align(
-            alignment: isTextArea ? Alignment.topLeft : Alignment.centerLeft,
-            child: Text(
-              value,
-              style: TextStyle(
-                color: const Color(0xFF888888).withOpacity(0.5),
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-                letterSpacing: 0.28,
-                height: isTextArea ? 1.5 : null,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-      ],
-    );
-  }
-
-  Widget _buildRejectReasonBox() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "¿Por qué rechazaste la oferta?",
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.normal,
-            color: Color(0xFF00444B),
-            letterSpacing: 0.28,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          height: 104,
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAFAFA),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFDFDFDF)),
-          ),
-          child: TextFormField(
-            controller: _rejectReasonController,
-            maxLines: null,
-            decoration: InputDecoration(
-              hintText: "Escribe aqui...",
-              hintStyle: TextStyle(
-                color: const Color(0xFF888888).withOpacity(0.5),
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-              ),
-              border: InputBorder.none,
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        SizedBox(
-          width: double.infinity,
-          height: 42,
-          child: ElevatedButton(
-            onPressed: _isActioning ? null : _rejectOffer,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE44444),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              elevation: 0,
-            ),
-            child: _isActioning
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
-                : const Text(
-                    "Confirmar Rechazo",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-          ),
-        ),
-        const SizedBox(height: 18),
-      ],
-    );
-  }
-
-  Widget _negotiationRow(
-    String label,
-    String value, {
-    CrossAxisAlignment valueAlign = CrossAxisAlignment.end,
-    TextStyle? valueStyle,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF666666),
-                  fontWeight: FontWeight.w400)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: valueStyle ??
-                  const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF00444B),
-                      fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
     );
   }
 

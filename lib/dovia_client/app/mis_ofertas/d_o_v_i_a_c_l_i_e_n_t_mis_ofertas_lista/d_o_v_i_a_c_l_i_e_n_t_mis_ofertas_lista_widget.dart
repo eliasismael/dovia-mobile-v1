@@ -22,6 +22,11 @@ export 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista_model.dart';
 ///
 /// Muestra todos los inmuebles de esa categoría en grilla, con las mismas
 /// acciones que la tarjeta del carrusel.
+///
+/// Los carriles que el diseño segmenta traen su propio menú de pestañas
+/// ([ClientOfferLaneX.filters]): dos en "Ofertas realizadas" (Enviado /
+/// Rechazada) y tres en "Ofertas aceptadas" (Proceso Legal / Finalizadas /
+/// Calificadas), que siguen el cierre del trato.
 class DOVIACLIENTMisOfertasListaWidget extends StatefulWidget {
   const DOVIACLIENTMisOfertasListaWidget({super.key, this.lane});
 

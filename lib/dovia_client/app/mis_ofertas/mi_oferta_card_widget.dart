@@ -70,7 +70,11 @@ class MiOfertaCardWidget extends StatelessWidget {
       case ClientOfferLane.contraoferta:
         return 'Ver contraoferta';
       case ClientOfferLane.aceptada:
-        return offer.isLegalProcessFinished ? 'Calificar' : 'Ver proceso legal';
+        // Calificado el trámite, el expediente queda como archivo: se vuelve a
+        // abrir el proceso legal, no el formulario de calificación.
+        return offer.isLegalProcessFinished && !offer.isRated
+            ? 'Calificar'
+            : 'Ver proceso legal';
       case ClientOfferLane.realizadas:
         return 'Ver tu oferta';
     }

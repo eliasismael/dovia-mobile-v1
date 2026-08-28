@@ -17,11 +17,16 @@ class DOVIACLIENTMisVisitasTuPropuestaWidget extends StatefulWidget {
     this.propuestaState,
     this.paymentMethod,
     this.offerId,
+    this.ratedRoles,
   });
 
   final String? propuestaState;
   final String? paymentMethod;
   final String? offerId;
+
+  /// Roles legales ya calificados, separados por coma: sus tarjetas se
+  /// muestran como archivo, sin calificar ni reportar.
+  final String? ratedRoles;
 
   static String routeName = 'DOVIA_CLIENT_MisVisitas_TuPropuesta';
   static String routePath = '/dOVIACLIENTMisVisitasTuPropuesta';
@@ -134,6 +139,7 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
                               state: widget.propuestaState ?? 'pending',
                               paymentMethod: widget.paymentMethod ?? '',
                               offerData: _offerData,
+                              ratedRoles: widget.ratedRoles ?? '',
                             ),
                           ),
                         ],

@@ -9,6 +9,7 @@ ClientOffer _offer({
   String? processStatus,
   int counterOfferCount = 0,
   String? lastOfferBy,
+  bool isRated = false,
 }) {
   return ClientOffer.fromJson({
     'offerId': 'offer-1',
@@ -17,6 +18,13 @@ ClientOffer _offer({
     'offerStatus': offerStatus,
     if (processStatus != null) 'processStatus': processStatus,
     'counterOfferCount': counterOfferCount,
+    // Lo inyecta el cruce con /offers/accepted; /offers/my-offers no lo trae.
+    if (isRated)
+      'ratingStatus': const {
+        'hasRatedLegalAssociate': true,
+        'hasRatedLegalHq': true,
+        'isFullyRated': true,
+      },
     if (lastOfferBy != null) 'lastOfferBy': lastOfferBy,
     'updatedAt': '2026-08-20T10:00:00.000Z',
     'property': {'id': 'prop-1', 'name': 'Orchad House'},
@@ -91,6 +99,21 @@ void main() {
 
       expect(find.text('Calificar'), findsOneWidget);
       expect(find.text('Ver proceso legal'), findsNothing);
+    });
+
+    testWidgets('ya calificado el tramite solo se consulta', (tester) async {
+      await _pumpCard(
+        tester,
+        _offer(
+          offerStatus: 'ACCEPTED',
+          processStatus: 'completed',
+          isRated: true,
+        ),
+        lane: ClientOfferLane.aceptada,
+      );
+
+      expect(find.text('Ver proceso legal'), findsOneWidget);
+      expect(find.text('Calificar'), findsNothing);
     });
   });
 
