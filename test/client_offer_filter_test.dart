@@ -119,6 +119,58 @@ void main() {
     expect(opensReadOnlyOfferDetail(enNegociacion), isFalse);
   });
 
+  group('Pestañas de Contraofertas', () {
+    ClientOffersBoard board() => ClientOffersBoard.fromOffers([
+          _offer(id: 'en-curso', status: 'COUNTER_OFFER'),
+          _offer(id: 'recontraoferta', status: 'COUNTER_OFFER'),
+          _offer(
+            id: 'caida',
+            status: 'REJECTED',
+            rejectedBy: 'OWNER',
+            counterOfferCount: 1,
+          ),
+          // Ruido: no pertenece al carril.
+          _offer(id: 'enviada'),
+        ]);
+
+    test('el menú del diseño, en orden', () {
+      expect(
+        ClientOfferLane.contraoferta.filters.map((filter) => filter.label),
+        ['Enviado', 'Rechazada'],
+      );
+      expect(ClientOfferLane.contraoferta.listTitle, 'Contraofertas');
+    });
+
+    test('las negociaciones vivas van a Enviado', () {
+      expect(
+        board()
+            .byFilter(ClientOfferFilter.contraofertaEnviada)
+            .map((offer) => offer.offerId),
+        ['en-curso', 'recontraoferta'],
+      );
+    });
+
+    test('las caídas quedan en Rechazada', () {
+      expect(
+        board()
+            .byFilter(ClientOfferFilter.contraofertaRechazada)
+            .map((offer) => offer.offerId),
+        ['caida'],
+      );
+    });
+
+    test('las dos pestañas reparten el carril sin perder ni duplicar', () {
+      final carril =
+          board().inLane(ClientOfferLane.contraoferta).map((o) => o.offerId);
+      final enPestanas = ClientOfferLane.contraoferta.filters
+          .expand((filter) => board().byFilter(filter))
+          .map((offer) => offer.offerId);
+
+      expect(enPestanas.toSet(), carril.toSet());
+      expect(enPestanas.length, carril.length);
+    });
+  });
+
   group('Pestañas de Ofertas aceptadas', () {
     ClientOffersBoard board() => ClientOffersBoard.fromOffers([
           _offer(

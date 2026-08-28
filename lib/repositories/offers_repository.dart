@@ -282,6 +282,27 @@ class OffersRepository extends ChangeNotifier {
     );
   }
 
+  /// Acepta la propuesta vigente del propietario y cierra la negociación.
+  ///
+  /// El trato pasa al carril de ofertas aceptadas y arranca el proceso con
+  /// Legal HQ.
+  Future<Result<bool>> acceptOfferAsClient(String offerId) async {
+    final response = await DOVIAAPIOfferContextGroup.acceptOfferCall.call(
+      offerId: offerId,
+      authToken: currentAuthenticationToken ?? '',
+      acceptedBy: 'CLIENT',
+    );
+
+    if (response.succeeded) return const Success(true);
+    return Failure(
+      response.jsonBody is Map
+          ? (response.jsonBody['message']?.toString() ??
+              'No pudimos aceptar la oferta.')
+          : 'No pudimos aceptar la oferta.',
+      statusCode: response.statusCode,
+    );
+  }
+
   /// Retira una oferta enviada por el cliente.
   ///
   /// El backend no tiene un endpoint propio de cancelación: retirar es

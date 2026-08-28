@@ -16,6 +16,8 @@ enum ClientOfferLane { realizadas, contraoferta, aceptada }
 enum ClientOfferFilter {
   enviada,
   rechazada,
+  contraofertaEnviada,
+  contraofertaRechazada,
   procesoLegal,
   finalizada,
   calificada,
@@ -63,7 +65,10 @@ extension ClientOfferLaneX on ClientOfferLane {
       case ClientOfferLane.realizadas:
         return const [ClientOfferFilter.enviada, ClientOfferFilter.rechazada];
       case ClientOfferLane.contraoferta:
-        return const [];
+        return const [
+          ClientOfferFilter.contraofertaEnviada,
+          ClientOfferFilter.contraofertaRechazada,
+        ];
       case ClientOfferLane.aceptada:
         return const [
           ClientOfferFilter.procesoLegal,
@@ -103,7 +108,10 @@ extension ClientOfferFilterX on ClientOfferFilter {
       case ClientOfferFilter.enviada:
         return 'Enviado';
       case ClientOfferFilter.rechazada:
+      case ClientOfferFilter.contraofertaRechazada:
         return 'Rechazada';
+      case ClientOfferFilter.contraofertaEnviada:
+        return 'Enviado';
       case ClientOfferFilter.procesoLegal:
         return 'Proceso Legal';
       case ClientOfferFilter.finalizada:
@@ -119,6 +127,10 @@ extension ClientOfferFilterX on ClientOfferFilter {
         return 'Todavía no has enviado ofertas.';
       case ClientOfferFilter.rechazada:
         return 'Ninguna de tus ofertas fue rechazada.';
+      case ClientOfferFilter.contraofertaEnviada:
+        return 'No tienes contraofertas esperando tu respuesta.';
+      case ClientOfferFilter.contraofertaRechazada:
+        return 'Ninguna negociación terminó en rechazo.';
       case ClientOfferFilter.procesoLegal:
         return 'No tienes trámites en proceso legal.';
       case ClientOfferFilter.finalizada:
@@ -496,6 +508,15 @@ class ClientOffersBoard {
               ClientOfferFilter.enviada =>
                 offer.isSentAwaitingOwnerResponse,
               ClientOfferFilter.rechazada => offer.wasRejectedByOwner,
+              // Toda negociación viva, no sólo la que espera respuesta del
+              // cliente: si el cliente ya recontraofertó, la pelota está del
+              // otro lado pero el trato sigue en curso y tiene que verse. De
+              // quién es el turno lo dice el punto rojo de la tarjeta.
+              ClientOfferFilter.contraofertaEnviada =>
+                offer.lane == ClientOfferLane.contraoferta && offer.isActive,
+              ClientOfferFilter.contraofertaRechazada =>
+                offer.lane == ClientOfferLane.contraoferta &&
+                    offer.isTerminal,
               ClientOfferFilter.procesoLegal ||
               ClientOfferFilter.finalizada ||
               ClientOfferFilter.calificada =>
