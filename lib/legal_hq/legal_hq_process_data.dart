@@ -654,6 +654,22 @@ class LegalHqProcessDetail {
   bool get hasSignedDoviaAgreement =>
       doviaAgreementSignedDocument?.hasFile ?? false;
 
+  /// Punto del ciclo del convenio, que es lo que anuncia su tarjeta en la
+  /// grilla. Son dos slots distintos —el que sube el HQ y el que devuelve
+  /// firmado el comprador— pero una sola tarjeta para el que audita.
+  LegalHqAgreementState get doviaAgreementState {
+    if (hasSignedDoviaAgreement) return LegalHqAgreementState.signed;
+    if (hasDoviaAgreement) return LegalHqAgreementState.awaitingSignature;
+    return LegalHqAgreementState.pending;
+  }
+
+  /// Archivo que abre la tarjeta del convenio: la versión firmada manda,
+  /// porque es la que cierra la auditoría.
+  LegalHqDocument? get doviaAgreementCardDocument =>
+      doviaAgreementSignedDocument?.hasFile ?? false
+          ? doviaAgreementSignedDocument
+          : doviaAgreementDocument;
+
   /// Slots obligatorios que todavía no tienen archivo, con su etiqueta
   /// visible. Vacío significa que `documents/complete` va a pasar.
   List<String> get missingRequiredDocuments => [
@@ -668,10 +684,17 @@ class LegalHqProcessDetail {
 
   /// Comprobantes que el HQ audita antes de generar el convenio: copias de
   /// contratos, depósitos a la cuenta de DOVIA y demás archivos ya cargados.
+  ///
+  /// Los dos slots del convenio quedan fuera: viven en su propia tarjeta, que
+  /// habla del ciclo completo en vez de repetirlo como dos archivos sueltos.
   List<LegalHqDocument> mortgageEvidenceDocuments() {
-    final agreementId = doviaAgreementDocument?.id;
+    final agreementIds = {
+      doviaAgreementDocument?.id,
+      doviaAgreementSignedDocument?.id,
+    }..remove(null);
     return documents
-        .where((document) => document.hasFile && document.id != agreementId)
+        .where((document) =>
+            document.hasFile && !agreementIds.contains(document.id))
         .toList();
   }
 
@@ -1048,6 +1071,23 @@ LegalHqDocumentProgress legalHqDocumentProgress(LegalHqDocument document) {
 }
 
 // ── Gestión bancaria (SALE_MORTGAGE) ────────────────────────────────────────
+
+/// Estado del convenio de DOVIA tal como lo ve el Legal HQ en la grilla: lo
+/// carga él sin firmar, el comprador lo devuelve firmado y recién ahí el
+/// expediente puede avanzar.
+enum LegalHqAgreementState {
+  pending('Convenio debe ser firmado', 1),
+  awaitingSignature('Convenio cargado, falta la firma', 3),
+  signed('Convenio firmado', kDocumentProgressSegments);
+
+  const LegalHqAgreementState(this.label, this.filledSegments);
+
+  /// Texto de la tarjeta.
+  final String label;
+
+  /// Tramos llenos de la barra segmentada.
+  final int filledSegments;
+}
 
 /// Pasos del stepper "Proceso de Documentación" del expediente hipotecario.
 const List<String> kMortgageStepLabels = [

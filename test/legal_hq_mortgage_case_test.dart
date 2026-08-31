@@ -479,6 +479,76 @@ void main() {
       expect(detail.hasDoviaAgreement, isTrue);
       expect(detail.hasSignedDoviaAgreement, isFalse);
     });
+
+    test('la tarjeta del convenio recorre el ciclo carga → firma', () {
+      const sinFirmar = LegalHqDocument(
+        id: 'doc-2',
+        label: 'Convenio DOVIA',
+        status: 'submitted',
+        type: 'DOVIA_AGREEMENT_UNSIGNED',
+        url: 'https://cdn.dovia.test/convenio.pdf',
+      );
+      const firmado = LegalHqDocument(
+        id: 'doc-3',
+        label: 'Convenio DOVIA firmado',
+        status: 'submitted',
+        type: 'DOVIA_AGREEMENT_SIGNED',
+        url: 'https://cdn.dovia.test/convenio-firmado.pdf',
+      );
+
+      const vacio = LegalHqProcessDetail(
+        process: process,
+        documents: [deposito],
+      );
+      expect(vacio.doviaAgreementState, LegalHqAgreementState.pending);
+      expect(vacio.doviaAgreementState.label, 'Convenio debe ser firmado');
+      expect(vacio.doviaAgreementCardDocument, isNull);
+
+      const cargado = LegalHqProcessDetail(
+        process: process,
+        documents: [deposito, sinFirmar],
+      );
+      expect(
+        cargado.doviaAgreementState,
+        LegalHqAgreementState.awaitingSignature,
+      );
+      expect(cargado.doviaAgreementCardDocument?.id, 'doc-2');
+
+      const cerrado = LegalHqProcessDetail(
+        process: process,
+        documents: [deposito, sinFirmar, firmado],
+      );
+      expect(cerrado.doviaAgreementState, LegalHqAgreementState.signed);
+      expect(
+        cerrado.doviaAgreementState.filledSegments,
+        kDocumentProgressSegments,
+      );
+      // La tarjeta abre la versión firmada: es la que cierra la auditoría.
+      expect(cerrado.doviaAgreementCardDocument?.id, 'doc-3');
+    });
+
+    test('los dos slots del convenio no se cuelan entre los comprobantes', () {
+      const sinFirmar = LegalHqDocument(
+        id: 'doc-2',
+        label: 'Convenio DOVIA',
+        status: 'submitted',
+        type: 'DOVIA_AGREEMENT_UNSIGNED',
+        url: 'https://cdn.dovia.test/convenio.pdf',
+      );
+      const firmado = LegalHqDocument(
+        id: 'doc-3',
+        label: 'Convenio DOVIA firmado',
+        status: 'submitted',
+        type: 'DOVIA_AGREEMENT_SIGNED',
+        url: 'https://cdn.dovia.test/convenio-firmado.pdf',
+      );
+      const detail = LegalHqProcessDetail(
+        process: process,
+        documents: [deposito, sinFirmar, firmado],
+      );
+
+      expect(detail.mortgageEvidenceDocuments().map((d) => d.id), ['doc-1']);
+    });
   });
 
   group('LegalHqProcessDetail: documentos obligatorios', () {

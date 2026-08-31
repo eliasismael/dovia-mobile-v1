@@ -1087,7 +1087,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
   Widget _buildDocumentsGrid(LegalHqProcessDetail detail) {
     final process = detail.process;
-    final agreementDocument = detail.doviaAgreementDocument;
+    final agreementState = detail.doviaAgreementState;
 
     final cards = <Widget>[
       for (final document in detail.mortgageEvidenceDocuments())
@@ -1096,13 +1096,14 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
           document: document,
           label: document.label,
         ),
-      // El convenio siempre ocupa una tarjeta, exista o no el slot todavía.
+      // El convenio siempre ocupa una tarjeta, exista o no el slot todavía, y
+      // su texto y su barra siguen el ciclo carga → firma en vez del nombre
+      // que le haya puesto el backend al archivo.
       _buildDocumentCard(
         process: process,
-        document: agreementDocument,
-        label: agreementDocument != null && agreementDocument.hasFile
-            ? agreementDocument.label
-            : 'Convenio debe ser firmado',
+        document: detail.doviaAgreementCardDocument,
+        label: agreementState.label,
+        filledSegments: agreementState.filledSegments,
       ),
     ];
 
@@ -1125,11 +1126,13 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
     required LegalHqProcess process,
     required LegalHqDocument? document,
     required String label,
+    int? filledSegments,
   }) {
     final hasFile = document?.hasFile ?? false;
-    final progress = document == null
-        ? const LegalHqDocumentProgress('Pendiente de carga', 1)
-        : legalHqDocumentProgress(document);
+    final progress = filledSegments ??
+        (document == null
+            ? 1
+            : legalHqDocumentProgress(document).filledSegments);
 
     return GestureDetector(
       onTap: () => _openDocument(process, document),
@@ -1185,7 +1188,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
             ),
           ),
           const SizedBox(height: 10.0),
-          _buildSegmentedProgress(progress.filledSegments),
+          _buildSegmentedProgress(progress),
         ],
       ),
     );
