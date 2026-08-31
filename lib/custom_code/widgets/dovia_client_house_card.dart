@@ -127,6 +127,13 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
   }
 
   Future<void> _handleHeartTap() async {
+    // Un invitado no puede guardar nada: la acción sólo abre el modal de
+    // registro, así que el corazón no debe encenderse.
+    if (FFAppState().UserRole == 'VISITOR') {
+      await widget.onAddToFavorites?.call();
+      return;
+    }
+
     if (!_isFavorite) {
       setState(() {
         _isFavorite = true;

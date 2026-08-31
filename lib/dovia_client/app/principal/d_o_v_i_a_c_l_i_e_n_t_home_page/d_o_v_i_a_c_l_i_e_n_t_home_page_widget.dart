@@ -219,27 +219,65 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         ),
                       ),
 
-                    // A partir de la segunda sesión el banner de bienvenida ya
-                    // no va, y la pantalla se presenta con su título.
-                    if (!_showWelcomeBanner)
+                    // Encabezado de la pantalla: el título —que reemplaza al
+                    // banner de bienvenida a partir de la segunda sesión— y,
+                    // para quien todavía no tiene cuenta, la invitación a
+                    // sumarse como asociado.
+                    if (!_showWelcomeBanner ||
+                        FFAppState().UserRole == 'VISITOR')
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 16.0, 20.0, 8.0),
-                        child: Align(
-                          alignment: const AlignmentDirectional(-1.0, 0.0),
-                          child: Text(
-                            'Home',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w600),
-                                  color: const Color(0xFF00444B),
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.0,
+                        child: Row(
+                          children: [
+                            if (!_showWelcomeBanner)
+                              Text(
+                                'Home',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.publicSans(
+                                          fontWeight: FontWeight.w600),
+                                      color: const Color(0xFF00444B),
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.0,
+                                    ),
+                              ),
+                            const Spacer(),
+                            if (FFAppState().UserRole == 'VISITOR')
+                              FFButtonWidget(
+                                onPressed: () async {
+                                  context.pushNamed('CreateAccount');
+                                },
+                                text: 'Conviértete en Asociado',
+                                options: FFButtonOptions(
+                                  height: 36.0,
+                                  padding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          20.0, 0.0, 20.0, 0.0),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
+                                  color: Colors.transparent,
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .override(
+                                        font: GoogleFonts.publicSans(
+                                          color: const Color(0xFF007376),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        fontSize: 14.0,
+                                      ),
+                                  elevation: 0.0,
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF007376),
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24.0),
                                 ),
-                          ),
+                              ),
+                          ],
                         ),
                       ),
 
@@ -247,7 +285,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       alignment: const AlignmentDirectional(0.0, -1.0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: FFAppState().UserRole == 'VISITOR' ? 260.0 : 200.0,
+                        // El invitado ya no necesita alto extra: su llamada a
+                        // sumarse vive arriba, junto al título.
+                        height: 200.0,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [Color(0xFF007376), Color(0xFF70ACAD)],
@@ -466,36 +506,6 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                   ),
                                 ],
                               ),
-                              if (FFAppState().UserRole == 'VISITOR')
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
-                                  child: Align(
-                                    alignment: AlignmentDirectional.centerEnd,
-                                    child: FFButtonWidget(
-                                      onPressed: () async {
-                                        context.pushNamed('CreateAccount');
-                                      },
-                                      text: 'Conviértete en Asociado',
-                                      options: FFButtonOptions(
-                                        height: 36.0,
-                                        padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                        iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                                        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                          font: GoogleFonts.publicSans(
-                                            color: const Color(0xFF007376),
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        borderSide: const BorderSide(
-                                          color: Colors.transparent,
-                                          width: 0.0,
-                                        ),
-                                        borderRadius: BorderRadius.circular(24.0),
-                                      ),
-                                    ),
-                                  ),
-                                ),
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 30.0, 0.0, 0.0),
