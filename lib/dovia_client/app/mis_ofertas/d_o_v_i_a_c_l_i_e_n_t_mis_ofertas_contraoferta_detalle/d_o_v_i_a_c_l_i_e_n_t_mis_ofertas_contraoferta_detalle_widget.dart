@@ -183,6 +183,14 @@ class _DOVIACLIENTMisOfertasContraofertaDetalleWidgetState
   }
 }
 
+/// Una celda de la grilla de una propuesta: a media línea o a lo ancho.
+class _TermSlot {
+  const _TermSlot({required this.half, required this.child});
+
+  final bool half;
+  final Widget child;
+}
+
 class ClientCounterOfferContent extends StatefulWidget {
   const ClientCounterOfferContent({
     super.key,
@@ -225,6 +233,7 @@ class _ClientCounterOfferContentState
     super.initState();
     _selectedCurrency = widget.detail.ownerTerms.currency;
     for (final field in widget.detail.ownerTerms.fields) {
+      if (!field.editable) continue;
       _controllers[field.key] = TextEditingController(text: field.value);
     }
     _rejectReasonController.addListener(_refresh);
@@ -418,51 +427,74 @@ class _ClientCounterOfferContentState
           ),
         ),
         const SizedBox(height: 18.0),
-        _readOnlyValue('Método de pago', terms.paymentMethodLabel, background),
-        _fields(
-          terms.fields,
+        _rows(_slots(
+          terms,
           readOnly: readOnly,
           background: background,
           useControllers: useControllers,
-        ),
-        _currencySelector(terms.currency, editable: !readOnly && useControllers),
+        )),
       ],
     );
   }
 
-  Widget _fields(
-    List<CounterOfferField> fields, {
+  /// Los bloques de una propuesta en el orden del diseño.
+  ///
+  /// La moneda no es un campo del backend pero ocupa una celda más de la
+  /// grilla: encabeza la propuesta del propietario —ahí se elige— y en la
+  /// propia acompaña al último dato antes de la solicitud adicional, que
+  /// siempre cierra a lo ancho.
+  List<_TermSlot> _slots(
+    CounterOfferTerms terms, {
     required bool readOnly,
     required Color background,
     required bool useControllers,
   }) {
+    final considerations = terms.fields
+        .where((field) => field.key == CounterOfferFieldKey.considerations);
+    final rest = terms.fields
+        .where((field) => field.key != CounterOfferFieldKey.considerations);
+    final currency = _currencySelector(
+      terms.currency,
+      editable: !readOnly && useControllers,
+    );
+
+    return [
+      if (useControllers) _TermSlot(half: false, child: currency),
+      for (final field in rest)
+        _TermSlot(
+          half: field.half,
+          child: _field(field, readOnly, background, useControllers),
+        ),
+      if (!useControllers) _TermSlot(half: true, child: currency),
+      for (final field in considerations)
+        _TermSlot(
+          half: false,
+          child: _field(field, readOnly, background, useControllers),
+        ),
+    ];
+  }
+
+  /// Empareja los bloques a media línea, uno debajo del otro en pantallas
+  /// angostas.
+  Widget _rows(List<_TermSlot> slots) {
     final rows = <Widget>[];
     var index = 0;
-    while (index < fields.length) {
-      final field = fields[index];
-      final next = index + 1 < fields.length ? fields[index + 1] : null;
-      if (field.half && next?.half == true) {
+    while (index < slots.length) {
+      final slot = slots[index];
+      final next = index + 1 < slots.length ? slots[index + 1] : null;
+      if (slot.half && next?.half == true) {
         rows.add(
           LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth < 620.0) {
-                return Column(
-                  children: [
-                    _field(field, readOnly, background, useControllers),
-                    _field(next!, readOnly, background, useControllers),
-                  ],
-                );
+                return Column(children: [slot.child, next!.child]);
               }
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _field(field, readOnly, background, useControllers),
-                  ),
+                  Expanded(child: slot.child),
                   const SizedBox(width: 17.0),
-                  Expanded(
-                    child: _field(next!, readOnly, background, useControllers),
-                  ),
+                  Expanded(child: next!.child),
                 ],
               );
             },
@@ -470,11 +502,14 @@ class _ClientCounterOfferContentState
         );
         index += 2;
       } else {
-        rows.add(_field(field, readOnly, background, useControllers));
+        rows.add(slot.child);
         index++;
       }
     }
-    return Column(children: rows);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: rows,
+    );
   }
 
   Widget _field(
@@ -485,6 +520,7 @@ class _ClientCounterOfferContentState
   ) {
     final controller = useControllers ? _controllers[field.key] : null;
     final displayed = field.value.isEmpty ? '—' : '${field.value}${field.suffix}';
+    final locked = readOnly || !field.editable;
     return Padding(
       padding: const EdgeInsets.only(bottom: 14.0),
       child: Column(
@@ -492,7 +528,7 @@ class _ClientCounterOfferContentState
         children: [
           Text(field.label, style: GoogleFonts.publicSans(color: _text)),
           const SizedBox(height: 8.0),
-          if (readOnly || controller == null)
+          if (locked || controller == null)
             Container(
               width: double.infinity,
               constraints: BoxConstraints(
@@ -506,7 +542,7 @@ class _ClientCounterOfferContentState
               ),
               decoration: BoxDecoration(
                 color: background,
-                borderRadius: BorderRadius.circular(9.0),
+                borderRadius: BorderRadius.circular(10.0),
               ),
               child: Text(
                 displayed,
@@ -536,41 +572,15 @@ class _ClientCounterOfferContentState
                   vertical: 12.0,
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(9.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   borderSide: const BorderSide(color: Color(0xFFB5D6D7)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(9.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   borderSide: const BorderSide(color: _aqua),
                 ),
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _readOnlyValue(String label, String value, Color background) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: GoogleFonts.publicSans(color: _text)),
-          const SizedBox(height: 8.0),
-          Container(
-            height: 42.0,
-            padding: const EdgeInsets.symmetric(horizontal: 14.0),
-            alignment: Alignment.centerLeft,
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(9.0),
-            ),
-            child: Text(
-              value,
-              style: GoogleFonts.publicSans(color: const Color(0xFF888888)),
-            ),
-          ),
         ],
       ),
     );
@@ -730,7 +740,7 @@ class _ClientCounterOfferContentState
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(9.0),
+                borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide.none,
               ),
             ),

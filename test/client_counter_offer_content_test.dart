@@ -104,6 +104,27 @@ void main() {
     expect(sentPayload!['paymentMethod'], 'cash');
   });
 
+  testWidgets('el método de pago se muestra pero nunca se edita',
+      (tester) async {
+    await tester.pumpWidget(_app(
+      detail: _detail(),
+      onAccept: () async => const Success(true),
+      onReject: (_) async => const Success(true),
+      onSendCounterOffer: (_) async => const Success(true),
+    ));
+
+    // Una vez en cada propuesta: la del cliente y la del propietario.
+    expect(find.text('Método de pago'), findsNWidgets(2));
+    expect(find.text('Contado'), findsNWidgets(2));
+
+    final counter = find.byKey(const ValueKey('counter-offer'));
+    await tester.ensureVisible(counter);
+    await tester.tap(counter);
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('counter-paymentMethod')), findsNothing);
+  });
+
   testWidgets('exige un motivo antes de confirmar el rechazo', (tester) async {
     String? rejectedReason;
     await tester.pumpWidget(_app(

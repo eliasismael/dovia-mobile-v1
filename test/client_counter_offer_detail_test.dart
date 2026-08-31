@@ -114,6 +114,20 @@ void main() {
     );
   });
 
+  test('el método de pago abre cada propuesta y no se edita', () {
+    final detail = ClientCounterOfferDetail.fromJson(_detail());
+
+    for (final terms in [detail.originalTerms, detail.ownerTerms]) {
+      final first = terms.fields.first;
+      expect(first.key, CounterOfferFieldKey.paymentMethod);
+      expect(first.value, 'Hipoteca');
+      expect(first.editable, isFalse);
+      // Comparte fila con el banco, como en el diseño.
+      expect(first.half, isTrue);
+      expect(terms.fields[1].key, CounterOfferFieldKey.bankName);
+    }
+  });
+
   test('genera el payload de una nueva contraoferta con valores editados', () {
     final terms = ClientCounterOfferDetail.fromJson(_detail()).ownerTerms;
     final payload = terms.toCounterOfferPayload(

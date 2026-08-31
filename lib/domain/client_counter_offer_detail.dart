@@ -2,6 +2,7 @@ import 'client_offer_models.dart';
 import 'offer_json.dart';
 
 enum CounterOfferFieldKey {
+  paymentMethod,
   proposedAmount,
   bankName,
   downPaymentPercentage,
@@ -65,6 +66,12 @@ class CounterOfferTerms {
         paymentMethod: 'renta',
         currency: currency,
         fields: [
+          const CounterOfferField(
+            key: CounterOfferFieldKey.paymentMethod,
+            label: 'Método de pago',
+            value: 'Renta',
+            editable: false,
+          ),
           CounterOfferField(
             key: CounterOfferFieldKey.contractStartDate,
             label: 'Fecha de inicio de contrato',
@@ -116,6 +123,16 @@ class CounterOfferTerms {
       ));
     }
 
+    // El método de pago abre las dos propuestas y nunca se edita: la
+    // negociación mueve montos, no cambia de instrumento.
+    fields.add(CounterOfferField(
+      key: CounterOfferFieldKey.paymentMethod,
+      label: 'Método de pago',
+      value: _paymentMethodLabel(normalizedMethod),
+      half: true,
+      editable: false,
+    ));
+
     switch (normalizedMethod) {
       case 'hipoteca':
         add(CounterOfferFieldKey.bankName, 'Banco', data['bankName'], half: true);
@@ -156,6 +173,7 @@ class CounterOfferTerms {
           'Propuesta económica',
           data['proposedAmount'],
           kind: CounterOfferFieldKind.number,
+          half: true,
         );
         add(
           CounterOfferFieldKey.initialReserve,
@@ -186,6 +204,7 @@ class CounterOfferTerms {
           'Propuesta económica',
           data['proposedAmount'],
           kind: CounterOfferFieldKind.number,
+          half: true,
         );
         add(
           CounterOfferFieldKey.estimatedApprovalTime,
@@ -211,18 +230,7 @@ class CounterOfferTerms {
     );
   }
 
-  String get paymentMethodLabel {
-    switch (paymentMethod) {
-      case 'hipoteca':
-        return 'Hipoteca';
-      case 'promesa':
-        return 'Promesa de compra';
-      case 'renta':
-        return 'Renta';
-      default:
-        return 'Contado';
-    }
-  }
+  String get paymentMethodLabel => _paymentMethodLabel(paymentMethod);
 
   Map<String, dynamic> toCounterOfferPayload(
     Map<CounterOfferFieldKey, String> values, {
@@ -241,6 +249,9 @@ class CounterOfferTerms {
     for (final field in fields) {
       final value = (values[field.key] ?? field.value).trim();
       switch (field.key) {
+        case CounterOfferFieldKey.paymentMethod:
+          // Es una etiqueta de lectura; el instrumento ya viaja arriba.
+          break;
         case CounterOfferFieldKey.proposedAmount:
           payload['proposedAmount'] = _parseNumber(value);
         case CounterOfferFieldKey.bankName:
@@ -319,6 +330,19 @@ class ClientCounterOfferDetail {
       isRejected: offer.isTerminal,
       rejectionReason: offer.rejectionReason,
     );
+  }
+}
+
+String _paymentMethodLabel(String normalized) {
+  switch (normalized) {
+    case 'hipoteca':
+      return 'Hipoteca';
+    case 'promesa':
+      return 'Promesa de compra';
+    case 'renta':
+      return 'Renta';
+    default:
+      return 'Contado';
   }
 }
 
