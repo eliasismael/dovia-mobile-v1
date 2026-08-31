@@ -542,6 +542,30 @@ class LegalHqBankAgent {
   bool get isEmpty =>
       bank.isEmpty && fullName.isEmpty && phone.isEmpty && email.isEmpty;
 
+  /// Etiquetas —las del diseño— de los campos obligatorios que todavía están
+  /// vacíos. La sucursal queda afuera: no es un campo del formulario, viene
+  /// con el snapshot del backend.
+  List<String> get missingFieldLabels => [
+        if (bank.trim().isEmpty) 'Banco',
+        if (phone.trim().isEmpty) 'Numero de telefono',
+        if (fullName.trim().isEmpty) 'Nombre y Apellido',
+        if (email.trim().isEmpty) 'Email',
+      ];
+
+  /// `true` cuando DOVIA ya tiene a quién contactar para el seguimiento, que
+  /// es lo que exige la etapa 2 antes de dejar avanzar el expediente.
+  bool get isComplete => missingFieldLabels.isEmpty;
+
+  /// El mismo shape que devuelve el backend en `bankAgentData`, así lo que se
+  /// guarda vuelve a entrar por [fromJson] sin una rama aparte.
+  Map<String, dynamic> toJson() => {
+        'bankName': bank,
+        'bankAddress': bankAddress,
+        'name': fullName,
+        'phone': phone,
+        'email': email,
+      };
+
   factory LegalHqBankAgent.fromJson(dynamic json) {
     if (json is! Map) return const LegalHqBankAgent();
 
@@ -1105,6 +1129,22 @@ const List<String> kMortgageStepLabels = [
   'Documentación',
   'En evaluación bancaria',
 ];
+
+/// Nota con la que el gestor bancario viaja al historial del expediente.
+///
+/// Es el único registro de servidor que hoy admite estos datos: el backend
+/// expone `bankAgentData` como snapshot de solo lectura —lo escribe el evento
+/// `BankAgentDataSubmitted` que crea el expediente hipotecario— y ninguna de
+/// las 39 rutas de `legal-processes` lo actualiza. Hasta que exista ese
+/// endpoint, `PUT /mortgage/status` deja el contacto en `stateHistory`, que es
+/// append-only.
+String legalHqBankAgentNote(LegalHqBankAgent agent) => [
+      'Documentación entregada al banco.',
+      'Gestor bancario: ${agent.fullName}',
+      'Banco: ${agent.bank}',
+      'Teléfono: ${agent.phone}',
+      'Email: ${agent.email}',
+    ].join('\n');
 
 /// Fecha en formato DD/MM/AAAA a partir del ISO 8601 del backend. Devuelve ''
 /// cuando la fecha no vino o no se puede leer.

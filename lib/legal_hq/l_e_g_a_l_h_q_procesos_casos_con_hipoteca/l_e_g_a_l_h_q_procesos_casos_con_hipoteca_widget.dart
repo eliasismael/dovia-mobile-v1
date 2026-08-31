@@ -44,6 +44,9 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
   bool _uploadingAgreement = false;
   bool _advancingStage = false;
 
+  /// Origen ya volcado al formulario del gestor, para no precargarlo de nuevo.
+  String? _bankAgentPrefillKey;
+
   /// Resolución elegida en el desplegable del seguimiento.
   LegalHqEvaluationOutcome? _evaluationOutcome;
 
@@ -315,18 +318,19 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
   /// Etapa 2: registrar al gestor bancario y confirmar la entrega de papeles.
   List<Widget> _buildDocumentationStage(LegalHqProcessDetail detail) {
-    _ensureBankAgentControllers(detail.bankAgent);
+    _ensureBankAgentControllers(detail);
+    final missing = _bankAgentDraft(detail).missingFieldLabels;
 
     return [
-      // Los datos del gestor llegan como snapshot con el evento que crea el
-      // expediente hipotecario: no hay endpoint de Legal HQ para editarlos,
-      // así que el bloque se muestra de solo lectura.
-      _buildBankAgentForm(readOnly: true),
-      if (detail.bankAgent.isEmpty)
+      _buildBankAgentForm(),
+      // El botón deshabilitado no explica nada por sí solo: sin esta línea el
+      // Legal HQ no sabe qué le falta para avanzar.
+      if (missing.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 12.0),
           child: Text(
-            'El comprador todavía no registró al gestor bancario en su oferta.',
+            'Completá los datos del gestor bancario para avanzar: '
+            '${missing.join(', ')}.',
             style: GoogleFonts.publicSans(
               color: _textDark,
               fontSize: 12.0,
@@ -342,7 +346,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
       _buildAquaButton(
         'Actualizar estado',
         busy: _advancingStage,
-        onPressed: () => _updateStage(detail),
+        onPressed: missing.isEmpty ? () => _updateStage(detail) : null,
       ),
     ];
   }
@@ -350,7 +354,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
   /// Etapa 3: seguimiento de la evaluación bancaria. El gestor y los contactos
   /// quedan de solo lectura para consulta rápida.
   List<Widget> _buildEvaluationStage(LegalHqProcessDetail detail) {
-    _ensureBankAgentControllers(detail.bankAgent);
+    _ensureBankAgentControllers(detail);
     _model.noteController ??= TextEditingController();
     _model.noteFocusNode ??= FocusNode();
 
@@ -652,7 +656,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
   // ── Formulario del gestor bancario ────────────────────────────────────────
 
-  void _ensureBankAgentControllers(LegalHqBankAgent agent) {
+  void _ensureBankAgentControllers(LegalHqProcessDetail detail) {
     _model.bankController ??= TextEditingController();
     _model.bankFocusNode ??= FocusNode();
     _model.phoneController ??= TextEditingController();
@@ -662,19 +666,61 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
     _model.emailController ??= TextEditingController();
     _model.emailFocusNode ??= FocusNode();
 
-    // Es un snapshot de solo lectura: se refresca en cada carga en vez de
-    // congelarse en el primer build, que podía llegar antes que los datos.
-    _syncField(_model.bankController!, agent.bank);
-    _syncField(_model.phoneController!, agent.phone);
-    _syncField(_model.agentNameController!, agent.fullName);
-    _syncField(_model.emailController!, agent.email);
+    final source = _bankAgentSource(detail);
+    // La precarga se aplica una sola vez por origen: si se repitiera en cada
+    // build pisaría lo que el Legal HQ está tipeando.
+    final key = '${detail.process.id}|${jsonEncode(source.toJson())}';
+    if (_bankAgentPrefillKey == key) return;
+    _bankAgentPrefillKey = key;
+
+    // El volcado espera al final del frame: escribir en un controlador que ya
+    // tiene un TextField escuchando lo haría reconstruirse en pleno build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final changed = [
+        _syncField(_model.bankController!, source.bank),
+        _syncField(_model.phoneController!, source.phone),
+        _syncField(_model.agentNameController!, source.fullName),
+        _syncField(_model.emailController!, source.email),
+      ].any((wrote) => wrote);
+      // Los controladores no avisan a la pantalla, y de ellos dependen el
+      // botón y el detalle de lo que falta.
+      if (changed) safeSetState(() {});
+    });
   }
 
-  static void _syncField(TextEditingController controller, String value) {
-    if (controller.text != value) controller.text = value;
+  /// Escribe el campo solo si cambió, y avisa si lo hizo.
+  static bool _syncField(TextEditingController controller, String value) {
+    if (controller.text == value) return false;
+    controller.text = value;
+    return true;
   }
+
+  /// Con qué se precarga el formulario: manda el snapshot del backend y, si el
+  /// expediente no lo trae, entra lo último que se registró en este
+  /// dispositivo.
+  LegalHqBankAgent _bankAgentSource(LegalHqProcessDetail detail) =>
+      detail.bankAgent.isEmpty
+          ? LegalHqBankAgent.fromJson(
+              FFAppState().mortgageBankAgent(detail.process.id))
+          : detail.bankAgent;
+
+  /// Lo que hay ahora escrito en el formulario. La sucursal no es un campo del
+  /// diseño, así que se arrastra la del snapshot para no perderla al guardar.
+  LegalHqBankAgent _bankAgentDraft(LegalHqProcessDetail detail) =>
+      LegalHqBankAgent(
+        bank: _model.bankController?.text.trim() ?? '',
+        bankAddress: _bankAgentSource(detail).bankAddress,
+        fullName: _model.agentNameController?.text.trim() ?? '',
+        phone: _model.phoneController?.text.trim() ?? '',
+        email: _model.emailController?.text.trim() ?? '',
+      );
 
   Widget _buildBankAgentForm({bool readOnly = false}) {
+    // Cada tecla revalida: es lo que enciende el botón apenas se completan los
+    // cuatro campos, sin tener que salir del formulario.
+    final onChanged = readOnly ? null : (String _) => safeSetState(() {});
+
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
@@ -700,6 +746,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
             focusNode: _model.bankFocusNode!,
             keyboardType: TextInputType.text,
             readOnly: readOnly,
+            onChanged: onChanged,
           ),
           const SizedBox(height: 12.0),
           _buildTextField(
@@ -708,6 +755,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
             focusNode: _model.phoneFocusNode!,
             keyboardType: TextInputType.phone,
             readOnly: readOnly,
+            onChanged: onChanged,
           ),
           const SizedBox(height: 12.0),
           _buildTextField(
@@ -716,6 +764,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
             focusNode: _model.agentNameFocusNode!,
             keyboardType: TextInputType.name,
             readOnly: readOnly,
+            onChanged: onChanged,
           ),
           const SizedBox(height: 12.0),
           _buildTextField(
@@ -724,6 +773,8 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
             focusNode: _model.emailFocusNode!,
             keyboardType: TextInputType.emailAddress,
             readOnly: readOnly,
+            textInputAction: TextInputAction.done,
+            onChanged: onChanged,
           ),
         ],
       ),
@@ -736,6 +787,8 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
     required FocusNode focusNode,
     required TextInputType keyboardType,
     bool readOnly = false,
+    TextInputAction textInputAction = TextInputAction.next,
+    ValueChanged<String>? onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -762,7 +815,8 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
             focusNode: focusNode,
             keyboardType: keyboardType,
             readOnly: readOnly,
-            textInputAction: TextInputAction.next,
+            onChanged: onChanged,
+            textInputAction: textInputAction,
             style: GoogleFonts.publicSans(
               color: _textDark,
               fontSize: 14.0,
@@ -1561,17 +1615,31 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
     safeSetState(_loadData);
   }
 
-  /// Pasa el expediente a evaluación bancaria.
+  /// Registra al gestor bancario y pasa el expediente a evaluación.
   ///
-  /// El gestor bancario no se guarda acá: es un snapshot que el comprador
-  /// registró en su oferta y que el expediente solo muestra.
+  /// El contacto viaja por dos caminos porque ninguno alcanza solo: la nota de
+  /// `mortgage/status` lo deja en `stateHistory` —el único registro del lado
+  /// del servidor que hoy lo admite, ver [legalHqBankAgentNote]— y el mapa de
+  /// [FFAppState] lo devuelve al formulario al reentrar, que si no aparecería
+  /// vacío mientras `bankAgentData` siga siendo un snapshot de solo lectura.
   Future<void> _updateStage(LegalHqProcessDetail detail) async {
+    final agent = _bankAgentDraft(detail);
+    if (!agent.isComplete) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Faltan datos del gestor bancario: '
+              '${agent.missingFieldLabels.join(', ')}'),
+        ),
+      );
+      return;
+    }
+
     safeSetState(() => _advancingStage = true);
 
     final response = await LegalHqProcessApi.updateMortgageStatus(
       processId: detail.process.id,
       status: 'BANK_EVALUATION',
-      note: 'Documentación en evaluación del banco',
+      note: legalHqBankAgentNote(agent),
     );
 
     if (!mounted) return;
@@ -1586,8 +1654,12 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
       return;
     }
 
+    FFAppState().setMortgageBankAgent(detail.process.id, agent.toJson());
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Expediente en evaluación bancaria')),
+      const SnackBar(
+        content: Text('Gestor registrado. Expediente en evaluación bancaria'),
+      ),
     );
     safeSetState(_loadData);
   }

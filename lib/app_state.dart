@@ -69,6 +69,14 @@ class FFAppState extends ChangeNotifier {
       _seenClientOffers =
           prefs.getStringList('ff_seenClientOffers') ?? _seenClientOffers;
     });
+    _safeInit(() {
+      final serialized = prefs.getString('ff_mortgageBankAgents');
+      if (serialized == null) return;
+      final decoded = jsonDecode(serialized);
+      if (decoded is Map) {
+        _mortgageBankAgents = Map<String, dynamic>.from(decoded);
+      }
+    });
   }
 
   void update(VoidCallback callback) {
@@ -251,6 +259,35 @@ class FFAppState extends ChangeNotifier {
           _seenClientOffers.sublist(_seenClientOffers.length - 200);
     }
     prefs.setStringList('ff_seenClientOffers', _seenClientOffers);
+  }
+
+  /// Gestor bancario que el Legal HQ registró en un expediente hipotecario,
+  /// indexado por `processId` y con el shape de `bankAgentData`.
+  ///
+  /// Vive en el dispositivo porque el backend no tiene dónde guardarlo: expone
+  /// `bankAgentData` como snapshot de solo lectura —lo escribe el evento
+  /// `BankAgentDataSubmitted` al crear el expediente— y ninguna de sus rutas lo
+  /// actualiza. Sirve para que el formulario no vuelva vacío al reentrar; el
+  /// registro que sí queda del lado del servidor es la nota de
+  /// `mortgage/status`. Cuando exista el endpoint, esto se borra.
+  Map<String, dynamic> _mortgageBankAgents = {};
+  Map<String, dynamic> get mortgageBankAgents => _mortgageBankAgents;
+  set mortgageBankAgents(Map<String, dynamic> value) {
+    _mortgageBankAgents = value;
+    prefs.setString('ff_mortgageBankAgents', jsonEncode(value));
+  }
+
+  /// Gestor guardado para [processId], o `null` si en este dispositivo no se
+  /// cargó ninguno.
+  Map<String, dynamic>? mortgageBankAgent(String processId) {
+    final stored = _mortgageBankAgents[processId];
+    return stored is Map ? Map<String, dynamic>.from(stored) : null;
+  }
+
+  void setMortgageBankAgent(String processId, Map<String, dynamic> agent) {
+    if (processId.isEmpty) return;
+    _mortgageBankAgents[processId] = agent;
+    prefs.setString('ff_mortgageBankAgents', jsonEncode(_mortgageBankAgents));
   }
 }
 

@@ -119,6 +119,93 @@ void main() {
       expect(LegalHqBankAgent.fromJson(null).isEmpty, isTrue);
       expect(const LegalHqBankAgent().isEmpty, isTrue);
     });
+
+    test('los cuatro campos del formulario son obligatorios', () {
+      const completo = LegalHqBankAgent(
+        bank: 'Banco Industrial',
+        fullName: 'Maria Del Valle',
+        phone: '+502 55511122',
+        email: 'mjdelvalle@banco.test',
+      );
+
+      expect(completo.isComplete, isTrue);
+      expect(completo.missingFieldLabels, isEmpty);
+    });
+
+    test('lista lo que falta con la etiqueta del diseño', () {
+      const soloBanco = LegalHqBankAgent(bank: 'Banco Industrial');
+
+      expect(soloBanco.isComplete, isFalse);
+      expect(soloBanco.missingFieldLabels,
+          ['Numero de telefono', 'Nombre y Apellido', 'Email']);
+    });
+
+    test('un campo en blanco no cuenta como cargado', () {
+      const enBlanco = LegalHqBankAgent(
+        bank: 'Banco Industrial',
+        fullName: '   ',
+        phone: '+502 55511122',
+        email: 'mjdelvalle@banco.test',
+      );
+
+      expect(enBlanco.isComplete, isFalse);
+      expect(enBlanco.missingFieldLabels, ['Nombre y Apellido']);
+    });
+
+    test('la sucursal no es del formulario y no bloquea el avance', () {
+      const sinSucursal = LegalHqBankAgent(
+        bank: 'Banco Industrial',
+        fullName: 'Maria Del Valle',
+        phone: '+502 55511122',
+        email: 'mjdelvalle@banco.test',
+      );
+
+      expect(sinSucursal.bankAddress, isEmpty);
+      expect(sinSucursal.isComplete, isTrue);
+    });
+
+    test('lo guardado vuelve a entrar por el shape del backend', () {
+      const agent = LegalHqBankAgent(
+        bank: 'Banco Industrial',
+        bankAddress: 'Sucursal Zona 10',
+        fullName: 'Maria Del Valle',
+        phone: '+502 55511122',
+        email: 'mjdelvalle@banco.test',
+      );
+
+      final relectura = LegalHqBankAgent.fromJson(agent.toJson());
+
+      expect(relectura.bank, agent.bank);
+      expect(relectura.bankAddress, agent.bankAddress);
+      expect(relectura.fullName, agent.fullName);
+      expect(relectura.phone, agent.phone);
+      expect(relectura.email, agent.email);
+    });
+  });
+
+  group('legalHqBankAgentNote', () {
+    test('deja el contacto completo en el historial del expediente', () {
+      const agent = LegalHqBankAgent(
+        bank: 'Banco Industrial',
+        fullName: 'Maria Del Valle',
+        phone: '+502 55511122',
+        email: 'mjdelvalle@banco.test',
+      );
+
+      final lineas = legalHqBankAgentNote(agent).split('\n');
+
+      expect(lineas, [
+        'Documentación entregada al banco.',
+        'Gestor bancario: Maria Del Valle',
+        'Banco: Banco Industrial',
+        'Teléfono: +502 55511122',
+        'Email: mjdelvalle@banco.test',
+      ]);
+    });
+
+    test('la nota nunca va vacia, que es lo que rechaza el backend', () {
+      expect(legalHqBankAgentNote(const LegalHqBankAgent()), isNotEmpty);
+    });
   });
 
   group('legalHqShortDate', () {
