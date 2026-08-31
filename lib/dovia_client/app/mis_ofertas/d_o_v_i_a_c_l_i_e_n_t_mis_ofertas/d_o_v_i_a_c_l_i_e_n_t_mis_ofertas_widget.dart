@@ -296,18 +296,7 @@ class _DOVIACLIENTMisOfertasWidgetState
                   ],
                 ],
               ),
-              InkWell(
-                onTap: () => _openLaneList(lane),
-                child: Text(
-                  'Ver más',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.publicSans(
-                            fontWeight: FontWeight.w600),
-                        color: FlutterFlowTheme.of(context).primary,
-                        fontSize: 14.0,
-                      ),
-                ),
-              ),
+              _verMasPill(lane),
             ],
           ),
         ),
@@ -380,6 +369,32 @@ class _DOVIACLIENTMisOfertasWidgetState
         ));
         break;
     }
+  }
+
+  /// "Ver más" del carril, en la píldora del diseño.
+  Widget _verMasPill(ClientOfferLane lane) {
+    return InkWell(
+      onTap: () => _openLaneList(lane),
+      borderRadius: BorderRadius.circular(99.0),
+      child: Container(
+        height: 30.0,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFCCE3E4),
+          borderRadius: BorderRadius.circular(99.0),
+        ),
+        child: Text(
+          'Ver más',
+          style: FlutterFlowTheme.of(context).titleSmall.override(
+                font: GoogleFonts.publicSans(),
+                color: FlutterFlowTheme.of(context).primary,
+                fontSize: 14.0,
+                letterSpacing: 0.0,
+              ),
+        ),
+      ),
+    );
   }
 
   Future<void> _openLaneList(ClientOfferLane lane) async {

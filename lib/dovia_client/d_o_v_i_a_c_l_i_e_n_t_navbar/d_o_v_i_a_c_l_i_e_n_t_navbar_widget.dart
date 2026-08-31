@@ -155,27 +155,6 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                 ),
               ),
             ),
-            InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(0.0),
-                child: SvgPicture.asset(
-                  'assets/images/IconoCalendario.svg',
-                  width: 24.0,
-                  height: 24.0,
-                  fit: BoxFit.none,
-                  colorFilter: _isActive(DOVIACLIENTMisVisitasWidget.routeName)
-                      ? _activeFilter(context)
-                      : null,
-                ),
-              ),
-            ),
             // Mis ofertas: las propuestas que el usuario envió como cliente.
             Builder(
               builder: (context) => InkWell(
@@ -214,6 +193,27 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                             ? _activeFilter(context)
                             : null,
                   ),
+                ),
+              ),
+            ),
+            InkWell(
+              splashColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              onTap: () async {
+                context.pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(0.0),
+                child: SvgPicture.asset(
+                  'assets/images/IconoCalendario.svg',
+                  width: 24.0,
+                  height: 24.0,
+                  fit: BoxFit.none,
+                  colorFilter: _isActive(DOVIACLIENTMisVisitasWidget.routeName)
+                      ? _activeFilter(context)
+                      : null,
                 ),
               ),
             ),
