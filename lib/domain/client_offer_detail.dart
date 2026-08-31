@@ -61,6 +61,14 @@ class ClientOfferDetail {
   /// La propuesta del cliente.
   final List<OfferDetailSection> proposalSections;
 
+  /// Una renta: el pie suma los requisitos del complejo que el inquilino
+  /// aceptó al enviar la propuesta.
+  final bool isRent;
+
+  /// Requisitos propios del complejo, si el listado los declara. Vacío cuando
+  /// el backend no manda ninguno.
+  final String complexRequirements;
+
   const ClientOfferDetail({
     required this.title,
     required this.isRejected,
@@ -68,6 +76,8 @@ class ClientOfferDetail {
     required this.canWithdraw,
     required this.ownerSections,
     required this.proposalSections,
+    this.isRent = false,
+    this.complexRequirements = '',
   });
 
   /// [offerJson] es la respuesta de `GET /offers/{offerId}` y [propertyJson] la
@@ -99,6 +109,8 @@ class ClientOfferDetail {
       ],
       proposalSections:
           isRent ? _rentProposal(data) : _saleProposal(data, offer),
+      isRent: isRent,
+      complexRequirements: isRent ? _complexRequirements(property) : '',
     );
   }
 
@@ -455,6 +467,18 @@ dynamic _propertyValue(Map<String, dynamic>? property, List<String> paths) {
     if (current != null) return current;
   }
   return null;
+}
+
+/// Reglas propias del complejo declaradas en el listado. Devuelve vacío —no el
+/// guion— porque el bloque decide con eso si mostrar un texto o el genérico.
+String _complexRequirements(Map<String, dynamic>? property) {
+  final value = _propertyValue(property, const [
+    'rentInfo.rentalConditions.complexRequirements',
+    'rentInfo.rentalConditions.condoRules',
+    'rentInfo.complexRequirements',
+    'conditions.complexRequirements',
+  ]);
+  return offerStr(value) ?? '';
 }
 
 String _propertyStr(Map<String, dynamic>? property, List<String> paths) =>

@@ -148,5 +148,37 @@ void main() {
       expect(_value(detail, 'Moneda de pago'), 'Quetzales');
       expect(_value(detail, 'Quien será el arrendatario'), 'Luis Arrendatario');
     });
+
+    test('los requisitos del complejo sólo viajan en la renta', () {
+      final rent = ClientOfferDetail.fromJson(
+        {
+          'offerId': 'offer-rent',
+          'propertyId': 'property-rent',
+          'offerType': 'RENT',
+          'offerStatus': 'SENT',
+          'offerData': const {'currency': 'USD'},
+        },
+        propertyJson: _propertyResponse({
+          'name': 'Apartamento Norte',
+          'rentInfo': {
+            'rentalConditions': {
+              'complexRequirements': 'Depósito de un mes en administración',
+            },
+          },
+        }),
+      );
+      final sale = ClientOfferDetail.fromJson({
+        'offerId': 'offer-sale',
+        'propertyId': 'property-sale',
+        'offerType': 'SALE',
+        'offerStatus': 'SENT',
+        'offerData': const {'currency': 'USD'},
+      });
+
+      expect(rent.isRent, isTrue);
+      expect(rent.complexRequirements, 'Depósito de un mes en administración');
+      expect(sale.isRent, isFalse);
+      expect(sale.complexRequirements, isEmpty);
+    });
   });
 }

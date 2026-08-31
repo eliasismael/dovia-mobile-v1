@@ -52,6 +52,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
   ClientOfferDetail? _detail;
   bool _isLoading = true;
   bool _isWithdrawing = false;
+  bool _requirementsExpanded = false;
   String? _errorMessage;
 
   @override
@@ -270,6 +271,10 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
           const SizedBox(height: 18.0),
           for (final section in detail.proposalSections)
             _section(section, background: _proposalFieldBg),
+          if (detail.isRent) ...[
+            _complexRequirements(detail),
+            const SizedBox(height: 18.0),
+          ],
           if (detail.isRejected) _rejectionBanner(detail) else _actions(detail),
         ],
       ),
@@ -398,6 +403,107 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
           color: isSelected ? Colors.white : _aqua,
         ),
       ),
+    );
+  }
+
+  /// Requisitos del complejo que el inquilino aceptó al enviar la propuesta:
+  /// el desplegable con lo que declaró el listado y, debajo, la lista fija de
+  /// usos prohibidos que firma toda oferta de renta.
+  Widget _complexRequirements(ClientOfferDetail detail) {
+    const prohibited = [
+      'Airbnb',
+      'Subarrendamiento',
+      'Eventos',
+      'Mascotas',
+      'Otros (según listing)',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            border: Border.all(color: const Color(0xFFDFDFDF)),
+          ),
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () => safeSetState(
+                    () => _requirementsExpanded = !_requirementsExpanded),
+                borderRadius: BorderRadius.circular(10.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0, vertical: 14.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Requisitos del complejo',
+                          style: GoogleFonts.publicSans(
+                              fontSize: 14.0, color: _text),
+                        ),
+                      ),
+                      Icon(
+                        _requirementsExpanded
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        color: _aqua,
+                        size: 22.0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (_requirementsExpanded)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0, vertical: 12.0),
+                  decoration: const BoxDecoration(
+                    border: Border(top: BorderSide(color: Color(0xFFDFDFDF))),
+                  ),
+                  child: Text(
+                    detail.complexRequirements.isNotEmpty
+                        ? detail.complexRequirements
+                        : 'El listado no declaró requisitos adicionales.',
+                    style: GoogleFonts.publicSans(
+                        fontSize: 14.0, height: 1.5, color: _fieldText),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18.0),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFFDDE9E9),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Entiendo que en este complejo NO se permite:',
+                style: GoogleFonts.publicSans(
+                    fontSize: 14.0, fontWeight: FontWeight.w600, color: _text),
+              ),
+              const SizedBox(height: 8.0),
+              for (final rule in prohibited)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    '• $rule',
+                    style:
+                        GoogleFonts.publicSans(fontSize: 14.0, color: _text),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
