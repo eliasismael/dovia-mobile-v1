@@ -1095,6 +1095,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
           process: process,
           document: document,
           label: document.label,
+          filledSegments: legalHqMortgageDocumentSegments(document),
         ),
       // El convenio siempre ocupa una tarjeta, exista o no el slot todavía, y
       // su texto y su barra siguen el ciclo carga → firma en vez del nombre
@@ -1441,6 +1442,11 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
         'documentUrl': serializeParam(document.url, ParamType.String),
         'propertyName': serializeParam(process.title, ParamType.String),
         'category': serializeParam(process.category, ParamType.String),
+        // Sin decisión de HQ: `documents/{id}/hq-review` solo se acepta con el
+        // proceso en LEGAL_HQ_REVIEW o REJECTED, y un expediente hipotecario
+        // nunca pasa por ahí —nace en BANK_MANAGEMENT_STARTED y se resuelve por
+        // el ciclo bancario—. Acá el documento se audita, no se aprueba.
+        'readOnly': serializeParam(true, ParamType.bool),
       }.withoutNulls,
     );
 
@@ -1466,7 +1472,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
     final selectedFiles = await selectFiles(
       multiFile: false,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
     );
     if (selectedFiles == null || selectedFiles.isEmpty || !mounted) return;
 

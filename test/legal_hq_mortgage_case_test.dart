@@ -527,6 +527,31 @@ void main() {
       expect(cerrado.doviaAgreementCardDocument?.id, 'doc-3');
     });
 
+    test('los comprobantes del hipotecario se miden por disponibilidad', () {
+      const cargado = LegalHqDocument(
+        id: 'doc-1',
+        label: 'Copia de deposito a cuenta Dovia',
+        status: 'submitted',
+        url: 'https://cdn.dovia.test/deposito.pdf',
+      );
+      const vacio = LegalHqDocument(
+        id: 'doc-9',
+        label: 'Certificación de la propiedad',
+        status: 'missing',
+      );
+
+      // El flujo bancario no pasa por la revisión de HQ, así que un
+      // comprobante subido está completo aunque nadie lo haya aprobado.
+      expect(cargado.hqReviewDecision, isEmpty);
+      expect(
+        legalHqMortgageDocumentSegments(cargado),
+        kDocumentProgressSegments,
+      );
+      expect(legalHqMortgageDocumentSegments(vacio), 1);
+      // La escala de revisión lo dejaría a media barra: por eso no se usa acá.
+      expect(legalHqDocumentProgress(cargado).filledSegments, lessThan(3));
+    });
+
     test('los dos slots del convenio no se cuelan entre los comprobantes', () {
       const sinFirmar = LegalHqDocument(
         id: 'doc-2',

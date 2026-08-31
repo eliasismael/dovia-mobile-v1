@@ -1072,6 +1072,16 @@ LegalHqDocumentProgress legalHqDocumentProgress(LegalHqDocument document) {
 
 // ── Gestión bancaria (SALE_MORTGAGE) ────────────────────────────────────────
 
+/// Tramos llenos de un comprobante del expediente hipotecario.
+///
+/// Este flujo no usa la revisión documental de Legal HQ: sus documentos se
+/// miden por DISPONIBILIDAD (`missing` / `submitted`) y nunca llevan
+/// `hqReviewDecision`, así que la escala de cinco pasos de
+/// [legalHqDocumentProgress] —pensada para el ciclo de revisión— dejaría toda
+/// la grilla a media barra. Acá el archivo está o no está.
+int legalHqMortgageDocumentSegments(LegalHqDocument document) =>
+    document.hasFile ? kDocumentProgressSegments : 1;
+
 /// Estado del convenio de DOVIA tal como lo ve el Legal HQ en la grilla: lo
 /// carga él sin firmar, el comprador lo devuelve firmado y recién ahí el
 /// expediente puede avanzar.

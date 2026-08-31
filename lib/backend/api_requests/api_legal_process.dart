@@ -938,7 +938,8 @@ class ResubmitToHQReviewListerHQCall {
 /// `status` acepta BANK_MANAGEMENT_STARTED | BANK_DOCUMENTATION_SUBMITTED |
 /// BANK_EVALUATION | APPROVED | REJECTED; `FINISHED` no se acepta acá, se
 /// cierra con `POST .../mortgage/finish`. Requiere `documentsComplete=true` y
-/// rechaza repetir el estado actual. `note` no puede viajar vacía.
+/// rechaza repetir el estado actual. `note` es opcional, pero el backend
+/// rechaza la cadena vacía: por eso se omite del body cuando no hay texto.
 class MortgageUpdateStatusCall {
   Future<ApiCallResponse> call({
     String? processId = '',
