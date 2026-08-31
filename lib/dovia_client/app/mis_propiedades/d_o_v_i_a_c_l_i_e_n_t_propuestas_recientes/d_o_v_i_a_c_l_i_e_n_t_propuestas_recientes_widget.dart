@@ -256,18 +256,7 @@ class _DOVIACLIENTPropuestasRecientesWidgetState
                   ],
                 ],
               ),
-              InkWell(
-                  onTap: () => _openLaneList(lane),
-                  child: Text(
-                    'Ver más',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.publicSans(
-                              fontWeight: FontWeight.w600),
-                          color: FlutterFlowTheme.of(context).primary,
-                          fontSize: 14.0,
-                        ),
-                  ),
-                ),
+              _verMasPill(lane),
             ],
           ),
         ),
@@ -301,6 +290,33 @@ class _DOVIACLIENTPropuestasRecientesWidgetState
             ),
           ),
       ],
+    );
+  }
+
+  /// "Ver más" del carril: la misma píldora que abre el carrusel del panel de
+  /// Mis Propiedades.
+  Widget _verMasPill(OwnerProposalLane lane) {
+    return InkWell(
+      onTap: () => _openLaneList(lane),
+      borderRadius: BorderRadius.circular(99.0),
+      child: Container(
+        height: 30.0,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFCCE3E4),
+          borderRadius: BorderRadius.circular(99.0),
+        ),
+        child: Text(
+          'Ver más',
+          style: FlutterFlowTheme.of(context).titleSmall.override(
+                font: GoogleFonts.publicSans(),
+                color: FlutterFlowTheme.of(context).primary,
+                fontSize: 14.0,
+                letterSpacing: 0.0,
+              ),
+        ),
+      ),
     );
   }
 
