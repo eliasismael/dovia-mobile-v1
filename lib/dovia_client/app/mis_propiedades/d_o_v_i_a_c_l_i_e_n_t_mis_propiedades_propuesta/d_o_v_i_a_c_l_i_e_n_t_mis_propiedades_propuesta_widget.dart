@@ -214,6 +214,28 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     }
   }
 
+  /// Nombre de la moneda tal como la nombran las píldoras del diseño.
+  String _currencyLabel(String currency) {
+    switch (currency.toUpperCase()) {
+      case 'GTQ':
+      case 'Q':
+        return 'Quetzales';
+      case '—':
+      case '':
+        return 'USD';
+      default:
+        return currency.toUpperCase();
+    }
+  }
+
+  /// Título de la pantalla: el tipo de operación negociada. Mientras la oferta
+  /// carga no hay dato, así que el header nace con el rótulo genérico.
+  String _screenTitle() {
+    if (_offerData == null) return 'Propuesta';
+    final label = _offerTypeLabel();
+    return label == '—' || label.isEmpty ? 'Propuesta' : label;
+  }
+
   String _paymentMethodLabel() {
     final raw = _resolveField([
       r'''$.activeOfferData.paymentMethod''',
@@ -371,8 +393,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                   wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
-                          title: 'Propuesta',
+                      child: DOVIASHAREDHeaderWidget(
+                          title: _screenTitle(),
                           hideActions: true,
                           showMap: false,
                           showCurrency: false,
@@ -486,7 +508,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Status badge ──────────────────────────────────────────────────
-          Text('Propuesta · ${_offerTypeLabel()}',
+          // El tipo de operación titula la pantalla (Venta / Renta); acá va
+          // sólo el rótulo de la sección, como en el diseño.
+          Text('Propuesta',
               style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -497,10 +521,26 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
           ],
           const SizedBox(height: 20),
 
-          // ── Método de pago (read-only) ────────────────────────────────────
-          _fieldLabel('Método de pago'),
+          // ── Moneda de pago (read-only) ────────────────────────────────────
+          _fieldLabel('Moneda de pago'),
           const SizedBox(height: 8),
-          _readOnlyField(_paymentMethodLabel()),
+          _currencyPill(currency),
+          const SizedBox(height: 20),
+
+          // ── Método de pago y propuesta económica ──────────────────────────
+          _pairRow(
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _fieldLabel('Método de pago'),
+              const SizedBox(height: 8),
+              _readOnlyField(_paymentMethodLabel()),
+            ]),
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _fieldLabel('Propuesta económica'),
+              const SizedBox(height: 8),
+              _economicDropdown(
+                  amount, commission, totalToReceive, currencySymbol),
+            ]),
+          ),
           const SizedBox(height: 20),
 
           if (_paymentMethodLabel() == 'Hipoteca') ...[
@@ -563,12 +603,6 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
             ]),
             const SizedBox(height: 20),
           ],
-
-          // ── Propuesta económica (dropdown) ────────────────────────────────
-          _fieldLabel('Propuesta económica'),
-          const SizedBox(height: 8),
-          _economicDropdown(amount, commission, totalToReceive, currencySymbol),
-          const SizedBox(height: 20),
 
           // ── Solicitud adicional (read-only) ───────────────────────────────
           _fieldLabel('Solicitud adicional'),
@@ -644,6 +678,42 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
   Widget _fieldLabel(String text) => Text(text,
       style: GoogleFonts.inter(
           fontSize: 16, color: _primaryDark, fontWeight: FontWeight.w400));
+
+  /// La moneda de la propuesta, en la píldora rellena del diseño: es un dato
+  /// del comprador, no una elección del dueño.
+  Widget _currencyPill(String currency) => Container(
+        height: 42,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFF70ACAD),
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Text(_currencyLabel(currency),
+            style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Colors.white)),
+      );
+
+  /// Dos bloques a media línea, uno debajo del otro en pantallas angostas.
+  Widget _pairRow(Widget first, Widget second) => LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 620) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [first, const SizedBox(height: 20), second],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: first),
+              const SizedBox(width: 18),
+              Expanded(child: second),
+            ],
+          );
+        },
+      );
 
   Widget _readOnlyField(String value) => Container(
         width: double.infinity,
