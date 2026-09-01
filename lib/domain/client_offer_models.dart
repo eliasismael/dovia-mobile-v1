@@ -329,10 +329,7 @@ class ClientOffer {
       offerStatus:
           (offerStr(json['offerStatus']) ?? offerStr(json['status']) ?? '')
               .toUpperCase(),
-      processStatus: (offerStr(json['processStatus']) ??
-              offerStr(offerAsMap(json['legalProcess'])?['status']) ??
-              '')
-          .toLowerCase(),
+      processStatus: offerProcessStatus(json),
       lastOfferBy: (offerStr(json['lastOfferBy']) ?? '').toUpperCase(),
       pendingResponseBy:
           (offerStr(json['pendingResponseBy']) ?? '').toUpperCase(),

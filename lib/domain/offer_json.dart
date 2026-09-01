@@ -24,6 +24,36 @@ num? offerNum(dynamic value) {
   return num.tryParse(value.toString());
 }
 
+/// `processStatus` de la oferta, en el vocabulario que entienden los carriles.
+///
+/// El dato llega por dos caminos con dos vocabularios distintos. La oferta lo
+/// trae en el suyo —`awaiting_legal_review`, `agreement_structuring`,
+/// `contract_signing`, `completed`—, pero cuando el payload sólo embebe
+/// `legalProcess`, ese `status` es el enum del proceso legal (`FINISHED`,
+/// `REJECTED`, `BANK_EVALUATION`…). Sin traducirlo, un trato ya cerrado
+/// llegaba como `finished`, que no es ninguno de los estados que los carriles
+/// conocen: se quedaba para siempre en "Proceso Legal" y el cliente nunca
+/// podía calificarlo.
+///
+/// Sólo se traducen los dos desenlaces, que son los que el backend documenta:
+/// `FINISHED` completa la oferta (`processStatus=COMPLETED`) y `REJECTED` la
+/// cierra. El resto son etapas abiertas y ya se leen como tales.
+String offerProcessStatus(Map<String, dynamic> json) {
+  final own = offerStr(json['processStatus']);
+  if (own != null) return own.toLowerCase();
+
+  final legal = (offerStr(offerAsMap(json['legalProcess'])?['status']) ?? '')
+      .toLowerCase();
+  switch (legal) {
+    case 'finished':
+      return 'completed';
+    case 'rejected':
+      return 'rejected';
+    default:
+      return legal;
+  }
+}
+
 /// Foto principal de la propiedad.
 ///
 /// El backend la expone de varias formas según el endpoint: `GET

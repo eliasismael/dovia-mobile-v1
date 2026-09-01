@@ -240,6 +240,52 @@ void main() {
       expect(enPestanas.length, carril.length);
     });
 
+    test('el cierre embebido en legalProcess también llega a Finalizadas', () {
+      // Cuando el payload no trae `processStatus` propio, el estado sale de
+      // `legalProcess`, que habla el enum del proceso legal. Sin traducirlo el
+      // trato cerrado se quedaba en Proceso Legal y nunca se podía calificar.
+      final embebido = ClientOffersBoard.fromOffers([
+        {
+          ..._offer(id: 'cerrado-por-legal', status: 'ACCEPTED'),
+          'legalProcess': const {'status': 'FINISHED'},
+        },
+      ]);
+
+      expect(
+        embebido
+            .byFilter(ClientOfferFilter.finalizada)
+            .map((offer) => offer.offerId),
+        ['cerrado-por-legal'],
+      );
+      expect(embebido.byFilter(ClientOfferFilter.procesoLegal), isEmpty);
+    });
+
+    test('el rechazo embebido cierra el trato igual que el propio', () {
+      final rechazado = ClientOffer.fromJson({
+        ..._offer(id: 'rechazado-por-legal', status: 'ACCEPTED'),
+        'legalProcess': const {'status': 'REJECTED'},
+      });
+
+      expect(rechazado.processStatus, 'rejected');
+      expect(rechazado.isTerminal, isTrue);
+    });
+
+    test('una etapa abierta del proceso legal sigue en Proceso Legal', () {
+      final enBanco = ClientOffersBoard.fromOffers([
+        {
+          ..._offer(id: 'en-banco', status: 'ACCEPTED'),
+          'legalProcess': const {'status': 'BANK_EVALUATION'},
+        },
+      ]);
+
+      expect(
+        enBanco
+            .byFilter(ClientOfferFilter.procesoLegal)
+            .map((offer) => offer.offerId),
+        ['en-banco'],
+      );
+    });
+
     test('ninguna pestaña del cierre abre el detalle de sólo lectura', () {
       final enProceso = ClientOffer.fromJson(_offer(
         id: 'firmando',
