@@ -539,41 +539,36 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
         color: _rejectionBg,
         borderRadius: BorderRadius.circular(16.0),
       ),
+      // Centrado y con aire entre el título y los motivos, como los demás
+      // avisos de la pantalla: apilados al ras se leían como un solo párrafo.
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'El banco rechazó la hipoteca por:',
-            style: GoogleFonts.publicSans(
-              color: _rejectionText,
-              fontSize: 12.0,
-              height: 16 / 12,
-            ),
-          ),
+          _rejectionLine('El banco rechazó la hipoteca por:'),
+          const SizedBox(height: 8.0),
           if (reasons.isEmpty)
-            Text(
-              'No se registraron motivos.',
-              style: GoogleFonts.publicSans(
-                color: _rejectionText,
-                fontSize: 12.0,
-                height: 16 / 12,
-              ),
-            )
+            _rejectionLine('No se registraron motivos.')
           else
-            for (final reason in reasons)
-              Text(
-                reason,
-                style: GoogleFonts.publicSans(
-                  color: _rejectionText,
-                  fontSize: 12.0,
-                  height: 16 / 12,
-                ),
-              ),
+            // Por índice, no por valor: dos motivos idénticos son dos líneas.
+            for (var i = 0; i < reasons.length; i++) ...[
+              if (i > 0) const SizedBox(height: 4.0),
+              _rejectionLine(reasons[i]),
+            ],
         ],
       ),
     );
   }
+
+  Widget _rejectionLine(String text) => Text(
+        text,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.publicSans(
+          color: _rejectionText,
+          fontSize: 12.0,
+          height: 16 / 12,
+        ),
+      );
 
   // ── Seguimiento de la evaluación ──────────────────────────────────────────
 
