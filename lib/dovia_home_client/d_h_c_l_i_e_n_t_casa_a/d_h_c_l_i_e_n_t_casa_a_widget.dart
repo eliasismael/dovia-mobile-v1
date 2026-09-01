@@ -1,5 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
+import '/core/external_links.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
 import '/dovia_home_client/extra_materials_fields.dart';
 import '/dovia_home_client/service_request_fields.dart';
@@ -12,7 +13,6 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'd_h_c_l_i_e_n_t_casa_a_model.dart';
 export 'd_h_c_l_i_e_n_t_casa_a_model.dart';
 
@@ -494,9 +494,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
       _showSnack('Chat no disponible');
       return;
     }
-    final clean = phone.replaceAll(RegExp(r'[^\d+]'), '');
-    final uri = Uri.parse('https://wa.me/$clean');
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    if (!await openExternalUri(whatsAppUri(phone))) {
       _showSnack('No se pudo abrir el chat');
     }
   }
@@ -507,8 +505,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
       _showSnack('Teléfono no disponible');
       return;
     }
-    final uri = Uri.parse('tel:$phone');
-    if (!await launchUrl(uri)) {
+    if (!await openExternalUri(telUri(phone))) {
       _showSnack('No se pudo iniciar la llamada');
     }
   }

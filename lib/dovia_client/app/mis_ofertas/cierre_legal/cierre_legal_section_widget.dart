@@ -1,10 +1,10 @@
+import '/core/external_links.dart';
 import '/core/result.dart';
 import '/domain/legal_closure_models.dart';
 import '/repositories/offers_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'calificar_agente_modal_widget.dart';
 import 'documentos_legales_widget.dart';
 import 'reportar_problema_modal_widget.dart';
@@ -129,29 +129,14 @@ class _CierreLegalSectionWidgetState extends State<CierreLegalSectionWidget> {
 
   Future<void> _openDocument(LegalDocument document) async {
     final uri = Uri.tryParse(document.url);
-    if (uri == null || !await _open(uri)) {
+    if (uri == null || !await openExternalUri(uri)) {
       if (mounted) _toast('No pudimos abrir el documento.', isError: true);
     }
   }
 
   Future<void> _launch(String scheme, String value) async {
-    if (!await _open(Uri(scheme: scheme, path: value)) && mounted) {
+    if (!await openExternalUri(Uri(scheme: scheme, path: value)) && mounted) {
       _toast('No pudimos abrir la aplicación.', isError: true);
-    }
-  }
-
-  /// Abre el enlace por fuera de la app y dice si pudo.
-  ///
-  /// El sondeo previo es el que usa el resto de la app: sin él, un dispositivo
-  /// sin nada que atienda el enlace —un teléfono sin marcador, un PDF sin
-  /// visor— hace que `launchUrl` tire excepción en vez de devolver `false`, y
-  /// el cliente se lleva un error crudo en lugar del aviso.
-  Future<bool> _open(Uri uri) async {
-    try {
-      if (!await canLaunchUrl(uri)) return false;
-      return await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      return false;
     }
   }
 

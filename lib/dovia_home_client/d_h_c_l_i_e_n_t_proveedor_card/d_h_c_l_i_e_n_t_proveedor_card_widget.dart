@@ -1,9 +1,9 @@
+import '/core/external_links.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'd_h_c_l_i_e_n_t_proveedor_card_model.dart';
 export 'd_h_c_l_i_e_n_t_proveedor_card_model.dart';
 
@@ -86,27 +86,20 @@ class _DHCLIENTProveedorCardWidgetState
   Future<void> _openWhatsApp() async {
     final phone = widget.phoneNumber ?? '';
     if (phone.isEmpty) return;
-    final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
-    final uri = Uri.parse('https://wa.me/$cleanPhone');
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir WhatsApp')),
-        );
-      }
+    if (!await openExternalUri(whatsAppUri(phone)) && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir WhatsApp')),
+      );
     }
   }
 
   Future<void> _callPhone() async {
     final phone = widget.phoneNumber ?? '';
     if (phone.isEmpty) return;
-    final uri = Uri.parse('tel:$phone');
-    if (!await launchUrl(uri)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo iniciar la llamada')),
-        );
-      }
+    if (!await openExternalUri(telUri(phone)) && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo iniciar la llamada')),
+      );
     }
   }
 
@@ -168,13 +161,10 @@ class _DHCLIENTProveedorCardWidgetState
       return;
     }
 
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir el documento')),
-        );
-      }
+    if (!await openExternalUri(Uri.tryParse(url)) && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el documento')),
+      );
     }
   }
 
