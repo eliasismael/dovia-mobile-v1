@@ -2688,7 +2688,12 @@ class RejectOutOfScopeProposalCall {
 // ---------------------------------------------------------------------------
 // POST /dovia-home/out-of-scope-proposals/{proposalId}/accept
 // Permiso: CLIENT suscrito + DOVIA_HOME_OUT_OF_SCOPE_PROPOSAL_ACCEPT. Sin body.
-// Actualiza el hijo, crea checkout OUT_OF_SCOPE_QUOTE (GTQ) y devuelve payment.
+//
+// Aceptar es la autorización de negocio y **no cobra**: el hijo pasa de
+// `PENDING / OUT_OF_SCOPE_QUOTING` a `TAKEN` con el proveedor asignado y su
+// `payment` queda en `NOT_REQUIRED`. No crea orden de pago ni checkout: la
+// respuesta es `{ requestId, proposalId, childServiceRequestId }` y no trae
+// `payment`, `paymentOrderId`, `checkoutId` ni `checkoutUrl`.
 // ---------------------------------------------------------------------------
 
 class AcceptOutOfScopeProposalCall {
@@ -2720,14 +2725,6 @@ class AcceptOutOfScopeProposalCall {
   String? childServiceRequestId(dynamic response) => castToType<String>(
         getJsonField(response, r'''$.data.childServiceRequestId''') ??
             getJsonField(response, r'''$.childServiceRequestId'''),
-      );
-  String? paymentOrderId(dynamic response) => castToType<String>(
-        getJsonField(response, r'''$.data.payment.id''') ??
-            getJsonField(response, r'''$.payment.id'''),
-      );
-  String? checkoutUrl(dynamic response) => castToType<String>(
-        getJsonField(response, r'''$.data.payment.checkoutUrl''') ??
-            getJsonField(response, r'''$.payment.checkoutUrl'''),
       );
 }
 

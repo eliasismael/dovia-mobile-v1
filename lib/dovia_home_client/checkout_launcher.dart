@@ -1,10 +1,15 @@
 /// Apertura del checkout de Recurrente para los cobros de Dovia Home.
 ///
-/// Los dos flujos que cobran de verdad —materiales extra y trabajo fuera de
-/// alcance— siguen el mismo contrato: el endpoint de aceptación crea la orden y
-/// devuelve un `PaymentOrderResponseDto` con `checkoutUrl`, y el pago sólo se
-/// completa si el cliente abre esa URL. Aceptar **no** paga: deja la solicitud
-/// en `PAYMENT_PENDING` hasta que el webhook confirme.
+/// El flujo que cobra por acá es el de **materiales extra**: el endpoint de
+/// aceptación crea la orden y devuelve un `PaymentOrderResponseDto` con
+/// `checkoutUrl`, y el pago sólo se completa si el cliente abre esa URL.
+/// Aceptar **no** paga: deja la solicitud en `PAYMENT_PENDING` hasta que el
+/// webhook confirme.
+///
+/// El trabajo **fuera de alcance no cobra por la plataforma**: aceptar una
+/// propuesta es la autorización de negocio, reserva el trabajo en el acto y
+/// deja su `payment` en `NOT_REQUIRED`. Su respuesta no trae `checkoutUrl`, así
+/// que no hay checkout que abrir ahí.
 ///
 /// Si el checkout se cae (EXPIRED / FAILED / CANCELED) no se repite la
 /// aceptación: se reanuda la orden con `POST /payments/{paymentOrderId}/resume`,

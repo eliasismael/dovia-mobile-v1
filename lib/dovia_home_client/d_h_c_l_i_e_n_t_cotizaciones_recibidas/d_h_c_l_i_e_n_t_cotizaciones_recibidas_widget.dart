@@ -1,4 +1,3 @@
-import '/dovia_home_client/checkout_launcher.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_agenda/d_h_c_l_i_e_n_t_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_instalacion/d_h_c_l_i_e_n_t_instalacion_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
@@ -10,6 +9,7 @@ import '/repositories/payments_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/premium_upsell_popup/premium_upsell_popup_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -231,15 +231,29 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   /// - `QUOTE`: la aceptación es terminal y **no cobra** por la plataforma. La
   ///   solicitud pasa a `TAKEN` con la empresa asignada y el cliente sigue al
   ///   agendamiento.
-  /// - `OUT_OF_SCOPE`: la aceptación crea una orden y devuelve un checkout de
-  ///   Recurrente que hay que abrir. El trabajo no queda reservado hasta que el
-  ///   pago se confirma.
+  /// - `OUT_OF_SCOPE`: la aceptación también es terminal y tampoco cobra. Es la
+  ///   autorización de negocio: el hijo pasa a `TAKEN` con el proveedor
+  ///   asignado y su `payment` queda en `NOT_REQUIRED`. Sí exige plan vigente,
+  ///   así que sin suscripción se ofrece el plan en vez de mandar una llamada
+  ///   que el backend va a rechazar.
   Future<void> _acceptSelected(
     List<Map<String, dynamic>> proposals,
     bool isPremium,
   ) async {
     final accepted = _selected(proposals);
     if (accepted == null) return;
+
+    if (proposalIsOutOfScope(accepted) && !isPremium) {
+      await showDialog(
+        context: context,
+        builder: (_) => const Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: PremiumUpsellPopupWidget(),
+        ),
+      );
+      return;
+    }
 
     safeSetState(() => _model.isAccepting = true);
     try {
@@ -286,9 +300,16 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   /// Acepta una propuesta de trabajo fuera de alcance. La ruta va por
   /// `proposalId` solamente: el hijo sobre el que se aplica ya está amarrado a
   /// la propuesta del lado del backend.
+  /// Acepta una propuesta de trabajo fuera de alcance.
+  ///
+  /// Aceptar reserva el trabajo en el acto: la transacción desactiva a las
+  /// competidoras, pasa el hijo a `TAKEN` con el proveedor asignado y deja su
+  /// `payment` en `NOT_REQUIRED`. No hay cobro por la plataforma —la respuesta
+  /// no trae `payment`, `paymentOrderId` ni `checkoutUrl`—, así que tampoco hay
+  /// checkout que abrir.
   Future<void> _acceptOutOfScope(Map<String, dynamic> accepted) async {
-    final call = DOVIAAPIDoviaHomeContextGroup.acceptOutOfScopeProposalCall;
-    final response = await call.call(
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.acceptOutOfScopeProposalCall.call(
       proposalId: proposalId(accepted),
       authToken: currentAuthenticationToken ?? '',
     );
@@ -299,19 +320,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
       return;
     }
 
-    final opened =
-        await launchDoviaHomeCheckout(call.checkoutUrl(response.jsonBody));
-    if (!mounted) return;
-
-    if (!opened) {
-      _showError(
-        'Aceptaste la propuesta, pero no pudimos abrir el pago. '
-        'Retómalo desde el detalle del trabajo.',
-      );
-      return;
-    }
-    // El trabajo queda reservado recién cuando el pago se confirma, así que la
-    // pantalla sólo se sale de en medio: no anuncia un trabajo ya agendado.
+    _showError('Aceptaste la propuesta. El proveedor queda asignado al '
+        'trabajo.');
     Navigator.pop(context);
   }
 
