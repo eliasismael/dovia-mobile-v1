@@ -16,6 +16,7 @@ import '/shared_components/popup_exito/popup_exito_widget.dart';
 // Force refresh: 2026-05-04 17:15
 
 import '/domain/counter_offer_view.dart';
+import '/domain/offer_json.dart';
 import '/dovia_client/app/mis_ofertas/cierre_legal/cierre_legal_section_widget.dart';
 import '/dovia_client/app/mis_ofertas/contraoferta/negociacion_contraoferta_widget.dart';
 
@@ -121,8 +122,14 @@ class _ProposalScreenState extends State<ProposalScreen> {
   NegotiationState get state {
     try {
       if (widget.offerData != null && widget.offerData is Map) {
+        // El cierre llega por dos caminos con dos vocabularios: el propio de
+        // la oferta y el enum del proceso legal, cuando el payload sólo
+        // embebe `legalProcess`. Sin traducirlo, un trato ya cerrado no
+        // coincidía con ninguna rama y caía en la de `accepted`: la pantalla
+        // mostraba la estructuración del acuerdo en vez del cierre, así que
+        // no había nada que calificar ni documentos que descargar.
         final pStatus =
-            widget.offerData['processStatus']?.toString().toLowerCase();
+            offerProcessStatus(Map<String, dynamic>.from(widget.offerData));
         if (pStatus == 'agreement_structuring')
           return paymentMethod == PaymentMethod.hipoteca
               ? NegotiationState.signing
@@ -331,13 +338,21 @@ class _ProposalScreenState extends State<ProposalScreen> {
   /// HQ terminó: calificar, reportar y descargar el expediente.
   Widget _buildClosureContent() {
     final data = widget.offerData;
-    final offerId = data is Map ? data['offerId']?.toString() ?? '' : '';
-    final legalProcessId = data is Map
-        ? (data['legalProcessId']?.toString() ??
-            (data['legalProcess'] is Map
-                ? data['legalProcess']['id']?.toString() ?? ''
-                : ''))
-        : '';
+    final json = data is Map ? Map<String, dynamic>.from(data) : null;
+    // La oferta identifica su id con las tres llaves según el endpoint que la
+    // devuelva; leer sólo `offerId` dejaba la calificación y el reporte
+    // apuntando a una ruta sin id.
+    final offerId = json == null
+        ? ''
+        : (offerStr(json['offerId']) ??
+            offerStr(json['id']) ??
+            offerStr(json['_id']) ??
+            '');
+    final legalProcessId = json == null
+        ? ''
+        : (offerStr(json['legalProcessId']) ??
+            offerStr(offerAsMap(json['legalProcess'])?['id']) ??
+            '');
 
     return CierreLegalSectionWidget(
       offerId: offerId,
@@ -396,7 +411,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
               _buildStepDivider(1),
               _buildStepItem("PASO 3", "Firma de\ncontrato", 2),
               _buildStepDivider(2),
-              _buildStepItem("PASO 4", "Finalizar\nproceso", 3),
+              _buildStepItem("PASO 4", "Finaliza\nproceso", 3),
             ],
           ),
         ],

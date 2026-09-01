@@ -55,6 +55,26 @@ void main() {
       expect(find.textContaining('Reportar'), findsNothing);
     });
 
+    testWidgets('con un envío en vuelo los controles quedan apagados',
+        (tester) async {
+      await _pump(
+        tester,
+        LegalProfessionalCardWidget(
+          professional: _professional,
+          onRate: () {},
+          onReport: () {},
+          enabled: false,
+        ),
+      );
+
+      // Sacarlos de la pantalla haría saltar el alto de la tarjeta y se
+      // leería como si el trámite ya estuviera calificado.
+      final calificar = find.widgetWithText(FilledButton, 'Calificar');
+      expect(calificar, findsOneWidget);
+      expect(tester.widget<FilledButton>(calificar).onPressed, isNull);
+      expect(find.textContaining('Reportar'), findsOneWidget);
+    });
+
     testWidgets('sin teléfono ni correo no dibuja contacto rápido',
         (tester) async {
       await _pump(

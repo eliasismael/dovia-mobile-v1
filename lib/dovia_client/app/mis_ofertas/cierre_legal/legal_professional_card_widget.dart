@@ -16,6 +16,7 @@ class LegalProfessionalCardWidget extends StatelessWidget {
     this.onReport,
     this.onCall,
     this.onEmail,
+    this.enabled = true,
   });
 
   final LegalProfessional professional;
@@ -28,10 +29,17 @@ class LegalProfessionalCardWidget extends StatelessWidget {
   final VoidCallback? onCall;
   final VoidCallback? onEmail;
 
+  /// `false` mientras un envío está en vuelo: los controles siguen en su
+  /// lugar, apagados. Sacarlos de la pantalla en ese momento haría saltar el
+  /// alto de la tarjeta y se leería como si el trámite ya estuviera
+  /// calificado.
+  final bool enabled;
+
   static const Color _aqua = Color(0xFF007376);
   static const Color _text = Color(0xFF00444B);
-  static const Color _chipBg = Color(0xFFDDE9E9);
-  static const Color _border = Color(0xFFB8D4D5);
+  /// `rgba(112,172,173,0.2)` del diseño.
+  static const Color _chipBg = Color(0x3370ACAD);
+  static const Color _border = Color(0xFF007376);
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +68,7 @@ class LegalProfessionalCardWidget extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: _chipBg,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(65),
                     ),
                     child: Text(
                       professional.role.label,
@@ -100,9 +108,10 @@ class LegalProfessionalCardWidget extends StatelessWidget {
           SizedBox(
             height: 40,
             child: FilledButton(
-              onPressed: onRate,
+              onPressed: enabled ? onRate : null,
               style: FilledButton.styleFrom(
                 backgroundColor: _aqua,
+                disabledBackgroundColor: _aqua.withOpacity(0.4),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),
@@ -198,12 +207,12 @@ class LegalProfessionalCardWidget extends StatelessWidget {
 
   Widget _reportBadge() {
     return InkWell(
-      onTap: onReport,
+      onTap: enabled ? onReport : null,
       borderRadius: BorderRadius.circular(6),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: _aqua,
+          color: enabled ? _aqua : _aqua.withOpacity(0.4),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Row(

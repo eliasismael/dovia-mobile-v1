@@ -129,18 +129,29 @@ class _CierreLegalSectionWidgetState extends State<CierreLegalSectionWidget> {
 
   Future<void> _openDocument(LegalDocument document) async {
     final uri = Uri.tryParse(document.url);
-    if (uri == null) return;
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!opened && mounted) {
-      _toast('No pudimos abrir el documento.', isError: true);
+    if (uri == null || !await _open(uri)) {
+      if (mounted) _toast('No pudimos abrir el documento.', isError: true);
     }
   }
 
   Future<void> _launch(String scheme, String value) async {
-    final uri = Uri(scheme: scheme, path: value);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
-        mounted) {
+    if (!await _open(Uri(scheme: scheme, path: value)) && mounted) {
       _toast('No pudimos abrir la aplicación.', isError: true);
+    }
+  }
+
+  /// Abre el enlace por fuera de la app y dice si pudo.
+  ///
+  /// El sondeo previo es el que usa el resto de la app: sin él, un dispositivo
+  /// sin nada que atienda el enlace —un teléfono sin marcador, un PDF sin
+  /// visor— hace que `launchUrl` tire excepción en vez de devolver `false`, y
+  /// el cliente se lleva un error crudo en lugar del aviso.
+  Future<bool> _open(Uri uri) async {
+    try {
+      if (!await canLaunchUrl(uri)) return false;
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      return false;
     }
   }
 
@@ -226,12 +237,12 @@ class _CierreLegalSectionWidgetState extends State<CierreLegalSectionWidget> {
               width: width,
               child: LegalProfessionalCardWidget(
                 professional: professional,
-                onRate: isRated || _isSubmitting
-                    ? null
-                    : () => _rate(professional),
-                onReport: isRated || _isSubmitting
-                    ? null
-                    : () => _report(professional),
+                // Calificado el rol, las acciones se van de la pantalla —eso
+                // es "Calificadas"—; mientras hay un envío en vuelo siguen en
+                // su lugar, apagadas.
+                onRate: isRated ? null : () => _rate(professional),
+                onReport: isRated ? null : () => _report(professional),
+                enabled: !_isSubmitting,
                 onCall: professional.hasPhone
                     ? () => _launch('tel', professional.phone)
                     : null,
