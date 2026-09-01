@@ -239,10 +239,13 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   /// Monto ahorrado por el cliente (suscripción / descuento). null si no aplica.
   ///
-  /// El contrato solo trae la fila de precio ya aplicada (`price.price`), no el
-  /// precio regular contra el que compararla, así que hoy esto casi siempre es
-  /// null y el banner sale sin cifra.
-  /// TODO: usar `savings` cuando el backend lo exponga.
+  /// El contrato solo trae la fila de precio ya aplicada, la del plan con el
+  /// que se creó la solicitud (`globalSettings.doviaHome.prices` para
+  /// `requestType + plan`), y el catálogo de servicios no expone tarifas: no
+  /// hay precio de lista contra el cual comparar, así que hoy esto casi
+  /// siempre es null y el banner sale sin cifra.
+  /// TODO: usar `savings` cuando el backend lo exponga, o el precio del plan
+  /// free junto al aplicado.
   String? get _savingsAmount {
     final payment = _data?['payment'];
     final raw = _data?['savings'] ??
@@ -514,9 +517,11 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   /// muestra el modal de éxito y regresa al Dashboard.
   Future<void> _confirmVisit() async {
     final id = _requestId.isNotEmpty ? _requestId : (_serviceRequestId ?? '');
-    // TODO: reemplazar por la confirmación real en el backend cuando exista el
-    // endpoint (hoy no hay "cliente confirma la visita"). Se marca client-side
-    // para reflejar el cambio de estatus a "Programada" en el Dashboard.
+    // TODO: reemplazar por la confirmación real cuando el backend exponga la
+    // ruta. El inventario del contexto no tiene ninguna que el cliente pueda
+    // usar para autorizar una visita ya tomada; ver la nota de
+    // [DHCLIENTHomepageWidget.confirmedVisitIds]. Se marca client-side para
+    // reflejar el cambio de estatus a "Programada" en el Dashboard.
     DHCLIENTHomepageWidget.markVisitConfirmed(id);
 
     // Pop-up central (no bottom sheet): el diseño lo pide sobre la pantalla.

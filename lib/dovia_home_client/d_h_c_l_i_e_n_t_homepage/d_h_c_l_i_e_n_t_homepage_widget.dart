@@ -122,9 +122,13 @@ class DHCLIENTHomepageWidget extends StatefulWidget {
   static final List<ScheduledVisit> upcomingVisits = [];
 
   /// Ids de solicitudes cuya visita el cliente ya confirmó ("Programada").
-  /// Se maneja client-side porque aún no existe endpoint de confirmación en el
-  /// backend; al confirmar en la pantalla de detalle se agrega aquí el id y la
-  /// tarjeta pierde el punto rojo y pasa de "Confirmar" a "Programada".
+  /// Se maneja client-side porque el backend no tiene dónde registrarlo: en el
+  /// inventario del contexto (59 rutas, verificado el 2026-08-17) no hay
+  /// ninguna confirmación de visita del cliente —las únicas que existen son de
+  /// pago, imágenes, propuestas de cotización, fuera de alcance y materiales—,
+  /// y el flujo SERVICE no define un subestado dentro de `TAKEN` donde
+  /// distinguirlo. Al confirmar en la pantalla de detalle se agrega aquí el id
+  /// y la tarjeta pierde el punto rojo y pasa de "Confirmar" a "Programada".
   ///
   /// Respaldado por [FFAppState] para que la confirmación sobreviva al
   /// reinicio de la app. Sigue siendo local al dispositivo: el mismo cliente
