@@ -1033,8 +1033,10 @@ LegalHqStatusStyle legalHqStatusStyle(String status) {
       return const LegalHqStatusStyle(
           'Documentación enviada al banco', _badgeBlueBg, _badgeBlueText);
     case 'BANK_EVALUATION':
+      // Naranja, como el diseño de la etapa 3: es lo que la distingue de la
+      // gestión bancaria iniciada, que también es morada.
       return const LegalHqStatusStyle(
-          'En evaluación bancaria', _badgePurpleBg, _badgePurpleText);
+          'En evaluación bancaria', _badgeOrangeBg, _badgeOrangeText);
     case 'FINISHED':
       return const LegalHqStatusStyle(
           'Finalizado', _badgeGreenBg, _badgeGreenText);

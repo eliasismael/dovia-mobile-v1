@@ -227,6 +227,18 @@ void main() {
       expect(style.background, const Color(0xFFCAE0FF));
       expect(style.foreground, const Color(0xFF065EDA));
     });
+
+    test('la etapa 3 se distingue en naranja, no en el morado del paso 1', () {
+      final evaluation = legalHqStatusStyle('BANK_EVALUATION');
+
+      expect(evaluation.label, 'En evaluación bancaria');
+      expect(evaluation.background, const Color(0xFFFFE3C6));
+      expect(evaluation.foreground, const Color(0xFFF57600));
+      expect(
+        evaluation.background,
+        isNot(legalHqStatusStyle('BANK_MANAGEMENT_STARTED').background),
+      );
+    });
   });
 
   group('legalHqMortgageStep', () {

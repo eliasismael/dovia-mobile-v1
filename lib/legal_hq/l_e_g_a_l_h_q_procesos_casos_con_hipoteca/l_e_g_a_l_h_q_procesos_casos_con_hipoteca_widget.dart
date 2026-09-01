@@ -383,6 +383,22 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
       ),
       const SizedBox(height: 12.0),
       _buildOutcomeDropdown(),
+      // La opción de mantenimiento no se explica sola: conviene decir, antes
+      // de escribir, que el trámite se queda donde está y que lo único que
+      // llega al cliente es la nota.
+      if (_evaluationOutcome == LegalHqEvaluationOutcome.stillEvaluating)
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            'El expediente se queda en evaluación bancaria: lo que viaja al '
+            'cliente es la nota, con la fecha de esta actualización.',
+            style: GoogleFonts.publicSans(
+              color: _textDark,
+              fontSize: 12.0,
+              height: 16 / 12,
+            ),
+          ),
+        ),
       const SizedBox(height: 12.0),
       _buildNoteField(),
       const SizedBox(height: 20.0),
@@ -1666,8 +1682,16 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
   /// Aplica la resolución elegida en el seguimiento de la evaluación.
   ///
-  /// Las tres opciones son transiciones reales de `PUT /mortgage/status`; la
-  /// nota viaja con cada una y queda en el historial del expediente.
+  /// Las tres opciones viajan por `PUT /mortgage/status`, y la nota queda con
+  /// cada una en el `stateHistory` del expediente —append-only—, que es el
+  /// historial interno del trámite.
+  ///
+  /// La de mantenimiento manda el mismo estado a propósito: lo que cambia es
+  /// la nota y, con ella, la fecha de última actualización. Hoy esa ruta
+  /// rechaza repetir el estado actual, así que el envío vuelve con el aviso
+  /// de abajo; se manda igual en vez de bloquearlo acá para que el día que la
+  /// ruta lo acepte —o exista una para registrar la novedad sin transición—
+  /// esto funcione sin tocar la pantalla.
   Future<void> _updateEvaluation(LegalHqProcessDetail detail) async {
     final outcome = _evaluationOutcome;
     final note = _model.noteController?.text.trim() ?? '';
@@ -1679,25 +1703,15 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
       return;
     }
 
-    // El backend rechaza repetir el estado actual, así que la actualización
-    // periódica dentro de la propia evaluación todavía no tiene canal.
-    if (!outcome.resolvesEvaluation &&
-        detail.process.status == 'BANK_EVALUATION') {
+    // Las dos opciones que no cierran con una buena noticia dependen de la
+    // nota: sin texto, la actualización de mantenimiento no le lleva nada al
+    // cliente y el rechazo no explica por qué.
+    if (note.isEmpty && outcome != LegalHqEvaluationOutcome.approved) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('El expediente ya está en evaluación bancaria: falta '
-              'el canal para registrar una novedad sin cambiar el estado'),
-        ),
-      );
-      return;
-    }
-
-    // El rechazo tiene que explicar por qué: esos motivos son lo que se le
-    // muestra al cliente.
-    if (outcome == LegalHqEvaluationOutcome.rejected && note.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Escribí los motivos del rechazo en la nota'),
+        SnackBar(
+          content: Text(outcome == LegalHqEvaluationOutcome.rejected
+              ? 'Escribí los motivos del rechazo en la nota'
+              : 'Escribí en la nota qué novedad avisarle al cliente'),
         ),
       );
       return;
@@ -1714,9 +1728,18 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
     safeSetState(() => _advancingStage = false);
 
     if (!response.succeeded) {
+      // La novedad sin cambio de estado es la que hoy no pasa: conviene
+      // nombrarlo, y no borrar la nota, para que no se lea como un error
+      // suelto ni haya que volver a escribirla.
+      final isMaintenance = !outcome.resolvesEvaluation &&
+          detail.process.status == 'BANK_EVALUATION';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pudo actualizar el estado del trámite'),
+        SnackBar(
+          content: Text(isMaintenance
+              ? 'No se pudo registrar la novedad: el expediente ya está en '
+                  'evaluación bancaria y la ruta todavía rechaza repetir el '
+                  'estado. La nota quedó escrita.'
+              : 'No se pudo actualizar el estado del trámite'),
         ),
       );
       return;
@@ -1727,8 +1750,12 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
         content: Text(switch (outcome) {
           LegalHqEvaluationOutcome.approved => 'Hipoteca aprobada',
           LegalHqEvaluationOutcome.rejected => 'Hipoteca rechazada',
+          // Entrar a la evaluación y avisar una novedad dentro de ella son la
+          // misma opción, pero no la misma noticia.
           LegalHqEvaluationOutcome.stillEvaluating =>
-            'Expediente en evaluación bancaria',
+            detail.process.status == 'BANK_EVALUATION'
+                ? 'Novedad registrada en el expediente'
+                : 'Expediente en evaluación bancaria',
         }),
       ),
     );
