@@ -124,18 +124,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     });
   }
 
-  bool _showWelcomeBanner = false;
-
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DOVIACLIENTHomePageModel());
-
-    _showWelcomeBanner = !FFAppState().hasSeenWelcomeBanner;
-    if (_showWelcomeBanner) {
-      // Mark as seen so next time it won't show
-      FFAppState().hasSeenWelcomeBanner = true;
-    }
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
@@ -203,83 +195,62 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    if (_showWelcomeBanner)
-                      Container(
-                        width: double.infinity,
-                        color: const Color(0xFF007376),
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-                        child: Text(
-                          "Encuentra tu próximo hogar sin complicaciones. Explora propiedades con información clara y toma decisiones con confianza.",
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.publicSans(),
-                            color: Colors.white,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
+                    // Encabezado de la pantalla: el título y, para quien
+                    // todavía no tiene cuenta, la invitación a sumarse como
+                    // asociado.
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 16.0, 20.0, 8.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Home',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.publicSans(
+                                      fontWeight: FontWeight.w600),
+                                  color: const Color(0xFF00444B),
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.0,
+                                ),
                           ),
-                        ),
-                      ),
-
-                    // Encabezado de la pantalla: el título —que reemplaza al
-                    // banner de bienvenida a partir de la segunda sesión— y,
-                    // para quien todavía no tiene cuenta, la invitación a
-                    // sumarse como asociado.
-                    if (!_showWelcomeBanner ||
-                        FFAppState().UserRole == 'VISITOR')
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            20.0, 16.0, 20.0, 8.0),
-                        child: Row(
-                          children: [
-                            if (!_showWelcomeBanner)
-                              Text(
-                                'Home',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
+                          const Spacer(),
+                          if (FFAppState().UserRole == 'VISITOR')
+                            FFButtonWidget(
+                              onPressed: () async {
+                                context.pushNamed('CreateAccount');
+                              },
+                              text: 'Conviértete en Asociado',
+                              options: FFButtonOptions(
+                                height: 36.0,
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    20.0, 0.0, 20.0, 0.0),
+                                iconPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
+                                color: Colors.transparent,
+                                textStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
                                     .override(
                                       font: GoogleFonts.publicSans(
-                                          fontWeight: FontWeight.w600),
-                                      color: const Color(0xFF00444B),
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                            const Spacer(),
-                            if (FFAppState().UserRole == 'VISITOR')
-                              FFButtonWidget(
-                                onPressed: () async {
-                                  context.pushNamed('CreateAccount');
-                                },
-                                text: 'Conviértete en Asociado',
-                                options: FFButtonOptions(
-                                  height: 36.0,
-                                  padding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          20.0, 0.0, 20.0, 0.0),
-                                  iconPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 0.0),
-                                  color: Colors.transparent,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          color: const Color(0xFF007376),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        fontSize: 14.0,
+                                        color: const Color(0xFF007376),
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                  elevation: 0.0,
-                                  borderSide: const BorderSide(
-                                    color: Color(0xFF007376),
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24.0),
+                                      fontSize: 14.0,
+                                    ),
+                                elevation: 0.0,
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF007376),
+                                  width: 1.0,
                                 ),
+                                borderRadius: BorderRadius.circular(24.0),
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
+                    ),
 
                     Align(
                       alignment: const AlignmentDirectional(0.0, -1.0),
@@ -287,7 +258,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         width: MediaQuery.sizeOf(context).width * 1.0,
                         // El invitado ya no necesita alto extra: su llamada a
                         // sumarse vive arriba, junto al título.
-                        height: 200.0,
+                        height: 92.0,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [Color(0xFF007376), Color(0xFF70ACAD)],
@@ -305,7 +276,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         ),
                         child: Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 30.0, 20.0, 8.0),
+                              20.0, 12.0, 20.0, 8.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -417,7 +388,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           ),
                                         ),
                                       ),
-                                      if (FFAppState().UserRole != 'VISITOR') ...[
+                                      if (FFAppState().UserRole !=
+                                          'VISITOR') ...[
                                         InkWell(
                                           splashColor: Colors.transparent,
                                           focusColor: Colors.transparent,
@@ -432,8 +404,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                             width: 40.0,
                                             height: 40.0,
                                             decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context)
-                                                  .secondaryBackground,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
                                               shape: BoxShape.circle,
                                             ),
                                             child: ClipRRect(
@@ -456,7 +429,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           onTap: () async {
                                             await showModalBottomSheet(
                                               isScrollControlled: true,
-                                              backgroundColor: Colors.transparent,
+                                              backgroundColor:
+                                                  Colors.transparent,
                                               enableDrag: false,
                                               context: context,
                                               builder: (context) {
@@ -484,8 +458,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                             width: 40.0,
                                             height: 40.0,
                                             decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context)
-                                                  .secondaryBackground,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
                                               shape: BoxShape.circle,
                                             ),
                                             child: ClipRRect(
@@ -501,200 +476,236 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           ),
                                         ),
                                       ],
-
                                     ].divide(const SizedBox(width: 8.0)),
                                   ),
                                 ],
                               ),
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 30.0, 0.0, 0.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Expanded(
-                                      child: SizedBox(
-                                        width: 200.0,
-                                        child: TextFormField(
-                                          controller: _model.textController,
-                                          focusNode: _model.textFieldFocusNode,
-                                          autofocus: false,
-                                          enabled: true,
-                                          obscureText: false,
-                                          decoration: InputDecoration(
-                                            isDense: true,
-                                            labelStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .override(
-                                                      font: GoogleFonts.inter(
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontStyle,
-                                                      ),
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium
-                                                              .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium
-                                                              .fontStyle,
-                                                    ),
-                                            hintText: 'Búsqueda con IA',
-                                            hintStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .override(
-                                                      font: GoogleFonts.inter(
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontStyle,
-                                                      ),
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium
-                                                              .fontWeight,
-                                                      fontStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium
-                                                              .fontStyle,
-                                                    ),
-                                            enabledBorder:
-                                                const OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Color(0x00000000),
-                                                width: 1.0,
-                                              ),
-                                              borderRadius: BorderRadius.only(
-                                                bottomLeft:
-                                                    Radius.circular(25.0),
-                                                bottomRight:
-                                                    Radius.circular(25.0),
-                                                topLeft: Radius.circular(25.0),
-                                                topRight: Radius.circular(25.0),
-                                              ),
-                                            ),
-                                            focusedBorder:
-                                                const OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Color(0x00000000),
-                                                width: 1.0,
-                                              ),
-                                              borderRadius: BorderRadius.only(
-                                                bottomLeft:
-                                                    Radius.circular(25.0),
-                                                bottomRight:
-                                                    Radius.circular(25.0),
-                                                topLeft: Radius.circular(25.0),
-                                                topRight: Radius.circular(25.0),
-                                              ),
-                                            ),
-                                            errorBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .error,
-                                                width: 1.0,
-                                              ),
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                bottomLeft:
-                                                    Radius.circular(25.0),
-                                                bottomRight:
-                                                    Radius.circular(25.0),
-                                                topLeft: Radius.circular(25.0),
-                                                topRight: Radius.circular(25.0),
-                                              ),
-                                            ),
-                                            focusedErrorBorder:
-                                                OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .error,
-                                                width: 1.0,
-                                              ),
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                bottomLeft:
-                                                    Radius.circular(25.0),
-                                                bottomRight:
-                                                    Radius.circular(25.0),
-                                                topLeft: Radius.circular(25.0),
-                                                topRight: Radius.circular(25.0),
-                                              ),
-                                            ),
-                                            filled: true,
-                                            fillColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .secondaryBackground,
-                                            prefixIcon: const Icon(
-                                              Icons.search_rounded,
-                                              size: 24.0,
-                                            ),
-                                          ),
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                          maxLines: null,
-                                          cursorColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .primaryText,
-                                          enableInteractiveSelection: true,
-                                          validator: _model
-                                              .textControllerValidator
-                                              .asValidator(context),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Imagen de bienvenida del diseño, con su titular al pie. El
+                    // degradado claro asegura que el texto se lea sobre la foto.
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 16.0, 20.0, 0.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: AspectRatio(
+                          aspectRatio: 16.0 / 9.0,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.asset(
+                                'assets/images/HomeBannerFamilia.jpg',
+                                fit: BoxFit.cover,
+                                alignment: const Alignment(0.0, 0.2),
+                              ),
+                              const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0x00FFFFFF),
+                                      Color(0xF2FFFFFF)
+                                    ],
+                                    stops: [0.45, 1.0],
+                                    begin: AlignmentDirectional(0.0, -1.0),
+                                    end: AlignmentDirectional(0.0, 1.0),
+                                  ),
+                                ),
+                              ),
+                              Align(
+                                alignment:
+                                    const AlignmentDirectional(-1.0, 1.0),
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 14.0),
+                                  child: Text(
+                                    'Tu próximo hogar, sin complicaciones',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.publicSans(
+                                              fontWeight: FontWeight.w600),
+                                          color: const Color(0xFF00444B),
+                                          fontSize: 22.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w600,
+                                          lineHeight: 1.2,
                                         ),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          20.0, 16.0, 20.0, 0.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25.0),
+                          boxShadow: const [
+                            BoxShadow(
+                              blurRadius: 12.0,
+                              color: Color(0x1A000000),
+                              offset: Offset(0.0, 4.0),
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                width: 200.0,
+                                child: TextFormField(
+                                  controller: _model.textController,
+                                  focusNode: _model.textFieldFocusNode,
+                                  autofocus: false,
+                                  enabled: true,
+                                  obscureText: false,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    labelStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontStyle,
+                                        ),
+                                    hintText: 'Búsqueda con IA',
+                                    hintStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontStyle,
+                                        ),
+                                    enabledBorder: const OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color(0x00000000),
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(25.0),
+                                        bottomRight: Radius.circular(25.0),
+                                        topLeft: Radius.circular(25.0),
+                                        topRight: Radius.circular(25.0),
+                                      ),
+                                    ),
+                                    focusedBorder: const OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color(0x00000000),
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(25.0),
+                                        bottomRight: Radius.circular(25.0),
+                                        topLeft: Radius.circular(25.0),
+                                        topRight: Radius.circular(25.0),
+                                      ),
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            FlutterFlowTheme.of(context).error,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: const BorderRadius.only(
+                                        bottomLeft: Radius.circular(25.0),
+                                        bottomRight: Radius.circular(25.0),
+                                        topLeft: Radius.circular(25.0),
+                                        topRight: Radius.circular(25.0),
+                                      ),
+                                    ),
+                                    focusedErrorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            FlutterFlowTheme.of(context).error,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: const BorderRadius.only(
+                                        bottomLeft: Radius.circular(25.0),
+                                        bottomRight: Radius.circular(25.0),
+                                        topLeft: Radius.circular(25.0),
+                                        topRight: Radius.circular(25.0),
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                    prefixIcon: const Icon(
+                                      Icons.search_rounded,
+                                      size: 24.0,
+                                    ),
+                                  ),
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                  maxLines: null,
+                                  cursorColor:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  enableInteractiveSelection: true,
+                                  validator: _model.textControllerValidator
+                                      .asValidator(context),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -1032,15 +1043,16 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 context.pushNamed(
                                                   DOVIACLIENTPropiedadSeleccionadaNewWidget
                                                       .routeName,
-                                                queryParameters: {
-                                                  'propertyId': serializeParam(
-                                                    getJsonField(
-                                                      eachHouseItem,
-                                                      r'''$.id''',
-                                                    ).toString(),
-                                                    ParamType.String,
-                                                  ),
-                                                }.withoutNulls,
+                                                  queryParameters: {
+                                                    'propertyId':
+                                                        serializeParam(
+                                                      getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
                                                 );
                                               });
                                             },
@@ -1101,9 +1113,22 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 eachHouseItem,
                                                 r'''$.price''',
                                               ).toString(),
-                                              propertyType: getJsonField(eachHouseItem, r'''$.propertyType''')?.toString(),
-                                              hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') == true || getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() == 'true',
-                                              originalPrice: getJsonField(eachHouseItem, r'''$.originalPrice''')?.toString(),
+                                              propertyType: getJsonField(
+                                                      eachHouseItem,
+                                                      r'''$.propertyType''')
+                                                  ?.toString(),
+                                              hasDiscount: getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.hasDiscount''') ==
+                                                      true ||
+                                                  getJsonField(eachHouseItem,
+                                                              r'''$.hasDiscount''')
+                                                          .toString() ==
+                                                      'true',
+                                              originalPrice: getJsonField(
+                                                      eachHouseItem,
+                                                      r'''$.originalPrice''')
+                                                  ?.toString(),
                                               propertyId: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.id''',
@@ -1343,7 +1368,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               FFButtonWidget(
                                 onPressed: () async {
                                   _handleRestrictedAction(() async {
-                                    await launchURL('https://dovia.app/desarrollos');
+                                    await launchURL(
+                                        'https://dovia.app/desarrollos');
                                   });
                                 },
                                 text: 'Ver mas',
@@ -1391,20 +1417,22 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: List.generate(3, (index) {
                                 return Builder(
-                                  builder: (context) =>                                  InkWell(
+                                  builder: (context) => InkWell(
                                     splashColor: Colors.transparent,
                                     focusColor: Colors.transparent,
                                     hoverColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
                                     onTap: () async {
                                       _handleRestrictedAction(() async {
-                                        await launchURL('https://dovia.app/desarrollos');
+                                        await launchURL(
+                                            'https://dovia.app/desarrollos');
                                       });
                                     },
                                     child: custom_widgets.DoviaClientHouseCard(
                                       width: 210.0,
                                       height: 0.0,
-                                      imageUrl: 'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',
+                                      imageUrl:
+                                          'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',
                                       name: 'Desarrollo Especial',
                                       type: 'Preventa',
                                       price: '\$ 1,000,000',
@@ -1557,7 +1585,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   DOVIACLIENTPropiedadSeleccionadaNewWidget
                                                       .routeName,
                                                   queryParameters: {
-                                                    'propertyId': serializeParam(
+                                                    'propertyId':
+                                                        serializeParam(
                                                       getJsonField(
                                                         eachHouseItem,
                                                         r'''$.id''',
@@ -1625,9 +1654,22 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 eachHouseItem,
                                                 r'''$.price''',
                                               ).toString(),
-                                              propertyType: getJsonField(eachHouseItem, r'''$.propertyType''')?.toString(),
-                                              hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') == true || getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() == 'true',
-                                              originalPrice: getJsonField(eachHouseItem, r'''$.originalPrice''')?.toString(),
+                                              propertyType: getJsonField(
+                                                      eachHouseItem,
+                                                      r'''$.propertyType''')
+                                                  ?.toString(),
+                                              hasDiscount: getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.hasDiscount''') ==
+                                                      true ||
+                                                  getJsonField(eachHouseItem,
+                                                              r'''$.hasDiscount''')
+                                                          .toString() ==
+                                                      'true',
+                                              originalPrice: getJsonField(
+                                                      eachHouseItem,
+                                                      r'''$.originalPrice''')
+                                                  ?.toString(),
                                               propertyId: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.id''',
@@ -1971,7 +2013,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   DOVIACLIENTPropiedadSeleccionadaNewWidget
                                                       .routeName,
                                                   queryParameters: {
-                                                    'propertyId': serializeParam(
+                                                    'propertyId':
+                                                        serializeParam(
                                                       getJsonField(
                                                         eachHouseItem,
                                                         r'''$.id''',
@@ -2039,9 +2082,22 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 eachHouseItem,
                                                 r'''$.price''',
                                               ).toString(),
-                                              propertyType: getJsonField(eachHouseItem, r'''$.propertyType''')?.toString(),
-                                              hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') == true || getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() == 'true',
-                                              originalPrice: getJsonField(eachHouseItem, r'''$.originalPrice''')?.toString(),
+                                              propertyType: getJsonField(
+                                                      eachHouseItem,
+                                                      r'''$.propertyType''')
+                                                  ?.toString(),
+                                              hasDiscount: getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.hasDiscount''') ==
+                                                      true ||
+                                                  getJsonField(eachHouseItem,
+                                                              r'''$.hasDiscount''')
+                                                          .toString() ==
+                                                      'true',
+                                              originalPrice: getJsonField(
+                                                      eachHouseItem,
+                                                      r'''$.originalPrice''')
+                                                  ?.toString(),
                                               propertyId: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.id''',

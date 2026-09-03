@@ -208,8 +208,13 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        (widget.propertyType!.toLowerCase().contains('departamento') || widget.propertyType!.toLowerCase().contains('edificio')) 
-                            ? Icons.apartment 
+                        (widget.propertyType!
+                                    .toLowerCase()
+                                    .contains('departamento') ||
+                                widget.propertyType!
+                                    .toLowerCase()
+                                    .contains('edificio'))
+                            ? Icons.apartment
                             : Icons.house,
                         color: const Color(0xFF00444B),
                         size: 20,
@@ -245,7 +250,6 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                     ),
                   ),
                 ),
-
               ],
             ),
           ),
@@ -260,18 +264,19 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      widget.price ?? "",
+                      _formatPrice(widget.price),
                       style: GoogleFonts.raleway(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF007376),
                       ),
                     ),
-                    if (widget.hasDiscount == true && widget.originalPrice != null)
+                    if (widget.hasDiscount == true &&
+                        widget.originalPrice != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Text(
-                          widget.originalPrice!,
+                          _formatPrice(widget.originalPrice),
                           style: GoogleFonts.raleway(
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
@@ -317,6 +322,40 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
         ],
       ),
     );
+  }
+
+  /// Formats a raw price into the format used across the designs, e.g.
+  /// `$ 1.000.000`. Returns the original string when it cannot be parsed.
+  String _formatPrice(String? raw) {
+    final value = (raw ?? '').trim();
+    if (value.isEmpty || value.toLowerCase() == 'null') {
+      return '';
+    }
+
+    var body = value.replaceAll(RegExp(r'[^0-9.,]'), '');
+    final lastSeparator = body.lastIndexOf(RegExp(r'[.,]'));
+    final decimals = lastSeparator == -1 ? 0 : body.length - lastSeparator - 1;
+    // A trailing group of one or two digits is a decimal part, not a
+    // thousands group, so drop it. Three digits means it is a group.
+    if (lastSeparator != -1 && decimals > 0 && decimals <= 2) {
+      body = body.substring(0, lastSeparator);
+    }
+
+    final digits = body.replaceAll(RegExp(r'[.,]'), '');
+    if (digits.isEmpty) {
+      return value;
+    }
+
+    final whole = digits.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+    final grouped = StringBuffer();
+    for (var i = 0; i < whole.length; i++) {
+      if (i > 0 && (whole.length - i) % 3 == 0) {
+        grouped.write('.');
+      }
+      grouped.write(whole[i]);
+    }
+
+    return '\$ ${value.startsWith('-') ? '-' : ''}$grouped';
   }
 
   Widget _buildSpecItem(String text) {
