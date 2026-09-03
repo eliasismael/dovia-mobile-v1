@@ -195,29 +195,15 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    // Encabezado de la pantalla: el título y, para quien
-                    // todavía no tiene cuenta, la invitación a sumarse como
-                    // asociado.
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 16.0, 20.0, 8.0),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Home',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w600),
-                                  color: const Color(0xFF00444B),
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                          const Spacer(),
-                          if (FFAppState().UserRole == 'VISITOR')
+                    // Para quien todavía no tiene cuenta, la invitación a
+                    // sumarse como asociado.
+                    if (FFAppState().UserRole == 'VISITOR')
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            20.0, 16.0, 20.0, 8.0),
+                        child: Row(
+                          children: [
+                            const Spacer(),
                             FFButtonWidget(
                               onPressed: () async {
                                 context.pushNamed('CreateAccount');
@@ -248,9 +234,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 borderRadius: BorderRadius.circular(24.0),
                               ),
                             ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
 
                     Align(
                       alignment: const AlignmentDirectional(0.0, -1.0),
