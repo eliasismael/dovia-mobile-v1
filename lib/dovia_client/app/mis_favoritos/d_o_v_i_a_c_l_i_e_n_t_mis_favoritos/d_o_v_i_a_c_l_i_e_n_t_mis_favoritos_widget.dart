@@ -570,38 +570,34 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                               authToken:
                                                   currentAuthenticationToken,
                                               onRemoveFromFavorites: () async {
-                                                await showDialog(
+                                                // El modal de carpetas se
+                                                // presenta desde abajo, como en
+                                                // el resto de la app.
+                                                await showModalBottomSheet(
+                                                  isScrollControlled: true,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  enableDrag: false,
                                                   context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
+                                                  builder: (context) {
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        FocusScope.of(context)
+                                                            .unfocus();
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                      },
+                                                      child: Padding(
+                                                        padding: MediaQuery
+                                                            .viewInsetsOf(
+                                                                context),
                                                         child:
                                                             TusFavoritosCarpetasModalWidget(
                                                           isCreatingNewFolderPARAM:
                                                               false,
-                                                          houseId: getJsonField(
-                                                            favoriteHouseItem,
-                                                            r'''$.id''',
-                                                          ).toString(),
+                                                          houseId: _propertyIdOf(
+                                                              favoriteHouseItem),
                                                           propertyName:
                                                               getJsonField(
                                                             favoriteHouseItem,
@@ -614,7 +610,8 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                                       ),
                                                     );
                                                   },
-                                                );
+                                                ).then((value) =>
+                                                    safeSetState(() {}));
                                               },
                                             ),
                                           ),

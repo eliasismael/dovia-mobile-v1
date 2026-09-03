@@ -494,35 +494,96 @@ class _TusFavoritosCarpetasModalWidgetState
                                                               eachFolderItem,
                                                               r'''$.id''',
                                                             ).toString())) {
-                                                          return Container(
-                                                            width: 30.0,
-                                                            height: 30.0,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .primaryText,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              border:
-                                                                  Border.all(
+                                                          // Ya esta en la
+                                                          // carpeta: el mismo
+                                                          // control la saca.
+                                                          return InkWell(
+                                                            splashColor: Colors
+                                                                .transparent,
+                                                            focusColor: Colors
+                                                                .transparent,
+                                                            hoverColor: Colors
+                                                                .transparent,
+                                                            highlightColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            onTap: () async {
+                                                              final removeResult =
+                                                                  await DOVIAAPIFavoriteContextGroup
+                                                                      .removeFavoriteFromFolderCall
+                                                                      .call(
+                                                                authToken:
+                                                                    currentAuthenticationToken,
+                                                                folderId:
+                                                                    getJsonField(
+                                                                  eachFolderItem,
+                                                                  r'''$.id''',
+                                                                ).toString(),
+                                                                propertyId:
+                                                                    widget
+                                                                        .houseId,
+                                                              );
+
+                                                              if (!removeResult
+                                                                  .succeeded) {
+                                                                await showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  builder:
+                                                                      (alertDialogContext) {
+                                                                    return AlertDialog(
+                                                                      title: const Text(
+                                                                          'error'),
+                                                                      content: Text((removeResult.jsonBody ??
+                                                                              '')
+                                                                          .toString()),
+                                                                      actions: [
+                                                                        TextButton(
+                                                                          onPressed: () =>
+                                                                              Navigator.pop(alertDialogContext),
+                                                                          child:
+                                                                              const Text('Ok'),
+                                                                        ),
+                                                                      ],
+                                                                    );
+                                                                  },
+                                                                );
+                                                              }
+
+                                                              safeSetState(
+                                                                  () {});
+                                                            },
+                                                            child: Container(
+                                                              width: 30.0,
+                                                              height: 30.0,
+                                                              decoration:
+                                                                  BoxDecoration(
                                                                 color: FlutterFlowTheme.of(
                                                                         context)
                                                                     .primaryText,
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                                border:
+                                                                    Border.all(
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primaryText,
+                                                                ),
                                                               ),
-                                                            ),
-                                                            child: ClipRRect(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8.0),
-                                                              child: SvgPicture
-                                                                  .asset(
-                                                                'assets/images/check.svg',
-                                                                width: 200.0,
-                                                                height: 200.0,
-                                                                fit:
-                                                                    BoxFit.none,
+                                                              child: ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8.0),
+                                                                child:
+                                                                    SvgPicture
+                                                                        .asset(
+                                                                  'assets/images/check.svg',
+                                                                  width: 200.0,
+                                                                  height: 200.0,
+                                                                  fit: BoxFit
+                                                                      .none,
+                                                                ),
                                                               ),
                                                             ),
                                                           );
