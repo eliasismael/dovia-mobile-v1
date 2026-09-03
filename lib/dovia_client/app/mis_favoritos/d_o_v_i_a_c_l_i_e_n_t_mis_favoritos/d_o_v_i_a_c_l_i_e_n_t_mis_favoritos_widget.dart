@@ -1,6 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
-import '/dovia_client/app/mis_favoritos/favorite_houses_card/favorite_houses_card_widget.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -10,6 +9,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
+import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,6 +47,18 @@ class _DOVIACLIENTMisFavoritosWidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// El favorito trae su propio id; el de la propiedad viaja en `propertyId`
+  /// y es el que espera el detalle. Algunas respuestas solo mandan `id`, asi
+  /// que sirve de respaldo.
+  String _propertyIdOf(dynamic item) {
+    final propertyId =
+        getJsonField(item, r'''$.propertyId''')?.toString() ?? '';
+    if (propertyId.isNotEmpty && propertyId != 'null') {
+      return propertyId;
+    }
+    return getJsonField(item, r'''$.id''').toString();
   }
 
   @override
@@ -486,68 +498,125 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                         builder: (context) => Padding(
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                          child: FavoriteHousesCardWidget(
-                                            key: Key(
-                                                'Keyq7t_${favoriteHouseIndex}_of_${favoriteHouse.length}'),
-                                            name: getJsonField(
-                                              favoriteHouseItem,
-                                              r'''$.name''',
-                                            ).toString(),
-                                            price: getJsonField(
-                                              favoriteHouseItem,
-                                              r'''$.price''',
-                                            ).toString(),
-                                            type: getJsonField(
-                                              favoriteHouseItem,
-                                              r'''$.listingType[0][0]''',
-                                            ).toString(),
-                                            onHertTap: () async {
-                                              await showDialog(
-                                                context: context,
-                                                builder: (dialogContext) {
-                                                  return Dialog(
-                                                    elevation: 0,
-                                                    insetPadding:
-                                                        EdgeInsets.zero,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    alignment:
-                                                        const AlignmentDirectional(
-                                                                0.0, 0.0)
-                                                            .resolve(
-                                                                Directionality.of(
-                                                                    context)),
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        FocusScope.of(
-                                                                dialogContext)
-                                                            .unfocus();
-                                                        FocusManager.instance
-                                                            .primaryFocus
-                                                            ?.unfocus();
-                                                      },
-                                                      child:
-                                                          TusFavoritosCarpetasModalWidget(
-                                                        isCreatingNewFolderPARAM:
-                                                            false,
-                                                        houseId: getJsonField(
-                                                          favoriteHouseItem,
-                                                          r'''$.id''',
-                                                        ).toString(),
-                                                        propertyName:
-                                                            getJsonField(
-                                                          favoriteHouseItem,
-                                                          r'''$.name''',
-                                                        ).toString(),
-                                                        propertyImage: '',
-                                                        propertyIsFavorite:
-                                                            true,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
+                                          child: InkWell(
+                                            splashColor: Colors.transparent,
+                                            focusColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            onTap: () async {
+                                              context.pushNamed(
+                                                DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                    .routeName,
+                                                queryParameters: {
+                                                  'propertyId': serializeParam(
+                                                    _propertyIdOf(
+                                                        favoriteHouseItem),
+                                                    ParamType.String,
+                                                  ),
+                                                }.withoutNulls,
                                               );
                                             },
+                                            child: custom_widgets
+                                                .DoviaClientHouseCard(
+                                              key: Key(
+                                                  'Keyq7t_${favoriteHouseIndex}_of_${favoriteHouse.length}'),
+                                              width: double.infinity,
+                                              height: 0.0,
+                                              imageUrl:
+                                                  'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                              isFavorite: true,
+                                              name: getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.name''')
+                                                  .toString(),
+                                              type: getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.listingType[0]''')
+                                                  .toString(),
+                                              price: getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.price''')
+                                                  .toString(),
+                                              propertyType: getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.propertyType''')
+                                                  ?.toString(),
+                                              hasDiscount: getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.hasDiscount''') ==
+                                                  true,
+                                              originalPrice: getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.originalPrice''')
+                                                  ?.toString(),
+                                              constructionArea: castToType<int>(
+                                                  getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.features.general.constructionArea''')),
+                                              landArea: castToType<double>(
+                                                  getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.features.general.landArea''')),
+                                              bedrooms: castToType<int>(
+                                                  getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.features.general.bedrooms''')),
+                                              bathrooms: castToType<int>(
+                                                  getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.features.general.bathrooms''')),
+                                              propertyId: _propertyIdOf(
+                                                  favoriteHouseItem),
+                                              authToken:
+                                                  currentAuthenticationToken,
+                                              onRemoveFromFavorites: () async {
+                                                await showDialog(
+                                                  context: context,
+                                                  builder: (dialogContext) {
+                                                    return Dialog(
+                                                      elevation: 0,
+                                                      insetPadding:
+                                                          EdgeInsets.zero,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      alignment:
+                                                          const AlignmentDirectional(
+                                                                  0.0, 0.0)
+                                                              .resolve(
+                                                                  Directionality.of(
+                                                                      context)),
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          FocusScope.of(
+                                                                  dialogContext)
+                                                              .unfocus();
+                                                          FocusManager.instance
+                                                              .primaryFocus
+                                                              ?.unfocus();
+                                                        },
+                                                        child:
+                                                            TusFavoritosCarpetasModalWidget(
+                                                          isCreatingNewFolderPARAM:
+                                                              false,
+                                                          houseId: getJsonField(
+                                                            favoriteHouseItem,
+                                                            r'''$.id''',
+                                                          ).toString(),
+                                                          propertyName:
+                                                              getJsonField(
+                                                            favoriteHouseItem,
+                                                            r'''$.name''',
+                                                          ).toString(),
+                                                          propertyImage: '',
+                                                          propertyIsFavorite:
+                                                              true,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            ),
                                           ),
                                         ),
                                       );
