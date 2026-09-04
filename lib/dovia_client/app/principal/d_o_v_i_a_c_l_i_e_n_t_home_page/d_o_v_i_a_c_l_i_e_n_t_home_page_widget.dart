@@ -11,6 +11,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/dovia_suupport_messages/dovia_suupport_messages_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/domain/offer_json.dart';
 import '/index.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,16 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
             '1';
 
     return _favoritePropertyIds.contains(propertyId) || payloadFavorite;
+  }
+
+  /// Foto principal que manda el backend para la propiedad. El listado de
+  /// propiedades hoy no incluye ninguna, y ahi la tarjeta se queda con su
+  /// imagen por defecto.
+  String _houseImageUrl(dynamic house) {
+    if (house is! Map) {
+      return '';
+    }
+    return firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? '';
   }
 
   /// Cuantas tarjetas muestra cada carrusel del Home.
@@ -1105,8 +1116,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   .DoviaClientHouseCard(
                                                 width: 210.0,
                                                 height: 0.0,
-                                                imageUrl:
-                                                    'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                                imageUrl: _houseImageUrl(
+                                                    eachHouseItem),
                                                 isFavorite: _isHouseFavorite(
                                                     eachHouseItem),
                                                 name: getJsonField(
@@ -1660,8 +1671,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   .DoviaClientHouseCard(
                                                 width: 210.0,
                                                 height: 0.0,
-                                                imageUrl:
-                                                    'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                                imageUrl: _houseImageUrl(
+                                                    eachHouseItem),
                                                 isFavorite: _isHouseFavorite(
                                                     eachHouseItem),
                                                 name: getJsonField(
@@ -2102,8 +2113,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   .DoviaClientHouseCard(
                                                 width: 210.0,
                                                 height: 0.0,
-                                                imageUrl:
-                                                    'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                                imageUrl: _houseImageUrl(
+                                                    eachHouseItem),
                                                 isFavorite: _isHouseFavorite(
                                                     eachHouseItem),
                                                 name: getJsonField(

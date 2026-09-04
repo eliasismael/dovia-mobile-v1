@@ -9,6 +9,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/domain/offer_json.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_ver_mas_propiedades_model.dart';
@@ -49,6 +50,15 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Foto principal que manda el backend para la propiedad. Cuando no viene
+  /// ninguna, la tarjeta se queda con su imagen por defecto.
+  String _houseImageUrl(dynamic house) {
+    if (house is! Map) {
+      return '';
+    }
+    return firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? '';
   }
 
   @override
@@ -195,7 +205,7 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                               width: 210.0,
                                               height: 0.0,
                                               imageUrl:
-                                                  'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+                                                  _houseImageUrl(eachHouseItem),
                                               isFavorite: getJsonField(
                                                 eachHouseItem,
                                                 r'''$.isFavorite''',

@@ -149,17 +149,36 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
     }
   }
 
+  /// Foto de la propiedad. Cuando el backend no manda ninguna, o la que
+  /// manda no carga, la tarjeta cae en la imagen de casa que trae la app.
+  Widget _photo() {
+    Widget fallback() => Image.asset(
+          'assets/images/casa_card_sobreMiVisita.png',
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) =>
+              Container(color: const Color(0xFFEFEFEF)),
+        );
+
+    final url = widget.imageUrl.trim();
+    if (url.isEmpty) {
+      return fallback();
+    }
+    if (url.startsWith('http')) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => fallback(),
+      );
+    }
+    return Image.asset(
+      url,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => fallback(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    ImageProvider imageProvider;
-
-    if (widget.imageUrl.startsWith('http') ||
-        widget.imageUrl.startsWith('https')) {
-      imageProvider = NetworkImage(widget.imageUrl);
-    } else {
-      imageProvider = AssetImage(widget.imageUrl);
-    }
-
     return Container(
       width: widget.width ?? 320,
       height:
@@ -183,17 +202,12 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
             height: 140,
             child: Stack(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
+                  child: SizedBox.expand(child: _photo()),
                 ),
 
                 // Typology Icon
