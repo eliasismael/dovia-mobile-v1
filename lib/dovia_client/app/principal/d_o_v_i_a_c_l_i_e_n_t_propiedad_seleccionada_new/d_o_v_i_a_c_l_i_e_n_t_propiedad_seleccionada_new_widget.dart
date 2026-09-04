@@ -65,6 +65,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   int _floors = 0;
   String _propertyCode = '';
   List<String> _carouselImages = [];
+
+  /// Fotos agrupadas por ambiente, tal como las manda el backend.
+  Map<String, List<String>> _imagesByRoom = {};
   Map<String, dynamic>? _amenitiesData;
   double _lat = 14.3;
   double _lng = -90.5;
@@ -119,15 +122,19 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
       final imagesList = <String>[];
       final mainImg = d?['image']?.toString() ?? '';
       if (mainImg.isNotEmpty) imagesList.add(mainImg);
+      final imagesByRoom = <String, List<String>>{};
       if (imagesObj is Map) {
-        for (final v in imagesObj.values) {
-          if (v is List) {
-            for (final url in v) {
-              final s = url?.toString() ?? '';
-              if (s.isNotEmpty && !imagesList.contains(s)) imagesList.add(s);
-            }
+        imagesObj.forEach((room, value) {
+          if (value is! List) return;
+          final urls = <String>[];
+          for (final url in value) {
+            final s = url?.toString() ?? '';
+            if (s.isEmpty) continue;
+            urls.add(s);
+            if (!imagesList.contains(s)) imagesList.add(s);
           }
-        }
+          if (urls.isNotEmpty) imagesByRoom[room.toString()] = urls;
+        });
       }
 
       safeSetState(() {
@@ -146,6 +153,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         _parkingSpots = (general?['parkingSpots'] as num?)?.toInt() ?? 0;
         _floors = (general?['floors'] as num?)?.toInt() ?? 0;
         _carouselImages = imagesList;
+        _imagesByRoom = imagesByRoom;
         _propertyCode = d?['code']?.toString() ??
             d?['internalCode']?.toString() ??
             d?['folio']?.toString() ??
@@ -216,6 +224,56 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     }
   }
 
+  /// Las fotos que manda el backend para la propiedad. Cuando no hay
+  /// ninguna se muestra la imagen que trae la app, para no dejar el hueco
+  /// en blanco.
+  List<Widget> _carouselItems() {
+    final urls = _carouselImages.isEmpty ? <String>[''] : _carouselImages;
+    return urls.map(_carouselItem).toList();
+  }
+
+  Widget _carouselItem(String url) {
+    Widget fallback() => Image.asset(
+          'assets/images/casa_card_sobreMiVisita.png',
+          fit: BoxFit.cover,
+        );
+
+    return GestureDetector(
+      onTap: _showGallery,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12.0),
+          child: SizedBox(
+            width: double.infinity,
+            height: 160.0,
+            child: url.isEmpty
+                ? fallback()
+                : Image.network(
+                    url,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => fallback(),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Ambientes que manda el backend y no tienen parametro propio en la
+  /// galeria, por ejemplo la sala. Sin esto sus fotos se perdian.
+  Map<String, List<String>>? _extraPhotoCategories() {
+    const standard = {'habitacion', 'habitación', 'cocina', 'terraza'};
+    final extras = <String, List<String>>{};
+    _imagesByRoom.forEach((room, urls) {
+      if (standard.contains(room.toLowerCase())) return;
+      final label =
+          room.isEmpty ? room : '${room[0].toUpperCase()}${room.substring(1)}';
+      extras[label] = urls;
+    });
+    return extras.isEmpty ? null : extras;
+  }
+
   void _showGallery() async {
     _trackInteraction();
     final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
@@ -228,6 +286,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
           habitacionImages: body != null ? api.imgHabitacion(body) : null,
           cocinaImages: body != null ? api.imgCocina(body) : null,
           terrazaImages: body != null ? api.imgTerraza(body) : null,
+          extraCategories: _extraPhotoCategories(),
         ),
       ),
     );
@@ -642,18 +701,47 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                   ].divide(const SizedBox(width: 8.0)),
                                 ),
                               ),
-                              RichText(
-                                textScaler: MediaQuery.of(context).textScaler,
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: _propertyName.isNotEmpty
-                                          ? _propertyName
-                                          : 'Propiedad',
+                              // El nombre puede ser largo: sin Expanded el titulo se sale de
+                              // la pantalla en lugar de repartirse en dos lineas.
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: RichText(
+                                    textScaler:
+                                        MediaQuery.of(context).textScaler,
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: _propertyName.isNotEmpty
+                                              ? _propertyName
+                                              : 'Propiedad',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.publicSans(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                                fontSize: 18.0,
+                                                letterSpacing: 0.0,
+                                                fontWeight: FontWeight.w600,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                                lineHeight: 1.4,
+                                              ),
+                                        )
+                                      ],
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
-                                            font: GoogleFonts.publicSans(
+                                            font: GoogleFonts.inter(
                                               fontWeight: FontWeight.w600,
                                               fontStyle:
                                                   FlutterFlowTheme.of(context)
@@ -669,29 +757,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                     .fontStyle,
                                             lineHeight: 1.4,
                                           ),
-                                    )
-                                  ],
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 18.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        lineHeight: 1.4,
-                                      ),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                  ),
                                 ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
                               ),
                               Column(
                                 mainAxisSize: MainAxisSize.max,
@@ -873,99 +943,28 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: 320.0,
-                                    height: 160.0,
-                                    child: CarouselSlider(
-                                      items: [
-                                        GestureDetector(
-                                          onTap: _showGallery,
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            child: Container(
-                                              width: 212.0,
-                                              height: MediaQuery.sizeOf(context)
-                                                      .height *
-                                                  1.6,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                child: Image.asset(
-                                                  'assets/images/casa_card_sobreMiVisita.png',
-                                                  width: 100.0,
-                                                  height: 100.0,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
+                                  // El ancho fijo desbordaba en pantallas chicas: el carrusel
+                                  // ocupa lo que queda entre las dos flechas.
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 160.0,
+                                      child: CarouselSlider(
+                                        items: _carouselItems(),
+                                        carouselController:
+                                            _model.carouselController ??=
+                                                CarouselSliderController(),
+                                        options: CarouselOptions(
+                                          initialPage: 0,
+                                          viewportFraction: 0.7,
+                                          disableCenter: false,
+                                          enlargeCenterPage: false,
+                                          enlargeFactor: 0.0,
+                                          enableInfiniteScroll: false,
+                                          scrollDirection: Axis.horizontal,
+                                          autoPlay: false,
+                                          onPageChanged: (index, _) => _model
+                                              .carouselCurrentIndex = index,
                                         ),
-                                        GestureDetector(
-                                          onTap: _showGallery,
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            child: Container(
-                                              width: 212.0,
-                                              height: 160.0,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                child: Image.network(
-                                                  'https://picsum.photos/seed/146/600',
-                                                  width: 212.0,
-                                                  height: 160.0,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: _showGallery,
-                                          child: Container(
-                                            width: 212.0,
-                                            height: 160.0,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/119/600',
-                                                width: 212.0,
-                                                height: 160.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                      carouselController:
-                                          _model.carouselController ??=
-                                              CarouselSliderController(),
-                                      options: CarouselOptions(
-                                        initialPage: 0,
-                                        viewportFraction: 0.7,
-                                        disableCenter: false,
-                                        enlargeCenterPage: false,
-                                        enlargeFactor: 0.0,
-                                        enableInfiniteScroll: false,
-                                        scrollDirection: Axis.horizontal,
-                                        autoPlay: false,
-                                        onPageChanged: (index, _) =>
-                                            _model.carouselCurrentIndex = index,
                                       ),
                                     ),
                                   ),
