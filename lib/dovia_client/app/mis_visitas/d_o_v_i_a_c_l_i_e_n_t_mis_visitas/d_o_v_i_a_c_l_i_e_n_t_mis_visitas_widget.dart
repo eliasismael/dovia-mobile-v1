@@ -10,6 +10,7 @@ import '/backend/api_requests/api_properties.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
 import '/auth/custom_auth/auth_util.dart';
+import '/domain/offer_json.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_model.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita/reschedule_visit_widget.dart';
@@ -39,6 +40,10 @@ class _DOVIACLIENTMisVisitasWidgetState
   Future<ApiCallResponse>? _upcomingAssignedFuture;
   Future<ApiCallResponse>? _upcomingPendingFuture;
   Future<ApiCallResponse>? _completedFuture;
+
+  /// Todas las visitas, sin filtro: es la unica forma de ver las
+  /// canceladas y las ya reprogramadas, que no tienen consulta propia.
+  Future<ApiCallResponse>? _allVisitsFuture;
   Future<ApiCallResponse>? _offersFuture;
 
   @override
@@ -86,6 +91,12 @@ class _DOVIACLIENTMisVisitasWidgetState
       limit: '10',
     );
 
+    _allVisitsFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
+      authToken: currentAuthenticationToken,
+      page: '1',
+      limit: '50',
+    );
+
     // ── OFERTAS ───────────────────────────────────────────────────────────
     _offersFuture = DOVIAAPIOfferContextGroup.listMyOffersCall.call(
       authToken: currentAuthenticationToken,
@@ -100,6 +111,28 @@ class _DOVIACLIENTMisVisitasWidgetState
   void dispose() {
     _model.dispose();
     super.dispose();
+  }
+
+  /// Una visita ya reprogramada, no una que espera que la reprogramen.
+  /// El backend no expone un unico campo para esto, asi que se miran los
+  /// que puede mandar; RESCHEDULE_REQUIRED queda afuera a proposito, porque
+  /// es justo la que todavia hay que reprogramar.
+  bool _wasRescheduled(dynamic visit) {
+    if (visit is! Map) return false;
+
+    final substatus = (visit['substatus']?.toString() ?? '').toUpperCase();
+    if (substatus == 'RESCHEDULE_REQUIRED') return false;
+
+    final status = (visit['status']?.toString() ?? '').toUpperCase();
+    if (substatus.contains('RESCHEDULED') || status.contains('RESCHEDULED')) {
+      return true;
+    }
+
+    final count = visit['rescheduleCount'] ?? visit['rescheduledCount'];
+    if (count is num && count > 0) return true;
+
+    final at = visit['rescheduledAt']?.toString() ?? '';
+    return at.isNotEmpty && at != 'null';
   }
 
   List<dynamic> _parseVisits(ApiCallResponse res) {
@@ -146,7 +179,12 @@ class _DOVIACLIENTMisVisitasWidgetState
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          // ── 1. Tus próximas visitas ────────────────────
+                          // ── 1 a 3. Los tres carriles de visitas ────────
+                          // Se piden juntos y se reparten en el cliente: las
+                          // que faltan reprogramar o quedaron canceladas van
+                          // con las próximas, completadas solo las
+                          // completadas y re-programadas solo las que ya se
+                          // reprogramaron.
                           FutureBuilder<List<ApiCallResponse>>(
                             future: Future.wait([
                               _pendingOwnerFuture ??
@@ -157,9 +195,16 @@ class _DOVIACLIENTMisVisitasWidgetState
                                   Future.value(ApiCallResponse(null, {}, 0)),
                               _rescheduledFuture ??
                                   Future.value(ApiCallResponse(null, {}, 0)),
+                              _allVisitsFuture ??
+                                  Future.value(ApiCallResponse(null, {}, 0)),
+                              _completedFuture ??
+                                  Future.value(ApiCallResponse(null, {}, 0)),
                             ]),
                             builder: (context, snap) {
-                              final merged = <dynamic>[];
+                              final upcoming = <dynamic>[];
+                              final rescheduled = <dynamic>[];
+                              final completed = <dynamic>[];
+
                               if (snap.hasData) {
                                 final seen = <String>{};
                                 for (final res in snap.data!) {
@@ -167,63 +212,81 @@ class _DOVIACLIENTMisVisitasWidgetState
                                     final id = v['visitId']?.toString() ??
                                         v['id']?.toString() ??
                                         '';
-                                    if (seen.add(id)) merged.add(v);
+                                    if (!seen.add(id)) continue;
+
+                                    final status =
+                                        (v['status']?.toString() ?? '')
+                                            .toUpperCase();
+                                    if (status == 'COMPLETED') {
+                                      completed.add(v);
+                                    } else if (_wasRescheduled(v)) {
+                                      rescheduled.add(v);
+                                    } else {
+                                      upcoming.add(v);
+                                    }
                                   }
                                 }
                               }
+
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // Re-programadas solo aparece cuando hay
+                                  // alguna: es un caso poco frecuente.
+                                  if (rescheduled.isNotEmpty) ...[
+                                    _sectionHeader(
+                                      'Visitas re-programadas',
+                                      () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (ctx) => _VerMasScreen(
+                                            title: 'Visitas re-programadas',
+                                            items: rescheduled,
+                                            cardType: _CardType.reschedule,
+                                          ),
+                                        ),
+                                      ),
+                                      topPadding: 40,
+                                    ),
+                                    _visitListHorizontal(rescheduled,
+                                        cardType: _CardType.reschedule),
+                                  ],
                                   _sectionHeader(
                                     'Tus próximas visitas',
                                     () {
-                                      if (merged.isNotEmpty) {
+                                      if (upcoming.isNotEmpty) {
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                                 builder: (ctx) => _VerMasScreen(
                                                     title:
                                                         'Tus próximas visitas',
-                                                    items: merged,
+                                                    items: upcoming,
                                                     cardType:
                                                         _CardType.upcoming)));
                                       }
                                     },
-                                    topPadding: 40,
+                                    topPadding:
+                                        rescheduled.isNotEmpty ? 24 : 40,
                                   ),
                                   if (!snap.hasData)
                                     _loader()
-                                  else if (merged.isEmpty)
+                                  else if (upcoming.isEmpty)
                                     _emptyMessage('No tienes próximas visitas.')
                                   else
-                                    _visitListHorizontal(merged,
+                                    _visitListHorizontal(upcoming,
                                         cardType: _CardType.upcoming),
-                                ],
-                              );
-                            },
-                          ),
-
-                          // ── 2. Tus visitas anteriores (Completadas) ─────────────────────
-                          FutureBuilder<ApiCallResponse>(
-                            future: _completedFuture,
-                            builder: (context, snap) {
-                              final visits = snap.hasData
-                                  ? _parseVisits(snap.data!)
-                                  : <dynamic>[];
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
                                   _sectionHeader(
                                     'Tus visitas anteriores',
                                     () {
-                                      if (visits.isNotEmpty) {
+                                      if (completed.isNotEmpty) {
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                                 builder: (ctx) => _VerMasScreen(
                                                     title:
                                                         'Tus visitas anteriores',
-                                                    items: visits,
+                                                    items: completed,
                                                     cardType:
                                                         _CardType.completed)));
                                       }
@@ -231,11 +294,11 @@ class _DOVIACLIENTMisVisitasWidgetState
                                   ),
                                   if (!snap.hasData)
                                     _loader()
-                                  else if (visits.isEmpty)
+                                  else if (completed.isEmpty)
                                     _emptyMessage(
                                         'No tienes visitas completadas.')
                                   else
-                                    _visitListHorizontal(visits,
+                                    _visitListHorizontal(completed,
                                         cardType: _CardType.completed),
                                 ],
                               );
@@ -345,9 +408,8 @@ class _DOVIACLIENTMisVisitasWidgetState
       final slot = v['confirmedTimeSlot'];
       final visitDate = slot is Map ? slot['date']?.toString() ?? '' : '';
       final visitTime = slot is Map ? slot['time']?.toString() ?? '' : '';
-      final images = property is Map ? property['images'] : null;
-      final imageUrl = (images is List && images.isNotEmpty)
-          ? images[0]['url']?.toString() ?? ''
+      final imageUrl = property is Map
+          ? (firstPropertyPhotoUrl(Map<String, dynamic>.from(property)) ?? '')
           : '';
       final propertyName = property is Map
           ? (property['name']?.toString() ??
@@ -614,6 +676,7 @@ class _VisitCard extends StatefulWidget {
 
   // Session-level cache so the same property is fetched only once.
   static final Map<String, String> _nameCache = {};
+  static final Map<String, String> _photoCache = {};
 
   @override
   State<_VisitCard> createState() => _VisitCardState();
@@ -621,6 +684,7 @@ class _VisitCard extends StatefulWidget {
 
 class _VisitCardState extends State<_VisitCard> {
   late String _displayName;
+  late String _displayImage;
 
   static const Color primary = Color(0xFF007376);
   static const Color dark = Color(0xFF00444B);
@@ -630,6 +694,14 @@ class _VisitCardState extends State<_VisitCard> {
   void initState() {
     super.initState();
     final cached = _VisitCard._nameCache[widget.propertyId];
+    final cachedPhoto = _VisitCard._photoCache[widget.propertyId];
+
+    _displayImage =
+        widget.imageUrl.isNotEmpty ? widget.imageUrl : (cachedPhoto ?? '');
+    if (widget.imageUrl.isNotEmpty) {
+      _VisitCard._photoCache[widget.propertyId] = widget.imageUrl;
+    }
+
     if (cached != null) {
       _displayName = cached;
     } else if (widget.propertyName.isNotEmpty &&
@@ -638,24 +710,37 @@ class _VisitCardState extends State<_VisitCard> {
       _VisitCard._nameCache[widget.propertyId] = _displayName;
     } else {
       _displayName = widget.propertyName;
-      if (widget.propertyId.isNotEmpty) _fetchPropertyName();
+    }
+
+    // La visita no siempre trae la propiedad completa. Si falta el nombre o
+    // la foto se piden a la propiedad, que sí los devuelve.
+    final needsName = _VisitCard._nameCache[widget.propertyId] == null;
+    final needsPhoto = _displayImage.isEmpty;
+    if (widget.propertyId.isNotEmpty && (needsName || needsPhoto)) {
+      _fetchPropertyDetails();
     }
   }
 
-  Future<void> _fetchPropertyName() async {
+  Future<void> _fetchPropertyDetails() async {
     final res = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
       propertyId: widget.propertyId,
     );
     if (!mounted || !res.succeeded) return;
     final data = getJsonField(res.jsonBody, r'$.data.data') ??
         getJsonField(res.jsonBody, r'$.data');
-    final name = (data is Map)
-        ? (data['name']?.toString() ?? data['title']?.toString() ?? '')
-        : '';
-    if (name.isNotEmpty) {
-      _VisitCard._nameCache[widget.propertyId] = name;
-      setState(() => _displayName = name);
-    }
+    if (data is! Map) return;
+
+    final name = data['name']?.toString() ?? data['title']?.toString() ?? '';
+    final photo = firstPropertyPhotoUrl(Map<String, dynamic>.from(data)) ?? '';
+
+    if (name.isNotEmpty) _VisitCard._nameCache[widget.propertyId] = name;
+    if (photo.isNotEmpty) _VisitCard._photoCache[widget.propertyId] = photo;
+    if (name.isEmpty && photo.isEmpty) return;
+
+    setState(() {
+      if (name.isNotEmpty) _displayName = name;
+      if (photo.isNotEmpty && _displayImage.isEmpty) _displayImage = photo;
+    });
   }
 
   String _formatDate(String raw) {
@@ -689,6 +774,7 @@ class _VisitCardState extends State<_VisitCard> {
 
   String get _label {
     if (widget.cardType == _CardType.completed) return 'Completada';
+    if (widget.cardType == _CardType.reschedule) return 'Re-programada';
     if (isPending) return 'Pendiente';
     if (isReschedule) return 'Reprogramar';
     if (isConfirmed) return 'Programada';
@@ -697,6 +783,7 @@ class _VisitCardState extends State<_VisitCard> {
 
   Color get _labelColor {
     if (widget.cardType == _CardType.completed) return primary;
+    if (widget.cardType == _CardType.reschedule) return primary;
     if (isPending) return Colors.orange;
     if (isReschedule) return Colors.red;
     if (isConfirmed) return primary;
@@ -778,9 +865,9 @@ class _VisitCardState extends State<_VisitCard> {
             // ── Image ─────────────────────────────────────────────────
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: widget.imageUrl.isNotEmpty
+              child: _displayImage.isNotEmpty
                   ? Image.network(
-                      widget.imageUrl,
+                      _displayImage,
                       width: double.infinity,
                       height: 95,
                       fit: BoxFit.cover,
@@ -884,6 +971,12 @@ class _VisitCardState extends State<_VisitCard> {
   }
 
   List<Widget> _buildActions(BuildContext context) {
+    if (widget.cardType == _CardType.reschedule) {
+      return [
+        _pill(context, Icons.remove_red_eye_outlined, 'Re-Programar',
+            onTap: () => _onRescheduleTap(context)),
+      ];
+    }
     if (widget.cardType == _CardType.completed) {
       return [
         _pill(context, Icons.remove_red_eye_outlined, 'Ver detalle',
@@ -1011,8 +1104,9 @@ class _VerMasScreen extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent:
-                  isOffers ? 110 : (cardType == _CardType.upcoming ? 290 : 260),
+              mainAxisExtent: isOffers
+                  ? 110
+                  : (cardType == _CardType.completed ? 260 : 290),
             ),
             itemCount: items.length,
             itemBuilder: (context, index) {
@@ -1036,9 +1130,10 @@ class _VerMasScreen extends StatelessWidget {
                   slot is Map ? slot['date']?.toString() ?? '' : '';
               final visitTime =
                   slot is Map ? slot['time']?.toString() ?? '' : '';
-              final images = property is Map ? property['images'] : null;
-              final imageUrl = (images is List && images.isNotEmpty)
-                  ? images[0]['url']?.toString() ?? ''
+              final imageUrl = property is Map
+                  ? (firstPropertyPhotoUrl(
+                          Map<String, dynamic>.from(property)) ??
+                      '')
                   : '';
               final propertyName = property is Map
                   ? (property['name']?.toString() ??
