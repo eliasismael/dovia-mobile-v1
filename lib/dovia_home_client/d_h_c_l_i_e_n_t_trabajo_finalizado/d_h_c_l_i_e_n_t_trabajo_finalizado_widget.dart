@@ -411,6 +411,8 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Trabajo finalizado',
                       showMap: false,
                       showCurrency: false,

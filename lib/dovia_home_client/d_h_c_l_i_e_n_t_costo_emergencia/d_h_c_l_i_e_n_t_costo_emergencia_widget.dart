@@ -647,6 +647,8 @@ class _DHCLIENTCostoEmergenciaWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Costo fijo mínimo\ndel trabajo',
                       hideActions: true,
                     ),

@@ -610,6 +610,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Dovia Home',
                       showMap: false,
                       showCurrency: false,

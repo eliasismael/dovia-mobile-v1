@@ -514,6 +514,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Materiales',
                       showMap: false,
                       showCurrency: false,

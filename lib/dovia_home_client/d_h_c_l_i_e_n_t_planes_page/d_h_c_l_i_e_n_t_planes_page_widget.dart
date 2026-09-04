@@ -78,6 +78,8 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Planes',
                     ),
                   ),

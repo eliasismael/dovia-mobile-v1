@@ -1153,8 +1153,13 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Dovia Home',
                       showCart: true,
+                      // Con avisos y ajustes sumados no entra tambien el
+                      // logotipo; el titulo ya dice donde estamos.
+                      showLogo: false,
                       showMap: false,
                       showCurrency: false,
                     ),

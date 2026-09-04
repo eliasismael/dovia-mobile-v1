@@ -677,6 +677,8 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Agenda',
                       showCurrency: false,
                       showMap: false,

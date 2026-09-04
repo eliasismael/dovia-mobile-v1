@@ -405,6 +405,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Cotizaciones Recibidas',
                       showMap: false,
                       showCurrency: false,

@@ -121,6 +121,20 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     fontWeight: active ? FontWeight.w600 : FontWeight.normal,
                   ),
             ),
+            const SizedBox(height: 3.0),
+            // La curva del diseño marca la seccion abierta. El hueco se
+            // reserva siempre para que las etiquetas no se muevan.
+            SizedBox(
+              height: 8.0,
+              child: active
+                  ? SvgPicture.asset(
+                      'assets/images/navbar-active-indicator.svg',
+                      width: 44.0,
+                      height: 8.0,
+                      fit: BoxFit.contain,
+                    )
+                  : null,
+            ),
           ],
         ),
       ),

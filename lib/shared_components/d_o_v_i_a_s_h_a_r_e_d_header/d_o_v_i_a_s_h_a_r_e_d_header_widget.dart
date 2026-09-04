@@ -19,6 +19,8 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showMap = true,
     this.showLogo = true,
     this.showCart = false,
+    this.showNotifications = false,
+    this.showSettings = false,
     this.onChatTap,
   }) : title = title ?? '[title]';
 
@@ -28,6 +30,11 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   final bool showMap;
   final bool showLogo;
   final bool showCart;
+
+  /// Las pantallas de Dovia Home sacaron avisos y ajustes de la barra de
+  /// abajo, asi que los muestran aca.
+  final bool showNotifications;
+  final bool showSettings;
 
   /// Destino alternativo del ícono de chat. Sin este callback el ícono abre el
   /// soporte de DOVIA; las pantallas donde el interlocutor es otro (Ej: el
@@ -219,7 +226,8 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                           width: 40.0,
                           height: 40.0,
                           decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
                             shape: BoxShape.circle,
                           ),
                           child: Padding(
@@ -275,6 +283,59 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                         ),
                       ),
                     ),
+                    if (widget.showNotifications)
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          context.pushNamed(
+                              DOVIACLIENTNotificacionesWidget.routeName);
+                        },
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: const AlignmentDirectional(0.0, 0.0),
+                          child: SvgPicture.asset(
+                            'assets/images/DH_icono-navbar-notificaciones.svg',
+                            width: 22.0,
+                            height: 22.0,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    if (widget.showSettings)
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          context.pushNamed(DOVIACLIENTAjustesWidget.routeName);
+                        },
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: const AlignmentDirectional(0.0, 0.0),
+                          child: SvgPicture.asset(
+                            'assets/images/DH_icono-navbar-ajustes.svg',
+                            width: 22.0,
+                            height: 22.0,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                   ].divide(const SizedBox(width: 8.0)),
                 ),
                 if (widget.showCurrency)

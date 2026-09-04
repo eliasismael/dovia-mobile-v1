@@ -208,6 +208,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Calificar',
                       showMap: false,
                       showCurrency: false,

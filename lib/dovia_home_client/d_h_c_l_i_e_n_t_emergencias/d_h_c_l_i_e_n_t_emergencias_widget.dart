@@ -234,6 +234,8 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showNotifications: true,
+                      showSettings: true,
                       title: 'Emergencias',
                     ),
                   ),
