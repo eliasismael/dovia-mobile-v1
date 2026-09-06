@@ -154,10 +154,20 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
     if (!mounted) return;
 
     if (_model.apiResCreateVisitRequest?.succeeded ?? false) {
-      final visitId = getJsonField(
-        _model.apiResCreateVisitRequest!.jsonBody,
-        r'$.id',
-      )?.toString();
+      final visitId = DOVIAAPIVisitContextGroup.createOperativeListingVisitCall
+          .visitId(_model.apiResCreateVisitRequest!.jsonBody);
+      if (visitId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'La visita fue creada, pero no se recibió su identificador. Volvé a Mis propiedades e inténtalo nuevamente.',
+            ),
+            backgroundColor: FlutterFlowTheme.of(context).error,
+          ),
+        );
+        safeSetState(() {});
+        return;
+      }
       showDialog(
         context: context,
         builder: (context) => Dialog(
@@ -172,7 +182,7 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
               context.pushNamed(
                 DOVIACLIENTMisPropiedadesVisita1Widget.routeName,
                 queryParameters: {
-                  if (visitId != null && visitId.isNotEmpty) 'visitId': visitId,
+                  'visitId': visitId,
                 },
               );
             },

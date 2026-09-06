@@ -159,13 +159,27 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
   }
 
   Future<void> _saveInstructions() async {
+    final visitId = widget.visitId?.trim();
+    if (visitId == null || visitId.isEmpty || visitId == 'null') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No se pudo guardar: esta visita no tiene un identificador válido. Volvé a Mis propiedades y abrila nuevamente.',
+          ),
+        ),
+      );
+      return;
+    }
+
     safeSetState(() => _model.isSavingInstructions = true);
-    await DOVIAAPIVisitContextGroup.updateVisitInstructionsCall.call(
-      visitId: widget.visitId,
+    final response =
+        await DOVIAAPIVisitContextGroup.updateVisitInstructionsCall.call(
+      visitId: visitId,
       authToken: currentAuthenticationToken,
       instructions: _model.instructionsController?.text ?? '',
     );
-    if (mounted) {
+    if (!mounted) return;
+    if (response.succeeded) {
       safeSetState(() {
         _model.isEditingInstructions = false;
         _model.isSavingInstructions = false;
@@ -182,6 +196,14 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
           ),
         ),
       );
+    } else {
+      safeSetState(() => _model.isSavingInstructions = false);
+      final body = response.jsonBody;
+      final message = body is Map && body['message'] != null
+          ? body['message'].toString()
+          : 'No se pudieron guardar las instrucciones. Inténtalo nuevamente.';
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     }
   }
 

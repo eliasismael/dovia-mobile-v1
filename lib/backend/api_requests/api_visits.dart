@@ -207,6 +207,28 @@ class CreateOperativeListingVisitCall {
       alwaysAllowBody: false,
     );
   }
+
+  /// La API puede responder la visita como `data`, `data.visit` o, en
+  /// versiones anteriores, en la raíz. Centralizar la lectura evita navegar
+  /// con `visitId == null` y terminar llamando `/visits/null/instructions`.
+  String? visitId(dynamic response) {
+    const paths = <String>[
+      r'$.data.id',
+      r'$.data.visit.id',
+      r'$.data.visitId',
+      r'$.data.operativeListerVisit.visitId',
+      r'$.data.lastVisitId',
+      r'$.id',
+      r'$.visit.id',
+      r'$.operativeListerVisit.visitId',
+      r'$.lastVisitId',
+    ];
+    for (final path in paths) {
+      final value = getJsonField(response, path)?.toString().trim();
+      if (value != null && value.isNotEmpty && value != 'null') return value;
+    }
+    return null;
+  }
 }
 
 class UploadSignedContractCall {

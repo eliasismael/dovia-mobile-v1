@@ -152,6 +152,27 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
   Future<void> _handleOfertar() async {
     if (widget.propertyId == null || widget.propertyId!.isEmpty) return;
 
+    if (FFAppState().UserRole == 'VISITOR') {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: GestureDetector(
+            onTap: () {
+              FocusScope.of(dialogContext).unfocus();
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: const VisitorRestrictionPopupWidget(),
+          ),
+        ),
+      );
+      return;
+    }
+
     // Check for active offers on this property for the current user
     final offersResponse =
         await DOVIAAPIOfferContextGroup.listMyOffersCall.call(

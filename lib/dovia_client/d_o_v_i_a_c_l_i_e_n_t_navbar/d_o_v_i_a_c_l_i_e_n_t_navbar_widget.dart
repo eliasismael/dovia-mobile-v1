@@ -149,7 +149,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
       onTap: () async {
-        context.pushNamed(DHCLIENTHomepageWidget.routeName);
+        await _openRestricted(DHCLIENTHomepageWidget.routeName);
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

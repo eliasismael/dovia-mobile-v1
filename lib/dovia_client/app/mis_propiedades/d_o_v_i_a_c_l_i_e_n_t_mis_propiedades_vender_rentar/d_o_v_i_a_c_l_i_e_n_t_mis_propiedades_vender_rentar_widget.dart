@@ -42,6 +42,47 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  String _apiErrorMessage(dynamic response, String fallback) {
+    if (response is Map) {
+      final message = response['message']?.toString().trim();
+      if (message != null && message.isNotEmpty) {
+        return message;
+      }
+
+      final errors = response['errors'];
+      if (errors is List) {
+        for (final error in errors) {
+          if (error is Map) {
+            final message = error['message']?.toString().trim();
+            if (message != null && message.isNotEmpty) {
+              return message;
+            }
+          }
+        }
+      }
+    }
+
+    return fallback;
+  }
+
+  Future<void> _showPublicationError(String message) async {
+    if (!mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('No se pudo publicar la propiedad'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Entendido'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -3739,22 +3780,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
 
                                     shouldSetState = true;
                                     if ((_model.apiResultSale?.succeeded ??
-                                        true)) {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (alertDialogContext) {
-                                          return AlertDialog(
-                                            title: const Text('exito'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    alertDialogContext),
-                                                child: const Text('Ok'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
+                                        false)) {
                                       _model.createdPropertyId =
                                           DOVIAAPIPropertyContextGroup
                                               .createPropertyBasicSALECall
@@ -3763,24 +3789,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                       );
                                       safeSetState(() {});
                                     } else {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (alertDialogContext) {
-                                          return AlertDialog(
-                                            title: const Text('error'),
-                                            content: Text((_model.apiResultSale
-                                                        ?.jsonBody ??
-                                                    '')
-                                                .toString()),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    alertDialogContext),
-                                                child: const Text('Ok'),
-                                              ),
-                                            ],
-                                          );
-                                        },
+                                      await _showPublicationError(
+                                        _apiErrorMessage(
+                                          _model.apiResultSale?.jsonBody,
+                                          'No se pudo crear la publicación de venta.',
+                                        ),
                                       );
                                       if (shouldSetState) safeSetState(() {});
                                       return;
@@ -3831,23 +3844,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
 
                                       shouldSetState = true;
                                       if ((_model.apiResultRent?.succeeded ??
-                                          true)) {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (alertDialogContext) {
-                                            return AlertDialog(
-                                              title: const Text('Extio renta'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(
-                                                          alertDialogContext),
-                                                  child: const Text('Ok'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
+                                          false)) {
                                         _model.createdPropertyId =
                                             DOVIAAPIPropertyContextGroup
                                                 .createPropertyBasicRENTCall
@@ -3857,26 +3854,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         );
                                         safeSetState(() {});
                                       } else {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (alertDialogContext) {
-                                            return AlertDialog(
-                                              title: const Text('error renta'),
-                                              content: Text((_model
-                                                          .apiResultRent
-                                                          ?.jsonBody ??
-                                                      '')
-                                                  .toString()),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(
-                                                          alertDialogContext),
-                                                  child: const Text('Ok'),
-                                                ),
-                                              ],
-                                            );
-                                          },
+                                        await _showPublicationError(
+                                          _apiErrorMessage(
+                                            _model.apiResultRent?.jsonBody,
+                                            'No se pudo crear la publicación de renta.',
+                                          ),
                                         );
                                         if (shouldSetState) safeSetState(() {});
                                         return;
@@ -3942,24 +3924,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         shouldSetState = true;
                                         if ((_model.apiResultSaleAndRent
                                                 ?.succeeded ??
-                                            true)) {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                content: const Text(
-                                                    'Exito sale y rent'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext),
-                                                    child: const Text('Ok'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
+                                            false)) {
                                           _model.createdPropertyId =
                                               getJsonField(
                                             (_model.apiResultSaleAndRent
@@ -3969,27 +3934,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                           ).toString();
                                           safeSetState(() {});
                                         } else {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                    'error sale y rent'),
-                                                content: Text(
-                                                    (_model.apiResultSaleAndRent
-                                                                ?.jsonBody ??
-                                                            '')
-                                                        .toString()),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext),
-                                                    child: const Text('Ok'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
+                                          await _showPublicationError(
+                                            _apiErrorMessage(
+                                              _model.apiResultSaleAndRent
+                                                  ?.jsonBody,
+                                              'No se pudo crear la publicación de venta y renta.',
+                                            ),
                                           );
                                           if (shouldSetState)
                                             safeSetState(() {});
@@ -4004,150 +3954,90 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     }
                                   }
 
+                                  final createdPropertyId =
+                                      _model.createdPropertyId?.trim();
+                                  if (createdPropertyId == null ||
+                                      createdPropertyId.isEmpty ||
+                                      createdPropertyId == 'null') {
+                                    await _showPublicationError(
+                                      'La propiedad fue creada, pero no se recibió su identificador para cargar los documentos.',
+                                    );
+                                    if (shouldSetState) safeSetState(() {});
+                                    return;
+                                  }
+
+                                  final documentErrors = <String>[];
                                   await Future.wait([
                                     Future(() async {
-                                      if ((_model
+                                      final hasCertification = _model
                                               .uploadedLocalFile_certifiacionDePropiedad
                                               .bytes
                                               ?.isNotEmpty ??
-                                          false)) {
-                                        _model.resCertificacionPropriedad =
-                                            await DOVIAAPIPropertyContextGroup
-                                                .uploadPropertyCertificationCall
-                                                .call(
-                                          propertyId: _model.createdPropertyId,
-                                          authToken: currentAuthenticationToken,
-                                          file: _model
-                                              .uploadedLocalFile_certifiacionDePropiedad,
+                                          false;
+                                      if (!hasCertification) {
+                                        documentErrors.add(
+                                          'No seleccionaste la certificación de la propiedad.',
                                         );
-
-                                        shouldSetState = true;
-                                        if ((_model.resCertificacionPropriedad
-                                                ?.succeeded ??
-                                            true)) {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                    'exito certificacion propiedad'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext),
-                                                    child: const Text('Ok'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        } else {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                    'error cert propiedad'),
-                                                content: Text(
-                                                    (_model.resCertificacionPropriedad
-                                                                ?.jsonBody ??
-                                                            '')
-                                                        .toString()),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext),
-                                                    child: const Text('Ok'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                          if (shouldSetState) {
-                                            safeSetState(() {});
-                                          }
-                                          return;
-                                        }
-                                      } else {
-                                        if (shouldSetState) {
-                                          safeSetState(() {});
-                                        }
                                         return;
+                                      }
+
+                                      _model.resCertificacionPropriedad =
+                                          await DOVIAAPIPropertyContextGroup
+                                              .uploadPropertyCertificationCall
+                                              .call(
+                                        propertyId: createdPropertyId,
+                                        authToken: currentAuthenticationToken,
+                                        file: _model
+                                            .uploadedLocalFile_certifiacionDePropiedad,
+                                      );
+                                      shouldSetState = true;
+                                      if (!(_model.resCertificacionPropriedad
+                                              ?.succeeded ??
+                                          false)) {
+                                        documentErrors.add(
+                                          'Certificación de la propiedad: ${_apiErrorMessage(_model.resCertificacionPropriedad?.jsonBody, 'no se pudo subir el documento.')}',
+                                        );
                                       }
                                     }),
                                     Future(() async {
-                                      if ((_model
+                                      final hasOwnerId = _model
                                               .uploadedLocalFile_propertyOwnerId
                                               .bytes
                                               ?.isNotEmpty ??
-                                          false)) {
-                                        _model.resOwnerId =
-                                            await DOVIAAPIPropertyContextGroup
-                                                .uploadPropertyOwnerIDDocumentCall
-                                                .call(
-                                          propertyId: _model.createdPropertyId,
-                                          authToken: currentAuthenticationToken,
-                                          file: _model
-                                              .uploadedLocalFile_propertyOwnerId,
+                                          false;
+                                      if (!hasOwnerId) {
+                                        documentErrors.add(
+                                          'No seleccionaste el documento de identidad del propietario.',
                                         );
-
-                                        shouldSetState = true;
-                                        if ((_model.resOwnerId?.succeeded ??
-                                            true)) {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                    'exito owner id'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext),
-                                                    child: const Text('Ok'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        } else {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                    'error owner id'),
-                                                content: Text((_model.resOwnerId
-                                                            ?.jsonBody ??
-                                                        '')
-                                                    .toString()),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext),
-                                                    child: const Text('Ok'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                          if (shouldSetState) {
-                                            safeSetState(() {});
-                                          }
-                                          return;
-                                        }
-                                      } else {
-                                        if (shouldSetState) {
-                                          safeSetState(() {});
-                                        }
                                         return;
+                                      }
+
+                                      _model.resOwnerId =
+                                          await DOVIAAPIPropertyContextGroup
+                                              .uploadPropertyOwnerIDDocumentCall
+                                              .call(
+                                        propertyId: createdPropertyId,
+                                        authToken: currentAuthenticationToken,
+                                        file: _model
+                                            .uploadedLocalFile_propertyOwnerId,
+                                      );
+                                      shouldSetState = true;
+                                      if (!(_model.resOwnerId?.succeeded ??
+                                          false)) {
+                                        documentErrors.add(
+                                          'Documento de identidad del propietario: ${_apiErrorMessage(_model.resOwnerId?.jsonBody, 'no se pudo subir el documento.')}',
+                                        );
                                       }
                                     }),
                                   ]);
+
+                                  if (documentErrors.isNotEmpty) {
+                                    await _showPublicationError(
+                                      documentErrors.join('\n'),
+                                    );
+                                    if (shouldSetState) safeSetState(() {});
+                                    return;
+                                  }
 
                                   context.pushNamed(
                                     DOVIACLIENTMisPropiedadesAgendarVisitaWidget

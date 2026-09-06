@@ -1058,22 +1058,19 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               highlightColor:
                                                   Colors.transparent,
                                               onTap: () async {
-                                                _handleRestrictedAction(() {
-                                                  context.pushNamed(
-                                                    DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                        .routeName,
-                                                    queryParameters: {
-                                                      'propertyId':
-                                                          serializeParam(
-                                                        getJsonField(
-                                                          eachHouseItem,
-                                                          r'''$.id''',
-                                                        ).toString(),
-                                                        ParamType.String,
-                                                      ),
-                                                    }.withoutNulls,
-                                                  );
-                                                });
+                                                context.pushNamed(
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                      .routeName,
+                                                  queryParameters: {
+                                                    'propertyId': serializeParam(
+                                                      getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
                                               },
                                               onLongPress: () async {
                                                 await showDialog(
@@ -1613,22 +1610,19 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               highlightColor:
                                                   Colors.transparent,
                                               onTap: () async {
-                                                _handleRestrictedAction(() {
-                                                  context.pushNamed(
-                                                    DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                        .routeName,
-                                                    queryParameters: {
-                                                      'propertyId':
-                                                          serializeParam(
-                                                        getJsonField(
-                                                          eachHouseItem,
-                                                          r'''$.id''',
-                                                        ).toString(),
-                                                        ParamType.String,
-                                                      ),
-                                                    }.withoutNulls,
-                                                  );
-                                                });
+                                                context.pushNamed(
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                      .routeName,
+                                                  queryParameters: {
+                                                    'propertyId': serializeParam(
+                                                      getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
                                               },
                                               onLongPress: () async {
                                                 await showDialog(
@@ -2055,22 +2049,19 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               highlightColor:
                                                   Colors.transparent,
                                               onTap: () async {
-                                                _handleRestrictedAction(() {
-                                                  context.pushNamed(
-                                                    DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                        .routeName,
-                                                    queryParameters: {
-                                                      'propertyId':
-                                                          serializeParam(
-                                                        getJsonField(
-                                                          eachHouseItem,
-                                                          r'''$.id''',
-                                                        ).toString(),
-                                                        ParamType.String,
-                                                      ),
-                                                    }.withoutNulls,
-                                                  );
-                                                });
+                                                context.pushNamed(
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                      .routeName,
+                                                  queryParameters: {
+                                                    'propertyId': serializeParam(
+                                                      getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      ParamType.String,
+                                                    ),
+                                                  }.withoutNulls,
+                                                );
                                               },
                                               onLongPress: () async {
                                                 await showDialog(
