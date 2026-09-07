@@ -10,6 +10,7 @@ class DrawMapComponentWidget extends StatefulWidget {
     this.height,
     bool? singlePointMode,
     this.onPointSelected,
+    this.onPointCleared,
     this.initialLatitude,
     this.initialLongitude,
     this.interactive = true,
@@ -18,6 +19,10 @@ class DrawMapComponentWidget extends StatefulWidget {
   final double? height;
   final bool singlePointMode;
   final Future Function(double latitude, double longitude)? onPointSelected;
+
+  /// Se invoca al tocar "Limpiar", para que el formulario descarte las
+  /// coordenadas que había guardado.
+  final VoidCallback? onPointCleared;
   final double? initialLatitude;
   final double? initialLongitude;
   final bool interactive;
@@ -65,6 +70,11 @@ class _DrawMapComponentWidgetState extends State<DrawMapComponentWidget> {
           initialLatitude: widget.initialLatitude ?? 14.6407,
           initialLongitude: widget.initialLongitude ?? -90.5133,
           singlePointMode: widget.singlePointMode,
+          // El 14.6407 / -90.5133 de arriba solo centra el mapa. El pin arranca
+          // marcado únicamente cuando quien usa el componente pasó una
+          // ubicación real; en un alta el mapa abre vacío.
+          preselectInitialPoint:
+              widget.initialLatitude != null && widget.initialLongitude != null,
           interactive: widget.interactive,
           onPointSelected: (latitude, longitude) async {
             await widget.onPointSelected?.call(
@@ -72,6 +82,7 @@ class _DrawMapComponentWidgetState extends State<DrawMapComponentWidget> {
               longitude,
             );
           },
+          onPointCleared: widget.onPointCleared,
         ),
       ),
     );

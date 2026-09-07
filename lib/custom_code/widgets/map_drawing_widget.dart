@@ -27,6 +27,8 @@ class MapDrawingWidget extends StatefulWidget {
     this.confirmButtonLabel,
     this.singlePointMode,
     this.onPointSelected,
+    this.onPointCleared,
+    this.preselectInitialPoint = true,
     this.interactive = true,
     this.circleRadius = 500,
     this.useRadiusInMeter = true,
@@ -49,6 +51,18 @@ class MapDrawingWidget extends StatefulWidget {
   /// Receives the latitude and longitude of the selected point.
   /// Use this in FlutterFlow to set page/app state variables.
   final Future Function(double latitude, double longitude)? onPointSelected;
+
+  /// Se invoca cuando el usuario toca "Limpiar" y se borra el punto. Sin esto,
+  /// quien haya guardado las coordenadas se queda con un valor viejo.
+  final VoidCallback? onPointCleared;
+
+  /// Si el punto inicial arranca marcado en modo single point.
+  ///
+  /// Va en `true` para las pantallas que muestran una ubicación ya guardada
+  /// (perfil, ajustes). En un formulario de alta hay que pasar `false`: si no,
+  /// el mapa abre con un pin sobre el centro por defecto y el usuario puede
+  /// publicar sin haber elegido nada.
+  final bool preselectInitialPoint;
 
   final bool interactive;
   final double circleRadius;
@@ -123,6 +137,7 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
     );
 
     if (_isSinglePoint &&
+        widget.preselectInitialPoint &&
         widget.initialLatitude != 0 &&
         widget.initialLongitude != 0) {
       _selectedPoint =
@@ -303,6 +318,7 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
     setState(() {
       _selectedPoint = null;
     });
+    widget.onPointCleared?.call();
   }
 
   void _confirmPoint() {

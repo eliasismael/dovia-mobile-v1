@@ -42,6 +42,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Punto que el propietario marca en el mapa. Es la única fuente de las
+  /// coordenadas de la propiedad: la dirección se escribe como texto libre y
+  /// no se geocodifica.
+  double? _selectedLatitude;
+  double? _selectedLongitude;
+
   String _apiErrorMessage(dynamic response, String fallback) {
     if (response is Map) {
       final message = response['message']?.toString().trim();
@@ -2702,7 +2708,18 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                               child: DrawMapComponentWidget(
                                 height: 300.0,
                                 singlePointMode: true,
-                                onPointSelected: (latitude, longitude) async {},
+                                onPointSelected: (latitude, longitude) async {
+                                  safeSetState(() {
+                                    _selectedLatitude = latitude;
+                                    _selectedLongitude = longitude;
+                                  });
+                                },
+                                onPointCleared: () {
+                                  safeSetState(() {
+                                    _selectedLatitude = null;
+                                    _selectedLongitude = null;
+                                  });
+                                },
                               ),
                             ),
                           ),
@@ -3741,6 +3758,30 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     );
                                     return;
                                   }
+                                  // Sin punto en el mapa la propiedad quedaría
+                                  // sin coordenadas y el operative lister no
+                                  // podría llegar.
+                                  if (_selectedLatitude == null ||
+                                      _selectedLongitude == null) {
+                                    await showDialog(
+                                      context: context,
+                                      builder: (alertDialogContext) {
+                                        return AlertDialog(
+                                          title: const Text('Campo Mandatorio'),
+                                          content: const Text(
+                                              'Marcá la ubicación de la propiedad en el mapa y tocá "Confirmar ubicación".'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(
+                                                  alertDialogContext),
+                                              child: const Text('Ok'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    return;
+                                  }
                                   var shouldSetState = false;
                                   if (widget.transactionType ==
                                       PropertyPublicationType.SALE) {
@@ -3755,8 +3796,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                       address: _model
                                           .direccionPropiedadTextController
                                           .text,
-                                      longitude: 1.0,
-                                      latitude: 1.0,
+                                      longitude: _selectedLongitude,
+                                      latitude: _selectedLatitude,
                                       finca: _model.fincaTextController.text,
                                       follio: _model.folioTextController.text,
                                       libro: _model.libroTextController.text,
@@ -3812,8 +3853,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         address: _model
                                             .direccionPropiedadTextController
                                             .text,
-                                        longitude: 1.0,
-                                        latitude: 1.0,
+                                        longitude: _selectedLongitude,
+                                        latitude: _selectedLatitude,
                                         finca: _model.fincaTextController.text,
                                         follio: _model.folioTextController.text,
                                         libro: _model.libroTextController.text,
@@ -3878,8 +3919,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                           address: _model
                                               .direccionPropiedadTextController
                                               .text,
-                                          longitude: 1.0,
-                                          latitude: 1.0,
+                                          longitude: _selectedLongitude,
+                                          latitude: _selectedLatitude,
                                           finca:
                                               _model.fincaTextController.text,
                                           follio:
