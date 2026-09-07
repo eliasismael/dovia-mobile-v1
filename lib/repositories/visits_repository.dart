@@ -270,23 +270,43 @@ class VisitsRepository extends ChangeNotifier {
           statusCode: response.statusCode);
     }
 
-    final rawList = (response.jsonBody?['operativeListers'] as List? ?? [])
-        .cast<Map<String, dynamic>>();
+    // El backend envuelve la respuesta en `data`
+    // (`{ data: { date, time, operativeListers } }`). Se deja el acceso plano
+    // como respaldo por si algún entorno devuelve el cuerpo sin envolver.
+    final body = response.jsonBody;
+    final envelope = body is Map ? body['data'] : null;
+    final rawList = (envelope is Map ? envelope['operativeListers'] : null) ??
+        (body is Map ? body['operativeListers'] : null);
 
-    final operatives = rawList
-        .map((o) => {
-              'id': o['id'] as String? ?? '',
-              'name': o['fullName'] as String? ?? '',
-              'photoUrl': o['avatar'] as String?,
-            })
-        .toList();
+    final operatives = <Map<String, dynamic>>[];
+    if (rawList is List) {
+      for (final o in rawList) {
+        if (o is! Map) continue;
+        // Muchos operativos de prueba comparten el mismo `fullName`; el email
+        // es lo único que los distingue en pantalla.
+        final phone = o['phone'];
+        operatives.add({
+          'id': o['id']?.toString() ?? '',
+          'name': o['fullName']?.toString() ?? '',
+          'photoUrl': o['avatar']?.toString(),
+          'email': o['email']?.toString() ?? '',
+          'phone': phone is Map
+              ? '${phone['countryCode'] ?? ''} ${phone['number'] ?? ''}'.trim()
+              : '',
+        });
+      }
+    }
 
     return Success(operatives);
   }
 
   /// Assigns an operative lister to a visit.
+  ///
+  /// El backend exige que la visita esté en substatus
+  /// `READY_TO_ASSIGN_OPERATIVE_LISTING` y que el usuario sea el `listerHqId`
+  /// asignado; en cualquier otro caso responde 400.
   Future<Result<void>> assignVisit({
-    required String propertyId,
+    required String visitId,
     required String operativeId,
     required DateTime date,
     required TimeOfDay time,
@@ -295,20 +315,6 @@ class VisitsRepository extends ChangeNotifier {
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
     final timeStr =
         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-
-    // Try to find a visit for this property in current cached visits
-    String visitId = '';
-    for (final v in _myVisits) {
-      if (v.propertyId == propertyId) {
-        visitId = v.id;
-        break;
-      }
-    }
-
-    // Fallback if not found in cache (e.g. testing with mock_prop_id)
-    if (visitId.isEmpty) {
-      visitId = propertyId;
-    }
 
     final response =
         await DOVIAAPIVisitContextGroup.assignOperativeListerCall.call(
@@ -320,8 +326,14 @@ class VisitsRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
+      // El backend explica el motivo real (substatus inválido, conflicto de
+      // horario, etc.); mostrarlo evita diagnosticar a ciegas.
+      final body = response.jsonBody;
+      final detail = body is Map ? body['message']?.toString() : null;
       return Failure(
-        'No se pudo asignar el operative lister',
+        detail == null || detail.isEmpty
+            ? 'No se pudo asignar el operative lister'
+            : 'No se pudo asignar el operative lister: $detail',
         statusCode: response.statusCode,
       );
     }

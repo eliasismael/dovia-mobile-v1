@@ -23,6 +23,13 @@ class ListingHQMatchmakingSelectorWidget extends StatefulWidget {
   /// 'time': 'HH:mm' }`. Las dos primeras son obligatorias y la tercera opcional.
   final List<Map<String, String>>? proposedSlots;
 
+  /// Disponibilidad semanal propuesta por el propietario, como
+  /// `{ 'dayOfWeek': 'WEDNESDAY', 'startTime': '09:00', 'endTime': '12:00' }`.
+  /// Es lo que usan las `OPERATIVE_LISTER_VISIT`. Cuando viene, el selector
+  /// solo ofrece fechas y horas dentro de estos rangos: el backend rechaza
+  /// cualquier otra con `SLOT_OUTSIDE_CLIENT_PROPOSED_AVAILABILITY`.
+  final List<Map<String, String>>? availabilityRanges;
+
   /// Teléfono del propietario, ya formateado (ej. "+52 5512345678").
   final String? ownerPhone;
 
@@ -34,6 +41,7 @@ class ListingHQMatchmakingSelectorWidget extends StatefulWidget {
     this.onClose,
     this.onOperativeSelected,
     this.proposedSlots,
+    this.availabilityRanges,
     this.ownerPhone,
   });
 
@@ -51,19 +59,128 @@ class _ListingHQMatchmakingSelectorWidgetState
   List<Map<String, dynamic>> _availableOperatives = [];
   Map<String, dynamic>? _selectedOperative;
 
+  /// Duración fija del slot de visita definida por el backend.
+  static const Duration _kSlotDuration = Duration(hours: 1);
+
+  static const Map<String, int> _kWeekdayByName = {
+    'MONDAY': DateTime.monday,
+    'TUESDAY': DateTime.tuesday,
+    'WEDNESDAY': DateTime.wednesday,
+    'THURSDAY': DateTime.thursday,
+    'FRIDAY': DateTime.friday,
+    'SATURDAY': DateTime.saturday,
+    'SUNDAY': DateTime.sunday,
+  };
+
+  static const Map<int, String> _kWeekdayLabel = {
+    DateTime.monday: 'Lunes',
+    DateTime.tuesday: 'Martes',
+    DateTime.wednesday: 'Miércoles',
+    DateTime.thursday: 'Jueves',
+    DateTime.friday: 'Viernes',
+    DateTime.saturday: 'Sábado',
+    DateTime.sunday: 'Domingo',
+  };
+
+  List<Map<String, String>> get _ranges =>
+      widget.availabilityRanges ?? const [];
+
+  bool get _hasRanges => _ranges.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
-    // Pre-cargar con la primera opción propuesta por el propietario (matchmaking);
-    // si no hay propuesta, por defecto mañana a las 10:00 AM.
-    final firstSlot = _parseSlot(widget.proposedSlots?.isNotEmpty == true
-        ? widget.proposedSlots!.first
-        : null);
-    _selectedDate =
-        firstSlot?.$1 ?? DateTime.now().add(const Duration(days: 1));
-    _selectedTime = firstSlot?.$2 ?? const TimeOfDay(hour: 10, minute: 0);
+
+    if (_hasRanges) {
+      // La visita trae disponibilidad semanal: arrancar en la primera fecha
+      // futura que caiga en un día ofrecido, a su primera hora válida.
+      final date = _firstAllowedDate();
+      _selectedDate = date;
+      final slots = date == null ? const <TimeOfDay>[] : _slotsForDate(date);
+      _selectedTime = slots.isNotEmpty ? slots.first : null;
+    } else {
+      // Sin rangos, se conserva el comportamiento previo: primera opción
+      // propuesta, o mañana a las 10:00.
+      final firstSlot = _parseSlot(widget.proposedSlots?.isNotEmpty == true
+          ? widget.proposedSlots!.first
+          : null);
+      _selectedDate =
+          firstSlot?.$1 ?? DateTime.now().add(const Duration(days: 1));
+      _selectedTime = firstSlot?.$2 ?? const TimeOfDay(hour: 10, minute: 0);
+    }
+
     _fetchOperatives();
   }
+
+  /// `HH:mm` a `TimeOfDay`. Null si no se puede interpretar.
+  TimeOfDay? _parseHhMm(String? value) {
+    final parts = (value ?? '').split(':');
+    if (parts.length < 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  int _minutes(TimeOfDay t) => t.hour * 60 + t.minute;
+
+  /// Días de la semana que ofreció el propietario.
+  Set<int> get _allowedWeekdays => _ranges
+      .map((r) => _kWeekdayByName[r['dayOfWeek']?.toUpperCase() ?? ''])
+      .whereType<int>()
+      .toSet();
+
+  bool _isAllowedDate(DateTime date) =>
+      _allowedWeekdays.contains(date.weekday) && _slotsForDate(date).isNotEmpty;
+
+  /// Horas de inicio válidas para [date]: se recorre cada rango de ese día en
+  /// pasos de una hora mientras el slot completo entre antes de `endTime`, y
+  /// se descartan las horas ya pasadas si la fecha es hoy.
+  List<TimeOfDay> _slotsForDate(DateTime date) {
+    final now = DateTime.now();
+    final isToday = date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+    final slotMinutes = _kSlotDuration.inMinutes;
+
+    final result = <int>{};
+    for (final range in _ranges) {
+      if (_kWeekdayByName[range['dayOfWeek']?.toUpperCase() ?? ''] !=
+          date.weekday) {
+        continue;
+      }
+      final start = _parseHhMm(range['startTime']);
+      final end = _parseHhMm(range['endTime']);
+      if (start == null || end == null) continue;
+
+      for (var m = _minutes(start); m + slotMinutes <= _minutes(end);
+          m += slotMinutes) {
+        if (isToday && m <= now.hour * 60 + now.minute) continue;
+        result.add(m);
+      }
+    }
+
+    final sorted = result.toList()..sort();
+    return sorted
+        .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
+        .toList();
+  }
+
+  /// Primera fecha, desde hoy, que caiga en un día ofrecido y todavía tenga
+  /// alguna hora disponible. Se busca hasta 90 días adelante.
+  DateTime? _firstAllowedDate() {
+    final today = DateTime.now();
+    for (var i = 0; i < 90; i++) {
+      final candidate =
+          DateTime(today.year, today.month, today.day).add(Duration(days: i));
+      if (_isAllowedDate(candidate)) return candidate;
+    }
+    return null;
+  }
+
+  String _formatTime(TimeOfDay t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   /// Convierte un slot `{ date, time }` en `(DateTime, TimeOfDay)`.
   /// Devuelve `null` si no se puede interpretar.
@@ -125,11 +242,22 @@ class _ListingHQMatchmakingSelectorWidgetState
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Con rangos, el calendario deshabilita los días que el propietario no
+    // ofreció, así no se puede elegir uno que el backend vaya a rechazar.
+    final initial = _hasRanges
+        ? (_selectedDate != null && _isAllowedDate(_selectedDate!)
+            ? _selectedDate!
+            : (_firstAllowedDate() ?? today))
+        : (_selectedDate ?? now);
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? now,
-      firstDate: now,
+      initialDate: initial,
+      firstDate: today,
       lastDate: DateTime(now.year + 1),
+      selectableDayPredicate: _hasRanges ? _isAllowedDate : null,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.light(
@@ -145,6 +273,14 @@ class _ListingHQMatchmakingSelectorWidgetState
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        if (_hasRanges) {
+          // La hora elegida antes puede no existir en el nuevo día.
+          final slots = _slotsForDate(picked);
+          final keep = _selectedTime != null &&
+              slots.any((s) => _minutes(s) == _minutes(_selectedTime!));
+          _selectedTime =
+              keep ? _selectedTime : (slots.isNotEmpty ? slots.first : null);
+        }
       });
       _fetchOperatives();
     }
@@ -287,14 +423,17 @@ class _ListingHQMatchmakingSelectorWidgetState
                       colorScheme: colorScheme,
                     ),
                     const SizedBox(height: 12),
-                    _buildPickerButton(
-                      icon: Icons.access_time,
-                      label: _selectedTime != null
-                          ? _selectedTime!.format(context)
-                          : 'Seleccionar hora',
-                      onTap: _pickTime,
-                      colorScheme: colorScheme,
-                    ),
+                    if (_hasRanges)
+                      _buildSlotChips(colorScheme)
+                    else
+                      _buildPickerButton(
+                        icon: Icons.access_time,
+                        label: _selectedTime != null
+                            ? _selectedTime!.format(context)
+                            : 'Seleccionar hora',
+                        onTap: _pickTime,
+                        colorScheme: colorScheme,
+                      ),
                   ],
                 );
 
@@ -402,10 +541,43 @@ class _ListingHQMatchmakingSelectorWidgetState
         ),
       );
     }
+
+    final visible = _filteredOperatives;
+
     return Column(
-      children: List.generate(_availableOperatives.length, (index) {
-        final operative = _availableOperatives[index];
-        final isSelected = _selectedOperative?['id'] == operative['id'];
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Buscador: casi todos los operativos comparten el mismo nombre, así
+        // que sin filtrar por email es imposible dar con uno concreto.
+        TextField(
+          onChanged: (value) => setState(() => _search = value),
+          decoration: InputDecoration(
+            hintText: 'Buscar por nombre o email',
+            prefixIcon: const Icon(Icons.search),
+            isDense: true,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          style: colorScheme.bodyMedium,
+        ),
+        const SizedBox(height: 12),
+        if (visible.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Text(
+              'Ningún operative coincide con "$_search".',
+              style: colorScheme.bodyMedium,
+            ),
+          ),
+        ...List.generate(visible.length, (index) {
+          final operative = visible[index];
+          final isSelected = _selectedOperative?['id'] == operative['id'];
+          final email = operative['email'] as String? ?? '';
+          final matchesSearch =
+              _search.trim().isNotEmpty && _matches(operative, _search);
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: InkWell(
@@ -418,33 +590,64 @@ class _ListingHQMatchmakingSelectorWidgetState
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color:
-                      isSelected ? colorScheme.primary : colorScheme.alternate,
-                  width: isSelected ? 2 : 1,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : (matchesSearch
+                          ? const Color(0xFFE8A200)
+                          : colorScheme.alternate),
+                  width: isSelected || matchesSearch ? 2 : 1,
                 ),
                 borderRadius: BorderRadius.circular(8),
                 color: isSelected
                     ? colorScheme.primary.withValues(alpha: 0.05)
-                    : Colors.transparent,
+                    : (matchesSearch
+                        ? const Color(0xFFFFF1CC)
+                        : Colors.transparent),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: operative['photoUrl'] != null
+                    backgroundImage: (operative['photoUrl'] as String?)
+                                ?.isNotEmpty ??
+                            false
                         ? NetworkImage(operative['photoUrl'] as String)
                         : null,
-                    child: operative['photoUrl'] == null
-                        ? const Icon(Icons.person)
-                        : null,
+                    // Sin este callback, una URL de avatar rota tira excepción
+                    // en cada repintado.
+                    onBackgroundImageError:
+                        (operative['photoUrl'] as String?)?.isNotEmpty ?? false
+                            ? (_, __) {}
+                            : null,
+                    child: (operative['photoUrl'] as String?)?.isNotEmpty ??
+                            false
+                        ? null
+                        : const Icon(Icons.person),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      operative['name'] as String? ?? '',
-                      style: colorScheme.bodyMedium.override(
-                        fontFamily: 'Public Sans',
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          operative['name'] as String? ?? '',
+                          style: colorScheme.bodyMedium.override(
+                            fontFamily: 'Public Sans',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (email.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            email,
+                            style: colorScheme.bodySmall.override(
+                              fontFamily: 'Public Sans',
+                              color: colorScheme.secondaryText,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                   if (isSelected)
@@ -454,13 +657,98 @@ class _ListingHQMatchmakingSelectorWidgetState
             ),
           ),
         );
-      }),
+        }),
+      ],
     );
+  }
+
+  /// Texto del buscador de operativos.
+  String _search = '';
+
+  bool _matches(Map<String, dynamic> operative, String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return false;
+    final name = (operative['name'] as String? ?? '').toLowerCase();
+    final email = (operative['email'] as String? ?? '').toLowerCase();
+    return name.contains(q) || email.contains(q);
+  }
+
+  List<Map<String, dynamic>> get _filteredOperatives {
+    if (_search.trim().isEmpty) return _availableOperatives;
+    return _availableOperatives.where((o) => _matches(o, _search)).toList();
   }
 
   /// Construye la lista de slots propuestos por el propietario. Las dos primeras
   /// opciones son obligatorias y la tercera (si existe) es opcional.
+  /// Horas de inicio válidas del día elegido, como chips. Evita el reloj libre,
+  /// que dejaba elegir horas fuera de la disponibilidad del propietario.
+  Widget _buildSlotChips(FlutterFlowTheme colorScheme) {
+    final date = _selectedDate;
+    final slots = date == null ? const <TimeOfDay>[] : _slotsForDate(date);
+
+    if (slots.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8D5D5),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFBC0000)),
+        ),
+        child: Text(
+          'Ese día no tiene horarios disponibles. Elegí otra fecha.',
+          style: colorScheme.bodyMedium.override(
+            fontFamily: 'Public Sans',
+            color: const Color(0xFFBC0000),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: slots.map((slot) {
+        final selected = _selectedTime != null &&
+            _minutes(slot) == _minutes(_selectedTime!);
+        return ChoiceChip(
+          label: Text(_formatTime(slot)),
+          selected: selected,
+          onSelected: (_) {
+            setState(() => _selectedTime = slot);
+            _fetchOperatives();
+          },
+          selectedColor: colorScheme.primary,
+          backgroundColor: colorScheme.secondaryBackground,
+          labelStyle: colorScheme.bodyMedium.override(
+            fontFamily: 'Public Sans',
+            color: selected ? Colors.white : colorScheme.primaryText,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: colorScheme.primary),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   List<Widget> _buildProposedSlots() {
+    // Para una visita de operative listing, lo que propuso el propietario es
+    // disponibilidad semanal, no fechas concretas.
+    if (_hasRanges) {
+      return _ranges.map((range) {
+        final weekday = _kWeekdayByName[range['dayOfWeek']?.toUpperCase() ?? ''];
+        final label = _kWeekdayLabel[weekday] ?? (range['dayOfWeek'] ?? '');
+        final start = range['startTime'] ?? '';
+        final end = range['endTime'] ?? '';
+        return _buildProposedRow(
+          Icons.calendar_today,
+          '$label de $start a $end',
+        );
+      }).toList();
+    }
+
     final slots = widget.proposedSlots ?? const [];
     if (slots.isEmpty) {
       return [_buildProposedRow(Icons.calendar_today, 'Sin fechas propuestas')];

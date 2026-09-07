@@ -61,6 +61,43 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     super.dispose();
   }
 
+  /// `GET /visits/{visitId}/details` responde
+  /// `{ success, message, data: { visit, property, ownerProfile,
+  /// operativeListing, listerHq } }`. Estos helpers desenvuelven ese sobre;
+  /// el respaldo al nivel plano cubre respuestas sin envolver.
+  Map<String, dynamic>? _dataMap(dynamic body) {
+    if (body is! Map) return null;
+    final data = body['data'];
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return Map<String, dynamic>.from(body);
+  }
+
+  Map<String, dynamic>? _visitMap(dynamic body) {
+    final data = _dataMap(body);
+    if (data == null) return null;
+    final visit = data['visit'];
+    return visit is Map ? Map<String, dynamic>.from(visit) : data;
+  }
+
+  Map<String, dynamic>? _sectionMap(dynamic body, String key) {
+    final section = _dataMap(body)?[key];
+    return section is Map ? Map<String, dynamic>.from(section) : null;
+  }
+
+  /// Estado de un ítem del `documentChecklist` de la visita
+  /// (`missing` | `submitted` | `approved` | `rejected`). Cadena vacía si el
+  /// ítem no está en el checklist.
+  String _checklistStatus(Map<String, dynamic>? visit, String type) {
+    final checklist = visit?['documentChecklist'];
+    if (checklist is! List) return '';
+    for (final item in checklist) {
+      if (item is Map && item['type']?.toString() == type) {
+        return item['status']?.toString().toLowerCase() ?? '';
+      }
+    }
+    return '';
+  }
+
   Future<void> _fetchVisitDetails({bool silent = false}) async {
     if (widget.visitId == null || widget.visitId!.isEmpty) return;
     if (!silent) safeSetState(() => _model.isLoading = true);
@@ -71,14 +108,17 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     );
     if (!mounted) return;
     final body = _model.visitDetailsResponse?.jsonBody;
-    if (body != null) {
-      final instructions = (body['instructions'] as String?) ?? '';
-      _model.instructionsController?.text = instructions;
+    final visit = _visitMap(body);
+    if (visit != null) {
+      _model.instructionsController?.text =
+          visit['instructions']?.toString() ?? '';
 
-      final uploaded = body['contractUploaded'];
-      final signedUrl = body['signedContractUrl'];
-      _model.contractUploaded = (uploaded == true) ||
-          (signedUrl != null && signedUrl.toString().isNotEmpty);
+      // El convenio firmado vive en `signedContractUrl` de la visita; también
+      // aparece como ítem `signed_contract` del checklist documental.
+      final signedUrl = visit['signedContractUrl']?.toString() ?? '';
+      const uploadedStates = {'submitted', 'approved'};
+      _model.contractUploaded = signedUrl.isNotEmpty ||
+          uploadedStates.contains(_checklistStatus(visit, 'signed_contract'));
     }
     if (!silent) safeSetState(() => _model.isLoading = false);
 
@@ -132,18 +172,28 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     );
   }
 
-  /// Derive the step (1–4) from the visit status.
-  /// Step 3 activates when the backend status is IN_PROGRESS or En_Revision_HQ.
+  /// Deriva el paso (1–4) del estado real de la `OPERATIVE_LISTER_VISIT`.
+  ///
+  /// - Paso 2 (Enlistamiento): `PENDING`, mientras se completa el checklist y
+  ///   se asigna al operative lister.
+  /// - Paso 3 (Preparar material): desde que hay slot confirmado
+  ///   (`SCHEDULED`/`IN_PROGRESS`/`NO_SHOW`) y mientras HQ revisa las fotos
+  ///   (`COMPLETED` con substatus `READY_TO_PUBLISH` o `CHANGES_REQUESTED`).
+  /// - Paso 4 (Publicación): `COMPLETED` sin substatus, que es como el backend
+  ///   marca la propiedad ya publicada.
   int _currentStep(dynamic body) {
-    if (body == null) return 2;
-    final status = (body['status'] as String?) ?? '';
+    final visit = _visitMap(body);
+    if (visit == null) return 2;
+    final status = visit['status']?.toString() ?? '';
+    final substatus = visit['substatus']?.toString() ?? '';
     switch (status) {
       case 'COMPLETED':
+        return substatus.isEmpty ? 4 : 3;
       case 'PUBLISHED':
         return 4;
+      case 'SCHEDULED':
       case 'IN_PROGRESS':
-        return 2;
-      case 'En_Revision_HQ':
+      case 'NO_SHOW':
         return 3;
       case 'PENDING':
       default:
@@ -151,12 +201,9 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     }
   }
 
-  /// True when the operative lister has been assigned.
-  bool _listerAssigned(dynamic body) {
-    if (body == null) return false;
-    final id = body['operativeListerId'];
-    return id != null && id.toString().isNotEmpty;
-  }
+  /// True cuando ya hay un operative lister asignado. El detalle expone su
+  /// perfil en `data.operativeListing` (null mientras no hay asignación).
+  bool _listerAssigned(dynamic body) => _sectionMap(body, 'operativeListing') != null;
 
   Future<void> _saveInstructions() async {
     final visitId = widget.visitId?.trim();
@@ -207,6 +254,18 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     }
   }
 
+  /// El botón de descarga queda visible aunque no haya convenio disponible,
+  /// para no dejar al propietario adivinando por qué no pasa nada.
+  void _reportContractUnavailable() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'El convenio todavía no está disponible para descargar. Escribinos si necesitás una copia.',
+        ),
+      ),
+    );
+  }
+
   Future<void> _downloadContract(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
@@ -229,26 +288,39 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
       authToken: currentAuthenticationToken,
       file: uploaded,
     );
-    if (mounted) {
-      safeSetState(() {
-        _model.isUploadingContract = false;
-        _model.contractUploaded = res.succeeded;
-      });
-      if (res.succeeded) {
-        showDialog(
-          context: context,
-          builder: (context) => Dialog(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            child: PopupExitoWidget(
-              title: '¡Subido!',
-              text: 'Tu documento ha sido cargado con éxito.',
-              onContinue: () => Navigator.pop(context),
-            ),
-          ),
-        );
-      }
+    if (!mounted) return;
+    safeSetState(() {
+      _model.isUploadingContract = false;
+      _model.contractUploaded = res.succeeded;
+    });
+
+    if (!res.succeeded) {
+      final body = res.jsonBody;
+      final message = body is Map && body['message'] != null
+          ? body['message'].toString()
+          : 'No se pudo subir el convenio. Inténtalo nuevamente.';
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+      return;
     }
+
+    // Releer el detalle: subir el convenio recalcula el substatus de la visita
+    // y el checklist, y de eso dependen el paso del stepper y el tilde de la
+    // fila del convenio.
+    await _fetchVisitDetails(silent: true);
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: PopupExitoWidget(
+          title: '¡Subido!',
+          text: 'Tu documento ha sido cargado con éxito.',
+          onContinue: () => Navigator.pop(context),
+        ),
+      ),
+    );
   }
 
   @override
@@ -257,14 +329,34 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     final step = _currentStep(body);
     final headerTitle = step == 3 ? 'Preparar material' : 'Visita';
     final listerAssigned = _listerAssigned(body);
-    final unsignedContractUrl = (body?['unsignedContractUrl'] as String?) ?? '';
+    final visit = _visitMap(body);
 
-    // Operative Lister data
-    final listerName = (body?['operativeListerName'] as String?) ?? '';
-    final listerPhoto = (body?['operativeListerPhoto'] as String?) ?? '';
-    final scheduledDate = (body?['scheduledDate'] as String?) ?? '';
-    final scheduledTime = (body?['scheduledTime'] as String?) ?? '';
-    final listerCredentialUrl = (body?['listerCredentialUrl'] as String?) ?? '';
+    // Convenio sin firmar que el propietario debe descargar. El backend lo
+    // genera al crear la visita, pero hoy solo lo devuelve en la respuesta 201
+    // de creación: `GET /visits/{visitId}/details` no expone
+    // `unsignedContractUrl`. Se leen las ubicaciones posibles para que el
+    // enlace funcione en cuanto el backend lo publique en el detalle.
+    final unsignedContractUrl =
+        (visit?['unsignedContractUrl'] ?? _dataMap(body)?['unsignedContractUrl'])
+                ?.toString() ??
+            '';
+
+    // Operative Lister asignado (`data.operativeListing`) y su slot confirmado.
+    final operativeListing = _sectionMap(body, 'operativeListing');
+    final confirmedSlot = visit?['confirmedTimeSlot'];
+    final listerName = operativeListing?['fullName']?.toString() ?? '';
+    final listerPhoto = operativeListing?['avatar']?.toString() ?? '';
+    final scheduledDate = confirmedSlot is Map
+        ? confirmedSlot['date']?.toString() ?? ''
+        : '';
+    final scheduledTime = confirmedSlot is Map
+        ? confirmedSlot['time']?.toString() ?? ''
+        : '';
+    final listerCredentialUrl =
+        operativeListing?['identificationDocumentUrl']?.toString() ?? '';
+
+    // Encargado de HQ (`data.listerHq`).
+    final listerHq = _sectionMap(body, 'listerHq');
 
     return GestureDetector(
       onTap: () {
@@ -346,7 +438,14 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                   ),
                                   const SizedBox(width: 12.0),
                                   // HQ card (always shown)
-                                  Expanded(child: _HQCard()),
+                                  Expanded(
+                                    child: _HQCard(
+                                      name: listerHq?['fullName']?.toString() ??
+                                          '',
+                                      photoUrl:
+                                          listerHq?['avatar']?.toString() ?? '',
+                                    ),
+                                  ),
                                 ],
                               ),
 
@@ -456,7 +555,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                                 onDownload: unsignedContractUrl.isNotEmpty
                                     ? () =>
                                         _downloadContract(unsignedContractUrl)
-                                    : null,
+                                    : _reportContractUnavailable,
                                 onUpload: _uploadContract,
                               ),
                             ],
@@ -764,6 +863,11 @@ class _ListerCard extends StatelessWidget {
 }
 
 class _HQCard extends StatelessWidget {
+  const _HQCard({this.name = '', this.photoUrl = ''});
+
+  final String name;
+  final String photoUrl;
+
   @override
   Widget build(BuildContext context) {
     const teal = Color(0xFF006B6B);
@@ -778,12 +882,25 @@ class _HQCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(50.0),
-            child: Image.asset(
-              'assets/images/nahid_photo.png',
-              width: 72,
-              height: 72,
-              fit: BoxFit.cover,
-            ),
+            child: photoUrl.isNotEmpty
+                ? Image.network(
+                    photoUrl,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                      'assets/images/nahid_photo.png',
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Image.asset(
+                    'assets/images/nahid_photo.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(height: 8),
           Container(
@@ -804,7 +921,8 @@ class _HQCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Nombre y Apellido',
+            name.isNotEmpty ? name : 'Asignando encargado...',
+            textAlign: TextAlign.center,
             style: FlutterFlowTheme.of(context).bodyMedium.override(
                   font: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   letterSpacing: 0.0,
@@ -1282,23 +1400,33 @@ class _Step4Content extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Property data — backend returns a nested `property` object or flat fields.
-    final prop = body?['property'] as Map<String, dynamic>?;
-    final imageUrl = ((prop?['mainImageUrl'] ??
+    // Property data — el detalle la anida en `data.property`; se conserva la
+    // lectura plana como respaldo para respuestas sin envolver.
+    final envelope = body is Map ? body['data'] : null;
+    final root = envelope is Map ? envelope : (body is Map ? body : null);
+    final prop = root?['property'] is Map
+        ? Map<String, dynamic>.from(root!['property'] as Map)
+        : null;
+    // El detalle expone la foto como `image` y el tipo como `propertyType`.
+    final imageUrl = (prop?['image'] ??
+            prop?['mainImageUrl'] ??
             prop?['imageUrl'] ??
-            body?['propertyImageUrl'] ??
-            '') as String)
+            '')
+        .toString()
         .trim();
-    final propertyName =
-        ((prop?['name'] ?? body?['propertyName'] ?? '') as String).trim();
-    final propertyType = prop?['type'] ?? body?['propertyType'];
-    final price =
-        ((prop?['price'] ?? body?['propertyPrice'] ?? '') as Object).toString();
-    final landAreaRaw = prop?['landArea'] ?? body?['propertyLandArea'];
+    final propertyName = (prop?['name'] ?? '').toString().trim();
+    final propertyType = prop?['propertyType'] ?? prop?['type'];
+    final saleInfo = prop?['saleInfo'];
+    final rentInfo = prop?['rentInfo'];
+    final price = (prop?['price'] ??
+            (saleInfo is Map ? saleInfo['salePrice'] : null) ??
+            (rentInfo is Map ? rentInfo['rentPrice'] : null) ??
+            '')
+        .toString();
+    final landAreaRaw = prop?['landArea'];
     final landArea =
         landAreaRaw != null ? double.tryParse(landAreaRaw.toString()) : null;
-    final propertyId =
-        ((prop?['id'] ?? body?['propertyId'] ?? '') as String).trim();
+    final propertyId = (prop?['id'] ?? '').toString().trim();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

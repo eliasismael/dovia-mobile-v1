@@ -229,8 +229,10 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                           note: note,
                                         );
                                         if (res.succeeded) {
+                                          // Volver al checklist para seguir
+                                          // revisando el resto de documentos.
                                           if (context.mounted) {
-                                            context.goNamed('LISTING_HQ_Home');
+                                            Navigator.of(context).pop(true);
                                           }
                                         } else {
                                           if (context.mounted) {
@@ -301,23 +303,28 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                                         .resolve(
                                                             Directionality.of(
                                                                 context)),
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    Navigator.pop(
-                                                        dialogContext);
-                                                  },
-                                                  child: const PopupExitoWidget(
-                                                    title:
-                                                        'Se envió con éxito al Equipo Legal',
-                                                    text:
-                                                        'El documento se ha enviado al equipo de legal para que lo revisen.',
-                                                  ),
+                                                // `PopupExitoWidget` solo
+                                                // dibuja el botón de cierre si
+                                                // recibe `onContinue`; sin él
+                                                // el popup queda sin salida.
+                                                child: PopupExitoWidget(
+                                                  title:
+                                                      'Se envió con éxito al Equipo Legal',
+                                                  text:
+                                                      'El documento se ha enviado al equipo de legal para que lo revisen.',
+                                                  continueText: 'Continuar',
+                                                  onContinue: () =>
+                                                      Navigator.pop(
+                                                          dialogContext),
                                                 ),
                                               );
                                             },
                                           );
+                                          // Volver al checklist, no al Home:
+                                          // normalmente quedan más documentos
+                                          // por revisar en la misma visita.
                                           if (context.mounted) {
-                                            context.goNamed('LISTING_HQ_Home');
+                                            Navigator.of(context).pop(true);
                                           }
                                         }
                                       } else {

@@ -61,6 +61,12 @@ class _LISTINGHQPropiedadAsignadaWidgetState
 
   /// Slots propuestos por el propietario (`{ 'date', 'time' }`), para el selector.
   final List<Map<String, String>> _proposedSlots = [];
+
+  /// Disponibilidad que propuso el propietario para una `OPERATIVE_LISTER_VISIT`:
+  /// `{ 'dayOfWeek', 'startTime', 'endTime' }`. El backend rechaza con
+  /// `SLOT_OUTSIDE_CLIENT_PROPOSED_AVAILABILITY` cualquier slot fuera de estos
+  /// rangos, así que el selector solo debe ofrecer fechas y horas de acá.
+  final List<Map<String, String>> _availabilityRanges = [];
   final List<String> _rescheduleHistory = [];
 
   // Lister nuevo elegido para asignar.
@@ -158,6 +164,20 @@ class _LISTINGHQPropiedadAsignadaWidgetState
         _proposedSlots.add({
           'date': slot['date']?.toString() ?? '',
           'time': slot['time']?.toString() ?? '',
+        });
+      }
+
+      // Las visitas de operative listing no traen fechas concretas sino
+      // rangos por día de la semana.
+      final ranges = (visit['proposedAvailabilityRanges'] as List?) ??
+          (data['proposedAvailabilityRanges'] as List?) ??
+          const [];
+      for (final range in ranges) {
+        if (range is! Map) continue;
+        _availabilityRanges.add({
+          'dayOfWeek': range['dayOfWeek']?.toString() ?? '',
+          'startTime': range['startTime']?.toString() ?? '',
+          'endTime': range['endTime']?.toString() ?? '',
         });
       }
 
@@ -260,6 +280,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
               height: double.infinity,
               propertyId: widget.visitId ?? '',
               proposedSlots: _proposedSlots,
+              availabilityRanges: _availabilityRanges,
               ownerPhone: _ownerPhone,
               onClose: () => Navigator.of(pageContext).pop(),
               onOperativeSelected: (operative, date, time) {
@@ -292,7 +313,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
     safeSetState(() => _submitting = true);
     final repo = context.read<VisitsRepository>();
     final res = await repo.assignVisit(
-      propertyId: widget.visitId ?? '',
+      visitId: widget.visitId ?? '',
       operativeId: _selectedOperative!['id'],
       date: _selectedDate!,
       time: _selectedTime!,
@@ -559,11 +580,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: _ownerAvatar != null && _ownerAvatar!.isNotEmpty
-                  ? Image.network(_ownerAvatar!,
-                      width: 120.0, height: 120.0, fit: BoxFit.cover)
-                  : Image.asset('assets/images/nahid_photo.png',
-                      width: 120.0, height: 120.0, fit: BoxFit.cover),
+              child: _buildAvatar(_ownerAvatar),
             ),
             _buildCardBadge('Información de propietario'),
             Padding(
@@ -586,6 +603,30 @@ class _LISTINGHQPropiedadAsignadaWidgetState
     );
   }
 
+  /// Avatar de 120x120. La mayoría de los perfiles no tienen foto y la URL
+  /// remota que se usaba de relleno fallaba, dejando el cuadro rojo de error de
+  /// Flutter con la URL escrita encima. Ante ausencia o fallo se cae a un
+  /// asset local.
+  Widget _buildAvatar(String? url) {
+    const double size = 120.0;
+    Widget placeholder() => Image.asset(
+          'assets/images/nahid_photo.png',
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        );
+
+    if (url == null || url.isEmpty) return placeholder();
+
+    return Image.network(
+      url,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => placeholder(),
+    );
+  }
+
   Widget _buildListerCard(double width) {
     final lister = _selectedOperative;
 
@@ -596,12 +637,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(
-              lister['photoUrl'] ?? 'https://i.pravatar.cc/150',
-              width: 120.0,
-              height: 120.0,
-              fit: BoxFit.cover,
-            ),
+            child: _buildAvatar(lister['photoUrl'] as String?),
           ),
           _buildCardBadge('Información Operative\nListing Associate'),
           Padding(
@@ -617,6 +653,22 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                   ),
             ),
           ),
+          // Varios operativos comparten el mismo nombre; el email confirma
+          // cuál quedó elegido antes de confirmar la visita.
+          if ((lister['email'] as String?)?.isNotEmpty ?? false)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(4.0, 2.0, 4.0, 0.0),
+              child: Text(
+                lister['email'] as String,
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.inter(),
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                      fontSize: 11.0,
+                      letterSpacing: 0.0,
+                    ),
+              ),
+            ),
         ],
       );
     } else {

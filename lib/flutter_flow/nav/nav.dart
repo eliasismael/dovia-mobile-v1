@@ -20,6 +20,12 @@ const kTransitionInfoKey = '__transition_info__';
 
 GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Observador del navegador raíz. Una pantalla que mezcla `RouteAware` recibe
+/// `didPopNext()` cuando vuelve al frente, que es el momento de releer datos
+/// que pudieron cambiar en la pantalla de la que se vuelve.
+final RouteObserver<ModalRoute<void>> appRouteObserver =
+    RouteObserver<ModalRoute<void>>();
+
 class AppStateNotifier extends ChangeNotifier {
   AppStateNotifier._();
 
@@ -78,6 +84,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
+      observers: [appRouteObserver],
       errorBuilder: (context, state) => appStateNotifier.loggedIn
           ? const DOVIACLIENTHomePageWidget()
           : const QueEsDoviaWidget(),

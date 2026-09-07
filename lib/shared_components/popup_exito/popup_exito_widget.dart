@@ -49,6 +49,21 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
     super.dispose();
   }
 
+  /// Acción del botón de cierre.
+  ///
+  /// Sin `onContinue` el popup se dibujaba sin ningún botón, y como se abre en
+  /// un `Dialog` a pantalla completa tampoco quedaba barrera para tocar afuera:
+  /// el usuario quedaba encerrado. Cuando el popup vive dentro de un diálogo
+  /// (`PopupRoute`) y quien lo abrió no pasó callback, se cierra solo.
+  VoidCallback? get _effectiveOnContinue {
+    if (widget.onContinue != null) return widget.onContinue;
+    final route = ModalRoute.of(context);
+    if (route is PopupRoute) {
+      return () => Navigator.of(context).pop();
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -122,12 +137,12 @@ class _PopupExitoWidgetState extends State<PopupExitoWidget> {
                           ),
                     ),
                   ),
-                  if (widget.onContinue != null)
+                  if (_effectiveOnContinue != null)
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           0.0, 32.0, 0.0, 0.0),
                       child: FFButtonWidget(
-                        onPressed: widget.onContinue,
+                        onPressed: _effectiveOnContinue,
                         text: widget.continueText ?? 'Continuar',
                         options: FFButtonOptions(
                           width: double.infinity,

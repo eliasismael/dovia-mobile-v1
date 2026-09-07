@@ -7,7 +7,6 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/listing_hq/l_i_s_t_i_n_g_h_q_documentos/l_i_s_t_i_n_g_h_q_documentos_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedades/l_i_s_t_i_n_g_h_q_propiedades_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_propiedad_rechazada_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_widget.dart';
@@ -26,6 +25,10 @@ class _HqCardData {
   final Color statusTextColor;
   final String tagText;
 
+  /// Substatus crudo de la visita. Define qué botón muestra la tarjeta cuando
+  /// un carril agrupa más de un substatus (ej. asignar vs. re-asignar).
+  final String substatus;
+
   _HqCardData({
     required this.id,
     required this.address,
@@ -33,6 +36,7 @@ class _HqCardData {
     required this.statusBgColor,
     required this.statusTextColor,
     required this.tagText,
+    this.substatus = '',
   });
 }
 
@@ -62,18 +66,36 @@ class LISTINGHQHomeWidget extends StatefulWidget {
   State<LISTINGHQHomeWidget> createState() => _LISTINGHQHomeWidgetState();
 }
 
-class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
+class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
+    with RouteAware {
   late LISTINGHQHomeModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  static const String _kDocPendingStatus = 'pending';
-  static const String _kAssignSubstatus = 'READY_TO_ASSIGN_OPERATIVE_LISTING';
+  /// Checklist documental todavía en manos del LISTER_HQ: `MISSING_INFO`
+  /// (falta subir algún documento requerido) y `DOCS_SUBMITTED` (subidos,
+  /// pendientes de aprobar). Mientras la visita esté aquí el backend rechaza
+  /// `assign-operative-lister`.
+  static const String _kDocsSubstatus = 'MISSING_INFO,DOCS_SUBMITTED';
+
+  /// Listas para asignar operative lister. `RESCHEDULE_REQUIRED` cubre tanto
+  /// la solicitud de reagendamiento como el no-show, porque el filtro del
+  /// backend es por substatus y ambos comparten ese valor.
+  static const String _kAssignSubstatus =
+      'READY_TO_ASSIGN_OPERATIVE_LISTING,RESCHEDULE_REQUIRED';
   static const String _kPublishSubstatus = 'READY_TO_PUBLISH';
   static const String _kLegalRejectedStatus = 'REJECTED';
   static const String _kCorrectionsSubstatus = 'CHANGES_REQUESTED';
 
-  Future<List<_HqCardData>>? _docsPendingFuture;
+  // Paleta de las píldoras de estado, tomada del diseño.
+  static const Color _kPendingBg = Color(0xFFFFDBBC);
+  static const Color _kPendingFg = Color(0xFFF57E00);
+  static const Color _kUrgentBg = Color(0xFFFFBCBC);
+  static const Color _kUrgentFg = Color(0xFFF52100);
+  static const Color _kAlertBg = Color(0xFFF8D5D5);
+  static const Color _kAlertFg = Color(0xFFBC0000);
+
+  Future<List<_HqCardData>>? _docsFuture;
   Future<List<_HqCardData>>? _assignFuture;
   Future<List<_HqCardData>>? _publishFuture;
   Future<List<_HqLargeCardData>>? _legalRejectedFuture;
@@ -88,32 +110,102 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
   }
 
   void _initFutures() {
-    _docsPendingFuture = _fetchHqDocuments(
-      status: _kDocPendingStatus,
-      defaultTag: 'Visita realizada',
-      defaultStatus: 'Pendiente',
-    );
-    _assignFuture = _fetchHqCards(
-      substatus: _kAssignSubstatus,
-      defaultTag: 'Programar',
-      defaultStatus: 'Reciente',
-    );
-    _publishFuture = _fetchHqCards(
-      substatus: _kPublishSubstatus,
-      defaultTag: 'Visita realizada',
-      defaultStatus: 'Pendiente',
-    );
+    _docsFuture = _fetchHqCards(substatus: _kDocsSubstatus);
+    _assignFuture = _fetchHqCards(substatus: _kAssignSubstatus);
+    _publishFuture = _fetchHqCards(substatus: _kPublishSubstatus);
     _legalRejectedFuture = _fetchLegalProcesses(status: _kLegalRejectedStatus);
     _correctionsFuture = _fetchHqLargeCards(substatus: _kCorrectionsSubstatus);
   }
 
+  /// Etiqueta del pill lateral: "Reciente" el primer día y "N Días" después,
+  /// para que HQ vea de un vistazo qué tarjeta lleva más tiempo esperando.
+  String _ageLabel(dynamic updatedAt) {
+    final parsed = DateTime.tryParse(updatedAt?.toString() ?? '');
+    if (parsed == null) return 'Pendiente';
+    final days = DateTime.now().toUtc().difference(parsed.toUtc()).inDays;
+    if (days <= 0) return 'Reciente';
+    return days == 1 ? '1 Día' : '$days Días';
+  }
+
+  /// Traduce el substatus de la visita al par (etiqueta, estatus) que muestra
+  /// la tarjeta.
+  ({String tag, String status, Color bg, Color fg}) _cardLabels(
+    String substatus,
+    dynamic updatedAt,
+  ) {
+    switch (substatus) {
+      case 'MISSING_INFO':
+        return (
+          tag: 'Faltan documentos',
+          status: 'Pendiente',
+          bg: _kPendingBg,
+          fg: _kPendingFg
+        );
+      case 'DOCS_SUBMITTED':
+        return (
+          tag: 'Documentos por revisar',
+          status: 'Pendiente',
+          bg: _kPendingBg,
+          fg: _kPendingFg
+        );
+      case 'READY_TO_ASSIGN_OPERATIVE_LISTING':
+        return (
+          tag: 'Programar',
+          status: _ageLabel(updatedAt),
+          bg: _kPendingBg,
+          fg: _kPendingFg
+        );
+      case 'RESCHEDULE_REQUIRED':
+        return (
+          tag: 'Re-programar',
+          status: 'Urgente',
+          bg: _kUrgentBg,
+          fg: _kUrgentFg
+        );
+      case 'READY_TO_PUBLISH':
+        return (
+          tag: 'Visita realizada',
+          status: 'Pendiente',
+          bg: _kPendingBg,
+          fg: _kPendingFg
+        );
+      default:
+        return (
+          tag: 'Pendiente',
+          status: 'Pendiente',
+          bg: _kPendingBg,
+          fg: _kPendingFg
+        );
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is ModalRoute<void>) {
+      appRouteObserver.subscribe(this, route);
+    }
+  }
+
+  /// Se dispara al volver de una pantalla apilada sobre el home. Revisar o
+  /// subir documentos cambia el substatus de la visita en el backend, así que
+  /// los carriles hay que releerlos: si no, la propiedad sigue apareciendo en
+  /// el carril viejo.
+  @override
+  void didPopNext() {
+    _handleRefresh();
+  }
+
   @override
   void dispose() {
+    appRouteObserver.unsubscribe(this);
     _model.dispose();
     super.dispose();
   }
 
   Future<void> _handleRefresh() async {
+    if (!mounted) return;
     setState(() {
       _initFutures();
     });
@@ -128,64 +220,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
     return cur is Map ? cur as Map<String, dynamic> : null;
   }
 
-  String _resolveVisitId(dynamic item) {
-    if (item is! Map) return '';
-    final visitId = item['visitId']?.toString();
-    if (visitId != null && visitId.isNotEmpty) return visitId;
-    final visit = item['visit'];
-    if (visit is Map) {
-      final nestedId = visit['id']?.toString();
-      if (nestedId != null && nestedId.isNotEmpty) return nestedId;
-    }
-    return item['id']?.toString() ?? '';
-  }
-
-  Future<List<_HqCardData>> _fetchHqDocuments({
-    required String status,
-    required String defaultTag,
-    required String defaultStatus,
-  }) async {
-    final token = currentAuthenticationToken ?? '';
-    final res =
-        await DOVIAAPIVisitContextGroup.getListerHqVisitDocumentsCall.call(
-      authToken: token,
-      status: status,
-      page: '1',
-      limit: '10',
-    );
-    if (!res.succeeded) return [];
-    final raw = getJsonField(res.jsonBody, r'$.data');
-    final docs = raw is List ? raw : <dynamic>[];
-
-    return docs.map((v) {
-      final id = _resolveVisitId(v);
-      String address = '';
-      if (v is Map) {
-        final prop = v['property'] ??
-            (v['visit'] is Map ? v['visit']['property'] : null);
-        if (prop is Map) {
-          final locAddr = _deepMap(prop, ['location', 'address']);
-          address = locAddr?['fullAddress']?.toString() ??
-              locAddr?['street']?.toString() ??
-              prop['name']?.toString() ??
-              '';
-        }
-      }
-      return _HqCardData(
-        id: id,
-        address: address,
-        statusText: defaultStatus,
-        statusBgColor: const Color(0xFFF4D476),
-        statusTextColor: const Color(0xFFF99F58),
-        tagText: defaultTag,
-      );
-    }).toList();
-  }
-
   Future<List<_HqCardData>> _fetchHqCards({
     required String substatus,
-    required String defaultTag,
-    required String defaultStatus,
   }) async {
     final token = currentAuthenticationToken ?? '';
     final res = await DOVIAAPIVisitContextGroup.getListerHqVisitsCall.call(
@@ -200,9 +236,12 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
 
     return visits.map((v) {
       final id = v is Map ? v['id']?.toString() ?? '' : '';
+      final visitSubstatus = v is Map ? v['substatus']?.toString() ?? '' : '';
       String address = '';
       if (v is Map) {
-        final prop = v['property'];
+        // `/visits/lister-hq` expone la propiedad resumida como
+        // `propertyInfo`; se conserva `property` por compatibilidad.
+        final prop = v['propertyInfo'] ?? v['property'];
         if (prop is Map) {
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
@@ -211,13 +250,18 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
               '';
         }
       }
+      final labels = _cardLabels(
+        visitSubstatus,
+        v is Map ? v['updatedAt'] : null,
+      );
       return _HqCardData(
         id: id,
         address: address,
-        statusText: defaultStatus,
-        statusBgColor: const Color(0xFFF4D476),
-        statusTextColor: const Color(0xFFF99F58),
-        tagText: defaultTag,
+        statusText: labels.status,
+        statusBgColor: labels.bg,
+        statusTextColor: labels.fg,
+        tagText: labels.tag,
+        substatus: visitSubstatus,
       );
     }).toList();
   }
@@ -585,19 +629,21 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                     ],
                     const SizedBox(height: 8.0),
                     Container(
+                      width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0x33FF5963),
-                        borderRadius: BorderRadius.circular(24.0),
+                        color: _kAlertBg,
+                        borderRadius: BorderRadius.circular(100.0),
                       ),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             10.0, 4.0, 10.0, 4.0),
                         child: Text(
                           'Falta información',
+                          textAlign: TextAlign.center,
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
                                     font: GoogleFonts.inter(),
-                                    color: const Color(0xFFFF5963),
+                                    color: _kAlertFg,
                                     fontSize: 12.0,
                                   ),
                         ),
@@ -736,13 +782,16 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
-                            // Fila 1: Propiedades revisar documentacion
+                            // Fila 1: Checklist documental pendiente. Sin
+                            // aprobarlo la visita no llega a
+                            // READY_TO_ASSIGN_OPERATIVE_LISTING y el backend
+                            // rechaza la asignación del operative.
                             _buildSectionHeader(
                               'Propiedades revisar documentacion',
-                              LISTINGHQDocumentosWidget.routeName,
+                              LISTINGHQPropiedadesWidget.routeName,
                             ),
                             FutureBuilder<List<_HqCardData>>(
-                              future: _docsPendingFuture,
+                              future: _docsFuture,
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) return _buildLoader();
                                 return _buildHorizontalList(
@@ -787,7 +836,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                                             statusText: e.statusText,
                                             statusBgColor: e.statusBgColor,
                                             statusTextColor: e.statusTextColor,
-                                            buttonText: 'Asignar',
+                                            buttonText: e.substatus ==
+                                                    'RESCHEDULE_REQUIRED'
+                                                ? 'Asignar de nuevo'
+                                                : 'Asignar',
                                             onPressed: () => context.pushNamed(
                                               LISTINGHQPropiedadAsignadaWidget
                                                   .routeName,
@@ -802,7 +854,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget> {
                               },
                             ),
 
-                            // Fila 3: Propiedades pendientes por publicar
+                            // Fila 3: Fotos cargadas, pendientes de revisión.
                             _buildSectionHeader(
                               'Propiedades pendientes por publicar',
                               LISTINGHQPropiedadesWidget.routeName,
