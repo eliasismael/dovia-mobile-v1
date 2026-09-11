@@ -225,24 +225,6 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                     safeSetState(() {});
                                   },
                                   onCompleted: (_) async {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          title: const Text('CODE'),
-                                          content: Text(
-                                              _model.pinCodeController!.text),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child:
-                                                  Text(FFAppState().UserEmail),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
                                     _model.apiResultvj1 =
                                         await DOVIAAPIAuthContextGroup
                                             .verifyCodeStepNEWCall
