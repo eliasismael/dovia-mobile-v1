@@ -13,6 +13,7 @@ import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_rentar_model.dart';
@@ -69,6 +70,172 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     }
 
     return fallback;
+  }
+
+  /// Revisa el formulario antes de llamar al backend y devuelve un problema
+  /// por linea.
+  ///
+  /// Los precios viajan parseados: entero para venta, mantenimiento, impuesto
+  /// y tiempo minimo, decimal para la renta mensual. Un texto que no parsea
+  /// llega como `null` y la propiedad se crearia sin ese dato, sin aviso.
+  List<String> _collectValidationErrors() {
+    final errors = <String>[];
+    final transactionType = widget.transactionType?.name ?? '';
+
+    void requireText(TextEditingController? controller, String label) {
+      if ((controller?.text.trim() ?? '').isEmpty) {
+        errors.add('$label: completá este campo.');
+      }
+    }
+
+    void checkNumber(
+      TextEditingController? controller,
+      String label, {
+      required bool isRequired,
+      bool decimal = false,
+    }) {
+      final raw = controller?.text.trim() ?? '';
+      if (raw.isEmpty) {
+        if (isRequired) errors.add('$label: completá este campo.');
+        return;
+      }
+
+      final num? value = decimal ? double.tryParse(raw) : int.tryParse(raw);
+      if (value == null) {
+        errors.add(decimal
+            ? '$label: ingresá un número, podés usar decimales.'
+            : '$label: ingresá un número entero, sin letras ni símbolos.');
+        return;
+      }
+      if (value < 0) {
+        errors.add('$label: no puede ser un número negativo.');
+      }
+    }
+
+    requireText(
+        _model.descripcionPropiedadTextController, 'Descripción de la propiedad');
+
+    if (transactionType.contains('SALE')) {
+      checkNumber(_model.precioVentaTextController, 'Precio de venta',
+          isRequired: true);
+      checkNumber(_model.cantidadARecibirTextController, 'Cantidad a recibir',
+          isRequired: false, decimal: true);
+      checkNumber(_model.mantenimientoTextController, 'Mantenimiento',
+          isRequired: false);
+      checkNumber(_model.impustoUnicoInmueblesTextController,
+          'Impuesto único sobre inmuebles',
+          isRequired: false);
+    }
+
+    if (transactionType.contains('RENT')) {
+      checkNumber(
+          _model.precioRentaMensualTextController, 'Precio de renta mensual',
+          isRequired: true, decimal: true);
+      checkNumber(_model.tiempoMinimoTextController, 'Tiempo mínimo',
+          isRequired: false);
+    }
+
+    if (_model.zonaValue == null || _model.zonaValue == '') {
+      errors.add('Zona donde se encuentra el inmueble: seleccioná una zona.');
+    }
+
+    requireText(
+        _model.direccionPropiedadTextController, 'Dirección de la propiedad');
+
+    // Sin punto en el mapa la propiedad quedaría sin coordenadas y el
+    // operative lister no podría llegar.
+    if (_selectedLatitude == null || _selectedLongitude == null) {
+      errors.add(
+          'Ubicación: marcá el punto en el mapa y tocá "Confirmar ubicación".');
+    }
+
+    return errors;
+  }
+
+  Future<void> _showValidationErrors(List<String> errors) async {
+    if (!mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Revisá los datos'),
+        content: Text(errors.join('\n\n')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Ok'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Vista previa del archivo elegido.
+  ///
+  /// Sin archivo muestra el mismo placeholder de siempre. Con una imagen
+  /// muestra la miniatura y con un documento el nombre, porque un PDF no se
+  /// puede previsualizar acá. En los dos casos sigue envuelto en el InkWell
+  /// que abre el selector, así que se puede reemplazar tocándolo.
+  Widget _uploadPreview(FFUploadedFile file) {
+    final width = MediaQuery.sizeOf(context).width * 1.0;
+    final bytes = file.bytes;
+
+    if (bytes == null || bytes.isEmpty) {
+      return SvgPicture.asset(
+        'assets/images/AddMediaImage.svg',
+        width: width,
+        height: 150.0,
+        fit: BoxFit.cover,
+      );
+    }
+
+    final filename = file.originalFilename.trim().isNotEmpty
+        ? file.originalFilename.trim()
+        : (file.name ?? '').trim();
+    final isImage = RegExp(r'\.(png|jpe?g|gif|webp|bmp|heic|heif)$',
+            caseSensitive: false)
+        .hasMatch(filename);
+
+    if (isImage) {
+      return Image.memory(
+        bytes,
+        width: width,
+        height: 150.0,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return Container(
+      width: width,
+      height: 150.0,
+      color: FlutterFlowTheme.of(context).secondaryBackground,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.description_outlined,
+            size: 44.0,
+            color: FlutterFlowTheme.of(context).primary,
+          ),
+          const SizedBox(height: 10.0),
+          Text(
+            filename.isEmpty ? 'Documento cargado' : filename,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.inter(
+                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                  ),
+                  fontSize: 13.0,
+                  letterSpacing: 0.0,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _showPublicationError(String message) async {
@@ -343,7 +510,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   ),
                                   filled: true,
                                   fillColor:
-                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 40.0, 0.0, 40.0),
@@ -456,6 +623,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     const TextInputType
                                                         .numberWithOptions(
                                                         decimal: true),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.digitsOnly,
+                                                ],
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -671,6 +841,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     const TextInputType
                                                         .numberWithOptions(
                                                         decimal: true),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                                                ],
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -886,6 +1059,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     const TextInputType
                                                         .numberWithOptions(
                                                         decimal: true),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.digitsOnly,
+                                                ],
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1101,6 +1277,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     const TextInputType
                                                         .numberWithOptions(
                                                         decimal: true),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.digitsOnly,
+                                                ],
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1351,6 +1530,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     const TextInputType
                                                         .numberWithOptions(
                                                         decimal: true),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                                                ],
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -1876,6 +2058,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                     const TextInputType
                                                         .numberWithOptions(
                                                         decimal: true),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.digitsOnly,
+                                                ],
                                                 obscureText: false,
                                                 decoration: InputDecoration(
                                                   isDense: true,
@@ -2665,7 +2850,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   ),
                                   filled: true,
                                   fillColor:
-                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -2825,11 +3010,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                               },
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/AddMediaImage.svg',
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  height: 150.0,
-                                  fit: BoxFit.cover,
+                                child: _uploadPreview(
+                                  _model.uploadedLocalFile_certifiacionDePropiedad,
                                 ),
                               ),
                             ),
@@ -2949,7 +3131,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   ),
                                   filled: true,
                                   fillColor:
-                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3097,7 +3279,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   ),
                                   filled: true,
                                   fillColor:
-                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3245,7 +3427,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   ),
                                   filled: true,
                                   fillColor:
-                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3426,7 +3608,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   ),
                                   filled: true,
                                   fillColor:
-                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3574,7 +3756,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                   ),
                                   filled: true,
                                   fillColor:
-                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3680,11 +3862,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                               },
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/AddMediaImage.svg',
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  height: 150.0,
-                                  fit: BoxFit.cover,
+                                child: _uploadPreview(
+                                  _model.uploadedLocalFile_propertyOwnerId,
                                 ),
                               ),
                             ),
@@ -3737,49 +3916,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                               child: PrimaryButtonWidget(
                                 text: 'Aceptar',
                                 onTap: () async {
-                                  if (_model.zonaValue == null ||
-                                      _model.zonaValue == '') {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          title: const Text('Campo Mandatorio'),
-                                          content: const Text(
-                                              'Por favor selecciona una zona para continuar.'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child: const Text('Ok'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                    return;
-                                  }
-                                  // Sin punto en el mapa la propiedad quedaría
-                                  // sin coordenadas y el operative lister no
-                                  // podría llegar.
-                                  if (_selectedLatitude == null ||
-                                      _selectedLongitude == null) {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          title: const Text('Campo Mandatorio'),
-                                          content: const Text(
-                                              'Marcá la ubicación de la propiedad en el mapa y tocá "Confirmar ubicación".'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child: const Text('Ok'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
+                                  // Una sola pasada de validación: así el
+                                  // propietario ve de una todo lo que le falta
+                                  // en vez de corregir de a un campo por vez.
+                                  final validationErrors =
+                                      _collectValidationErrors();
+                                  if (validationErrors.isNotEmpty) {
+                                    await _showValidationErrors(
+                                        validationErrors);
                                     return;
                                   }
                                   var shouldSetState = false;
