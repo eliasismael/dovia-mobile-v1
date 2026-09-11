@@ -153,10 +153,8 @@ class _DOVIACLIENTComoFuncionaWidgetState
                                 0.0, 20.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: MediaQuery.sizeOf(context).height * 1.0,
                               child: custom_widgets.HowItWorksWidget(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: MediaQuery.sizeOf(context).height * 1.0,
                                 onAccept: () async {
                                   context.pushNamed(
                                       DOVIACLIENTMisPropiedadesAccionesARealizarWidget
