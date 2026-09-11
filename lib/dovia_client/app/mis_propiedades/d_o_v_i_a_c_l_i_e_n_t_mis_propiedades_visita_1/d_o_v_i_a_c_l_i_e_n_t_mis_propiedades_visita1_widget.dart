@@ -331,11 +331,10 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     final listerAssigned = _listerAssigned(body);
     final visit = _visitMap(body);
 
-    // Convenio sin firmar que el propietario debe descargar. El backend lo
-    // genera al crear la visita, pero hoy solo lo devuelve en la respuesta 201
-    // de creación: `GET /visits/{visitId}/details` no expone
-    // `unsignedContractUrl`. Se leen las ubicaciones posibles para que el
-    // enlace funcione en cuanto el backend lo publique en el detalle.
+    // Convenio sin firmar que el propietario descarga, firma y vuelve a subir.
+    // El detalle de la visita lo expone en `visit.unsignedContractUrl`, así que
+    // está disponible en cualquier momento y desde cualquier dispositivo. Se
+    // conserva la lectura a nivel de `data` como respaldo.
     final unsignedContractUrl =
         (visit?['unsignedContractUrl'] ?? _dataMap(body)?['unsignedContractUrl'])
                 ?.toString() ??
