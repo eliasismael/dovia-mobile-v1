@@ -8,6 +8,7 @@
 
 import 'client_offer_models.dart';
 import 'offer_json.dart';
+import 'offer_credit_status.dart';
 
 enum OfferDetailFieldKind { text, textArea, currency }
 
@@ -386,16 +387,7 @@ String _paymentMethodLabel(String normalized) {
 
 String _creditStatus(Map<String, dynamic> data) {
   final raw = offerStr(data['creditStatus']);
-  switch (raw?.toLowerCase()) {
-    case 'approved':
-      return 'Aprobado';
-    case 'in_process':
-      return 'En proceso';
-    case 'not_started':
-      return 'No iniciado';
-    default:
-      return raw ?? _empty;
-  }
+  return creditStatusLabel(raw) ?? raw ?? _empty;
 }
 
 String _currencyLabel(Map<String, dynamic> data) {
@@ -455,19 +447,8 @@ String _availableFrom(Map<String, dynamic>? property) {
 }
 
 /// Lee un valor de la propiedad probando varias rutas con puntos.
-dynamic _propertyValue(Map<String, dynamic>? property, List<String> paths) {
-  if (property == null) return null;
-  for (final path in paths) {
-    dynamic current = property;
-    for (final segment in path.split('.')) {
-      final map = offerAsMap(current);
-      current = map?[segment];
-      if (current == null) break;
-    }
-    if (current != null) return current;
-  }
-  return null;
-}
+dynamic _propertyValue(Map<String, dynamic>? property, List<String> paths) =>
+    propertyPathValue(property, paths);
 
 /// Reglas propias del complejo declaradas en el listado. Devuelve vacío —no el
 /// guion— porque el bloque decide con eso si mostrar un texto o el genérico.

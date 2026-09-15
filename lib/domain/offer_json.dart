@@ -121,3 +121,23 @@ String? offerRejectionReason(Map<String, dynamic>? json) {
   }
   return null;
 }
+
+/// Lee un valor anidado de la propiedad probando varias rutas con puntos.
+///
+/// El backend no publica un nombre único para varios campos del listado
+/// (`allowedUses` vive en `rentInfo.rentalConditions` o suelto en
+/// `conditions`), así que cada lector declara los alias que conoce y se queda
+/// con el primero que traiga dato.
+dynamic propertyPathValue(Map<String, dynamic>? property, List<String> paths) {
+  if (property == null) return null;
+  for (final path in paths) {
+    dynamic current = property;
+    for (final segment in path.split('.')) {
+      final map = offerAsMap(current);
+      current = map?[segment];
+      if (current == null) break;
+    }
+    if (current != null) return current;
+  }
+  return null;
+}

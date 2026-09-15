@@ -65,10 +65,10 @@ class DOVIACLIENTOfertaCompraModel
   TextEditingController? hIPOTECABancoTextController;
   String? Function(BuildContext, String?)? hIPOTECABancoTextControllerValidator;
   // State field(s) for HIPOTECA_EstadoCredito widget.
-  FocusNode? hIPOTECAEstadoCreditoFocusNode;
-  TextEditingController? hIPOTECAEstadoCreditoTextController;
-  String? Function(BuildContext, String?)?
-      hIPOTECAEstadoCreditoTextControllerValidator;
+  // `creditStatus` es un enum del contrato (`approved`, `in_process`,
+  // `not_started`), asi que se elige de una lista en vez de escribirse.
+  String? hIPOTECAEstadoCreditoValue;
+  FormFieldController<String>? hIPOTECAEstadoCreditoValueController;
   // State field(s) for HIPOTECA_TiempoAprobacionBanco widget.
   FocusNode? hIPOTECATiempoAprobacionBancoFocusNode;
   TextEditingController? hIPOTECATiempoAprobacionBancoTextController;
@@ -184,9 +184,6 @@ class DOVIACLIENTOfertaCompraModel
 
     hIPOTECABancoFocusNode?.dispose();
     hIPOTECABancoTextController?.dispose();
-
-    hIPOTECAEstadoCreditoFocusNode?.dispose();
-    hIPOTECAEstadoCreditoTextController?.dispose();
 
     hIPOTECATiempoAprobacionBancoFocusNode?.dispose();
     hIPOTECATiempoAprobacionBancoTextController?.dispose();
