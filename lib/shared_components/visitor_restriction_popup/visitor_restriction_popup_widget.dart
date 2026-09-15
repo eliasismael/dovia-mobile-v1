@@ -99,10 +99,10 @@ class _VisitorRestrictionPopupWidgetState
                     ),
               ),
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Flexible(
+                  Expanded(
                     child: Container(
                       decoration: BoxDecoration(
                         color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -119,19 +119,24 @@ class _VisitorRestrictionPopupWidgetState
                       ),
                     ),
                   ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.5,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondaryBackground,
-                    ),
-                    child: wrapWithModel(
-                      model: _model.primaryButtonModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: PrimaryButtonWidget(
-                        text: 'Registrame o inicar sesión',
-                        onTap: () async {
-                          context.pushNamed(SignInWidget.routeName);
-                        },
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                      ),
+                      child: wrapWithModel(
+                        model: _model.primaryButtonModel,
+                        updateCallback: () => safeSetState(() {}),
+                        child: PrimaryButtonWidget(
+                          text: 'Registrame o inicar sesión',
+                          height: 54.0,
+                          maxLines: 2,
+                          onTap: () async {
+                            context.pushNamed(SignInWidget.routeName);
+                          },
+                        ),
                       ),
                     ),
                   ),

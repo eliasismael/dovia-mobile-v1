@@ -259,7 +259,7 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
               ),
               const SizedBox(height: 16),
               Text(
-                'Ya tienes una oferta en pendiente de aceptar o una contraoferta para este inmueble. Visualiza el estatus en la pantalla de Mis Visitas.',
+                'Ya tienes una oferta pendiente de aceptar o una contraoferta para este inmueble. Visualiza el estatus en la pantalla de Mis Ofertas.',
                 textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.inter(
@@ -307,7 +307,7 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
                         context
-                            .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
+                            .pushNamed(DOVIACLIENTMisOfertasWidget.routeName);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: FlutterFlowTheme.of(context).primary,
@@ -318,7 +318,7 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
                         elevation: 0,
                       ),
                       child: Text(
-                        'Ir a Mis visitas',
+                        'Ir a Mis ofertas',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,

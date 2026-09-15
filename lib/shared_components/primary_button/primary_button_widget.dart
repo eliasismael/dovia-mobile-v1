@@ -12,10 +12,14 @@ class PrimaryButtonWidget extends StatefulWidget {
     super.key,
     required this.text,
     this.onTap,
+    this.height,
+    this.maxLines,
   });
 
   final String? text;
   final Future Function()? onTap;
+  final double? height;
+  final int? maxLines;
 
   @override
   State<PrimaryButtonWidget> createState() => _PrimaryButtonWidgetState();
@@ -54,10 +58,11 @@ class _PrimaryButtonWidgetState extends State<PrimaryButtonWidget> {
       text: widget.text!,
       options: FFButtonOptions(
         width: MediaQuery.sizeOf(context).width * 1.0,
-        height: 42.0,
+        height: widget.height ?? 42.0,
         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
         iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
         color: FlutterFlowTheme.of(context).primary,
+        maxLines: widget.maxLines,
         textStyle: FlutterFlowTheme.of(context).titleSmall.override(
               font: GoogleFonts.publicSans(
                 fontWeight: FontWeight.normal,

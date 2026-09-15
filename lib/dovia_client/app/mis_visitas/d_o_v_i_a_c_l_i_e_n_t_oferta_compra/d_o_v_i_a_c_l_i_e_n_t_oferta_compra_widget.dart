@@ -5536,34 +5536,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   );
 
                                                   shouldSetState = true;
-                                                  if ((_model.ofertaContado
+                                                  if (!(_model.ofertaContado
                                                           ?.succeeded ??
                                                       true)) {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder:
-                                                          (alertDialogContext) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                              'exito'),
-                                                          content: Text((_model
-                                                                      .ofertaContado
-                                                                      ?.jsonBody ??
-                                                                  '')
-                                                              .toString()),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext),
-                                                              child: const Text(
-                                                                  'Ok'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  } else {
                                                     await showDialog(
                                                       context: context,
                                                       builder:
@@ -5655,35 +5630,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     );
 
                                                     shouldSetState = true;
-                                                    if ((_model.ofertaHipoteca
+                                                    if (!(_model.ofertaHipoteca
                                                             ?.succeeded ??
                                                         true)) {
-                                                      await showDialog(
-                                                        context: context,
-                                                        builder:
-                                                            (alertDialogContext) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                                'exito'),
-                                                            content: Text((_model
-                                                                        .ofertaHipoteca
-                                                                        ?.jsonBody ??
-                                                                    '')
-                                                                .toString()),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        alertDialogContext),
-                                                                child:
-                                                                    const Text(
-                                                                        'Ok'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    } else {
                                                       await showDialog(
                                                         context: context,
                                                         builder:
@@ -5770,35 +5719,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       );
 
                                                       shouldSetState = true;
-                                                      if ((_model.ofertaPromesa
+                                                      if (!(_model.ofertaPromesa
                                                               ?.succeeded ??
                                                           true)) {
-                                                        await showDialog(
-                                                          context: context,
-                                                          builder:
-                                                              (alertDialogContext) {
-                                                            return AlertDialog(
-                                                              title: const Text(
-                                                                  'exito'),
-                                                              content: Text((_model
-                                                                          .ofertaPromesa
-                                                                          ?.jsonBody ??
-                                                                      '')
-                                                                  .toString()),
-                                                              actions: [
-                                                                TextButton(
-                                                                  onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          alertDialogContext),
-                                                                  child:
-                                                                      const Text(
-                                                                          'Ok'),
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                                                      } else {
                                                         await showDialog(
                                                           context: context,
                                                           builder:
