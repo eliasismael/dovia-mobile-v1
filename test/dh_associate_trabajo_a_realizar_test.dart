@@ -46,7 +46,7 @@ void main() {
     });
 
     expect(find.text('Tu trabajo', findRichText: true), findsOneWidget);
-    expect(find.text('Postularme a este trabajo'), findsOneWidget);
+    expect(find.text('Aceptar trabajo'), findsOneWidget);
     // La ficha se ve, pero con la dirección enmascarada y sin mapa ni check-in.
     expect(find.text('Dirección exacta'), findsOneWidget);
     expect(find.text('Se revela cuando aceptes el trabajo.'), findsOneWidget);
@@ -74,7 +74,7 @@ void main() {
     });
 
     expect(find.text('Tu trabajo', findRichText: true), findsOneWidget);
-    expect(find.text('Postularme a este trabajo'), findsNothing);
+    expect(find.text('Aceptar trabajo'), findsNothing);
     expect(find.text('Dirección exacta'), findsOneWidget);
     expect(find.text('Calle Falsa 123'), findsOneWidget);
     expect(find.text('Mapa'), findsOneWidget);

@@ -23,7 +23,9 @@ void main() {
       // `Uri.parse('tel:+502 5555 5555')` se rompe con el espacio.
       final uri = telUri('+502 5555 5555')!;
       expect(uri.scheme, 'tel');
-      expect(uri.path, '+502 5555 5555');
+      // `Uri.path` devuelve el componente ya codificado, así que el espacio
+      // viaja como %20; lo que importa es que el número llegue entero.
+      expect(Uri.decodeComponent(uri.path), '+502 5555 5555');
     });
 
     test('sin número no hay llamada', () {

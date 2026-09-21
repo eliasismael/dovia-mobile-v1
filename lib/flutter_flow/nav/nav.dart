@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '/backend/schema/structs/index.dart';
@@ -1326,7 +1327,9 @@ class FFRoute {
               ? Container(
                   color: FlutterFlowTheme.of(context).primary,
                   child: Center(
-                    child: Image.asset(
+                    // El logo es un SVG: `Image.asset` no lo sabe decodificar
+                    // y la pantalla de carga quedaba con el ícono roto.
+                    child: SvgPicture.asset(
                       'assets/images/D-blanca.svg',
                       height: 200.0,
                       fit: BoxFit.contain,
