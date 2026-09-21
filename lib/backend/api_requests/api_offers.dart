@@ -350,9 +350,14 @@ class SubmitBankAgentDataCall {
 }
 
 class ListMyOffersCall {
+  /// `page` y `limit` van siempre con valor: `GET /offers/my-offers` responde
+  /// 500 si llegan vacíos (`?page=&limit=&...`). Quien no pagina —como la
+  /// pantalla de propiedad, que sólo busca si ya hay una oferta— obtenía ese
+  /// 500, y con él perdía en silencio el aviso de "oferta en curso".
+  /// 50 es lo que ya usa el panel de Mis Ofertas.
   Future<ApiCallResponse> call({
-    String? page = '',
-    String? limit = '',
+    String? page = '1',
+    String? limit = '50',
     String? offerType = '',
     String? offerStatus = '',
     String? processStatus = '',
