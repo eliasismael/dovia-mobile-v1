@@ -514,7 +514,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
               ),
               const SizedBox(height: 16),
               Text(
-                'Ya tienes una oferta en pendiente de acetar o una contraoferta para este inmueble. Visualiza el estatus en la pantalla de Mis Visitas.',
+                'Ya tienes una oferta pendiente de aceptar o una contraoferta para este inmueble. Visualiza el estatus en la pantalla de Mis Ofertas.',
                 textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.inter(
@@ -562,7 +562,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
                         context
-                            .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
+                            .pushNamed(DOVIACLIENTMisOfertasWidget.routeName);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: FlutterFlowTheme.of(context).primary,
@@ -573,7 +573,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                         elevation: 0,
                       ),
                       child: Text(
-                        'Ir a Mis visitas',
+                        'Ir a Mis ofertas',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,
@@ -1219,7 +1219,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 22.0, 0.0, 0.0),
                                 child: Container(
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  width: double.infinity,
                                   decoration: BoxDecoration(
                                     color: FlutterFlowTheme.of(context)
                                         .secondaryBackground,
@@ -1240,160 +1240,168 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         const EdgeInsetsDirectional.fromSTEB(
                                             10.0, 10.0, 10.0, 10.0),
                                     child: Row(
-                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisSize: MainAxisSize.max,
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0.0, 10.0, 0.0, 10.0),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              _model.ventaORenta = 'venta';
-                                              safeSetState(() {});
-                                            },
-                                            child: Container(
-                                              width: 144.0,
-                                              height: 44.0,
-                                              decoration: BoxDecoration(
-                                                color: _model.ventaORenta ==
-                                                        'venta'
-                                                    ? FlutterFlowTheme.of(
-                                                            context)
-                                                        .accent1
-                                                    : FlutterFlowTheme.of(
-                                                            context)
-                                                        .tertiary,
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        100.0),
-                                              ),
-                                              child: Align(
-                                                alignment:
-                                                    const AlignmentDirectional(
-                                                        0.0, 0.0),
-                                                child: Text(
-                                                  'Venta',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        color: _model
-                                                                    .ventaORenta ==
-                                                                'venta'
-                                                            ? FlutterFlowTheme
-                                                                    .of(context)
-                                                                .primaryText
-                                                            : FlutterFlowTheme
-                                                                    .of(context)
-                                                                .secondaryText,
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                            child: InkWell(
+                                              splashColor: Colors.transparent,
+                                              focusColor: Colors.transparent,
+                                              hoverColor: Colors.transparent,
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              onTap: () async {
+                                                _model.ventaORenta = 'venta';
+                                                safeSetState(() {});
+                                              },
+                                              child: Container(
+                                                width: double.infinity,
+                                                height: 44.0,
+                                                decoration: BoxDecoration(
+                                                  color: _model.ventaORenta ==
+                                                          'venta'
+                                                      ? FlutterFlowTheme.of(
+                                                              context)
+                                                          .accent1
+                                                      : FlutterFlowTheme.of(
+                                                              context)
+                                                          .tertiary,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100.0),
+                                                ),
+                                                child: Align(
+                                                  alignment:
+                                                      const AlignmentDirectional(
+                                                          0.0, 0.0),
+                                                  child: Text(
+                                                    'Venta',
+                                                    style:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .inter(
+                                                                fontWeight: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontWeight,
+                                                                fontStyle: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontStyle,
+                                                              ),
+                                                              color: _model
+                                                                          .ventaORenta ==
+                                                                      'venta'
+                                                                  ? FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primaryText
+                                                                  : FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondaryText,
+                                                              fontSize: 14.0,
+                                                              letterSpacing:
+                                                                  0.0,
+                                                              fontWeight:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontWeight,
+                                                              fontStyle:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontStyle,
+                                                            ),
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0.0, 10.0, 0.0, 10.0),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              _model.ventaORenta = 'renta';
-                                              safeSetState(() {});
-                                            },
-                                            child: Container(
-                                              width: 144.0,
-                                              height: 44.0,
-                                              decoration: BoxDecoration(
-                                                color: _model.ventaORenta ==
-                                                        'renta'
-                                                    ? FlutterFlowTheme.of(
-                                                            context)
-                                                        .accent1
-                                                    : FlutterFlowTheme.of(
-                                                            context)
-                                                        .tertiary,
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        100.0),
-                                              ),
-                                              child: Align(
-                                                alignment:
-                                                    const AlignmentDirectional(
-                                                        0.0, 0.0),
-                                                child: Text(
-                                                  'Renta',
-                                                  textAlign: TextAlign.center,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        color: _model
-                                                                    .ventaORenta ==
-                                                                'renta'
-                                                            ? FlutterFlowTheme
-                                                                    .of(context)
-                                                                .primaryText
-                                                            : FlutterFlowTheme
-                                                                    .of(context)
-                                                                .secondaryText,
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                            child: InkWell(
+                                              splashColor: Colors.transparent,
+                                              focusColor: Colors.transparent,
+                                              hoverColor: Colors.transparent,
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              onTap: () async {
+                                                _model.ventaORenta = 'renta';
+                                                safeSetState(() {});
+                                              },
+                                              child: Container(
+                                                width: double.infinity,
+                                                height: 44.0,
+                                                decoration: BoxDecoration(
+                                                  color: _model.ventaORenta ==
+                                                          'renta'
+                                                      ? FlutterFlowTheme.of(
+                                                              context)
+                                                          .accent1
+                                                      : FlutterFlowTheme.of(
+                                                              context)
+                                                          .tertiary,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100.0),
+                                                ),
+                                                child: Align(
+                                                  alignment:
+                                                      const AlignmentDirectional(
+                                                          0.0, 0.0),
+                                                  child: Text(
+                                                    'Renta',
+                                                    textAlign: TextAlign.center,
+                                                    style:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .override(
+                                                              font: GoogleFonts
+                                                                  .inter(
+                                                                fontWeight: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontWeight,
+                                                                fontStyle: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .fontStyle,
+                                                              ),
+                                                              color: _model
+                                                                          .ventaORenta ==
+                                                                      'renta'
+                                                                  ? FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primaryText
+                                                                  : FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondaryText,
+                                                              fontSize: 14.0,
+                                                              letterSpacing:
+                                                                  0.0,
+                                                              fontWeight:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontWeight,
+                                                              fontStyle:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .fontStyle,
+                                                            ),
+                                                  ),
                                                 ),
                                               ),
                                             ),

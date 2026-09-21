@@ -9,7 +9,12 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
+import '/domain/client_offer_detail.dart' show unwrapPropertyJson;
+import '/domain/offer_json.dart' show offerAsMap, offerStr, propertyPathValue;
+import '/domain/offer_credit_status.dart';
+import '/domain/offer_form_validation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_oferta_compra_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_oferta_compra_model.dart';
@@ -41,6 +46,7 @@ class DOVIACLIENTOfertaCompraWidget extends StatefulWidget {
 class _DOVIACLIENTOfertaCompraWidgetState
     extends State<DOVIACLIENTOfertaCompraWidget> {
   late DOVIACLIENTOfertaCompraModel _model;
+  late final Future<ApiCallResponse> _propertyRequest;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -49,6 +55,14 @@ class _DOVIACLIENTOfertaCompraWidgetState
     super.initState();
     _model = createModel(context, () => DOVIACLIENTOfertaCompraModel());
 
+    // La propiedad se pide una sola vez: si el Future se creara dentro de
+    // build, cada safeSetState (validar, elegir moneda, cambiar de metodo de
+    // pago) dispararia otro GET y el formulario parpadearia al spinner.
+    _propertyRequest = DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
+      propertyId: widget.propertyId,
+    );
+
+    _model.precioTextController ??= TextEditingController();
     _model.precioFocusNode ??= FocusNode();
 
     _model.usoPermitidoTextController ??= TextEditingController();
@@ -57,6 +71,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
     _model.usoNoPermitidoTextController ??= TextEditingController();
     _model.usoNoPermitidoFocusNode ??= FocusNode();
 
+    _model.otrasConsideracionesTextController ??= TextEditingController();
     _model.otrasConsideracionesFocusNode ??= FocusNode();
 
     _model.propuestaEconomicaTextController ??= TextEditingController();
@@ -74,9 +89,6 @@ class _DOVIACLIENTOfertaCompraWidgetState
 
     _model.hIPOTECABancoTextController ??= TextEditingController();
     _model.hIPOTECABancoFocusNode ??= FocusNode();
-
-    _model.hIPOTECAEstadoCreditoTextController ??= TextEditingController();
-    _model.hIPOTECAEstadoCreditoFocusNode ??= FocusNode();
 
     _model.hIPOTECATiempoAprobacionBancoTextController ??=
         TextEditingController();
@@ -122,12 +134,236 @@ class _DOVIACLIENTOfertaCompraWidgetState
     super.dispose();
   }
 
+  // -- Validacion del formulario ------------------------------------------
+  //
+  // El backend arma el cuerpo de la oferta por interpolacion de strings, asi
+  // que un campo vacio viaja como null y la oferta se cae del lado del
+  // servidor sin explicar por que. En vez de dejar que eso pase, cada campo
+  // que la API necesita se valida aca: el asterisco rojo lo anuncia y
+  // errorText pinta el borde rojo que las decoraciones ya definen.
+
+  /// Mensaje de error vigente por campo. Vacio hasta el primer "Aceptar".
+  final Map<String, String?> _fieldErrors = {};
+
+  String _text(TextEditingController? controller) => controller?.text ?? '';
+
+  /// Revalida el formulario segun el tipo de oferta y el metodo de pago.
+  /// Devuelve true si se puede enviar.
+  bool _validateForm() {
+    final errors = validateOfferForm(
+      OfferFormInput(
+        offerType: widget.offerType,
+        paymentMethod: _model.paymentMethod,
+        purchaseAmount: _text(_model.propuestaEconomicaTextController),
+        rentAmount: _text(_model.propuestaRentaTextController),
+        cashPaymentTime:
+            _text(_model.cONTADOTiempoEstimadoDePagoTextController),
+        downPayment: _text(_model.hIPOTECAEngancheTextController),
+        bankName: _text(_model.hIPOTECABancoTextController),
+        bankApprovalTime:
+            _text(_model.hIPOTECATiempoAprobacionBancoTextController),
+        initialReserve: _text(_model.pROMESAReservaInicialTextController),
+        promiseMonths: _text(_model.pROMESATiempoPromesaTextController),
+        buyerName: _text(_model.nombreCompradorTextController),
+        legalName: _text(_model.razonSocialTextController),
+        legalRepresentative: _text(_model.representanteLegalTextController),
+        contractStart: _text(_model.fechaInicioContratoTextController),
+        contractEnd: _text(_model.fechaFinalizacionContratoTextController),
+      ),
+    );
+
+    safeSetState(() {
+      _fieldErrors
+        ..clear()
+        ..addAll(errors);
+    });
+
+    return errors.isEmpty;
+  }
+
+  /// Limpia el error de un campo apenas el usuario lo corrige, para que el
+  /// borde rojo no sobreviva a la correccion.
+  void _clearFieldError(String key) {
+    if (_fieldErrors.containsKey(key)) {
+      safeSetState(() => _fieldErrors.remove(key));
+    }
+  }
+
+  /// Etiqueta con el asterisco rojo de campo obligatorio.
+  Widget _requiredLabel(String text, {TextStyle? style}) {
+    final base = style ?? FlutterFlowTheme.of(context).bodyMedium;
+    return Text.rich(
+      TextSpan(
+        text: text,
+        style: base,
+        children: [
+          TextSpan(
+            text: ' *',
+            style: base.copyWith(
+              color: FlutterFlowTheme.of(context).error,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Igual que [_requiredLabel] pero el asterisco aparece solo cuando el campo
+  /// pasa a ser obligatorio: el representante legal lo es recien cuando se
+  /// declara una razon social.
+  Widget _maybeRequiredLabel(
+    String text, {
+    required bool required,
+    TextStyle? style,
+  }) =>
+      required ? _requiredLabel(text, style: style) : Text(text, style: style);
+
+  // -- Caracteristicas que proporciono el propietario ---------------------
+
+  /// Vuelca en los campos de solo lectura lo que publico el propietario.
+  ///
+  /// GET /properties/{id} responde {data: {...}} pero los getters generados
+  /// leen $.data.data.*, asi que hasta ahora estos campos salian vacios.
+  /// unwrapPropertyJson acepta las dos formas y propertyPathValue prueba los
+  /// alias que el backend usa para cada dato.
+  void _syncOwnerFields(ApiCallResponse response) {
+    final property = unwrapPropertyJson(offerAsMap(response.jsonBody));
+    if (property == null) return;
+
+    final precio = widget.offerType == 'renta'
+        ? propertyPathValue(property, const ['rentInfo.monthlyRent', 'price'])
+        : propertyPathValue(property, const ['saleInfo.salePrice', 'price']);
+
+    _setReadOnlyText(_model.precioTextController, offerStr(precio));
+    _setReadOnlyText(
+      _model.usoPermitidoTextController,
+      offerStr(propertyPathValue(property, const [
+        'rentInfo.rentalConditions.allowedUses',
+        'conditions.allowedUses',
+        'infoHQ.allowedUses',
+      ])),
+    );
+    _setReadOnlyText(
+      _model.usoNoPermitidoTextController,
+      offerStr(propertyPathValue(property, const [
+        'rentInfo.rentalConditions.notAllowedUses',
+        'rentInfo.rentalConditions.prohibitedUses',
+        'conditions.notAllowedUses',
+        'infoHQ.notAllowedUses',
+      ])),
+    );
+    _setReadOnlyText(
+      _model.otrasConsideracionesTextController,
+      offerStr(propertyPathValue(property, const [
+        'infoHQ.showingConsiderations',
+        'rentInfo.rentalConditions.otherConsiderations',
+        'rentInfo.rentalConditions.others',
+      ])),
+    );
+  }
+
+  void _setReadOnlyText(TextEditingController? controller, String? value) {
+    if (controller == null) return;
+    final text = value ?? '';
+    if (controller.text != text) controller.text = text;
+  }
+
+  /// "Duracion del contrato" se anuncia como un calculo en base a las fechas,
+  /// pero se dejaba a mano y no viaja en la peticion: se deriva de las fechas
+  /// elegidas para que muestre lo que dice mostrar.
+  void _syncContractDuration() {
+    final inicio =
+        DateTime.tryParse(_model.fechaInicioContratoTextController?.text ?? '');
+    final fin = DateTime.tryParse(
+        _model.fechaFinalizacionContratoTextController?.text ?? '');
+    if (inicio == null || fin == null || !fin.isAfter(inicio)) {
+      _model.duracionContratoTextController?.text = '';
+      return;
+    }
+    var meses = (fin.year - inicio.year) * 12 + (fin.month - inicio.month);
+    if (fin.day < inicio.day) meses -= 1;
+    _model.duracionContratoTextController?.text =
+        meses <= 0 ? '' : '$meses ${meses == 1 ? 'mes' : 'meses'}';
+  }
+
+  /// Monto mensual propuesto para una renta.
+  ///
+  /// Lo piden tanto la oferta de renta como la combinada, asi que se arma una
+  /// sola vez en vez de duplicar el campo en cada rama del arbol.
+  Widget _rentAmountField() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        decoration: const BoxDecoration(),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _requiredLabel(
+              'Precio mensual propuesto (renta)',
+              style: FlutterFlowTheme.of(context).bodyMedium,
+            ),
+            const SizedBox(height: 8.0),
+            TextFormField(
+              controller: _model.propuestaRentaTextController,
+              focusNode: _model.propuestaRentaFocusNode,
+              autofocus: false,
+              obscureText: false,
+              onChanged: (_) => _clearFieldError('propuestaRenta'),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ],
+              decoration: InputDecoration(
+                errorText: _fieldErrors['propuestaRenta'],
+                isDense: true,
+                hintText: 'Ej. 1500.00',
+                hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: const BorderSide(color: Color(0x00000000)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: const BorderSide(color: Color(0x00000000)),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).error,
+                    width: 1.0,
+                  ),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).error,
+                    width: 1.0,
+                  ),
+                ),
+                filled: true,
+                fillColor: FlutterFlowTheme.of(context).tertiary,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 14.0,
+                ),
+              ),
+              style: FlutterFlowTheme.of(context).bodyMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ApiCallResponse>(
-      future: DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
-        propertyId: widget.propertyId,
-      ),
+      future: _propertyRequest,
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
@@ -147,6 +383,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
           );
         }
         final dOVIACLIENTOfertaCompraGetPropertyByIDResponse = snapshot.data!;
+        _syncOwnerFields(dOVIACLIENTOfertaCompraGetPropertyByIDResponse);
 
         return GestureDetector(
           onTap: () {
@@ -284,23 +521,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         1.0,
                                                 child: TextFormField(
                                                   controller: _model
-                                                          .precioTextController ??=
-                                                      TextEditingController(
-                                                    text: widget.offerType ==
-                                                            'renta'
-                                                        ? getJsonField(
-                                                            dOVIACLIENTOfertaCompraGetPropertyByIDResponse
-                                                                .jsonBody,
-                                                            r'''$.data.data.rentInfo.monthlyRent''',
-                                                          )?.toString()
-                                                        : DOVIAAPIPropertyContextGroup
-                                                            .getPropertyByIDCall
-                                                            .salePrice(
-                                                              dOVIACLIENTOfertaCompraGetPropertyByIDResponse
-                                                                  .jsonBody,
-                                                            )
-                                                            ?.toString(),
-                                                  ),
+                                                      .precioTextController,
                                                   focusNode:
                                                       _model.precioFocusNode,
                                                   autofocus: false,
@@ -957,15 +1178,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         1.0,
                                                 child: TextFormField(
                                                   controller: _model
-                                                          .otrasConsideracionesTextController ??=
-                                                      TextEditingController(
-                                                    text: DOVIAAPIPropertyContextGroup
-                                                        .getPropertyByIDCall
-                                                        .showingConsiderations(
-                                                      dOVIACLIENTOfertaCompraGetPropertyByIDResponse
-                                                          .jsonBody,
-                                                    ),
-                                                  ),
+                                                      .otrasConsideracionesTextController,
                                                   focusNode: _model
                                                       .otrasConsideracionesFocusNode,
                                                   autofocus: false,
@@ -1404,6 +1617,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                           ].divide(const SizedBox(width: 10.0)),
                                         ),
                                       ),
+                                      if (widget.offerType == 'renta')
+                                        _rentAmountField(),
                                       if (widget.offerType != 'renta') ...[
                                         Align(
                                           alignment: const AlignmentDirectional(
@@ -1521,81 +1736,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                           ),
                                         ),
                                         if (widget.offerType == 'ambos') ...[
-                                          Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                            child: Container(
-                                              width: MediaQuery.sizeOf(context)
-                                                      .width *
-                                                  1.0,
-                                              decoration: const BoxDecoration(),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Precio mensual propuesto (renta)',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium,
-                                                  ),
-                                                  const SizedBox(height: 8.0),
-                                                  TextFormField(
-                                                    controller: _model
-                                                        .propuestaRentaTextController,
-                                                    focusNode: _model
-                                                        .propuestaRentaFocusNode,
-                                                    autofocus: false,
-                                                    obscureText: false,
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                    decoration: InputDecoration(
-                                                      isDense: true,
-                                                      hintText: 'Ej. 1500.00',
-                                                      hintStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium,
-                                                      enabledBorder:
-                                                          OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                        borderSide:
-                                                            const BorderSide(
-                                                                color: Color(
-                                                                    0x00000000)),
-                                                      ),
-                                                      focusedBorder:
-                                                          OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                        borderSide:
-                                                            const BorderSide(
-                                                                color: Color(
-                                                                    0x00000000)),
-                                                      ),
-                                                      filled: true,
-                                                      fillColor:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .tertiary,
-                                                      contentPadding:
-                                                          const EdgeInsets
-                                                              .symmetric(
-                                                              horizontal: 12.0,
-                                                              vertical: 14.0),
-                                                    ),
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
+                                          _rentAmountField(),
                                         ],
                                         Padding(
                                           padding: const EdgeInsetsDirectional
@@ -1610,7 +1751,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(
+                                                _requiredLabel(
                                                   widget.offerType == 'ambos'
                                                       ? 'Precio propuesto (compra)'
                                                       : 'Propuesta económica',
@@ -1654,9 +1795,23 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     focusNode: _model
                                                         .propuestaEconomicaFocusNode,
                                                     autofocus: false,
+                                                    onChanged: (_) =>
+                                                        _clearFieldError(
+                                                            'propuestaEconomica'),
+                                                    keyboardType:
+                                                        const TextInputType
+                                                            .numberWithOptions(
+                                                            decimal: true),
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter
+                                                          .allow(RegExp(
+                                                              r'^\d*\.?\d{0,2}'))
+                                                    ],
                                                     enabled: true,
                                                     obscureText: false,
                                                     decoration: InputDecoration(
+                                                      errorText: _fieldErrors[
+                                                          'propuestaEconomica'],
                                                       isDense: true,
                                                       labelStyle:
                                                           FlutterFlowTheme.of(
@@ -1797,10 +1952,6 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .bodyMedium
                                                                   .fontStyle,
                                                         ),
-                                                    keyboardType:
-                                                        const TextInputType
-                                                            .numberWithOptions(
-                                                            decimal: true),
                                                     cursorColor:
                                                         FlutterFlowTheme.of(
                                                                 context)
@@ -1843,7 +1994,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
-                                                        Text(
+                                                        _requiredLabel(
                                                           'Tiempo estimado de pago tras aceptación de la oferta',
                                                           style: FlutterFlowTheme
                                                                   .of(context)
@@ -1885,10 +2036,25 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             focusNode: _model
                                                                 .cONTADOTiempoEstimadoDePagoFocusNode,
                                                             autofocus: false,
+                                                            onChanged: (_) =>
+                                                                _clearFieldError(
+                                                                    'contadoTiempoPago'),
+                                                            keyboardType:
+                                                                const TextInputType
+                                                                    .numberWithOptions(
+                                                                    decimal:
+                                                                        false),
+                                                            inputFormatters: [
+                                                              FilteringTextInputFormatter
+                                                                  .digitsOnly
+                                                            ],
                                                             enabled: true,
                                                             obscureText: false,
                                                             decoration:
                                                                 InputDecoration(
+                                                              errorText:
+                                                                  _fieldErrors[
+                                                                      'contadoTiempoPago'],
                                                               isDense: true,
                                                               labelStyle:
                                                                   FlutterFlowTheme.of(
@@ -2023,9 +2189,6 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                       .bodyMedium
                                                                       .fontStyle,
                                                                 ),
-                                                            keyboardType:
-                                                                TextInputType
-                                                                    .number,
                                                             cursorColor:
                                                                 FlutterFlowTheme.of(
                                                                         context)
@@ -2105,7 +2268,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               CrossAxisAlignment
                                                                   .start,
                                                           children: [
-                                                            Text(
+                                                            _requiredLabel(
                                                               'Enganche',
                                                               style: FlutterFlowTheme
                                                                       .of(context)
@@ -2148,11 +2311,26 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .hIPOTECAEngancheFocusNode,
                                                                 autofocus:
                                                                     false,
+                                                                keyboardType:
+                                                                    const TextInputType
+                                                                        .numberWithOptions(
+                                                                        decimal:
+                                                                            false),
+                                                                inputFormatters: [
+                                                                  FilteringTextInputFormatter
+                                                                      .digitsOnly
+                                                                ],
+                                                                onChanged: (_) =>
+                                                                    _clearFieldError(
+                                                                        'enganche'),
                                                                 enabled: true,
                                                                 obscureText:
                                                                     false,
                                                                 decoration:
                                                                     InputDecoration(
+                                                                  errorText:
+                                                                      _fieldErrors[
+                                                                          'enganche'],
                                                                   isDense: true,
                                                                   labelStyle: FlutterFlowTheme.of(
                                                                           context)
@@ -2283,11 +2461,6 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                           .bodyMedium
                                                                           .fontStyle,
                                                                     ),
-                                                                keyboardType:
-                                                                    const TextInputType
-                                                                        .numberWithOptions(
-                                                                        decimal:
-                                                                            true),
                                                                 cursorColor:
                                                                     FlutterFlowTheme.of(
                                                                             context)
@@ -2327,7 +2500,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               CrossAxisAlignment
                                                                   .start,
                                                           children: [
-                                                            Text(
+                                                            _requiredLabel(
                                                               'Banco a utilizar',
                                                               style: FlutterFlowTheme
                                                                       .of(context)
@@ -2370,11 +2543,17 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .hIPOTECABancoFocusNode,
                                                                 autofocus:
                                                                     false,
+                                                                onChanged: (_) =>
+                                                                    _clearFieldError(
+                                                                        'banco'),
                                                                 enabled: true,
                                                                 obscureText:
                                                                     false,
                                                                 decoration:
                                                                     InputDecoration(
+                                                                  errorText:
+                                                                      _fieldErrors[
+                                                                          'banco'],
                                                                   isDense: true,
                                                                   labelStyle: FlutterFlowTheme.of(
                                                                           context)
@@ -2571,164 +2750,66 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                         .fontStyle,
                                                                   ),
                                                             ),
-                                                            SizedBox(
+                                                            FlutterFlowDropDown<
+                                                                String>(
+                                                              controller: _model
+                                                                      .hIPOTECAEstadoCreditoValueController ??=
+                                                                  FormFieldController<
+                                                                      String>(
+                                                                _model
+                                                                    .hIPOTECAEstadoCreditoValue,
+                                                              ),
+                                                              options:
+                                                                  creditStatusLabels,
+                                                              onChanged: (val) =>
+                                                                  safeSetState(() =>
+                                                                      _model.hIPOTECAEstadoCreditoValue =
+                                                                          val),
                                                               width: MediaQuery
                                                                           .sizeOf(
                                                                               context)
                                                                       .width *
                                                                   1.0,
-                                                              child:
-                                                                  TextFormField(
-                                                                controller: _model
-                                                                    .hIPOTECAEstadoCreditoTextController,
-                                                                focusNode: _model
-                                                                    .hIPOTECAEstadoCreditoFocusNode,
-                                                                autofocus:
-                                                                    false,
-                                                                enabled: true,
-                                                                obscureText:
-                                                                    false,
-                                                                decoration:
-                                                                    InputDecoration(
-                                                                  isDense: true,
-                                                                  labelStyle: FlutterFlowTheme.of(
+                                                              height: 48.0,
+                                                              textStyle:
+                                                                  FlutterFlowTheme.of(
                                                                           context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        font: GoogleFonts
-                                                                            .inter(
-                                                                          fontWeight: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontWeight,
-                                                                          fontStyle: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontStyle,
-                                                                        ),
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontStyle,
-                                                                      ),
-                                                                  hintStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        font: GoogleFonts
-                                                                            .inter(
-                                                                          fontWeight: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontWeight,
-                                                                          fontStyle: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontStyle,
-                                                                        ),
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontStyle,
-                                                                      ),
-                                                                  enabledBorder:
-                                                                      OutlineInputBorder(
-                                                                    borderSide:
-                                                                        const BorderSide(
-                                                                      color: Color(
-                                                                          0x00000000),
-                                                                      width:
-                                                                          1.0,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10.0),
-                                                                  ),
-                                                                  focusedBorder:
-                                                                      OutlineInputBorder(
-                                                                    borderSide:
-                                                                        const BorderSide(
-                                                                      color: Color(
-                                                                          0x00000000),
-                                                                      width:
-                                                                          1.0,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10.0),
-                                                                  ),
-                                                                  errorBorder:
-                                                                      OutlineInputBorder(
-                                                                    borderSide:
-                                                                        BorderSide(
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .error,
-                                                                      width:
-                                                                          1.0,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10.0),
-                                                                  ),
-                                                                  focusedErrorBorder:
-                                                                      OutlineInputBorder(
-                                                                    borderSide:
-                                                                        BorderSide(
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .error,
-                                                                      width:
-                                                                          1.0,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10.0),
-                                                                  ),
-                                                                  filled: true,
-                                                                  fillColor: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .tertiary,
-                                                                ),
-                                                                style: FlutterFlowTheme.of(
+                                                                      .bodyMedium,
+                                                              hintText:
+                                                                  'Selecciona el estado',
+                                                              icon: Icon(
+                                                                Icons
+                                                                    .keyboard_arrow_down_rounded,
+                                                                color: FlutterFlowTheme.of(
                                                                         context)
-                                                                    .bodyMedium
-                                                                    .override(
-                                                                      font: GoogleFonts
-                                                                          .inter(
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .fontStyle,
-                                                                      ),
-                                                                      letterSpacing:
-                                                                          0.0,
-                                                                      fontWeight: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontWeight,
-                                                                      fontStyle: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .fontStyle,
-                                                                    ),
-                                                                cursorColor:
-                                                                    FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .primaryText,
-                                                                enableInteractiveSelection:
-                                                                    true,
-                                                                validator: _model
-                                                                    .hIPOTECAEstadoCreditoTextControllerValidator
-                                                                    .asValidator(
-                                                                        context),
+                                                                    .secondaryText,
+                                                                size: 24.0,
                                                               ),
+                                                              fillColor:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .alternate,
+                                                              elevation: 0.0,
+                                                              borderColor: Colors
+                                                                  .transparent,
+                                                              borderWidth: 1.0,
+                                                              borderRadius:
+                                                                  10.0,
+                                                              margin:
+                                                                  const EdgeInsetsDirectional
+                                                                      .fromSTEB(
+                                                                      12.0,
+                                                                      4.0,
+                                                                      12.0,
+                                                                      4.0),
+                                                              hidesUnderline:
+                                                                  true,
+                                                              isOverButton:
+                                                                  false,
+                                                              isSearchable:
+                                                                  false,
+                                                              isMultiSelect:
+                                                                  false,
                                                             ),
                                                           ].divide(
                                                               const SizedBox(
@@ -2757,7 +2838,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               CrossAxisAlignment
                                                                   .start,
                                                           children: [
-                                                            Text(
+                                                            _requiredLabel(
                                                               'Tiempo estimado para aprobación del banco',
                                                               style: FlutterFlowTheme
                                                                       .of(context)
@@ -2800,11 +2881,26 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .hIPOTECATiempoAprobacionBancoFocusNode,
                                                                 autofocus:
                                                                     false,
+                                                                keyboardType:
+                                                                    const TextInputType
+                                                                        .numberWithOptions(
+                                                                        decimal:
+                                                                            false),
+                                                                inputFormatters: [
+                                                                  FilteringTextInputFormatter
+                                                                      .digitsOnly
+                                                                ],
+                                                                onChanged: (_) =>
+                                                                    _clearFieldError(
+                                                                        'tiempoAprobacion'),
                                                                 enabled: true,
                                                                 obscureText:
                                                                     false,
                                                                 decoration:
                                                                     InputDecoration(
+                                                                  errorText:
+                                                                      _fieldErrors[
+                                                                          'tiempoAprobacion'],
                                                                   isDense: true,
                                                                   labelStyle: FlutterFlowTheme.of(
                                                                           context)
@@ -3016,7 +3112,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               CrossAxisAlignment
                                                                   .start,
                                                           children: [
-                                                            Text(
+                                                            _requiredLabel(
                                                               'Reserva inicial',
                                                               style: FlutterFlowTheme
                                                                       .of(context)
@@ -3059,11 +3155,27 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .pROMESAReservaInicialFocusNode,
                                                                 autofocus:
                                                                     false,
+                                                                keyboardType:
+                                                                    const TextInputType
+                                                                        .numberWithOptions(
+                                                                        decimal:
+                                                                            true),
+                                                                inputFormatters: [
+                                                                  FilteringTextInputFormatter
+                                                                      .allow(RegExp(
+                                                                          r'^\d*\.?\d{0,2}'))
+                                                                ],
+                                                                onChanged: (_) =>
+                                                                    _clearFieldError(
+                                                                        'reservaInicial'),
                                                                 enabled: true,
                                                                 obscureText:
                                                                     false,
                                                                 decoration:
                                                                     InputDecoration(
+                                                                  errorText:
+                                                                      _fieldErrors[
+                                                                          'reservaInicial'],
                                                                   isDense: true,
                                                                   labelStyle: FlutterFlowTheme.of(
                                                                           context)
@@ -3274,6 +3386,16 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .pROMESAPagoFinalFocusNode,
                                                                 autofocus:
                                                                     false,
+                                                                keyboardType:
+                                                                    const TextInputType
+                                                                        .numberWithOptions(
+                                                                        decimal:
+                                                                            true),
+                                                                inputFormatters: [
+                                                                  FilteringTextInputFormatter
+                                                                      .allow(RegExp(
+                                                                          r'^\d*\.?\d{0,2}'))
+                                                                ],
                                                                 enabled: true,
                                                                 obscureText:
                                                                     false,
@@ -3446,7 +3568,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               CrossAxisAlignment
                                                                   .start,
                                                           children: [
-                                                            Text(
+                                                            _requiredLabel(
                                                               'Tiempo de promesa',
                                                               style: FlutterFlowTheme
                                                                       .of(context)
@@ -3489,11 +3611,26 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .pROMESATiempoPromesaFocusNode,
                                                                 autofocus:
                                                                     false,
+                                                                keyboardType:
+                                                                    const TextInputType
+                                                                        .numberWithOptions(
+                                                                        decimal:
+                                                                            false),
+                                                                inputFormatters: [
+                                                                  FilteringTextInputFormatter
+                                                                      .digitsOnly
+                                                                ],
+                                                                onChanged: (_) =>
+                                                                    _clearFieldError(
+                                                                        'tiempoPromesa'),
                                                                 enabled: true,
                                                                 obscureText:
                                                                     false,
                                                                 decoration:
                                                                     InputDecoration(
+                                                                  errorText:
+                                                                      _fieldErrors[
+                                                                          'tiempoPromesa'],
                                                                   isDense: true,
                                                                   labelStyle: FlutterFlowTheme.of(
                                                                           context)
@@ -3710,7 +3847,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
+                                              _requiredLabel(
                                                 widget.offerType == 'renta'
                                                     ? 'Nombre del arrendatario'
                                                     : 'Nombre del comprador',
@@ -3755,9 +3892,14 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   focusNode: _model
                                                       .nombreCompradorFocusNode,
                                                   autofocus: false,
+                                                  onChanged: (_) =>
+                                                      _clearFieldError(
+                                                          'nombreComprador'),
                                                   enabled: true,
                                                   obscureText: false,
                                                   decoration: InputDecoration(
+                                                    errorText: _fieldErrors[
+                                                        'nombreComprador'],
                                                     isDense: true,
                                                     labelStyle: FlutterFlowTheme
                                                             .of(context)
@@ -4011,6 +4153,11 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   focusNode: _model
                                                       .razonSocialFocusNode,
                                                   autofocus: false,
+                                                  onChanged: (_) {
+                                                    _clearFieldError(
+                                                        'representanteLegal');
+                                                    safeSetState(() {});
+                                                  },
                                                   enabled: true,
                                                   obscureText: false,
                                                   decoration: InputDecoration(
@@ -4186,8 +4333,14 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
+                                              _maybeRequiredLabel(
                                                 'Representante legal',
+                                                required:
+                                                    (_model.razonSocialTextController
+                                                                ?.text ??
+                                                            '')
+                                                        .trim()
+                                                        .isNotEmpty,
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -4229,9 +4382,14 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   focusNode: _model
                                                       .representanteLegalFocusNode,
                                                   autofocus: false,
+                                                  onChanged: (_) =>
+                                                      _clearFieldError(
+                                                          'representanteLegal'),
                                                   enabled: true,
                                                   obscureText: false,
                                                   decoration: InputDecoration(
+                                                    errorText: _fieldErrors[
+                                                        'representanteLegal'],
                                                     isDense: true,
                                                     labelStyle: FlutterFlowTheme
                                                             .of(context)
@@ -4629,7 +4787,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       MainAxisSize.max,
                                                   children: [
                                                     Expanded(
-                                                      child: Text(
+                                                      child: _requiredLabel(
                                                         'Fecha de inicio de contrato',
                                                         style:
                                                             FlutterFlowTheme.of(
@@ -4639,7 +4797,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ),
                                                     const SizedBox(width: 12.0),
                                                     Expanded(
-                                                      child: Text(
+                                                      child: _requiredLabel(
                                                         'Fecha de finalización',
                                                         style:
                                                             FlutterFlowTheme.of(
@@ -4709,14 +4867,20 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .padLeft(
                                                                         2, '0');
                                                             safeSetState(() {
+                                                              _clearFieldError(
+                                                                  'fechaInicio');
                                                               _model.fechaInicioContratoTextController
                                                                       ?.text =
                                                                   '$yyyy-$mm-$dd';
+                                                              _syncContractDuration();
                                                             });
                                                           }
                                                         },
                                                         decoration:
                                                             InputDecoration(
+                                                          errorText:
+                                                              _fieldErrors[
+                                                                  'fechaInicio'],
                                                           hintText:
                                                               'Ej. 2024-01-01',
                                                           enabledBorder: OutlineInputBorder(
@@ -4737,6 +4901,30 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   const BorderSide(
                                                                       color: Color(
                                                                           0x00000000))),
+                                                          errorBorder:
+                                                              OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                            borderSide: BorderSide(
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .error,
+                                                                width: 1.0),
+                                                          ),
+                                                          focusedErrorBorder:
+                                                              OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                            borderSide: BorderSide(
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .error,
+                                                                width: 1.0),
+                                                          ),
                                                           filled: true,
                                                           fillColor:
                                                               FlutterFlowTheme.of(
@@ -4810,14 +4998,20 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .padLeft(
                                                                         2, '0');
                                                             safeSetState(() {
+                                                              _clearFieldError(
+                                                                  'fechaFin');
                                                               _model.fechaFinalizacionContratoTextController
                                                                       ?.text =
                                                                   '$yyyy-$mm-$dd';
+                                                              _syncContractDuration();
                                                             });
                                                           }
                                                         },
                                                         decoration:
                                                             InputDecoration(
+                                                          errorText:
+                                                              _fieldErrors[
+                                                                  'fechaFin'],
                                                           hintText:
                                                               'Ej. 2025-01-01',
                                                           enabledBorder: OutlineInputBorder(
@@ -4838,6 +5032,30 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   const BorderSide(
                                                                       color: Color(
                                                                           0x00000000))),
+                                                          errorBorder:
+                                                              OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                            borderSide: BorderSide(
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .error,
+                                                                width: 1.0),
+                                                          ),
+                                                          focusedErrorBorder:
+                                                              OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                            borderSide: BorderSide(
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .error,
+                                                                width: 1.0),
+                                                          ),
                                                           filled: true,
                                                           fillColor:
                                                               FlutterFlowTheme.of(
@@ -4866,6 +5084,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   focusNode: _model
                                                       .duracionContratoFocusNode,
                                                   autofocus: false,
+                                                  readOnly: true,
                                                   obscureText: false,
                                                   decoration: InputDecoration(
                                                     hintText:
@@ -5058,6 +5277,23 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                             child: PrimaryButtonWidget(
                                               text: 'Aceptar',
                                               onTap: () async {
+                                                // Ningun envio sale sin los
+                                                // campos que la API pide: los
+                                                // que falten quedan con borde
+                                                // rojo y el foco vuelve al
+                                                // formulario.
+                                                if (!_validateForm()) {
+                                                  ScaffoldMessenger.of(context)
+                                                    ..hideCurrentSnackBar()
+                                                    ..showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            'Revisa los campos marcados en rojo antes de enviar tu oferta.'),
+                                                      ),
+                                                    );
+                                                  return;
+                                                }
+
                                                 var shouldSetState = false;
 
                                                 // Handle BOTH (ambos) offer type: submit rent + purchase
@@ -5221,9 +5457,10 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       bankName: _model
                                                           .hIPOTECABancoTextController
                                                           .text,
-                                                      creditStatus: _model
-                                                          .hIPOTECAEstadoCreditoTextController
-                                                          .text,
+                                                      creditStatus:
+                                                          creditStatusValueFromLabel(
+                                                              _model
+                                                                  .hIPOTECAEstadoCreditoValue),
                                                       estimatedApprovalTime:
                                                           int.tryParse(_model
                                                               .hIPOTECATiempoAprobacionBancoTextController
@@ -5386,7 +5623,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         _model.selectedCurrency,
                                                     proposedAmount:
                                                         double.tryParse(_model
-                                                                .propuestaEconomicaTextController
+                                                                .propuestaRentaTextController
                                                                 ?.text ??
                                                             ''),
                                                     propertyUse: _model
@@ -5536,34 +5773,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   );
 
                                                   shouldSetState = true;
-                                                  if ((_model.ofertaContado
+                                                  if (!(_model.ofertaContado
                                                           ?.succeeded ??
                                                       true)) {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder:
-                                                          (alertDialogContext) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                              'exito'),
-                                                          content: Text((_model
-                                                                      .ofertaContado
-                                                                      ?.jsonBody ??
-                                                                  '')
-                                                              .toString()),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext),
-                                                              child: const Text(
-                                                                  'Ok'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  } else {
                                                     await showDialog(
                                                       context: context,
                                                       builder:
@@ -5629,9 +5841,10 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       bankName: _model
                                                           .hIPOTECABancoTextController
                                                           .text,
-                                                      creditStatus: _model
-                                                          .hIPOTECAEstadoCreditoTextController
-                                                          .text,
+                                                      creditStatus:
+                                                          creditStatusValueFromLabel(
+                                                              _model
+                                                                  .hIPOTECAEstadoCreditoValue),
                                                       estimatedApprovalTime:
                                                           int.tryParse(_model
                                                               .hIPOTECATiempoAprobacionBancoTextController
@@ -5655,35 +5868,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     );
 
                                                     shouldSetState = true;
-                                                    if ((_model.ofertaHipoteca
+                                                    if (!(_model.ofertaHipoteca
                                                             ?.succeeded ??
                                                         true)) {
-                                                      await showDialog(
-                                                        context: context,
-                                                        builder:
-                                                            (alertDialogContext) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                                'exito'),
-                                                            content: Text((_model
-                                                                        .ofertaHipoteca
-                                                                        ?.jsonBody ??
-                                                                    '')
-                                                                .toString()),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        alertDialogContext),
-                                                                child:
-                                                                    const Text(
-                                                                        'Ok'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    } else {
                                                       await showDialog(
                                                         context: context,
                                                         builder:
@@ -5770,35 +5957,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       );
 
                                                       shouldSetState = true;
-                                                      if ((_model.ofertaPromesa
+                                                      if (!(_model.ofertaPromesa
                                                               ?.succeeded ??
                                                           true)) {
-                                                        await showDialog(
-                                                          context: context,
-                                                          builder:
-                                                              (alertDialogContext) {
-                                                            return AlertDialog(
-                                                              title: const Text(
-                                                                  'exito'),
-                                                              content: Text((_model
-                                                                          .ofertaPromesa
-                                                                          ?.jsonBody ??
-                                                                      '')
-                                                                  .toString()),
-                                                              actions: [
-                                                                TextButton(
-                                                                  onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          alertDialogContext),
-                                                                  child:
-                                                                      const Text(
-                                                                          'Ok'),
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                                                      } else {
                                                         await showDialog(
                                                           context: context,
                                                           builder:

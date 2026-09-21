@@ -22,25 +22,29 @@ class HowItWorksWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildInfoHeader(),
+          const SizedBox(height: 40),
+          _buildStepsTimeline(),
+          const SizedBox(height: 48),
+          _buildAcceptButton(),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+
+    // Sin alto fijo el widget crece con su contenido y deja que scrollee quien
+    // lo contiene. Con alto fijo scrollea acá adentro, porque entonces el
+    // contenido no entra. Scrollear en los dos lados obliga a saltar de un
+    // scroll al otro para seguir bajando.
     return SizedBox(
       width: width ?? double.infinity,
       height: height,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildInfoHeader(),
-              const SizedBox(height: 40),
-              _buildStepsTimeline(),
-              const SizedBox(height: 48),
-              _buildAcceptButton(),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
+      child: height == null ? content : SingleChildScrollView(child: content),
     );
   }
 

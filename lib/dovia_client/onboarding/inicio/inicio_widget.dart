@@ -76,7 +76,9 @@ class _InicioWidgetState extends State<InicioWidget> {
                   alignment: const AlignmentDirectional(0.0, -1.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
-                    height: MediaQuery.sizeOf(context).height * 0.45,
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.sizeOf(context).height * 0.45,
+                    ),
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [Color(0xFF007376), Color(0xFF70ACAD)],

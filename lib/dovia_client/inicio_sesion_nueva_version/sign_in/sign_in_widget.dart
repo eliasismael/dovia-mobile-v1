@@ -860,54 +860,69 @@ class _SignInWidgetState extends State<SignInWidget> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
-                                width: 108.0,
-                                height: 42.0,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF4F4F4),
-                                  borderRadius: BorderRadius.circular(13.0),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(0.0),
-                                  child: SvgPicture.asset(
-                                    'assets/images/AppleLogo.svg',
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.contain,
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 6.0, 0.0),
+                                  child: Container(
+                                    height: 42.0,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF4F4F4),
+                                      borderRadius: BorderRadius.circular(13.0),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(0.0),
+                                      child: SvgPicture.asset(
+                                        'assets/images/AppleLogo.svg',
+                                        width: 200.0,
+                                        height: 200.0,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                              Container(
-                                width: 108.0,
-                                height: 42.0,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF4F4F4),
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                  child: SvgPicture.asset(
-                                    'assets/images/GoogleLogo.svg',
-                                    width: 13.0,
-                                    height: 13.0,
-                                    fit: BoxFit.none,
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      6.0, 0.0, 6.0, 0.0),
+                                  child: Container(
+                                    height: 42.0,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF4F4F4),
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      child: SvgPicture.asset(
+                                        'assets/images/GoogleLogo.svg',
+                                        width: 13.0,
+                                        height: 13.0,
+                                        fit: BoxFit.none,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                              Container(
-                                width: 108.0,
-                                height: 42.0,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF4F4F4),
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(0.0),
-                                  child: SvgPicture.asset(
-                                    'assets/images/FacebookLogo.svg',
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.none,
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      6.0, 0.0, 0.0, 0.0),
+                                  child: Container(
+                                    height: 42.0,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF4F4F4),
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(0.0),
+                                      child: SvgPicture.asset(
+                                        'assets/images/FacebookLogo.svg',
+                                        width: 200.0,
+                                        height: 200.0,
+                                        fit: BoxFit.none,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

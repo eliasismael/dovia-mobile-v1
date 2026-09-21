@@ -415,26 +415,6 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                       ? null
                                       : () async {
                                           var shouldSetState = false;
-                                          await showDialog(
-                                            context: context,
-                                            builder: (alertDialogContext) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                    'Valor del correo'),
-                                                content: Text(_model
-                                                    .correoElectronicoTextController
-                                                    .text),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(
-                                                            alertDialogContext),
-                                                    child: const Text('Ok'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
                                           FFAppState().UserEmail = _model
                                               .correoElectronicoTextController
                                               .text;

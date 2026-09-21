@@ -9,6 +9,7 @@
 import 'client_offer_detail.dart';
 import 'client_offer_models.dart';
 import 'offer_json.dart';
+import 'offer_credit_status.dart';
 
 const String _empty = '—';
 
@@ -46,7 +47,8 @@ extension CounterOfferInputX on CounterOfferInput {
   }
 
   /// El backend espera número en todo lo económico.
-  bool get isNumeric => this != CounterOfferInput.bankName &&
+  bool get isNumeric =>
+      this != CounterOfferInput.bankName &&
       this != CounterOfferInput.considerations;
 }
 
@@ -129,28 +131,26 @@ List<OfferDetailField> _mineFields(
         OfferDetailField('Método de pago', 'Hipoteca', half: true),
         OfferDetailField('Banco', _str(data['bankName']), half: true),
         OfferDetailField('Propuesta económica', amount, half: true),
-        OfferDetailField(
-            'Enganche', _percent(data['downPaymentPercentage']), half: true),
-        OfferDetailField('Estado del crédito', _creditStatus(data),
+        OfferDetailField('Enganche', _percent(data['downPaymentPercentage']),
             half: true),
+        OfferDetailField('Estado del crédito', _creditStatus(data), half: true),
         OfferDetailField('Moneda de pago', currency,
             kind: OfferDetailFieldKind.currency, half: true),
-        OfferDetailField(
-            'Solicitud adicional', _str(data['considerations']),
+        OfferDetailField('Solicitud adicional', _str(data['considerations']),
             kind: OfferDetailFieldKind.textArea),
       ];
     case 'promesa':
       return [
         OfferDetailField('Método de pago', 'Promesa de compra'),
         OfferDetailField('Propuesta económica', amount),
-        OfferDetailField('Reserva inicial',
-            _money(data['initialReserve'], currency), half: true),
         OfferDetailField(
-            'Pago final', _money(data['finalPayment'], currency), half: true),
+            'Reserva inicial', _money(data['initialReserve'], currency),
+            half: true),
+        OfferDetailField('Pago final', _money(data['finalPayment'], currency),
+            half: true),
         OfferDetailField('Moneda de pago', currency,
             kind: OfferDetailFieldKind.currency, half: true),
-        OfferDetailField(
-            'Solicitud adicional', _str(data['considerations']),
+        OfferDetailField('Solicitud adicional', _str(data['considerations']),
             kind: OfferDetailFieldKind.textArea),
       ];
     default:
@@ -159,8 +159,7 @@ List<OfferDetailField> _mineFields(
         OfferDetailField('Propuesta económica', amount, half: true),
         OfferDetailField('Moneda de pago', currency,
             kind: OfferDetailFieldKind.currency, half: true),
-        OfferDetailField(
-            'Solicitud adicional', _str(data['considerations']),
+        OfferDetailField('Solicitud adicional', _str(data['considerations']),
             kind: OfferDetailFieldKind.textArea),
       ];
   }
@@ -182,8 +181,8 @@ List<CounterOfferRow> _theirsRows(
   switch (method) {
     case 'hipoteca':
       return [
-        CounterOfferRow(OfferDetailField('Método de pago', 'Hipoteca',
-            half: true)),
+        CounterOfferRow(
+            OfferDetailField('Método de pago', 'Hipoteca', half: true)),
         CounterOfferRow(
           OfferDetailField('Banco', _str(data['bankName']), half: true),
           input: CounterOfferInput.bankName,
@@ -195,8 +194,8 @@ List<CounterOfferRow> _theirsRows(
           rawValue: _raw(data['proposedAmount']),
         ),
         CounterOfferRow(
-          OfferDetailField(
-              'Enganche', _percent(data['downPaymentPercentage']), half: true),
+          OfferDetailField('Enganche', _percent(data['downPaymentPercentage']),
+              half: true),
           input: CounterOfferInput.downPaymentPercentage,
           rawValue: _raw(data['downPaymentPercentage']),
         ),
@@ -212,14 +211,15 @@ List<CounterOfferRow> _theirsRows(
           rawValue: _raw(data['proposedAmount']),
         ),
         CounterOfferRow(
-          OfferDetailField('Reserva inicial',
-              _money(data['initialReserve'], currency), half: true),
+          OfferDetailField(
+              'Reserva inicial', _money(data['initialReserve'], currency),
+              half: true),
           input: CounterOfferInput.initialReserve,
           rawValue: _raw(data['initialReserve']),
         ),
         CounterOfferRow(
-          OfferDetailField(
-              'Pago final', _money(data['finalPayment'], currency), half: true),
+          OfferDetailField('Pago final', _money(data['finalPayment'], currency),
+              half: true),
         ),
         considerations,
       ];
@@ -280,14 +280,5 @@ String _percent(dynamic value) {
 
 String _creditStatus(Map<String, dynamic> data) {
   final raw = offerStr(data['creditStatus']);
-  switch (raw?.toLowerCase()) {
-    case 'approved':
-      return 'Aprobado';
-    case 'in_process':
-      return 'En proceso';
-    case 'not_started':
-      return 'No iniciado';
-    default:
-      return raw ?? _empty;
-  }
+  return creditStatusLabel(raw) ?? raw ?? _empty;
 }

@@ -591,6 +591,13 @@ class CreateOfferPURCHASEMortgageCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
+    // `creditStatus` es opcional y sólo acepta `approved`, `in_process` o
+    // `not_started`: si el comprador no lo eligió se omite la clave, porque un
+    // "" no es ninguno de esos valores y el enum lo rechazaría.
+    final creditStatusEntry = (creditStatus?.isNotEmpty ?? false)
+        ? '\n    "creditStatus": "${escapeStringForJson(creditStatus)}",'
+        : '';
+
     final ffApiRequestBody = '''
 {
   "offerType": "SALE",
@@ -606,8 +613,7 @@ class CreateOfferPURCHASEMortgageCall {
       "legalRepresentative": "${escapeStringForJson(legalRepresentative)}"
     },
     "downPaymentPercentage": $downPaymentPercentage,
-    "bankName": "${escapeStringForJson(bankName)}",
-    "creditStatus": "${escapeStringForJson(creditStatus)}",
+    "bankName": "${escapeStringForJson(bankName)}",$creditStatusEntry
     "estimatedApprovalTime": $estimatedApprovalTime
   }
 }''';

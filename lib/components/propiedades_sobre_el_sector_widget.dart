@@ -137,6 +137,7 @@ class _PropiedadesSobreElSectorWidgetState
                           accessToken: FFAppConstants.MapboxAccessToken,
                           startLat: widget.lat,
                           startLng: widget.lng,
+                          readOnly: true,
                         ),
                       ),
                       Padding(
