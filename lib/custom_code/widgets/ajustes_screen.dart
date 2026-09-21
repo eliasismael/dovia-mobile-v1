@@ -878,12 +878,18 @@ class _AjustesScreenState extends State<AjustesScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(title,
-            style: const TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: _textPrimary)),
+        // El título se queda con el ancho que sobra después de la flecha: a su
+        // medida natural desbordaba la fila en los teléfonos angostos.
+        Expanded(
+          child: Text(title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary)),
+        ),
         Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
             color: _textPrimary),
       ]),
