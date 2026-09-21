@@ -76,38 +76,28 @@ MockClient _fakeBackend({
 Map<String, dynamic> _offer({
   String propertyId = _propertyId,
   String offerStatus = 'PENDING',
-}) =>
-    {
-      'offerId': 'offer-1',
-      'propertyId': propertyId,
-      'offerType': 'PURCHASE',
-      'offerStatus': offerStatus,
-      'processStatus': 'PENDING',
-    };
+}) => {
+  'offerId': 'offer-1',
+  'propertyId': propertyId,
+  'offerType': 'PURCHASE',
+  'offerStatus': offerStatus,
+  'processStatus': 'PENDING',
+};
 
 Future<void> _pumpPropiedad(WidgetTester tester) async {
-  // Dos fuentes de ruido de layout en esta pantalla, ajenas a lo que este
-  // archivo mide y que el framework de tests cuenta como falla:
-  //
-  //  * Tres desbordes de 3 px en las tarjetas de datos (`..._new_widget.dart`
-  //    :1739, :1823, :1907). Ya estaban antes de integrar `fix/formularios-
-  //    cliente`.
-  //  * Un Row con flex dentro de un ancho sin límite en `propiedad_
-  //    caracteristicas_widget.dart`, que arrastra decenas de "was not laid
-  //    out". Es posterior a ese merge.
-  //
-  // Se silencian sólo esos mensajes, no cualquier error de layout, y se
-  // restaura el handler al terminar.
+  // Las tarjetas de datos de esta pantalla desbordan 3 px (`..._new_widget
+  // .dart` :1739, :1823, :1907). Es anterior a `fix/formularios-cliente`,
+  // ajeno a lo que este archivo mide, y el framework de tests lo cuenta como
+  // falla. Se silencia sólo ese mensaje —cualquier otro error de layout sigue
+  // haciendo fallar el test— y se restaura el handler al terminar.
   final originalOnError = FlutterError.onError;
   FlutterError.onError = (details) {
-    final message = details.exception.toString();
-    if (message.contains('overflowed by 3.0 pixels') ||
-        message.contains('non-zero flex but incoming') ||
-        message.contains('was not laid out')) {
+    if (details.exception.toString().contains('overflowed by 3.0 pixels')) {
       return;
     }
     originalOnError?.call(details);
   };
+
   addTearDown(() => FlutterError.onError = originalOnError);
 
   tester.view.physicalSize = const Size(390 * 3, 3000 * 3);
@@ -164,8 +154,9 @@ void main() {
 
   tearDown(FFAppState.reset);
 
-  testWidgets('con una oferta en curso, Ofertar muestra el aviso al instante',
-      (tester) async {
+  testWidgets('con una oferta en curso, Ofertar muestra el aviso al instante', (
+    tester,
+  ) async {
     await http.runWithClient(() async {
       await _pumpPropiedad(tester);
       await _tapOfertar(tester);
@@ -174,8 +165,9 @@ void main() {
     }, () => _fakeBackend(offers: [_offer()]));
   });
 
-  testWidgets('el aviso no deja avanzar al formulario de ofertas',
-      (tester) async {
+  testWidgets('el aviso no deja avanzar al formulario de ofertas', (
+    tester,
+  ) async {
     await http.runWithClient(() async {
       await _pumpPropiedad(tester);
       await _tapOfertar(tester);
@@ -187,23 +179,25 @@ void main() {
   });
 
   testWidgets(
-      'pide las ofertas con page y limit, que es lo que el backend exige',
-      (tester) async {
-    final requests = <Uri>[];
+    'pide las ofertas con page y limit, que es lo que el backend exige',
+    (tester) async {
+      final requests = <Uri>[];
 
-    await http.runWithClient(() async {
-      await _pumpPropiedad(tester);
-      await _tapOfertar(tester);
+      await http.runWithClient(() async {
+        await _pumpPropiedad(tester);
+        await _tapOfertar(tester);
 
-      final myOffers =
-          requests.where((u) => u.path.endsWith('/offers/my-offers')).toList();
-      expect(myOffers, isNotEmpty);
-      for (final url in myOffers) {
-        expect(url.queryParameters['page'], isNotEmpty);
-        expect(url.queryParameters['limit'], isNotEmpty);
-      }
-    }, () => _fakeBackend(offers: [_offer()], requests: requests));
-  });
+        final myOffers = requests
+            .where((u) => u.path.endsWith('/offers/my-offers'))
+            .toList();
+        expect(myOffers, isNotEmpty);
+        for (final url in myOffers) {
+          expect(url.queryParameters['page'], isNotEmpty);
+          expect(url.queryParameters['limit'], isNotEmpty);
+        }
+      }, () => _fakeBackend(offers: [_offer()], requests: requests));
+    },
+  );
 
   testWidgets('una oferta ya rechazada no bloquea una nueva', (tester) async {
     await http.runWithClient(() async {
