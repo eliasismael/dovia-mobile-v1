@@ -130,12 +130,13 @@ void main() {
 
     test('el enganche es un porcentaje entero entre 1 y 100', () {
       expect(
-        validateOfferForm(_hipoteca(downPayment: '20.5'))[
-            OfferField.downPayment],
+        validateOfferForm(
+            _hipoteca(downPayment: '20.5'))[OfferField.downPayment],
         'Ingresa un número entero',
       );
       expect(
-        validateOfferForm(_hipoteca(downPayment: '120'))[OfferField.downPayment],
+        validateOfferForm(
+            _hipoteca(downPayment: '120'))[OfferField.downPayment],
         'Debe ser menor o igual a 100',
       );
       expect(
@@ -174,6 +175,37 @@ void main() {
 
     test('la reserva inicial admite decimales', () {
       expect(validateOfferForm(_promesa(initialReserve: '60000.75')), isEmpty);
+    });
+
+    // El backend rechaza el rango con "El tiempo de la promesa debe estar
+    // entre 1 y 36 meses"; el formulario tiene que decirlo antes de enviar.
+    group('el tiempo de promesa va de 1 a 36 meses', () {
+      const rangeMessage = 'El tiempo debe estar entre 1 y 36 meses';
+
+      test('acepta los dos extremos', () {
+        expect(validateOfferForm(_promesa(promiseMonths: '1')), isEmpty);
+        expect(validateOfferForm(_promesa(promiseMonths: '36')), isEmpty);
+      });
+
+      test('rechaza 37 en adelante', () {
+        for (final value in const ['37', '40', '120']) {
+          final errors = validateOfferForm(_promesa(promiseMonths: value));
+          expect(errors[OfferField.promiseMonths], rangeMessage,
+              reason: '"$value" meses');
+        }
+      });
+
+      test('rechaza 0', () {
+        final errors = validateOfferForm(_promesa(promiseMonths: '0'));
+
+        expect(errors[OfferField.promiseMonths], rangeMessage);
+      });
+
+      test('vacío sigue siendo "Campo obligatorio", no un error de rango', () {
+        final errors = validateOfferForm(_promesa(promiseMonths: '  '));
+
+        expect(errors[OfferField.promiseMonths], 'Campo obligatorio');
+      });
     });
   });
 
@@ -278,8 +310,10 @@ void main() {
       );
     });
 
-    test('al declarar una empresa, el representante pasa a ser obligatorio', () {
-      final errors = validateOfferForm(_contado(legalName: 'Compras Ana, S.A.'));
+    test('al declarar una empresa, el representante pasa a ser obligatorio',
+        () {
+      final errors =
+          validateOfferForm(_contado(legalName: 'Compras Ana, S.A.'));
 
       expect(errors[OfferField.legalRepresentative], 'Campo obligatorio');
     });

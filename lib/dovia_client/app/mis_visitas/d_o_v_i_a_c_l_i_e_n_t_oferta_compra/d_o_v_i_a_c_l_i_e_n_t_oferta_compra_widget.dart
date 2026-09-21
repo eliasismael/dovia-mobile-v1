@@ -10,7 +10,8 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/domain/client_offer_detail.dart' show unwrapPropertyJson;
-import '/domain/offer_json.dart' show offerAsMap, offerStr, propertyPathValue;
+import '/domain/offer_json.dart'
+    show offerApiErrorMessage, offerAsMap, offerStr, propertyPathValue;
 import '/domain/offer_credit_status.dart';
 import '/domain/offer_form_validation.dart';
 import 'package:flutter/material.dart';
@@ -179,6 +180,20 @@ class _DOVIACLIENTOfertaCompraWidgetState
     });
 
     return errors.isEmpty;
+  }
+
+  /// Avisa que el servidor rechazó la oferta, con el motivo en palabras.
+  ///
+  /// Antes salía un diálogo "error" con el JSON de la respuesta entero. Los
+  /// rangos y los obligatorios ya se atajan en [_validateForm]; esto es la red
+  /// de seguridad para lo que sólo el servidor puede saber.
+  void _showOfferError(ApiCallResponse? response) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(offerApiErrorMessage(response?.jsonBody))),
+      );
   }
 
   /// Limpia el error de un campo apenas el usuario lo corrige, para que el
@@ -3569,7 +3584,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                   .start,
                                                           children: [
                                                             _requiredLabel(
-                                                              'Tiempo de promesa',
+                                                              'Tiempo de promesa (en meses)',
                                                               style: FlutterFlowTheme
                                                                       .of(context)
                                                                   .bodyMedium
@@ -5776,30 +5791,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   if (!(_model.ofertaContado
                                                           ?.succeeded ??
                                                       true)) {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder:
-                                                          (alertDialogContext) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                              'error'),
-                                                          content: Text((_model
-                                                                      .ofertaContado
-                                                                      ?.jsonBody ??
-                                                                  '')
-                                                              .toString()),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext),
-                                                              child: const Text(
-                                                                  'Ok'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
+                                                    _showOfferError(
+                                                        _model.ofertaContado);
                                                     if (shouldSetState) {
                                                       safeSetState(() {});
                                                     }
@@ -5871,31 +5864,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     if (!(_model.ofertaHipoteca
                                                             ?.succeeded ??
                                                         true)) {
-                                                      await showDialog(
-                                                        context: context,
-                                                        builder:
-                                                            (alertDialogContext) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                                'error'),
-                                                            content: Text((_model
-                                                                        .ofertaHipoteca
-                                                                        ?.jsonBody ??
-                                                                    '')
-                                                                .toString()),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        alertDialogContext),
-                                                                child:
-                                                                    const Text(
-                                                                        'Ok'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
+                                                      _showOfferError(_model
+                                                          .ofertaHipoteca);
                                                       if (shouldSetState) {
                                                         safeSetState(() {});
                                                       }
@@ -5960,31 +5930,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       if (!(_model.ofertaPromesa
                                                               ?.succeeded ??
                                                           true)) {
-                                                        await showDialog(
-                                                          context: context,
-                                                          builder:
-                                                              (alertDialogContext) {
-                                                            return AlertDialog(
-                                                              title: const Text(
-                                                                  'error'),
-                                                              content: Text((_model
-                                                                          .ofertaPromesa
-                                                                          ?.jsonBody ??
-                                                                      '')
-                                                                  .toString()),
-                                                              actions: [
-                                                                TextButton(
-                                                                  onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          alertDialogContext),
-                                                                  child:
-                                                                      const Text(
-                                                                          'Ok'),
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
+                                                        _showOfferError(_model
+                                                            .ofertaPromesa);
                                                         if (shouldSetState) {
                                                           safeSetState(() {});
                                                         }

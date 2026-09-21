@@ -350,9 +350,21 @@ class SubmitBankAgentDataCall {
 }
 
 class ListMyOffersCall {
+  /// Ningún parámetro viaja vacío.
+  ///
+  /// `offerType`, `offerStatus` y `processStatus` se mandaban siempre, aunque
+  /// nadie los use, así que toda llamada salía con `?...&offerType=&
+  /// offerStatus=&processStatus=`. Los otros cuatro filtros del mismo endpoint
+  /// ya se omitían cuando no traen valor; estos tres quedaron fuera de esa
+  /// regla. `page` y `limit` toman el 1/50 que ya usaba Mis Ofertas.
+  ///
+  /// El endpoint responde 500 en `dev` y un filtro de enum vacío es un
+  /// candidato a romper su parseo, pero **no está confirmado**: sin token no
+  /// se puede comprobar desde afuera, y el 500 también aparece con `page` y
+  /// `limit` correctos. Si persiste, el problema es del backend.
   Future<ApiCallResponse> call({
-    String? page = '',
-    String? limit = '',
+    String? page = '1',
+    String? limit = '50',
     String? offerType = '',
     String? offerStatus = '',
     String? processStatus = '',
@@ -373,11 +385,13 @@ class ListMyOffersCall {
           'Authorization': 'Bearer $authToken',
       },
       params: {
-        'page': page,
-        'limit': limit,
-        'offerType': offerType,
-        'offerStatus': offerStatus,
-        'processStatus': processStatus,
+        if (page != null && page.isNotEmpty) 'page': page,
+        if (limit != null && limit.isNotEmpty) 'limit': limit,
+        if (offerType != null && offerType.isNotEmpty) 'offerType': offerType,
+        if (offerStatus != null && offerStatus.isNotEmpty)
+          'offerStatus': offerStatus,
+        if (processStatus != null && processStatus.isNotEmpty)
+          'processStatus': processStatus,
         if (lastOfferBy != null && lastOfferBy.isNotEmpty)
           'lastOfferBy': lastOfferBy,
         if (pendingResponseBy != null && pendingResponseBy.isNotEmpty)

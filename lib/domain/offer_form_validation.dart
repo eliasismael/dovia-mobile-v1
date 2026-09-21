@@ -81,6 +81,11 @@ abstract final class OfferField {
 
 const String _requiredMessage = 'Campo obligatorio';
 
+/// Rango que el backend acepta para `promiseTimeMonths`. Fuera de él rechaza la
+/// oferta con "El tiempo de la promesa debe estar entre 1 y 36 meses".
+const int kPromiseMonthsMin = 1;
+const int kPromiseMonthsMax = 36;
+
 /// Devuelve el error de cada campo que impide enviar la oferta. Vacío significa
 /// que el formulario está listo.
 Map<String, String> validateOfferForm(OfferFormInput input) {
@@ -111,7 +116,14 @@ Map<String, String> validateOfferForm(OfferFormInput input) {
         check(OfferField.initialReserve, _number(input.initialReserve, min: 1));
         check(
           OfferField.promiseMonths,
-          _number(input.promiseMonths, integer: true, min: 1),
+          _number(
+            input.promiseMonths,
+            integer: true,
+            min: kPromiseMonthsMin,
+            max: kPromiseMonthsMax,
+            rangeMessage:
+                'El tiempo debe estar entre $kPromiseMonthsMin y $kPromiseMonthsMax meses',
+          ),
         );
         break;
       default: // Contado
@@ -159,6 +171,7 @@ String? _number(
   bool integer = false,
   num? min,
   num? max,
+  String? rangeMessage,
 }) {
   final raw = value.trim();
   if (raw.isEmpty) return _requiredMessage;
@@ -167,7 +180,13 @@ String? _number(
   if (parsed == null) {
     return integer ? 'Ingresa un número entero' : 'Ingresa un número válido';
   }
-  if (min != null && parsed < min) return 'Debe ser mayor o igual a $min';
-  if (max != null && parsed > max) return 'Debe ser menor o igual a $max';
+  // [rangeMessage] reemplaza a los dos avisos genéricos cuando el campo tiene
+  // un rango con nombre propio y "entre 1 y 36" dice más que "mayor o igual".
+  if (min != null && parsed < min) {
+    return rangeMessage ?? 'Debe ser mayor o igual a $min';
+  }
+  if (max != null && parsed > max) {
+    return rangeMessage ?? 'Debe ser menor o igual a $max';
+  }
   return null;
 }
