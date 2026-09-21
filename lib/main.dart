@@ -30,6 +30,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => VisitsRepository()),
       ChangeNotifierProvider(create: (_) => OffersRepository()),
       ChangeNotifierProvider(create: (_) => PaymentsRepository()),
+      ChangeNotifierProvider(create: (_) => NotificationsRepository()),
     ],
     child: const MyApp(),
   ));
@@ -73,6 +74,7 @@ class _MyAppState extends State<MyApp> {
           .map((e) => getRoute(e))
           .toList();
   late Stream<DoviaAuthUser> userStream;
+  String? _notificationsUserId;
 
   @override
   void initState() {
@@ -91,6 +93,11 @@ class _MyAppState extends State<MyApp> {
         if (!user.loggedIn && mounted) {
           context.read<PaymentsRepository>().clear();
         }
+        // Tambien cubre un cambio directo de cuenta sin un evento de logout.
+        if (mounted && (!user.loggedIn || _notificationsUserId != user.uid)) {
+          context.read<NotificationsRepository>().clear();
+        }
+        _notificationsUserId = user.loggedIn ? user.uid : null;
       });
 
     Future.delayed(
