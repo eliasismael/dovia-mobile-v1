@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 
 import 'package:dovia/app_state.dart';
@@ -136,5 +140,51 @@ void main() {
       find.text('No pudimos enviar tu oferta. Inténtalo de nuevo.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets(
+      'un 409 de oferta duplicada se muestra en palabras, sin el diálogo',
+      (tester) async {
+    // El backend responde 409 cuando ya hay una oferta activa sobre la
+    // propiedad. Es el caso que el usuario vio como un volcado de JSON.
+    final backend = MockClient((request) async {
+      if (request.method == 'POST') {
+        return http.Response(
+          jsonEncode({
+            'success': false,
+            'status_code': 409,
+            'message': 'Ya tienes una oferta en curso',
+            'meta': {'request_id': '0f9c1f11', 'path': '/offers/properties/x'},
+            'errors': [
+              {
+                'source': 'VALIDATION',
+                'code': 'USER_ALREADY_HAS_ACTIVE_OFFER',
+                'message': 'Ya tienes una oferta en curso',
+              },
+            ],
+          }),
+          409,
+        );
+      }
+      return http.Response(jsonEncode({'success': true, 'data': {}}), 200);
+    });
+
+    await http.runWithClient(() async {
+      await _pumpOferta(tester);
+      await _choosePromesa(tester);
+
+      await tester.enterText(_fieldUnder('Propuesta económica'), '250000');
+      await tester.enterText(_fieldUnder('Reserva inicial'), '60000');
+      await tester.enterText(_promiseField(tester), '12');
+      await tester.enterText(_fieldUnder('Nombre del comprador'), 'Ana');
+      await _tapAceptar(tester);
+
+      expect(find.text('Ya tienes una oferta en curso'), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.text('error'), findsNothing);
+      // Nada del cuerpo crudo llega a la pantalla.
+      expect(find.textContaining('request_id'), findsNothing);
+      expect(find.textContaining('status_code'), findsNothing);
+    }, () => backend);
   });
 }

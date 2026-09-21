@@ -35,6 +35,37 @@ void main() {
       );
     });
 
+    test('un 409 de oferta duplicada se lee como la frase del backend', () {
+      // Cuerpo real del rechazo al ofertar dos veces sobre la misma propiedad.
+      final body = {
+        'success': false,
+        'status_code': 409,
+        'message': 'Ya tienes una oferta en curso',
+        'action_required': 'NONE',
+        'data': null,
+        'meta': {
+          'timestamp': '2026-09-21T21:51:27.743Z',
+          'request_id': '0f9c1f11-7a92-45c3-927d-2407733b5712',
+          'path': '/offers/properties/01a082b9-c6ff-713c-8157-d71becabdfb0',
+        },
+        'errors': [
+          {
+            'source': 'VALIDATION',
+            'code': 'USER_ALREADY_HAS_ACTIVE_OFFER',
+            'message': 'Ya tienes una oferta en curso',
+            'field': null,
+          },
+        ],
+      };
+
+      final message = offerApiErrorMessage(body);
+
+      expect(message, 'Ya tienes una oferta en curso');
+      expect(message, isNot(contains('status_code')));
+      expect(message, isNot(contains('USER_ALREADY_HAS_ACTIVE_OFFER')));
+      expect(message, isNot(contains('request_id')));
+    });
+
     test('nunca deja pasar ids, paths ni el JSON crudo', () {
       final message = offerApiErrorMessage({
         'message': 'Invalid SaleOfferData: Algo falló',
