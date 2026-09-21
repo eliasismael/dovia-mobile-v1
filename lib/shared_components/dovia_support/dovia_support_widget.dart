@@ -40,385 +40,381 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
+    // La hoja ocupa el alto que le da quien la abre. El panel pedía el alto de
+    // la pantalla entera, así que en las pantallas que lo limitan al 70 %
+    // —Ajustes, el perfil de lister— desbordaba justo ese 30 % restante.
+    return Stack(
+      alignment: const AlignmentDirectional(0.0, 1.0),
       children: [
-        Stack(
-          alignment: const AlignmentDirectional(0.0, 1.0),
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).tertiary,
-                borderRadius: BorderRadius.circular(18.0),
+        Container(
+          decoration: BoxDecoration(
+            color: FlutterFlowTheme.of(context).tertiary,
+            borderRadius: BorderRadius.circular(18.0),
+          ),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0x85007376),
+                  FlutterFlowTheme.of(context).secondary
+                ],
+                stops: const [0.0, 1.0],
+                begin: const AlignmentDirectional(0.0, -1.0),
+                end: const AlignmentDirectional(0, 1.0),
               ),
-              child: Container(
-                width: MediaQuery.sizeOf(context).width * 1.0,
-                height: MediaQuery.sizeOf(context).height * 1.0,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0x85007376),
-                      FlutterFlowTheme.of(context).secondary
-                    ],
-                    stops: const [0.0, 1.0],
-                    begin: const AlignmentDirectional(0.0, -1.0),
-                    end: const AlignmentDirectional(0, 1.0),
-                  ),
-                  borderRadius: BorderRadius.circular(18.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      20.0, 30.0, 20.0, 0.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ClipRRect(
+              borderRadius: BorderRadius.circular(18.0),
+            ),
+            child: Padding(
+              // El 120 de abajo reserva la franja donde flota la barra de
+              // Inicio / Mensajes, apoyada al fondo del Stack.
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 120.0),
+              // Con la hoja recortada el contenido no siempre entra, así
+              // que rueda en vez de desbordar.
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(0.0),
+                          child: SvgPicture.asset(
+                            'assets/images/D-blanca.svg',
+                            width: 28.0,
+                            height: 36.0,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () async {
+                            Navigator.pop(context);
+                          },
+                          child: ClipRRect(
                             borderRadius: BorderRadius.circular(0.0),
                             child: SvgPicture.asset(
-                              'assets/images/D-blanca.svg',
-                              width: 28.0,
-                              height: 36.0,
-                              fit: BoxFit.contain,
+                              'assets/images/CloseIcon.svg',
+                              width: 12.0,
+                              height: 12.0,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              Navigator.pop(context);
-                            },
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(0.0),
-                              child: SvgPicture.asset(
-                                'assets/images/CloseIcon.svg',
-                                width: 12.0,
-                                height: 12.0,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Align(
-                        alignment: const AlignmentDirectional(-1.0, 0.0),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 50.0, 0.0, 0.0),
-                          child: Text(
-                            '¡Hola!',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  color: FlutterFlowTheme.of(context).secondary,
-                                  fontSize: 30.0,
-                                  letterSpacing: 0.0,
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: const AlignmentDirectional(-1.0, 0.0),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 50.0, 0.0, 0.0),
+                        child: Text(
+                          '¡Hola!',
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(
                                   fontWeight: FontWeight.w600,
                                   fontStyle: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .fontStyle,
-                                  lineHeight: 1.5,
                                 ),
-                          ),
+                                color: FlutterFlowTheme.of(context).secondary,
+                                fontSize: 30.0,
+                                letterSpacing: 0.0,
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontStyle,
+                                lineHeight: 1.5,
+                              ),
                         ),
                       ),
-                      Align(
-                        alignment: const AlignmentDirectional(-1.0, 0.0),
-                        child: Text(
-                          '¿Necesitas ayuda? Escríbenos \npor aquI',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 27.0, 0.0, 0.0),
-                        child: Container(
-                          width: MediaQuery.sizeOf(context).width * 1.0,
-                          height: 100.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: const [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Color(0x33000000),
-                                offset: Offset(
-                                  0.0,
-                                  2.0,
-                                ),
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                14.0, 14.0, 14.0, 14.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Hacer una pregunra',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        lineHeight: 1.5,
-                                      ),
-                                ),
-                                Text(
-                                  'Nuestro bot y nuestro equipo te ayudarán',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 12.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
-                              ],
+                    ),
+                    Align(
+                      alignment: const AlignmentDirectional(-1.0, 0.0),
+                      child: Text(
+                        '¿Necesitas ayuda? Escríbenos \npor aquI',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontStyle,
+                              ),
+                              fontSize: 16.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontStyle,
                             ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 14.0, 0.0, 0.0),
-                        child: Container(
-                          width: MediaQuery.sizeOf(context).width * 1.0,
-                          height: 100.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: const [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Color(0x33000000),
-                                offset: Offset(
-                                  0.0,
-                                  2.0,
-                                ),
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                14.0, 14.0, 14.0, 14.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Pregunras frecuentes',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        lineHeight: 1.5,
-                                      ),
-                                ),
-                                Text(
-                                  'Encontrarás las preguntas más frecuentes.',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 12.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(20.0, 120.0, 20.0, 20.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).tertiary,
-                  boxShadow: const [
-                    BoxShadow(
-                      blurRadius: 4.0,
-                      color: Color(0x4B000000),
-                      offset: Offset(
-                        0.0,
-                        2.0,
-                      ),
-                    )
-                  ],
-                  borderRadius: BorderRadius.circular(26.0),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 0.0, 20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: SvgPicture.asset(
-                              'assets/images/DH_icono-navbar-home.svg',
-                              width: 24.0,
-                              height: 24.0,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Text(
-                            'Inicio',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                          ),
-                        ],
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 20.0, 20.0, 20.0),
-                      child: InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          await showModalBottomSheet(
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            enableDrag: false,
-                            context: context,
-                            builder: (context) {
-                              return Padding(
-                                padding: MediaQuery.viewInsetsOf(context),
-                                child: const DoviaSuupportMessagesWidget(),
-                              );
-                            },
-                          ).then((value) => safeSetState(() {}));
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: SvgPicture.asset(
-                                'assets/images/IconoDoviaHomeClienteMensajes.svg',
-                                width: 24.0,
-                                height: 24.0,
-                                fit: BoxFit.cover,
+                          0.0, 27.0, 0.0, 0.0),
+                      child: Container(
+                        width: MediaQuery.sizeOf(context).width * 1.0,
+                        height: 100.0,
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          boxShadow: const [
+                            BoxShadow(
+                              blurRadius: 4.0,
+                              color: Color(0x33000000),
+                              offset: Offset(
+                                0.0,
+                                2.0,
                               ),
-                            ),
-                            Text(
-                              'Mensajes',
-                              style: FlutterFlowTheme.of(context)
+                            )
+                          ],
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              14.0, 14.0, 14.0, 14.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Hacer una pregunra',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                      lineHeight: 1.5,
+                                    ),
+                              ),
+                              Text(
+                                'Nuestro bot y nuestro equipo te ayudarán',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      fontSize: 12.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 14.0, 0.0, 0.0),
+                      child: Container(
+                        width: MediaQuery.sizeOf(context).width * 1.0,
+                        height: 100.0,
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          boxShadow: const [
+                            BoxShadow(
+                              blurRadius: 4.0,
+                              color: Color(0x33000000),
+                              offset: Offset(
+                                0.0,
+                                2.0,
+                              ),
+                            )
+                          ],
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              14.0, 14.0, 14.0, 14.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Pregunras frecuentes',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                      lineHeight: 1.5,
+                                    ),
+                              ),
+                              Text(
+                                'Encontrarás las preguntas más frecuentes.',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      fontSize: 12.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding:
+              const EdgeInsetsDirectional.fromSTEB(20.0, 120.0, 20.0, 20.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).tertiary,
+              boxShadow: const [
+                BoxShadow(
+                  blurRadius: 4.0,
+                  color: Color(0x4B000000),
+                  offset: Offset(
+                    0.0,
+                    2.0,
+                  ),
+                )
+              ],
+              borderRadius: BorderRadius.circular(26.0),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 20.0, 0.0, 20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: SvgPicture.asset(
+                          'assets/images/DH_icono-navbar-home.svg',
+                          width: 24.0,
+                          height: 24.0,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Text(
+                        'Inicio',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontStyle,
+                              ),
+                              letterSpacing: 0.0,
+                              fontWeight: FlutterFlowTheme.of(context)
                                   .bodyMedium
-                                  .override(
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontStyle,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      0.0, 20.0, 20.0, 20.0),
+                  child: InkWell(
+                    splashColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () async {
+                      await showModalBottomSheet(
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        enableDrag: false,
+                        context: context,
+                        builder: (context) {
+                          return Padding(
+                            padding: MediaQuery.viewInsetsOf(context),
+                            child: const DoviaSuupportMessagesWidget(),
+                          );
+                        },
+                      ).then((value) => safeSetState(() {}));
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: SvgPicture.asset(
+                            'assets/images/IconoDoviaHomeClienteMensajes.svg',
+                            width: 24.0,
+                            height: 24.0,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Text(
+                          'Mensajes',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
                                     font: GoogleFonts.inter(
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .bodyMedium
@@ -435,16 +431,14 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                                         .bodyMedium
                                         .fontStyle,
                                   ),
-                            ),
-                          ],
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );

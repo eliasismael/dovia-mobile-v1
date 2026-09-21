@@ -97,21 +97,26 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 20.0, 20.0, 20.0),
                             child: Container(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
+                              width: double.infinity,
                               decoration: BoxDecoration(
                                 color: FlutterFlowTheme.of(context)
                                     .secondaryBackground,
                                 borderRadius: BorderRadius.circular(24.0),
                               ),
+                              // Las pestañas se reparten el ancho de la barra.
+                              // A lo que midieran sus etiquetas no entraban en
+                              // un teléfono angosto y la fila desbordaba.
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  _buildTab(
-                                      context, 'Perfil y seguridad', 'perfil'),
-                                  _buildTab(context, 'Notificaciones',
-                                      'notificaciones'),
+                                  Expanded(
+                                    child: _buildTab(context,
+                                        'Perfil y seguridad', 'perfil'),
+                                  ),
+                                  Expanded(
+                                    child: _buildTab(context, 'Notificaciones',
+                                        'notificaciones'),
+                                  ),
                                 ],
                               ),
                             ),
@@ -237,10 +242,13 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
           borderRadius: BorderRadius.circular(25.0),
         ),
         child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(30.0, 10.0, 30.0, 10.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(12.0, 10.0, 12.0, 10.0),
           child: Text(
             label,
             textAlign: TextAlign.center,
+            // Red de seguridad para un tipo de letra agrandado por accesibilidad.
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: FlutterFlowTheme.of(context).bodyMedium.override(
                   font: GoogleFonts.inter(
                     fontWeight:
