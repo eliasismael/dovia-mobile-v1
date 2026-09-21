@@ -122,6 +122,36 @@ String? offerRejectionReason(Map<String, dynamic>? json) {
   return null;
 }
 
+/// Mensaje legible de una respuesta de error de la API de ofertas.
+///
+/// El backend responde `{success: false, message, errors: [{source, code,
+/// message, field}]}`. Mostrar ese cuerpo tal cual —como hacían los diálogos
+/// de "Ofertar"— le tira al usuario un volcado de JSON con request ids y
+/// paths. Acá se toma el primer mensaje de `errors` (o el de la raíz) y se le
+/// quita el nombre del DTO que el backend pone por delante
+/// ("Invalid SaleOfferData: ..."), que al usuario no le dice nada.
+String offerApiErrorMessage(
+  dynamic body, {
+  String fallback = 'No pudimos enviar tu oferta. Inténtalo de nuevo.',
+}) {
+  final json = offerAsMap(body);
+  if (json == null) return fallback;
+
+  String? message;
+  final errors = json['errors'];
+  if (errors is List) {
+    for (final error in errors) {
+      message = offerStr(offerAsMap(error)?['message']);
+      if (message != null) break;
+    }
+  }
+  message ??= offerStr(json['message']);
+  if (message == null) return fallback;
+
+  final cleaned = message.replaceFirst(RegExp(r'^Invalid \w+:\s*'), '').trim();
+  return cleaned.isEmpty ? fallback : cleaned;
+}
+
 /// Lee un valor anidado de la propiedad probando varias rutas con puntos.
 ///
 /// El backend no publica un nombre único para varios campos del listado
