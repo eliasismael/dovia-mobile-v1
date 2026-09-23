@@ -142,7 +142,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                     Align(
                       alignment: const AlignmentDirectional(-1.0, 0.0),
                       child: Text(
-                        '¿Necesitas ayuda? Escríbenos \npor aquI',
+                        '¿Necesitas ayuda? Escríbenos \npor aquí',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,
@@ -189,7 +189,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Hacer una pregunra',
+                                'Hacer una pregunta',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -208,7 +208,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                                     ),
                               ),
                               Text(
-                                'Nuestro bot y nuestro equipo te ayudarán',
+                                'Chatea con servicio al cliente',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -265,7 +265,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Pregunras frecuentes',
+                                'Preguntas frecuentes',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -281,29 +281,6 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                                           .bodyMedium
                                           .fontStyle,
                                       lineHeight: 1.5,
-                                    ),
-                              ),
-                              Text(
-                                'Encontrarás las preguntas más frecuentes.',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 12.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
                                     ),
                               ),
                             ],
@@ -342,39 +319,47 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(
                       20.0, 20.0, 0.0, 20.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: SvgPicture.asset(
-                          'assets/images/DH_icono-navbar-home.svg',
-                          width: 24.0,
-                          height: 24.0,
-                          fit: BoxFit.cover,
+                  child: InkWell(
+                    splashColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () => Navigator.pop(context),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: SvgPicture.asset(
+                            'assets/images/DH_icono-navbar-home.svg',
+                            width: 24.0,
+                            height: 24.0,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Inicio',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                      ),
-                    ],
+                        Text(
+                          'Inicio',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    letterSpacing: 0.0,
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Padding(
