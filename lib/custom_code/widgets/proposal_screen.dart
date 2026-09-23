@@ -563,11 +563,11 @@ class _ProposalScreenState extends State<ProposalScreen> {
             const SizedBox(height: 16),
             _buildField(
               "Reserva inicial",
-              _offerVal('initialReserve', prefix: '\$'),
+              _offerVal('initialReserve', prefix: 'Q'),
               hasChevron: false,
               isEditable: false,
             ),
-            _buildField("Pago final", _offerVal('finalPayment', prefix: '\$'),
+            _buildField("Pago final", _offerVal('finalPayment', prefix: 'Q'),
                 isEditable: false),
             _buildField(
               "Tiempo de promesa",
@@ -1104,7 +1104,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
         ),
         _buildCurrencySelector(),
         _buildField(
-            "Propuesta económica", _offerVal('proposedAmount', prefix: '\$')),
+            "Propuesta económica", _offerVal('proposedAmount', prefix: 'Q')),
         if (paymentMethod == PaymentMethod.hipoteca)
           _buildField("Enganche", "%"),
         if (showAdditionalRequest)

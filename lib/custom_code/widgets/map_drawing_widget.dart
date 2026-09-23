@@ -29,6 +29,9 @@ class MapDrawingWidget extends StatefulWidget {
     this.onPointSelected,
     this.onPointCleared,
     this.preselectInitialPoint = true,
+    this.markedLatitude,
+    this.markedLongitude,
+    this.showConfirmButton = true,
     this.interactive = true,
     this.circleRadius = 500,
     this.useRadiusInMeter = true,
@@ -63,6 +66,17 @@ class MapDrawingWidget extends StatefulWidget {
   /// el mapa abre con un pin sobre el centro por defecto y el usuario puede
   /// publicar sin haber elegido nada.
   final bool preselectInitialPoint;
+
+  /// Punto marcado desde afuera (p. ej. al geocodificar una dirección). Cada
+  /// vez que cambia, el pin se mueve ahí y la cámara lo sigue. El usuario
+  /// puede seguir tocando el mapa para corregirlo.
+  final double? markedLatitude;
+  final double? markedLongitude;
+
+  /// En modo punto, "Confirmar ubicación" solo muestra un aviso: el punto ya
+  /// se entrega con [onPointSelected] al tocar el mapa. Las pantallas que no
+  /// lo necesitan lo ocultan.
+  final bool showConfirmButton;
 
   final bool interactive;
   final double circleRadius;
@@ -142,6 +156,33 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
         widget.initialLongitude != 0) {
       _selectedPoint =
           ll.LatLng(widget.initialLatitude, widget.initialLongitude);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MapDrawingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Si quien usa el mapa cambia el centro (p. ej. al elegir una zona), la
+    // camara se mueve alli. El pin no se toca: el punto exacto lo marca el
+    // usuario.
+    if (widget.initialLatitude != oldWidget.initialLatitude ||
+        widget.initialLongitude != oldWidget.initialLongitude) {
+      _mapController.move(
+        ll.LatLng(widget.initialLatitude, widget.initialLongitude),
+        math.max(_mapController.camera.zoom, 14.0),
+      );
+    }
+
+    final lat = widget.markedLatitude;
+    final lng = widget.markedLongitude;
+    if (lat != null &&
+        lng != null &&
+        (lat != oldWidget.markedLatitude || lng != oldWidget.markedLongitude)) {
+      final point = ll.LatLng(lat, lng);
+      _pinDropController.reset();
+      setState(() => _selectedPoint = point);
+      _pinDropController.forward();
+      _mapController.move(point, math.max(_mapController.camera.zoom, 16.0));
     }
   }
 
@@ -348,6 +389,35 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
 
   @override
   Widget build(BuildContext context) {
+    if (_isSinglePoint && widget.interactive) {
+      // El mapa y la barra ocupan siempre el mismo alto; la tarjeta del punto
+      // se suma debajo en vez de achicar el mapa. Los mapas de solo lectura
+      // (perfil, ajustes) viven en cajas de alto fijo y siguen el layout de
+      // abajo.
+      return SizedBox(
+        width: widget.width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: widget.height,
+              child: Column(
+                children: [
+                  Expanded(child: _buildMapArea()),
+                  const SizedBox(height: 12),
+                  _buildSinglePointToolbar(),
+                ],
+              ),
+            ),
+            if (_selectedPoint != null) ...[
+              const SizedBox(height: 12),
+              _buildPointInfo(),
+            ],
+          ],
+        ),
+      );
+    }
     return SizedBox(
       width: widget.width,
       height: widget.height,
@@ -739,18 +809,20 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
             onPressed: _selectedPoint != null ? _clearPoint : null,
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 2,
-          child: _buildBtn(
-            icon: Icons.check_circle_outline_rounded,
-            label: widget.confirmButtonLabel ?? 'Confirmar ubicación',
-            color: _successColor,
-            isActive: false,
-            isPrimary: true,
-            onPressed: _selectedPoint != null ? _confirmPoint : null,
+        if (widget.showConfirmButton) ...[
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 2,
+            child: _buildBtn(
+              icon: Icons.check_circle_outline_rounded,
+              label: widget.confirmButtonLabel ?? 'Confirmar ubicación',
+              color: _successColor,
+              isActive: false,
+              isPrimary: true,
+              onPressed: _selectedPoint != null ? _confirmPoint : null,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

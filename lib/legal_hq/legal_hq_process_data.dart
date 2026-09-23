@@ -462,7 +462,7 @@ class LegalHqAgreement {
     }
   }
 
-  /// Monto con separador de miles: `$ 1,250,000 USD`.
+  /// Monto con separador de miles: `Q 1,250,000` o `1,250,000 USD`.
   String get amountLabel {
     final amount = proposedAmount;
     if (amount == null) return '';
@@ -470,7 +470,9 @@ class LegalHqAgreement {
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
         );
-    return currency.isNotEmpty ? '\$ $digits $currency' : '\$ $digits';
+    return currency.isEmpty || currency.toUpperCase() == 'GTQ'
+        ? 'Q $digits'
+        : '$digits $currency';
   }
 
   String get downPaymentLabel => downPaymentPercentage == null

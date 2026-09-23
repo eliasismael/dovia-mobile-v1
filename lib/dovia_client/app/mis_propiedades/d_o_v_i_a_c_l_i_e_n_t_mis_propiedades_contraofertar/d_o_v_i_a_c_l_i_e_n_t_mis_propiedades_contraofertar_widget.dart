@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '/repositories/offers_repository.dart';
+import '/core/amount_input_formatter.dart';
 import '/core/result.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_model.dart';
@@ -77,7 +78,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
         context, () => DOVIACLIENTMisPropiedadesContraofertarModel());
     _selectedCurrency = widget.currency ?? 'USD';
     if (widget.initialAmount != null && widget.initialAmount != '—') {
-      _amountCtrl.text = widget.initialAmount!;
+      _amountCtrl.text = formatAmountText(widget.initialAmount!);
     }
     if (widget.considerations != null && widget.considerations != '—') {
       _considerationsCtrl.text = widget.considerations!;
@@ -89,10 +90,10 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
       _downPaymentCtrl.text = widget.downPayment!;
     }
     if (widget.initialReserve != null && widget.initialReserve != '—') {
-      _reservationCtrl.text = widget.initialReserve!;
+      _reservationCtrl.text = formatAmountText(widget.initialReserve!);
     }
     if (widget.finalPayment != null && widget.finalPayment != '—') {
-      _finalPaymentCtrl.text = widget.finalPayment!;
+      _finalPaymentCtrl.text = formatAmountText(widget.finalPayment!);
     }
     if (widget.promiseTimeMonths != null && widget.promiseTimeMonths != '—') {
       _promiseTimeCtrl.text = widget.promiseTimeMonths!;
@@ -486,7 +487,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))
+                AmountInputFormatter()
               ],
               decoration: InputDecoration(
                 hintText: 'Ej. 150,000',
@@ -495,7 +496,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                 border: InputBorder.none,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-                prefixText: '$_selectedCurrency ',
+                prefixText: '${currencySymbol(_selectedCurrency)} ',
                 prefixStyle: GoogleFonts.inter(
                     fontSize: 15,
                     color: _primaryDark,
@@ -585,7 +586,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))
+                  AmountInputFormatter()
                 ],
                 decoration: InputDecoration(
                   hintText: 'Ej. 10,000',
@@ -594,7 +595,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                   border: InputBorder.none,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-                  prefixText: '$_selectedCurrency ',
+                  prefixText: '${currencySymbol(_selectedCurrency)} ',
                   prefixStyle: GoogleFonts.inter(
                       fontSize: 15,
                       color: _primaryDark,
@@ -621,7 +622,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]'))
+                          AmountInputFormatter()
                         ],
                         decoration: InputDecoration(
                           hintText: 'Ej. 140,000',
@@ -630,7 +631,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 15, vertical: 13),
-                          prefixText: '$_selectedCurrency ',
+                          prefixText: '${currencySymbol(_selectedCurrency)} ',
                           prefixStyle: GoogleFonts.inter(
                               fontSize: 15,
                               color: _primaryDark,

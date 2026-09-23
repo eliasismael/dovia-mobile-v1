@@ -355,11 +355,11 @@ class _HouseMarkerWidget extends StatelessWidget {
   // Formateador rápido para evitar que precios largos desborden el diseño
   String _formatPrice(double value) {
     if (value >= 1000000) {
-      return '\$${(value / 1000000).toStringAsFixed(1)}M';
+      return 'Q${(value / 1000000).toStringAsFixed(1)}M';
     } else if (value >= 1000) {
-      return '\$${(value / 1000).toStringAsFixed(0)}k';
+      return 'Q${(value / 1000).toStringAsFixed(0)}k';
     }
-    return '\$${value.toStringAsFixed(0)}';
+    return 'Q${value.toStringAsFixed(0)}';
   }
 
   @override

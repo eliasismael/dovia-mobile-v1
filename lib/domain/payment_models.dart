@@ -216,7 +216,7 @@ extension SubscriptionPlanDisplay on SubscriptionPlan {
   /// El formato se fija explícitamente porque Guatemala escribe los montos al
   /// estilo estadounidense y el locale del dispositivo no tiene por qué serlo.
   String get formattedAmount {
-    final symbol = currency == PaymentCurrency.usd ? '\$' : 'Q';
+    final symbol = currency == PaymentCurrency.usd ? 'USD ' : 'Q';
     return '$symbol${NumberFormat('#,##0.00', 'en_US').format(amount ?? 0)}';
   }
 }

@@ -815,7 +815,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                                         .labelMedium
                                         .fontStyle,
                                   ),
-                              hintText: '\$',
+                              hintText: 'Q',
                               hintStyle: FlutterFlowTheme.of(context)
                                   .labelMedium
                                   .override(
@@ -957,7 +957,7 @@ class _FiltroCompletePopupWidgetState extends State<FiltroCompletePopupWidget> {
                                         .labelMedium
                                         .fontStyle,
                                   ),
-                              hintText: '\$',
+                              hintText: 'Q',
                               hintStyle: FlutterFlowTheme.of(context)
                                   .labelMedium
                                   .override(

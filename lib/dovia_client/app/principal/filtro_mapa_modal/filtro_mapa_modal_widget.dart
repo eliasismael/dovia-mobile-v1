@@ -326,7 +326,7 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '\$0',
+                      'Q0',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(
                               fontWeight: FlutterFlowTheme.of(context)
@@ -346,7 +346,7 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                           ),
                     ),
                     Text(
-                      '\$2000',
+                      'Q2000',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.inter(
                               fontWeight: FlutterFlowTheme.of(context)

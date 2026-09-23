@@ -1176,7 +1176,7 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            '\$0',
+                                            'Q0',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1206,7 +1206,7 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                                 ),
                                           ),
                                           Text(
-                                            '\$2000',
+                                            'Q2000',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -1273,7 +1273,7 @@ class _Datos3WidgetState extends State<Datos3Widget> {
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0.0, 10.0, 0.0, 0.0),
                                         child: Text(
-                                          '\$${valueOrDefault<String>(
+                                          'Q${valueOrDefault<String>(
                                             _model.sliderValue.toString(),
                                             '0',
                                           )}',

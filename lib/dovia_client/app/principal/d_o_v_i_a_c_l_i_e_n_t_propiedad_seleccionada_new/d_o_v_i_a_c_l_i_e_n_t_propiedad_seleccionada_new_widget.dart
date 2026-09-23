@@ -1708,7 +1708,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         children: [
                                           Text(
                                             _price.isNotEmpty
-                                                ? '\$$_price'
+                                                ? 'Q$_price'
                                                 : '—',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium

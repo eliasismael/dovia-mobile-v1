@@ -475,7 +475,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
     final RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     final String Function(Match) matchFunc = (Match match) => '${match[1]},';
     final formatted = parts[0].replaceAllMapped(reg, matchFunc);
-    return '\$ $formatted';
+    return 'Q $formatted';
   }
 
   @override

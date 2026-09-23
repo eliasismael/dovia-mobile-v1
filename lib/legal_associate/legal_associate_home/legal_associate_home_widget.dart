@@ -794,7 +794,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
       if (i > 0 && (whole.length - i) % 3 == 0) buffer.write(',');
       buffer.write(whole[i]);
     }
-    return '\$$buffer';
+    return 'Q$buffer';
   }
 
   // ── Helper: definitive completed badge label by deal type ─────────────────

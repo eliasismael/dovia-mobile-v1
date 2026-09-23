@@ -467,7 +467,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
           RichText(
             text: const TextSpan(children: [
               TextSpan(
-                  text: '\$30',
+                  text: 'Q30',
                   style: TextStyle(
                       fontFamily: 'Public Sans',
                       fontSize: 30,

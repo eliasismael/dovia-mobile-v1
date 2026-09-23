@@ -369,7 +369,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
       grouped.write(whole[i]);
     }
 
-    return '\$ ${value.startsWith('-') ? '-' : ''}$grouped';
+    return 'Q ${value.startsWith('-') ? '-' : ''}$grouped';
   }
 
   Widget _buildSpecItem(String text) {

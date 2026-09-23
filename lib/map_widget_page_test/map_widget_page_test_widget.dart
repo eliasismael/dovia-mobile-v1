@@ -57,30 +57,27 @@ class _MapWidgetPageTestWidgetState extends State<MapWidgetPageTestWidget> {
                 updateCallback: () => safeSetState(() {}),
                 child: const CornerGradientBackgroundWidget(),
               ),
-              SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    wrapWithModel(
-                      model: _model.dOVIASHAREDHeaderModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
-                        title: 'Mapa',
+              // El mapa ocupa solo el alto que deja el header, sin scroll.
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  wrapWithModel(
+                    model: _model.dOVIASHAREDHeaderModel,
+                    updateCallback: () => safeSetState(() {}),
+                    child: const DOVIASHAREDHeaderWidget(
+                      title: 'Mapa',
+                    ),
+                  ),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) =>
+                          custom_widgets.MapExplorerPageWidget(
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
                       ),
                     ),
-                    Align(
-                      alignment: const AlignmentDirectional(0.0, 0.0),
-                      child: SizedBox(
-                        width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: MediaQuery.sizeOf(context).height * 1.0,
-                        child: custom_widgets.MapExplorerPageWidget(
-                          width: MediaQuery.sizeOf(context).width * 1.0,
-                          height: MediaQuery.sizeOf(context).height * 1.0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),

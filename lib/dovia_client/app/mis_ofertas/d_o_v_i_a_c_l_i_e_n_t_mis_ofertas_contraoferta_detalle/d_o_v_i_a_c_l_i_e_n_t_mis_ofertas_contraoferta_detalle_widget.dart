@@ -1,3 +1,4 @@
+import '/core/amount_input_formatter.dart';
 import '/core/result.dart';
 import '/domain/client_counter_offer_detail.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
@@ -221,6 +222,15 @@ class _ClientCounterOfferContentState
   static const Color _destructive = Color(0xFFE44444);
 
   final Map<CounterOfferFieldKey, TextEditingController> _controllers = {};
+
+  /// Campos que son montos: se escriben con separadores de miles.
+  static const _moneyKeys = {
+    CounterOfferFieldKey.proposedAmount,
+    CounterOfferFieldKey.initialReserve,
+    CounterOfferFieldKey.finalPayment,
+  };
+  static bool _isMoney(CounterOfferFieldKey key) => _moneyKeys.contains(key);
+
   final _rejectReasonController = TextEditingController();
   bool _isCounterEditing = false;
   bool _showRejectReason = false;
@@ -234,7 +244,8 @@ class _ClientCounterOfferContentState
     _selectedCurrency = widget.detail.ownerTerms.currency;
     for (final field in widget.detail.ownerTerms.fields) {
       if (!field.editable) continue;
-      _controllers[field.key] = TextEditingController(text: field.value);
+      _controllers[field.key] = TextEditingController(
+          text: _isMoney(field.key) ? formatAmountText(field.value) : field.value);
     }
     _rejectReasonController.addListener(_refresh);
   }
@@ -560,10 +571,15 @@ class _ClientCounterOfferContentState
               keyboardType: field.kind == CounterOfferFieldKind.number
                   ? const TextInputType.numberWithOptions(decimal: true)
                   : null,
-              inputFormatters: field.kind == CounterOfferFieldKind.number
-                  ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
-                  : null,
+              inputFormatters: _isMoney(field.key)
+                  ? [AmountInputFormatter()]
+                  : field.kind == CounterOfferFieldKind.number
+                      ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+                      : null,
               decoration: InputDecoration(
+                prefixText: _isMoney(field.key)
+                    ? '${currencySymbol(_selectedCurrency)} '
+                    : null,
                 filled: true,
                 fillColor: Colors.white,
                 suffixText: field.suffix.trim().isEmpty ? null : field.suffix,

@@ -180,12 +180,12 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
               getJsonField(
                   _offerData, r'''$.activeOfferData.reservationAmount''') ??
               getJsonField(_offerData, r'''$.initialReserve''');
-          if (resAmt != null) _model.textController9?.text = '\$${resAmt}';
+          if (resAmt != null) _model.textController9?.text = 'Q${resAmt}';
 
           final finalPay =
               getJsonField(_offerData, r'''$.activeOfferData.finalPayment''') ??
                   getJsonField(_offerData, r'''$.finalPayment''');
-          if (finalPay != null) _model.textController10?.text = '\$${finalPay}';
+          if (finalPay != null) _model.textController10?.text = 'Q${finalPay}';
 
           // API uses 'promiseTimeMonths', not 'promiseTime'
           final promiseTime = getJsonField(
@@ -211,7 +211,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
           final amount = getJsonField(
                   _offerData, r'''$.activeOfferData.proposedAmount''') ??
               getJsonField(_offerData, r'''$.proposedAmount''');
-          if (amount != null) _model.textController8?.text = '\$${amount}';
+          if (amount != null) _model.textController8?.text = 'Q${amount}';
         }
       });
       debugPrint('[Acuerdo] loaded offer: $_offerData');
@@ -1671,7 +1671,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                   getJsonField(_offerData,
                                                       r'''$.proposedAmount''');
                                               return v != null
-                                                  ? '\$$v'
+                                                  ? 'Q$v'
                                                   : (widget.proposedAmount ??
                                                       '—');
                                             }();
@@ -1682,14 +1682,14 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                       r'''$.reservationAmount''') ??
                                                   getJsonField(_offerData,
                                                       r'''$.initialReserve''');
-                                              return v != null ? '\$$v' : '—';
+                                              return v != null ? 'Q$v' : '—';
                                             }();
                                             final pagoFinalVal = () {
                                               final v = getJsonField(activeData,
                                                       r'''$.finalPayment''') ??
                                                   getJsonField(_offerData,
                                                       r'''$.finalPayment''');
-                                              return v != null ? '\$$v' : '—';
+                                              return v != null ? 'Q$v' : '—';
                                             }();
                                             final tiempoVal = () {
                                               final v = getJsonField(activeData,

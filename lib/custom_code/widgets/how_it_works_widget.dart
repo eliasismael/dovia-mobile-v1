@@ -95,7 +95,7 @@ class HowItWorksWidget extends StatelessWidget {
           ),
           SizedBox(height: 16),
           Text(
-            'DOVIA comercializa tu propiedad con un proceso estructurado, transparente y respaldado por tecnología y profesionales en cada etapa.\n\nEn venta, nuestra comisión es de 3.5% [impuestos incluidos].\n\nEn renta, nuestra comisión es equivalente a medio mes de renta.\n\nSolo personas verificadas visitan tu propiedad, recibes ofertas directas y te acompañamos hasta el cierre.',
+            'DOVIA comercializa tu propiedad con un proceso estructurado, transparente y respaldado por tecnología y profesionales en cada etapa.\n\nEn venta, nuestra comisión es de 3.5% + IVA.\n\nEn renta nuestra comisión es equivalente a un mes de renta.\n\nSolo personas verificadas visitan tu propiedad, recibes ofertas directas y te acompañamos hasta el cierre.',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 14,

@@ -235,7 +235,7 @@ class _DoviaClientMisPropiedadesVenderState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Precio de venta incluyendo comisión Dovia (3.5%)',
+          'Precio de venta incluyendo comisión Dovia (3.5% + IVA)',
           style: TextStyle(
             fontFamily: 'Public Sans',
             fontSize: 14,

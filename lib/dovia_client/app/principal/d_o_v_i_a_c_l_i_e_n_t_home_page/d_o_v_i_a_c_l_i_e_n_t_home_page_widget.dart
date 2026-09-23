@@ -1458,7 +1458,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',
                                       name: 'Desarrollo Especial',
                                       type: 'Preventa',
-                                      price: '\$ 1,000,000',
+                                      price: 'Q 1,000,000',
                                       propertyType: 'Edificio',
                                     ),
                                   ),

@@ -808,7 +808,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                           color: FlutterFlowTheme.of(context).secondaryText)),
                 ],
                 const SizedBox(height: 4),
-                Text(rawAmount == null ? '—' : '\$$proposedAmountStr',
+                Text(rawAmount == null ? '—' : 'Q$proposedAmountStr',
                     style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -938,7 +938,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                           color: FlutterFlowTheme.of(context).secondaryText)),
                 ],
                 const SizedBox(height: 4),
-                Text(rawAmount == null ? '—' : '\$$proposedAmountStr',
+                Text(rawAmount == null ? '—' : 'Q$proposedAmountStr',
                     style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -1120,14 +1120,14 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               const SizedBox(height: 16),
               // Price summary
               if (hasSale) ...[
-                _priceRow('Precio de venta', '\$$salePrice'),
-                _priceRow('Cantidad a recibir', '\$$amountToReceive',
+                _priceRow('Precio de venta', 'Q$salePrice'),
+                _priceRow('Cantidad a recibir', 'Q$amountToReceive',
                     small: true),
-                _priceRow('Mantenimiento', '\$$maintenanceFee', small: true),
-                _priceRow('Imp. único inmuebles', '\$$singlePropertyTax',
+                _priceRow('Mantenimiento', 'Q$maintenanceFee', small: true),
+                _priceRow('Imp. único inmuebles', 'Q$singlePropertyTax',
                     small: true),
               ],
-              if (hasRent) _priceRow('Renta mensual', '\$$monthlyRent'),
+              if (hasRent) _priceRow('Renta mensual', 'Q$monthlyRent'),
             ],
           ),
         ),
@@ -2139,7 +2139,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
     if (price != null && price > 0) {
       final amount = price * 0.965;
       setState(() {
-        _amountToReceiveDisplay = '\$${amount.toStringAsFixed(2)}';
+        _amountToReceiveDisplay = 'Q${amount.toStringAsFixed(2)}';
       });
     } else {
       setState(() => _amountToReceiveDisplay = '');
@@ -2375,7 +2375,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                           _dividerLabel('Datos de Venta'),
                           _inputField(
                             label:
-                                'Precio de venta (incluyendo comisión Dovia 3.5%)',
+                                'Precio de venta (incluyendo comisión Dovia 3.5% + IVA)',
                             controller: widget.precioVentaCtrl,
                             hint: 'Ej: 250000',
                             fieldKey: 'salePrice',
@@ -2460,7 +2460,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                             fieldKey: 'monthlyRent',
                           ),
                           Text(
-                            'Comisión Dovia: 1 renta',
+                            'Comisión Dovia: un mes de renta',
                             style: GoogleFonts.inter(
                                 fontSize: 12, color: const Color(0xFF888888)),
                           ),

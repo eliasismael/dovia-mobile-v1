@@ -530,7 +530,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                                                 ),
                                                           ),
                                                           TextSpan(
-                                                            text: '\$$price\n',
+                                                            text: 'Q$price\n',
                                                           ),
                                                           TextSpan(
                                                             text: specs,

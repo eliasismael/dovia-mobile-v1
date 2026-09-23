@@ -350,12 +350,18 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
                   ? 'Casa'
                   : _typeFilter == 'APARTMENT'
                       ? 'Depto'
-                      : 'Tipo',
+                      : _typeFilter == 'NEW_PROJECT'
+                          ? 'Proyecto nuevo'
+                          : 'Tipo',
               isActive: _typeFilter != null,
               items: const [
                 PopupMenuItem(value: 'ALL', child: Text('Todos')),
                 PopupMenuItem(value: 'HOUSE', child: Text('Casa')),
                 PopupMenuItem(value: 'APARTMENT', child: Text('Departamento')),
+                // Valor provisional: el backend todavia no expone un tipo
+                // para proyectos nuevos (en inicio son tarjetas fijas).
+                PopupMenuItem(
+                    value: 'NEW_PROJECT', child: Text('Proyecto nuevo')),
               ],
               onSelected: (val) {
                 _typeFilter = val == 'ALL' ? null : val;
@@ -861,7 +867,7 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                             _subLabel('Desde'),
                             const SizedBox(height: 6),
                             _numericInput(
-                                ctrl: _minPriceCtrl, hint: '\$', theme: theme),
+                                ctrl: _minPriceCtrl, hint: 'Q', theme: theme),
                           ],
                         ),
                       ),
@@ -873,7 +879,7 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                             _subLabel('Hasta'),
                             const SizedBox(height: 6),
                             _numericInput(
-                                ctrl: _maxPriceCtrl, hint: '\$', theme: theme),
+                                ctrl: _maxPriceCtrl, hint: 'Q', theme: theme),
                           ],
                         ),
                       ),

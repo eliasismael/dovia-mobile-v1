@@ -790,7 +790,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                   border: Border(bottom: BorderSide(color: Color(0xFFDFDFDF)))),
               child: Row(children: [
                 Expanded(
-                    child: Text('Comisión Dovia (3.5%)',
+                    child: Text('Comisión Dovia (3.5% + IVA)',
                         style: GoogleFonts.inter(
                             fontSize: 15, color: _primaryDark))),
                 Text('$currencySymbol${_formatAmount(commission)}',

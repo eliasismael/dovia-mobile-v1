@@ -1253,7 +1253,7 @@ class _OfferCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    '\$ $amountStr',
+                    'Q $amountStr',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.publicSans(
                               fontWeight: FontWeight.w500),

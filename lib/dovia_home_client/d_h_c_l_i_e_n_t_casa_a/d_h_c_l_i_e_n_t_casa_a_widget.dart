@@ -730,7 +730,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
             // mockup "$ (Precio de servicio...)" parecería un error en
             // producción.
             _savingsAmount != null
-                ? 'Ahorraste:\n\$${_savingsAmount!} que no pagas por tener suscripción'
+                ? 'Ahorraste:\nQ${_savingsAmount!} que no pagas por tener suscripción'
                 : 'Ahorraste el precio de este servicio por tener tu suscripción.',
             style: FlutterFlowTheme.of(context).bodyMedium.override(
                   font: GoogleFonts.inter(),

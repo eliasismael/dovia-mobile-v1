@@ -2,6 +2,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/core/amount_input_formatter.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
@@ -155,15 +156,18 @@ class _DOVIACLIENTOfertaCompraWidgetState
       OfferFormInput(
         offerType: widget.offerType,
         paymentMethod: _model.paymentMethod,
-        purchaseAmount: _text(_model.propuestaEconomicaTextController),
-        rentAmount: _text(_model.propuestaRentaTextController),
+        purchaseAmount: _text(_model.propuestaEconomicaTextController)
+            .replaceAll(',', ''),
+        rentAmount: _text(_model.propuestaRentaTextController)
+            .replaceAll(',', ''),
         cashPaymentTime:
             _text(_model.cONTADOTiempoEstimadoDePagoTextController),
         downPayment: _text(_model.hIPOTECAEngancheTextController),
         bankName: _text(_model.hIPOTECABancoTextController),
         bankApprovalTime:
             _text(_model.hIPOTECATiempoAprobacionBancoTextController),
-        initialReserve: _text(_model.pROMESAReservaInicialTextController),
+        initialReserve: _text(_model.pROMESAReservaInicialTextController)
+            .replaceAll(',', ''),
         promiseMonths: _text(_model.pROMESATiempoPromesaTextController),
         buyerName: _text(_model.nombreCompradorTextController),
         legalName: _text(_model.razonSocialTextController),
@@ -250,7 +254,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
         ? propertyPathValue(property, const ['rentInfo.monthlyRent', 'price'])
         : propertyPathValue(property, const ['saleInfo.salePrice', 'price']);
 
-    _setReadOnlyText(_model.precioTextController, offerStr(precio));
+    _setReadOnlyText(
+        _model.precioTextController, formatAmountText(offerStr(precio) ?? ''));
     _setReadOnlyText(
       _model.usoPermitidoTextController,
       offerStr(propertyPathValue(property, const [
@@ -331,9 +336,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                 decimal: true,
               ),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                AmountInputFormatter(),
               ],
-              decoration: InputDecoration(
+              decoration: InputDecoration(prefixText: '${currencySymbol(_model.selectedCurrency)} ',
                 errorText: _fieldErrors['propuestaRenta'],
                 isDense: true,
                 hintText: 'Ej. 1500.00',
@@ -1817,14 +1822,14 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         const TextInputType
                                                             .numberWithOptions(
                                                             decimal: true),
+                                                    // Separadores de miles y
+                                                    // hasta 2 decimales.
                                                     inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .allow(RegExp(
-                                                              r'^\d*\.?\d{0,2}'))
+                                                      AmountInputFormatter()
                                                     ],
                                                     enabled: true,
                                                     obscureText: false,
-                                                    decoration: InputDecoration(
+                                                    decoration: InputDecoration(prefixText: '${currencySymbol(_model.selectedCurrency)} ',
                                                       errorText: _fieldErrors[
                                                           'propuestaEconomica'],
                                                       isDense: true,
@@ -3176,9 +3181,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                         decimal:
                                                                             true),
                                                                 inputFormatters: [
-                                                                  FilteringTextInputFormatter
-                                                                      .allow(RegExp(
-                                                                          r'^\d*\.?\d{0,2}'))
+                                                                  AmountInputFormatter()
                                                                 ],
                                                                 onChanged: (_) =>
                                                                     _clearFieldError(
@@ -3187,7 +3190,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 obscureText:
                                                                     false,
                                                                 decoration:
-                                                                    InputDecoration(
+                                                                    InputDecoration(prefixText: '${currencySymbol(_model.selectedCurrency)} ',
                                                                   errorText:
                                                                       _fieldErrors[
                                                                           'reservaInicial'],
@@ -5346,7 +5349,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     currency:
                                                         _model.selectedCurrency,
                                                     proposedAmount:
-                                                        double.tryParse(_model
+                                                        parseAmount(_model
                                                                 .propuestaRentaTextController
                                                                 ?.text ??
                                                             ''),
@@ -5404,9 +5407,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          double.tryParse(_model
-                                                              .propuestaEconomicaTextController
-                                                              .text),
+                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5450,9 +5451,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          double.tryParse(_model
-                                                              .propuestaEconomicaTextController
-                                                              .text),
+                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5499,9 +5498,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          double.tryParse(_model
-                                                              .propuestaEconomicaTextController
-                                                              .text),
+                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5522,7 +5519,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               .representanteLegalTextController
                                                               .text,
                                                       initialReserve:
-                                                          double.tryParse(_model
+                                                          parseAmount(_model
                                                               .pROMESAReservaInicialTextController
                                                               .text),
                                                       promiseTimeMonths:
@@ -5637,7 +5634,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     currency:
                                                         _model.selectedCurrency,
                                                     proposedAmount:
-                                                        double.tryParse(_model
+                                                        parseAmount(_model
                                                                 .propuestaRentaTextController
                                                                 ?.text ??
                                                             ''),
@@ -5754,9 +5751,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     currency:
                                                         _model.selectedCurrency,
                                                     proposedAmount:
-                                                        double.tryParse(_model
-                                                            .propuestaEconomicaTextController
-                                                            .text),
+                                                        parseAmount(_model.propuestaEconomicaTextController?.text),
                                                     considerations: _model
                                                         .consideracionesTextController
                                                         .text,
@@ -5812,9 +5807,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          double.tryParse(_model
-                                                              .propuestaEconomicaTextController
-                                                              .text),
+                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5884,10 +5877,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             widget.propertyId,
                                                         currency: _model
                                                             .selectedCurrency,
-                                                        proposedAmount: double
-                                                            .tryParse(_model
-                                                                .propuestaEconomicaTextController
-                                                                .text),
+                                                        proposedAmount: parseAmount(_model.propuestaEconomicaTextController?.text),
                                                         considerations: _model
                                                             .consideracionesTextController
                                                             .text,
@@ -5916,8 +5906,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .representanteLegalTextController
                                                                     .text
                                                                 : '',
-                                                        initialReserve: double
-                                                            .tryParse(_model
+                                                        initialReserve: parseAmount(_model
                                                                 .pROMESAReservaInicialTextController
                                                                 .text),
                                                         promiseTimeMonths:

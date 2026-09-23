@@ -59,7 +59,7 @@ void main() {
       });
 
       expect(agreement.paymentMethodLabel, 'Compra con hipoteca');
-      expect(agreement.amountLabel, r'$ 1,250,000 USD');
+      expect(agreement.amountLabel, '1,250,000 USD');
       expect(agreement.downPaymentLabel, '20 %');
       expect(agreement.termLabel, '24 meses');
       expect(agreement.bankName, 'Banco Industrial');
@@ -74,7 +74,7 @@ void main() {
       });
 
       expect(agreement.paymentMethodLabel, 'Promesa de compra');
-      expect(agreement.amountLabel, r'$ 980,000');
+      expect(agreement.amountLabel, 'Q 980,000');
       expect(agreement.termLabel, '6 meses');
       expect(agreement.downPaymentLabel, isEmpty);
     });
