@@ -110,7 +110,7 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
   void _scrollLeft(String categoryName) {
     final controller = _scrollControllers[categoryName];
     if (controller != null && controller.hasClients) {
-      final newOffset = (controller.offset - 150).clamp(
+      final newOffset = (controller.offset - 276).clamp(
         0.0,
         controller.position.maxScrollExtent,
       );
@@ -125,7 +125,7 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
   void _scrollRight(String categoryName) {
     final controller = _scrollControllers[categoryName];
     if (controller != null && controller.hasClients) {
-      final newOffset = (controller.offset + 150).clamp(
+      final newOffset = (controller.offset + 276).clamp(
         0.0,
         controller.position.maxScrollExtent,
       );
@@ -352,7 +352,7 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
   Widget _buildHeader() {
     return Padding(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 10,
+        top: MediaQuery.of(context).padding.top + 24,
         left: 20,
         right: 20,
         bottom: 10,
@@ -464,52 +464,37 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
 
           const SizedBox(height: 16),
 
-          // Image gallery with navigation arrows
+          // Fotos grandes; las flechas van juntas debajo para no taparlas.
           SizedBox(
-            height: 130,
-            child: Stack(
-              clipBehavior: Clip.none,
+            height: 200,
+            child: ListView.separated(
+              controller: _scrollControllers[category.name],
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(right: 20),
+              itemCount: category.imagePaths.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 16),
+              itemBuilder: (context, index) {
+                return _buildImageThumbnail(
+                  category.imagePaths[index],
+                  onTap: () => _openPhotoViewer(category.imagePaths, index),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Scrollable images
-                ListView.separated(
-                  controller: _scrollControllers[category.name],
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(left: 35, right: 55),
-                  itemCount: category.imagePaths.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 16),
-                  itemBuilder: (context, index) {
-                    return _buildImageThumbnail(
-                      category.imagePaths[index],
-                      onTap: () => _openPhotoViewer(category.imagePaths, index),
-                    );
-                  },
+                _buildNavigationArrow(
+                  isLeft: true,
+                  onTap: () => _scrollLeft(category.name),
                 ),
-
-                // Left arrow
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: _buildNavigationArrow(
-                      isLeft: true,
-                      onTap: () => _scrollLeft(category.name),
-                    ),
-                  ),
-                ),
-
-                // Right arrow
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: _buildNavigationArrow(
-                      isLeft: false,
-                      onTap: () => _scrollRight(category.name),
-                    ),
-                  ),
+                const SizedBox(width: 16),
+                _buildNavigationArrow(
+                  isLeft: false,
+                  onTap: () => _scrollRight(category.name),
                 ),
               ],
             ),
@@ -528,8 +513,8 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Container(
-          width: 140,
-          height: 130,
+          width: 260,
+          height: 200,
           decoration: BoxDecoration(
             color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(10),
@@ -538,8 +523,8 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
               ? Image.network(
                   imagePath,
                   fit: BoxFit.cover,
-                  width: 140,
-                  height: 130,
+                  width: 260,
+                  height: 200,
                   errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.broken_image,
                       size: 40,
@@ -548,12 +533,12 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
               : Image.asset(
                   imagePath,
                   fit: BoxFit.cover,
-                  width: 140,
-                  height: 130,
+                  width: 260,
+                  height: 200,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      width: 140,
-                      height: 130,
+                      width: 260,
+                      height: 200,
                       color: Colors.grey.shade300,
                       child: const Center(
                         child: Icon(
@@ -574,27 +559,15 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
     required bool isLeft,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: primaryColor,
-            width: 1,
-          ),
-        ),
-        child: Center(
-          child: Icon(
-            isLeft ? Icons.chevron_left : Icons.chevron_right,
-            size: 20,
-            color: primaryColor,
-          ),
-        ),
+    return IconButton(
+      onPressed: onTap,
+      icon: Icon(
+        isLeft
+            ? Icons.arrow_back_ios_new_rounded
+            : Icons.arrow_forward_ios_rounded,
       ),
+      iconSize: 28,
+      color: primaryColor,
     );
   }
 }

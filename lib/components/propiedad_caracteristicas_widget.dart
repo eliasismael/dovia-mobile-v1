@@ -44,7 +44,7 @@ class _PropiedadCaracteristicasWidgetState
     _model = createModel(context, () => PropiedadCaracteristicasModel());
 
     _model.expandableExpandableController =
-        ExpandableController(initialExpanded: false)
+        ExpandableController(initialExpanded: true)
           ..addListener(() => safeSetState(() {}));
     _model.textController1 ??= TextEditingController(
         text: widget.bedrooms > 0 ? '${widget.bedrooms}' : '');
@@ -637,7 +637,7 @@ class _PropiedadCaracteristicasWidgetState
                                       alignment:
                                           const AlignmentDirectional(-1.0, 0.0),
                                       child: Text(
-                                        'Medio baños',
+                                        'Medios baños',
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
@@ -850,7 +850,7 @@ class _PropiedadCaracteristicasWidgetState
                                       alignment:
                                           const AlignmentDirectional(-1.0, 0.0),
                                       child: Text(
-                                        'Parqueo',
+                                        'Parqueos',
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
@@ -1116,7 +1116,7 @@ class _PropiedadCaracteristicasWidgetState
                                             borderRadius:
                                                 BorderRadius.circular(0.0),
                                             child: SvgPicture.asset(
-                                              'assets/images/medio-bao.svg',
+                                              'assets/images/piso.svg',
                                               width: 200.0,
                                               height: 200.0,
                                               fit: BoxFit.contain,

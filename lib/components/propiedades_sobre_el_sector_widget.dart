@@ -48,7 +48,7 @@ class _PropiedadesSobreElSectorWidgetState
     _model = createModel(context, () => PropiedadesSobreElSectorModel());
 
     _model.expandableExpandableController =
-        ExpandableController(initialExpanded: false)
+        ExpandableController(initialExpanded: true)
           ..addListener(() => safeSetState(() {}));
     _model.textController ??= TextEditingController(text: widget.description);
     _model.textFieldFocusNode ??= FocusNode();

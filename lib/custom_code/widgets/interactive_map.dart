@@ -56,10 +56,26 @@ class _InteractiveMapState extends State<InteractiveMap> {
     _selectedPoint = latLng.LatLng(widget.startLat, widget.startLng);
   }
 
+  // Ultimo zoom visto, para detectar gestos de zoom en solo lectura.
+  double _lastZoom = 15.0;
+
+  // En solo lectura el zoom siempre se centra en la propiedad.
+  latLng.LatLng get _zoomCenter =>
+      widget.readOnly ? _selectedPoint : _mapController.camera.center;
+
   void _zoomBy(double delta) {
     final newZoom =
         (_mapController.camera.zoom + delta).clamp(_minZoom, _maxZoom);
-    _mapController.move(_mapController.camera.center, newZoom);
+    _mapController.move(_zoomCenter, newZoom);
+  }
+
+  void _onPositionChanged(MapCamera camera, bool hasGesture) {
+    final zoomChanged = (camera.zoom - _lastZoom).abs() > 0.0001;
+    _lastZoom = camera.zoom;
+    if (widget.readOnly && hasGesture && zoomChanged) {
+      // Pellizco, rueda o doble toque: se recentra en el punto.
+      _mapController.move(_selectedPoint, camera.zoom);
+    }
   }
 
   @override
@@ -105,7 +121,7 @@ class _InteractiveMapState extends State<InteractiveMap> {
                 // event.scale is cumulative; log2(scale) -> zoom delta.
                 final newZoom = (base + math.log(event.scale) / math.ln2)
                     .clamp(_minZoom, _maxZoom);
-                _mapController.move(_mapController.camera.center, newZoom);
+                _mapController.move(_zoomCenter, newZoom);
               },
               onPointerPanZoomEnd: (event) {
                 _panZoomBaseZoom = null;
@@ -117,9 +133,16 @@ class _InteractiveMapState extends State<InteractiveMap> {
                   initialZoom: 15.0,
                   minZoom: _minZoom,
                   maxZoom: _maxZoom,
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                  // En solo lectura el mapa se puede arrastrar, pero el punto
+                  // no se mueve y el zoom se centra siempre en el.
+                  interactionOptions: InteractionOptions(
+                    flags: widget.readOnly
+                        ? InteractiveFlag.all &
+                            ~InteractiveFlag.rotate &
+                            ~InteractiveFlag.pinchMove
+                        : InteractiveFlag.all & ~InteractiveFlag.rotate,
                   ),
+                  onPositionChanged: _onPositionChanged,
                   onTap: widget.readOnly
                       ? null
                       : (tapPosition, point) => _updatePoint(point),

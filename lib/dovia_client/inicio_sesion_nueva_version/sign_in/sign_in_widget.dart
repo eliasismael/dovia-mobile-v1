@@ -509,7 +509,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
-                                'Correo o contraseña incorrectos.\nPor favor, verifica tus datos e Inténtalo nuevamente.',
+                                _model.signInError ?? '',
                                 textAlign: TextAlign.center,
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
@@ -762,25 +762,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     context.mounted);
                               }
                             } else {
-                              await showDialog(
-                                context: context,
-                                builder: (alertDialogContext) {
-                                  return AlertDialog(
-                                    title: Text(
-                                        (_model.apiResultbr7?.statusCode ?? 200)
-                                            .toString()),
-                                    content: Text(
-                                        (_model.apiResultbr7?.bodyText ?? '')),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(alertDialogContext),
-                                        child: const Text('Ok'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
+                              // Error en texto rojo bajo el form, sin dialog con el JSON.
+                              final status =
+                                  _model.apiResultbr7?.statusCode ?? 0;
+                              _model.signInError = (status == 400 ||
+                                      status == 401 ||
+                                      status == 404)
+                                  ? 'Correo o contraseña incorrectos.\nPor favor, verifica tus datos e Inténtalo nuevamente.'
+                                  : 'No pudimos iniciar sesión. Intenta de nuevo en unos minutos.';
                               _model.invalidMailOrPassword = true;
                               safeSetState(() {});
                             }

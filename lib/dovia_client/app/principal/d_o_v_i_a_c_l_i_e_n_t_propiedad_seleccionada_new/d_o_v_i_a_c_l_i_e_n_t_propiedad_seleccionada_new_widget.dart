@@ -232,6 +232,15 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     return urls.map(_carouselItem).toList();
   }
 
+  Widget _carouselArrow(IconData icon, VoidCallback onTap) {
+    return IconButton(
+      onPressed: onTap,
+      icon: Icon(icon),
+      iconSize: 28.0,
+      color: FlutterFlowTheme.of(context).primary,
+    );
+  }
+
   Widget _carouselItem(String url) {
     Widget fallback() => Image.asset(
           'assets/images/casa_card_sobreMiVisita.png',
@@ -246,7 +255,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
           borderRadius: BorderRadius.circular(12.0),
           child: SizedBox(
             width: double.infinity,
-            height: 160.0,
+            height: 220.0,
             child: url.isEmpty
                 ? fallback()
                 : Image.network(
@@ -260,33 +269,31 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     );
   }
 
-  /// Ambientes que manda el backend y no tienen parametro propio en la
-  /// galeria, por ejemplo la sala. Sin esto sus fotos se perdian.
-  Map<String, List<String>>? _extraPhotoCategories() {
-    const standard = {'habitacion', 'habitación', 'cocina', 'terraza'};
-    final extras = <String, List<String>>{};
+  /// Las mismas fotos del carrusel, agrupadas por ambiente. Se arman desde
+  /// lo que ya se parseo para el carrusel: antes la galeria releia el JSON
+  /// por otro camino y mostraba menos fotos que las de la ficha.
+  Map<String, List<String>> _galleryCategories() {
+    final categories = <String, List<String>>{};
+    final inRooms = _imagesByRoom.values.expand((u) => u).toSet();
+    final sueltas =
+        _carouselImages.where((u) => !inRooms.contains(u)).toList();
+    if (sueltas.isNotEmpty) categories['Principal'] = sueltas;
     _imagesByRoom.forEach((room, urls) {
-      if (standard.contains(room.toLowerCase())) return;
       final label =
           room.isEmpty ? room : '${room[0].toUpperCase()}${room.substring(1)}';
-      extras[label] = urls;
+      categories.putIfAbsent(label, () => []).addAll(urls);
     });
-    return extras.isEmpty ? null : extras;
+    return categories;
   }
 
   void _showGallery() async {
     _trackInteraction();
-    final api = DOVIAAPIPropertyContextGroup.getPropertyByIDCall;
-    final body = _propertyData?.jsonBody;
 
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => TodasLasFotosWidget(
-          habitacionImages: body != null ? api.imgHabitacion(body) : null,
-          cocinaImages: body != null ? api.imgCocina(body) : null,
-          terrazaImages: body != null ? api.imgTerraza(body) : null,
-          extraCategories: _extraPhotoCategories(),
+          extraCategories: _galleryCategories(),
         ),
       ),
     );
@@ -706,7 +713,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
+                                      horizontal: 28.0),
                                   child: RichText(
                                     textScaler:
                                         MediaQuery.of(context).textScaler,
@@ -904,101 +911,55 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                               ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 40.0, 0.0, 0.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                  0.0, 32.0, 0.0, 0.0),
+                              // Carrusel a todo el ancho, con las flechas
+                              // juntas debajo para no tapar las fotos.
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      await _model.carouselController
-                                          ?.previousPage(
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        curve: Curves.ease,
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 20.0,
-                                      height: 20.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/page-left.svg',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                                  CarouselSlider(
+                                    items: _carouselItems(),
+                                    carouselController:
+                                        _model.carouselController ??=
+                                            CarouselSliderController(),
+                                    options: CarouselOptions(
+                                      height: 220.0,
+                                      initialPage: 0,
+                                      viewportFraction: 0.92,
+                                      disableCenter: false,
+                                      enlargeCenterPage: false,
+                                      enlargeFactor: 0.0,
+                                      enableInfiniteScroll: false,
+                                      scrollDirection: Axis.horizontal,
+                                      autoPlay: false,
+                                      onPageChanged: (index, _) => _model
+                                          .carouselCurrentIndex = index,
                                     ),
                                   ),
-                                  // El ancho fijo desbordaba en pantallas chicas: el carrusel
-                                  // ocupa lo que queda entre las dos flechas.
-                                  Expanded(
-                                    child: SizedBox(
-                                      height: 160.0,
-                                      child: CarouselSlider(
-                                        items: _carouselItems(),
-                                        carouselController:
-                                            _model.carouselController ??=
-                                                CarouselSliderController(),
-                                        options: CarouselOptions(
-                                          initialPage: 0,
-                                          viewportFraction: 0.7,
-                                          disableCenter: false,
-                                          enlargeCenterPage: false,
-                                          enlargeFactor: 0.0,
-                                          enableInfiniteScroll: false,
-                                          scrollDirection: Axis.horizontal,
-                                          autoPlay: false,
-                                          onPageChanged: (index, _) => _model
-                                              .carouselCurrentIndex = index,
+                                  const SizedBox(height: 6.0),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      _carouselArrow(
+                                        Icons.arrow_back_ios_new_rounded,
+                                        () => _model.carouselController
+                                            ?.previousPage(
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.ease,
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      await _model.carouselController?.nextPage(
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        curve: Curves.ease,
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 20.0,
-                                      height: 20.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/page-right.svg',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.cover,
+                                      const SizedBox(width: 16.0),
+                                      _carouselArrow(
+                                        Icons.arrow_forward_ios_rounded,
+                                        () => _model.carouselController
+                                            ?.nextPage(
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.ease,
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -1217,7 +1178,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                             if (!widget.isReadOnly)
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 22.0, 0.0, 0.0),
+                                    60.0, 22.0, 60.0, 0.0),
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
@@ -1238,7 +1199,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                   child: Padding(
                                     padding:
                                         const EdgeInsetsDirectional.fromSTEB(
-                                            10.0, 10.0, 10.0, 10.0),
+                                            4.0, 4.0, 4.0, 4.0),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       mainAxisAlignment:
@@ -1247,7 +1208,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         Expanded(
                                           child: Padding(
                                             padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                                .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                             child: InkWell(
                                               splashColor: Colors.transparent,
                                               focusColor: Colors.transparent,
@@ -1258,9 +1219,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                 _model.ventaORenta = 'venta';
                                                 safeSetState(() {});
                                               },
-                                              child: Container(
+                                              child: AnimatedContainer(
+                                                duration: const Duration(milliseconds: 250),
+                                                curve: Curves.easeInOut,
                                                 width: double.infinity,
-                                                height: 44.0,
+                                                height: 36.0,
                                                 decoration: BoxDecoration(
                                                   color: _model.ventaORenta ==
                                                           'venta'
@@ -1328,7 +1291,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                         Expanded(
                                           child: Padding(
                                             padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                                .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                             child: InkWell(
                                               splashColor: Colors.transparent,
                                               focusColor: Colors.transparent,
@@ -1339,9 +1302,11 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                 _model.ventaORenta = 'renta';
                                                 safeSetState(() {});
                                               },
-                                              child: Container(
+                                              child: AnimatedContainer(
+                                                duration: const Duration(milliseconds: 250),
+                                                curve: Curves.easeInOut,
                                                 width: double.infinity,
-                                                height: 44.0,
+                                                height: 36.0,
                                                 decoration: BoxDecoration(
                                                   color: _model.ventaORenta ==
                                                           'renta'

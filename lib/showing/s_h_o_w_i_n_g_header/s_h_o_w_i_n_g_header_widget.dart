@@ -108,14 +108,36 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
               ].divide(const SizedBox(width: 8.0)),
             ),
           ),
-          RichText(
-            textScaler: MediaQuery.of(context).textScaler,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: widget.title!,
+          // Expanded + margen: nombres largos bajan de linea en vez
+          // de pegarse al logo.
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28.0),
+              child: RichText(
+                textScaler: MediaQuery.of(context).textScaler,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: widget.title!,
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontStyle,
+                            ),
+                            fontSize: 18.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .fontStyle,
+                            lineHeight: 1.4,
+                          ),
+                    )
+                  ],
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.publicSans(
+                        font: GoogleFonts.inter(
                           fontWeight: FontWeight.w600,
                           fontStyle:
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
@@ -127,23 +149,10 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                             FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                         lineHeight: 1.4,
                       ),
-                )
-              ],
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                    ),
-                    fontSize: 18.0,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.w600,
-                    fontStyle:
-                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                    lineHeight: 1.4,
-                  ),
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
           widget.actionWidget ??
               Row(

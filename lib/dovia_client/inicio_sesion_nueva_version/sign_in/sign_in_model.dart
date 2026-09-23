@@ -9,6 +9,7 @@ class SignInModel extends FlutterFlowModel<SignInWidget> {
   ///  Local state fields for this page.
 
   bool invalidMailOrPassword = false;
+  String? signInError;
 
   ///  State fields for stateful widgets in this page.
 

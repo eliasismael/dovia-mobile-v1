@@ -35,7 +35,7 @@ class _PorpiedadesAmenidadesWidgetState
     _model = createModel(context, () => PorpiedadesAmenidadesModel());
 
     _model.expandableExpandableController =
-        ExpandableController(initialExpanded: false)
+        ExpandableController(initialExpanded: true)
           ..addListener(() => safeSetState(() {}));
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
