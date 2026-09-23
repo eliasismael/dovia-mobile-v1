@@ -9,6 +9,7 @@
 import 'client_offer_models.dart';
 import 'offer_json.dart';
 import 'offer_credit_status.dart';
+import 'offer_form_validation.dart' show cashPaymentTimeLabel;
 
 enum OfferDetailFieldKind { text, textArea, currency }
 
@@ -281,7 +282,8 @@ List<OfferDetailSection> _saleProposal(
             OfferDetailField('Propuesta económica', amount),
             OfferDetailField(
               'Tiempo estimado de pago',
-              _months(_str(data['estimatedPaymentTime'])),
+              cashPaymentTimeLabel(data['estimatedPaymentTime']) ??
+                  _months(_str(data['estimatedPaymentTime'])),
             ),
           ],
         ),

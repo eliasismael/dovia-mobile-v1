@@ -129,7 +129,8 @@ Map<String, String> validateOfferForm(OfferFormInput input) {
       default: // Contado
         check(
           OfferField.cashPaymentTime,
-          _number(input.cashPaymentTime, integer: true, min: 1),
+          _number(input.cashPaymentTime,
+              integer: true, min: 0, max: kCashPaymentTimeMaxDays),
         );
     }
   }
@@ -187,6 +188,25 @@ String? _number(
   }
   if (max != null && parsed > max) {
     return rangeMessage ?? 'Debe ser menor o igual a $max';
+  }
+  return null;
+}
+
+/// Opciones del tiempo estimado de pago al contado, en días (tope: 1 mes).
+const kCashPaymentTimeOptions = <String, int>{
+  'Inmediatamente': 0,
+  '1 semana': 7,
+  '2 semanas': 14,
+  '3 semanas': 21,
+  '4 semanas': 28,
+};
+const kCashPaymentTimeMaxDays = 28;
+
+/// Etiqueta de un tiempo de pago guardado en días; `null` si no coincide.
+String? cashPaymentTimeLabel(Object? days) {
+  final value = int.tryParse('${days ?? ''}'.trim());
+  for (final entry in kCashPaymentTimeOptions.entries) {
+    if (entry.value == value) return entry.key;
   }
   return null;
 }

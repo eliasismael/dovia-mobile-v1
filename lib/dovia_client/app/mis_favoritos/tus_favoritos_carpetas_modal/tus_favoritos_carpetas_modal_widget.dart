@@ -52,6 +52,42 @@ class _TusFavoritosCarpetasModalWidgetState
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
+  /// Si la casa sigue en favoritos. Se cambia desde el corazón de arriba sin
+  /// cerrar el modal, así se puede volver a agregar ahí mismo; la pantalla de
+  /// atrás recién la saca de la lista al cerrarlo, cuando vuelve a cargar.
+  late bool _isFavorite = widget.propertyIsFavorite ?? true;
+  bool _togglingFavorite = false;
+
+  Future<void> _toggleFavorite() async {
+    final propertyId = widget.houseId;
+    if (_togglingFavorite || propertyId == null || propertyId.isEmpty) return;
+    _togglingFavorite = true;
+    final wasFavorite = _isFavorite;
+    safeSetState(() => _isFavorite = !wasFavorite);
+    final res = wasFavorite
+        ? await DOVIAAPIFavoriteContextGroup.removePropertyFromFavoritesCall
+            .call(
+            propertyId: propertyId,
+            authToken: currentAuthenticationToken,
+          )
+        : await DOVIAAPIFavoriteContextGroup.addPropertyToFavoritesCall.call(
+            propertyId: propertyId,
+            authToken: currentAuthenticationToken,
+          );
+    _togglingFavorite = false;
+    if (!mounted) return;
+    if (!res.succeeded) {
+      safeSetState(() => _isFavorite = wasFavorite);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(wasFavorite
+              ? 'No se pudo quitar de favoritos.'
+              : 'No se pudo agregar a favoritos.'),
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _model.maybeDispose();
@@ -229,21 +265,36 @@ class _TusFavoritosCarpetasModalWidgetState
                                   ],
                                 ),
                               ),
-                              Container(
-                                width: 30.0,
-                                height: 30.0,
-                                decoration: BoxDecoration(
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: SvgPicture.asset(
-                                    'assets/images/whiteHeart.svg',
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.none,
+                              InkWell(
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: _toggleFavorite,
+                                child: Container(
+                                  width: 30.0,
+                                  height: 30.0,
+                                  decoration: BoxDecoration(
+                                    color: _isFavorite
+                                        ? FlutterFlowTheme.of(context)
+                                            .primaryText
+                                        : null,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: SvgPicture.asset(
+                                      _isFavorite
+                                          ? 'assets/images/whiteHeart.svg'
+                                          : 'assets/images/plus.svg',
+                                      width: 200.0,
+                                      height: 200.0,
+                                      fit: BoxFit.none,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -619,6 +670,8 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                       .apiResultvbr
                                                                       ?.succeeded ??
                                                                   true)) {
+                                                                _isFavorite =
+                                                                    true;
                                                                 await showDialog(
                                                                   context:
                                                                       context,

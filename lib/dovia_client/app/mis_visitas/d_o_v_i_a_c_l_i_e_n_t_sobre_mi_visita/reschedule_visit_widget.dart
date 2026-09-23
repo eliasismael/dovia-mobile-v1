@@ -61,10 +61,14 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
   Future<void> _pickDate(int index) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    // Hoy y los 3 días siguientes no se pueden elegir.
+    final first = today.add(const Duration(days: 4));
+    final current = _dates[index];
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dates[index] ?? today,
-      firstDate: today,
+      initialDate:
+          current != null && !current.isBefore(first) ? current : first,
+      firstDate: first,
       lastDate: DateTime(today.year + 2),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(

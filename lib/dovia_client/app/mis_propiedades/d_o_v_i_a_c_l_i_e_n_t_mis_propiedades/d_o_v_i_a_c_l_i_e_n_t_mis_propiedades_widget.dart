@@ -1,6 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
-import '/backend/schema/enums/enums.dart';
 import '/core/result.dart';
 import '/domain/owner_proposal_models.dart';
 import '/repositories/offers_repository.dart';
@@ -751,39 +750,18 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                               },
                                             );
                                           } else if (status == 'DRAFT') {
-                                            final listingTypeField =
-                                                getJsonField(
-                                                    p, r'''$.listingType''');
-                                            final listingTypeStr =
-                                                listingTypeField?.toString() ??
-                                                    '';
-                                            PropertyPublicationType parsedType =
-                                                PropertyPublicationType.SALE;
-                                            String title = 'Vender';
-                                            if (listingTypeStr
-                                                    .contains('SALE') &&
-                                                listingTypeStr
-                                                    .contains('RENT')) {
-                                              parsedType =
-                                                  PropertyPublicationType
-                                                      .SALE_AND_RENT;
-                                              title = 'Vender / Rentar';
-                                            } else if (listingTypeStr
-                                                .contains('RENT')) {
-                                              parsedType =
-                                                  PropertyPublicationType.RENT;
-                                              title = 'Rentar';
-                                            }
-
+                                            // El borrador solo existe una vez enviado el formulario, así que
+                                            // lo que falta es agendar la visita del operativo.
                                             context.pushNamed(
-                                              'DOVIA_CLIENT_MisPropiedades_VenderRentar',
+                                              DOVIACLIENTMisPropiedadesAgendarVisitaWidget
+                                                  .routeName,
                                               queryParameters: {
-                                                'title': serializeParam(
-                                                    title, ParamType.String),
-                                                'transactionType':
-                                                    serializeParam(parsedType,
-                                                        ParamType.Enum),
-                                              },
+                                                'propertyId': serializeParam(
+                                                  getJsonField(p, r'''$.id''')
+                                                      .toString(),
+                                                  ParamType.String,
+                                                ),
+                                              }.withoutNulls,
                                             );
                                           }
                                         },
@@ -875,8 +853,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                   Text(
                     'Propuestas Recientes',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font:
-                              GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                          font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600),
                           fontSize: 17.0,
                           letterSpacing: 0.33,
                           fontWeight: FontWeight.w600,
@@ -898,8 +876,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
               ),
               FFButtonWidget(
                 onPressed: () async {
-                  await context
-                      .pushNamed(DOVIACLIENTPropuestasRecientesWidget.routeName);
+                  await context.pushNamed(
+                      DOVIACLIENTPropuestasRecientesWidget.routeName);
                   if (!mounted) return;
                   await _loadProposals();
                 },

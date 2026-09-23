@@ -261,7 +261,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                             .toString(),
                                         type: getJsonField(
                                                 eachFavoriteInFolderItem,
-                                                r'''$.listingType[0]''')
+                                                r'''$.listingType''')
                                             .toString(),
                                         price: getJsonField(
                                                 eachFavoriteInFolderItem,

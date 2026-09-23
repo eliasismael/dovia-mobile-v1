@@ -1123,7 +1123,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 ).toString(),
                                                 type: getJsonField(
                                                   eachHouseItem,
-                                                  r'''$.listingType[0]''',
+                                                  r'''$.listingType''',
                                                 ).toString(),
                                                 price: getJsonField(
                                                   eachHouseItem,
@@ -1675,7 +1675,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 ).toString(),
                                                 type: getJsonField(
                                                   eachHouseItem,
-                                                  r'''$.listingType[0]''',
+                                                  r'''$.listingType''',
                                                 ).toString(),
                                                 price: getJsonField(
                                                   eachHouseItem,
@@ -2114,7 +2114,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 ).toString(),
                                                 type: getJsonField(
                                                   eachHouseItem,
-                                                  r'''$.listingType[0]''',
+                                                  r'''$.listingType''',
                                                 ).toString(),
                                                 price: getJsonField(
                                                   eachHouseItem,

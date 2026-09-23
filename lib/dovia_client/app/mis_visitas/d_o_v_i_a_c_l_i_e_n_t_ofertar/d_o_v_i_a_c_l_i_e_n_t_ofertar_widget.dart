@@ -147,14 +147,14 @@ class _DOVIACLIENTOfertarWidgetState extends State<DOVIACLIENTOfertarWidget> {
                           ),
                           const SizedBox(height: 32),
                           _ToggleOptionButton(
-                            label: 'Venta',
+                            label: 'Comprar',
                             selected: _selectVenta,
                             onTap: () => safeSetState(
                                 () => _selectVenta = !_selectVenta),
                           ),
                           const SizedBox(height: 16),
                           _ToggleOptionButton(
-                            label: 'Renta',
+                            label: 'Rentar',
                             selected: _selectRenta,
                             onTap: () => safeSetState(
                                 () => _selectRenta = !_selectRenta),

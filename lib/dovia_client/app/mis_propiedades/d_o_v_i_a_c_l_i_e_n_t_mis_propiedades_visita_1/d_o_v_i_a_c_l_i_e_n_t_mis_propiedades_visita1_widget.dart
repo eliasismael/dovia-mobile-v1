@@ -964,7 +964,7 @@ class _InstructionsSectionHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Instrucciones para nosotros',
+          'Instrucciones para la visita',
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.inter(fontWeight: FontWeight.w600),
                 letterSpacing: 0.0,

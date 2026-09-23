@@ -48,6 +48,8 @@ class DOVIACLIENTOfertaCompraWidget extends StatefulWidget {
 class _DOVIACLIENTOfertaCompraWidgetState
     extends State<DOVIACLIENTOfertaCompraWidget> {
   late DOVIACLIENTOfertaCompraModel _model;
+
+  final _cashPaymentTimeController = FormFieldController<String>(null);
   late final Future<ApiCallResponse> _propertyRequest;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -156,10 +158,10 @@ class _DOVIACLIENTOfertaCompraWidgetState
       OfferFormInput(
         offerType: widget.offerType,
         paymentMethod: _model.paymentMethod,
-        purchaseAmount: _text(_model.propuestaEconomicaTextController)
-            .replaceAll(',', ''),
-        rentAmount: _text(_model.propuestaRentaTextController)
-            .replaceAll(',', ''),
+        purchaseAmount:
+            _text(_model.propuestaEconomicaTextController).replaceAll(',', ''),
+        rentAmount:
+            _text(_model.propuestaRentaTextController).replaceAll(',', ''),
         cashPaymentTime:
             _text(_model.cONTADOTiempoEstimadoDePagoTextController),
         downPayment: _text(_model.hIPOTECAEngancheTextController),
@@ -338,7 +340,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
               inputFormatters: [
                 AmountInputFormatter(),
               ],
-              decoration: InputDecoration(prefixText: '${currencySymbol(_model.selectedCurrency)} ',
+              decoration: InputDecoration(
+                prefixText: '${currencySymbol(_model.selectedCurrency)} ',
                 errorText: _fieldErrors['propuestaRenta'],
                 isDense: true,
                 hintText: 'Ej. 1500.00',
@@ -1556,7 +1559,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
                                                     _model.selectedCurrency =
-                                                        'Quetzales';
+                                                        'QUETZALES';
                                                     safeSetState(() {});
                                                   },
                                                   text: 'Quetzales',
@@ -1572,7 +1575,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             0.0, 0.0, 0.0, 0.0),
                                                     color:
                                                         _model.selectedCurrency ==
-                                                                'Quetzales'
+                                                                'QUETZALES'
                                                             ? FlutterFlowTheme
                                                                     .of(context)
                                                                 .primary
@@ -1596,7 +1599,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               ),
                                                               color: _model
                                                                           .selectedCurrency ==
-                                                                      'Quetzales'
+                                                                      'QUETZALES'
                                                                   ? FlutterFlowTheme.of(
                                                                           context)
                                                                       .secondaryBackground
@@ -1620,7 +1623,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     borderSide: BorderSide(
                                                       color: _model
                                                                   .selectedCurrency ==
-                                                              'Quetzales'
+                                                              'QUETZALES'
                                                           ? const Color(
                                                               0x00000000)
                                                           : FlutterFlowTheme.of(
@@ -1829,7 +1832,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ],
                                                     enabled: true,
                                                     obscureText: false,
-                                                    decoration: InputDecoration(prefixText: '${currencySymbol(_model.selectedCurrency)} ',
+                                                    decoration: InputDecoration(
+                                                      prefixText:
+                                                          '${currencySymbol(_model.selectedCurrency)} ',
                                                       errorText: _fieldErrors[
                                                           'propuestaEconomica'],
                                                       isDense: true,
@@ -2044,183 +2049,83 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .fontStyle,
                                                               ),
                                                         ),
-                                                        SizedBox(
+                                                        FlutterFlowDropDown<
+                                                            String>(
+                                                          controller:
+                                                              _cashPaymentTimeController,
+                                                          options:
+                                                              kCashPaymentTimeOptions
+                                                                  .keys
+                                                                  .toList(),
+                                                          onChanged: (val) =>
+                                                              safeSetState(() {
+                                                            _model.cONTADOTiempoEstimadoDePagoTextController!
+                                                                    .text =
+                                                                '${kCashPaymentTimeOptions[val] ?? ''}';
+                                                            _clearFieldError(
+                                                                'contadoTiempoPago');
+                                                          }),
                                                           width:
                                                               MediaQuery.sizeOf(
                                                                           context)
                                                                       .width *
                                                                   1.0,
-                                                          child: TextFormField(
-                                                            controller: _model
-                                                                .cONTADOTiempoEstimadoDePagoTextController,
-                                                            focusNode: _model
-                                                                .cONTADOTiempoEstimadoDePagoFocusNode,
-                                                            autofocus: false,
-                                                            onChanged: (_) =>
-                                                                _clearFieldError(
-                                                                    'contadoTiempoPago'),
-                                                            keyboardType:
-                                                                const TextInputType
-                                                                    .numberWithOptions(
-                                                                    decimal:
-                                                                        false),
-                                                            inputFormatters: [
-                                                              FilteringTextInputFormatter
-                                                                  .digitsOnly
-                                                            ],
-                                                            enabled: true,
-                                                            obscureText: false,
-                                                            decoration:
-                                                                InputDecoration(
-                                                              errorText:
-                                                                  _fieldErrors[
-                                                                      'contadoTiempoPago'],
-                                                              isDense: true,
-                                                              labelStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        font: GoogleFonts
-                                                                            .inter(
-                                                                          fontWeight: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontWeight,
-                                                                          fontStyle: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontStyle,
-                                                                        ),
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontStyle,
-                                                                      ),
-                                                              hintStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        font: GoogleFonts
-                                                                            .inter(
-                                                                          fontWeight: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontWeight,
-                                                                          fontStyle: FlutterFlowTheme.of(context)
-                                                                              .labelMedium
-                                                                              .fontStyle,
-                                                                        ),
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .labelMedium
-                                                                            .fontStyle,
-                                                                      ),
-                                                              enabledBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    const BorderSide(
-                                                                  color: Color(
-                                                                      0x00000000),
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10.0),
-                                                              ),
-                                                              focusedBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    const BorderSide(
-                                                                  color: Color(
-                                                                      0x00000000),
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10.0),
-                                                              ),
-                                                              errorBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .error,
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10.0),
-                                                              ),
-                                                              focusedErrorBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .error,
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10.0),
-                                                              ),
-                                                              filled: true,
-                                                              fillColor:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .tertiary,
-                                                            ),
-                                                            style: FlutterFlowTheme
+                                                          height: 48.0,
+                                                          textStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium,
+                                                          hintText:
+                                                              'Selecciona el tiempo',
+                                                          icon: Icon(
+                                                            Icons
+                                                                .keyboard_arrow_down_rounded,
+                                                            color: FlutterFlowTheme
                                                                     .of(context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  font:
-                                                                      GoogleFonts
-                                                                          .inter(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                                ),
-                                                            cursorColor:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .primaryText,
-                                                            enableInteractiveSelection:
-                                                                true,
-                                                            validator: _model
-                                                                .cONTADOTiempoEstimadoDePagoTextControllerValidator
-                                                                .asValidator(
-                                                                    context),
+                                                                .secondaryText,
+                                                            size: 24.0,
                                                           ),
+                                                          fillColor:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .tertiary,
+                                                          elevation: 0.0,
+                                                          borderColor: _fieldErrors[
+                                                                      'contadoTiempoPago'] !=
+                                                                  null
+                                                              ? FlutterFlowTheme
+                                                                      .of(
+                                                                          context)
+                                                                  .error
+                                                              : Colors
+                                                                  .transparent,
+                                                          borderWidth: 1.0,
+                                                          borderRadius: 10.0,
+                                                          margin:
+                                                              const EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                  12.0,
+                                                                  4.0,
+                                                                  12.0,
+                                                                  4.0),
+                                                          hidesUnderline: true,
+                                                          isOverButton: false,
+                                                          isSearchable: false,
+                                                          isMultiSelect: false,
                                                         ),
+                                                        if (_fieldErrors[
+                                                                'contadoTiempoPago'] !=
+                                                            null)
+                                                          Text(
+                                                            _fieldErrors[
+                                                                'contadoTiempoPago']!,
+                                                            style: TextStyle(
+                                                              color: FlutterFlowTheme
+                                                                      .of(context)
+                                                                  .error,
+                                                              fontSize: 12.0,
+                                                            ),
+                                                          ),
                                                       ].divide(const SizedBox(
                                                           height: 12.0)),
                                                     ),
@@ -3190,7 +3095,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                 obscureText:
                                                                     false,
                                                                 decoration:
-                                                                    InputDecoration(prefixText: '${currencySymbol(_model.selectedCurrency)} ',
+                                                                    InputDecoration(
+                                                                  prefixText:
+                                                                      '${currencySymbol(_model.selectedCurrency)} ',
                                                                   errorText:
                                                                       _fieldErrors[
                                                                           'reservaInicial'],
@@ -5348,9 +5255,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         : '',
                                                     currency:
                                                         _model.selectedCurrency,
-                                                    proposedAmount:
-                                                        parseAmount(_model
-                                                                .propuestaRentaTextController
+                                                    proposedAmount: parseAmount(
+                                                        _model.propuestaRentaTextController
                                                                 ?.text ??
                                                             ''),
                                                     propertyUse: _model
@@ -5407,7 +5313,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
+                                                          parseAmount(_model
+                                                              .propuestaEconomicaTextController
+                                                              ?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5451,7 +5359,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
+                                                          parseAmount(_model
+                                                              .propuestaEconomicaTextController
+                                                              ?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5498,7 +5408,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
+                                                          parseAmount(_model
+                                                              .propuestaEconomicaTextController
+                                                              ?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5633,9 +5545,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                         : '',
                                                     currency:
                                                         _model.selectedCurrency,
-                                                    proposedAmount:
-                                                        parseAmount(_model
-                                                                .propuestaRentaTextController
+                                                    proposedAmount: parseAmount(
+                                                        _model.propuestaRentaTextController
                                                                 ?.text ??
                                                             ''),
                                                     propertyUse: _model
@@ -5750,8 +5661,10 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             .text),
                                                     currency:
                                                         _model.selectedCurrency,
-                                                    proposedAmount:
-                                                        parseAmount(_model.propuestaEconomicaTextController?.text),
+                                                    proposedAmount: parseAmount(
+                                                        _model
+                                                            .propuestaEconomicaTextController
+                                                            ?.text),
                                                     considerations: _model
                                                         .consideracionesTextController
                                                         .text,
@@ -5807,7 +5720,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       currency: _model
                                                           .selectedCurrency,
                                                       proposedAmount:
-                                                          parseAmount(_model.propuestaEconomicaTextController?.text),
+                                                          parseAmount(_model
+                                                              .propuestaEconomicaTextController
+                                                              ?.text),
                                                       considerations: _model
                                                           .consideracionesTextController
                                                           .text,
@@ -5877,7 +5792,10 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                             widget.propertyId,
                                                         currency: _model
                                                             .selectedCurrency,
-                                                        proposedAmount: parseAmount(_model.propuestaEconomicaTextController?.text),
+                                                        proposedAmount:
+                                                            parseAmount(_model
+                                                                .propuestaEconomicaTextController
+                                                                ?.text),
                                                         considerations: _model
                                                             .consideracionesTextController
                                                             .text,
@@ -5906,7 +5824,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                                     .representanteLegalTextController
                                                                     .text
                                                                 : '',
-                                                        initialReserve: parseAmount(_model
+                                                        initialReserve:
+                                                            parseAmount(_model
                                                                 .pROMESAReservaInicialTextController
                                                                 .text),
                                                         promiseTimeMonths:

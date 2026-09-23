@@ -5,7 +5,6 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '/backend/api_requests/api_offers.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
@@ -44,7 +43,6 @@ class _DOVIACLIENTMisVisitasWidgetState
   /// Todas las visitas, sin filtro: es la unica forma de ver las
   /// canceladas y las ya reprogramadas, que no tienen consulta propia.
   Future<ApiCallResponse>? _allVisitsFuture;
-  Future<ApiCallResponse>? _offersFuture;
 
   @override
   void initState() {
@@ -97,13 +95,6 @@ class _DOVIACLIENTMisVisitasWidgetState
       limit: '50',
     );
 
-    // ── OFERTAS ───────────────────────────────────────────────────────────
-    _offersFuture = DOVIAAPIOfferContextGroup.listMyOffersCall.call(
-      authToken: currentAuthenticationToken,
-      limit: '10',
-      page: '1',
-    );
-
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -137,10 +128,37 @@ class _DOVIACLIENTMisVisitasWidgetState
 
   List<dynamic> _parseVisits(ApiCallResponse res) {
     final items = getJsonField(res.jsonBody, r'$.data.items');
-    if (items is List) return items;
     final data = getJsonField(res.jsonBody, r'$.data');
-    if (data is List) return data;
-    return [];
+    final list = items is List ? items : (data is List ? data : const []);
+    return list.where(_isClientVisit).toList();
+  }
+
+  /// Mis visitas es para las visitas que el usuario hace como cliente. Las
+  /// `OPERATIVE_LISTER_VISIT` (el operativo que revisa una propiedad propia
+  /// antes de publicarla) también vuelven en /visits/me, pero se siguen desde
+  /// Mis propiedades. El backend no tiene un único campo para distinguirlas,
+  /// así que se mira el tipo y, si no viene, quién es el dueño.
+  bool _isClientVisit(dynamic visit) {
+    if (visit is! Map) return false;
+    final type = [
+      visit['type'],
+      visit['visitType'],
+      visit['kind'],
+    ].map((e) => (e?.toString() ?? '').toUpperCase()).join(' ');
+    if (type.contains('OPERATIVE') || type.contains('LISTER')) return false;
+
+    final uid = currentUserUid;
+    if (uid.isEmpty) return true;
+    final property = visit['property'];
+    final ownerIds = [
+      visit['ownerId'],
+      visit['propertyOwnerId'],
+      if (property is Map) property['ownerId'],
+      if (property is Map) property['userId'],
+      if (property is Map && property['owner'] is Map)
+        (property['owner'] as Map)['id'],
+    ].map((e) => e?.toString() ?? '');
+    return !ownerIds.contains(uid);
   }
 
   @override
@@ -304,9 +322,6 @@ class _DOVIACLIENTMisVisitasWidgetState
                               );
                             },
                           ),
-
-                          // ── 3. Tus ofertas ─────────────────────────────
-                          _offersSection(),
                         ],
                       ),
                     ),
@@ -464,181 +479,6 @@ class _DOVIACLIENTMisVisitasWidgetState
   }
 
   // ── Ofertas section ─────────────────────────────────────────────────────────
-  Widget _offersSection() {
-    return FutureBuilder<ApiCallResponse>(
-      future: _offersFuture,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return _loader();
-        final res = snapshot.data!;
-        if (!res.succeeded) {
-          return const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text('Error cargando ofertas.',
-                style: TextStyle(color: Colors.red)),
-          );
-        }
-        final data = getJsonField(res.jsonBody, r'$.data.items') ??
-            getJsonField(res.jsonBody, r'$.data') ??
-            [];
-        final offers = data is List
-            ? data
-            : (data is Map && data['items'] != null
-                ? data['items'] as List
-                : [data]);
-        final offerCards =
-            offers.map((offer) => _buildOfferCard(context, offer)).toList();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sectionHeader(
-              'Tus ofertas',
-              () {
-                if (offers.isNotEmpty) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (ctx) => _VerMasScreen(
-                              title: 'Tus ofertas',
-                              items: offers,
-                              cardType: _CardType.upcoming,
-                              isOffers: true)));
-                }
-              },
-            ),
-            if (offers.isEmpty || (offers.length == 1 && offers[0] == null))
-              _emptyMessage('No tienes ofertas activas.')
-            else
-              SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: offerCards.length,
-                  itemBuilder: (context, index) => offerCards[index],
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildOfferCard(BuildContext context, dynamic offer,
-      {bool isGrid = false}) {
-    final offerId = offer['id'] ?? offer['_id'] ?? offer['offerId'] ?? '';
-    final amountRaw = offer['offerData']?['proposedAmount'] ??
-        offer['proposedAmount'] ??
-        offer['amount'];
-    final double amountDouble = amountRaw is num
-        ? amountRaw.toDouble()
-        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
-    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0)
-        .format(amountDouble);
-    final currency = offer['offerData']?['currency']?.toString() ??
-        offer['currency']?.toString() ??
-        'USD';
-    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ??
-        offer['paymentMethod']?.toString() ??
-        '';
-    final processStatus = offer['processStatus']?.toString() ?? '';
-    final offerStatus = offer['offerStatus']?.toString() ??
-        offer['status']?.toString() ??
-        'pending';
-    final status = processStatus.isNotEmpty ? processStatus : offerStatus;
-    final property = offer['property'] ?? offer['propertyId'];
-    final propertyName = property is Map
-        ? (property['title'] ?? property['name'] ?? 'Propiedad')
-        : 'Propiedad';
-
-    return Padding(
-      padding: isGrid
-          ? EdgeInsets.zero
-          : const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
-      child: InkWell(
-        onTap: () {
-          context.pushNamed(
-            'DOVIA_CLIENT_MisVisitas_TuPropuesta',
-            queryParameters: {
-              'offerId': offerId,
-              'paymentMethod': paymentMethod,
-              'propuestaState': status,
-            },
-          );
-        },
-        child: Container(
-          width: isGrid ? double.infinity : 250,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: FlutterFlowTheme.of(context).alternate),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      propertyName,
-                      style: FlutterFlowTheme.of(context).bodyLarge.override(
-                            font: GoogleFonts.publicSans(
-                                fontWeight: FontWeight.bold),
-                            fontSize: 16.0,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color:
-                          FlutterFlowTheme.of(context).primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      status.toUpperCase(),
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            font: GoogleFonts.publicSans(
-                                fontWeight: FontWeight.w600),
-                            color: FlutterFlowTheme.of(context).primary,
-                            fontSize: 10.0,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.local_offer_outlined,
-                      size: 16,
-                      color: FlutterFlowTheme.of(context).secondaryText),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Oferta: $currency \$ $amountStr',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.publicSans(
-                                fontWeight: FontWeight.w500),
-                            color: FlutterFlowTheme.of(context).primaryText,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 // ── Card type enum ─────────────────────────────────────────────────────────
@@ -1069,13 +909,11 @@ class _VerMasScreen extends StatelessWidget {
   final String title;
   final List<dynamic> items;
   final _CardType cardType;
-  final bool isOffers;
 
   const _VerMasScreen({
     required this.title,
     required this.items,
     required this.cardType,
-    this.isOffers = false,
   });
 
   @override
@@ -1104,17 +942,10 @@ class _VerMasScreen extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: isOffers
-                  ? 110
-                  : (cardType == _CardType.completed ? 260 : 290),
+              mainAxisExtent: cardType == _CardType.completed ? 260 : 290,
             ),
             itemCount: items.length,
             itemBuilder: (context, index) {
-              if (isOffers) {
-                // To reuse _buildOfferCard we'd need a reference or duplicate it.
-                // We'll duplicate the logic for _OfferCard since _buildOfferCard is inside the state class.
-                return _OfferCard(offer: items[index]);
-              }
               final v = items[index];
               final visitId = v['visitId']?.toString() ??
                   v['id']?.toString() ??
@@ -1160,113 +991,6 @@ class _VerMasScreen extends StatelessWidget {
               );
             },
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OfferCard extends StatelessWidget {
-  final dynamic offer;
-  const _OfferCard({required this.offer});
-
-  @override
-  Widget build(BuildContext context) {
-    final offerId = offer['id'] ?? offer['_id'] ?? offer['offerId'] ?? '';
-    final amountRaw = offer['offerData']?['proposedAmount'] ??
-        offer['proposedAmount'] ??
-        offer['amount'];
-    final double amountDouble = amountRaw is num
-        ? amountRaw.toDouble()
-        : double.tryParse(amountRaw?.toString() ?? '') ?? 0.0;
-    final amountStr = NumberFormat.currency(symbol: '', decimalDigits: 0)
-        .format(amountDouble);
-    final currency = offer['offerData']?['currency']?.toString() ??
-        offer['currency']?.toString() ??
-        'USD';
-    final paymentMethod = offer['offerData']?['paymentMethod']?.toString() ??
-        offer['paymentMethod']?.toString() ??
-        '';
-    final processStatus = offer['processStatus']?.toString() ?? '';
-    final offerStatus = offer['offerStatus']?.toString() ??
-        offer['status']?.toString() ??
-        'pending';
-    final status = processStatus.isNotEmpty ? processStatus : offerStatus;
-    final property = offer['property'] ?? offer['propertyId'];
-    final propertyName = property is Map
-        ? (property['title'] ?? property['name'] ?? 'Propiedad')
-        : 'Propiedad';
-
-    return InkWell(
-      onTap: () {
-        context.pushNamed(
-          'DOVIA_CLIENT_MisVisitas_TuPropuesta',
-          queryParameters: {
-            'offerId': offerId,
-            'paymentMethod': paymentMethod,
-            'propuestaState': status,
-          },
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: FlutterFlowTheme.of(context).alternate),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              propertyName,
-              style: FlutterFlowTheme.of(context).bodyLarge.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.bold),
-                    fontSize: 14.0,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                status.toUpperCase(),
-                style: FlutterFlowTheme.of(context).bodySmall.override(
-                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                      color: FlutterFlowTheme.of(context).primary,
-                      fontSize: 9.0,
-                    ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.local_offer_outlined,
-                    size: 14,
-                    color: FlutterFlowTheme.of(context).secondaryText),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    'Q $amountStr',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.publicSans(
-                              fontWeight: FontWeight.w500),
-                          color: FlutterFlowTheme.of(context).primaryText,
-                          fontSize: 12.0,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ],
         ),
       ),
     );

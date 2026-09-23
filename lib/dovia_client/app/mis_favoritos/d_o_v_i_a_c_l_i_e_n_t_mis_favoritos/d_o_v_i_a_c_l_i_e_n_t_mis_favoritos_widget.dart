@@ -275,7 +275,7 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                   if (eachFolder.isEmpty) {
                                     return const Center(
                                         child: Text(
-                                            "No tenés carpetas de favoritos todavía"));
+                                            "Aún no tienes carpetas"));
                                   }
 
                                   return ListView.separated(
@@ -492,6 +492,16 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                               ?.toList() ??
                                           [];
 
+                                  if (favoriteHouse.isEmpty) {
+                                    return const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 24.0),
+                                      child: Center(
+                                          child: Text(
+                                              'Aún no tienes favoritos')),
+                                    );
+                                  }
+
                                   return ListView.builder(
                                     padding: EdgeInsets.zero,
                                     shrinkWrap: true,
@@ -541,7 +551,7 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                                   .toString(),
                                               type: getJsonField(
                                                       favoriteHouseItem,
-                                                      r'''$.listingType[0]''')
+                                                      r'''$.listingType''')
                                                   .toString(),
                                               price: getJsonField(
                                                       favoriteHouseItem,
