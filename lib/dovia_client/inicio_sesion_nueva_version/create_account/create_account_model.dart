@@ -10,6 +10,8 @@ class CreateAccountModel extends FlutterFlowModel<CreateAccountWidget> {
 
   bool mailAlredyRegistered = false;
 
+  String? signUpError;
+
   bool mailInvalid = false;
 
   ///  State fields for stateful widgets in this page.

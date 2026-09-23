@@ -88,19 +88,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       observers: [appRouteObserver],
       errorBuilder: (context, state) => appStateNotifier.loggedIn
           ? const DOVIACLIENTHomePageWidget()
-          : const QueEsDoviaWidget(),
+          : const SignInWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
           builder: (context, _) => appStateNotifier.loggedIn
               ? const DOVIACLIENTHomePageWidget()
-              : const QueEsDoviaWidget(),
-        ),
-        FFRoute(
-          name: QueEsDoviaWidget.routeName,
-          path: QueEsDoviaWidget.routePath,
-          builder: (context, params) => const QueEsDoviaWidget(),
+              : const SignInWidget(),
         ),
         FFRoute(
           name: InicioWidget.routeName,

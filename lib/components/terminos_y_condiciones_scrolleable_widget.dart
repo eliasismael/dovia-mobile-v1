@@ -78,7 +78,34 @@ class _TerminosYCondicionesScrolleableWidgetState
           ),
           Padding(
             padding:
-                const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 0.0),
+                const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 0.0),
+            child: Row(
+              children: [
+                Icon(
+                  _model.hasCompletedScroll
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.keyboard_double_arrow_down_rounded,
+                  size: 18.0,
+                  color: FlutterFlowTheme.of(context).primary,
+                ),
+                const SizedBox(width: 6.0),
+                Expanded(
+                  child: Text(
+                    _model.hasCompletedScroll
+                        ? 'Ya puedes aceptar los términos y condiciones.'
+                        : 'Desplázate hasta el final para poder aceptar.',
+                    style: GoogleFonts.inter(
+                      fontSize: 13.0,
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding:
+                const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 0.0),
             child: Container(
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -89,6 +116,7 @@ class _TerminosYCondicionesScrolleableWidgetState
                 child: custom_widgets.TermsScroller(
                   width: MediaQuery.sizeOf(context).width * 1.0,
                   height: 400.0,
+                  titulo: 'Términos y condiciones de uso de Dovia',
                   terminos: FFAppConstants.TermsAndConditions,
                   onBottomReached: () async {
                     _model.hasCompletedScroll = true;

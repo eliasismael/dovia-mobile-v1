@@ -1119,10 +1119,8 @@ class _RecoverPassword2WidgetState extends State<RecoverPassword2Widget> {
                                             },
                                           );
 
-                                          // Ir a inicio
-
-                                          context.pushNamed(
-                                              InicioWidget.routeName);
+                                          context.goNamed(
+                                              SignInWidget.routeName);
 
                                           return;
                                         } else {

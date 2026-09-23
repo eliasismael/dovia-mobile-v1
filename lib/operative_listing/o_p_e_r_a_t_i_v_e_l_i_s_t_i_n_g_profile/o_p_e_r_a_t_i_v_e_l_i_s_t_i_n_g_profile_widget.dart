@@ -54,7 +54,7 @@ class _OPERATIVELISTINGProfileWidgetState
     await authManager.signOut();
     router.clearRedirectLocation();
     if (mounted) {
-      context.goNamedAuth(QueEsDoviaWidget.routeName, mounted);
+      context.goNamedAuth(SignInWidget.routeName, mounted);
     }
   }
 

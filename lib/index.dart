@@ -1,6 +1,4 @@
 // Export pages
-export '/dovia_client/onboarding/que_es_dovia/que_es_dovia_widget.dart'
-    show QueEsDoviaWidget;
 export '/dovia_client/onboarding/inicio/inicio_widget.dart' show InicioWidget;
 export '/dovia_client/inicio_sesion_nueva_version/sign_in/sign_in_widget.dart'
     show SignInWidget;

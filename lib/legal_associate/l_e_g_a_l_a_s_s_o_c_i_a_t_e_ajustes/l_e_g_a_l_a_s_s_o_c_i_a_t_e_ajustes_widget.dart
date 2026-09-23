@@ -102,7 +102,7 @@ class _LEGALASSOCIATEAjustesWidgetState
                                 if (mounted) {
                                   // ignore: use_build_context_synchronously
                                   context.goNamedAuth(
-                                      QueEsDoviaWidget.routeName, mounted);
+                                      SignInWidget.routeName, mounted);
                                 }
                               },
                               onDeleteAccount: (reason) async {

@@ -191,12 +191,13 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                         '_model.correoElectronicoTextController',
                                         const Duration(milliseconds: 2000),
                                         () async {
-                                          if (_model.mailInvalid) {
+                                          if (_model.mailInvalid ||
+                                              _model.mailAlredyRegistered ||
+                                              _model.signUpError != null) {
                                             _model.mailInvalid = false;
                                             _model.mailAlredyRegistered = false;
+                                            _model.signUpError = null;
                                             safeSetState(() {});
-                                          } else {
-                                            return;
                                           }
                                         },
                                       ),
@@ -363,7 +364,7 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                       );
                                     } else if (_model.mailAlredyRegistered) {
                                       return Text(
-                                        'El correo electrónico ya está registrado. Iniicia sesión.',
+                                        'El correo electrónico ya está registrado. Inicia sesión.',
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
@@ -390,6 +391,17 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                                       .bodyMedium
                                                       .fontStyle,
                                             ),
+                                      );
+                                    } else if (_model.signUpError != null) {
+                                      return Text(
+                                        _model.signUpError!,
+                                        style: GoogleFonts.inter(
+                                          color: FlutterFlowTheme.of(context)
+                                              .error,
+                                          fontSize: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .fontSize,
+                                        ),
                                       );
                                     } else {
                                       return Container(
@@ -437,25 +449,17 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                             }
                                             return;
                                           } else {
-                                            await showDialog(
-                                              context: context,
-                                              builder: (alertDialogContext) {
-                                                return AlertDialog(
-                                                  content: Text((_model.response
-                                                              ?.jsonBody ??
-                                                          '')
-                                                      .toString()),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext),
-                                                      child: const Text('Ok'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
+                                            final errorCode = getJsonField(
+                                              _model.response?.jsonBody,
+                                              r'''$.errors[0].code''',
+                                            )?.toString();
+                                            if (errorCode ==
+                                                'PASSWORD_RECOVERY_REQUIRED') {
+                                              _model.signUpError =
+                                                  'Tu cuenta existe pero el registro está incompleto. Recupera tu contraseña para continuar.';
+                                              safeSetState(() {});
+                                              return;
+                                            }
                                             if ((_model.response?.statusCode ??
                                                     200) ==
                                                 409) {
@@ -467,15 +471,11 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                               }
                                               return;
                                             } else {
-                                              if (shouldSetState) {
-                                                safeSetState(() {});
-                                              }
+                                              _model.signUpError =
+                                                  'No pudimos crear tu cuenta. Intenta de nuevo.';
+                                              safeSetState(() {});
                                               return;
                                             }
-                                          }
-
-                                          if (shouldSetState) {
-                                            safeSetState(() {});
                                           }
                                         },
                                   text: 'Continuar',

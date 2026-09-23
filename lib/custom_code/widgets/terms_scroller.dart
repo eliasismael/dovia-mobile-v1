@@ -12,8 +12,10 @@ class TermsScroller extends StatefulWidget {
     this.height,
     required this.terminos,
     required this.onBottomReached,
+    this.titulo,
   });
 
+  final String? titulo;
   final double? width;
   final double? height;
   final Future Function() onBottomReached;
@@ -64,12 +66,30 @@ class _TermsScrollerState extends State<TermsScroller> {
       height: widget.height,
       child: SingleChildScrollView(
         controller: _scrollController,
-        child: Text(
-          widget.terminos,
-          style: const TextStyle(
-            color: Color(0xFF004D40), // Tu color verde oscuro
-            fontSize: 14.0,
-          ),
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.titulo != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Text(
+                  widget.titulo!,
+                  style: const TextStyle(
+                    color: Color(0xFF004D40),
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            Text(
+              widget.terminos,
+              style: const TextStyle(
+                color: Color(0xFF004D40),
+                fontSize: 14.0,
+              ),
+            ),
+          ],
         ),
       ),
     );

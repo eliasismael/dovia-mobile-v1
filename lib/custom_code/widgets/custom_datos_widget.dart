@@ -515,7 +515,8 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                           ),
                                     ),
                                     _buildFieldSection(
-                                      label: 'Nombres',
+                                      label:
+                                          'Nombre(s) que aparecen en tu identificación',
                                       error: nombreError,
                                       child: TextFormField(
                                         controller: nombreInputTextController,
@@ -525,8 +526,7 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                           setState(() {});
                                         },
                                         decoration: _inputDecoration(
-                                          hintText:
-                                              'Nombres que aparecen en tu ID',
+                                          hintText: 'Ej: María José',
                                           hasError: nombreError != null,
                                         ),
                                         style: _bodyStyle,
@@ -536,7 +536,8 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                       ),
                                     ),
                                     _buildFieldSection(
-                                      label: 'Apellidos',
+                                      label:
+                                          'Apellidos que aparecen en tu identificación',
                                       error: apellidosError,
                                       child: TextFormField(
                                         controller:
@@ -547,8 +548,7 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                           setState(() {});
                                         },
                                         decoration: _inputDecoration(
-                                          hintText:
-                                              'Apellidos que aparecen en tu ID',
+                                          hintText: 'Ej: López García',
                                           hasError: apellidosError != null,
                                         ),
                                         style: _bodyStyle,
@@ -675,7 +675,8 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          _buildLabel('Sexo'),
+                                          _buildLabel(
+                                              'Sexo que aparece en tu identificación'),
                                           Padding(
                                             padding: const EdgeInsetsDirectional
                                                 .fromSTEB(0.0, 12.0, 0.0, 0.0),
@@ -683,10 +684,8 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                               controller:
                                                   sexoInpotValueController,
                                               options: const [
-                                                'Masculino',
                                                 'Femenino',
-                                                'Otro',
-                                                'Prefiero no decirlo'
+                                                'Masculino',
                                               ],
                                               onChanged: (val) => setState(
                                                   () => sexoInpotValue = val),
@@ -802,16 +801,23 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                                         .fromSTEB(
                                                         0.0, 12.0, 0.0, 0.0),
                                                 child: SizedBox(
-                                                  width: 56.0,
+                                                  width: 76.0,
                                                   child: TextFormField(
                                                     controller:
                                                         areaCodeInputTextController,
                                                     focusNode:
                                                         areaCodeInputFocusNode,
                                                     readOnly: true,
+                                                    textAlign: TextAlign.center,
                                                     decoration:
                                                         _inputDecoration(
-                                                            hintText: '+51'),
+                                                                hintText: '+51')
+                                                            .copyWith(
+                                                      contentPadding:
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(6.0,
+                                                              12.0, 6.0, 12.0),
+                                                    ),
                                                     style: _bodyStyle,
                                                   ),
                                                 ),
@@ -1093,9 +1099,8 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                       .userId((response?.jsonBody ?? '')),
                                 );
 
-                                // NOTE: In a True Custom Widget you might want to replace this with an action callback parameter
-                                // instead of hardcoding the pushNamedAuth to a specific screen, but maintaining original logic for now:
-                                context.pushNamed('Datos_2');
+                                // go en vez de push: el registro ya se completó en el backend y volver a este form da 400.
+                                context.goNamed('Datos_2');
                               } else {
                                 await showDialog(
                                   context: context,

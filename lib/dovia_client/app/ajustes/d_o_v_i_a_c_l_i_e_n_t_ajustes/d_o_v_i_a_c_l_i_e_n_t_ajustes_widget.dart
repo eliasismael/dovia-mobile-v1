@@ -52,7 +52,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
     await authManager.signOut();
     GoRouter.of(context).clearRedirectLocation();
     if (context.mounted) {
-      context.goNamedAuth(QueEsDoviaWidget.routeName, context.mounted);
+      context.goNamedAuth(SignInWidget.routeName, context.mounted);
     }
   }
 

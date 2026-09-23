@@ -1764,7 +1764,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                             .fromSTEB(0.0, 12.0,
                                                             0.0, 0.0),
                                                     child: SizedBox(
-                                                      width: 56.0,
+                                                      width: 76.0,
                                                       child: TextFormField(
                                                         controller: _model
                                                             .areaCodeInputTextController,
@@ -1773,9 +1773,18 @@ class _DatosWidgetState extends State<DatosWidget> {
                                                         autofocus: false,
                                                         enabled: true,
                                                         obscureText: false,
+                                                        textAlign:
+                                                            TextAlign.center,
                                                         decoration:
                                                             InputDecoration(
                                                           isDense: true,
+                                                          contentPadding:
+                                                              const EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                  6.0,
+                                                                  12.0,
+                                                                  6.0,
+                                                                  12.0),
                                                           labelStyle:
                                                               FlutterFlowTheme.of(
                                                                       context)

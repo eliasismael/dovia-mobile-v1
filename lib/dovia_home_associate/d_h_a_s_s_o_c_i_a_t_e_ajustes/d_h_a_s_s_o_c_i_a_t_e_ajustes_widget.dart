@@ -85,7 +85,7 @@ class _DHASSOCIATEAjustesWidgetState extends State<DHASSOCIATEAjustesWidget> {
     router.clearRedirectLocation();
     if (!mounted) return;
     // ignore: use_build_context_synchronously
-    context.goNamedAuth(QueEsDoviaWidget.routeName, mounted);
+    context.goNamedAuth(SignInWidget.routeName, mounted);
   }
 
   @override
