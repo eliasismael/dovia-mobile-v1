@@ -871,7 +871,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                 .labelMedium
                                                                 .fontStyle,
                                                       ),
-                                                  hintText: 'xxx',
+                                                  hintText: '1,500,000',
                                                   hintStyle: FlutterFlowTheme
                                                           .of(context)
                                                       .labelMedium
@@ -1092,7 +1092,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                 .labelMedium
                                                                 .fontStyle,
                                                       ),
-                                                  hintText: 'x',
+                                                  hintText: 'Se calcula con el precio de venta',
                                                   hintStyle: FlutterFlowTheme
                                                           .of(context)
                                                       .labelMedium
@@ -1310,7 +1310,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                 .labelMedium
                                                                 .fontStyle,
                                                       ),
-                                                  hintText: 'x',
+                                                  hintText: '1,200',
                                                   hintStyle: FlutterFlowTheme
                                                           .of(context)
                                                       .labelMedium
@@ -2623,7 +2623,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                 .labelMedium
                                                                 .fontStyle,
                                                       ),
-                                                  hintText: 'x',
+                                                  hintText: 'Ej. no se permiten mascotas',
                                                   hintStyle: FlutterFlowTheme
                                                           .of(context)
                                                       .labelMedium
@@ -3301,7 +3301,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .labelMedium
                                             .fontStyle,
                                       ),
-                                  hintText: 'x',
+                                  hintText: 'Ej. 1234',
                                   hintStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .override(
@@ -3455,7 +3455,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .labelMedium
                                             .fontStyle,
                                       ),
-                                  hintText: 'x',
+                                  hintText: 'Ej. 56',
                                   hintStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .override(
@@ -3609,7 +3609,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .labelMedium
                                             .fontStyle,
                                       ),
-                                  hintText: 'x',
+                                  hintText: 'Ej. 789E',
                                   hintStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .override(
@@ -3826,7 +3826,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .labelMedium
                                             .fontStyle,
                                       ),
-                                  hintText: 'x',
+                                  hintText: _isCompany ? 'Nombre de la sociedad' : 'Nombre completo',
                                   hintStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .override(
@@ -3984,7 +3984,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .labelMedium
                                             .fontStyle,
                                       ),
-                                  hintText: 'x',
+                                  hintText: 'Nombre completo',
                                   hintStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .override(

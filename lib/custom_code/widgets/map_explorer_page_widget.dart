@@ -15,6 +15,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '/backend/api_requests/api_calls.dart';
+import '/core/amount_input_formatter.dart';
 import '/components/house_card_component_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 
@@ -165,8 +166,10 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
         _minPrice = result['minPrice'] as double?;
         _maxPrice = result['maxPrice'] as double?;
         // Sync pill-bar price controllers
-        _minPriceController.text = _minPrice?.toStringAsFixed(0) ?? '';
-        _maxPriceController.text = _maxPrice?.toStringAsFixed(0) ?? '';
+        _minPriceController.text =
+            formatAmountText(_minPrice?.toStringAsFixed(0) ?? '');
+        _maxPriceController.text =
+            formatAmountText(_maxPrice?.toStringAsFixed(0) ?? '');
         _filteredProperties = _applyFilters(_allProperties);
       });
     }
@@ -418,7 +421,7 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
                 focusNode: _minPriceFocus,
                 hint: 'Desde',
                 onChanged: (v) {
-                  _minPrice = double.tryParse(v);
+                  _minPrice = parseAmount(v);
                   _updateFilters();
                 },
               ),
@@ -437,7 +440,7 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
                 focusNode: _maxPriceFocus,
                 hint: 'Hasta',
                 onChanged: (v) {
-                  _maxPrice = double.tryParse(v);
+                  _maxPrice = parseAmount(v);
                   _updateFilters();
                 },
               ),
@@ -464,9 +467,11 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
       controller: controller,
       focusNode: focusNode,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [AmountInputFormatter()],
       decoration: InputDecoration(
         isDense: true,
         hintText: hint,
+        prefixText: '${currencySymbol()} ',
         hintStyle: FlutterFlowTheme.of(context).labelMedium.override(
               font: GoogleFonts.publicSans(),
               letterSpacing: 0.0,
@@ -867,7 +872,10 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                             _subLabel('Desde'),
                             const SizedBox(height: 6),
                             _numericInput(
-                                ctrl: _minPriceCtrl, hint: 'Q', theme: theme),
+                                ctrl: _minPriceCtrl,
+                                hint: '0',
+                                theme: theme,
+                                money: true),
                           ],
                         ),
                       ),
@@ -879,7 +887,10 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                             _subLabel('Hasta'),
                             const SizedBox(height: 6),
                             _numericInput(
-                                ctrl: _maxPriceCtrl, hint: 'Q', theme: theme),
+                                ctrl: _maxPriceCtrl,
+                                hint: '0',
+                                theme: theme,
+                                money: true),
                           ],
                         ),
                       ),
@@ -945,10 +956,10 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                             ? double.tryParse(_maxAreaCtrl.text)
                             : null,
                         'minPrice': _minPriceCtrl.text.isNotEmpty
-                            ? double.tryParse(_minPriceCtrl.text)
+                            ? parseAmount(_minPriceCtrl.text)
                             : null,
                         'maxPrice': _maxPriceCtrl.text.isNotEmpty
-                            ? double.tryParse(_maxPriceCtrl.text)
+                            ? parseAmount(_maxPriceCtrl.text)
                             : null,
                       });
                     },
@@ -1111,13 +1122,16 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
     required TextEditingController ctrl,
     required String hint,
     required FlutterFlowTheme theme,
+    bool money = false,
   }) {
     return TextField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: money ? [AmountInputFormatter()] : null,
       decoration: InputDecoration(
         isDense: true,
         hintText: hint,
+        prefixText: money ? '${currencySymbol()} ' : null,
         hintStyle: GoogleFonts.publicSans(
           fontSize: 14,
           color: const Color(0xFF888888).withValues(alpha: 0.5),

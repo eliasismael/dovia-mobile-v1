@@ -11,8 +11,9 @@ class DOVIACLIENTMisPropiedadesAgendarVisitaModel
     extends FlutterFlowModel<DOVIACLIENTMisPropiedadesAgendarVisitaWidget> {
   ///  Local state fields for this page.
 
-  // Selected weekdays: 0=Lun, 1=Mar, 2=Mié, 3=Jue, 4=Vie, 5=Sáb
-  Set<int> selectedDays = {};
+  // Fecha elegida en el calendario. El backend recibe días de la semana, así
+  // que se manda el día que le corresponde a esta fecha.
+  DateTime? selectedDate;
 
   // Time range selected by user ("HH:MM" 24h format)
   TimeOfDay? timeFrom;
@@ -20,7 +21,7 @@ class DOVIACLIENTMisPropiedadesAgendarVisitaModel
 
   // Whether the continue button can be enabled
   bool get canContinue =>
-      selectedDays.isNotEmpty &&
+      selectedDate != null &&
       timeFrom != null &&
       timeTo != null &&
       _timeToMinutes(timeTo!) > _timeToMinutes(timeFrom!);

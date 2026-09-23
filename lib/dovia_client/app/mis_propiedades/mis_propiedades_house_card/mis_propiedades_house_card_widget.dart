@@ -114,98 +114,79 @@ class _MisPropiedadesHouseCardWidgetState
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
-                  child: Container(
-                    decoration: const BoxDecoration(),
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: ColorFiltered(
-                            colorFilter: isPaused
-                                ? const ColorFilter.mode(
-                                    Color(0x55000000), BlendMode.darken)
-                                : const ColorFilter.mode(
-                                    Colors.transparent, BlendMode.multiply),
-                            child: imageUrl != null
-                                ? Image.network(
-                                    imageUrl,
-                                    width: 72.0,
-                                    height: 108.0,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Image.asset(
+            // Sin publicar todavía no hay fotos ni favoritos. Solo las pausadas,
+            // que ya se publicaron, muestran la foto (con la marca "Pausada").
+            if (isPaused)
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 0.0, 10.0, 0.0),
+                    child: Container(
+                      decoration: const BoxDecoration(),
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: ColorFiltered(
+                              colorFilter: isPaused
+                                  ? const ColorFilter.mode(
+                                      Color(0x55000000), BlendMode.darken)
+                                  : const ColorFilter.mode(
+                                      Colors.transparent, BlendMode.multiply),
+                              child: imageUrl != null
+                                  ? Image.network(
+                                      imageUrl,
+                                      width: 72.0,
+                                      height: 108.0,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Image.asset(
+                                        'assets/images/casa_card_sobreMiVisita.png',
+                                        width: 72.0,
+                                        height: 108.0,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : Image.asset(
                                       'assets/images/casa_card_sobreMiVisita.png',
                                       width: 72.0,
                                       height: 108.0,
                                       fit: BoxFit.cover,
                                     ),
-                                  )
-                                : Image.asset(
-                                    'assets/images/casa_card_sobreMiVisita.png',
-                                    width: 72.0,
-                                    height: 108.0,
-                                    fit: BoxFit.cover,
+                            ),
+                          ),
+                          if (isPaused)
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height: 28,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xCCE85D75),
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(8),
+                                    bottomRight: Radius.circular(8),
                                   ),
-                          ),
-                        ),
-                        if (isPaused)
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              height: 28,
-                              decoration: const BoxDecoration(
-                                color: Color(0xCCE85D75),
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(8),
-                                  bottomRight: Radius.circular(8),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Pausada',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Pausada',
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                2.0, 2.0, 0.0, 0.0),
-                            child: Container(
-                              width: 20.0,
-                              height: 20.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/hearIcon.svg',
-                                  width: 10.0,
-                                  height: 10.0,
-                                  fit: BoxFit.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
+                            )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.max,

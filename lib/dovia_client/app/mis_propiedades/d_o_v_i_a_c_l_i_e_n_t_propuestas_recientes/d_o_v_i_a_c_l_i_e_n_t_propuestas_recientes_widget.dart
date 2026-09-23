@@ -168,6 +168,22 @@ class _DOVIACLIENTPropuestasRecientesWidgetState
     }
 
     if (_errorMessage != null) {
+      // Cuenta sin verificar: reintentar no sirve hasta que un administrador
+      // la verifique, así que solo se avisa.
+      final pendingVerification =
+          _errorMessage!.toLowerCase().contains('pendiente de verificaci');
+      if (pendingVerification) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60.0),
+          child: Text(
+            'Tu cuenta está pendiente de verificación.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+                fontSize: 14.0,
+                color: FlutterFlowTheme.of(context).secondaryText),
+          ),
+        );
+      }
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 60.0),
         child: Column(

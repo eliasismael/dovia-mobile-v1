@@ -35,18 +35,16 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  static const List<String> _dayLabels = [
-    'Lun',
-    'Mar',
-    'Mié',
-    'Jue',
-    'Vie',
-    'Sáb',
-    'Dom',
+  static const List<String> _weekdayNames = [
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+    'Domingo',
   ];
 
-  // Colors matching DOVIA Teal primary
-  static const Color _teal = Color(0xFF006B6B);
 
   @override
   void initState() {
@@ -76,6 +74,53 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
     return '$h:$m';
   }
 
+  String _formatDate(DateTime d) =>
+      '${_weekdayNames[d.weekday - 1]} ${d.day.toString().padLeft(2, '0')}/'
+      '${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  /// Calendario y reloj con los colores de DOVIA en vez del azul de Material.
+  Widget _doviaPickerTheme(BuildContext context, Widget child) {
+    final theme = FlutterFlowTheme.of(context);
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: ColorScheme.light(
+          primary: theme.primary,
+          onPrimary: Colors.white,
+          surface: theme.secondaryBackground,
+          onSurface: theme.primaryText,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: theme.primary),
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    // Hoy y los 3 días siguientes no se pueden elegir; domingo tampoco,
+    // como antes con los días de la semana.
+    var first = today.add(const Duration(days: 4));
+    while (first.weekday == DateTime.sunday) {
+      first = first.add(const Duration(days: 1));
+    }
+    final current = _model.selectedDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate:
+          current != null && !current.isBefore(first) ? current : first,
+      firstDate: first,
+      lastDate: DateTime(today.year + 1, today.month, today.day),
+      selectableDayPredicate: (day) => day.weekday != DateTime.sunday,
+      helpText: 'Selecciona una fecha',
+      builder: (context, child) => _doviaPickerTheme(context, child!),
+    );
+    if (picked == null) return;
+    safeSetState(() => _model.selectedDate = picked);
+  }
+
   Future<void> _pickTime({required bool isFrom}) async {
     final initial = isFrom
         ? (_model.timeFrom ?? const TimeOfDay(hour: 9, minute: 0))
@@ -85,9 +130,12 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
       context: context,
       initialTime: initial,
       initialEntryMode: TimePickerEntryMode.input,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-        child: child!,
+      builder: (context, child) => _doviaPickerTheme(
+        context,
+        MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: child!,
+        ),
       ),
     );
 
@@ -132,17 +180,17 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
       'SUNDAY',
     ];
 
-    final sortedDays = _model.selectedDays.toList()..sort();
+    final dayIndex = _model.selectedDate!.weekday - 1;
     final startTimeStr = _timeToApi(_model.timeFrom!);
     final endTimeStr = _timeToApi(_model.timeTo!);
 
-    final ranges = sortedDays
-        .map((dayIndex) => {
-              'dayOfWeek': dayNames[dayIndex],
-              'startTime': startTimeStr,
-              'endTime': endTimeStr,
-            })
-        .toList();
+    final ranges = [
+      {
+        'dayOfWeek': dayNames[dayIndex],
+        'startTime': startTimeStr,
+        'endTime': endTimeStr,
+      },
+    ];
 
     _model.apiResCreateVisitRequest =
         await DOVIAAPIVisitContextGroup.createOperativeListingVisitCall.call(
@@ -304,7 +352,7 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'Selecciona el día ',
+                                  text: 'Selecciona una fecha ',
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -324,75 +372,14 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                           ),
                           const SizedBox(height: 10.0),
 
-                          // Day chips row
-                          Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: List.generate(7, (index) {
-                              final isSelected =
-                                  _model.selectedDays.contains(index);
-                              final isSunday = index == 6;
-                              return GestureDetector(
-                                onTap: isSunday
-                                    ? null
-                                    : () {
-                                        safeSetState(() {
-                                          if (isSelected) {
-                                            _model.selectedDays.remove(index);
-                                          } else {
-                                            _model.selectedDays.add(index);
-                                          }
-                                        });
-                                      },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 14.0, vertical: 8.0),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? _teal.withOpacity(0.1)
-                                        : isSunday
-                                            ? FlutterFlowTheme.of(context)
-                                                .alternate
-                                            : FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? _teal
-                                          : isSunday
-                                              ? FlutterFlowTheme.of(context)
-                                                  .secondaryText
-                                                  .withOpacity(0.3)
-                                              : FlutterFlowTheme.of(context)
-                                                  .secondaryText
-                                                  .withAlpha(128),
-                                      width: isSelected ? 2.0 : 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Text(
-                                    _dayLabels[index],
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodySmall
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight: isSelected
-                                                ? FontWeight.w600
-                                                : FontWeight.w400,
-                                          ),
-                                          color: isSelected
-                                              ? _teal
-                                              : isSunday
-                                                  ? FlutterFlowTheme.of(context)
-                                                      .secondaryText
-                                                      .withOpacity(0.4)
-                                                  : FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                          letterSpacing: 0.0,
-                                        ),
-                                  ),
-                                ),
-                              );
-                            }),
+                          _TimePickerField(
+                            label: 'Fecha',
+                            value: _model.selectedDate == null
+                                ? 'Selecciona una fecha'
+                                : _formatDate(_model.selectedDate!),
+                            hasValue: _model.selectedDate != null,
+                            icon: Icons.calendar_today_outlined,
+                            onTap: _pickDate,
                           ),
 
                           const SizedBox(height: 24.0),
@@ -594,12 +581,14 @@ class _TimePickerField extends StatelessWidget {
     required this.value,
     required this.hasValue,
     required this.onTap,
+    this.icon = Icons.access_time,
   });
 
   final String label;
   final String value;
   final bool hasValue;
   final VoidCallback onTap;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -620,7 +609,7 @@ class _TimePickerField extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              Icons.access_time,
+              icon,
               size: 18.0,
               color: hasValue
                   ? FlutterFlowTheme.of(context).primary
