@@ -64,6 +64,8 @@ class DOVIAAPILegalProcessContextGroup {
   static MortgageCompleteDocumentsCall mortgageCompleteDocumentsCall =
       MortgageCompleteDocumentsCall();
   static MortgageFinishCall mortgageFinishCall = MortgageFinishCall();
+  static FinishLegalProcessCall finishLegalProcessCall =
+      FinishLegalProcessCall();
 }
 
 /// GET /legal-processes/associate
@@ -806,11 +808,13 @@ class UploadSignedContractCall {
 }
 
 /// POST /legal-processes/{processId}/submit-to-hq-review
-/// Roles: LEGAL_ASSOCIATE
+/// Roles: LEGAL_ASSOCIATE — body opcional `{ meetingNotes }` con las notas de
+/// la reunión de firma (vacío se guarda como `null`).
 class SubmitToHQReviewCall {
   Future<ApiCallResponse> call({
     String? processId = '',
     String? authToken = '',
+    String? meetingNotes,
   }) async {
     final baseUrl = DOVIAAPILegalProcessContextGroup.getBaseUrl();
 
@@ -823,6 +827,10 @@ class SubmitToHQReviewCall {
           'Authorization': 'Bearer $authToken',
       },
       params: {},
+      body: jsonEncode({
+        if (meetingNotes != null && meetingNotes.trim().isNotEmpty)
+          'meetingNotes': meetingNotes.trim(),
+      }),
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
@@ -988,8 +996,7 @@ class MortgageUploadUnsignedAgreementCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Mortgage Upload Unsigned Agreement',
-      apiUrl:
-          '$baseUrl/legal-processes/$processId/mortgage/unsigned-agreement',
+      apiUrl: '$baseUrl/legal-processes/$processId/mortgage/unsigned-agreement',
       callType: ApiCallType.POST,
       headers: {
         if (authToken != null && authToken.isNotEmpty)
@@ -1023,8 +1030,7 @@ class MortgageCompleteDocumentsCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Mortgage Complete Documents',
-      apiUrl:
-          '$baseUrl/legal-processes/$processId/mortgage/documents/complete',
+      apiUrl: '$baseUrl/legal-processes/$processId/mortgage/documents/complete',
       callType: ApiCallType.POST,
       headers: {
         if (authToken != null && authToken.isNotEmpty)
@@ -1056,6 +1062,38 @@ class MortgageFinishCall {
     return ApiManager.instance.makeApiCall(
       callName: 'Mortgage Finish',
       apiUrl: '$baseUrl/legal-processes/$processId/mortgage/finish',
+      callType: ApiCallType.POST,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// POST /legal-processes/{processId}/finish
+/// Roles: LEGAL_ASSOCIATE o LEGAL_OFFICER asignado — cierra un `SALE`/`RENT`
+/// `APPROVED -> FINISHED`.
+///
+/// Exige un `DOVIA_PAYMENT_PROOF` con archivo (lo sube el cliente). Completa
+/// la oferta y deja la propiedad en `SOLD` o `RENTED`.
+class FinishLegalProcessCall {
+  Future<ApiCallResponse> call({
+    String? processId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPILegalProcessContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Finish Legal Process',
+      apiUrl: '$baseUrl/legal-processes/$processId/finish',
       callType: ApiCallType.POST,
       headers: {
         if (authToken != null && authToken.isNotEmpty)

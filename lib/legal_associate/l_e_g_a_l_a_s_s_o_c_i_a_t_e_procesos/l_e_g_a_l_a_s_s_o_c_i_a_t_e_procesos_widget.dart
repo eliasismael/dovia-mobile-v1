@@ -375,8 +375,8 @@ class _LEGALASSOCIATEProcesosWidgetState
                   height: 30,
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: abrir el paso del flujo según el estado; por
-                      // ahora solo existe el paso 1.
+                      // La pantalla del trámite muestra el paso que
+                      // corresponde al estado.
                       context.pushNamed(
                         LEGALASSOCIATEProcesos2Widget.routeName,
                         queryParameters: {

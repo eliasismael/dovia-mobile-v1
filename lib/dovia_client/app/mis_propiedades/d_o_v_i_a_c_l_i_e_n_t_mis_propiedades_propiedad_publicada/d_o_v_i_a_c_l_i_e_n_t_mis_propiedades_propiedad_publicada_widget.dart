@@ -1020,11 +1020,15 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                     const Icon(Icons.check_circle_rounded,
                         color: _bannerGreen, size: 16),
                     const SizedBox(width: 4),
-                    Text('Oferta aceptada (En Acuerdo)',
-                        style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: _bannerGreen)),
+                    Expanded(
+                      child: Text('Oferta aceptada (En Acuerdo)',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: _bannerGreen)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),

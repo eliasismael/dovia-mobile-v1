@@ -141,9 +141,12 @@ class _LegalAssociateCardWidgetState extends State<LegalAssociateCardWidget> {
             Padding(
               padding:
                   const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // Wrap: con un email largo, el teléfono y el mail van en dos
+              // líneas en vez de salirse de la tarjeta.
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 16.0,
+                runSpacing: 4.0,
                 children: [
                   Text(
                     widget.phone ?? 'Teléfono',

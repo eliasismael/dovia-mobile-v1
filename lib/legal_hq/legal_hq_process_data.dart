@@ -598,6 +598,35 @@ class LegalHqContractVersion {
   final LegalHqDocument document;
 }
 
+/// Reunión de firma que agenda el asociado legal.
+class LegalHqAppointment {
+  const LegalHqAppointment({
+    required this.id,
+    required this.scheduledAt,
+    this.address = '',
+    this.status = '',
+    this.cancelReason = '',
+  });
+
+  final String id;
+  final DateTime? scheduledAt;
+  final String address;
+
+  /// `SCHEDULED` | `COMPLETED` | `CANCELLED` | `RESCHEDULED`
+  final String status;
+  final String cancelReason;
+
+  factory LegalHqAppointment.fromJson(Map<String, dynamic> json) =>
+      LegalHqAppointment(
+        id: json['id']?.toString() ?? '',
+        scheduledAt:
+            DateTime.tryParse(json['scheduledAt']?.toString() ?? '')?.toLocal(),
+        address: json['address']?.toString() ?? '',
+        status: json['status']?.toString() ?? '',
+        cancelReason: json['cancelReason']?.toString() ?? '',
+      );
+}
+
 /// Detalle completo de un expediente.
 class LegalHqProcessDetail {
   const LegalHqProcessDetail({
@@ -610,10 +639,36 @@ class LegalHqProcessDetail {
     this.bankAgent = const LegalHqBankAgent(),
     this.owner = const LegalHqParty(),
     this.client = const LegalHqParty(),
+    this.appointments = const [],
+    this.unsignedContractName = '',
+    this.meetingNotes = '',
   });
+
+  /// Nombre original del contrato sin firmar (`unsignedContractDetail`).
+  final String unsignedContractName;
+
+  /// Notas de la reunión de firma que el asociado envió junto con el
+  /// contrato firmado al pasar a revisión de HQ.
+  final String meetingNotes;
 
   final LegalHqProcess process;
   final List<LegalHqDocument> documents;
+
+  /// Reuniones de firma, en el orden en que se crearon. Re-agendar deja la
+  /// anterior como `RESCHEDULED` y suma una nueva.
+  final List<LegalHqAppointment> appointments;
+
+  /// Reunión vigente (`SCHEDULED`), si hay una.
+  LegalHqAppointment? get activeAppointment {
+    for (final a in appointments.reversed) {
+      if (a.status == 'SCHEDULED') return a;
+    }
+    return null;
+  }
+
+  /// Última dirección usada, para pre-llenar el re-agendamiento.
+  String get lastAppointmentAddress =>
+      appointments.isEmpty ? '' : appointments.last.address;
 
   /// Borrador de contrato que el asociado dejó en el proceso.
   final String unsignedContractUrl;
@@ -863,9 +918,8 @@ class LegalHqProcessApi {
       process: LegalHqProcess.fromJson(data, isAssignedToMe: true),
       documents: documents,
       unsignedContractUrl: data['unsignedContractUrl']?.toString() ?? '',
-      paymentProofUrl: (data['paymentProofUrl'] ?? data['paymentProof'])
-              ?.toString() ??
-          '',
+      paymentProofUrl:
+          (data['paymentProofUrl'] ?? data['paymentProof'])?.toString() ?? '',
       offerId: offerId,
       agreement: offer == null
           ? const LegalHqAgreement()
@@ -875,6 +929,18 @@ class LegalHqProcessApi {
       bankAgent: LegalHqBankAgent.fromJson(data['bankAgentData']),
       owner: LegalHqParty.fromJson(data['ownerProfile']),
       client: LegalHqParty.fromJson(data['interestedProfile']),
+      appointments: [
+        for (final raw in data['appointments'] is List
+            ? data['appointments'] as List
+            : const [])
+          if (raw is Map<String, dynamic>) LegalHqAppointment.fromJson(raw),
+      ],
+      unsignedContractName: data['unsignedContractDetail'] is Map
+          ? (data['unsignedContractDetail'] as Map)['originalName']
+                  ?.toString() ??
+              ''
+          : '',
+      meetingNotes: data['meetingNotes']?.toString() ?? '',
     );
   }
 
@@ -1023,8 +1089,7 @@ LegalHqStatusStyle legalHqStatusStyle(String status) {
       return const LegalHqStatusStyle(
           'En Revisión de Legal HQ', _badgeOrangeBg, _badgeOrangeText);
     case 'REJECTED':
-      return const LegalHqStatusStyle(
-          'Rechazado', _badgeRedBg, _badgeRedText);
+      return const LegalHqStatusStyle('Rechazado', _badgeRedBg, _badgeRedText);
     case 'APPROVED':
       return const LegalHqStatusStyle(
           'Aprobado', _badgeGreenBg, _badgeGreenText);
@@ -1204,5 +1269,6 @@ enum LegalHqEvaluationOutcome {
   final String status;
 
   /// `true` cuando la elección cierra el ciclo de evaluación bancaria.
-  bool get resolvesEvaluation => this != LegalHqEvaluationOutcome.stillEvaluating;
+  bool get resolvesEvaluation =>
+      this != LegalHqEvaluationOutcome.stillEvaluating;
 }

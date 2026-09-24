@@ -332,7 +332,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                           const SizedBox(height: 14.0),
                           _buildFutureCarousel<_LegalProcess>(
                             future: _newAssignmentsFuture,
-                            height: 188.0,
+                            height: 164.0,
                             emptyMessage: 'No tienes nuevas asignaciones',
                             cardBuilder: (process) =>
                                 _buildAssignedCard(context, process),
