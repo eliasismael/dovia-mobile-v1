@@ -88,6 +88,8 @@ class OffersRepository extends ChangeNotifier {
     );
 
     if (!response.succeeded) {
+      debugPrint('[MisOfertas] my-offers ${response.statusCode}: '
+          '${response.bodyText}');
       return Failure(
         response.jsonBody?['message']?.toString() ??
             'Error al cargar tus ofertas',

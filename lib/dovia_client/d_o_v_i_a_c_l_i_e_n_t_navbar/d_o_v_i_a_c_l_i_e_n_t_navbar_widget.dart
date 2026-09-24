@@ -86,6 +86,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
     required String label,
     required String routeName,
     required Future<void> Function() onTap,
+    double iconSize = 24.0,
   }) {
     final active = _isActive(routeName);
     return Expanded(
@@ -98,12 +99,20 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              asset,
+            // Caja fija de 24 para que los textos queden alineados aunque
+            // el ícono sea más chico.
+            SizedBox(
               width: 24.0,
               height: 24.0,
-              fit: BoxFit.contain,
-              colorFilter: active ? _activeFilter(context) : null,
+              child: Center(
+                child: SvgPicture.asset(
+                  asset,
+                  width: iconSize,
+                  height: iconSize,
+                  fit: BoxFit.contain,
+                  colorFilter: active ? _activeFilter(context) : null,
+                ),
+              ),
             ),
             const SizedBox(height: 4.0),
             Text(
@@ -249,7 +258,8 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     ),
                     _navItem(
                       asset: 'assets/images/IconoCorazon.svg',
-                      label: 'Favorito',
+                      label: 'Favoritos',
+                      iconSize: 20.0,
                       routeName: DOVIACLIENTMisFavoritosWidget.routeName,
                       onTap: () async {
                         context

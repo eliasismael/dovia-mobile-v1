@@ -193,8 +193,9 @@ String? _number(
 }
 
 /// Opciones del tiempo estimado de pago al contado, en días (tope: 1 mes).
+/// "Inmediatamente" va como 1: el backend exige entre 1 y 180 días.
 const kCashPaymentTimeOptions = <String, int>{
-  'Inmediatamente': 0,
+  'Inmediatamente': 1,
   '1 semana': 7,
   '2 semanas': 14,
   '3 semanas': 21,
@@ -204,7 +205,9 @@ const kCashPaymentTimeMaxDays = 28;
 
 /// Etiqueta de un tiempo de pago guardado en días; `null` si no coincide.
 String? cashPaymentTimeLabel(Object? days) {
-  final value = int.tryParse('${days ?? ''}'.trim());
+  var value = int.tryParse('${days ?? ''}'.trim());
+  // Ofertas viejas guardaron "Inmediatamente" como 0.
+  if (value == 0) value = 1;
   for (final entry in kCashPaymentTimeOptions.entries) {
     if (entry.value == value) return entry.key;
   }
