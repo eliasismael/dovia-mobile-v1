@@ -6,7 +6,6 @@ import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_widget.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_2/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_widget.dart';
-import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos/l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos_widget.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos_2/l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos2_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +26,24 @@ class _LegalProcess {
     this.propertyType = '',
     this.createdAt = '',
     this.commission,
+    this.name = '',
+    this.description = '',
+    this.ownerName = '',
   });
+
+  final String name;
+  final String description;
+  final String ownerName;
+
+  /// Coincide con el texto buscado: propietario, dirección o ID del trámite.
+  bool matches(String q) {
+    if (q.isEmpty) return true;
+    final t = q.toLowerCase();
+    return ownerName.toLowerCase().contains(t) ||
+        address.toLowerCase().contains(t) ||
+        name.toLowerCase().contains(t) ||
+        id.toLowerCase().contains(t);
+  }
 
   final String id;
   final String category; // SALE, RENT, PUBLICATION
@@ -55,8 +71,17 @@ class _LegalProcess {
       address: property['fullAddress']?.toString() ?? '',
       imageUrl: property['image']?.toString() ?? '',
       propertyType: property['propertyType']?.toString() ?? '',
-      createdAt: json['createdAt']?.toString() ?? '',
+      // Fecha en que se le asignó el trámite al asociado.
+      createdAt: json['legalAssociateAssignedAt']?.toString() ??
+          json['createdAt']?.toString() ??
+          '',
       commission: _readCommission(json),
+      name: property['name']?.toString() ?? '',
+      description: property['description']?.toString() ?? '',
+      ownerName: (json['ownerProfile'] is Map
+              ? json['ownerProfile']['fullName']?.toString()
+              : null) ??
+          '',
     );
   }
 
@@ -92,7 +117,7 @@ const _kInProgressStatuses =
     'IN_PROGRESS,DRAFTING,MEETING_COORDINATION,MEETING_SCHEDULED,LEGAL_HQ_REVIEW,REJECTED';
 
 /// Carousel 3: Completed
-const _kCompletedStatuses = 'APPROVED';
+const _kCompletedStatuses = 'APPROVED,FINISHED';
 
 // ── Main page widget ────────────────────────────────────────────────────────
 
@@ -117,6 +142,10 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
   late Future<List<_LegalProcess>> _newAssignmentsFuture;
   late Future<List<_LegalProcess>> _inProgressFuture;
   late Future<List<_LegalProcess>> _completedFuture;
+
+  final _searchController = TextEditingController();
+  String _query = '';
+  String? _startingId;
 
   // ── Colors (from existing codebase) ───────────────────────────────────────
 
@@ -148,6 +177,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -244,21 +274,34 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                               ),
                               const SizedBox(width: 12.0),
                               Expanded(
-                                child: Text(
-                                  'Búsqueda con IA',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.3,
-                                      ),
+                                child: TextField(
+                                  controller: _searchController,
+                                  onChanged: (v) =>
+                                      safeSetState(() => _query = v.trim()),
+                                  style: GoogleFonts.publicSans(
+                                      color: _textDark, fontSize: 15.0),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    border: InputBorder.none,
+                                    hintText:
+                                        'Propietario, dirección o ID de trámite',
+                                    hintStyle: GoogleFonts.publicSans(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      fontSize: 15.0,
+                                    ),
+                                  ),
                                 ),
                               ),
+                              if (_query.isNotEmpty)
+                                InkWell(
+                                  onTap: () {
+                                    _searchController.clear();
+                                    safeSetState(() => _query = '');
+                                  },
+                                  child: const Icon(Icons.close,
+                                      size: 20, color: _textDark),
+                                ),
                             ],
                           ),
                         ),
@@ -281,7 +324,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             title: 'Tus siguientes inmuebles\nasignados',
                             onVerMas: () {
                               context.pushNamed(
-                                  LEGALASSOCIATEProcesosWidget.routeName);
+                                LEGALASSOCIATEProcesosWidget.routeName,
+                                queryParameters: {'filter': 'nuevos'},
+                              );
                             },
                           ),
                           const SizedBox(height: 14.0),
@@ -303,7 +348,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             title: 'Propiedades pendientes\npor revisar',
                             onVerMas: () {
                               context.pushNamed(
-                                  LEGALASSOCIATEProcesosWidget.routeName);
+                                LEGALASSOCIATEProcesosWidget.routeName,
+                                queryParameters: {'filter': 'en_curso'},
+                              );
                             },
                           ),
                           const SizedBox(height: 14.0),
@@ -328,7 +375,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                             title: 'Propiedades Completadas',
                             onVerMas: () {
                               context.pushNamed(
-                                  LEGALASSOCIATEDocumentosWidget.routeName);
+                                LEGALASSOCIATEProcesosWidget.routeName,
+                                queryParameters: {'filter': 'aprobados'},
+                              );
                             },
                           ),
                           const SizedBox(height: 14.0),
@@ -391,14 +440,18 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
           );
         }
 
-        final items = snapshot.data ?? [];
+        final items = (snapshot.data ?? [])
+            .where((e) => e is! _LegalProcess || e.matches(_query))
+            .toList();
 
         if (items.isEmpty) {
           return SizedBox(
             height: height,
             child: Center(
               child: Text(
-                emptyMessage,
+                _query.isNotEmpty
+                    ? 'Sin resultados para "$_query"'
+                    : emptyMessage,
                 style: GoogleFonts.publicSans(
                   color: _textDark,
                   fontSize: 14.0,
@@ -543,10 +596,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                   width: double.infinity,
                   height: 29.0,
                   child: ElevatedButton(
-                    onPressed: () {
-                      context.pushNamed(
-                          LEGALASSOCIATEProcesos2Widget.routeName);
-                    },
+                    onPressed: _startingId != null
+                        ? null
+                        : () => _startProcess(process),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _aqua,
                       foregroundColor: Colors.white,
@@ -557,14 +609,21 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     ),
-                    child: Text(
-                      'Iniciar Proceso',
-                      style: GoogleFonts.publicSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: _startingId == process.id
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(
+                            'Iniciar Proceso',
+                            style: GoogleFonts.publicSans(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -573,6 +632,33 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
         ],
       ),
     );
+  }
+
+  /// Marca el trámite como iniciado y abre el paso a paso legal.
+  Future<void> _startProcess(_LegalProcess process) async {
+    safeSetState(() => _startingId = process.id);
+    final res = await DOVIAAPILegalProcessContextGroup.startLegalProcessCall
+        .call(processId: process.id, authToken: currentAuthenticationToken);
+    if (!mounted) return;
+    safeSetState(() => _startingId = null);
+    if (!res.succeeded) {
+      final msg = getJsonField(res.jsonBody, r'$.message')?.toString();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(msg != null && msg.isNotEmpty
+            ? msg
+            : 'No se pudo iniciar el proceso'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+    await context.pushNamed(
+      LEGALASSOCIATEProcesos2Widget.routeName,
+      queryParameters: {
+        'processId': process.id,
+        'propertyName': process.name,
+      },
+    );
+    if (mounted) safeSetState(_loadData);
   }
 
   // ── Carousel 2 & 3: Property card with status badge ──────────────────────
@@ -621,9 +707,11 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    process.address.isNotEmpty
-                        ? process.address
-                        : _propertyTypeLabel(process.propertyType),
+                    process.name.isNotEmpty
+                        ? process.name
+                        : (process.address.isNotEmpty
+                            ? process.address
+                            : _propertyTypeLabel(process.propertyType)),
                     style: GoogleFonts.publicSans(
                       color: _textDark,
                       fontSize: 16.0,
@@ -634,7 +722,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                   ),
                   const SizedBox(height: 4.0),
                   Text(
-                    'Categoría:',
+                    'Descripción:',
                     style: GoogleFonts.publicSans(
                       color: _aqua,
                       fontSize: 14.0,
@@ -642,7 +730,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                     ),
                   ),
                   Text(
-                    _categoryLabel(process.category),
+                    process.description.isNotEmpty
+                        ? process.description
+                        : _categoryLabel(process.category),
                     style: GoogleFonts.publicSans(
                       color: _aqua,
                       fontSize: 14.0,

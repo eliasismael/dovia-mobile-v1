@@ -789,7 +789,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                             // propiedades también salen en la fila 2: el
                             // operative se asigna sin esperar la revisión.
                             _buildSectionHeader(
-                              'Propiedades revisar documentacion',
+                              'Propiedades a revisar su documentación',
                               LISTINGHQPropiedadesWidget.routeName,
                             ),
                             FutureBuilder<List<_HqCardData>>(

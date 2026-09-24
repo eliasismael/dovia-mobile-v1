@@ -515,7 +515,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                           children: [
                             // Sección 1: Checklist documental pendiente.
                             _buildSectionHeader(
-                              'Propiedades revisar documentacion',
+                              'Propiedades a revisar su documentación',
                             ),
                             FutureBuilder<List<_HqCardData>>(
                               future: _docsFuture,

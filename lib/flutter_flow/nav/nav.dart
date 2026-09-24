@@ -982,12 +982,17 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: LEGALASSOCIATEProcesosWidget.routeName,
           path: LEGALASSOCIATEProcesosWidget.routePath,
-          builder: (context, params) => const LEGALASSOCIATEProcesosWidget(),
+          builder: (context, params) => LEGALASSOCIATEProcesosWidget(
+            filter: params.getParam('filter', ParamType.String),
+          ),
         ),
         FFRoute(
           name: LEGALASSOCIATEProcesos2Widget.routeName,
           path: LEGALASSOCIATEProcesos2Widget.routePath,
-          builder: (context, params) => const LEGALASSOCIATEProcesos2Widget(),
+          builder: (context, params) => LEGALASSOCIATEProcesos2Widget(
+            processId: params.getParam('processId', ParamType.String),
+            propertyName: params.getParam('propertyName', ParamType.String),
+          ),
         ),
         FFRoute(
           name: LEGALASSOCIATENotificationsWidget.routeName,
