@@ -269,29 +269,35 @@ class _ShowingRegistroVisitaDatosState
           ),
         ],
       ),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSection1DatosBasicos(),
-              const SizedBox(height: 32),
-              _buildSection2Asistentes(),
-              const SizedBox(height: 32),
-              _buildSection3EstadoInmueble(),
-              const SizedBox(height: 32),
-              _buildSection4ReaccionCliente(),
-              const SizedBox(height: 32),
-              _buildSection5ProximoPaso(),
-              const SizedBox(height: 32),
-              _buildSection6Evidencia(),
-              const SizedBox(height: 32),
-              _buildSection7Confirmacion(),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
+      // Sin alto fijo el formulario crece y scrollea la pantalla; con alto,
+      // scrollea por dentro.
+      child: widget.height == null
+          ? _buildForm()
+          : SingleChildScrollView(child: _buildForm()),
+    );
+  }
+
+  Widget _buildForm() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSection1DatosBasicos(),
+          const SizedBox(height: 32),
+          _buildSection2Asistentes(),
+          const SizedBox(height: 32),
+          _buildSection3EstadoInmueble(),
+          const SizedBox(height: 32),
+          _buildSection4ReaccionCliente(),
+          const SizedBox(height: 32),
+          _buildSection5ProximoPaso(),
+          const SizedBox(height: 32),
+          _buildSection6Evidencia(),
+          const SizedBox(height: 32),
+          _buildSection7Confirmacion(),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
@@ -510,21 +516,23 @@ class _ShowingRegistroVisitaDatosState
           trailing: widget.onCancelVisit != null
               ? InkWell(
                   onTap: widget.onCancelVisit,
+                  borderRadius: BorderRadius.circular(24),
+                  // Botón relleno rojo (texto blanco) para que no parezca label.
                   child: Container(
-                    height: 26,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    height: 30,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFC90A0A)),
+                      color: const Color(0xFFC90A0A),
+                      borderRadius: BorderRadius.circular(24),
                     ),
                     alignment: Alignment.center,
                     child: const Text(
-                      'No se realizo',
+                      'No se realizó',
                       style: TextStyle(
                         fontFamily: 'Public Sans',
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFFC90A0A),
+                        color: Colors.white,
                       ),
                     ),
                   ),

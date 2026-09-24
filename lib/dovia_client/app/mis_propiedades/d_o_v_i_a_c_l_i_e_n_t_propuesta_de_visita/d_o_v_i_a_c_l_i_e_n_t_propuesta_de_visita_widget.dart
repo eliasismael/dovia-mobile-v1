@@ -36,9 +36,13 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
 
   bool _isLoading = true;
   bool _isSending = false;
+  bool _isAccepting = false;
   dynamic _visitData;
   List<dynamic> _proposedSlots = [];
   String _visitSubstatus = '';
+
+  /// Ya se pidieron otras fechas: las propuestas solo se informan.
+  bool get _changeRequested => _visitSubstatus == 'RESCHEDULE_REQUIRED';
 
   static const Color _primary = Color(0xFF007376);
   static const Color _primaryDark = Color(0xFF00444B);
@@ -132,7 +136,8 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
   }
 
   Future<void> _aceptarFecha() async {
-    if (_model.selectedDateIndex == null) return;
+    if (_model.selectedDateIndex == null || _isAccepting) return;
+    safeSetState(() => _isAccepting = true);
     final slot = _proposedSlots[_model.selectedDateIndex!];
     final date = (slot is Map ? slot['date'] : null)?.toString() ?? '';
     final time = (slot is Map ? slot['time'] : null)?.toString() ?? '';
@@ -146,6 +151,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
     );
 
     if (mounted) {
+      safeSetState(() => _isAccepting = false);
       if (res.succeeded) {
         showDialog(
           context: context,
@@ -239,7 +245,9 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                   ),
                                 ),
                               Text(
-                                'El interesado propuso estas fechas para visitar tu propiedad. Selecciona una o solicita otras fechas:',
+                                _changeRequested
+                                    ? 'Estas eran las fechas que había propuesto el interesado:'
+                                    : 'El interesado propuso estas fechas para visitar tu propiedad. Selecciona una o solicita otras fechas:',
                                 style: GoogleFonts.inter(
                                     fontSize: 14,
                                     color: FlutterFlowTheme.of(context)
@@ -261,15 +269,17 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                       (slot is Map ? slot['time'] : null)
                                               ?.toString() ??
                                           '';
-                                  final isSelected =
+                                  final isSelected = !_changeRequested &&
                                       _model.selectedDateIndex == idx;
 
                                   return GestureDetector(
-                                    onTap: () {
-                                      safeSetState(() {
-                                        _model.selectedDateIndex = idx;
-                                      });
-                                    },
+                                    onTap: _changeRequested
+                                        ? null
+                                        : () {
+                                            safeSetState(() {
+                                              _model.selectedDateIndex = idx;
+                                            });
+                                          },
                                     child: Container(
                                       margin: const EdgeInsets.only(bottom: 12),
                                       padding: const EdgeInsets.all(16),
@@ -321,32 +331,34 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                               ],
                                             ),
                                           ),
-                                          Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
+                                          if (!_changeRequested)
+                                            Container(
+                                              width: 24,
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? Colors.white
+                                                      : Colors.grey.shade400,
+                                                  width: 2,
+                                                ),
                                                 color: isSelected
                                                     ? Colors.white
-                                                    : Colors.grey.shade400,
-                                                width: 2,
+                                                    : Colors.transparent,
                                               ),
-                                              color: isSelected
-                                                  ? Colors.white
-                                                  : Colors.transparent,
+                                              child: isSelected
+                                                  ? const Icon(Icons.check,
+                                                      size: 16, color: _primary)
+                                                  : null,
                                             ),
-                                            child: isSelected
-                                                ? const Icon(Icons.check,
-                                                    size: 16, color: _primary)
-                                                : null,
-                                          ),
                                         ],
                                       ),
                                     ),
                                   );
                                 }),
-                              if (_model.selectedDateIndex != null) ...[
+                              if (!_changeRequested &&
+                                  _model.selectedDateIndex != null) ...[
                                 Container(
                                   padding: const EdgeInsets.all(24),
                                   decoration: BoxDecoration(
@@ -443,7 +455,8 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                 const SizedBox(height: 12),
                                 // Botón Primario: Aceptar y enviar notificación
                                 ElevatedButton(
-                                  onPressed: _model.selectedDateIndex != null
+                                  onPressed: _model.selectedDateIndex != null &&
+                                          !_isAccepting
                                       ? _aceptarFecha
                                       : null,
                                   style: ElevatedButton.styleFrom(
@@ -457,14 +470,23 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                             BorderRadius.circular(25)),
                                     elevation: 0,
                                   ),
-                                  child: Text(
-                                    'Aceptar y enviar notificación',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                  child: _isAccepting
+                                      ? const SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: _primary,
+                                          ),
+                                        )
+                                      : Text(
+                                          'Aceptar y enviar notificación',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                 ),
                               ],
                             ],

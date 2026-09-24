@@ -768,7 +768,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
                                     context.pushNamed(
-                                        OPERATIVELISTINGPrimeraVisitaWidget
+                                        LISTINGHQBusquedaPropiedadWidget
                                             .routeName);
                                   },
                                   child: ClipRRect(
@@ -797,7 +797,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
                                     context.pushNamed(
-                                        OPERATIVELISTINGPrimeraVisitaWidget
+                                        LISTINGHQDocumentosPendientesWidget
                                             .routeName);
                                   },
                                   child: ClipRRect(

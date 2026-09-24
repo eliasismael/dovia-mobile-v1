@@ -99,11 +99,7 @@ class _OPERATIVELISTINGHeaderWidgetState
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () async {
-                    if (FFAppState().UserRole == 'OPERATIVE_LISTER') {
-                      context.pushNamed(OPERATIVELISTINGHomeWidget.routeName);
-                    } else {
-                      context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
-                    }
+                    context.pushNamed(OPERATIVELISTINGHomeWidget.routeName);
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(0.0),

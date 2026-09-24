@@ -13,6 +13,7 @@ import '/backend/api_requests/api_properties.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_model.dart';
 
@@ -54,6 +55,78 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
 
   // ─── Visit / offer lists ───────────────────────────────────────────────────
   List<dynamic> _pendingVisits = [];
+
+  /// Reprogramaciones recibidas que el propietario ve por primera vez.
+  Set<String> _newRescheduleReceived = {};
+
+  /// Visitas donde el interesado ya mandó fechas nuevas, según el historial
+  /// de la visita en el servidor (vale en cualquier dispositivo).
+  Set<String> _rescheduleReceivedIds = {};
+
+  static const String _kSeenReceivedKey = 'seenRescheduleReceived';
+
+  String _visitIdOf(dynamic v) =>
+      getJsonField(v, r'''$.visitId''')?.toString() ??
+      getJsonField(v, r'''$.id''')?.toString() ??
+      '';
+
+  /// 'sent': pedí otras fechas y espero al interesado.
+  /// 'received': el interesado ya mandó fechas nuevas.
+  String _rescheduleState(dynamic v) {
+    final substatus = getJsonField(v, r'''$.substatus''')?.toString() ?? '';
+    if (substatus == 'RESCHEDULE_REQUIRED') return 'sent';
+    if (_rescheduleReceivedIds.contains(_visitIdOf(v))) return 'received';
+    return '';
+  }
+
+  /// Busca en el historial de cada visita pendiente si el interesado propuso
+  /// fechas nuevas tras un pedido de reprogramación.
+  Future<void> _loadRescheduleReceived(List<dynamic> pending) async {
+    final candidates = pending
+        .where((v) =>
+            getJsonField(v, r'''$.substatus''')?.toString() !=
+            'RESCHEDULE_REQUIRED')
+        .map(_visitIdOf)
+        .where((id) => id.isNotEmpty)
+        .toList();
+    if (candidates.isEmpty) return;
+    final results = await Future.wait(candidates
+        .map((id) => DOVIAAPIVisitContextGroup.getVisitActivityLogCall.call(
+              visitId: id,
+              authToken: currentAuthenticationToken,
+              page: '1',
+              limit: '100',
+            )));
+    final received = <String>{
+      for (var i = 0; i < candidates.length; i++)
+        if (results[i].succeeded &&
+            results[i].bodyText.contains('VISIT_NEW_SLOTS_PROPOSED'))
+          candidates[i],
+    };
+    if (!mounted) return;
+    safeSetState(() => _rescheduleReceivedIds = received);
+    await _markNewRescheduleReceived(pending);
+  }
+
+  /// Marca como nuevas las reprogramaciones recibidas que no se vieron.
+  /// Se identifican por visita y fechas propuestas: si vuelve a pasar sobre
+  /// la misma visita, se destaca otra vez.
+  Future<void> _markNewRescheduleReceived(List<dynamic> pending) async {
+    final received = {
+      for (final v in pending)
+        if (_rescheduleState(v) == 'received')
+          '${_visitIdOf(v)}|${jsonEncode(getJsonField(v, r'''$.proposedTimeSlots'''))}',
+    };
+    if (received.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final seen = (prefs.getStringList(_kSeenReceivedKey) ?? []).toSet();
+    final fresh = received.difference(seen);
+    if (fresh.isEmpty) return;
+    await prefs.setStringList(_kSeenReceivedKey, [...seen, ...fresh]);
+    safeSetState(() =>
+        _newRescheduleReceived = fresh.map((k) => k.split('|').first).toSet());
+  }
+
   List<dynamic> _confirmedVisits = [];
   List<dynamic> _activeOffers = [];
   bool _isLoadingVisits = true;
@@ -235,6 +308,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           _confirmedVisits = confirmed;
           _isLoadingVisits = false;
         });
+        _loadRescheduleReceived(pending);
         debugPrint(
             '[OwnerVisits] pending=${pending.length}, confirmed=${confirmed.length}');
       } else {
@@ -659,6 +733,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     dynamic visitJson, {
     required String statusLabel,
     required VoidCallback onViewTap,
+    bool highlight = false,
   }) {
     final date = _formatDate(visitJson);
     final buyerName =
@@ -666,7 +741,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             getJsonField(visitJson, r'''$.requester.name''')?.toString() ??
             'Visitante';
 
-    return Container(
+    final card = Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -718,6 +793,33 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           ),
         ],
       ),
+    );
+    // Toda la card abre el detalle, no solo el ojo.
+    final tappable = GestureDetector(
+      onTap: onViewTap,
+      behavior: HitTestBehavior.opaque,
+      child: card,
+    );
+    if (!highlight) return tappable;
+    // Punto rojo: novedad que el propietario todavía no vio.
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        tappable,
+        Positioned(
+          top: -3,
+          right: -3,
+          child: Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.red,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1683,35 +1785,6 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // ── BANNER "Tu propiedad ya está publicada" ────────
-                          const SizedBox(height: 16),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: _bannerGreen,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.check_circle_rounded,
-                                    color: Colors.white, size: 22),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'Tu propiedad ya está publicada',
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
                           // ── MÉTRICAS ──────────────────────────────────────
                           const SizedBox(height: 20),
                           GridView.count(
@@ -1769,9 +1842,15 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                       ?.toString() ??
                                   getJsonField(v, r'''$.id''')?.toString() ??
                                   '';
+                              final reschedule = _rescheduleState(v);
                               return _visitCard(context, v,
-                                  statusLabel: 'Pendiente de confirmación',
-                                  onViewTap: () {
+                                  statusLabel: reschedule == 'sent'
+                                      ? 'Solicitud de reprogramación enviada'
+                                      : reschedule == 'received'
+                                          ? 'Solicitud de reprogramación recibida'
+                                          : 'Pendiente de confirmación',
+                                  highlight: _newRescheduleReceived
+                                      .contains(visitId), onViewTap: () {
                                 context
                                     .pushNamed(
                                       DOVIACLIENTPropuestaDeVisitaWidget

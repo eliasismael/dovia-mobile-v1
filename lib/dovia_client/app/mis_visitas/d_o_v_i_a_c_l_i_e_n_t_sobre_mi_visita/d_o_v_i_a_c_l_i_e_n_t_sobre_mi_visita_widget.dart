@@ -13,6 +13,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_users.dart';
 import '/backend/api_requests/api_properties.dart';
+import '/domain/offer_json.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_ofertar/d_o_v_i_a_c_l_i_e_n_t_ofertar_widget.dart';
 import '../../principal/agendar_cita/agendar_cita_widget.dart';
 import 'reschedule_visit_widget.dart';
@@ -56,6 +57,9 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
   String _entryInstructions = '';
   double? _lat;
   double? _lng;
+
+  /// Propiedad completa: la visita no trae nombre, precio ni medidas.
+  Map<String, dynamic> _propertyData = {};
 
   String _advisorName = '';
   String _advisorAge = '';
@@ -126,45 +130,47 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
         }
       }
 
-      // If coordinates not populated by visit details, fetch from property API
-      if (_lat == null &&
-          _lng == null &&
-          widget.propertyId != null &&
-          widget.propertyId!.isNotEmpty) {
+      // La propiedad completa trae nombre, fotos, precio, medidas y
+      // coordenadas; el detalle de la visita no siempre.
+      Map<String, dynamic> propData = {};
+      final propertyId = widget.propertyId?.isNotEmpty == true
+          ? widget.propertyId!
+          : (_str(property, 'id') ?? '');
+      if (propertyId.isNotEmpty) {
         final propRes =
             await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
-          propertyId: widget.propertyId,
+          propertyId: propertyId,
         );
-        if (propRes.succeeded) {
-          final propData = getJsonField(propRes.jsonBody, r'$.data.data') ??
-              getJsonField(propRes.jsonBody, r'$.data');
-          if (propData is Map) {
-            final geo =
-                _deepValue(propData, ['location', 'geo', 'coordinates']);
-            if (geo is List && geo.length >= 2) {
-              _lat = (geo[1] as num?)?.toDouble();
-              _lng = (geo[0] as num?)?.toDouble();
-            }
-            if (_address.isEmpty) {
-              _address =
-                  _deepStr(propData, ['location', 'address', 'fullAddress']) ??
-                      _deepStr(propData, ['location', 'address', 'street']) ??
-                      '';
-            }
-          }
-        }
+        final raw = propRes.succeeded
+            ? (getJsonField(propRes.jsonBody, r'$.data.data') ??
+                getJsonField(propRes.jsonBody, r'$.data'))
+            : null;
+        if (raw is Map) propData = Map<String, dynamic>.from(raw);
       }
+      if (!mounted) return;
 
       safeSetState(() {
-        _propertyName = _str(property, 'name') ?? _str(property, 'title') ?? '';
+        _propertyData = propData;
+        String? pick(String? a, String? b) =>
+            (a != null && a.isNotEmpty) ? a : b;
 
-        final images = property is Map ? property['images'] : null;
-        if (images is List && images.isNotEmpty) {
-          _propertyImageUrl = images[0]['url']?.toString() ?? '';
-        }
+        _propertyName = pick(
+                pick(_str(propData, 'name'), _str(propData, 'title')),
+                pick(_str(property, 'name'), _str(property, 'title'))) ??
+            '';
 
-        _address = _deepStr(property, ['location', 'address', 'fullAddress']) ??
-            _deepStr(property, ['location', 'address', 'street']) ??
+        _propertyImageUrl =
+            (propData.isNotEmpty ? firstPropertyPhotoUrl(propData) : null) ??
+                (property is Map
+                    ? firstPropertyPhotoUrl(Map<String, dynamic>.from(property))
+                    : null) ??
+                '';
+
+        _address = pick(
+                pick(_deepStr(propData, ['location', 'address', 'fullAddress']),
+                    _deepStr(property, ['location', 'address', 'fullAddress'])),
+                pick(_deepStr(propData, ['location', 'address', 'street']),
+                    _deepStr(property, ['location', 'address', 'street']))) ??
             '';
 
         final slot = visit is Map ? visit['confirmedTimeSlot'] : null;
@@ -182,7 +188,9 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
         _entryInstructions =
             _deepStr(property, ['infoHQ', 'visitorInstructions']) ?? '';
 
-        final geo = _deepValue(property, ['location', 'geo', 'coordinates']);
+        // GeoJSON: [longitud, latitud].
+        final geo = _deepValue(propData, ['location', 'geo', 'coordinates']) ??
+            _deepValue(property, ['location', 'geo', 'coordinates']);
         if (geo is List && geo.length >= 2) {
           _lng = (geo[0] as num?)?.toDouble();
           _lat = (geo[1] as num?)?.toDouble();
@@ -290,35 +298,30 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
     return time.isNotEmpty ? '$date $time' : date;
   }
 
+  /// Abre Google Maps en las coordenadas de la propiedad; si no hay,
+  /// busca por la dirección.
   Future<void> _openLocation() async {
+    final String query;
     if (_lat != null && _lng != null) {
-      // Universal geo URI — opens in any maps app the user has
-      final geoUri = Uri.parse('geo:$_lat,$_lng?q=$_lat,$_lng');
-      if (await canLaunchUrl(geoUri)) {
-        await launchUrl(geoUri, mode: LaunchMode.externalApplication);
-        return;
-      }
-      // Fallback: Google Maps deep link
-      final googleUri = Uri.parse(
-          'https://www.google.com/maps/search/?api=1&query=$_lat,$_lng');
-      if (await canLaunchUrl(googleUri)) {
-        await launchUrl(googleUri, mode: LaunchMode.externalApplication);
-        return;
-      }
+      query = '$_lat,$_lng';
     } else if (_address.isNotEmpty) {
-      final encoded = Uri.encodeComponent(_address);
-      final googleUri =
-          Uri.parse('https://www.google.com/maps/search/?api=1&query=$encoded');
-      if (await canLaunchUrl(googleUri)) {
-        await launchUrl(googleUri, mode: LaunchMode.externalApplication);
-        return;
-      }
+      query = _address;
+    } else {
+      _snack('La propiedad no tiene ubicación cargada.');
+      return;
     }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir el mapa')),
-      );
-    }
+    final uri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}');
+    var opened = false;
+    try {
+      opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+    if (!opened) _snack('No se pudo abrir el mapa');
+  }
+
+  void _snack(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   Future<void> _cancelVisit() async {
@@ -501,6 +504,36 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                 child: custom_widgets.DoviaClientHouseCard(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
                                   height: 240.0,
+                                  propertyId: widget.propertyId,
+                                  authToken: currentAuthenticationToken,
+                                  name: _propertyName.isNotEmpty
+                                      ? _propertyName
+                                      : null,
+                                  type: getJsonField(
+                                      _propertyData, r'$.listingType'),
+                                  price: getJsonField(_propertyData,
+                                              r'$.offerOptions[0].price') !=
+                                          null
+                                      ? '${getJsonField(_propertyData, r'$.offerOptions[0].currency') ?? 'USD'} ${getJsonField(_propertyData, r'$.offerOptions[0].price')}'
+                                      : null,
+                                  landArea: castToType<double>(getJsonField(
+                                      _propertyData,
+                                      r'$.features.general.landArea')),
+                                  constructionArea: castToType<int>(getJsonField(
+                                      _propertyData,
+                                      r'$.features.general.constructionArea')),
+                                  bedrooms: castToType<int>(getJsonField(
+                                      _propertyData,
+                                      r'$.features.general.bedrooms')),
+                                  bathrooms: castToType<int>(getJsonField(
+                                      _propertyData,
+                                      r'$.features.general.bathrooms')),
+                                  propertyType: getJsonField(
+                                          _propertyData, r'$.propertyType')
+                                      ?.toString(),
+                                  isFavorite: getJsonField(
+                                          _propertyData, r'$.isFavorite') ==
+                                      true,
                                   imageUrl: _propertyImageUrl.isNotEmpty
                                       ? _propertyImageUrl
                                       : 'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
@@ -731,9 +764,6 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
       padding: const EdgeInsetsDirectional.fromSTEB(0.0, 21.0, 0.0, 0.0),
       child: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -794,11 +824,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 padding: const EdgeInsetsDirectional.fromSTEB(
-                    10.0, 16.0, 10.0, 16.0),
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).alternate,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
+                    20.0, 14.0, 20.0, 14.0),
+                decoration: _fieldDecoration,
                 child: Text(
                   content.isNotEmpty ? content : 'Sin instrucciones',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -857,14 +884,17 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
     );
   }
 
+  /// Mismo aspecto que los inputs de publicar propiedad: blanco, sin borde.
+  BoxDecoration get _fieldDecoration => BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(8.0),
+      );
+
   Widget _infoText(String text) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      padding: const EdgeInsetsDirectional.fromSTEB(10.0, 12.0, 10.0, 12.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).alternate,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 20.0, 14.0),
+      decoration: _fieldDecoration,
       child: Text(
         text,
         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -880,8 +910,10 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
   }
 
   Widget _emptyText(String text) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 20.0, 14.0),
+      decoration: _fieldDecoration,
       child: Text(
         text,
         style: FlutterFlowTheme.of(context).bodyMedium.override(

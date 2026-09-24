@@ -1,4 +1,4 @@
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
+import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
@@ -14,22 +14,22 @@ class DHCLIENTBienvenidaModel
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   // Model for FIXED_DOVIA_ICON component.
   late FixedDoviaIconModel fixedDoviaIconModel;
-  // Model for DH_ASSOCIATE_Navbar component.
-  late DHASSOCIATENavbarModel dHASSOCIATENavbarModel;
+  // Model for DH_CLIENT_Navbar component.
+  late DHCLIENTNavbarModel dHCLIENTNavbarModel;
 
   @override
   void initState(BuildContext context) {
     cornerGradientBackgroundModel =
         createModel(context, () => CornerGradientBackgroundModel());
     fixedDoviaIconModel = createModel(context, () => FixedDoviaIconModel());
-    dHASSOCIATENavbarModel =
-        createModel(context, () => DHASSOCIATENavbarModel());
+    dHCLIENTNavbarModel =
+        createModel(context, () => DHCLIENTNavbarModel());
   }
 
   @override
   void dispose() {
     cornerGradientBackgroundModel.dispose();
     fixedDoviaIconModel.dispose();
-    dHASSOCIATENavbarModel.dispose();
+    dHCLIENTNavbarModel.dispose();
   }
 }

@@ -1,7 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
-import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -749,9 +749,9 @@ class _LISTINGHQNotificationsWidgetState
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     wrapWithModel(
-                      model: _model.oPERATIVELISTINGNavbarModel,
+                      model: _model.lISTINGHQNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const OPERATIVELISTINGNavbarWidget(),
+                      child: const LISTINGHQNavbarWidget(),
                     ),
                   ],
                 ),

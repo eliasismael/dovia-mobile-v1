@@ -48,7 +48,11 @@ class _DOVIACLIENTMisVisitasWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => DOVIACLIENTMisVisitasModel());
+    _loadVisits();
+    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
 
+  void _loadVisits() {
     // All PENDING visits — classify by substatus in each visit's response body
     _pendingOwnerFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
       authToken: currentAuthenticationToken,
@@ -94,8 +98,6 @@ class _DOVIACLIENTMisVisitasWidgetState
       page: '1',
       limit: '50',
     );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
@@ -261,6 +263,7 @@ class _DOVIACLIENTMisVisitasWidgetState
                                             title: 'Visitas re-programadas',
                                             items: rescheduled,
                                             cardType: _CardType.reschedule,
+                                            onChanged: _refreshPending,
                                           ),
                                         ),
                                       ),
@@ -281,7 +284,9 @@ class _DOVIACLIENTMisVisitasWidgetState
                                                         'Tus próximas visitas',
                                                     items: upcoming,
                                                     cardType:
-                                                        _CardType.upcoming)));
+                                                        _CardType.upcoming,
+                                                    onChanged:
+                                                        _refreshPending)));
                                       }
                                     },
                                     topPadding:
@@ -452,30 +457,26 @@ class _DOVIACLIENTMisVisitasWidgetState
       );
     }).toList();
 
-    return SizedBox(
-      height: _cardHeight(cardType),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: cards.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (ctx, i) => cards[i],
+    // Alto según el contenido: la card más alta define la fila.
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              if (i > 0) const SizedBox(width: 12),
+              cards[i],
+            ],
+          ],
+        ),
       ),
     );
   }
 
-  double _cardHeight(_CardType t) {
-    return t == _CardType.completed ? 270 : 310;
-  }
-
   void _refreshPending() {
-    safeSetState(() {
-      _pendingOwnerFuture = DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
-        authToken: currentAuthenticationToken,
-        status: 'PENDING',
-        page: '1',
-        limit: '20',
-      );
-    });
+    safeSetState(_loadVisits);
   }
 
   // ── Ofertas section ─────────────────────────────────────────────────────────
@@ -604,13 +605,27 @@ class _VisitCardState extends State<_VisitCard> {
     );
   }
 
-  bool get isPending =>
-      widget.visitStatus == 'PENDING' &&
-      widget.visitSubstatus == 'MISSING_INFO';
   bool get isReschedule => widget.visitSubstatus == 'RESCHEDULE_REQUIRED';
   bool get isConfirmed =>
       widget.visitSubstatus == 'ASSIGNED' ||
       widget.visitSubstatus == 'READY_TO_ASSIGN_SHOWING';
+
+  /// El propietario todavía no eligió ninguna de las fechas propuestas.
+  bool get isPending =>
+      !isReschedule &&
+      !isConfirmed &&
+      (widget.visitStatus == 'PENDING' ||
+          widget.visitSubstatus == 'MISSING_INFO');
+
+  /// Tocar la card: si hay que reprogramar abre "Agendar cita", si no el
+  /// detalle de la visita.
+  void _onCardTap(BuildContext ctx) {
+    if (widget.cardType == _CardType.reschedule || isReschedule) {
+      _onRescheduleTap(ctx);
+    } else {
+      _navigateToDetail(ctx);
+    }
+  }
 
   String get _label {
     if (widget.cardType == _CardType.completed) return 'Completada';
@@ -649,41 +664,120 @@ class _VisitCardState extends State<_VisitCard> {
   void _onCancelTap(BuildContext ctx) {
     showDialog(
       context: ctx,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('Cancelar visita'),
-        content:
-            const Text('¿Estás seguro de que deseas cancelar esta visita?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Volver'),
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: Colors.white,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 340),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.event_busy_outlined,
+                      color: Colors.red, size: 28),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Cancelar visita',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: dark),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '¿Estás seguro de que deseas cancelar esta visita? '
+                  'Esta acción no se puede deshacer.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 14,
+                      color: Color(0xFF6B7280)),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: () => _confirmCancel(ctx, dialogCtx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24)),
+                    ),
+                    child: const Text('Sí, cancelar',
+                        style: TextStyle(
+                            fontFamily: 'Public Sans',
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(dialogCtx),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: primary),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24)),
+                    ),
+                    child: const Text('Volver',
+                        style: TextStyle(
+                            fontFamily: 'Public Sans',
+                            fontWeight: FontWeight.w600,
+                            color: primary)),
+                  ),
+                ),
+              ],
+            ),
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogCtx);
-              final res = await DOVIAAPIVisitContextGroup.cancelVisitCall.call(
-                authToken: currentAuthenticationToken,
-                visitId: widget.visitId,
-              );
-              if (ctx.mounted) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(
-                      content: Text(res.succeeded
-                          ? 'Visita cancelada'
-                          : 'Error al cancelar la visita')),
-                );
-              }
-            },
-            child:
-                const Text('Sí, cancelar', style: TextStyle(color: Colors.red)),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Future<void> _confirmCancel(BuildContext ctx, BuildContext dialogCtx) async {
+    // Se toma antes: si la card sale de la lista, su contexto deja de existir.
+    final messenger = ScaffoldMessenger.of(ctx);
+    Navigator.pop(dialogCtx);
+    final res = await DOVIAAPIVisitContextGroup.cancelVisitCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: widget.visitId,
+    );
+    if (res.succeeded) widget.onRescheduleSuccess?.call();
+    messenger.showSnackBar(
+      SnackBar(
+          content: Text(res.succeeded
+              ? 'Visita cancelada'
+              : 'Error al cancelar la visita')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _onCardTap(context),
+      behavior: HitTestBehavior.opaque,
+      child: _buildCard(context),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
     return Container(
       width: 200,
       decoration: BoxDecoration(
@@ -773,6 +867,7 @@ class _VisitCardState extends State<_VisitCard> {
                         fontSize: 12,
                         color: Colors.grey)),
             ],
+            const SizedBox(height: 10),
             const Spacer(),
             // ── Actions ───────────────────────────────────────────────
             ..._buildActions(context),
@@ -905,16 +1000,29 @@ class _VisitCardState extends State<_VisitCard> {
   }
 }
 
-class _VerMasScreen extends StatelessWidget {
+class _VerMasScreen extends StatefulWidget {
   final String title;
   final List<dynamic> items;
   final _CardType cardType;
+
+  final VoidCallback? onChanged;
 
   const _VerMasScreen({
     required this.title,
     required this.items,
     required this.cardType,
+    this.onChanged,
   });
+
+  @override
+  State<_VerMasScreen> createState() => _VerMasScreenState();
+}
+
+class _VerMasScreenState extends State<_VerMasScreen> {
+  late final List<dynamic> items = List.of(widget.items);
+
+  String get title => widget.title;
+  _CardType get cardType => widget.cardType;
 
   @override
   Widget build(BuildContext context) {
@@ -988,6 +1096,12 @@ class _VerMasScreen extends StatelessWidget {
                 visitStatus: visitStatus,
                 proposedTimeSlots: proposedSlots,
                 cardType: cardType,
+                // Cancelada o reprogramada: sale de la grilla y se recarga
+                // la pantalla de atrás.
+                onRescheduleSuccess: () {
+                  setState(() => items.remove(v));
+                  widget.onChanged?.call();
+                },
               );
             },
           ),

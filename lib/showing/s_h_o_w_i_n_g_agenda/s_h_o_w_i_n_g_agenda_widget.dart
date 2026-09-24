@@ -26,6 +26,7 @@ class _AgendaVisit {
   final String time;
   final String imageUrl;
   final String substatus;
+  final String status;
   final double? lat;
   final double? lng;
 
@@ -38,6 +39,7 @@ class _AgendaVisit {
     this.time = '',
     this.imageUrl = '',
     this.substatus = '',
+    this.status = '',
     this.lat,
     this.lng,
   });
@@ -89,19 +91,27 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     safeSetState(() => _loading = true);
     final token = currentAuthenticationToken ?? '';
 
-    final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
-      authToken: token,
-      page: '1',
-      limit: '100',
-    );
-
-    if (!res.succeeded) {
-      if (mounted) safeSetState(() => _loading = false);
-      return;
+    const pageSize = 50;
+    final visits = <dynamic>[];
+    for (var page = 1; page <= 20; page++) {
+      final res =
+          await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
+        authToken: token,
+        page: '$page',
+        limit: '$pageSize',
+      );
+      if (!res.succeeded) {
+        if (page == 1) {
+          if (mounted) safeSetState(() => _loading = false);
+          return;
+        }
+        break;
+      }
+      final raw = getJsonField(res.jsonBody, r'$.data');
+      final chunk = raw is List ? raw : const [];
+      visits.addAll(chunk);
+      if (chunk.length < pageSize) break;
     }
-
-    final raw = getJsonField(res.jsonBody, r'$.data');
-    final visits = raw is List ? raw : <dynamic>[];
 
     // Enrich each visit with title/address/owner/coordinates via its overview.
     final ovFutures = visits.map((v) {
@@ -125,9 +135,14 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
       final date = slot['date']?.toString() ?? '';
       final time = slot['time']?.toString() ?? '';
 
-      String title = '';
-      String address = '';
-      String ownerName = v['ownerFullName']?.toString() ?? '';
+      final summary = v['property'] is Map ? v['property'] as Map : const {};
+      final listOwner =
+          v['ownerProfile'] is Map ? v['ownerProfile'] as Map : const {};
+      String title = summary['name']?.toString() ?? '';
+      String address = summary['address']?.toString() ?? '';
+      String ownerName = listOwner['fullName']?.toString() ??
+          v['ownerFullName']?.toString() ??
+          '';
       double? lat;
       double? lng;
 
@@ -137,11 +152,15 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
         if (data is Map) {
           final prop = data['property'];
           if (prop is Map) {
-            title =
-                prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+            if (title.isEmpty) {
+              title =
+                  prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+            }
             if (image.isEmpty) image = prop['image']?.toString() ?? '';
             final addr = _deepMap(prop, ['location', 'address']);
-            address = addr?['fullAddress']?.toString() ?? '';
+            if (address.isEmpty) {
+              address = addr?['fullAddress']?.toString() ?? '';
+            }
             final coords = _deepValue(prop, ['location', 'geo', 'coordinates']);
             if (coords is List && coords.length >= 2) {
               lng = (coords[0] as num?)?.toDouble();
@@ -166,6 +185,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
         time: time,
         imageUrl: image,
         substatus: v['substatus']?.toString() ?? '',
+        status: v['status']?.toString() ?? '',
         lat: lat,
         lng: lng,
       ));
@@ -268,21 +288,26 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
       return;
     }
 
-    final googleMapsUrl =
-        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
-    final appleMapsUrl = Uri.parse('https://maps.apple.com/?q=$query');
+    // "En camino" en el backend: revela propietario y cliente en Detalles.
+    DOVIAAPIVisitContextGroup.operativeListerOnMyWayCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: visit.visitId,
+    );
+
+    // Sin canLaunchUrl: en Android 11+ devuelve false sin <queries>.
+    final uri = isiOS
+        ? Uri.parse('https://maps.apple.com/?daddr=$query')
+        : Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&destination=$query');
+    var opened = false;
     try {
-      if (await canLaunchUrl(googleMapsUrl)) {
-        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
-      } else if (await canLaunchUrl(appleMapsUrl)) {
-        await launchUrl(appleMapsUrl, mode: LaunchMode.externalApplication);
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('No se pudo abrir la app de navegación.')),
-        );
-      }
+      opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {}
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir la app de navegación.')),
+      );
+    }
   }
 
   String _formatDateString(String dateStr) {
@@ -319,27 +344,9 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     }
   }
 
-  // A visit is "overdue" when >24h passed since its scheduled start and it
-  // hasn't been registered/closed yet.
-  bool _isOverdue(_AgendaVisit visit) {
-    final s = visit.substatus.toUpperCase();
-    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
-    if (visit.date.isEmpty) return false;
-    try {
-      final d = visit.date.split('-');
-      final t = visit.time.isNotEmpty ? visit.time.split(':') : ['0', '0'];
-      final dt = DateTime(
-        int.parse(d[0]),
-        int.parse(d[1]),
-        int.parse(d[2]),
-        int.parse(t[0]),
-        t.length > 1 ? int.parse(t[1]) : 0,
-      );
-      return DateTime.now().difference(dt).inHours > 24;
-    } catch (_) {
-      return false;
-    }
-  }
+  // Vencida = la marcó el backend: 24 h después de terminada la visita sin
+  // reporte pasa a REPORT_EXPIRED.
+  bool _isOverdue(_AgendaVisit visit) => visit.substatus == 'REPORT_EXPIRED';
 
   // Report an overdue visit: justify the delay, then unassign/republish it.
   Future<void> _onReport(String visitId) async {
@@ -358,10 +365,11 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     );
     if (message == null || message.trim().isEmpty) return;
 
-    final res = await DOVIAAPIVisitContextGroup.showingReportProblemCall.call(
+    final res =
+        await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
       authToken: currentAuthenticationToken,
       visitId: visitId,
-      message: message.trim(),
+      reason: message.trim(),
     );
     if (!mounted) return;
 
@@ -474,8 +482,8 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                               )
                             else if (visibleDates.isEmpty)
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 60.0),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 60.0),
                                 child: Text(
                                   _model.selectedDate != null
                                       ? 'No tienes visitas agendadas para esta fecha.'
@@ -690,7 +698,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                                     color: primary,
                                   ),
                         ),
-                        _buildStatusPill(visit.substatus),
+                        _buildStatusPill(visit.status, visit.substatus),
                       ],
                     ),
                   ],
@@ -714,57 +722,58 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                     )
                   else
                     Row(
-                    children: [
-                      Expanded(
-                        child: FFButtonWidget(
-                          onPressed: () {
-                            context.pushNamed(
-                              SHOWINGPropiedadAMostrarWidget.routeName,
-                              queryParameters: {
-                                'visitId': serializeParam(
-                                    visit.visitId, ParamType.String),
-                              }.withoutNulls,
-                            );
-                          },
-                          text: 'Detalles',
-                          options: FFButtonOptions(
-                            height: 30.0,
-                            color: Colors.transparent,
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.inter(
-                                      color: primary, fontSize: 14.0),
-                                ),
-                            elevation: 0.0,
-                            borderSide: BorderSide(color: primary, width: 1.0),
-                            borderRadius: BorderRadius.circular(24.0),
-                          ),
-                        ),
-                      ),
-                      if (isToday) ...[
-                        const SizedBox(width: 8.0),
+                      children: [
                         Expanded(
                           child: FFButtonWidget(
-                            onPressed: () => _startRoute(visit),
-                            text: 'Iniciar ruta',
+                            onPressed: () {
+                              context.pushNamed(
+                                SHOWINGPropiedadAMostrarWidget.routeName,
+                                queryParameters: {
+                                  'visitId': serializeParam(
+                                      visit.visitId, ParamType.String),
+                                }.withoutNulls,
+                              );
+                            },
+                            text: 'Detalles',
                             options: FFButtonOptions(
                               height: 30.0,
-                              color: primary,
+                              color: Colors.transparent,
                               textStyle: FlutterFlowTheme.of(context)
                                   .titleSmall
                                   .override(
                                     font: GoogleFonts.inter(
-                                        color: Colors.white, fontSize: 14.0),
+                                        color: primary, fontSize: 14.0),
                                   ),
                               elevation: 0.0,
+                              borderSide:
+                                  BorderSide(color: primary, width: 1.0),
                               borderRadius: BorderRadius.circular(24.0),
                             ),
                           ),
                         ),
-                      ]
-                    ],
-                  ),
+                        if (isToday) ...[
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: FFButtonWidget(
+                              onPressed: () => _startRoute(visit),
+                              text: 'Iniciar ruta',
+                              options: FFButtonOptions(
+                                height: 30.0,
+                                color: primary,
+                                textStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                          color: Colors.white, fontSize: 14.0),
+                                    ),
+                                elevation: 0.0,
+                                borderRadius: BorderRadius.circular(24.0),
+                              ),
+                            ),
+                          ),
+                        ]
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -774,33 +783,32 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     );
   }
 
-  Widget _buildStatusPill(String substatus) {
-    String statusStr = substatus;
-    Color bgColor = const Color(0xFFF5F5F5);
-    Color textColor = const Color(0xFF8C8C8C);
+  Widget _buildStatusPill(String status, String substatus) {
+    String statusStr = 'Pendiente';
+    Color bgColor = const Color(0xFFFFD78D);
+    Color textColor = Colors.orange;
 
-    switch (substatus) {
-      case 'ASSIGNED':
-        statusStr = 'Pendiente';
-        bgColor = const Color(0xFFFFD78D);
-        textColor = Colors.orange;
-        break;
-      case 'VISIT_IN_PROGRESS':
-      case 'AWAITING_REPORT':
-        statusStr = 'En proceso';
-        bgColor = const Color(0xFFD6E4FF);
-        textColor = const Color(0xFF1890FF);
-        break;
-      case 'CANCELLED':
-        statusStr = 'Cancelada';
-        bgColor = const Color(0xFFFFF1F0);
-        textColor = const Color(0xFFF5222D);
-        break;
-      case 'COMPLETED':
-        statusStr = 'Registrada';
-        bgColor = const Color(0xFFF5F5F5);
-        textColor = const Color(0xFF8C8C8C);
-        break;
+    if (status == 'COMPLETED') {
+      statusStr = 'Registrada';
+      bgColor = const Color(0xFFE6F4EA);
+      textColor = const Color(0xFF007376);
+    } else if (status == 'CANCELLED' ||
+        substatus == 'CANCELLED' ||
+        substatus == 'PROBLEM_REPORTED' ||
+        substatus == 'NOT_COMPLETED_REPORTED') {
+      statusStr = 'Cancelada';
+      bgColor = const Color(0xFFFFF1F0);
+      textColor = const Color(0xFFF5222D);
+    } else if (substatus == 'REPORT_EXPIRED') {
+      statusStr = 'Vencida';
+      bgColor = const Color(0xFFFFF1F0);
+      textColor = const Color(0xFFC90A0A);
+    } else if (status == 'IN_PROGRESS' ||
+        substatus == 'VISIT_IN_PROGRESS' ||
+        substatus == 'AWAITING_REPORT') {
+      statusStr = 'En proceso';
+      bgColor = const Color(0xFFD6E4FF);
+      textColor = const Color(0xFF1890FF);
     }
 
     return Container(

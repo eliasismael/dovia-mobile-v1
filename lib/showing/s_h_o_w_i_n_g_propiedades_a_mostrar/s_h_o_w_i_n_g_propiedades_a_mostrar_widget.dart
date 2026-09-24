@@ -72,15 +72,22 @@ class _SHOWINGPropiedadesAMostrarWidgetState
 
   Future<List<_ShowingVisit>> _fetchVisits() async {
     final token = currentAuthenticationToken ?? '';
-    final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
-      authToken: token,
-      page: '1',
-      limit: '100',
-    );
-    if (!res.succeeded) return [];
-
-    final raw = getJsonField(res.jsonBody, r'$.data');
-    final visits = raw is List ? raw : <dynamic>[];
+    // Trae todas las páginas: el listado no tiene tope.
+    const pageSize = 50;
+    final visits = <dynamic>[];
+    for (var page = 1; page <= 20; page++) {
+      final res =
+          await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
+        authToken: token,
+        page: '$page',
+        limit: '$pageSize',
+      );
+      if (!res.succeeded) break;
+      final raw = getJsonField(res.jsonBody, r'$.data');
+      final chunk = raw is List ? raw : const [];
+      visits.addAll(chunk);
+      if (chunk.length < pageSize) break;
+    }
 
     final ovFutures = visits.map((v) {
       final id = v is Map ? v['visitId']?.toString() ?? '' : '';
@@ -97,8 +104,11 @@ class _SHOWINGPropiedadesAMostrarWidgetState
         image = (v['property'] as Map)['image']?.toString() ?? '';
       }
 
-      String title = '';
-      String address = '';
+      // El listado ya trae nombre, dirección y foto; el overview completa.
+      final summary =
+          v is Map && v['property'] is Map ? v['property'] as Map : const {};
+      String title = summary['name']?.toString() ?? '';
+      String address = summary['address']?.toString() ?? '';
       String ownerName = '';
       double? lat;
       double? lng;
@@ -108,9 +118,14 @@ class _SHOWINGPropiedadesAMostrarWidgetState
         if (data is Map) {
           final prop = data['property'];
           if (prop is Map) {
-            title = prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+            if (title.isEmpty) {
+              title =
+                  prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+            }
             final addr = _deepMap(prop, ['location', 'address']);
-            address = addr?['fullAddress']?.toString() ?? '';
+            if (address.isEmpty) {
+              address = addr?['fullAddress']?.toString() ?? '';
+            }
             final coords = _deepValue(prop, ['location', 'geo', 'coordinates']);
             if (coords is List && coords.length >= 2) {
               lng = (coords[0] as num?)?.toDouble();
@@ -206,7 +221,8 @@ class _SHOWINGPropiedadesAMostrarWidgetState
     );
     if (message == null || message.trim().isEmpty) return;
 
-    final res = await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
+    final res =
+        await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
       authToken: currentAuthenticationToken,
       visitId: visitId,
       reason: message.trim(),
@@ -404,36 +420,31 @@ class _SHOWINGPropiedadesAMostrarWidgetState
 
     if (confirm != true) return;
 
-    // Marca la ruta como iniciada ("en camino") SOLO localmente: desbloquea la
-    // info de contacto en la pantalla de detalles. No se notifica al backend para
-    // no cambiar el estado de la visita (eso la sacaría de "hoy"/"upcoming").
     try {
       if (v.visitId.isNotEmpty &&
           !FFAppState().routeStartedVisits.contains(v.visitId)) {
         FFAppState().addToRouteStartedVisits(v.visitId);
       }
     } catch (_) {}
+    // "En camino" en el backend: no cambia el estado de la visita y revela
+    // propietario y cliente en Detalles. Si ya estaba marcado, se ignora.
+    DOVIAAPIVisitContextGroup.operativeListerOnMyWayCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: v.visitId,
+    );
 
-    final googleMapsUrl = Uri.parse(
-        "https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}");
-    final appleMapsUrl =
-        Uri.parse("https://maps.apple.com/?q=${v.lat},${v.lng}");
-
+    // Sin canLaunchUrl: en Android 11+ devuelve false sin <queries>.
+    final uri = isiOS
+        ? Uri.parse('https://maps.apple.com/?daddr=${v.lat},${v.lng}')
+        : Uri.parse('https://www.google.com/maps/dir/?api=1'
+            '&destination=${v.lat},${v.lng}');
+    var opened = false;
     try {
-      if (await canLaunchUrl(googleMapsUrl)) {
-        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
-      } else if (await canLaunchUrl(appleMapsUrl)) {
-        await launchUrl(appleMapsUrl, mode: LaunchMode.externalApplication);
-      } else {
-        final webUrl =
-            Uri.parse("https://www.google.com/maps/place/${v.lat},${v.lng}");
-        if (await canLaunchUrl(webUrl)) {
-          await launchUrl(webUrl);
-        }
-      }
-    } catch (e) {
+      opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+    if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo abrir la app de mapas: $e')),
+        const SnackBar(content: Text('No se pudo abrir el mapa')),
       );
     }
   }
@@ -620,7 +631,8 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                         .titleSmall
                                         .fontStyle,
                                   ),
-                                  color: FlutterFlowTheme.of(context).primaryText,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
                                   fontSize: 14.0,
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.normal,
@@ -708,22 +720,23 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                             iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 0.0),
                             color: FlutterFlowTheme.of(context).primary,
-                            textStyle:
-                                FlutterFlowTheme.of(context).titleSmall.override(
-                                      font: GoogleFonts.publicSans(
-                                        fontWeight: FontWeight.normal,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                      color: Colors.white,
-                                      fontSize: 14.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.normal,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
+                            textStyle: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
+                                  font: GoogleFonts.publicSans(
+                                    fontWeight: FontWeight.normal,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .fontStyle,
+                                  ),
+                                  color: Colors.white,
+                                  fontSize: 14.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .fontStyle,
+                                ),
                             elevation: 0.0,
                             borderRadius: BorderRadius.circular(24.0),
                           ),

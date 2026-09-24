@@ -11,7 +11,10 @@ import 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_widget.dart'
     show DOVIACLIENTPropiedadSeleccionadaNewWidget;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_header/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_header_widget.dart';
+import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
+import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 
 class DOVIACLIENTPropiedadSeleccionadaNewModel
     extends FlutterFlowModel<DOVIACLIENTPropiedadSeleccionadaNewWidget> {
@@ -39,8 +42,12 @@ class DOVIACLIENTPropiedadSeleccionadaNewModel
   late PropiedadesSobreElSectorModel propiedadesSobreElSectorModel;
   // Model for DOVIA_CLIENT_Navbar component.
   late DOVIACLIENTNavbarModel dOVIACLIENTNavbarModel;
-  // Model for SHOWING_Header component.
+  // Models for OPERATIVE_LISTING header and navbar (read-only mode).
+  late OPERATIVELISTINGHeaderModel oPERATIVELISTINGHeaderModel;
+  late OPERATIVELISTINGNavbarModel oPERATIVELISTINGNavbarModel;
+  // Header y navbar del Showing (solo lectura desde una visita).
   late SHOWINGHeaderModel sHOWINGHeaderModel;
+  late SHOWINGNavbarModel sHOWINGNavbarModel;
 
   @override
   void initState(BuildContext context) {
@@ -56,7 +63,12 @@ class DOVIACLIENTPropiedadSeleccionadaNewModel
         createModel(context, () => PropiedadesSobreElSectorModel());
     dOVIACLIENTNavbarModel =
         createModel(context, () => DOVIACLIENTNavbarModel());
+    oPERATIVELISTINGHeaderModel =
+        createModel(context, () => OPERATIVELISTINGHeaderModel());
+    oPERATIVELISTINGNavbarModel =
+        createModel(context, () => OPERATIVELISTINGNavbarModel());
     sHOWINGHeaderModel = createModel(context, () => SHOWINGHeaderModel());
+    sHOWINGNavbarModel = createModel(context, () => SHOWINGNavbarModel());
   }
 
   @override
@@ -68,6 +80,9 @@ class DOVIACLIENTPropiedadSeleccionadaNewModel
     porpiedadesAmenidadesModel.dispose();
     propiedadesSobreElSectorModel.dispose();
     dOVIACLIENTNavbarModel.dispose();
+    oPERATIVELISTINGHeaderModel.dispose();
+    oPERATIVELISTINGNavbarModel.dispose();
     sHOWINGHeaderModel.dispose();
+    sHOWINGNavbarModel.dispose();
   }
 }

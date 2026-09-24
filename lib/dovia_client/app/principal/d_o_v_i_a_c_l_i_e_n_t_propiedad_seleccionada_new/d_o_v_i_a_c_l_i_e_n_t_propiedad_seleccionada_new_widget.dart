@@ -11,7 +11,10 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/secondary_button/secondary_button_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
+import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_header/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_header_widget.dart';
+import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
+import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import 'dart:ui';
 import '/index.dart';
 import '/auth/custom_auth/auth_util.dart';
@@ -275,8 +278,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   Map<String, List<String>> _galleryCategories() {
     final categories = <String, List<String>>{};
     final inRooms = _imagesByRoom.values.expand((u) => u).toSet();
-    final sueltas =
-        _carouselImages.where((u) => !inRooms.contains(u)).toList();
+    final sueltas = _carouselImages.where((u) => !inRooms.contains(u)).toList();
     if (sueltas.isNotEmpty) categories['Principal'] = sueltas;
     _imagesByRoom.forEach((room, urls) {
       final label =
@@ -604,6 +606,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     );
   }
 
+  /// En solo lectura, el Showing ve su propio header y navbar.
+  bool get _isShowing => FFAppState().UserRole == 'SHOWING_AGENT';
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -631,12 +636,22 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      if (widget.isReadOnly)
+                      if (widget.isReadOnly && _isShowing)
                         wrapWithModel(
                           model: _model.sHOWINGHeaderModel,
                           updateCallback: () => safeSetState(() {}),
                           child: SHOWINGHeaderWidget(
                             title: _propertyName.isNotEmpty
+                                ? _propertyName
+                                : 'Propiedad',
+                          ),
+                        )
+                      else if (widget.isReadOnly)
+                        wrapWithModel(
+                          model: _model.oPERATIVELISTINGHeaderModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: OPERATIVELISTINGHeaderWidget(
+                            titleText: _propertyName.isNotEmpty
                                 ? _propertyName
                                 : 'Propiedades a mostrar',
                           ),
@@ -932,8 +947,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       enableInfiniteScroll: false,
                                       scrollDirection: Axis.horizontal,
                                       autoPlay: false,
-                                      onPageChanged: (index, _) => _model
-                                          .carouselCurrentIndex = index,
+                                      onPageChanged: (index, _) =>
+                                          _model.carouselCurrentIndex = index,
                                     ),
                                   ),
                                   const SizedBox(height: 6.0),
@@ -952,8 +967,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                       const SizedBox(width: 16.0),
                                       _carouselArrow(
                                         Icons.arrow_forward_ios_rounded,
-                                        () => _model.carouselController
-                                            ?.nextPage(
+                                        () =>
+                                            _model.carouselController?.nextPage(
                                           duration:
                                               const Duration(milliseconds: 300),
                                           curve: Curves.ease,
@@ -1220,7 +1235,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                 safeSetState(() {});
                                               },
                                               child: AnimatedContainer(
-                                                duration: const Duration(milliseconds: 250),
+                                                duration: const Duration(
+                                                    milliseconds: 250),
                                                 curve: Curves.easeInOut,
                                                 width: double.infinity,
                                                 height: 36.0,
@@ -1303,7 +1319,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                 safeSetState(() {});
                                               },
                                               child: AnimatedContainer(
-                                                duration: const Duration(milliseconds: 250),
+                                                duration: const Duration(
+                                                    milliseconds: 250),
                                                 curve: Curves.easeInOut,
                                                 width: double.infinity,
                                                 height: 36.0,
@@ -2004,11 +2021,24 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    wrapWithModel(
-                      model: _model.dOVIACLIENTNavbarModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: const DOVIACLIENTNavbarWidget(),
-                    ),
+                    if (widget.isReadOnly && _isShowing)
+                      wrapWithModel(
+                        model: _model.sHOWINGNavbarModel,
+                        updateCallback: () => safeSetState(() {}),
+                        child: const SHOWINGNavbarWidget(),
+                      )
+                    else if (widget.isReadOnly)
+                      wrapWithModel(
+                        model: _model.oPERATIVELISTINGNavbarModel,
+                        updateCallback: () => safeSetState(() {}),
+                        child: const OPERATIVELISTINGNavbarWidget(),
+                      )
+                    else
+                      wrapWithModel(
+                        model: _model.dOVIACLIENTNavbarModel,
+                        updateCallback: () => safeSetState(() {}),
+                        child: const DOVIACLIENTNavbarWidget(),
+                      ),
                   ],
                 ),
               ),

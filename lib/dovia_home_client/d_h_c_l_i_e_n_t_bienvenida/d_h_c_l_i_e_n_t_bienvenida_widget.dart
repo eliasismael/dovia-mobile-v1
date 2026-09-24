@@ -1,4 +1,4 @@
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
+import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -270,9 +270,9 @@ class _DHCLIENTBienvenidaWidgetState extends State<DHCLIENTBienvenidaWidget> {
                 Align(
                   alignment: const AlignmentDirectional(0.0, 1.0),
                   child: wrapWithModel(
-                    model: _model.dHASSOCIATENavbarModel,
+                    model: _model.dHCLIENTNavbarModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: const DHASSOCIATENavbarWidget(),
+                    child: const DHCLIENTNavbarWidget(),
                   ),
                 ),
               ],

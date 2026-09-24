@@ -1,6 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_widget.dart';
+import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import 'package:flutter/material.dart';
@@ -749,9 +749,9 @@ class _SHOWINGNotificationsWidgetState
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     wrapWithModel(
-                      model: _model.oPERATIVELISTINGNavbarModel,
+                      model: _model.sHOWINGNavbarModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const OPERATIVELISTINGNavbarWidget(),
+                      child: const SHOWINGNavbarWidget(),
                     ),
                   ],
                 ),

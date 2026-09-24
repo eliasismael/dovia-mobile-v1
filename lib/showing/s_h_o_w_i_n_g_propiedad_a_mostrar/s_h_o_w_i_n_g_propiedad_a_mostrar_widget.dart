@@ -12,10 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_propiedad_a_mostrar_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:geolocator/geolocator.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
-import '/showing/s_h_o_w_i_n_g_propiedad_detalle/s_h_o_w_i_n_g_propiedad_detalle_widget.dart';
+import '/index.dart';
 export 's_h_o_w_i_n_g_propiedad_a_mostrar_model.dart';
 
 class SHOWINGPropiedadAMostrarWidget extends StatefulWidget {
@@ -81,6 +82,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
   bool _arrivedLoading = false;
   bool _arrivedSent = false;
   bool _routeLoading = false;
+  bool _onMyWayRetried = false;
 
   @override
   void initState() {
@@ -123,7 +125,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
 
     final prop = data['property'];
     final owner = data['ownerProfile'];
-    final client = data['clientProfile'] ?? data['client'];
+    // El backend manda al interesado como `requester`.
+    final client = data['requester'] ?? data['clientProfile'] ?? data['client'];
 
     String propertyName = '';
     String propertyType = '';
@@ -186,7 +189,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
         ownerPhone = '$cc $num'.trim();
       }
       ownerAge = owner['age']?.toString() ?? '';
-      ownerGender = owner['gender']?.toString() ?? '';
+      ownerGender = _genderLabel(owner['gender']);
       ownerNationality = owner['nationality']?.toString() ?? '';
     }
 
@@ -208,7 +211,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
         clientPhone = '$cc $num'.trim();
       }
       clientAge = client['age']?.toString() ?? '';
-      clientGender = client['gender']?.toString() ?? '';
+      clientGender = _genderLabel(client['gender']);
       clientNationality = client['nationality']?.toString() ?? '';
     }
 
@@ -238,7 +241,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
       final propRes = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall
           .call(propertyId: propertyId);
       if (propRes.succeeded) {
-        final d = getJsonField(propRes.jsonBody, r'$.data.data');
+        final d = getJsonField(propRes.jsonBody, r'$.data.data') ??
+            getJsonField(propRes.jsonBody, r'$.data');
         if (d is Map) {
           if (propertyName.isEmpty)
             propertyName =
@@ -309,6 +313,36 @@ class _SHOWINGPropiedadAMostrarWidgetState
 
       _loading = false;
     });
+
+    // Ruta iniciada en este celular pero el backend no lo sabe (sin datos de
+    // contacto): se marca "en camino" una vez y se vuelve a cargar.
+    if (_routeStarted && ownerName.isEmpty && !_onMyWayRetried) {
+      _onMyWayRetried = true;
+      final res =
+          await DOVIAAPIVisitContextGroup.operativeListerOnMyWayCall.call(
+        authToken: currentAuthenticationToken,
+        visitId: widget.visitId,
+      );
+      debugPrint(
+          '[ShowingVisita] on-my-way ${res.statusCode}: ${res.bodyText}');
+      if (res.succeeded && mounted) await _loadOverview();
+    }
+  }
+
+  String _genderLabel(dynamic g) {
+    switch (g?.toString().toUpperCase()) {
+      case 'MALE':
+      case 'M':
+        return 'Masculino';
+      case 'FEMALE':
+      case 'F':
+        return 'Femenino';
+      case null:
+      case '':
+        return '';
+      default:
+        return 'Otro';
+    }
   }
 
   Map<String, dynamic>? _deepMap(dynamic obj, List<String> keys) {
@@ -394,26 +428,40 @@ class _SHOWINGPropiedadAMostrarWidgetState
 
     safeSetState(() => _routeLoading = true);
 
-    // Mark route as started LOCALLY only (unlocks contact info). We intentionally
-    // do NOT call the backend on-my-way here: changing the visit status removes it
-    // from the "hoy"/"upcoming" lists (which only return pending visits).
     if (!_routeStarted) {
       try {
         FFAppState().addToRouteStartedVisits(widget.visitId!);
       } catch (_) {}
     }
+    // "En camino" solo marca el trayecto (no cambia el estado de la visita)
+    // y hace que el overview revele propietario y cliente. Si ya estaba
+    // marcado, el backend responde error y se ignora.
+    final onMyWay =
+        await DOVIAAPIVisitContextGroup.operativeListerOnMyWayCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: widget.visitId,
+    );
+    if (!onMyWay.succeeded) {
+      debugPrint('[ShowingVisita] on-my-way ${onMyWay.statusCode}: '
+          '${onMyWay.bodyText}');
+    }
+    _loadOverview();
 
-    // Open the maps app to the property.
-    final googleMapsUrl = Uri.parse(
-        "https://www.google.com/maps/search/?api=1&query=$_lat,$_lng");
-    final appleMapsUrl = Uri.parse("https://maps.apple.com/?q=$_lat,$_lng");
+    // Abre la app de navegación con las coordenadas de la casa. Sin
+    // canLaunchUrl: en Android 11+ devuelve false sin <queries>.
+    final uri = isiOS
+        ? Uri.parse('https://maps.apple.com/?daddr=$_lat,$_lng')
+        : Uri.parse('https://www.google.com/maps/dir/?api=1'
+            '&destination=$_lat,$_lng');
+    var opened = false;
     try {
-      if (await canLaunchUrl(googleMapsUrl)) {
-        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
-      } else if (await canLaunchUrl(appleMapsUrl)) {
-        await launchUrl(appleMapsUrl, mode: LaunchMode.externalApplication);
-      }
+      opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {}
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el mapa')),
+      );
+    }
 
     if (!mounted) return;
     safeSetState(() => _routeLoading = false);
@@ -446,7 +494,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Reporte enviado. Visita cancelada.',
+            'Reporte enviado. La visita se volvió a publicar para otro asesor.',
             style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
           ),
           backgroundColor: FlutterFlowTheme.of(context).secondary,
@@ -460,6 +508,79 @@ class _SHOWINGPropiedadAMostrarWidgetState
         const SnackBar(content: Text('No se pudo enviar el reporte.')),
       );
     }
+  }
+
+  /// Pide permiso y toma la posición actual; null si no se pudo.
+  Future<Position?> _currentPosition() async {
+    void msg(String t) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t)));
+      }
+    }
+
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      msg('Activá la ubicación del dispositivo para notificar tu llegada.');
+      return null;
+    }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      msg('Necesitamos permiso de ubicación para notificar tu llegada.');
+      return null;
+    }
+    try {
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+    } catch (_) {
+      msg('No pudimos obtener tu ubicación. Intentá de nuevo.');
+      return null;
+    }
+  }
+
+  /// Envía la ubicación real del Showing: el backend marca la visita
+  /// "en la ubicación" y avisa a propietario y cliente.
+  Future<void> _notifyArrival() async {
+    if (_arrivedLoading || _arrivedSent) return;
+    safeSetState(() => _arrivedLoading = true);
+    final pos = await _currentPosition();
+    if (pos == null) {
+      safeSetState(() => _arrivedLoading = false);
+      return;
+    }
+    final res = await DOVIAAPIVisitContextGroup.updateVisitLocationCall.call(
+      authToken: currentAuthenticationToken,
+      visitId: widget.visitId,
+      lat: pos.latitude,
+      lng: pos.longitude,
+    );
+    if (!res.succeeded) {
+      debugPrint('[ShowingVisita] location ${res.statusCode}: ${res.bodyText}');
+    }
+    if (!mounted) return;
+    safeSetState(() {
+      _arrivedLoading = false;
+      if (res.succeeded) _arrivedSent = true;
+    });
+    final backendMsg = getJsonField(res.jsonBody, r'$.message')?.toString();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          res.succeeded
+              ? '¡Llegada notificada!'
+              : (backendMsg != null && backendMsg.isNotEmpty
+                  ? backendMsg
+                  : 'Error al notificar la llegada'),
+        ),
+        backgroundColor: res.succeeded ? const Color(0xFF007376) : Colors.red,
+      ),
+    );
   }
 
   Future<void> _callPhone(String phone) async {
@@ -596,13 +717,16 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                               if (_propertyId != null &&
                                                   _propertyId!.isNotEmpty) {
                                                 context.pushNamed(
-                                                  SHOWINGPropiedadDetalleWidget
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
                                                       .routeName,
                                                   queryParameters: {
                                                     'propertyId':
                                                         serializeParam(
                                                             _propertyId,
                                                             ParamType.String),
+                                                    'isReadOnly':
+                                                        serializeParam(true,
+                                                            ParamType.bool),
                                                   }.withoutNulls,
                                                 );
                                               }
@@ -990,24 +1114,40 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                       padding:
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 20.0, 0.0, 0.0),
-                                      child: SizedBox(
-                                        width:
-                                            MediaQuery.sizeOf(context).width *
-                                                1.0,
-                                        height: 150.0,
-                                        child: custom_widgets.InteractiveMap(
-                                          width:
-                                              MediaQuery.sizeOf(context).width *
-                                                  1.0,
-                                          height: 150.0,
-                                          accessToken:
-                                              FFAppConstants.MapboxAccessToken,
-                                          startLat: _lat ?? 0.0,
-                                          startLng: _lng ?? 0.0,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          height: 180.0,
+                                          // Mapa fijo con la casa marcada; sin coordenadas, un aviso.
+                                          child: _lat != null && _lng != null
+                                              ? custom_widgets.InteractiveMap(
+                                                  key: ValueKey('$_lat,$_lng'),
+                                                  width: double.infinity,
+                                                  height: 180.0,
+                                                  accessToken: FFAppConstants
+                                                      .MapboxAccessToken,
+                                                  startLat: _lat!,
+                                                  startLng: _lng!,
+                                                  readOnly: true,
+                                                )
+                                              : Container(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .accent1,
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    'La propiedad no tiene ubicación cargada',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium,
+                                                  ),
+                                                ),
                                         ),
                                       ),
                                     ),
-                                    if (!_routeStarted && _isPrivacyGated)
+                                    if (!_routeStarted)
                                       Padding(
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0.0, 20.0, 0.0, 0.0),
@@ -1149,12 +1289,15 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                               padding:
                                                                   const EdgeInsetsDirectional
                                                                       .fromSTEB(
-                                                                      0.0,
+                                                                      10.0,
                                                                       4.0,
-                                                                      0.0,
+                                                                      10.0,
                                                                       4.0),
                                                               child: Text(
                                                                 'Información de propietario',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
                                                                 style: FlutterFlowTheme.of(
                                                                         context)
                                                                     .bodyMedium
@@ -1195,6 +1338,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                           _ownerName.isNotEmpty
                                                               ? _ownerName
                                                               : 'Sin nombre',
+                                                          textAlign:
+                                                              TextAlign.center,
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium
@@ -1408,12 +1553,15 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                               padding:
                                                                   const EdgeInsetsDirectional
                                                                       .fromSTEB(
-                                                                      0.0,
+                                                                      10.0,
                                                                       4.0,
-                                                                      0.0,
+                                                                      10.0,
                                                                       4.0),
                                                               child: Text(
                                                                 'Información del cliente',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
                                                                 style: FlutterFlowTheme.of(
                                                                         context)
                                                                     .bodyMedium
@@ -1454,6 +1602,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                           _clientName.isNotEmpty
                                                               ? _clientName
                                                               : 'Sin nombre',
+                                                          textAlign:
+                                                              TextAlign.center,
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium
@@ -1600,43 +1750,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                 : (_arrivedLoading
                                                     ? 'Enviando...'
                                                     : 'Enviar mi ubicación y notificar'),
-                                            onTap: () async {
-                                              if (_arrivedLoading ||
-                                                  _arrivedSent) return;
-                                              safeSetState(
-                                                  () => _arrivedLoading = true);
-                                              final res =
-                                                  await DOVIAAPIVisitContextGroup
-                                                      .operativeListerArrivedCall
-                                                      .call(
-                                                authToken:
-                                                    currentAuthenticationToken,
-                                                visitId: widget.visitId,
-                                              );
-                                              safeSetState(() {
-                                                _arrivedLoading = false;
-                                                if (res.succeeded) {
-                                                  _arrivedSent = true;
-                                                }
-                                              });
-                                              if (mounted) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      res.succeeded
-                                                          ? '¡Llegada notificada!'
-                                                          : 'Error al notificar la llegada',
-                                                    ),
-                                                    backgroundColor:
-                                                        res.succeeded
-                                                            ? const Color(
-                                                                0xFF007376)
-                                                            : Colors.red,
-                                                  ),
-                                                );
-                                              }
-                                            },
+                                            onTap: _notifyArrival,
                                           ),
                                         ),
                                       ),

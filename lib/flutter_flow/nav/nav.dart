@@ -80,6 +80,30 @@ class AppStateNotifier extends ChangeNotifier {
   }
 }
 
+/// Home de cada rol. Con la sesión abierta, al abrir o reiniciar la app se
+/// entra al home del rol guardado, igual que al iniciar sesión.
+Widget homeForRole(String role) {
+  switch (role) {
+    case 'SHOWING_AGENT':
+      return const SHOWINGHomeWidget();
+    case 'OPERATIVE_LISTER':
+      return const OPERATIVELISTINGHomeWidget();
+    case 'LISTER_HQ':
+      return const LISTINGHQHomeWidget();
+    case 'LEGAL_OFFICER':
+      return const LEGALHQHomeWidget();
+    case 'LEGAL_ASSOCIATE':
+      return const LegalAssociateHomeWidget();
+    case 'HOME_ASSOCIATE_COMPANY':
+      return const DHASSOCIATEEmpresaHomePageWidget();
+    case 'HOME_ASSOCIATE':
+    case 'HQ_ADMIN':
+      return const DHASSOCIATEHomePageWidget();
+    default:
+      return const DOVIACLIENTHomePageWidget();
+  }
+}
+
 GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       initialLocation: '/',
       debugLogDiagnostics: true,
@@ -87,14 +111,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       navigatorKey: appNavigatorKey,
       observers: [appRouteObserver],
       errorBuilder: (context, state) => appStateNotifier.loggedIn
-          ? const DOVIACLIENTHomePageWidget()
+          ? homeForRole(FFAppState().UserRole)
           : const SignInWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
           builder: (context, _) => appStateNotifier.loggedIn
-              ? const DOVIACLIENTHomePageWidget()
+              ? homeForRole(FFAppState().UserRole)
               : const SignInWidget(),
         ),
         FFRoute(
@@ -221,8 +245,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DHASSOCIATEFueraDeAlcanceWidget.routeName,
           path: DHASSOCIATEFueraDeAlcanceWidget.routePath,
-          builder: (context, params) =>
-              const DHASSOCIATEFueraDeAlcanceWidget(),
+          builder: (context, params) => const DHASSOCIATEFueraDeAlcanceWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEEmpresaHomePageWidget.routeName,
@@ -890,11 +913,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SHOWINGPropiedadDetalleWidget.routeName,
           path: SHOWINGPropiedadDetalleWidget.routePath,
-          builder: (context, params) => SHOWINGPropiedadDetalleWidget(
+          builder: (context, params) =>
+              DOVIACLIENTPropiedadSeleccionadaNewWidget(
             propertyId: params.getParam(
               'propertyId',
               ParamType.String,
             ),
+            isReadOnly: true,
           ),
         ),
         FFRoute(

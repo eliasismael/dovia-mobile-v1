@@ -1,6 +1,8 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
+import '/backend/api_requests/api_manager.dart';
+import '/domain/offer_json.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -30,6 +32,9 @@ class _ShowingVisit {
   final String status;
   final String substatus;
 
+  /// Comisión del Showing por la visita, ya formateada (p. ej. "Q 100").
+  final String amount;
+
   const _ShowingVisit({
     required this.visitId,
     this.propertyId = '',
@@ -41,6 +46,7 @@ class _ShowingVisit {
     this.imageUrl = '',
     this.status = '',
     this.substatus = '',
+    this.amount = '',
   });
 }
 
@@ -150,6 +156,14 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     return slot[field]?.toString() ?? '';
   }
 
+  /// "Q 100" a partir de `agentCommission` de la visita.
+  String _commission(dynamic visit) {
+    final c = visit is Map ? visit['agentCommission'] : null;
+    if (c is! Map || c['amount'] == null) return '';
+    final currency = c['currency']?.toString() ?? 'GTQ';
+    return '${currency == 'GTQ' ? 'Q' : currency} ${c['amount']}';
+  }
+
   Map? _deepMap(dynamic obj, List<String> keys) {
     dynamic cur = obj;
     for (final k in keys) {
@@ -180,17 +194,27 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     final out = <_ShowingVisit>[];
     for (int i = 0; i < visits.length; i++) {
       final v = visits[i];
-      String title = '';
-      String address = '';
-      String image = '';
+      final summary =
+          v is Map && v['property'] is Map ? v['property'] as Map : const {};
+      final owner = v is Map && v['ownerProfile'] is Map
+          ? v['ownerProfile'] as Map
+          : const {};
+      String title = summary['name']?.toString() ?? '';
+      String address = summary['address']?.toString() ?? '';
+      String image = summary['image']?.toString() ?? '';
       final p = props[i];
       if (p.succeeded) {
-        final d = getJsonField(p.jsonBody, r'$.data.data');
+        final d = getJsonField(p.jsonBody, r'$.data.data') ??
+            getJsonField(p.jsonBody, r'$.data');
         if (d is Map) {
-          title = d['name']?.toString() ?? d['title']?.toString() ?? '';
-          image = d['image']?.toString() ?? '';
-          final addr = _deepMap(d, ['location', 'address']);
-          address = addr?['fullAddress']?.toString() ?? '';
+          if (title.isEmpty) {
+            title = d['name']?.toString() ?? d['title']?.toString() ?? '';
+          }
+          if (image.isEmpty) image = d['image']?.toString() ?? '';
+          if (address.isEmpty) {
+            final addr = _deepMap(d, ['location', 'address']);
+            address = addr?['fullAddress']?.toString() ?? '';
+          }
         }
       }
       out.add(_ShowingVisit(
@@ -198,9 +222,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         propertyId: v is Map ? v['propertyId']?.toString() ?? '' : '',
         title: title,
         address: address,
+        ownerName: owner['fullName']?.toString() ?? '',
         imageUrl: image,
         date: _slot(v, 'date'),
         time: _slot(v, 'time'),
+        amount: _commission(v),
       ));
     }
     return out;
@@ -229,6 +255,19 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
           .call(authToken: token, visitId: id);
     }).toList();
     final overviews = await Future.wait(ovFutures);
+    final propFutures = visits.map((v) {
+      final pid = v is Map
+          ? (v['propertyId'] ??
+                      (v['property'] is Map ? v['property']['id'] : null))
+                  ?.toString() ??
+              ''
+          : '';
+      return pid.isEmpty
+          ? Future.value(ApiCallResponse(null, {}, 0))
+          : DOVIAAPIPropertyContextGroup.getPropertyByIDCall
+              .call(propertyId: pid);
+    }).toList();
+    final props = await Future.wait(propFutures);
 
     final out = <_ShowingVisit>[];
     for (int i = 0; i < visits.length; i++) {
@@ -238,23 +277,47 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         image = (v['property'] as Map)['image']?.toString() ?? '';
       }
 
-      String title = '';
-      String address = '';
-      String ownerName = '';
+      // La lista ya trae nombre, dirección y propietario; el overview solo
+      // completa lo que falte (su propietario se oculta hasta 2 h antes).
+      final summary =
+          v is Map && v['property'] is Map ? v['property'] as Map : const {};
+      final owner = v is Map && v['ownerProfile'] is Map
+          ? v['ownerProfile'] as Map
+          : const {};
+      String title = summary['name']?.toString() ?? '';
+      String address = summary['address']?.toString() ?? '';
+      String ownerName = owner['fullName']?.toString() ?? '';
       final ov = overviews[i];
       if (ov.succeeded) {
         final data = getJsonField(ov.jsonBody, r'$.data');
         if (data is Map) {
           final prop = data['property'];
           if (prop is Map) {
-            title = prop['name']?.toString() ?? '';
-            final addr = _deepMap(prop, ['location', 'address']);
-            address = addr?['fullAddress']?.toString() ?? '';
+            if (title.isEmpty) title = prop['name']?.toString() ?? '';
+            if (address.isEmpty) {
+              final addr = _deepMap(prop, ['location', 'address']);
+              address = addr?['fullAddress']?.toString() ?? '';
+            }
           }
-          final owner = data['ownerProfile'];
-          if (owner is Map) {
-            ownerName = owner['fullName']?.toString() ?? '';
+          final ovOwner = data['ownerProfile'];
+          if (ownerName.isEmpty && ovOwner is Map) {
+            ownerName = ovOwner['fullName']?.toString() ?? '';
           }
+        }
+      }
+
+      final pd = props[i].succeeded
+          ? (getJsonField(props[i].jsonBody, r'$.data.data') ??
+              getJsonField(props[i].jsonBody, r'$.data'))
+          : null;
+      if (pd is Map) {
+        if (title.isEmpty) {
+          title = pd['name']?.toString() ?? pd['title']?.toString() ?? '';
+        }
+        if (image.isEmpty) {
+          image = firstPropertyPhotoUrl(Map<String, dynamic>.from(pd)) ??
+              pd['image']?.toString() ??
+              '';
         }
       }
 
@@ -268,6 +331,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         time: _slot(v, 'time'),
         status: v is Map ? v['status']?.toString() ?? '' : '',
         substatus: v is Map ? v['substatus']?.toString() ?? '' : '',
+        amount: _commission(v),
       ));
     }
     return out;
@@ -336,24 +400,24 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     }
   }
 
-  void _openForm(String visitId) {
-    context.pushNamed(
-      SHOWINGRegistroDeVisita2Widget.routeName,
+  // Al volver del formulario o de Detalles (registro o "Tuve un problema"),
+  // se recargan las listas para que la visita cerrada ya no aparezca.
+  Future<void> _openForm(String visitId) =>
+      _pushAndReload(SHOWINGRegistroDeVisita2Widget.routeName, visitId);
+
+  Future<void> _pushAndReload(String route, String visitId) async {
+    await context.pushNamed(
+      route,
       queryParameters: {
         'visitId': serializeParam(visitId, ParamType.String),
       }.withoutNulls,
     );
+    if (mounted) safeSetState(_loadAll);
   }
 
-  // A visit is "overdue" when more than 24h passed since its scheduled start
-  // and it hasn't been registered/closed yet.
-  bool _isOverdue(_ShowingVisit v) {
-    final s = v.substatus.toUpperCase();
-    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
-    final dt = _parseDateTime(v.date, v.time);
-    if (dt == null) return false;
-    return DateTime.now().difference(dt).inHours > 24;
-  }
+  // Vencida = la marcó el backend: 24 h después de terminada la visita sin
+  // reporte pasa a REPORT_EXPIRED.
+  bool _isOverdue(_ShowingVisit v) => v.substatus == 'REPORT_EXPIRED';
 
   // Report an overdue visit: justify the delay, then unassign/republish it.
   Future<void> _onReport(String visitId) async {
@@ -372,10 +436,12 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     );
     if (message == null || message.trim().isEmpty) return;
 
-    final res = await DOVIAAPIVisitContextGroup.showingReportProblemCall.call(
+    // Vencida (REPORT_EXPIRED): se justifica con el reporte de no completada.
+    final res =
+        await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
       authToken: currentAuthenticationToken,
       visitId: visitId,
-      message: message.trim(),
+      reason: message.trim(),
     );
     if (!mounted) return;
 
@@ -423,7 +489,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                     wrapWithModel(
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const SHOWINGHeaderWidget(
+                      child: SHOWINGHeaderWidget(
                         title: 'Home',
                       ),
                     ),
@@ -458,19 +524,31 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                               visit: v,
                               showStatus: true,
                               buttonText: 'Detalles',
-                              onPressed: () {
-                                context.pushNamed(
-                                  'SHOWING_PropiedadAMostrar',
-                                  queryParameters: {
-                                    'visitId': serializeParam(
-                                        v.visitId, ParamType.String),
-                                  }.withoutNulls,
-                                );
-                              },
+                              onPressed: () => _pushAndReload(
+                                  'SHOWING_PropiedadAMostrar', v.visitId),
                             ),
                           ),
 
-                          // 3. Registro de visita (past today visits)
+                          // 3. Visitas aceptadas (assigned upcoming)
+                          _sectionTitleWithAction(
+                            'Visitas aceptadas',
+                            onVerTodo: () => context.pushNamed(
+                                SHOWINGRegistroDeVisitaWidget.routeName),
+                          ),
+                          _horizontalList(
+                            future: _acceptedFuture,
+                            emptyMsg: 'No tienes visitas aceptadas.',
+                            height: 220,
+                            cardBuilder: (v) => _buildVisitCard(
+                              visit: v,
+                              showStatus: false,
+                              buttonText: 'Ver ficha',
+                              onPressed: () => _pushAndReload(
+                                  'SHOWING_PropiedadAMostrar', v.visitId),
+                            ),
+                          ),
+
+                          // 4. Registro de visita (past today visits)
                           _sectionTitleWithAction(
                             'Registro de visita',
                             onVerTodo: () => context.pushNamed(
@@ -495,32 +573,6 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                                     : () => _openForm(v.visitId),
                               );
                             },
-                          ),
-
-                          // 4. Visitas aceptadas (assigned upcoming)
-                          _sectionTitleWithAction(
-                            'Visitas aceptadas',
-                            onVerTodo: () => context.pushNamed(
-                                SHOWINGRegistroDeVisitaWidget.routeName),
-                          ),
-                          _horizontalList(
-                            future: _acceptedFuture,
-                            emptyMsg: 'No tienes visitas aceptadas.',
-                            height: 220,
-                            cardBuilder: (v) => _buildVisitCard(
-                              visit: v,
-                              showStatus: false,
-                              buttonText: 'Ver ficha',
-                              onPressed: () {
-                                context.pushNamed(
-                                  'SHOWING_PropiedadAMostrar',
-                                  queryParameters: {
-                                    'visitId': serializeParam(
-                                        v.visitId, ParamType.String),
-                                  }.withoutNulls,
-                                );
-                              },
-                            ),
                           ),
                         ],
                       ),
@@ -654,13 +706,20 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                         ),
                   ),
                 ),
-                SizedBox(
-                  height: height,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: entry.value.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (ctx, i) => cardBuilder(entry.value[i]),
+                // Alto según el contenido: la card más alta define la fila.
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var i = 0; i < entry.value.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 12),
+                          cardBuilder(entry.value[i]),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -768,91 +827,100 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
       ),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _cardImage(v.imageUrl),
-            const SizedBox(width: 10.0),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    v.title.isNotEmpty ? v.title : 'Propiedad',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600, fontSize: 16.0),
-                          color: const Color(0xFF0F3E48),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _cardImage(v.imageUrl),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        v.title.isNotEmpty ? v.title : 'Propiedad',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600, fontSize: 16.0),
+                              color: const Color(0xFF0F3E48),
+                            ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      if (v.amount.isNotEmpty)
+                        Text(
+                          'Monto: ${v.amount}',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
                         ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    'Monto:',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(fontSize: 12.0),
-                          color: _primary,
+                      if (v.address.isNotEmpty)
+                        Text(
+                          'Dirección: ${v.address}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
                         ),
-                  ),
-                  if (v.address.isNotEmpty)
-                    Text(
-                      'Dirección: ${v.address}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
-                            color: _primary,
-                          ),
-                    ),
-                  if (v.date.isNotEmpty)
-                    Text(
-                      'Fecha: ${_formatDate(v.date)}',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
-                            color: _primary,
-                          ),
-                    ),
-                  if (v.time.isNotEmpty)
-                    Text(
-                      'Hora: ${v.time}',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
-                            color: _primary,
-                          ),
-                    ),
-                  Text(
-                    v.ownerName.isNotEmpty
-                        ? 'Propietario: ${v.ownerName}'
-                        : 'Propietario:',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(fontSize: 12.0),
-                          color: _primary,
+                      if (v.date.isNotEmpty)
+                        Text(
+                          'Fecha: ${_formatDate(v.date)}',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
                         ),
+                      if (v.time.isNotEmpty)
+                        Text(
+                          'Hora: ${v.time}',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
+                        ),
+                      if (v.ownerName.isNotEmpty)
+                        Text(
+                          'Propietario: ${v.ownerName}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 12.0),
-                  FFButtonWidget(
-                    onPressed: () => _onAccept(v.visitId),
-                    text: 'Aceptar',
-                    options: FFButtonOptions(
-                      width: double.infinity,
-                      height: 30.0,
-                      color: Colors.transparent,
-                      textStyle:
-                          FlutterFlowTheme.of(context).titleSmall.override(
-                                font: GoogleFonts.inter(
-                                    color: _primary, fontSize: 14.0),
-                              ),
-                      elevation: 0.0,
-                      borderSide: const BorderSide(color: _primary, width: 1.0),
-                      borderRadius: BorderRadius.circular(24.0),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12.0),
+            // Aceptar ocupa todo el ancho de la card.
+            FFButtonWidget(
+              onPressed: () => _onAccept(v.visitId),
+              text: 'Aceptar',
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 36.0,
+                color: Colors.transparent,
+                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                      font: GoogleFonts.inter(color: _primary, fontSize: 14.0),
                     ),
-                  ),
-                ],
+                elevation: 0.0,
+                borderSide: const BorderSide(color: _primary, width: 1.0),
+                borderRadius: BorderRadius.circular(24.0),
               ),
             ),
           ],
@@ -883,107 +951,120 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
       ),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _cardImage(visit.imageUrl),
-            const SizedBox(width: 10.0),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    visit.title.isNotEmpty ? visit.title : 'Propiedad',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600, fontSize: 16.0),
-                          color: const Color(0xFF0F3E48),
-                        ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    'Monto:',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(fontSize: 12.0),
-                          color: _primary,
-                        ),
-                  ),
-                  if (visit.address.isNotEmpty)
-                    Text(
-                      'Dirección: ${visit.address}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
-                            color: _primary,
-                          ),
-                    ),
-                  if (visit.date.isNotEmpty)
-                    Text(
-                      'Fecha: ${_formatDate(visit.date)}',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
-                            color: _primary,
-                          ),
-                    ),
-                  if (visit.time.isNotEmpty)
-                    Text(
-                      'Hora: ${visit.time}',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
-                            color: _primary,
-                          ),
-                    ),
-                  Text(
-                    visit.ownerName.isNotEmpty
-                        ? 'Propietario: ${visit.ownerName}'
-                        : 'Propietario:',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(fontSize: 12.0),
-                          color: _primary,
-                        ),
-                  ),
-                  if (showStatus && visit.substatus.isNotEmpty) ...[
-                    const SizedBox(height: 8.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _cardImage(visit.imageUrl),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        visit.title.isNotEmpty ? visit.title : 'Propiedad',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600, fontSize: 16.0),
+                              color: const Color(0xFF0F3E48),
+                            ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      if (visit.amount.isNotEmpty)
                         Text(
-                          'Estatus',
+                          'Monto: ${visit.amount}',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
                                     font: GoogleFonts.inter(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
-                        _buildStatusPill(_statusLabel(visit.substatus)),
+                      if (visit.address.isNotEmpty)
+                        Text(
+                          'Dirección: ${visit.address}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
+                        ),
+                      if (visit.date.isNotEmpty)
+                        Text(
+                          'Fecha: ${_formatDate(visit.date)}',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
+                        ),
+                      if (visit.time.isNotEmpty)
+                        Text(
+                          'Hora: ${visit.time}',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
+                        ),
+                      if (visit.ownerName.isNotEmpty)
+                        Text(
+                          'Propietario: ${visit.ownerName}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
+                        ),
+                      if (showStatus && visit.substatus.isNotEmpty) ...[
+                        const SizedBox(height: 8.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Estatus',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    color: _primary,
+                                  ),
+                            ),
+                            _buildStatusPill(
+                                _statusLabel(visit.status, visit.substatus)),
+                          ],
+                        ),
                       ],
-                    ),
-                  ],
-                  const SizedBox(height: 12.0),
-                  FFButtonWidget(
-                    onPressed: onPressed,
-                    text: buttonText,
-                    options: FFButtonOptions(
-                      width: double.infinity,
-                      height: 30.0,
-                      color: buttonColor ?? _primary,
-                      textStyle: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      elevation: 0.0,
-                      borderRadius: BorderRadius.circular(24.0),
-                    ),
+                    ],
                   ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12.0),
+            // El botón ocupa todo el ancho de la card.
+            FFButtonWidget(
+              onPressed: onPressed,
+              text: buttonText,
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 36.0,
+                color: buttonColor ?? _primary,
+                textStyle: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                ),
+                elevation: 0.0,
+                borderRadius: BorderRadius.circular(24.0),
               ),
             ),
           ],
@@ -992,7 +1073,10 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
     );
   }
 
-  String _statusLabel(String substatus) {
+  /// Badge de la visita de hoy: Pendiente, En proceso o Cancelada.
+  String _statusLabel(String status, String substatus) {
+    if (status == 'CANCELLED' || status == 'NO_SHOW') return 'Cancelada';
+    if (status == 'IN_PROGRESS') return 'En proceso';
     switch (substatus) {
       case 'ASSIGNED':
         return 'Pendiente';
@@ -1000,9 +1084,11 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
       case 'AWAITING_REPORT':
         return 'En proceso';
       case 'CANCELLED':
+      case 'PROBLEM_REPORTED':
+      case 'ASSIGNMENT_EXPIRED':
         return 'Cancelada';
       default:
-        return substatus;
+        return 'Pendiente';
     }
   }
 

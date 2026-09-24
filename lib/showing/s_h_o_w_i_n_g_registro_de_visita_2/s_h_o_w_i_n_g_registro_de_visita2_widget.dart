@@ -1,9 +1,10 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
+import '/backend/api_requests/api_properties.dart';
+import '/domain/offer_json.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
@@ -37,6 +38,23 @@ class _SHOWINGRegistroDeVisita2WidgetState
 
   Future<ApiCallResponse>? _overviewFuture;
 
+  /// Propiedad completa: el overview no trae nombre, foto ni precio.
+  Map? _propData;
+
+  Future<void> _loadProperty() async {
+    final ov = await _overviewFuture;
+    final pid = ov != null && ov.succeeded
+        ? getJsonField(ov.jsonBody, r'$.data.property.id')?.toString()
+        : null;
+    if (pid == null || pid.isEmpty) return;
+    final res = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall
+        .call(propertyId: pid);
+    if (!res.succeeded || !mounted) return;
+    final d = getJsonField(res.jsonBody, r'$.data.data') ??
+        getJsonField(res.jsonBody, r'$.data');
+    if (d is Map) safeSetState(() => _propData = d);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +65,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
         authToken: currentAuthenticationToken,
         visitId: widget.visitId,
       );
+      _loadProperty();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -68,7 +87,10 @@ class _SHOWINGRegistroDeVisita2WidgetState
           backgroundColor: Colors.transparent,
           alignment: const AlignmentDirectional(0.0, 0.0)
               .resolve(Directionality.of(context)),
-          child: const SHOWINGReportPopupWidget(),
+          child: const SHOWINGReportPopupWidget(
+            title: 'Visita no realizada',
+            subtitle: 'Por favor, describe por qué no se realizó la visita',
+          ),
         );
       },
     );
@@ -259,77 +281,6 @@ class _SHOWINGRegistroDeVisita2WidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: SHOWINGHeaderWidget(
                         title: 'Registro de visita',
-                        actionWidget: FFButtonWidget(
-                          onPressed: () async {
-                            final reason = await showDialog<String>(
-                              context: context,
-                              builder: (dialogContext) {
-                                return Dialog(
-                                  elevation: 0,
-                                  insetPadding: EdgeInsets.zero,
-                                  backgroundColor: Colors.transparent,
-                                  alignment:
-                                      const AlignmentDirectional(0.0, 0.0)
-                                          .resolve(Directionality.of(context)),
-                                  child: const SHOWINGReportPopupWidget(
-                                    title: 'Visita no realizada',
-                                    subtitle:
-                                        'Por favor, describe por qué no se realizó la visita',
-                                  ),
-                                );
-                              },
-                            );
-
-                            if (reason != null && reason.trim().isNotEmpty) {
-                              final res = await DOVIAAPIVisitContextGroup
-                                  .showingNotCompletedReportCall
-                                  .call(
-                                visitId: widget.visitId,
-                                authToken: currentAuthenticationToken,
-                                reason: reason.trim(),
-                              );
-                              if (!mounted) return;
-                              if (res.succeeded) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Reporte enviado correctamente.')),
-                                );
-                                context.safePop();
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Error al enviar el reporte.')),
-                                );
-                              }
-                            }
-                          },
-                          text: 'No se realizó',
-                          options: FFButtonOptions(
-                            height: 30.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                8.0, 0.0, 8.0, 0.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: Colors.transparent,
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  color: const Color(0xFFC90A0A),
-                                  fontSize: 12.0,
-                                ),
-                            elevation: 0.0,
-                            borderSide: const BorderSide(
-                              color: Color(0xFFC90A0A),
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                        ),
                       ),
                     ),
                     Padding(
@@ -360,8 +311,13 @@ class _SHOWINGRegistroDeVisita2WidgetState
                           String timeText = '';
 
                           if (data is Map) {
-                            final prop = data['property'];
-                            if (prop is Map) {
+                            // Overview + propiedad completa (nombre, foto).
+                            final prop = {
+                              if (data['property'] is Map)
+                                ...data['property'] as Map,
+                              if (_propData != null) ..._propData!,
+                            };
+                            if (prop.isNotEmpty) {
                               title = prop['name']?.toString() ??
                                   prop['title']?.toString() ??
                                   'Propiedad';
@@ -375,7 +331,10 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                   prop['saleInfo']?['salePrice'];
                               price = priceVal?.toString() ?? '';
 
-                              imageUrl = prop['image']?.toString() ?? '';
+                              imageUrl = firstPropertyPhotoUrl(
+                                      Map<String, dynamic>.from(prop)) ??
+                                  prop['image']?.toString() ??
+                                  '';
 
                               String buildSize = '-';
                               String bedrooms = '-';
@@ -394,13 +353,19 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                         '-';
                               }
 
-                              specs =
-                                  '$buildSize M2 - $bedrooms Habitaciones - $bathrooms Baños\n';
+                              // Sin "-" sueltos cuando faltan datos.
+                              specs = [
+                                if (buildSize != '-') '$buildSize M2',
+                                if (bedrooms != '-') '$bedrooms Habitaciones',
+                                if (bathrooms != '-') '$bathrooms Baños',
+                              ].join(' - ');
                             }
-                            final owner = data['ownerProfile'];
-                            if (owner is Map) {
+                            // El cliente es quien pidió la visita
+                            // (`requester`), no el propietario.
+                            final client = data['requester'];
+                            if (client is Map) {
                               ownerName =
-                                  owner['fullName']?.toString() ?? 'Cliente';
+                                  client['fullName']?.toString() ?? 'Cliente';
                             }
                             final visitMap = data['visit'] is Map
                                 ? data['visit'] as Map
@@ -562,14 +527,12 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                   ),
                                 ),
                               ),
+                              // Sin alto fijo: un solo scroll, el de la pantalla.
                               SizedBox(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: MediaQuery.sizeOf(context).height * 1.0,
                                 child:
                                     custom_widgets.ShowingRegistroVisitaDatos(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
-                                  height:
-                                      MediaQuery.sizeOf(context).height * 1.0,
                                   propertyName: title,
                                   clientName: ownerName,
                                   dateText: dateText,

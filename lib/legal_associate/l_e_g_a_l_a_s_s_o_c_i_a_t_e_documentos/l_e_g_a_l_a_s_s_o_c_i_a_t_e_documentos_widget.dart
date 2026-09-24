@@ -174,7 +174,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
                                     context.pushNamed(
-                                        OPERATIVELISTINGPrimeraVisitaWidget
+                                        LEGALASSOCIATEDocumentosWidget
                                             .routeName);
                                   },
                                   child: ClipRRect(

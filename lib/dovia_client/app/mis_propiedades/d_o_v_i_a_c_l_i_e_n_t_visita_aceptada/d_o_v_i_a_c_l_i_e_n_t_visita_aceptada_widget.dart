@@ -2,7 +2,6 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
-import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/auth/custom_auth/auth_util.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +38,7 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
   List<dynamic> _proposedSlots = [];
   dynamic _confirmedSlot;
   dynamic _showingAgent;
+  bool _sending = false;
 
   static const Color _primary = Color(0xFF007376);
   static const Color _primaryDark = Color(0xFF00444B);
@@ -101,42 +101,85 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
         slot['time'] == _confirmedSlot['time'];
   }
 
+  /// Recordatorio al interesado y al Showing (o aviso urgente a los
+  /// Showings si nadie tomó la visita). Lo resuelve el backend.
   Future<void> _enviarNotificacion() async {
+    if (_sending) return;
+    safeSetState(() => _sending = true);
     final res = await DOVIAAPIVisitContextGroup.notifyVisitReminderCall.call(
       visitId: widget.visitId,
       authToken: currentAuthenticationToken,
     );
+    if (!mounted) return;
+    safeSetState(() => _sending = false);
 
-    if (mounted) {
-      if (res.succeeded) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          barrierColor: Colors.black45,
-          builder: (ctx) => Dialog(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: PopupExitoWidget(
-              title: 'Éxito',
-              text:
-                  'Se envió con éxito. Se envió un recordatorio al interesado y al agente Showing.',
-              continueText: 'Aceptar',
-              onContinue: () {
-                Navigator.pop(ctx);
-                context.pop(); // return to dashboard
-              },
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al enviar la notificación.'),
-            backgroundColor: Color(0xFFD32F2F),
-          ),
-        );
-      }
+    if (!res.succeeded) {
+      final body = res.jsonBody;
+      final msg = body is Map ? body['message']?.toString() : null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg != null && msg.isNotEmpty
+              ? msg
+              : 'Error al enviar la notificación.'),
+          backgroundColor: const Color(0xFFD32F2F),
+        ),
+      );
+      return;
     }
+
+    // Se cierra solo a los 2 segundos o tocando afuera; después vuelve al
+    // dashboard de la propiedad.
+    final nav = Navigator.of(context, rootNavigator: true);
+    var closed = false;
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!closed && nav.canPop()) nav.pop();
+    });
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black45,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Stack(
+          alignment: AlignmentDirectional.topCenter,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 36),
+              constraints: const BoxConstraints(maxWidth: 340),
+              padding: const EdgeInsets.fromLTRB(24, 52, 24, 28),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Se envió con éxito',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.publicSans(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: _primaryDark,
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2E9E5B),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 40),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    closed = true;
+    if (mounted) context.pop();
   }
 
   @override
@@ -207,7 +250,8 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
                               _advisorCard(),
                               const SizedBox(height: 48),
                               ElevatedButton(
-                                onPressed: _enviarNotificacion,
+                                onPressed:
+                                    _sending ? null : _enviarNotificacion,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: _primary,
                                   padding:
@@ -216,14 +260,21 @@ class _DOVIACLIENTVisitaAceptadaWidgetState
                                       borderRadius: BorderRadius.circular(25)),
                                   elevation: 0,
                                 ),
-                                child: Text(
-                                  'Enviar notificación',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                child: _sending
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2.5, color: _primary),
+                                      )
+                                    : Text(
+                                        'Enviar notificación',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                               ),
                             ],
                           ),

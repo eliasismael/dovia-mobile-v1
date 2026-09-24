@@ -107,7 +107,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
     final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
       page: '1',
-      limit: '50',
+      limit: '100',
     );
     if (!res.succeeded) return [];
 
@@ -124,50 +124,49 @@ class _SHOWINGRegistroDeVisitaWidgetState
     final out = <_ScheduleVisit>[];
     for (int i = 0; i < visits.length; i++) {
       final v = visits[i];
-      final ov = overviews[i];
-      if (!ov.succeeded) continue;
-
-      final data = getJsonField(ov.jsonBody, r'$.data');
-      if (data is! Map) continue;
-
-      String title = '';
-      String address = '';
-      String ownerName = '';
-      String image = '';
-      String dateStr = '';
-      String timeStr = '';
-
-      final prop = data['property'];
-      if (prop is Map) {
-        title = prop['name']?.toString() ?? '';
-        image = prop['image']?.toString() ?? '';
-        final location = prop['location'];
-        if (location is Map) {
-          address = location['address']?.toString() ?? '';
-        }
+      if (v is! Map) continue;
+      // Ya cerradas o reportadas: no van en la bandeja.
+      final status = v['status']?.toString() ?? '';
+      final sub = v['substatus']?.toString() ?? '';
+      if (status == 'COMPLETED' ||
+          status == 'CANCELLED' ||
+          sub == 'NOT_COMPLETED_REPORTED' ||
+          sub == 'PROBLEM_REPORTED') {
+        continue;
       }
-      final owner = data['ownerProfile'];
-      if (owner is Map) {
-        ownerName = owner['fullName']?.toString() ?? '';
-      }
-      final slot = data['confirmedTimeSlot'];
-      if (slot is Map) {
-        dateStr = slot['date']?.toString() ?? '';
-        timeStr = slot['time']?.toString() ?? '';
-      }
+      final data = overviews[i].succeeded
+          ? getJsonField(overviews[i].jsonBody, r'$.data')
+          : null;
+      final ov = data is Map ? data : const {};
+
+      // El listado trae nombre, dirección, foto, propietario y horario; el
+      // overview solo completa lo que falte.
+      final summary = v['property'] is Map ? v['property'] as Map : const {};
+      final owner = v['ownerProfile'] is Map
+          ? v['ownerProfile'] as Map
+          : (ov['ownerProfile'] is Map ? ov['ownerProfile'] as Map : const {});
+      final ovVisit = ov['visit'] is Map ? ov['visit'] as Map : const {};
+      final slot = v['confirmedTimeSlot'] ?? ovVisit['confirmedTimeSlot'];
+      final ovAddr = _deepFullAddress(ov['property']);
 
       out.add(_ScheduleVisit(
-        visitId: v is Map ? v['visitId']?.toString() ?? '' : '',
-        title: title,
-        address: address,
-        ownerName: ownerName,
-        date: dateStr,
-        time: timeStr,
-        imageUrl: image,
-        substatus: v is Map ? v['substatus']?.toString() ?? '' : '',
+        visitId: v['visitId']?.toString() ?? '',
+        title: summary['name']?.toString() ?? '',
+        address: summary['address']?.toString() ?? ovAddr,
+        ownerName: owner['fullName']?.toString() ?? '',
+        date: slot is Map ? slot['date']?.toString() ?? '' : '',
+        time: slot is Map ? slot['time']?.toString() ?? '' : '',
+        imageUrl: summary['image']?.toString() ?? '',
+        substatus: sub,
       ));
     }
     return out;
+  }
+
+  String _deepFullAddress(dynamic prop) {
+    final loc = prop is Map ? prop['location'] : null;
+    final addr = loc is Map ? loc['address'] : null;
+    return addr is Map ? addr['fullAddress']?.toString() ?? '' : '';
   }
 
   String _todayStr() {
@@ -200,13 +199,15 @@ class _SHOWINGRegistroDeVisitaWidgetState
     return '$d de ${months[m]} de ${parts[0]}';
   }
 
-  void _openForm(String visitId) {
-    context.pushNamed(
+  // Al volver del formulario se recarga: la visita registrada desaparece.
+  Future<void> _openForm(String visitId) async {
+    await context.pushNamed(
       SHOWINGRegistroDeVisita2Widget.routeName,
       queryParameters: {
         'visitId': serializeParam(visitId, ParamType.String),
       }.withoutNulls,
     );
+    if (mounted) safeSetState(() => _scheduleFuture = _fetchPastVisits());
   }
 
   Future<void> _onReport(String visitId) async {
@@ -225,7 +226,8 @@ class _SHOWINGRegistroDeVisitaWidgetState
     );
     if (message == null || message.trim().isEmpty) return;
 
-    final res = await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
+    final res =
+        await DOVIAAPIVisitContextGroup.showingNotCompletedReportCall.call(
       authToken: currentAuthenticationToken,
       visitId: visitId,
       reason: message.trim(),
@@ -236,7 +238,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Reporte enviado.',
+            'Reporte enviado a Listing HQ.',
             style: TextStyle(color: FlutterFlowTheme.of(context).primaryText),
           ),
           backgroundColor: FlutterFlowTheme.of(context).secondary,
@@ -370,9 +372,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
         continue;
       }
 
-      // Regla de Backend (24 Horas)
-      final diff = now.difference(visitDt);
-      if (diff.inHours <= 24) {
+      // Vencida = la marcó el backend (24 h después de terminada la visita
+      // sin reporte pasa a REPORT_EXPIRED).
+      if (v.substatus != 'REPORT_EXPIRED') {
         enPlazo.add(v);
       } else {
         vencidas.add(v);

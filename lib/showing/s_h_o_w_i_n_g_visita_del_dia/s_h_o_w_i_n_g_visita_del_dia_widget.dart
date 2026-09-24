@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
+import '/showing/s_h_o_w_i_n_g_to_navegation_app/s_h_o_w_i_n_g_to_navegation_app_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -156,8 +157,7 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
                                     context.pushNamed(
-                                        OPERATIVELISTINGPrimeraVisitaWidget
-                                            .routeName);
+                                        SHOWINGAgendaWidget.routeName);
                                   },
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
@@ -184,9 +184,16 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    context.pushNamed(
-                                        OPERATIVELISTINGPrimeraVisitaWidget
-                                            .routeName);
+                                    await showDialog(
+                                      context: context,
+                                      builder: (dialogContext) => Dialog(
+                                        elevation: 0,
+                                        insetPadding: EdgeInsets.zero,
+                                        backgroundColor: Colors.transparent,
+                                        child:
+                                            const SHOWINGToNavegationAppWidget(),
+                                      ),
+                                    );
                                   },
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
