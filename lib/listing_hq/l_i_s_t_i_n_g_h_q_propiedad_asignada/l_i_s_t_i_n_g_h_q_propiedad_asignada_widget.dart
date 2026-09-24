@@ -19,8 +19,8 @@ export 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
 /// Pantalla "Propiedad pendiente de Operative Listing".
 ///
 /// Se abre desde el botón "Asignar" (Home / Propiedades) para visitas
-/// `OPERATIVE_LISTER_VISIT` en substatus `READY_TO_ASSIGN_OPERATIVE_LISTING`
-/// (es decir, sin operative lister asignado todavía). HQ elige fecha/hora y un
+/// `OPERATIVE_LISTER_VISIT` sin operative lister asignado todavía, incluso
+/// mientras el Lister HQ revisa la documentación (se asigna en paralelo). HQ elige fecha/hora y un
 /// Operative Lister disponible y confirma la visita.
 ///
 /// Nota: el flujo de "desvincular un operative ya asignado / reprogramar" no se

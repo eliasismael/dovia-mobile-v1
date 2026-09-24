@@ -114,8 +114,8 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
             ),
           ),
         ),
-        Align(
-          alignment: const AlignmentDirectional(0.0, -1.0),
+        Positioned(
+          top: 0.0,
           child: Container(
             width: 72.0,
             height: 72.0,

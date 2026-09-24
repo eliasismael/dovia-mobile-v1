@@ -189,33 +189,98 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 24.0, 0.0, 0.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Expanded(
-                                  child: FFButtonWidget(
-                                    onPressed: () async {
-                                      final note = await showDialog<String>(
-                                        context: context,
-                                        builder: (dialogContext) {
-                                          return Dialog(
-                                            elevation: 0,
-                                            insetPadding: EdgeInsets.zero,
-                                            backgroundColor: Colors.transparent,
-                                            alignment:
-                                                const AlignmentDirectional(
-                                                        0.0, 0.0)
-                                                    .resolve(Directionality.of(
-                                                        context)),
-                                            child:
-                                                const PopupRechazarDocumentoWidget(),
+                          // Sin documentId es solo lectura (ej. lo que subió el propietario).
+                          if ((widget.documentId ?? '').isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 24.0, 0.0, 0.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Expanded(
+                                    child: FFButtonWidget(
+                                      onPressed: () async {
+                                        final note = await showDialog<String>(
+                                          context: context,
+                                          builder: (dialogContext) {
+                                            return Dialog(
+                                              elevation: 0,
+                                              insetPadding: EdgeInsets.zero,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              alignment:
+                                                  const AlignmentDirectional(
+                                                          0.0, 0.0)
+                                                      .resolve(
+                                                          Directionality.of(
+                                                              context)),
+                                              child:
+                                                  const PopupRechazarDocumentoWidget(),
+                                            );
+                                          },
+                                        );
+                                        if (note != null && note.isNotEmpty) {
+                                          final token =
+                                              currentAuthenticationToken ?? '';
+                                          final res =
+                                              await DOVIAAPIVisitContextGroup
+                                                  .reviewListerHqDocumentCall
+                                                  .call(
+                                            visitId: widget.visitId ?? '',
+                                            documentId: widget.documentId,
+                                            authToken: token,
+                                            status: 'rejected',
+                                            note: note,
                                           );
-                                        },
-                                      );
-                                      if (note != null && note.isNotEmpty) {
+                                          if (res.succeeded) {
+                                            // Volver al checklist para seguir
+                                            // revisando el resto de documentos.
+                                            if (context.mounted) {
+                                              Navigator.of(context).pop(true);
+                                            }
+                                          } else {
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                    content: Text(
+                                                        'Error al rechazar el documento')),
+                                              );
+                                            }
+                                          }
+                                        }
+                                      },
+                                      text: 'Rechazar documento',
+                                      options: FFButtonOptions(
+                                        height: 48.0,
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                        color: Colors.transparent,
+                                        textStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .override(
+                                              font: GoogleFonts.inter(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                            ),
+                                        elevation: 0.0,
+                                        borderSide: BorderSide(
+                                          color: FlutterFlowTheme.of(context)
+                                              .primary,
+                                          width: 1.0,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(24.0),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12.0),
+                                  Expanded(
+                                    child: FFButtonWidget(
+                                      onPressed: () async {
                                         final token =
                                             currentAuthenticationToken ?? '';
                                         final res =
@@ -225,14 +290,47 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                           visitId: widget.visitId ?? '',
                                           documentId: widget.documentId,
                                           authToken: token,
-                                          status: 'rejected',
-                                          note: note,
+                                          status: 'approved',
                                         );
                                         if (res.succeeded) {
-                                          // Volver al checklist para seguir
-                                          // revisando el resto de documentos.
                                           if (context.mounted) {
-                                            Navigator.of(context).pop(true);
+                                            await showDialog(
+                                              context: context,
+                                              builder: (dialogContext) {
+                                                return Dialog(
+                                                  elevation: 0,
+                                                  insetPadding: EdgeInsets.zero,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  alignment:
+                                                      const AlignmentDirectional(
+                                                              0.0, 0.0)
+                                                          .resolve(
+                                                              Directionality.of(
+                                                                  context)),
+                                                  // `PopupExitoWidget` solo
+                                                  // dibuja el botón de cierre si
+                                                  // recibe `onContinue`; sin él
+                                                  // el popup queda sin salida.
+                                                  child: PopupExitoWidget(
+                                                    title:
+                                                        'Se envió con éxito al Equipo Legal',
+                                                    text:
+                                                        'El documento se ha enviado al equipo de legal para que lo revisen.',
+                                                    continueText: 'Continuar',
+                                                    onContinue: () =>
+                                                        Navigator.pop(
+                                                            dialogContext),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                            // Volver al checklist, no al Home:
+                                            // normalmente quedan más documentos
+                                            // por revisar en la misma visita.
+                                            if (context.mounted) {
+                                              Navigator.of(context).pop(true);
+                                            }
                                           }
                                         } else {
                                           if (context.mounted) {
@@ -240,128 +338,35 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                                 .showSnackBar(
                                               const SnackBar(
                                                   content: Text(
-                                                      'Error al rechazar el documento')),
+                                                      'Error al aprobar el documento')),
                                             );
                                           }
                                         }
-                                      }
-                                    },
-                                    text: 'Rechazar documento',
-                                    options: FFButtonOptions(
-                                      height: 48.0,
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color: Colors.transparent,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .primary,
-                                          ),
-                                      elevation: 0.0,
-                                      borderSide: BorderSide(
+                                      },
+                                      text: 'Aceptar y enviar a Dovia Legal',
+                                      options: FFButtonOptions(
+                                        height: 48.0,
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 0.0, 0.0, 0.0),
                                         color: FlutterFlowTheme.of(context)
                                             .primary,
-                                        width: 1.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(24.0),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12.0),
-                                Expanded(
-                                  child: FFButtonWidget(
-                                    onPressed: () async {
-                                      final token =
-                                          currentAuthenticationToken ?? '';
-                                      final res =
-                                          await DOVIAAPIVisitContextGroup
-                                              .reviewListerHqDocumentCall
-                                              .call(
-                                        visitId: widget.visitId ?? '',
-                                        documentId: widget.documentId,
-                                        authToken: token,
-                                        status: 'approved',
-                                      );
-                                      if (res.succeeded) {
-                                        if (context.mounted) {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (dialogContext) {
-                                              return Dialog(
-                                                elevation: 0,
-                                                insetPadding: EdgeInsets.zero,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                alignment:
-                                                    const AlignmentDirectional(
-                                                            0.0, 0.0)
-                                                        .resolve(
-                                                            Directionality.of(
-                                                                context)),
-                                                // `PopupExitoWidget` solo
-                                                // dibuja el botón de cierre si
-                                                // recibe `onContinue`; sin él
-                                                // el popup queda sin salida.
-                                                child: PopupExitoWidget(
-                                                  title:
-                                                      'Se envió con éxito al Equipo Legal',
-                                                  text:
-                                                      'El documento se ha enviado al equipo de legal para que lo revisen.',
-                                                  continueText: 'Continuar',
-                                                  onContinue: () =>
-                                                      Navigator.pop(
-                                                          dialogContext),
-                                                ),
-                                              );
-                                            },
-                                          );
-                                          // Volver al checklist, no al Home:
-                                          // normalmente quedan más documentos
-                                          // por revisar en la misma visita.
-                                          if (context.mounted) {
-                                            Navigator.of(context).pop(true);
-                                          }
-                                        }
-                                      } else {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text(
-                                                    'Error al aprobar el documento')),
-                                          );
-                                        }
-                                      }
-                                    },
-                                    text: 'Aceptar y enviar a Dovia Legal',
-                                    options: FFButtonOptions(
-                                      height: 48.0,
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight: FontWeight.w600,
+                                        textStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .override(
+                                              font: GoogleFonts.inter(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              color: Colors.white,
                                             ),
-                                            color: Colors.white,
-                                          ),
-                                      elevation: 0.0,
-                                      borderRadius: BorderRadius.circular(24.0),
+                                        elevation: 0.0,
+                                        borderRadius:
+                                            BorderRadius.circular(24.0),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
