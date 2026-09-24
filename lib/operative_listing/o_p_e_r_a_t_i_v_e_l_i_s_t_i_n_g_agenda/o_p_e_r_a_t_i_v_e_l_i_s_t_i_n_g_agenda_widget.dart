@@ -56,14 +56,9 @@ class _OPERATIVELISTINGAgendaWidgetState
   DateTime _displayMonth =
       DateTime(DateTime.now().year, DateTime.now().month, 1);
 
-  /// Visitas asignadas a este operative, también las que siguen con la
-  /// documentación en revisión (HQ puede asignarlas en paralelo).
-  static const List<String> _kAssignedSubstatuses = [
-    'ASSIGNED',
-    'MISSING_INFO',
-    'DOCS_SUBMITTED',
-    'READY_TO_ASSIGN_OPERATIVE_LISTING',
-  ];
+  /// Visitas asignadas a este operative. HQ asigna recién con la
+  /// documentación aprobada, así que todas llegan como `ASSIGNED`.
+  static const List<String> _kAssignedSubstatuses = ['ASSIGNED'];
 
   @override
   void initState() {

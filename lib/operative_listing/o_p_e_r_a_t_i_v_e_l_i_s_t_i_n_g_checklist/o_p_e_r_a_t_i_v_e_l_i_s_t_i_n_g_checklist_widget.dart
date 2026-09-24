@@ -109,9 +109,6 @@ class _OPERATIVELISTINGChecklistWidgetState
   /// asignadas donde el operative ya marcó que llegó.
   static const List<String> _kPendingCandidates = [
     'ASSIGNED',
-    'MISSING_INFO',
-    'DOCS_SUBMITTED',
-    'READY_TO_ASSIGN_OPERATIVE_LISTING',
     'VISIT_IN_PROGRESS',
     'AWAITING_REPORT',
   ];

@@ -53,17 +53,14 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  /// Checklist documental todavía en manos del LISTER_HQ. No bloquea la
-  /// asignación: estas propiedades también aparecen para asignar.
+  /// Checklist documental todavía en manos del LISTER_HQ; bloquea la
+  /// asignación del operative hasta que todos los requeridos estén aprobados.
   static const String _kDocsSubstatus = 'MISSING_INFO,DOCS_SUBMITTED';
 
   /// `RESCHEDULE_REQUIRED` cubre el reagendamiento pedido y el no-show:
   /// el filtro del backend es por substatus y ambos comparten ese valor.
-  ///
-  /// También entran las que siguen con la documentación en revisión: se
-  /// asigna en paralelo para que la visita no espere a la certificación.
   static const String _kAssignSubstatus =
-      'MISSING_INFO,DOCS_SUBMITTED,READY_TO_ASSIGN_OPERATIVE_LISTING,RESCHEDULE_REQUIRED';
+      'READY_TO_ASSIGN_OPERATIVE_LISTING,RESCHEDULE_REQUIRED';
   static const String _kPublishSubstatus = 'READY_TO_PUBLISH';
 
   // Paleta de las píldoras de estado, tomada del diseño.

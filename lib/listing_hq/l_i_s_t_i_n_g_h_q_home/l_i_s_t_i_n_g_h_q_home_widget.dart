@@ -81,11 +81,8 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
   /// Listas para asignar operative lister. `RESCHEDULE_REQUIRED` cubre tanto
   /// la solicitud de reagendamiento como el no-show, porque el filtro del
   /// backend es por substatus y ambos comparten ese valor.
-  ///
-  /// También entran las que siguen con la documentación en revisión: se
-  /// asigna en paralelo para que la visita no espere a la certificación.
   static const String _kAssignSubstatus =
-      'MISSING_INFO,DOCS_SUBMITTED,READY_TO_ASSIGN_OPERATIVE_LISTING,RESCHEDULE_REQUIRED';
+      'READY_TO_ASSIGN_OPERATIVE_LISTING,RESCHEDULE_REQUIRED';
   static const String _kPublishSubstatus = 'READY_TO_PUBLISH';
   static const String _kLegalRejectedStatus = 'REJECTED';
   static const String _kCorrectionsSubstatus = 'CHANGES_REQUESTED';
@@ -785,9 +782,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
-                            // Fila 1: Checklist documental pendiente. Estas
-                            // propiedades también salen en la fila 2: el
-                            // operative se asigna sin esperar la revisión.
+                            // Fila 1: Checklist documental pendiente. Sin
+                            // aprobarlo la visita no llega a
+                            // READY_TO_ASSIGN_OPERATIVE_LISTING y el backend
+                            // rechaza la asignación del operative.
                             _buildSectionHeader(
                               'Propiedades a revisar su documentación',
                               LISTINGHQPropiedadesWidget.routeName,

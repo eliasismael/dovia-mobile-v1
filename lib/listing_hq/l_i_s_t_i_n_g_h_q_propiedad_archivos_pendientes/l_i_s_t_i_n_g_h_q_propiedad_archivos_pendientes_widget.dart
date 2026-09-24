@@ -43,12 +43,10 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
 
   Future<List<dynamic>>? _docsFuture;
 
-  /// Lo que llenó el propietario al publicar y quién está asignado. Llegan en
-  /// el mismo detalle de la visita que el checklist.
+  /// Lo que llenó el propietario al publicar. Llega en el mismo detalle de la
+  /// visita que el checklist.
   Map? _property;
   Map? _owner;
-  Map? _operative;
-  String _substatus = '';
 
   @override
   void initState() {
@@ -227,7 +225,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
   }
 
   // ---------------------------------------------------------------------------
-  // Datos que cargó el propietario y asignación en paralelo.
+  // Datos que cargó el propietario.
   // ---------------------------------------------------------------------------
 
   String _str(dynamic v) => v == null ? '' : v.toString().trim();
@@ -418,8 +416,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
     );
   }
 
-  /// Datos de la propiedad, documentos del propietario y asignación del
-  /// operative, arriba del checklist: se revisa y se asigna en paralelo.
+  /// Datos de la propiedad y documentos del propietario, arriba del checklist.
   List<Widget> _buildReviewHeader() {
     final p = _property;
     final legal = p?['legalInfo'] is Map ? p!['legalInfo'] as Map : null;
@@ -483,57 +480,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
         _ownerDocTile('Certificación de la propiedad',
             _str(legal?['propertyCertification'])),
       ]),
-      _buildSectionTitle('Operative Listing'),
-      _buildAssignCard(),
     ];
-  }
-
-  /// Asignar no espera a que se apruebe la documentación: el Lister HQ saca la
-  /// certificación mientras el operative ya tiene su visita.
-  Widget _buildAssignCard() {
-    final assignedName = _str(_operative?['fullName']);
-    if (assignedName.isNotEmpty && _substatus != 'RESCHEDULE_REQUIRED') {
-      return _card([_infoRow('Asignado a', assignedName)]);
-    }
-    return _card([
-      Text(
-        'Podés asignar el Operative Listing mientras revisás la documentación, '
-        'así la visita no espera a la certificación.',
-        style: FlutterFlowTheme.of(context).bodyMedium.override(
-              font: GoogleFonts.inter(),
-              color: FlutterFlowTheme.of(context).secondaryText,
-              fontSize: 13.0,
-              letterSpacing: 0.0,
-            ),
-      ),
-      const SizedBox(height: 12.0),
-      FFButtonWidget(
-        onPressed: () async {
-          await context.pushNamed(
-            LISTINGHQPropiedadAsignadaWidget.routeName,
-            queryParameters: {
-              'visitId': serializeParam(widget.visitId, ParamType.String),
-            }.withoutNulls,
-          );
-          if (mounted) setState(() => _docsFuture = _fetchDocs());
-        },
-        text: _substatus == 'RESCHEDULE_REQUIRED'
-            ? 'Asignar de nuevo'
-            : 'Asignar Operative Listing',
-        options: FFButtonOptions(
-          width: double.infinity,
-          height: 44.0,
-          color: FlutterFlowTheme.of(context).primary,
-          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                font: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                color: Colors.white,
-                letterSpacing: 0.0,
-              ),
-          elevation: 0.0,
-          borderRadius: BorderRadius.circular(24.0),
-        ),
-      ),
-    ]);
   }
 
   /// El motivo que da el backend (documento inexistente, visita de otro
@@ -581,14 +528,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
 
     final data = getJsonField(res.jsonBody, r'$.data');
     if (data is Map) {
-      final visitData = data['visit'];
       _property = data['property'] is Map ? data['property'] as Map : null;
       _owner = data['ownerProfile'] is Map ? data['ownerProfile'] as Map : null;
-      _operative = data['operativeListing'] is Map
-          ? data['operativeListing'] as Map
-          : null;
-      _substatus =
-          (visitData is Map ? visitData['substatus'] : null)?.toString() ?? '';
       // The visit details DTO nests the checklist under `visit`. Fall back to
       // the top level in case the response is unwrapped.
       final visit = data['visit'];

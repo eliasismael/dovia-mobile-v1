@@ -94,15 +94,9 @@ class _OPERATIVELISTINGHomeWidgetState
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
-  /// Substatus de visitas ya asignadas a este operative. Las que siguen con la
-  /// documentación en revisión también son suyas: HQ puede asignarlas en
-  /// paralelo, así que van en próximas visitas.
-  static const List<String> _kActiveSubstatuses = [
-    'ASSIGNED',
-    'MISSING_INFO',
-    'DOCS_SUBMITTED',
-    'READY_TO_ASSIGN_OPERATIVE_LISTING',
-  ];
+  /// Substatus de visitas ya asignadas a este operative. HQ asigna recién con
+  /// la documentación aprobada, así que todas llegan como `ASSIGNED`.
+  static const List<String> _kActiveSubstatuses = ['ASSIGNED'];
 
   /// Próximas = asignadas y en plazo. Pendientes = vencidas (24 h después
   /// de la visita sin hacerla) y las ya reportadas, que esperan a HQ.
