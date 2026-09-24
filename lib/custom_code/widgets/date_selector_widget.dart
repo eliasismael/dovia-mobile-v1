@@ -175,7 +175,7 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
       child: Container(
         width: widget.width ?? double.infinity,
         height: widget.height ?? 56,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(13),
@@ -196,24 +196,25 @@ class _DateSelectorWidgetState extends State<DateSelectorWidget> {
               onTap: () => _step(-1),
             ),
 
-            const Spacer(),
-
-            // Center: Día | Month | Year
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Día pill
-                _buildPill(_dayLabel, isSelected: false),
-                const SizedBox(width: 1.5),
-                // Month pill (highlighted with border)
-                _buildPill(_monthName, isSelected: true),
-                const SizedBox(width: 1.5),
-                // Year pill
-                _buildPill(_year, isSelected: false),
-              ],
+            // Center: Día | Month | Year. Se achica si no entra (meses largos
+            // o letra grande del sistema) en vez de desbordar a la derecha.
+            Expanded(
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildPill(_dayLabel, isSelected: false),
+                      const SizedBox(width: 4),
+                      _buildPill(_monthName, isSelected: true),
+                      const SizedBox(width: 4),
+                      _buildPill(_year, isSelected: false),
+                    ],
+                  ),
+                ),
+              ),
             ),
-
-            const Spacer(),
 
             // Right arrow button
             _buildNavButton(

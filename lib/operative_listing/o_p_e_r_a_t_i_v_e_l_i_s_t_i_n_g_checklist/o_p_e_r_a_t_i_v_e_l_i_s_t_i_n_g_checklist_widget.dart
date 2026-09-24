@@ -25,6 +25,10 @@ class _ChecklistData {
   // HQ auditor (assigned LISTER_HQ) — used by the contact popup
   final String hqName;
   final String hqPhone; // full dial string, e.g. "+573000000000"
+  final String substatus;
+
+  /// Estado del recorrido del operative: ON_MY_WAY o AT_LOCATION.
+  final String journey;
 
   const _ChecklistData({
     required this.visitId,
@@ -37,7 +41,41 @@ class _ChecklistData {
     required this.time,
     required this.hqName,
     required this.hqPhone,
+    this.substatus = '',
+    this.journey = '',
   });
+
+  DateTime? get slotStart {
+    final d = DateTime.tryParse(date);
+    if (d == null) return null;
+    final t = time.split(':');
+    return DateTime(
+        d.year,
+        d.month,
+        d.day,
+        t.isNotEmpty ? int.tryParse(t[0]) ?? 0 : 0,
+        t.length > 1 ? int.tryParse(t[1]) ?? 0 : 0);
+  }
+
+  /// Checklist por hacer: la visita ya empezó y el operative marcó que llegó
+  /// (o el backend ya la pasó a en curso / esperando reporte).
+  bool get isChecklistPending {
+    if (substatus == 'VISIT_IN_PROGRESS' || substatus == 'AWAITING_REPORT') {
+      return true;
+    }
+    final start = slotStart;
+    return journey == 'AT_LOCATION' &&
+        start != null &&
+        !DateTime.now().isBefore(start);
+  }
+
+  bool matches(String q) {
+    if (q.isEmpty) return true;
+    final t = q.toLowerCase();
+    return propertyName.toLowerCase().contains(t) ||
+        address.toLowerCase().contains(t) ||
+        ownerName.toLowerCase().contains(t);
+  }
 }
 
 class OPERATIVELISTINGChecklistWidget extends StatefulWidget {
@@ -61,6 +99,23 @@ class _OPERATIVELISTINGChecklistWidgetState
   Future<List<_ChecklistData>>? _pendingFuture;
   Future<List<_ChecklistData>>? _rejectedFuture;
 
+  final _searchController = TextEditingController();
+  String _query = '';
+  bool _pendingExpanded = false;
+  bool _rejectedExpanded = false;
+
+  /// Visitas del operative que pueden tener el checklist por hacer. El backend
+  /// hoy no pasa solo a AWAITING_REPORT, así que también se miran las
+  /// asignadas donde el operative ya marcó que llegó.
+  static const List<String> _kPendingCandidates = [
+    'ASSIGNED',
+    'MISSING_INFO',
+    'DOCS_SUBMITTED',
+    'READY_TO_ASSIGN_OPERATIVE_LISTING',
+    'VISIT_IN_PROGRESS',
+    'AWAITING_REPORT',
+  ];
+
   static const Color _primary = Color(0xFF007376);
   static const Color _dark = Color(0xFF00444B);
   static const Color _pillBg = Color(0xFFCCE3E4);
@@ -69,13 +124,17 @@ class _OPERATIVELISTINGChecklistWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => OPERATIVELISTINGChecklistModel());
-    _pendingFuture = _fetchEnriched(substatus: 'AWAITING_REPORT');
+    _pendingFuture = Future.wait([
+      for (final sub in _kPendingCandidates) _fetchEnriched(substatus: sub),
+    ]).then((lists) =>
+        lists.expand((l) => l).where((v) => v.isChecklistPending).toList());
     _rejectedFuture = _fetchEnriched(substatus: 'CHANGES_REQUESTED');
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -141,6 +200,7 @@ class _OPERATIVELISTINGChecklistWidgetState
       String ownerName = '';
       String hqName = '';
       String hqPhone = '';
+      String journey = '';
 
       final ov = overviews[i];
       if (ov.succeeded) {
@@ -159,6 +219,10 @@ class _OPERATIVELISTINGChecklistWidgetState
           if (owner is Map) {
             ownerName = owner['fullName']?.toString() ?? '';
           }
+          final visitData = data['visit'];
+          final report =
+              visitData is Map ? visitData['operativeLocationReport'] : null;
+          if (report is Map) journey = report['status']?.toString() ?? '';
           final hq = data['listerHq'];
           if (hq is Map) {
             hqName = hq['fullName']?.toString() ?? '';
@@ -197,6 +261,8 @@ class _OPERATIVELISTINGChecklistWidgetState
         time: time,
         hqName: hqName,
         hqPhone: hqPhone,
+        substatus: substatus,
+        journey: journey,
       ));
     }
     return result;
@@ -224,9 +290,9 @@ class _OPERATIVELISTINGChecklistWidgetState
       final dt = DateTime.parse(d.date);
       final dateStr =
           '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
-      return 'Visita: $dateStr ${d.time}'.trim();
+      return 'Horario de la visita: $dateStr ${d.time}'.trim();
     } catch (_) {
-      return 'Visita: ${d.date} ${d.time}'.trim();
+      return 'Horario de la visita: ${d.date} ${d.time}'.trim();
     }
   }
 
@@ -282,23 +348,37 @@ class _OPERATIVELISTINGChecklistWidgetState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),
                     child: Container(
-                      height: 64,
+                      height: 56,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.search, color: Colors.grey, size: 24),
-                          SizedBox(width: 12),
+                          const Icon(Icons.search,
+                              color: Colors.grey, size: 24),
+                          const SizedBox(width: 12),
+                          // Filtra ambas secciones por nombre, dirección o
+                          // propietario.
                           Expanded(
-                            child: Text(
-                              'Búsqueda con IA',
-                              style: TextStyle(
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (v) =>
+                                  safeSetState(() => _query = v.trim()),
+                              style: const TextStyle(
                                 fontFamily: 'Public Sans',
-                                color: Color(0xFF888888),
                                 fontSize: 15,
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Búsqueda con IA',
+                                hintStyle: TextStyle(
+                                  fontFamily: 'Public Sans',
+                                  color: Color(0xFF888888),
+                                  fontSize: 15,
+                                ),
+                                border: InputBorder.none,
+                                isDense: true,
                               ),
                             ),
                           ),
@@ -317,11 +397,13 @@ class _OPERATIVELISTINGChecklistWidgetState
                           // Checklist Pendiente
                           _sectionHeader(
                             'Checklist Pendiente',
-                            onVerMas: () => context.pushNamed(
-                                OPERATIVELISTINGAgendaWidget.routeName),
+                            expanded: _pendingExpanded,
+                            onVerMas: () => safeSetState(
+                                () => _pendingExpanded = !_pendingExpanded),
                           ),
                           _section(
                             future: _pendingFuture,
+                            expanded: _pendingExpanded,
                             emptyText: 'No tienes checklists pendientes.',
                             cardBuilder: (data) => _PendingCard(
                               data: data,
@@ -343,11 +425,13 @@ class _OPERATIVELISTINGChecklistWidgetState
                           // Checklist Rechazados
                           _sectionHeader(
                             'Checklist Rechazados',
-                            onVerMas: () => context.pushNamed(
-                                OPERATIVELISTINGAgendaWidget.routeName),
+                            expanded: _rejectedExpanded,
+                            onVerMas: () => safeSetState(
+                                () => _rejectedExpanded = !_rejectedExpanded),
                           ),
                           _section(
                             future: _rejectedFuture,
+                            expanded: _rejectedExpanded,
                             emptyText: 'No tienes checklists rechazados.',
                             cardBuilder: (data) => _RejectedCard(
                               data: data,
@@ -375,49 +459,72 @@ class _OPERATIVELISTINGChecklistWidgetState
     );
   }
 
-  // Horizontal carousel for a section, driven by its future.
+  /// Carrusel horizontal; con "Ver más" pasa a la lista completa vertical.
+  /// El alto sale del contenido para que no desborde con letra grande.
   Widget _section({
     required Future<List<_ChecklistData>>? future,
+    required bool expanded,
     required String emptyText,
     required Widget Function(_ChecklistData) cardBuilder,
   }) {
-    return SizedBox(
-      height: 180,
-      child: FutureBuilder<List<_ChecklistData>>(
-        future: future,
-        builder: (context, snap) {
-          if (!snap.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(color: _primary),
-            );
-          }
-          final items = snap.data!;
-          if (items.isEmpty) {
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                emptyText,
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  color: Color(0xFF888888),
-                ),
-              ),
-            );
-          }
-          return ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 15),
-            itemBuilder: (ctx, i) => cardBuilder(items[i]),
+    return FutureBuilder<List<_ChecklistData>>(
+      future: future,
+      builder: (context, snap) {
+        if (!snap.hasData) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator(color: _primary)),
           );
-        },
-      ),
+        }
+        final items = snap.data!.where((d) => d.matches(_query)).toList();
+        if (items.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              _query.isEmpty ? emptyText : 'Sin resultados para "$_query".',
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 13,
+                color: Color(0xFF888888),
+              ),
+            ),
+          );
+        }
+        if (expanded) {
+          return Column(
+            children: [
+              for (final item in items)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: cardBuilder(item),
+                ),
+            ],
+          );
+        }
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < items.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 12),
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width - 56,
+                    child: cardBuilder(items[i]),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _sectionHeader(
     String title, {
+    required bool expanded,
     required VoidCallback onVerMas,
   }) {
     return Padding(
@@ -425,15 +532,18 @@ class _OPERATIVELISTINGChecklistWidgetState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontWeight: FontWeight.w600,
-              color: _dark,
-              fontSize: 17,
+          Flexible(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontWeight: FontWeight.w600,
+                color: _dark,
+                fontSize: 17,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
           GestureDetector(
             onTap: onVerMas,
             child: Container(
@@ -444,8 +554,8 @@ class _OPERATIVELISTINGChecklistWidgetState
                 borderRadius: BorderRadius.circular(100),
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'Ver más',
+              child: Text(
+                expanded ? 'Ver menos' : 'Ver más',
                 style: TextStyle(
                   fontFamily: 'Public Sans',
                   color: _primary,
@@ -498,7 +608,6 @@ class _PendingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 320,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -530,7 +639,7 @@ class _PendingCard extends StatelessWidget {
                     fontSize: 16,
                     color: Color(0xFF00444B),
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
@@ -542,7 +651,7 @@ class _PendingCard extends StatelessWidget {
                       fontSize: 12,
                       color: Color(0xFF007376),
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
@@ -551,16 +660,16 @@ class _PendingCard extends StatelessWidget {
                   subtitle,
                   style: const TextStyle(
                     fontFamily: 'Public Sans',
-                    fontSize: 12,
+                    fontSize: 13,
                     color: Color(0xFF007376),
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
-                  height: 24,
+                  height: 26,
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFECCC), // Light orange
                     borderRadius: BorderRadius.circular(100),
@@ -580,7 +689,7 @@ class _PendingCard extends StatelessWidget {
                   onTap: onChecklistTap,
                   child: Container(
                     width: double.infinity,
-                    height: 30,
+                    height: 34,
                     decoration: BoxDecoration(
                       color: const Color(0xFF007376),
                       borderRadius: BorderRadius.circular(25),
@@ -614,7 +723,6 @@ class _RejectedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 320,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -646,7 +754,7 @@ class _RejectedCard extends StatelessWidget {
                     fontSize: 16,
                     color: Color(0xFF00444B),
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
@@ -656,16 +764,16 @@ class _RejectedCard extends StatelessWidget {
                       : 'Nombre del propietario',
                   style: const TextStyle(
                     fontFamily: 'Public Sans',
-                    fontSize: 12,
+                    fontSize: 13,
                     color: Color(0xFF007376),
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
-                  height: 24,
+                  height: 26,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF8D5D5), // Light pink
                     borderRadius: BorderRadius.circular(100),
@@ -685,7 +793,7 @@ class _RejectedCard extends StatelessWidget {
                   onTap: onContactTap,
                   child: Container(
                     width: double.infinity,
-                    height: 30,
+                    height: 34,
                     decoration: BoxDecoration(
                       color: const Color(0xFF007376),
                       borderRadius: BorderRadius.circular(25),
@@ -729,6 +837,7 @@ class _ContactHQPopup extends StatefulWidget {
 class _ContactHQPopupState extends State<_ContactHQPopup> {
   final _controller = TextEditingController();
   bool _loading = false;
+  String? _fieldError;
 
   @override
   void dispose() {
@@ -752,7 +861,10 @@ class _ContactHQPopupState extends State<_ContactHQPopup> {
 
   Future<void> _submit() async {
     final message = _controller.text.trim();
-    if (message.isEmpty) return;
+    if (message.isEmpty) {
+      setState(() => _fieldError = 'Escribe tu duda o descargo.');
+      return;
+    }
     setState(() => _loading = true);
 
     final token = currentAuthenticationToken ?? '';
@@ -782,116 +894,125 @@ class _ContactHQPopupState extends State<_ContactHQPopup> {
   Widget build(BuildContext context) {
     final hqName =
         widget.hqName.isNotEmpty ? widget.hqName : 'Auditor de DOVIA HQ';
+    const primary = Color(0xFF007376);
+    const dark = Color(0xFF00444B);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HQ Auditor Card (assigned LISTER_HQ for this visit)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F7FA),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+          const Text(
+            'Envía la solicitud o comunícate con él por teléfono',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 16,
+              color: dark,
             ),
-            child: Row(
+          ),
+          const SizedBox(height: 16),
+          // Tarjeta del Lister HQ que audita esta propiedad.
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: primary, width: 0.8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Color(0xFFCCE3E4),
-                  child: Icon(Icons.person, color: Color(0xFF007376)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
                         hqName,
                         style: const TextStyle(
                           fontFamily: 'Public Sans',
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Color(0xFF00444B),
+                          fontSize: 15,
+                          color: dark,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const Text(
-                        'Dovia HQ - Encargado del proceso',
-                        style: TextStyle(
-                          fontFamily: 'Public Sans',
-                          fontSize: 12,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _makeCall,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF25D366), // Green phone color
-                      shape: BoxShape.circle,
                     ),
-                    child:
-                        const Icon(Icons.phone, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: _makeCall,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF25D366),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.phone,
+                            color: Colors.white, size: 18),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDDEBEC),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: const Text(
+                    'Dovia HQ (Encargado del proceso)',
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 13,
+                      color: dark,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'Escribe tu duda o descargo:',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF00444B),
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           TextField(
             controller: _controller,
-            minLines: 4,
-            maxLines: 6,
+            minLines: 2,
+            maxLines: 5,
             maxLength: 1000,
+            onChanged: (_) {
+              if (_fieldError != null) setState(() => _fieldError = null);
+            },
             decoration: InputDecoration(
-              hintText: 'Ej: El dueño no me dejó sacarle fotos al baño...',
+              hintText: 'Escribe aquí...',
+              errorText: _fieldError,
+              counterText: '',
               hintStyle: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 14,
                 color: Color(0xFFB0B8C1),
               ),
               filled: true,
-              fillColor: const Color(0xFFF5F7FA),
+              fillColor: const Color(0xFFF7F7F7),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.all(16),
+              contentPadding: const EdgeInsets.all(14),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           SizedBox(
-            width: double.infinity,
             height: 48,
             child: ElevatedButton(
               onPressed: _loading ? null : _submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF007376),
-                disabledBackgroundColor:
-                    const Color(0xFF007376).withValues(alpha: 0.6),
+                backgroundColor: primary,
+                disabledBackgroundColor: primary.withValues(alpha: 0.6),
+                padding: const EdgeInsets.symmetric(horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -910,7 +1031,7 @@ class _ContactHQPopupState extends State<_ContactHQPopup> {
                       'Aceptar y Enviar',
                       style: TextStyle(
                         fontFamily: 'Public Sans',
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),

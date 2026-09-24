@@ -21,7 +21,15 @@ class OperativeListingCheckList extends StatefulWidget {
     this.height,
     this.onAddServicio,
     this.onSave,
+    this.visitId = '',
+    this.address = '',
   });
+
+  /// Visita del formulario: el borrador local se guarda por visita.
+  final String visitId;
+
+  /// Dirección de la propiedad, que ya cargó el propietario.
+  final String address;
 
   @override
   State<OperativeListingCheckList> createState() =>
@@ -51,6 +59,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   final _instruccionesController = TextEditingController();
   final _complejoController = TextEditingController();
   final _danosDescripcionController = TextEditingController();
+  final _sectorController = TextEditingController();
 
   // ==================== DROPDOWN VALUES ====================
   String? _tipoVivienda;
@@ -133,7 +142,6 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   final GlobalKey _keyAdicionales = GlobalKey();
 
   bool _errorTipoVivienda = false;
-  bool _errorDireccion = false;
   bool _errorHabitaciones = false;
   bool _errorCriterios = false;
   bool _errorDanos = false;
@@ -141,14 +149,13 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   bool validateForm() {
     setState(() {
       _errorTipoVivienda = _tipoVivienda == null;
-      _errorDireccion = _direccion == null;
       _errorHabitaciones = _habitaciones == null;
       _errorCriterios = _selectedCriteria.length < 3;
       _errorDanos =
           _hasDanos == 'Si' && _danosDescripcionController.text.trim().isEmpty;
     });
 
-    if (_errorTipoVivienda || _errorDireccion) {
+    if (_errorTipoVivienda) {
       if (!_datosGeneralesExpanded)
         setState(() => _datosGeneralesExpanded = true);
       Scrollable.ensureVisible(_keyDatosGenerales.currentContext!,
@@ -178,44 +185,157 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     return true;
   }
 
+  static const Map<String, String> _kPropertyTypes = {
+    'Casa': 'HOUSE',
+    'Apartamento': 'APARTMENT',
+    'Penthouse': 'PENTHOUSE',
+    'Estudio': 'STUDIO',
+    'Finca': 'FARM',
+    'Terreno': 'LOT',
+  };
+
+  static const Map<String, String> _kSpaces = {
+    'Sala': 'livingRoom',
+    'Comedor': 'diningRoom',
+    'Lavandería': 'laundryArea',
+    'Cuarto de servicio': 'serviceRoom',
+    'Amueblado': 'furnished',
+    'Cocina': 'kitchen',
+  };
+  static const Map<String, String> _kOthers = {
+    'Pet Frendly': 'petFriendly',
+    'Permitido para Airbnb': 'allowedForAirbnb',
+    'Permitido subarrendar': 'allowedToSublet',
+  };
+  static const Map<String, String> _kPropertyAmenities = {
+    'A/C': 'airConditioning',
+    'Jardín': 'garden',
+    'Área de churrasquera': 'bbqArea',
+    'Cocina con isla': 'islandKitchen',
+    'Sala de exterior': 'outdoorLivingRoom',
+    'Tina': 'bathtub',
+  };
+  static const Map<String, String> _kCommonAreas = {
+    'Piscina': 'pool',
+    'Parque de juegos': 'playground',
+    'Gimnasio': 'gym',
+    'Coworking': 'coworking',
+    'Salón de eventos': 'eventHall',
+    'Yoga Deck': 'yogaDeck',
+    'Cocina para eventos': 'eventKitchen',
+  };
+  static const Map<String, String> _kNeighborhood = {
+    'Caminabilidad': 'walkable',
+    'Áreas verdes': 'greenAreas',
+    'Recreación': 'recreation',
+    'Servicios esenciales': 'essentialServices',
+    'Colegios': 'schools',
+    'Comercio y servicios': 'commerceAndServices',
+    'Conectividad vial': 'roadConnectivity',
+    'Seguridad': 'security',
+    'Zona turística': 'touristZone',
+    'Gastronomía': 'gastronomy',
+    'Vida urbana': 'urbanLife',
+    'Universidades': 'universities',
+    'Centros corporativos': 'corporateCenters',
+    'Tranquilidad y silencio': 'tranquilityAndSilence',
+    'Salud y hospitales': 'healthAndHospitals',
+    'Movilidad': 'mobility',
+  };
+
+  /// "5+" → 5. Null si no se eligió.
+  int? _count(String? v) =>
+      v == null ? null : int.tryParse(v.replaceAll('+', ''));
+
+  /// Checkboxes conocidos van a su campo; los agregados con [+ Añadir], a
+  /// `additionalProperties`.
+  Map<String, dynamic> _checks(
+      Map<String, bool> items, Map<String, String> keys) {
+    final out = <String, dynamic>{};
+    final extra = <String, bool>{};
+    items.forEach((label, value) {
+      final key = keys[label];
+      if (key != null) {
+        out[key] = value;
+      } else {
+        extra[label] = value;
+      }
+    });
+    if (extra.isNotEmpty) out['additionalProperties'] = extra;
+    return out;
+  }
+
+  String? _text(TextEditingController c) {
+    final t = c.text.trim();
+    return t.isEmpty ? null : t;
+  }
+
+  /// Cuerpo de `PATCH /properties/{id}` con el formato que espera el backend.
   Map<String, dynamic> getFormData() {
+    final general = <String, dynamic>{
+      if (_count(_habitaciones) != null) 'bedrooms': _count(_habitaciones),
+      if (_count(_banos) != null) 'bathrooms': _count(_banos),
+      if (_count(_mediosBanos) != null) 'halfBathrooms': _count(_mediosBanos),
+      if (_count(_parqueo) != null) 'parkingSpots': _count(_parqueo),
+      if (_count(_pisos) != null) 'floors': _count(_pisos),
+    };
+    final neighborhood = <String, dynamic>{
+      if (_text(_sectorController) != null)
+        'description': _text(_sectorController),
+    };
+    _starRatings.forEach((label, stars) {
+      final key = _kNeighborhood[label];
+      if (key != null && stars > 0) neighborhood[key] = stars;
+    });
+    // El backend no tiene campo para describir daños: va al inicio de las
+    // dudas para que HQ lo lea.
+    final danos = _hasDanos == 'Si' ? _text(_danosDescripcionController) : null;
+    final dudas = _text(_dudasController);
+    final questions = [
+      if (danos != null) 'Daños: $danos',
+      if (dudas != null) dudas,
+    ].join('\n\n');
     return {
-      'tipoVivienda': _tipoVivienda,
-      'direccion': _direccion,
-      'descripcion': _descripcionController.text,
-      'caracteristicas': {
-        'habitaciones': _habitaciones,
-        'banos': _banos,
-        'parqueo': _parqueo,
-        'pisos': _pisos,
-        'mediosBanos': _mediosBanos,
-        ..._generalCharacteristics,
+      if (_tipoVivienda != null && _kPropertyTypes[_tipoVivienda] != null)
+        'propertyType': _kPropertyTypes[_tipoVivienda],
+      if (_text(_descripcionController) != null)
+        'description': _text(_descripcionController),
+      'features': {
+        'general': general,
+        'spaces': _checks(_generalCharacteristics, _kSpaces),
+        'others': _checks(_otherCharacteristics, _kOthers),
+        'amenities': {
+          'property': _checks(_propiedadAmenities, _kPropertyAmenities),
+          'commonAreas': _checks(_areasComunes, _kCommonAreas),
+        },
+        'neighborhood': neighborhood,
       },
-      'otrasCaracteristicas': _otherCharacteristics,
-      'amenidades': {
-        'propiedad': _propiedadAmenities,
-        'comunes': _areasComunes,
-      },
-      'starRatings': _starRatings,
-      'infoHq': {
-        'servicios': _servicios,
-        'hasDanos': _hasDanos,
-        'danosDescripcion': _danosDescripcionController.text,
-      },
-      'adicionales': {
-        'dudas': _dudasController.text,
-        'consideraciones': _consideracionesController.text,
-        'instrucciones': _instruccionesController.text,
-        'complejo': _complejoController.text,
+      'infoHQ': {
+        'services': _servicios,
+        if (_hasDanos != null) 'hasDamages': _hasDanos == 'Si',
+        if (questions.isNotEmpty) 'questions': questions,
+        if (_text(_consideracionesController) != null)
+          'showingConsiderations': _text(_consideracionesController),
+        if (_text(_instruccionesController) != null)
+          'visitorInstructions': _text(_instruccionesController),
+        if (_text(_complejoController) != null)
+          'complexNotes': _text(_complejoController),
       },
     };
   }
 
-  // Selected criteria (max 3)
+  /// Tras enviar con éxito, el borrador local ya no hace falta.
+  Future<void> clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_draftKey);
+  }
+
+  // Criterios calificados (mínimo 3)
   final Set<String> _selectedCriteria = {};
 
   late SharedPreferences _prefs;
-  String get _draftKey => 'checklist_draft_${FFAppState().lastActiveVisitId}';
+  String get _draftKey =>
+      'checklist_draft_${widget.visitId.isNotEmpty ? widget.visitId : FFAppState().lastActiveVisitId}';
   bool _isInit = false;
 
   @override
@@ -229,6 +349,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     _instruccionesController.addListener(_saveState);
     _complejoController.addListener(_saveState);
     _danosDescripcionController.addListener(_saveState);
+    _sectorController.addListener(_saveState);
   }
 
   Future<void> _loadState() async {
@@ -258,6 +379,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
             _complejoController.text = data['complejo'];
           if (data['danosDescripcion'] != null)
             _danosDescripcionController.text = data['danosDescripcion'];
+          if (data['sector'] != null) _sectorController.text = data['sector'];
 
           if (data['generalCharacteristics'] != null)
             _updateMapFromJson(
@@ -310,6 +432,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
       'instrucciones': _instruccionesController.text,
       'complejo': _complejoController.text,
       'danosDescripcion': _danosDescripcionController.text,
+      'sector': _sectorController.text,
       'generalCharacteristics': _generalCharacteristics,
       'otherCharacteristics': _otherCharacteristics,
       'propiedadAmenities': _propiedadAmenities,
@@ -334,6 +457,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     _instruccionesController.dispose();
     _complejoController.dispose();
     _danosDescripcionController.dispose();
+    _sectorController.dispose();
     super.dispose();
   }
 
@@ -399,30 +523,15 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
                   'Tipo de vivienda',
                   _tipoVivienda,
                   (val) => setState(() => _tipoVivienda = val),
-                  options: const [
-                    'Casa',
-                    'Apartamento',
-                    'Duplex',
-                    'Penthouse',
-                    'Terreno',
-                    'Otro'
-                  ],
+                  options: _kPropertyTypes.keys.toList(),
                   hasError: _errorTipoVivienda,
                 ),
               ),
               const SizedBox(width: 11),
               Expanded(
-                child: _buildDropdownField(
+                child: _buildReadOnlyField(
                   'Dirección',
-                  _direccion,
-                  (val) => setState(() => _direccion = val),
-                  options: const [
-                    'Av. Reforma 10-00, Z. 9',
-                    'Bulevar Vista Hermosa 12-45, Z. 15',
-                    '10a Calle A 5-67, Z. 14',
-                    'Ruta 4 3-21, Z. 4'
-                  ],
-                  hasError: _errorDireccion,
+                  widget.address.isNotEmpty ? widget.address : '—',
                 ),
               ),
             ],
@@ -541,74 +650,55 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
-          'Criterios de calificación',
+          'Sobre el sector',
           _criteriosExpanded,
           () => setState(() => _criteriosExpanded = !_criteriosExpanded),
           fontSize: 14,
         ),
         if (_criteriosExpanded) ...[
           const SizedBox(height: 12),
-          if (_errorCriterios)
-            const Text(
-              '¡Debes seleccionar al menos 3 criterios!',
-              style: TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          const SizedBox(height: 6),
-          // Description input area
           _buildTextAreaField(
-            '',
-            TextEditingController(),
-            placeholder: 'Añade detalles adicionales si es necesario',
-            showLabel: false,
-          ),
-          const SizedBox(height: 12),
-          // Instruction text
-          const Text(
-            'Selecciona máximo 3 criterio y califica de 1 a 5 estrellas',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: textColor,
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Criteria selector button
-          GestureDetector(
-            onTap: () {
-              // Could open a modal/bottom sheet for criteria selection
-            },
-            child: Container(
-              height: 54,
-              decoration: BoxDecoration(
-                color: inputBackground,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                'Selecciona el criterio',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: placeholderColor.withValues(alpha: 0.5),
-                ),
-              ),
-            ),
+            'Anota las dudas que tengas',
+            _sectorController,
+            placeholder: 'Escribe aquí...',
+            labelFontSize: 14,
           ),
           const SizedBox(height: 16),
-          // Star rating items
-          Center(
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 16,
-              runSpacing: 16,
-              children: _starRatings.entries
-                  .map(
-                    (entry) => _buildStarRatingItem(entry.key, entry.value),
-                  )
-                  .toList(),
+          Text(
+            'Selecciona mínimo 3 criterios y califica de 1 a 5 estrellas',
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _errorCriterios ? Colors.red : textColor,
             ),
+          ),
+          if (_errorCriterios)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Calificaste ${_selectedCriteria.length} de 3 como mínimo.',
+                style: const TextStyle(color: Colors.red, fontSize: 12),
+              ),
+            ),
+          const SizedBox(height: 16),
+          // Star rating items
+          // Dos columnas del ancho disponible, sea cual sea el padding.
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const gap = 12.0;
+              final cardWidth = (constraints.maxWidth - gap) / 2;
+              return Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: _starRatings.entries
+                    .map((entry) => SizedBox(
+                          width: cardWidth,
+                          child: _buildStarRatingItem(entry.key, entry.value),
+                        ))
+                    .toList(),
+              );
+            },
           ),
           const SizedBox(height: 10),
         ],
@@ -681,11 +771,19 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
           if (_hasDanos == 'Si') ...[
             const SizedBox(height: 12),
             _buildTextAreaField(
-              'Describe los daños',
+              'Describe los daños *',
               _danosDescripcionController,
               placeholder: 'Escribe aquí...',
               hasError: _errorDanos,
             ),
+            if (_errorDanos)
+              const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text(
+                  'Describe los daños para poder enviar.',
+                  style: TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
           ],
           const SizedBox(height: 10),
         ],
@@ -836,7 +934,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     String hintText = 'Escribe aquí...';
 
     if (sectionName == 'Características generales') {
-      titleText = 'Añade una característica general a la propiedad';
+      titleText = 'Agrega una característica general adicional';
     } else if (sectionName == 'Otras características') {
       titleText = 'Añade otra característica a la propiedad';
     } else if (sectionName == 'Propiedad') {
@@ -1407,14 +1505,33 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     );
   }
 
+  static const Map<String, IconData> _kCriteriaIcons = {
+    'Caminabilidad': Icons.directions_walk,
+    'Áreas verdes': Icons.park_outlined,
+    'Recreación': Icons.sports_soccer_outlined,
+    'Servicios esenciales': Icons.local_grocery_store_outlined,
+    'Colegios': Icons.school_outlined,
+    'Comercio y servicios': Icons.storefront_outlined,
+    'Conectividad vial': Icons.alt_route,
+    'Seguridad': Icons.shield_outlined,
+    'Zona turística': Icons.map_outlined,
+    'Gastronomía': Icons.restaurant_outlined,
+    'Vida urbana': Icons.location_city_outlined,
+    'Universidades': Icons.account_balance_outlined,
+    'Centros corporativos': Icons.business_center_outlined,
+    'Tranquilidad y silencio': Icons.volume_off_outlined,
+    'Salud y hospitales': Icons.local_hospital_outlined,
+    'Movilidad': Icons.directions_bus_outlined,
+  };
+
   // ==================== REUSABLE: STAR RATING ITEM ====================
+  /// Tarjeta de un criterio del sector. Se resalta en teal al calificarla.
   Widget _buildStarRatingItem(String label, int rating) {
     final bool isSelected = rating > 0;
     return Container(
-      width: (MediaQuery.of(context).size.width - 32 - 16) / 2,
-      height: 171,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isSelected ? const Color(0xFFEAF4F4) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isSelected ? primaryColor : borderColor,
@@ -1422,82 +1539,111 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
         ),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon placeholder (circle)
           Container(
-            width: 54,
-            height: 54,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: isSelected ? primaryColor : addButtonBg,
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.star_outline_rounded,
+              _kCriteriaIcons[label] ?? Icons.star_outline_rounded,
               color: isSelected ? Colors.white : primaryColor,
-              size: 27,
+              size: 22,
             ),
           ),
           const SizedBox(height: 8),
-          // Label
           Text(
             label,
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontFamily: 'Public Sans',
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: textColor,
-              height: 23.2 / 16,
             ),
           ),
           const SizedBox(height: 8),
-          // Star rating row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              return GestureDetector(
-                onTap: () {
-                  if (_selectedCriteria.length < 3 ||
-                      _selectedCriteria.contains(label)) {
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(5, (index) {
+                return GestureDetector(
+                  onTap: () {
                     setState(() {
                       if (_starRatings[label] == index + 1) {
-                        // Toggle off
+                        // Tocar la misma estrella la desmarca.
                         _starRatings[label] = 0;
                         _selectedCriteria.remove(label);
                       } else {
                         _starRatings[label] = index + 1;
-                        if (index + 1 > 0) {
-                          _selectedCriteria.add(label);
-                        }
+                        _selectedCriteria.add(label);
+                      }
+                      if (_selectedCriteria.length >= 3) {
+                        _errorCriterios = false;
                       }
                     });
-                  } else {
-                    // Maximum of 3 reached
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(
-                              'Ya has seleccionado el máximo de 3 criterios.')),
-                    );
-                  }
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: index < 4 ? 5 : 0,
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(right: index < 4 ? 4 : 0),
+                    child: Icon(
+                      index < rating ? Icons.star : Icons.star_border,
+                      size: 26,
+                      color: index < rating
+                          ? primaryColor
+                          : placeholderColor.withValues(alpha: 0.4),
+                    ),
                   ),
-                  child: Icon(
-                    index < rating ? Icons.star : Icons.star_border,
-                    size: 24,
-                    color: index < rating
-                        ? const Color(0xFFFFC107)
-                        : placeholderColor.withValues(alpha: 0.4),
-                  ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  // ==================== REUSABLE: READ-ONLY FIELD ====================
+  Widget _buildReadOnlyField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: textColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          constraints: const BoxConstraints(minHeight: 42),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: inputBackground,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 12,
+              color: textColor,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

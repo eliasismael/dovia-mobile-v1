@@ -23,6 +23,28 @@ class _VisitCardData {
   final double? lat;
   final double? lng;
 
+  /// Substatus con el que vino la visita: decide si todavía se puede reportar.
+  final String substatus;
+
+  /// Fecha y hora de la visita, si el backend la informa.
+  DateTime? get slotDateTime {
+    final d = DateTime.tryParse(date);
+    if (d == null) return null;
+    final parts = time.split(':');
+    final h = parts.isNotEmpty ? int.tryParse(parts[0]) ?? 0 : 0;
+    final m = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+    return DateTime(d.year, d.month, d.day, h, m);
+  }
+
+  /// Pasaron 24 horas desde la visita y sigue sin hacerse: pasa a
+  /// Pendientes para reagendarla con HQ.
+  bool get isOverdue {
+    final slot = slotDateTime;
+    return substatus != 'RESCHEDULE_REQUIRED' &&
+        slot != null &&
+        DateTime.now().isAfter(slot.add(const Duration(hours: 24)));
+  }
+
   const _VisitCardData({
     required this.visitId,
     required this.propertyName,
@@ -32,6 +54,7 @@ class _VisitCardData {
     required this.time,
     this.lat,
     this.lng,
+    this.substatus = '',
   });
 }
 
@@ -67,17 +90,51 @@ class _OPERATIVELISTINGHomeWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => OPERATIVELISTINGHomeModel());
-    _upcomingFuture = _fetchEnriched(substatus: 'ASSIGNED').then((list) {
-      _resolvedUpcoming = list;
-      return list;
-    });
-    // Pendientes = MISSING_INFO + RESCHEDULE_REQUIRED merged
-    _pendingFuture = Future.wait([
-      _fetchEnriched(substatus: 'MISSING_INFO'),
-      _fetchEnriched(substatus: 'RESCHEDULE_REQUIRED'),
-    ]).then((lists) => [...lists[0], ...lists[1]]);
+    _loadVisits();
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
+
+  /// Substatus de visitas ya asignadas a este operative. Las que siguen con la
+  /// documentación en revisión también son suyas: HQ puede asignarlas en
+  /// paralelo, así que van en próximas visitas.
+  static const List<String> _kActiveSubstatuses = [
+    'ASSIGNED',
+    'MISSING_INFO',
+    'DOCS_SUBMITTED',
+    'READY_TO_ASSIGN_OPERATIVE_LISTING',
+  ];
+
+  /// Próximas = asignadas y en plazo. Pendientes = vencidas (24 h después
+  /// de la visita sin hacerla) y las ya reportadas, que esperan a HQ.
+  void _loadVisits() {
+    final all = Future.wait([
+      for (final sub in _kActiveSubstatuses) _fetchEnriched(substatus: sub),
+      _fetchEnriched(substatus: 'RESCHEDULE_REQUIRED'),
+    ]).then((lists) => lists.expand((l) => l).toList());
+
+    int bySlot(_VisitCardData a, _VisitCardData b) {
+      final da = a.slotDateTime, db = b.slotDateTime;
+      if (da == null || db == null) return da == null ? 1 : -1;
+      return da.compareTo(db);
+    }
+
+    _upcomingFuture = all.then((list) {
+      final upcoming = list
+          .where((v) => v.substatus != 'RESCHEDULE_REQUIRED' && !v.isOverdue)
+          .toList()
+        ..sort(bySlot);
+      _resolvedUpcoming = upcoming;
+      return upcoming;
+    });
+    _pendingFuture = all.then((list) => list
+        .where((v) => v.substatus == 'RESCHEDULE_REQUIRED' || v.isOverdue)
+        .toList()
+      ..sort(bySlot));
+  }
+
+  /// Tras reagendar, la visita sale de próximas y aparece en Pendientes como
+  /// "En revisión por HQ".
+  void _reload() => safeSetState(_loadVisits);
 
   @override
   void dispose() {
@@ -171,6 +228,7 @@ class _OPERATIVELISTINGHomeWidgetState
       }
 
       result.add(_VisitCardData(
+        substatus: substatus,
         visitId: visitId,
         propertyName: propertyName,
         address: address,
@@ -209,180 +267,191 @@ class _OPERATIVELISTINGHomeWidgetState
     return cur;
   }
 
+  /// Fila horizontal que toma el alto de la tarjeta más alta, en vez de un
+  /// alto fijo que dejaba espacio vacío.
+  Widget _horizontalCards(
+      int count, Widget Function(BuildContext, int) itemBuilder) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < count; i++) ...[
+              if (i > 0) const SizedBox(width: 12),
+              itemBuilder(context, i),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SafeArea(
-          top: true,
-          child: Stack(
-            children: [
-              wrapWithModel(
-                model: _model.cornerGradientBackgroundModel,
-                updateCallback: () => safeSetState(() {}),
-                child: const CornerGradientBackgroundWidget(),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    wrapWithModel(
-                      model: _model.oPERATIVELISTINGHeaderModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: OPERATIVELISTINGHeaderWidget(
-                        titleText: 'Home',
-                        onLocationTap: () {
-                          final next = _resolvedUpcoming.isNotEmpty
-                              ? _resolvedUpcoming.first
-                              : null;
-                          context.pushNamed(
-                            OPERATIVELISTINGPrimeraVisitaWidget.routeName,
-                            queryParameters: {
-                              'visitId': serializeParam(
-                                  next?.visitId ?? '', ParamType.String),
-                              'isPrimeraVisita':
-                                  serializeParam(true, ParamType.bool),
-                              'propertyName': serializeParam(
-                                  next?.propertyName ?? '', ParamType.String),
-                            }.withoutNulls,
-                          );
-                        },
+    // Es la pantalla raíz del operative: atrás de Android llevaba al login.
+    return PopScope(
+      canPop: false,
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: Scaffold(
+          key: scaffoldKey,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          body: SafeArea(
+            top: true,
+            child: Stack(
+              children: [
+                wrapWithModel(
+                  model: _model.cornerGradientBackgroundModel,
+                  updateCallback: () => safeSetState(() {}),
+                  child: const CornerGradientBackgroundWidget(),
+                ),
+                SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      wrapWithModel(
+                        model: _model.oPERATIVELISTINGHeaderModel,
+                        updateCallback: () => safeSetState(() {}),
+                        child: OPERATIVELISTINGHeaderWidget(
+                          titleText: 'Home',
+                          showBack: false,
+                          onLocationTap: () {
+                            final next = _resolvedUpcoming.isNotEmpty
+                                ? _resolvedUpcoming.first
+                                : null;
+                            context.pushNamed(
+                              OPERATIVELISTINGPrimeraVisitaWidget.routeName,
+                              queryParameters: {
+                                'visitId': serializeParam(
+                                    next?.visitId ?? '', ParamType.String),
+                                'isPrimeraVisita':
+                                    serializeParam(true, ParamType.bool),
+                                'propertyName': serializeParam(
+                                    next?.propertyName ?? '', ParamType.String),
+                              }.withoutNulls,
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          // ── Tus próximas visitas ────────────────────────
-                          FutureBuilder<List<_VisitCardData>>(
-                            future: _upcomingFuture,
-                            builder: (context, snap) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _sectionHeader(
-                                    'Tus próximas visitas',
-                                    onVerMas: () => context.pushNamed(
-                                        OPERATIVELISTINGAgendaWidget.routeName),
-                                    topPadding: 32,
-                                  ),
-                                  if (!snap.hasData)
-                                    _loader()
-                                  else if (snap.data!.isEmpty)
-                                    _emptyMsg('No tienes próximas visitas.')
-                                  else
-                                    SizedBox(
-                                      height: 220,
-                                      child: ListView.separated(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: snap.data!.length,
-                                        separatorBuilder: (_, __) =>
-                                            const SizedBox(width: 12),
-                                        itemBuilder: (ctx, i) {
-                                          final cardData = snap.data![i];
-                                          return _UpcomingCard(
-                                            data: cardData,
-                                            onCardTap: () => context.pushNamed(
-                                              OPERATIVELISTINGPrimeraVisitaWidget
-                                                  .routeName,
-                                              queryParameters: {
-                                                'visitId': serializeParam(
-                                                    cardData.visitId,
-                                                    ParamType.String),
-                                                'isPrimeraVisita':
-                                                    serializeParam(
-                                                        false, ParamType.bool),
-                                                'propertyName': serializeParam(
-                                                    cardData.propertyName,
-                                                    ParamType.String),
-                                              }.withoutNulls,
-                                            ),
-                                            onVoyEnCamino: () =>
-                                                context.pushNamed(
-                                              OPERATIVELISTINGPrimeraVisitaWidget
-                                                  .routeName,
-                                              queryParameters: {
-                                                'visitId': serializeParam(
-                                                    cardData.visitId,
-                                                    ParamType.String),
-                                                'isPrimeraVisita':
-                                                    serializeParam(
-                                                        false, ParamType.bool),
-                                                'propertyName': serializeParam(
-                                                    cardData.propertyName,
-                                                    ParamType.String),
-                                              }.withoutNulls,
-                                            ),
-                                          );
-                                        },
-                                      ),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            20.0, 0.0, 20.0, 100.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            // ── Tus próximas visitas ────────────────────────
+                            FutureBuilder<List<_VisitCardData>>(
+                              future: _upcomingFuture,
+                              builder: (context, snap) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _sectionHeader(
+                                      'Tus próximas visitas',
+                                      onVerMas: () => context.pushNamed(
+                                          OPERATIVELISTINGAgendaWidget
+                                              .routeName),
+                                      topPadding: 32,
                                     ),
-                                ],
-                              );
-                            },
-                          ),
+                                    if (!snap.hasData)
+                                      _loader()
+                                    else if (snap.data!.isEmpty)
+                                      _emptyMsg('No tienes próximas visitas.')
+                                    else
+                                      _horizontalCards(snap.data!.length,
+                                          (ctx, i) {
+                                        final cardData = snap.data![i];
+                                        return _UpcomingCard(
+                                          data: cardData,
+                                          onCardTap: () => context.pushNamed(
+                                            OPERATIVELISTINGPrimeraVisitaWidget
+                                                .routeName,
+                                            queryParameters: {
+                                              'visitId': serializeParam(
+                                                  cardData.visitId,
+                                                  ParamType.String),
+                                              'isPrimeraVisita': serializeParam(
+                                                  false, ParamType.bool),
+                                              'propertyName': serializeParam(
+                                                  cardData.propertyName,
+                                                  ParamType.String),
+                                            }.withoutNulls,
+                                          ),
+                                          onVoyEnCamino: () =>
+                                              context.pushNamed(
+                                            OPERATIVELISTINGPrimeraVisitaWidget
+                                                .routeName,
+                                            queryParameters: {
+                                              'visitId': serializeParam(
+                                                  cardData.visitId,
+                                                  ParamType.String),
+                                              'isPrimeraVisita': serializeParam(
+                                                  false, ParamType.bool),
+                                              'propertyName': serializeParam(
+                                                  cardData.propertyName,
+                                                  ParamType.String),
+                                            }.withoutNulls,
+                                          ),
+                                        );
+                                      }),
+                                  ],
+                                );
+                              },
+                            ),
 
-                          // ── Pendientes ──────────────────────────────────
-                          FutureBuilder<List<_VisitCardData>>(
-                            future: _pendingFuture,
-                            builder: (context, snap) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _sectionHeader(
-                                    'Pendientes',
-                                    onVerMas: () => context.pushNamed(
-                                        OPERATIVELISTINGAgendaWidget.routeName),
-                                  ),
-                                  if (!snap.hasData)
-                                    _loader()
-                                  else if (snap.data!.isEmpty)
-                                    _emptyMsg('No tienes visitas pendientes.')
-                                  else
-                                    SizedBox(
-                                      height: 150,
-                                      child: ListView.separated(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: snap.data!.length,
-                                        separatorBuilder: (_, __) =>
-                                            const SizedBox(width: 12),
-                                        itemBuilder: (ctx, i) =>
-                                            _PendingCard(data: snap.data![i]),
-                                      ),
+                            // ── Pendientes ──────────────────────────────────
+                            FutureBuilder<List<_VisitCardData>>(
+                              future: _pendingFuture,
+                              builder: (context, snap) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _sectionHeader(
+                                      'Pendientes',
+                                      onVerMas: () => context.pushNamed(
+                                          OPERATIVELISTINGAgendaWidget
+                                              .routeName),
                                     ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
+                                    if (!snap.hasData)
+                                      _loader()
+                                    else if (snap.data!.isEmpty)
+                                      _emptyMsg('No tienes visitas pendientes.')
+                                    else
+                                      _horizontalCards(
+                                          snap.data!.length,
+                                          (ctx, i) => _PendingCard(
+                                              data: snap.data![i],
+                                              onRescheduled: _reload)),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Align(
-                alignment: const AlignmentDirectional(0.0, 0.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    wrapWithModel(
-                      model: _model.oPERATIVELISTINGNavbarModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: const OPERATIVELISTINGNavbarWidget(),
-                    ),
-                  ],
+                Align(
+                  alignment: const AlignmentDirectional(0.0, 0.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      wrapWithModel(
+                        model: _model.oPERATIVELISTINGNavbarModel,
+                        updateCallback: () => safeSetState(() {}),
+                        child: const OPERATIVELISTINGNavbarWidget(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -471,8 +540,6 @@ class _UpcomingCardState extends State<_UpcomingCard> {
   static const Color _primary = Color(0xFF007376);
   static const Color _dark = Color(0xFF00444B);
 
-  bool _isUnderReview = false;
-
   String _formatDate(String raw) {
     if (raw.isEmpty) return '';
     try {
@@ -520,84 +587,13 @@ class _UpcomingCardState extends State<_UpcomingCard> {
     }
   }
 
-  void _showSuccess() {
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: const BoxDecoration(
-                  color: _primary,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 38),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Se envio con exito',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: _dark,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Pronto se comunicaran contigo el Asocia HQ para reagendar la visita',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  color: Color(0xFF6B7280),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onReschedule() {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-        child: _RescheduleReasonSheet(
-          visitId: widget.data.visitId,
-          onSuccess: () {
-            Navigator.of(context).pop();
-            _showSuccess();
-            setState(() {
-              _isUnderReview = true;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onCardTap,
       child: Container(
-        width: 290,
+        // Ocupa casi todo el ancho: con una sola visita no queda un hueco.
+        width: MediaQuery.sizeOf(context).width - 56,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -620,11 +616,11 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                   : 'Propiedad',
               style: const TextStyle(
                 fontFamily: 'Public Sans',
-                fontSize: 15,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: _dark,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             // Address
@@ -634,10 +630,10 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                 'Dirección: ${widget.data.address}',
                 style: const TextStyle(
                   fontFamily: 'Public Sans',
-                  fontSize: 12,
+                  fontSize: 14,
                   color: _primary,
                 ),
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -648,10 +644,10 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                 widget.data.ownerName,
                 style: const TextStyle(
                   fontFamily: 'Public Sans',
-                  fontSize: 12,
+                  fontSize: 14,
                   color: _primary,
                 ),
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -662,7 +658,7 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                 'Fecha: ${_formatDate(widget.data.date)}',
                 style: const TextStyle(
                   fontFamily: 'Public Sans',
-                  fontSize: 13,
+                  fontSize: 15,
                   color: _dark,
                 ),
               ),
@@ -674,12 +670,12 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                 'Hora: ${widget.data.time}',
                 style: const TextStyle(
                   fontFamily: 'Public Sans',
-                  fontSize: 13,
+                  fontSize: 15,
                   color: _dark,
                 ),
               ),
             ],
-            const Spacer(),
+            const SizedBox(height: 12),
             // Action buttons
             Row(
               children: [
@@ -687,7 +683,7 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                   child: GestureDetector(
                     onTap: () => _openMaps(context),
                     child: Container(
-                      height: 30,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: const Color(0xFF70ACAD).withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(25),
@@ -697,7 +693,7 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                         'Ubicación',
                         style: TextStyle(
                           fontFamily: 'Public Sans',
-                          fontSize: 12,
+                          fontSize: 14,
                           color: _dark,
                         ),
                       ),
@@ -709,7 +705,7 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                   child: GestureDetector(
                     onTap: widget.onVoyEnCamino,
                     child: Container(
-                      height: 30,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: _primary,
                         borderRadius: BorderRadius.circular(25),
@@ -719,7 +715,7 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                         'Voy en camino',
                         style: TextStyle(
                           fontFamily: 'Public Sans',
-                          fontSize: 12,
+                          fontSize: 14,
                           color: Colors.white,
                         ),
                       ),
@@ -728,50 +724,6 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                 ),
               ],
             ),
-            if (!_isUnderReview) ...[
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: _onReschedule,
-                child: Container(
-                  width: double.infinity,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: _primary, width: 1),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Reportar con HQ',
-                    style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 11,
-                      color: _primary,
-                    ),
-                  ),
-                ),
-              ),
-            ] else ...[
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                height: 22,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3CD),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'En revisión por HQ',
-                  style: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF856404),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -782,8 +734,9 @@ class _UpcomingCardState extends State<_UpcomingCard> {
 // ── Pending visit card ─────────────────────────────────────────────────────
 class _PendingCard extends StatefulWidget {
   final _VisitCardData data;
+  final VoidCallback onRescheduled;
 
-  const _PendingCard({required this.data});
+  const _PendingCard({required this.data, required this.onRescheduled});
 
   @override
   State<_PendingCard> createState() => _PendingCardState();
@@ -795,84 +748,16 @@ class _PendingCardState extends State<_PendingCard> {
   static const Color _badgeBg = Color(0xFFF8D5D5);
   static const Color _badgeText = Color(0xFFBC0000);
 
-  bool _isUnderReview = false;
+  /// Ya reportada: espera a que HQ le asigne una fecha nueva.
+  bool get _isUnderReview => widget.data.substatus == 'RESCHEDULE_REQUIRED';
 
-  void _onReschedule() {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-        child: _RescheduleReasonSheet(
-          visitId: widget.data.visitId,
-          onSuccess: () {
-            Navigator.of(context).pop();
-            _showSuccess();
-            setState(() {
-              _isUnderReview = true;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  void _showSuccess() {
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: const BoxDecoration(
-                  color: _primary,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 38),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Se envio con exito',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: _dark,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Pronto se comunicaran contigo el Asocia HQ para reagendar la visita',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  color: Color(0xFF6B7280),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  void _onReschedule() => _openReschedule(context,
+      visitId: widget.data.visitId, onDone: widget.onRescheduled);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 300,
+      width: MediaQuery.sizeOf(context).width - 56,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -909,11 +794,11 @@ class _PendingCardState extends State<_PendingCard> {
                       : 'Propiedad',
                   style: const TextStyle(
                     fontFamily: 'Public Sans',
-                    fontSize: 14,
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: _dark,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (widget.data.address.isNotEmpty) ...[
@@ -922,10 +807,10 @@ class _PendingCardState extends State<_PendingCard> {
                     'Dirección: ${widget.data.address}',
                     style: const TextStyle(
                       fontFamily: 'Public Sans',
-                      fontSize: 11,
+                      fontSize: 13,
                       color: _primary,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -935,50 +820,51 @@ class _PendingCardState extends State<_PendingCard> {
                     widget.data.ownerName,
                     style: const TextStyle(
                       fontFamily: 'Public Sans',
-                      fontSize: 11,
+                      fontSize: 13,
                       color: _primary,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
                 const SizedBox(height: 6),
                 Container(
                   width: double.infinity,
-                  height: 22,
+                  height: 26,
                   decoration: BoxDecoration(
                     color: _isUnderReview ? const Color(0xFFFFF3CD) : _badgeBg,
                     borderRadius: BorderRadius.circular(100),
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    _isUnderReview ? 'En revisión por HQ' : 'Falta información',
+                    _isUnderReview ? 'En revisión por HQ' : 'Plazo vencido',
                     style: TextStyle(
                       fontFamily: 'Public Sans',
-                      fontSize: 11,
+                      fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color:
                           _isUnderReview ? const Color(0xFF856404) : _badgeText,
                     ),
                   ),
                 ),
+                // Vencida: sin botones de navegación, solo reagendar.
                 if (!_isUnderReview) ...[
                   const SizedBox(height: 6),
                   GestureDetector(
                     onTap: _onReschedule,
                     child: Container(
                       width: double.infinity,
-                      height: 26,
+                      height: 32,
                       decoration: BoxDecoration(
                         color: _primary,
                         borderRadius: BorderRadius.circular(25),
                       ),
                       alignment: Alignment.center,
                       child: const Text(
-                        'Reportar con HQ',
+                        'Reagendar con HQ',
                         style: TextStyle(
                           fontFamily: 'Public Sans',
-                          fontSize: 11,
+                          fontSize: 13,
                           color: Colors.white,
                         ),
                       ),
@@ -992,6 +878,106 @@ class _PendingCardState extends State<_PendingCard> {
       ),
     );
   }
+}
+
+// ── Reagendar con HQ ───────────────────────────────────────────────────────
+
+/// Pide el motivo; si se envía, muestra el éxito y avisa para recargar.
+void _openReschedule(BuildContext context,
+    {required String visitId, required VoidCallback onDone}) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) => Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      child: _RescheduleReasonSheet(
+        visitId: visitId,
+        onSuccess: () async {
+          Navigator.of(dialogContext).pop();
+          await _showRescheduleSuccess(context);
+          onDone();
+        },
+      ),
+    ),
+  );
+}
+
+Future<void> _showRescheduleSuccess(BuildContext context) {
+  const primary = Color(0xFF007376);
+  const dark = Color(0xFF00444B);
+  return showDialog(
+    context: context,
+    builder: (ctx) => Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check, color: Colors.white, size: 34),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Se envió con éxito',
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: dark,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Pronto se comunicarán contigo desde HQ para reagendar la visita.',
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                color: Color(0xFF6B7280),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Entendido',
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 // ── Reschedule reason bottom sheet ─────────────────────────────────────────
@@ -1014,6 +1000,7 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
 
   final _controller = TextEditingController();
   bool _loading = false;
+  String? _fieldError;
 
   @override
   void dispose() {
@@ -1023,8 +1010,14 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
 
   Future<void> _submit() async {
     final reason = _controller.text.trim();
-    if (reason.isEmpty) return;
-    setState(() => _loading = true);
+    if (reason.isEmpty) {
+      setState(() => _fieldError = 'Escribe el motivo para poder enviarlo.');
+      return;
+    }
+    setState(() {
+      _fieldError = null;
+      _loading = true;
+    });
 
     final res = await DOVIAAPIVisitContextGroup
         .operativeListerRescheduleRequestCall
@@ -1040,8 +1033,24 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
     if (res.succeeded) {
       widget.onSuccess();
     } else {
+      // El motivo del backend (ej. la visita no está en una etapa que admita
+      // reporte) en vez de un error genérico.
+      final body = res.jsonBody;
+      String? detail;
+      if (body is Map) {
+        final errors = body['errors'];
+        if (errors is List && errors.isNotEmpty && errors.first is Map) {
+          detail = (errors.first as Map)['message']?.toString();
+        }
+        detail ??= body['message']?.toString();
+      }
+      debugPrint('[Operative reporte] ${res.statusCode}: ${res.bodyText}');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al enviar la solicitud')),
+        SnackBar(
+          content: Text(detail == null || detail.isEmpty
+              ? 'Error al enviar la solicitud (HTTP ${res.statusCode})'
+              : 'Error al enviar la solicitud: $detail'),
+        ),
       );
     }
   }
@@ -1059,7 +1068,7 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Cuéntanos por qué tienes que\nreportar la visita',
+            'Cuéntanos por qué tienes que\nreagendar la visita',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 16,
@@ -1073,7 +1082,11 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
             controller: _controller,
             minLines: 4,
             maxLines: 6,
+            onChanged: (_) {
+              if (_fieldError != null) setState(() => _fieldError = null);
+            },
             decoration: InputDecoration(
+              errorText: _fieldError,
               hintText: 'Escribe aquí...',
               hintStyle: const TextStyle(
                 fontFamily: 'Public Sans',
@@ -1113,7 +1126,7 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
                       ),
                     )
                   : const Text(
-                      'Enviar reporte',
+                      'Enviar solicitud',
                       style: TextStyle(
                         fontFamily: 'Public Sans',
                         fontSize: 15,

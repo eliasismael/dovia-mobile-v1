@@ -52,14 +52,27 @@ class _OPERATIVELISTINGAgendaWidgetState
   List<_AgendaVisitData> _allVisits = [];
   Map<String, List<_AgendaVisitData>> _groupedVisits = {};
 
+  /// Mes que se lista cuando no hay un día elegido.
+  DateTime _displayMonth =
+      DateTime(DateTime.now().year, DateTime.now().month, 1);
+
+  /// Visitas asignadas a este operative, también las que siguen con la
+  /// documentación en revisión (HQ puede asignarlas en paralelo).
+  static const List<String> _kAssignedSubstatuses = [
+    'ASSIGNED',
+    'MISSING_INFO',
+    'DOCS_SUBMITTED',
+    'READY_TO_ASSIGN_OPERATIVE_LISTING',
+  ];
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => OPERATIVELISTINGAgendaModel());
 
-    // On page load action.
+    // Arranca sin día elegido: se ve todo el mes agrupado por fecha.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.selectedDate = getCurrentTimestamp;
+      _model.selectedDate = null;
       safeSetState(() {});
       await _fetchVisits();
     });
@@ -76,21 +89,22 @@ class _OPERATIVELISTINGAgendaWidgetState
   Future<void> _fetchVisits() async {
     final token = currentAuthenticationToken ?? '';
 
-    final listRes =
-        await DOVIAAPIVisitContextGroup.getOperativeListerVisitsCall.call(
-      authToken: token,
-      substatus: 'ASSIGNED',
-      page: '1',
-      limit: '50',
-    );
+    final responses = await Future.wait([
+      for (final sub in _kAssignedSubstatuses)
+        DOVIAAPIVisitContextGroup.getOperativeListerVisitsCall.call(
+          authToken: token,
+          substatus: sub,
+          page: '1',
+          limit: '50',
+        ),
+    ]);
 
-    if (!listRes.succeeded) {
-      if (mounted) safeSetState(() => _loading = false);
-      return;
+    final visits = <dynamic>[];
+    for (final res in responses) {
+      if (!res.succeeded) continue;
+      final raw = getJsonField(res.jsonBody, r'$.data');
+      if (raw is List) visits.addAll(raw);
     }
-
-    final raw = getJsonField(listRes.jsonBody, r'$.data');
-    final visits = raw is List ? raw : <dynamic>[];
 
     // Sort ascending by date+time
     visits.sort((a, b) {
@@ -135,11 +149,6 @@ class _OPERATIVELISTINGAgendaWidgetState
                 '';
           }
         }
-      }
-
-      if (propertyName.isEmpty && address.isNotEmpty) {
-        propertyName = address;
-        address = '';
       }
 
       result.add(_AgendaVisitData(
@@ -214,7 +223,7 @@ class _OPERATIVELISTINGAgendaWidgetState
         'Noviembre',
         'Diciembre'
       ];
-      return '${weekdays[dt.weekday - 1]}, ${dt.day} de ${months[dt.month - 1]}';
+      return '${weekdays[dt.weekday - 1]} ${dt.day} de ${months[dt.month - 1]}';
     } catch (_) {
       return dateStr;
     }
@@ -250,12 +259,13 @@ class _OPERATIVELISTINGAgendaWidgetState
           '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
     }
 
-    List<String> visibleDates = _groupedVisits.keys.toList();
-    if (filterDateStr.isNotEmpty && _groupedVisits.containsKey(filterDateStr)) {
-      visibleDates = [filterDateStr];
-    } else if (filterDateStr.isNotEmpty) {
-      visibleDates = [];
-    }
+    // Sin día elegido: todas las fechas del mes mostrado. Con día: solo esa.
+    final monthPrefix =
+        '${_displayMonth.year}-${_displayMonth.month.toString().padLeft(2, '0')}-';
+    final List<String> visibleDates = filterDateStr.isNotEmpty
+        ? (_groupedVisits.containsKey(filterDateStr) ? [filterDateStr] : [])
+        : (_groupedVisits.keys.where((k) => k.startsWith(monthPrefix)).toList()
+          ..sort());
 
     return GestureDetector(
       onTap: () {
@@ -299,15 +309,42 @@ class _OPERATIVELISTINGAgendaWidgetState
                               child: custom_widgets.DateSelectorWidget(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: 70.0,
-                                initialDate:
-                                    _model.selectedDate ?? DateTime.now(),
+                                dayNavigation: true,
+                                selectedDate: _model.selectedDate,
+                                displayMonth: _displayMonth,
                                 onDateSelected: (newDate) async {
                                   _model.selectedDate = newDate;
+                                  if (newDate != null) {
+                                    _displayMonth = DateTime(
+                                        newDate.year, newDate.month, 1);
+                                  }
                                   safeSetState(() {});
+                                },
+                                onMonthChanged: (month) {
+                                  safeSetState(() => _displayMonth = month);
                                 },
                               ),
                             ),
                           ),
+                          // Con un día elegido, volver a la lista del mes.
+                          if (_model.selectedDate != null)
+                            Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: TextButton(
+                                onPressed: () => safeSetState(
+                                    () => _model.selectedDate = null),
+                                child: Text(
+                                  'Ver todo el mes',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600),
+                                        color: const Color(0xFF007376),
+                                      ),
+                                ),
+                              ),
+                            ),
                           if (_loading)
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 60.0),
@@ -320,6 +357,7 @@ class _OPERATIVELISTINGAgendaWidgetState
                               padding: EdgeInsets.symmetric(vertical: 60.0),
                               child: Text(
                                 'No hay visitas asignadas para esta fecha.',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.grey),
                               ),
                             )
@@ -414,9 +452,13 @@ class _OPERATIVELISTINGAgendaWidgetState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        visit.propertyName.isNotEmpty
-                            ? visit.propertyName
-                            : 'Dirección',
+                        visit.address.isNotEmpty
+                            ? visit.address
+                            : visit.propertyName.isNotEmpty
+                                ? visit.propertyName
+                                : 'Sin dirección',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                   fontWeight: FontWeight.w500),
@@ -426,7 +468,7 @@ class _OPERATIVELISTINGAgendaWidgetState
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${_formatDateShort(visit.date)} a las ${visit.time}',
+                        '${_formatDateShort(visit.date)} · ${visit.time} hs',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                   fontWeight: FontWeight.normal),
@@ -438,9 +480,10 @@ class _OPERATIVELISTINGAgendaWidgetState
                     ],
                   ),
                 ),
+                const SizedBox(width: 12),
                 Container(
-                  width: 30.0,
-                  height: 30.0,
+                  width: 36.0,
+                  height: 36.0,
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).accent1,
                     shape: BoxShape.circle,
@@ -452,7 +495,7 @@ class _OPERATIVELISTINGAgendaWidgetState
                       child: Icon(
                         Icons.remove_red_eye,
                         color: Color(0xFF007376),
-                        size: 14.0,
+                        size: 18.0,
                       ),
                     ),
                   ),

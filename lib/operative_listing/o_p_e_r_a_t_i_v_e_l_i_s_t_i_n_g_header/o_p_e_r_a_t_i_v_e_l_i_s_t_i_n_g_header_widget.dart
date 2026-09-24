@@ -12,10 +12,14 @@ class OPERATIVELISTINGHeaderWidget extends StatefulWidget {
     super.key,
     required this.titleText,
     this.onLocationTap,
+    this.showBack = true,
   });
 
   final String? titleText;
   final VoidCallback? onLocationTap;
+
+  /// En el Home no hay a dónde volver: atrás llevaba al login.
+  final bool showBack;
 
   @override
   State<OPERATIVELISTINGHeaderWidget> createState() =>
@@ -62,32 +66,33 @@ class _OPERATIVELISTINGHeaderWidgetState
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  width: 35.0,
-                  height: 35.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).alternate,
-                    shape: BoxShape.circle,
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      context.safePop();
-                    },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: SvgPicture.asset(
-                        'assets/images/IconoVolverAtras.svg',
-                        width: 200.0,
-                        height: 200.0,
-                        fit: BoxFit.none,
+                if (widget.showBack)
+                  Container(
+                    width: 35.0,
+                    height: 35.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      shape: BoxShape.circle,
+                    ),
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () async {
+                        context.safePop();
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: SvgPicture.asset(
+                          'assets/images/IconoVolverAtras.svg',
+                          width: 200.0,
+                          height: 200.0,
+                          fit: BoxFit.none,
+                        ),
                       ),
                     ),
                   ),
-                ),
                 InkWell(
                   splashColor: Colors.transparent,
                   focusColor: Colors.transparent,

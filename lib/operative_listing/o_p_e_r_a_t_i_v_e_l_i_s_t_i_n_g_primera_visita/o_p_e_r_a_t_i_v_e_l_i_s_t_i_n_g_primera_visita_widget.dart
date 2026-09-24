@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -9,6 +11,7 @@ import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
@@ -48,7 +51,6 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
   // Loaded from API
   String _ownerName = '';
   String _ownerAvatarUrl = '';
-  String _ownerPhone = '';
   String _propertyType = '';
   String _address = '';
   String _description = '';
@@ -61,11 +63,24 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
   bool _arrivedSent = false;
   String _visitDate = '';
   String _visitTime = '';
+  String _visitUtc = '';
+
+  /// Número de Dovia HQ para dudas del operative. Provisorio hasta que el
+  /// backend lo informe.
+  static const String _kHqPhone = '+502 2222 0000';
+
+  /// El backend fija el fin de la visita una hora después del inicio.
+  static const Duration _kVisitLength = Duration(hours: 1);
+
+  /// Re-evalúa el horario sin tener que salir de la pantalla.
+  Timer? _clock;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => OPERATIVELISTINGPrimeraVisitaModel());
+    _clock =
+        Timer.periodic(const Duration(seconds: 30), (_) => safeSetState(() {}));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.visitId.isNotEmpty) {
         FFAppState().lastActiveVisitId = widget.visitId;
@@ -78,6 +93,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
 
   @override
   void dispose() {
+    _clock?.cancel();
     _model.dispose();
     super.dispose();
   }
@@ -107,7 +123,6 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
 
     String ownerName = '';
     String ownerAvatarUrl = '';
-    String ownerPhone = '';
     String propertyType = '';
     String address = '';
     String description = '';
@@ -117,12 +132,6 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
     if (owner is Map) {
       ownerName = owner['fullName']?.toString() ?? '';
       ownerAvatarUrl = owner['avatar']?.toString() ?? '';
-      final phone = owner['phone'];
-      if (phone is Map) {
-        final cc = phone['countryCode']?.toString() ?? '';
-        final num = phone['number']?.toString() ?? '';
-        ownerPhone = '$cc $num'.trim();
-      }
     }
 
     if (prop is Map) {
@@ -144,16 +153,24 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
 
     String visitDate = '';
     String visitTime = '';
-    final slot = data['confirmedSlot'];
+    String visitUtc = '';
+    // El overview anida el horario en `visit.confirmedTimeSlot`.
+    final visitData = data['visit'];
+    final slot = (visitData is Map ? visitData['confirmedTimeSlot'] : null) ??
+        data['confirmedSlot'];
     if (slot is Map) {
       visitDate = slot['date']?.toString() ?? '';
       visitTime = slot['time']?.toString() ?? '';
+      visitUtc = slot['utcTimestamp']?.toString() ?? '';
     }
+    // Al volver a la pantalla, lo ya avisado sigue marcado.
+    final report =
+        visitData is Map ? visitData['operativeLocationReport'] : null;
+    final journey = report is Map ? report['status']?.toString() ?? '' : '';
 
     safeSetState(() {
       _ownerName = ownerName;
       _ownerAvatarUrl = ownerAvatarUrl;
-      _ownerPhone = ownerPhone;
       _propertyType = propertyType;
       _address = address;
       _description = description;
@@ -161,6 +178,11 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
       _lng = lng;
       _visitDate = visitDate;
       _visitTime = visitTime;
+      _visitUtc = visitUtc;
+      if (journey == 'ON_MY_WAY' || journey == 'AT_LOCATION') {
+        _onMyWaySent = true;
+      }
+      if (journey == 'AT_LOCATION') _arrivedSent = true;
       _loading = false;
     });
   }
@@ -209,24 +231,69 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
     );
   }
 
+  /// Inicio de la visita en hora local. Prefiere el instante UTC del backend.
+  DateTime? get _visitStart {
+    final utc = DateTime.tryParse(_visitUtc);
+    if (utc != null) return utc.toLocal();
+    if (_visitDate.isEmpty || _visitTime.isEmpty) return null;
+    final d = DateTime.tryParse(_visitDate);
+    final t = _visitTime.split(':');
+    if (d == null || t.length < 2) return null;
+    return DateTime(d.year, d.month, d.day, int.tryParse(t[0]) ?? 0,
+        int.tryParse(t[1]) ?? 0);
+  }
+
+  /// El checklist solo se abre dentro del horario asignado a la visita.
   bool get _isChecklistEnabled {
-    if (_visitDate.isEmpty || _visitTime.isEmpty) return false;
+    final start = _visitStart;
+    if (start == null) return false;
+    final now = DateTime.now();
+    return !now.isBefore(start) && now.isBefore(start.add(_kVisitLength));
+  }
+
+  String get _checklistHint {
+    final start = _visitStart;
+    if (start == null) return 'La visita no tiene horario asignado.';
+    final end = start.add(_kVisitLength);
+    String hm(DateTime d) =>
+        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+    if (DateTime.now().isBefore(start)) {
+      return 'El checklist se habilita a las ${hm(start)}.';
+    }
+    return 'El horario de la visita terminó a las ${hm(end)}.';
+  }
+
+  /// Pide permiso y toma la posición actual; null si no se pudo.
+  Future<Position?> _currentPosition() async {
+    void msg(String t) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t)));
+      }
+    }
+
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      msg('Activá la ubicación del dispositivo para notificar tu llegada.');
+      return null;
+    }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      msg('Necesitamos permiso de ubicación para notificar tu llegada.');
+      return null;
+    }
     try {
-      final d = _visitDate.split('-');
-      final t = _visitTime.split(':');
-      if (d.length < 3 || t.length < 2) return false;
-      final visitDt = DateTime(
-        int.parse(d[0]),
-        int.parse(d[1]),
-        int.parse(d[2]),
-        int.parse(t[0]),
-        int.parse(t[1]),
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
       );
-      // Unlock 15 min before the scheduled time
-      return DateTime.now()
-          .isAfter(visitDt.subtract(const Duration(minutes: 15)));
     } catch (_) {
-      return false;
+      msg('No pudimos obtener tu ubicación. Intentá de nuevo.');
+      return null;
     }
   }
 
@@ -234,9 +301,18 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
     if (_arrivedSent || _arrivedLoading) return;
     safeSetState(() => _arrivedLoading = true);
 
-    final res = await DOVIAAPIVisitContextGroup.operativeListerArrivedCall.call(
+    // Llegar se registra con la ubicación real: el backend marca la visita
+    // "en la ubicación" con estas coordenadas.
+    final pos = await _currentPosition();
+    if (pos == null) {
+      safeSetState(() => _arrivedLoading = false);
+      return;
+    }
+    final res = await DOVIAAPIVisitContextGroup.updateVisitLocationCall.call(
       authToken: currentAuthenticationToken,
       visitId: widget.visitId,
+      lat: pos.latitude,
+      lng: pos.longitude,
     );
 
     if (!mounted) return;
@@ -257,8 +333,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
   }
 
   Future<void> _callPhone() async {
-    if (_ownerPhone.isEmpty) return;
-    final uri = Uri(scheme: 'tel', path: _ownerPhone.replaceAll(' ', ''));
+    final uri = Uri(scheme: 'tel', path: _kHqPhone.replaceAll(' ', ''));
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
@@ -472,9 +547,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                         const SizedBox(height: 16),
                                         // Hablar con Dovia HQ box
                                         GestureDetector(
-                                          onTap: _ownerPhone.isNotEmpty
-                                              ? _callPhone
-                                              : null,
+                                          onTap: _callPhone,
                                           child: Container(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *
@@ -506,7 +579,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                             FontWeight.w600,
                                                       ),
                                                 ),
-                                                if (_ownerPhone.isNotEmpty) ...[
+                                                ...[
                                                   const SizedBox(height: 8),
                                                   Row(
                                                     mainAxisAlignment:
@@ -520,7 +593,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                               0xFF007376)),
                                                       const SizedBox(width: 6),
                                                       Text(
-                                                        _ownerPhone,
+                                                        _kHqPhone,
                                                         style: FlutterFlowTheme
                                                                 .of(context)
                                                             .bodySmall
@@ -785,6 +858,26 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                             ),
                                           ],
                                         ),
+                                        if (!_isChecklistEnabled && !_loading)
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 8),
+                                            child: Text(
+                                              _checklistHint,
+                                              textAlign: TextAlign.center,
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .publicSans(),
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .secondaryText,
+                                                      ),
+                                            ),
+                                          ),
                                         // "Notificar que llegué" — visible solo cuando el checklist está habilitado
                                         if (_isChecklistEnabled) ...[
                                           const SizedBox(height: 10),
