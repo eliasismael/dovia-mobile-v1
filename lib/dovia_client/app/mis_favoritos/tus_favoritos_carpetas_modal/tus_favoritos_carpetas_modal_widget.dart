@@ -56,6 +56,7 @@ class _TusFavoritosCarpetasModalWidgetState
   /// cerrar el modal, así se puede volver a agregar ahí mismo; la pantalla de
   /// atrás recién la saca de la lista al cerrarlo, cuando vuelve a cargar.
   late bool _isFavorite = widget.propertyIsFavorite ?? true;
+  final _foldersScroll = ScrollController();
   bool _togglingFavorite = false;
 
   Future<void> _toggleFavorite() async {
@@ -90,6 +91,7 @@ class _TusFavoritosCarpetasModalWidgetState
 
   @override
   void dispose() {
+    _foldersScroll.dispose();
     _model.maybeDispose();
 
     super.dispose();
@@ -123,9 +125,8 @@ class _TusFavoritosCarpetasModalWidgetState
 
         return Container(
           width: MediaQuery.sizeOf(context).width * 1.0,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.5,
-          ),
+          // Ocupa siempre media pantalla: así entran varias carpetas a la vista.
+          height: MediaQuery.sizeOf(context).height * 0.5,
           decoration: BoxDecoration(
             color: FlutterFlowTheme.of(context).secondaryBackground,
             boxShadow: const [
@@ -145,16 +146,18 @@ class _TusFavoritosCarpetasModalWidgetState
               topRight: Radius.circular(32.0),
             ),
           ),
-          child: Builder(
-            builder: (context) {
-              if (widget.isCreatingNewFolderPARAM != true &&
-                  !_model.isCreatingNewFolder) {
-                return Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                  child: SingleChildScrollView(
+          // El contenido termina sobre los botones de Android, no detrás.
+          child: SafeArea(
+            top: false,
+            child: Builder(
+              builder: (context) {
+                if (widget.isCreatingNewFolderPARAM != true &&
+                    !_model.isCreatingNewFolder) {
+                  return Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 20.0, 0.0, 0.0),
                     child: Column(
-                      mainAxisSize: MainAxisSize.max,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
@@ -301,31 +304,46 @@ class _TusFavoritosCarpetasModalWidgetState
                             ],
                           ),
                         ),
-                        Container(
-                          width: MediaQuery.sizeOf(context).width * 1.0,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEDEDED),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 20.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      20.0, 20.0, 20.0, 0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Carpetas ',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
+                        // Solo la lista de carpetas se desplaza; lo de arriba queda fijo.
+                        Expanded(
+                          child: Container(
+                            width: MediaQuery.sizeOf(context).width * 1.0,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEDEDED),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 20.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            20.0, 20.0, 20.0, 0.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Carpetas ',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.inter(
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                                letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -335,36 +353,38 @@ class _TusFavoritosCarpetasModalWidgetState
                                                         .bodyMedium
                                                         .fontStyle,
                                               ),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                      ),
-                                      FFButtonWidget(
-                                        onPressed: () async {
-                                          _model.isCreatingNewFolder = true;
-                                          safeSetState(() {});
-                                        },
-                                        text: 'Nueva carpeta',
-                                        options: FFButtonOptions(
-                                          height: 30.0,
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                          iconPadding:
-                                              const EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                          color: const Color(0xFF1CA9A9),
-                                          textStyle: FlutterFlowTheme.of(
-                                                  context)
-                                              .titleSmall
-                                              .override(
-                                                font: GoogleFonts.publicSans(
+                                        ),
+                                        FFButtonWidget(
+                                          onPressed: () async {
+                                            _model.isCreatingNewFolder = true;
+                                            safeSetState(() {});
+                                          },
+                                          text: 'Nueva carpeta',
+                                          options: FFButtonOptions(
+                                            height: 30.0,
+                                            padding: const EdgeInsetsDirectional
+                                                .fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                            iconPadding:
+                                                const EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                    0.0, 0.0, 0.0, 0.0),
+                                            color: const Color(0xFF1CA9A9),
+                                            textStyle: FlutterFlowTheme.of(
+                                                    context)
+                                                .titleSmall
+                                                .override(
+                                                  font: GoogleFonts.publicSans(
+                                                    fontWeight:
+                                                        FontWeight.normal,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .titleSmall
+                                                            .fontStyle,
+                                                  ),
+                                                  color: Colors.white,
+                                                  fontSize: 14.0,
+                                                  letterSpacing: 0.0,
                                                   fontWeight: FontWeight.normal,
                                                   fontStyle:
                                                       FlutterFlowTheme.of(
@@ -372,543 +392,410 @@ class _TusFavoritosCarpetasModalWidgetState
                                                           .titleSmall
                                                           .fontStyle,
                                                 ),
-                                                color: Colors.white,
-                                                fontSize: 14.0,
-                                                letterSpacing: 0.0,
-                                                fontWeight: FontWeight.normal,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .fontStyle,
-                                              ),
-                                          elevation: 0.0,
-                                          borderRadius:
-                                              BorderRadius.circular(24.0),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 20.0, 0.0, 0.0),
-                                  child: FutureBuilder<ApiCallResponse>(
-                                    future: DOVIAAPIFavoriteContextGroup
-                                        .getAllFavoriteFoldersCall
-                                        .call(
-                                      authToken: currentAuthenticationToken,
-                                    ),
-                                    builder: (context, snapshot) {
-                                      // Customize what your widget looks like when it's loading.
-                                      if (!snapshot.hasData) {
-                                        return Center(
-                                          child: SizedBox(
-                                            width: 50.0,
-                                            height: 50.0,
-                                            child: CircularProgressIndicator(
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                FlutterFlowTheme.of(context)
-                                                    .primary,
-                                              ),
-                                            ),
+                                            elevation: 0.0,
+                                            borderRadius:
+                                                BorderRadius.circular(24.0),
                                           ),
-                                        );
-                                      }
-                                      final listViewGetAllFavoriteFoldersResponse =
-                                          snapshot.data!;
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 20.0, 0.0, 0.0),
+                                      child: FutureBuilder<ApiCallResponse>(
+                                        future: DOVIAAPIFavoriteContextGroup
+                                            .getAllFavoriteFoldersCall
+                                            .call(
+                                          authToken: currentAuthenticationToken,
+                                        ),
+                                        builder: (context, snapshot) {
+                                          // Customize what your widget looks like when it's loading.
+                                          if (!snapshot.hasData) {
+                                            return Center(
+                                              child: SizedBox(
+                                                width: 50.0,
+                                                height: 50.0,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(
+                                                    FlutterFlowTheme.of(context)
+                                                        .primary,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          final listViewGetAllFavoriteFoldersResponse =
+                                              snapshot.data!;
 
-                                      return Builder(
-                                        builder: (context) {
-                                          final eachFolder =
-                                              DOVIAAPIFavoriteContextGroup
-                                                      .getAllFavoriteFoldersCall
-                                                      .folders(
-                                                        listViewGetAllFavoriteFoldersResponse
-                                                            .jsonBody,
-                                                      )
-                                                      ?.toList() ??
-                                                  [];
+                                          return Builder(
+                                            builder: (context) {
+                                              final eachFolder =
+                                                  DOVIAAPIFavoriteContextGroup
+                                                          .getAllFavoriteFoldersCall
+                                                          .folders(
+                                                            listViewGetAllFavoriteFoldersResponse
+                                                                .jsonBody,
+                                                          )
+                                                          ?.toList() ??
+                                                      [];
 
-                                          return ListView.builder(
-                                            padding: EdgeInsets.zero,
-                                            shrinkWrap: true,
-                                            scrollDirection: Axis.vertical,
-                                            itemCount: eachFolder.length,
-                                            itemBuilder:
-                                                (context, eachFolderIndex) {
-                                              final eachFolderItem =
-                                                  eachFolder[eachFolderIndex];
-                                              return Padding(
-                                                padding:
-                                                    const EdgeInsetsDirectional
-                                                        .fromSTEB(
-                                                        20.0, 20.0, 20.0, 0.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Container(
-                                                      decoration:
-                                                          const BoxDecoration(),
+                                              // La barra lateral siempre visible
+                                              // avisa que hay más carpetas abajo.
+                                              return Scrollbar(
+                                                controller: _foldersScroll,
+                                                thumbVisibility: true,
+                                                child: ListView.builder(
+                                                  controller: _foldersScroll,
+                                                  padding: EdgeInsets.zero,
+                                                  scrollDirection:
+                                                      Axis.vertical,
+                                                  itemCount: eachFolder.length,
+                                                  itemBuilder: (context,
+                                                      eachFolderIndex) {
+                                                    final eachFolderItem =
+                                                        eachFolder[
+                                                            eachFolderIndex];
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsetsDirectional
+                                                              .fromSTEB(20.0,
+                                                              20.0, 20.0, 0.0),
                                                       child: Row(
                                                         mainAxisSize:
                                                             MainAxisSize.max,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
                                                         children: [
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                    0.0,
-                                                                    0.0,
-                                                                    10.0,
-                                                                    0.0),
-                                                            child: ClipRRect(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8.0),
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/casa_card_sobreMiVisita.png',
-                                                                width: 53.0,
-                                                                height: 79.0,
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
+                                                          Container(
+                                                            decoration:
+                                                                const BoxDecoration(),
+                                                            child: Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .max,
+                                                              children: [
+                                                                Padding(
+                                                                  padding:
+                                                                      const EdgeInsetsDirectional
+                                                                          .fromSTEB(
+                                                                          0.0,
+                                                                          0.0,
+                                                                          10.0,
+                                                                          0.0),
+                                                                  child:
+                                                                      ClipRRect(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            8.0),
+                                                                    child: Image
+                                                                        .asset(
+                                                                      'assets/images/casa_card_sobreMiVisita.png',
+                                                                      width:
+                                                                          53.0,
+                                                                      height:
+                                                                          79.0,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Column(
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .max,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Align(
+                                                                      alignment:
+                                                                          const AlignmentDirectional(
+                                                                              -1.0,
+                                                                              0.0),
+                                                                      child:
+                                                                          Text(
+                                                                        getJsonField(
+                                                                          eachFolderItem,
+                                                                          r'''$.name''',
+                                                                        ).toString(),
+                                                                        textAlign:
+                                                                            TextAlign.start,
+                                                                        style: FlutterFlowTheme.of(context)
+                                                                            .bodyMedium
+                                                                            .override(
+                                                                              font: GoogleFonts.inter(
+                                                                                fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                              ),
+                                                                              letterSpacing: 0.0,
+                                                                              fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                                                                              fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                            ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
                                                             ),
                                                           ),
-                                                          Column(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .max,
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Align(
-                                                                alignment:
-                                                                    const AlignmentDirectional(
-                                                                        -1.0,
-                                                                        0.0),
-                                                                child: Text(
-                                                                  getJsonField(
+                                                          Builder(
+                                                            builder: (context) {
+                                                              if ((DOVIAAPIFavoriteContextGroup
+                                                                      .checkIfPropertyIsFavoritedCall
+                                                                      .foledersStoredIn(
+                                                                containerCheckIfPropertyIsFavoritedResponse
+                                                                    .jsonBody,
+                                                              )!)
+                                                                  .toList()
+                                                                  .contains(
+                                                                      getJsonField(
                                                                     eachFolderItem,
-                                                                    r'''$.name''',
-                                                                  ).toString(),
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .start,
-                                                                  style: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .override(
-                                                                        font: GoogleFonts
-                                                                            .inter(
-                                                                          fontWeight: FlutterFlowTheme.of(context)
-                                                                              .bodyMedium
-                                                                              .fontWeight,
-                                                                          fontStyle: FlutterFlowTheme.of(context)
-                                                                              .bodyMedium
-                                                                              .fontStyle,
-                                                                        ),
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                        fontWeight: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .fontWeight,
-                                                                        fontStyle: FlutterFlowTheme.of(context)
-                                                                            .bodyMedium
-                                                                            .fontStyle,
+                                                                    r'''$.id''',
+                                                                  ).toString())) {
+                                                                // Ya esta en la
+                                                                // carpeta: el mismo
+                                                                // control la saca.
+                                                                return InkWell(
+                                                                  splashColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                  focusColor: Colors
+                                                                      .transparent,
+                                                                  hoverColor: Colors
+                                                                      .transparent,
+                                                                  highlightColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                  onTap:
+                                                                      () async {
+                                                                    final removeResult =
+                                                                        await DOVIAAPIFavoriteContextGroup
+                                                                            .removeFavoriteFromFolderCall
+                                                                            .call(
+                                                                      authToken:
+                                                                          currentAuthenticationToken,
+                                                                      folderId:
+                                                                          getJsonField(
+                                                                        eachFolderItem,
+                                                                        r'''$.id''',
+                                                                      ).toString(),
+                                                                      propertyId:
+                                                                          widget
+                                                                              .houseId,
+                                                                    );
+
+                                                                    if (!removeResult
+                                                                        .succeeded) {
+                                                                      await showDialog(
+                                                                        context:
+                                                                            context,
+                                                                        builder:
+                                                                            (alertDialogContext) {
+                                                                          return AlertDialog(
+                                                                            title:
+                                                                                const Text('error'),
+                                                                            content:
+                                                                                Text((removeResult.jsonBody ?? '').toString()),
+                                                                            actions: [
+                                                                              TextButton(
+                                                                                onPressed: () => Navigator.pop(alertDialogContext),
+                                                                                child: const Text('Ok'),
+                                                                              ),
+                                                                            ],
+                                                                          );
+                                                                        },
+                                                                      );
+                                                                    }
+
+                                                                    safeSetState(
+                                                                        () {});
+                                                                  },
+                                                                  child:
+                                                                      Container(
+                                                                    width: 30.0,
+                                                                    height:
+                                                                        30.0,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      color: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .primaryText,
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                      border:
+                                                                          Border
+                                                                              .all(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .primaryText,
                                                                       ),
-                                                                ),
-                                                              ),
-                                                            ],
+                                                                    ),
+                                                                    child:
+                                                                        ClipRRect(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              8.0),
+                                                                      child: SvgPicture
+                                                                          .asset(
+                                                                        'assets/images/check.svg',
+                                                                        width:
+                                                                            200.0,
+                                                                        height:
+                                                                            200.0,
+                                                                        fit: BoxFit
+                                                                            .none,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                return InkWell(
+                                                                  splashColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                  focusColor: Colors
+                                                                      .transparent,
+                                                                  hoverColor: Colors
+                                                                      .transparent,
+                                                                  highlightColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                  onTap:
+                                                                      () async {
+                                                                    _model.apiResultvbr =
+                                                                        await DOVIAAPIFavoriteContextGroup
+                                                                            .addPropertyToFavoritesCall
+                                                                            .call(
+                                                                      authToken:
+                                                                          currentAuthenticationToken,
+                                                                      folderId:
+                                                                          getJsonField(
+                                                                        eachFolderItem,
+                                                                        r'''$.id''',
+                                                                      ).toString(),
+                                                                      propertyId:
+                                                                          widget
+                                                                              .houseId,
+                                                                    );
+
+                                                                    if ((_model
+                                                                            .apiResultvbr
+                                                                            ?.succeeded ??
+                                                                        true)) {
+                                                                      _isFavorite =
+                                                                          true;
+                                                                      // Sin aviso: el ícono de la carpeta ya muestra que quedó guardada.
+                                                                    } else {
+                                                                      await showDialog(
+                                                                        context:
+                                                                            context,
+                                                                        builder:
+                                                                            (alertDialogContext) {
+                                                                          return AlertDialog(
+                                                                            title:
+                                                                                const Text('error'),
+                                                                            content:
+                                                                                Text((_model.apiResultvbr?.jsonBody ?? '').toString()),
+                                                                            actions: [
+                                                                              TextButton(
+                                                                                onPressed: () => Navigator.pop(alertDialogContext),
+                                                                                child: const Text('Ok'),
+                                                                              ),
+                                                                            ],
+                                                                          );
+                                                                        },
+                                                                      );
+                                                                    }
+
+                                                                    safeSetState(
+                                                                        () {});
+                                                                  },
+                                                                  child:
+                                                                      Container(
+                                                                    width: 30.0,
+                                                                    height:
+                                                                        30.0,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                      border:
+                                                                          Border
+                                                                              .all(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .primaryText,
+                                                                      ),
+                                                                    ),
+                                                                    child:
+                                                                        ClipRRect(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              8.0),
+                                                                      child: SvgPicture
+                                                                          .asset(
+                                                                        'assets/images/plus.svg',
+                                                                        width:
+                                                                            200.0,
+                                                                        height:
+                                                                            200.0,
+                                                                        fit: BoxFit
+                                                                            .none,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }
+                                                            },
                                                           ),
                                                         ],
                                                       ),
-                                                    ),
-                                                    Builder(
-                                                      builder: (context) {
-                                                        if ((DOVIAAPIFavoriteContextGroup
-                                                                .checkIfPropertyIsFavoritedCall
-                                                                .foledersStoredIn(
-                                                          containerCheckIfPropertyIsFavoritedResponse
-                                                              .jsonBody,
-                                                        )!)
-                                                            .toList()
-                                                            .contains(
-                                                                getJsonField(
-                                                              eachFolderItem,
-                                                              r'''$.id''',
-                                                            ).toString())) {
-                                                          // Ya esta en la
-                                                          // carpeta: el mismo
-                                                          // control la saca.
-                                                          return InkWell(
-                                                            splashColor: Colors
-                                                                .transparent,
-                                                            focusColor: Colors
-                                                                .transparent,
-                                                            hoverColor: Colors
-                                                                .transparent,
-                                                            highlightColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            onTap: () async {
-                                                              final removeResult =
-                                                                  await DOVIAAPIFavoriteContextGroup
-                                                                      .removeFavoriteFromFolderCall
-                                                                      .call(
-                                                                authToken:
-                                                                    currentAuthenticationToken,
-                                                                folderId:
-                                                                    getJsonField(
-                                                                  eachFolderItem,
-                                                                  r'''$.id''',
-                                                                ).toString(),
-                                                                propertyId:
-                                                                    widget
-                                                                        .houseId,
-                                                              );
-
-                                                              if (!removeResult
-                                                                  .succeeded) {
-                                                                await showDialog(
-                                                                  context:
-                                                                      context,
-                                                                  builder:
-                                                                      (alertDialogContext) {
-                                                                    return AlertDialog(
-                                                                      title: const Text(
-                                                                          'error'),
-                                                                      content: Text((removeResult.jsonBody ??
-                                                                              '')
-                                                                          .toString()),
-                                                                      actions: [
-                                                                        TextButton(
-                                                                          onPressed: () =>
-                                                                              Navigator.pop(alertDialogContext),
-                                                                          child:
-                                                                              const Text('Ok'),
-                                                                        ),
-                                                                      ],
-                                                                    );
-                                                                  },
-                                                                );
-                                                              }
-
-                                                              safeSetState(
-                                                                  () {});
-                                                            },
-                                                            child: Container(
-                                                              width: 30.0,
-                                                              height: 30.0,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .primaryText,
-                                                                shape: BoxShape
-                                                                    .circle,
-                                                                border:
-                                                                    Border.all(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                ),
-                                                              ),
-                                                              child: ClipRRect(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                                child:
-                                                                    SvgPicture
-                                                                        .asset(
-                                                                  'assets/images/check.svg',
-                                                                  width: 200.0,
-                                                                  height: 200.0,
-                                                                  fit: BoxFit
-                                                                      .none,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        } else {
-                                                          return InkWell(
-                                                            splashColor: Colors
-                                                                .transparent,
-                                                            focusColor: Colors
-                                                                .transparent,
-                                                            hoverColor: Colors
-                                                                .transparent,
-                                                            highlightColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            onTap: () async {
-                                                              _model.apiResultvbr =
-                                                                  await DOVIAAPIFavoriteContextGroup
-                                                                      .addPropertyToFavoritesCall
-                                                                      .call(
-                                                                authToken:
-                                                                    currentAuthenticationToken,
-                                                                folderId:
-                                                                    getJsonField(
-                                                                  eachFolderItem,
-                                                                  r'''$.id''',
-                                                                ).toString(),
-                                                                propertyId:
-                                                                    widget
-                                                                        .houseId,
-                                                              );
-
-                                                              if ((_model
-                                                                      .apiResultvbr
-                                                                      ?.succeeded ??
-                                                                  true)) {
-                                                                _isFavorite =
-                                                                    true;
-                                                                await showDialog(
-                                                                  context:
-                                                                      context,
-                                                                  builder:
-                                                                      (alertDialogContext) {
-                                                                    return AlertDialog(
-                                                                      content:
-                                                                          const Text(
-                                                                              'Se guardó correctamente'),
-                                                                      actions: [
-                                                                        TextButton(
-                                                                          onPressed: () =>
-                                                                              Navigator.pop(alertDialogContext),
-                                                                          child:
-                                                                              const Text('Ok'),
-                                                                        ),
-                                                                      ],
-                                                                    );
-                                                                  },
-                                                                );
-                                                              } else {
-                                                                await showDialog(
-                                                                  context:
-                                                                      context,
-                                                                  builder:
-                                                                      (alertDialogContext) {
-                                                                    return AlertDialog(
-                                                                      title: const Text(
-                                                                          'error'),
-                                                                      content: Text((_model.apiResultvbr?.jsonBody ??
-                                                                              '')
-                                                                          .toString()),
-                                                                      actions: [
-                                                                        TextButton(
-                                                                          onPressed: () =>
-                                                                              Navigator.pop(alertDialogContext),
-                                                                          child:
-                                                                              const Text('Ok'),
-                                                                        ),
-                                                                      ],
-                                                                    );
-                                                                  },
-                                                                );
-                                                              }
-
-                                                              safeSetState(
-                                                                  () {});
-                                                            },
-                                                            child: Container(
-                                                              width: 30.0,
-                                                              height: 30.0,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                shape: BoxShape
-                                                                    .circle,
-                                                                border:
-                                                                    Border.all(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                ),
-                                                              ),
-                                                              child: ClipRRect(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                                child:
-                                                                    SvgPicture
-                                                                        .asset(
-                                                                  'assets/images/plus.svg',
-                                                                  width: 200.0,
-                                                                  height: 200.0,
-                                                                  fit: BoxFit
-                                                                      .none,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }
-                                                      },
-                                                    ),
-                                                  ],
+                                                    );
+                                                  },
                                                 ),
                                               );
                                             },
                                           );
                                         },
-                                      );
-                                    },
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              } else {
-                return Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      20.0, 20.0, 20.0, 20.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                _model.isCreatingNewFolder = false;
-                                safeSetState(() {});
-                              },
-                              child: Text(
-                                'Cancelar',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                            ),
-                            Builder(
-                              builder: (context) => InkWell(
+                  );
+                } else {
+                  return Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        20.0, 20.0, 20.0, 20.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              InkWell(
                                 splashColor: Colors.transparent,
                                 focusColor: Colors.transparent,
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
-                                  _model.apiResult3ce =
-                                      await DOVIAAPIFavoriteContextGroup
-                                          .createFavoriteFolderCall
-                                          .call(
-                                    folderName: _model.textController.text,
-                                    authToken: currentAuthenticationToken,
-                                  );
-
-                                  if ((_model.apiResult3ce?.succeeded ??
-                                      true)) {
-                                    final newFolderId = getJsonField(
-                                      _model.apiResult3ce?.jsonBody,
-                                      r'''$.data.id''',
-                                    ).toString();
-
-                                    final bool addedToFolder =
-                                        widget.houseId != null &&
-                                            widget.houseId!.isNotEmpty;
-                                    if (addedToFolder) {
-                                      await DOVIAAPIFavoriteContextGroup
-                                          .addPropertyToFavoritesCall
-                                          .call(
-                                        authToken: currentAuthenticationToken,
-                                        folderId: newFolderId,
-                                        propertyId: widget.houseId,
-                                      );
-                                    }
-
-                                    await showDialog(
-                                      context: context,
-                                      builder: (dialogContext) {
-                                        return Dialog(
-                                          elevation: 0,
-                                          insetPadding: EdgeInsets.zero,
-                                          backgroundColor: Colors.transparent,
-                                          alignment: const AlignmentDirectional(
-                                                  0.0, 0.0)
-                                              .resolve(
-                                                  Directionality.of(context)),
-                                          child: SizedBox(
-                                            height: MediaQuery.sizeOf(context)
-                                                    .height *
-                                                0.5,
-                                            width: MediaQuery.sizeOf(context)
-                                                    .width *
-                                                0.9,
-                                            child:
-                                                TusFavoritosCarpetaCreadaModalWidget(
-                                                    folderName: _model
-                                                        .textController.text),
-                                          ),
-                                        );
-                                      },
-                                    );
-
-                                    if (widget.isCreatingNewFolderPARAM ==
-                                            true ||
-                                        addedToFolder) {
-                                      Navigator.pop(context);
-                                    } else {
-                                      _model.isCreatingNewFolder = false;
-                                      _model.textController?.clear();
-                                      safeSetState(() {});
-                                    }
-                                  } else {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          title: const Text('error'),
-                                          content: Text(
-                                              (_model.apiResult3ce?.jsonBody ??
-                                                      '')
-                                                  .toString()),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child: const Text('Ok'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  }
-
+                                  _model.isCreatingNewFolder = false;
                                   safeSetState(() {});
                                 },
                                 child: Text(
-                                  'Guardar',
+                                  'Cancelar',
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -927,165 +814,169 @@ class _TusFavoritosCarpetasModalWidgetState
                                       ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 8.0, 0.0, 0.0),
-                          child: Text(
-                            'Nueva carpeta',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.inter(
+                              Builder(
+                                builder: (context) => InkWell(
+                                  splashColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () async {
+                                    _model.apiResult3ce =
+                                        await DOVIAAPIFavoriteContextGroup
+                                            .createFavoriteFolderCall
+                                            .call(
+                                      folderName: _model.textController.text,
+                                      authToken: currentAuthenticationToken,
+                                    );
+
+                                    if ((_model.apiResult3ce?.succeeded ??
+                                        true)) {
+                                      final newFolderId = getJsonField(
+                                        _model.apiResult3ce?.jsonBody,
+                                        r'''$.data.id''',
+                                      ).toString();
+
+                                      final bool addedToFolder =
+                                          widget.houseId != null &&
+                                              widget.houseId!.isNotEmpty;
+                                      if (addedToFolder) {
+                                        await DOVIAAPIFavoriteContextGroup
+                                            .addPropertyToFavoritesCall
+                                            .call(
+                                          authToken: currentAuthenticationToken,
+                                          folderId: newFolderId,
+                                          propertyId: widget.houseId,
+                                        );
+                                      }
+
+                                      await showDialog(
+                                        context: context,
+                                        builder: (dialogContext) {
+                                          return Dialog(
+                                            elevation: 0,
+                                            insetPadding: EdgeInsets.zero,
+                                            backgroundColor: Colors.transparent,
+                                            alignment:
+                                                const AlignmentDirectional(
+                                                        0.0, 0.0)
+                                                    .resolve(Directionality.of(
+                                                        context)),
+                                            child: SizedBox(
+                                              height: MediaQuery.sizeOf(context)
+                                                      .height *
+                                                  0.5,
+                                              width: MediaQuery.sizeOf(context)
+                                                      .width *
+                                                  0.9,
+                                              child:
+                                                  TusFavoritosCarpetaCreadaModalWidget(
+                                                      folderName: _model
+                                                          .textController.text),
+                                            ),
+                                          );
+                                        },
+                                      );
+
+                                      if (widget.isCreatingNewFolderPARAM ==
+                                              true ||
+                                          addedToFolder) {
+                                        Navigator.pop(context);
+                                      } else {
+                                        _model.isCreatingNewFolder = false;
+                                        _model.textController?.clear();
+                                        safeSetState(() {});
+                                      }
+                                    } else {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (alertDialogContext) {
+                                          return AlertDialog(
+                                            title: const Text('error'),
+                                            content: Text((_model.apiResult3ce
+                                                        ?.jsonBody ??
+                                                    '')
+                                                .toString()),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    alertDialogContext),
+                                                child: const Text('Ok'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+
+                                    safeSetState(() {});
+                                  },
+                                  child: Text(
+                                    'Guardar',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w600,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 8.0, 0.0, 0.0),
+                            child: Text(
+                              'Nueva carpeta',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    fontSize: 16.0,
+                                    letterSpacing: 0.0,
                                     fontWeight: FontWeight.w600,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .fontStyle,
                                   ),
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 12.0, 0.0, 0.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset(
-                              'assets/images/casa_card_sobreMiVisita.png',
-                              width: 187.0,
-                              height: 110.0,
-                              fit: BoxFit.cover,
                             ),
                           ),
-                        ),
-                        Align(
-                          alignment: const AlignmentDirectional(-1.0, 0.0),
-                          child: Padding(
+                          Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 0.0),
-                            child: Text(
-                              'Nombre de la carpeta',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
+                                0.0, 12.0, 0.0, 0.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.asset(
+                                'assets/images/casa_card_sobreMiVisita.png',
+                                width: 187.0,
+                                height: 110.0,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
-                        ),
-                        Align(
-                          alignment: const AlignmentDirectional(-1.0, 0.0),
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 8.0, 0.0, 0.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(
-                                controller: _model.textController,
-                                focusNode: _model.textFieldFocusNode,
-                                autofocus: false,
-                                enabled: true,
-                                obscureText: false,
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  labelStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontStyle,
-                                      ),
-                                  hintText: 'Escribe el nombre de la carpeta',
-                                  hintStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 10.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontStyle,
-                                      ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                      color: Color(0x00000000),
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context).error,
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  filled: true,
-                                  fillColor: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                ),
+                          Align(
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 20.0, 0.0, 0.0),
+                              child: Text(
+                                'Nombre de la carpeta',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -1105,21 +996,143 @@ class _TusFavoritosCarpetasModalWidgetState
                                           .bodyMedium
                                           .fontStyle,
                                     ),
-                                cursorColor:
-                                    FlutterFlowTheme.of(context).primaryText,
-                                enableInteractiveSelection: true,
-                                validator: _model.textControllerValidator
-                                    .asValidator(context),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          Align(
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 8.0, 0.0, 0.0),
+                              child: SizedBox(
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                child: TextFormField(
+                                  controller: _model.textController,
+                                  focusNode: _model.textFieldFocusNode,
+                                  autofocus: false,
+                                  enabled: true,
+                                  obscureText: false,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    labelStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontStyle,
+                                        ),
+                                    hintText: 'Escribe el nombre de la carpeta',
+                                    hintStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                          fontSize: 10.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontStyle,
+                                        ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: const BorderSide(
+                                        color: Color(0x00000000),
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: const BorderSide(
+                                        color: Color(0x00000000),
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            FlutterFlowTheme.of(context).error,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    focusedErrorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            FlutterFlowTheme.of(context).error,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    filled: true,
+                                    fillColor: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                  ),
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                  cursorColor:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  enableInteractiveSelection: true,
+                                  validator: _model.textControllerValidator
+                                      .asValidator(context),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }
-            },
+                  );
+                }
+              },
+            ),
           ),
         );
       },

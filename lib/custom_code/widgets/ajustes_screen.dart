@@ -691,7 +691,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+          padding: EdgeInsets.fromLTRB(
+              24, 20, 24, 32 + MediaQuery.viewPaddingOf(context).bottom),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -777,7 +778,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+          padding: EdgeInsets.fromLTRB(
+              24, 12, 24, 32 + MediaQuery.viewPaddingOf(context).bottom),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

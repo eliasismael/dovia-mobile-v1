@@ -369,8 +369,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
         },
     ];
 
-    final presignRes =
-        await DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall.call(
+    final presignRes = await DOVIAAPIDoviaHomeContextGroup
+        .presignServiceRequestImagesCall
+        .call(
       serviceRequestId: serviceRequestId,
       uploads: uploads,
       authToken: token,
@@ -425,8 +426,8 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
     final scheduledAt = _scheduledDateTime(date);
     // El selector de fecha respeta la anticipación mínima, pero la franja
     // horaria puede quedar por debajo (Ej: el primer día hábil a las 6:00 AM).
-    final earliest =
-        DateTime.now().add(Duration(hours: DHCLIENTAgendaWidget.minAdvanceHours));
+    final earliest = DateTime.now()
+        .add(Duration(hours: DHCLIENTAgendaWidget.minAdvanceHours));
     if (scheduledAt.isBefore(earliest)) {
       _showSnack(
           'La visita debe agendarse con al menos ${DHCLIENTAgendaWidget.minAdvanceHours} hs de anticipación.');
@@ -447,9 +448,10 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
 
       // El endpoint rechaza strings vacíos: si se llegó hasta aquí sin
       // levantamiento (Ej: entrando directo a la ruta) se manda el servicio.
-      final description = DHCLIENTInstalacionWidget.description.trim().isNotEmpty
-          ? DHCLIENTInstalacionWidget.description.trim()
-          : 'Solicitud de ${DHCLIENTInstalacionWidget.serviceTitle}';
+      final description =
+          DHCLIENTInstalacionWidget.description.trim().isNotEmpty
+              ? DHCLIENTInstalacionWidget.description.trim()
+              : 'Solicitud de ${DHCLIENTInstalacionWidget.serviceTitle}';
 
       final response =
           await DOVIAAPIDoviaHomeContextGroup.createServiceRequestCall.call(
@@ -541,8 +543,8 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
 
   Future<void> _pickDate() async {
     // Respeta la anticipación mínima (36h sin plan / 24h con suscripción).
-    final firstDate =
-        DateTime.now().add(Duration(hours: DHCLIENTAgendaWidget.minAdvanceHours));
+    final firstDate = DateTime.now()
+        .add(Duration(hours: DHCLIENTAgendaWidget.minAdvanceHours));
     final picked = await showDatePicker(
       context: context,
       initialDate: _model.selectedDate ?? firstDate,
@@ -693,13 +695,14 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                       children: [
                         Text(
                           'Selecciona fecha y hora para tu servicio',
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w600),
-                                color: const Color(0xFF00444B),
-                                fontSize: 17.0,
-                                letterSpacing: 0.3,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
+                                    color: const Color(0xFF00444B),
+                                    fontSize: 17.0,
+                                    letterSpacing: 0.3,
+                                  ),
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
@@ -782,7 +785,8 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                             // Crea la solicitud en el backend: sin esto la red
                             // de Home Associates nunca la ve.
                             onPressed: _canContinue ? _submit : null,
-                            text: _model.isSubmitting ? 'Enviando...' : 'Enviar',
+                            text:
+                                _model.isSubmitting ? 'Enviando...' : 'Enviar',
                             options: FFButtonOptions(
                               width: double.infinity,
                               height: 50.0,
@@ -867,129 +871,130 @@ class _AddressPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40.0,
-                height: 4.0,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDFDFDF),
-                  borderRadius: BorderRadius.circular(2.0),
-                ),
+    // El fondo blanco llega hasta abajo y el contenido termina sobre los
+    // botones de Android.
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+          20.0, 16.0, 20.0, 20.0 + MediaQuery.viewPaddingOf(context).bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40.0,
+              height: 4.0,
+              decoration: BoxDecoration(
+                color: const Color(0xFFDFDFDF),
+                borderRadius: BorderRadius.circular(2.0),
               ),
             ),
-            const SizedBox(height: 16.0),
-            Text(
-              'Lugar del servicio',
-              style: GoogleFonts.publicSans(
-                fontWeight: FontWeight.w600,
-                fontSize: 17.0,
-                color: const Color(0xFF00444B),
-              ),
+          ),
+          const SizedBox(height: 16.0),
+          Text(
+            'Lugar del servicio',
+            style: GoogleFonts.publicSans(
+              fontWeight: FontWeight.w600,
+              fontSize: 17.0,
+              color: const Color(0xFF00444B),
             ),
-            const SizedBox(height: 12.0),
-            if (addresses.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: Text(
-                  'Todavía no tienes ubicaciones registradas.',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.0,
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                  ),
+          ),
+          const SizedBox(height: 12.0),
+          if (addresses.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Text(
+                'Todavía no tienes ubicaciones registradas.',
+                style: GoogleFonts.inter(
+                  fontSize: 14.0,
+                  color: FlutterFlowTheme.of(context).secondaryText,
                 ),
-              )
-            else
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: addresses.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8.0),
-                  itemBuilder: (context, index) {
-                    final address = addresses[index];
-                    final id = idOf(address);
-                    final selected = id != null && id == selectedId;
-                    return InkWell(
-                      onTap: id == null ? null : () => onSelect(id),
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 14.0),
-                        decoration: BoxDecoration(
+              ),
+            )
+          else
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: addresses.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8.0),
+                itemBuilder: (context, index) {
+                  final address = addresses[index];
+                  final id = idOf(address);
+                  final selected = id != null && id == selectedId;
+                  return InkWell(
+                    onTap: id == null ? null : () => onSelect(id),
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 14.0),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? const Color(0x3670ACAD)
+                            : const Color(0xFFF7F7F7),
+                        borderRadius: BorderRadius.circular(10.0),
+                        border: Border.all(
                           color: selected
-                              ? const Color(0x3670ACAD)
-                              : const Color(0xFFF7F7F7),
-                          borderRadius: BorderRadius.circular(10.0),
-                          border: Border.all(
-                            color: selected
-                                ? FlutterFlowTheme.of(context).primary
-                                : Colors.transparent,
-                          ),
+                              ? FlutterFlowTheme.of(context).primary
+                              : Colors.transparent,
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                labelOf(address),
-                                style: GoogleFonts.publicSans(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15.0,
-                                  color: const Color(0xFF00444B),
-                                ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              labelOf(address),
+                              style: GoogleFonts.publicSans(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15.0,
+                                color: const Color(0xFF00444B),
                               ),
                             ),
-                            if (selected)
-                              Icon(
-                                Icons.check_circle,
-                                size: 20.0,
-                                color: FlutterFlowTheme.of(context).primary,
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(height: 12.0),
-            InkWell(
-              onTap: onAddOther,
-              borderRadius: BorderRadius.circular(10.0),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.add_location_alt_outlined,
-                      size: 20.0,
-                      color: FlutterFlowTheme.of(context).primary,
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      'Otra ubicación',
-                      style: GoogleFonts.publicSans(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15.0,
-                        color: FlutterFlowTheme.of(context).primary,
+                          ),
+                          if (selected)
+                            Icon(
+                              Icons.check_circle,
+                              size: 20.0,
+                              color: FlutterFlowTheme.of(context).primary,
+                            ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
-          ],
-        ),
+          const SizedBox(height: 12.0),
+          InkWell(
+            onTap: onAddOther,
+            borderRadius: BorderRadius.circular(10.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.add_location_alt_outlined,
+                    size: 20.0,
+                    color: FlutterFlowTheme.of(context).primary,
+                  ),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    'Otra ubicación',
+                    style: GoogleFonts.publicSans(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15.0,
+                      color: FlutterFlowTheme.of(context).primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

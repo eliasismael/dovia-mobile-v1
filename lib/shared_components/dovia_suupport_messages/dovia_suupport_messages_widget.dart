@@ -51,6 +51,9 @@ class _DoviaSuupportMessagesWidgetState
           alignment: const AlignmentDirectional(0.0, 1.0),
           children: [
             Container(
+              // Se abre desde abajo: el contenido termina sobre los botones de Android.
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewPaddingOf(context).bottom),
               width: MediaQuery.sizeOf(context).width * 1.0,
               height: MediaQuery.sizeOf(context).height * 1.0,
               decoration: BoxDecoration(

@@ -43,6 +43,9 @@ class _DHASSOCIATESelectRolePopupWidgetState
   @override
   Widget build(BuildContext context) {
     return Container(
+      // Se abre desde abajo: el contenido termina sobre los botones de Android.
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
       width: 300.0,
       height: MediaQuery.sizeOf(context).height * 1.0,
       decoration: BoxDecoration(

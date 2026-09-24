@@ -406,7 +406,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                     // los accesos rápidos a la derecha, ajustes incluido.
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 8.0, 20.0, 4.0),
+                          20.0, 24.0, 20.0, 4.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -481,7 +481,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24.0),
                         child: AspectRatio(
-                          aspectRatio: 1.05,
+                          aspectRatio: 1.4,
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
@@ -709,7 +709,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 22.0, 0.0, 0.0),
+                          0.0, 12.0, 0.0, 0.0),
                       child: Container(
                         decoration: const BoxDecoration(),
                         child: Padding(
@@ -922,7 +922,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                       children: [
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
+                              20.0, 4.0, 20.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1000,7 +1000,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
+                              20.0, 8.0, 20.0, 0.0),
                           child: FutureBuilder<ApiCallResponse>(
                             future: DOVIAAPIPropertyContextGroup
                                 .listPropertiesCall
@@ -1031,7 +1031,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                       _filterByListingType(getJsonField(
                                     rowListPropertiesResponse.jsonBody,
                                     r'''$.data''',
-                                  ).toList());
+                                  ) as List? ?? []);
                                   final eachHouse =
                                       _carouselPage('loNuevo', allHouses);
 
@@ -1583,7 +1583,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                       _filterByListingType(getJsonField(
                                     rowListPropertiesResponse.jsonBody,
                                     r'''$.data''',
-                                  ).toList());
+                                  ) as List? ?? []);
                                   final eachHouse =
                                       _carouselPage('recomendado', allHouses);
 
@@ -2022,7 +2022,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                       _filterByListingType(getJsonField(
                                     rowListPropertiesResponse.jsonBody,
                                     r'''$.data''',
-                                  ).toList());
+                                  ) as List? ?? []);
                                   final eachHouse = _carouselPage(
                                       'vistoRecientemente', allHouses);
 

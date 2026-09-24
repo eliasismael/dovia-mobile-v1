@@ -1,3 +1,4 @@
+import '/core/dovia_zones.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -85,14 +86,6 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     _keyboardWasOpen = keyboardOpen;
   }
 
-  /// "5a Avenida" y "5 Avenida" son la misma calle.
-  static String _normalizeStreet(String s) => s
-      .toLowerCase()
-      .replaceAllMapped(RegExp(r'(\d+)\s*(a|ª|era|da|ta|ma|va|na)\b'),
-          (m) => m.group(1)!)
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
-
   /// Busca la dirección escrita (dentro de la zona elegida) con Mapbox y
   /// ubica el pin en el resultado.
   Future<void> _geocodeAddress() async {
@@ -108,15 +101,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     if (query == _lastGeocodedQuery) return;
     _lastGeocodedQuery = query;
 
-    final center = _zoneCenters[zone];
-    // Con zona elegida, solo se aceptan resultados dentro de ella (una caja
-    // de ~3 km alrededor del centro).
-    const d = 0.03;
-    final zoneFilter = center == null
-        ? ''
-        : '&proximity=${center.$2},${center.$1}'
-            '&bbox=${center.$2 - d},${center.$1 - d},'
-            '${center.$2 + d},${center.$1 + d}';
+    // Con zona elegida, solo se aceptan resultados dentro de ella.
+    final zoneFilter = mapboxZoneFilter(zone);
     try {
       final url = Uri.parse(
         'https://api.mapbox.com/geocoding/v5/mapbox.places/'
@@ -132,16 +118,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
       final data = json.decode(response.body) as Map<String, dynamic>;
       final features = data['features'] as List<dynamic>? ?? [];
       if (features.isEmpty) return;
-      // Mapbox suele poner primero otra calle con el mismo número; se prefiere
-      // el resultado cuya calle coincide con lo escrito.
-      final typed = _normalizeStreet(address);
-      final match = features.firstWhere(
-        (f) {
-          final street = _normalizeStreet((f['text'] ?? '').toString());
-          return street.isNotEmpty && typed.contains(street);
-        },
-        orElse: () => features.first,
-      );
+      final match = bestAddressMatch(features, address);
       // Mapbox devuelve [longitud, latitud].
       final coords = match['center'] as List<dynamic>;
       final lng = (coords[0] as num).toDouble();
@@ -157,16 +134,6 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
       // Sin resultado el propietario marca el punto a mano.
     }
   }
-
-  /// Centro aproximado de cada zona: al elegirla, el mapa se mueve alli para
-  /// que el propietario marque el punto exacto.
-  static const Map<String, (double, double)> _zoneCenters = {
-    'Zona 10': (14.6005, -90.5075),
-    'Zona 14': (14.5870, -90.5130),
-    'Zona 15': (14.5975, -90.4870),
-    'Zona 16': (14.6150, -90.4700),
-    'Carretera a El Salvador': (14.5480, -90.4450),
-  };
 
   String _apiErrorMessage(dynamic response, String fallback) {
     if (response is Map) {
@@ -2859,13 +2826,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                             child: FlutterFlowDropDown<String>(
                               controller: _model.zonaValueController ??=
                                   FormFieldController<String>(null),
-                              options: const [
-                                'Zona 10',
-                                'Zona 14',
-                                'Zona 15',
-                                'Zona 16',
-                                'Carretera a El Salvador',
-                              ],
+                              options: kDoviaZones,
                               onChanged: (val) {
                                 safeSetState(() => _model.zonaValue = val);
                                 _clearFieldError('zona');
@@ -3094,9 +3055,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                               child: DrawMapComponentWidget(
                                 height: 300.0,
                                 singlePointMode: true,
-                                centerLatitude: _zoneCenters[_model.zonaValue]?.$1,
+                                centerLatitude: kDoviaZoneCenters[_model.zonaValue]?.$1,
                                 centerLongitude:
-                                    _zoneCenters[_model.zonaValue]?.$2,
+                                    kDoviaZoneCenters[_model.zonaValue]?.$2,
                                 markedLatitude: _geocodedLatitude,
                                 markedLongitude: _geocodedLongitude,
                                 // El punto marcado ya es la ubicación.

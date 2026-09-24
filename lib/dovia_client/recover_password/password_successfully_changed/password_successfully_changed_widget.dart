@@ -42,11 +42,13 @@ class _PasswordSuccessfullyChangedWidgetState
   @override
   Widget build(BuildContext context) {
     return Stack(
+      alignment: AlignmentDirectional.topCenter,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
+            constraints: const BoxConstraints(maxWidth: 340.0),
             height: 166.0,
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -57,7 +59,7 @@ class _PasswordSuccessfullyChangedWidgetState
               children: [
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(
-                      42.0, 71.0, 42.0, 34.0),
+                      24.0, 52.0, 24.0, 12.0),
                   child: Text(
                     'Se actualizó con éxito la contraseña',
                     textAlign: TextAlign.center,
@@ -68,7 +70,7 @@ class _PasswordSuccessfullyChangedWidgetState
                                 .bodyMedium
                                 .fontStyle,
                           ),
-                          fontSize: 25.0,
+                          fontSize: 20.0,
                           letterSpacing: 0.0,
                           fontWeight: FontWeight.bold,
                           fontStyle:
@@ -83,8 +85,9 @@ class _PasswordSuccessfullyChangedWidgetState
         Align(
           alignment: const AlignmentDirectional(0.0, -1.0),
           child: Container(
-            width: 104.0,
-            height: 104.0,
+            width: 72.0,
+            height: 72.0,
+            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).primary,
               shape: BoxShape.circle,
@@ -93,9 +96,9 @@ class _PasswordSuccessfullyChangedWidgetState
               borderRadius: BorderRadius.circular(24.0),
               child: SvgPicture.asset(
                 'assets/images/Visto.svg',
-                width: 104.0,
-                height: 104.0,
-                fit: BoxFit.none,
+                width: 32.0,
+                height: 32.0,
+                fit: BoxFit.contain,
               ),
             ),
           ),

@@ -28,8 +28,8 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
   late DOVIACLIENTNavbarModel _model;
 
   /// Alto total: la barra más lo que el botón central sobresale por arriba.
-  static const double _barHeight = 70.0;
-  static const double _totalHeight = 92.0;
+  static const double _barHeight = 62.0;
+  static const double _totalHeight = 84.0;
 
   @override
   void setState(VoidCallback callback) {
@@ -216,8 +216,11 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
               child: Padding(
                 padding:
                     const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
+                // Los ítems van pegados abajo: la curva del activo marca el
+                // borde inferior de la barra.
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _navItem(
                       asset: 'assets/images/IconoCasaLLave.svg',

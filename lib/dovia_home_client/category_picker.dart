@@ -126,123 +126,124 @@ class _CategoryPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40.0,
-                height: 4.0,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDFDFDF),
-                  borderRadius: BorderRadius.circular(2.0),
-                ),
+    // El fondo blanco llega hasta abajo y el contenido termina sobre los
+    // botones de Android.
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+          20.0, 16.0, 20.0, 20.0 + MediaQuery.viewPaddingOf(context).bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40.0,
+              height: 4.0,
+              decoration: BoxDecoration(
+                color: const Color(0xFFDFDFDF),
+                borderRadius: BorderRadius.circular(2.0),
               ),
             ),
-            const SizedBox(height: 16.0),
-            Text(
-              title,
-              style: GoogleFonts.publicSans(
-                fontWeight: FontWeight.w600,
-                fontSize: 17.0,
-                color: const Color(0xFF00444B),
-              ),
+          ),
+          const SizedBox(height: 16.0),
+          Text(
+            title,
+            style: GoogleFonts.publicSans(
+              fontWeight: FontWeight.w600,
+              fontSize: 17.0,
+              color: const Color(0xFF00444B),
             ),
-            const SizedBox(height: 12.0),
-            if (categories.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: Text(
-                  emptyMessage,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.0,
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                  ),
+          ),
+          const SizedBox(height: 12.0),
+          if (categories.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Text(
+                emptyMessage,
+                style: GoogleFonts.inter(
+                  fontSize: 14.0,
+                  color: FlutterFlowTheme.of(context).secondaryText,
                 ),
-              )
-            else
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: categories.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8.0),
-                  itemBuilder: (context, index) {
-                    final category = categories[index];
-                    final selected = category.id == selectedId;
-                    return InkWell(
-                      onTap: () => onSelect(category),
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 14.0),
-                        decoration: BoxDecoration(
+              ),
+            )
+          else
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: categories.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8.0),
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  final selected = category.id == selectedId;
+                  return InkWell(
+                    onTap: () => onSelect(category),
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 14.0),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? const Color(0x3670ACAD)
+                            : const Color(0xFFF7F7F7),
+                        borderRadius: BorderRadius.circular(10.0),
+                        border: Border.all(
                           color: selected
-                              ? const Color(0x3670ACAD)
-                              : const Color(0xFFF7F7F7),
-                          borderRadius: BorderRadius.circular(10.0),
-                          border: Border.all(
-                            color: selected
-                                ? FlutterFlowTheme.of(context).primary
-                                : Colors.transparent,
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    category.name,
-                                    style: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 15.0,
-                                      color: const Color(0xFF00444B),
-                                    ),
-                                  ),
-                                  if (category.description.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4.0),
-                                      child: Text(
-                                        category.description,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 12.0,
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            if (selected)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: Icon(
-                                  Icons.check_circle,
-                                  size: 20.0,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                ),
-                              ),
-                          ],
+                              ? FlutterFlowTheme.of(context).primary
+                              : Colors.transparent,
                         ),
                       ),
-                    );
-                  },
-                ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  category.name,
+                                  style: GoogleFonts.publicSans(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15.0,
+                                    color: const Color(0xFF00444B),
+                                  ),
+                                ),
+                                if (category.description.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      category.description,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.0,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (selected)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Icon(
+                                Icons.check_circle,
+                                size: 20.0,
+                                color: FlutterFlowTheme.of(context).primary,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

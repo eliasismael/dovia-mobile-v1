@@ -19,22 +19,35 @@ library;
 
 import 'package:url_launcher/url_launcher.dart';
 
-/// Abre [checkoutUrl] en el navegador externo.
+/// Abre [checkoutUrl] en el navegador del sistema **dentro de la app**
+/// (Custom Tabs en Android, SFSafariViewController en iOS), así el cliente no
+/// sale de DOVIA para pagar.
 ///
 /// Devuelve `false` si la URL no es utilizable o el sistema no pudo abrirla, para
-/// que la pantalla lo diga en vez de dar el pago por encaminado. Se usa
-/// [LaunchMode.externalApplication] porque el checkout es un flujo de pago de
-/// terceros: dentro de una webview embebida pierde cookies y métodos de pago
-/// guardados.
+/// que la pantalla lo diga en vez de dar el pago por encaminado. No se usa una
+/// webview embebida porque el checkout es un flujo de pago de terceros: ahí
+/// pierde cookies, métodos de pago guardados y Apple Pay/Google Pay.
 Future<bool> launchDoviaHomeCheckout(String? checkoutUrl) =>
-    _launchExternal(checkoutUrl);
+    _launch(checkoutUrl, LaunchMode.inAppBrowserView);
+
+/// Cierra el checkout cuando el pago ya se resolvió. Sólo iOS lo permite; en
+/// Android el cliente lo cierra con la X y debajo encuentra la app al día.
+Future<void> closeDoviaHomeCheckout() async {
+  try {
+    if (await supportsCloseForLaunchMode(LaunchMode.inAppBrowserView)) {
+      await closeInAppWebView();
+    }
+  } catch (_) {
+    // Nada abierto o plataforma sin soporte: no hay nada que cerrar.
+  }
+}
 
 /// Abre un PDF del flujo (cotización de materiales, propuesta de un proveedor)
 /// en el visor del sistema. Mismo transporte que el checkout, distinto propósito.
 Future<bool> launchDoviaHomeDocument(String? documentUrl) =>
-    _launchExternal(documentUrl);
+    _launch(documentUrl, LaunchMode.externalApplication);
 
-Future<bool> _launchExternal(String? url) async {
+Future<bool> _launch(String? url, LaunchMode mode) async {
   final raw = url?.trim();
   if (raw == null || raw.isEmpty) return false;
 
@@ -42,7 +55,7 @@ Future<bool> _launchExternal(String? url) async {
   if (uri == null || !uri.hasScheme) return false;
 
   try {
-    return await launchUrl(uri, mode: LaunchMode.externalApplication);
+    return await launchUrl(uri, mode: mode);
   } catch (_) {
     return false;
   }

@@ -583,7 +583,8 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                       return Padding(
                         padding: MediaQuery.viewInsetsOf(context),
                         child: SizedBox(
-                          height: 400.0,
+                          height:
+                              400.0 + MediaQuery.viewPaddingOf(context).bottom,
                           child: HouseCardComponentWidget(
                             propertyId: propertyId,
                             name: name,

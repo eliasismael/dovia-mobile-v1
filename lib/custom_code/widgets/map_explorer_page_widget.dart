@@ -216,7 +216,8 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
                             builder: (ctx) => Padding(
                               padding: MediaQuery.viewInsetsOf(ctx),
                               child: SizedBox(
-                                height: 360.0,
+                                height: 360.0 +
+                                    MediaQuery.viewPaddingOf(ctx).bottom,
                                 child: HouseCardComponentWidget(
                                   propertyId: propertyId,
                                   name: name,
@@ -706,6 +707,9 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
     return Container(
       // ~90% of screen height
       height: MediaQuery.of(context).size.height * 0.92,
+      // El contenido termina sobre los botones de Android.
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
       decoration: BoxDecoration(
         color: theme.primaryBackground,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),

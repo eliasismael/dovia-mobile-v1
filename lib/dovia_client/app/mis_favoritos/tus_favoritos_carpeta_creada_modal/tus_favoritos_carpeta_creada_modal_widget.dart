@@ -43,25 +43,27 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
   @override
   Widget build(BuildContext context) {
     return Stack(
+      alignment: AlignmentDirectional.topCenter,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 50.0, 20.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(20.0, 36.0, 20.0, 0.0),
           child: Container(
             width: MediaQuery.sizeOf(context).width * 1.0,
+            constraints: const BoxConstraints(maxWidth: 340.0),
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).secondaryBackground,
               borderRadius: BorderRadius.circular(10.4),
             ),
             child: Padding(
               padding:
-                  const EdgeInsetsDirectional.fromSTEB(38.0, 75.0, 38.0, 55.0),
+                  const EdgeInsetsDirectional.fromSTEB(24.0, 52.0, 24.0, 28.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
-                        42.0, 0.0, 42.0, 0.0),
+                        0.0, 0.0, 0.0, 0.0),
                     child: Text(
                       'Se creó con éxito la carpeta',
                       textAlign: TextAlign.center,
@@ -72,7 +74,7 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
                                   .bodyMedium
                                   .fontStyle,
                             ),
-                            fontSize: 25.0,
+                            fontSize: 20.0,
                             letterSpacing: 0.0,
                             fontWeight: FontWeight.bold,
                             fontStyle: FlutterFlowTheme.of(context)
@@ -83,7 +85,7 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
                   ),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 34.0, 0.0, 0.0),
+                        0.0, 12.0, 0.0, 0.0),
                     child: Text(
                       'Creaste una carpeta llamada ${widget.folderName}. Aquí podrás guardar todos tus favoritos.',
                       textAlign: TextAlign.center,
@@ -115,8 +117,9 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
         Align(
           alignment: const AlignmentDirectional(0.0, -1.0),
           child: Container(
-            width: 104.0,
-            height: 104.0,
+            width: 72.0,
+            height: 72.0,
+            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).primary,
               shape: BoxShape.circle,
@@ -125,9 +128,9 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
               borderRadius: BorderRadius.circular(24.0),
               child: SvgPicture.asset(
                 'assets/images/Visto.svg',
-                width: 104.0,
-                height: 104.0,
-                fit: BoxFit.none,
+                width: 32.0,
+                height: 32.0,
+                fit: BoxFit.contain,
               ),
             ),
           ),

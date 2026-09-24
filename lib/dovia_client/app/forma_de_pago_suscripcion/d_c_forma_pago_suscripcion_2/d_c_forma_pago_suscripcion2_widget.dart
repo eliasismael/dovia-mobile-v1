@@ -176,7 +176,7 @@ class _DCFormaPagoSuscripcion2WidgetState
         _phase = _CheckoutPhase.failed;
         _paymentOrderId = order.id;
         _failureMessage =
-            'No pudimos abrir el pago en tu navegador. Intentá de nuevo.';
+            'No pudimos abrir el pago. Intentá de nuevo.';
       });
       return;
     }
@@ -196,6 +196,10 @@ class _DCFormaPagoSuscripcion2WidgetState
     _polling = true;
     try {
       final order = await _payments.awaitPaymentResolution(orderId);
+      if (!mounted) return;
+      // Pago resuelto: se cierra el checkout (en iOS) para mostrar el
+      // resultado sin que el cliente tenga que cerrarlo.
+      if (order != null) await closeDoviaHomeCheckout();
       if (!mounted) return;
 
       // Se agotó la espera sin novedad. No es un fallo: el pago puede seguir
@@ -295,7 +299,7 @@ class _DCFormaPagoSuscripcion2WidgetState
           ),
           const SizedBox(height: 8.0),
           Text(
-            'Completá el pago en la pestaña que abrimos y volvé acá.',
+            'Completá el pago en la ventana que abrimos y cerrala al terminar.',
             textAlign: TextAlign.center,
             style: FlutterFlowTheme.of(context).bodySmall.override(
                   font: GoogleFonts.publicSans(),

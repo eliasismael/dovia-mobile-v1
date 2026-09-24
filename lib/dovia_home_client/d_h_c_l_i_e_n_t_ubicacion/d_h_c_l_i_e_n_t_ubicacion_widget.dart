@@ -7,8 +7,9 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
+import '/core/dovia_zones.dart';
+import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -59,11 +60,15 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   Timer? _debounce;
   List<Map<String, dynamic>> _suggestions = [];
 
+  /// Último resultado de geocodificar la dirección; se le pasa al mapa para
+  /// que mueva el pin.
+  double? _geocodedLat;
+  double? _geocodedLng;
+
   /// Zonas con cobertura operativa de DOVIA. Son el criterio del Coverage
-  /// Check. Si el endpoint falla, el desplegable se alimenta de
-  /// [_fallbackZones] para que el cliente pueda ir completando el formulario,
-  /// pero la validación **no** se da por buena: [_verifyCoverageAndSave]
-  /// reintenta el endpoint y sin zonas autorizadas no deja registrar.
+  /// Check. Si el endpoint falla, la validación **no** se da por buena:
+  /// [_verifyCoverageAndSave] reintenta el endpoint y sin zonas autorizadas no
+  /// deja registrar.
   List<String> _workableZones = [];
   bool _zonesLoaded = false;
 
@@ -77,38 +82,12 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   /// Registro de la dirección en curso (bloquea el botón [Aceptar]).
   bool _isSaving = false;
 
-  static const List<String> _fallbackZones = [
-    'Zona 1',
-    'Zona 2',
-    'Zona 3',
-    'Zona 4',
-    'Zona 5',
-    'Zona 6',
-    'Zona 7',
-    'Zona 8',
-    'Zona 9',
-    'Zona 10',
-    'Zona 11',
-    'Zona 12',
-    'Zona 13',
-    'Zona 14',
-    'Zona 15',
-    'Zona 16',
-    'Zona 17',
-    'Zona 18',
-    'Zona 19',
-    'Zona 21',
-    'Zona 24',
-    'Zona 25',
-  ];
-
   String? _str(dynamic value) =>
       (value is String && value.trim().isNotEmpty) ? value.trim() : null;
 
-  /// Zonas ofrecidas en el desplegable: las del backend si llegaron, si no el
-  /// listado de respaldo.
-  List<String> get _zoneOptions =>
-      _workableZones.isNotEmpty ? _workableZones : _fallbackZones;
+  /// Zonas ofrecidas en el desplegable: las mismas que en el formulario de
+  /// venta/renta de DOVIA. La cobertura se valida después contra el backend.
+  List<String> get _zoneOptions => kDoviaZones;
 
   /// Zonas operables tal como las devuelve el endpoint, que puede mandar
   /// strings o objetos `{ name/zone/label/code }`.
@@ -138,7 +117,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         .call(authToken: currentAuthenticationToken ?? '');
     if (!mounted) return false;
 
-    final zones = response.succeeded ? _zonesFrom(response.jsonBody) : <String>[];
+    final zones =
+        response.succeeded ? _zonesFrom(response.jsonBody) : <String>[];
     if (zones.isNotEmpty) {
       safeSetState(() => _workableZones = zones);
     }
@@ -149,7 +129,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   Future<void> _loadCoverageData() async {
     final token = currentAuthenticationToken ?? '';
     final results = await Future.wait([
-      DOVIAAPIDoviaHomeContextGroup.listWorkableZonesCall.call(authToken: token),
+      DOVIAAPIDoviaHomeContextGroup.listWorkableZonesCall
+          .call(authToken: token),
       DOVIAAPIDoviaHomeContextGroup.listServiceAddressesCall
           .call(authToken: token),
     ]);
@@ -158,7 +139,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
     final zonesRes = results[0];
     final addressesRes = results[1];
 
-    final zones = zonesRes.succeeded ? _zonesFrom(zonesRes.jsonBody) : <String>[];
+    final zones =
+        zonesRes.succeeded ? _zonesFrom(zonesRes.jsonBody) : <String>[];
 
     final addresses = <Map<String, dynamic>>[];
     if (addressesRes.succeeded) {
@@ -221,7 +203,6 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   Future<void> _verifyCoverageAndSave() async {
     final zone = _model.dropDownValue;
     final street = (_model.textController1?.text ?? '').trim();
-    final altura = (_model.alturaController?.text ?? '').trim();
     final lat = _model.selectedLat;
     final lng = _model.selectedLng;
     if (zone == null || street.isEmpty || lat == null || lng == null) return;
@@ -254,8 +235,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         return;
       }
 
-      final fullAddress =
-          altura.isNotEmpty ? '$street $altura, $zone' : '$street, $zone';
+      final fullAddress = '$street, $zone';
       final instructions = (_model.textController2?.text ?? '').trim();
 
       final response =
@@ -340,15 +320,11 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
     }
   }
 
-  /// Builds the search query combining street, street number and zone.
-  /// Street + number go in a single token ("6a Avenida 1234") so Mapbox
-  /// resolves the exact house instead of just the street center.
+  /// Builds the search query combining the address and zone.
   String _buildQuery(String street) {
-    final altura = (_model.alturaController?.text ?? '').trim();
     final zone = _model.dropDownValue;
-    final streetLine = altura.isNotEmpty ? '$street $altura' : street;
     return [
-      streetLine,
+      street,
       if (zone != null && zone.isNotEmpty) zone,
       'Guatemala',
     ].join(', ');
@@ -375,7 +351,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         '${Uri.encodeComponent(_buildQuery(street))}.json'
         '?access_token=${FFAppConstants.MapboxAccessToken}'
         '&country=gt&autocomplete=true&limit=5&language=es'
-        '&types=address,street,poi',
+        '&types=address,street,poi${mapboxZoneFilter(_model.dropDownValue)}',
       );
       final response = await http.get(url);
       if (response.statusCode != 200) return;
@@ -407,18 +383,23 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
       _suggestions = [];
       _model.selectedLat = suggestion['lat'] as double;
       _model.selectedLng = suggestion['lng'] as double;
+      _geocodedLat = _model.selectedLat;
+      _geocodedLng = _model.selectedLng;
     });
   }
 
   /// Looks up the typed address with Mapbox Geocoding and moves the map
   /// marker to the matching coordinates (manual search / enter).
-  Future<void> _geocodeAddress() async {
+  ///
+  /// Con [silent] (al elegir zona o salir del campo) no se avisa si no hay
+  /// resultado: el cliente puede marcar el punto a mano.
+  Future<void> _geocodeAddress({bool silent = false}) async {
     final street = (_model.textController1?.text ?? '').trim();
-    if (street.isEmpty || _isGeocoding) {
+    if (street.length < 4 || _isGeocoding) {
       return;
     }
 
-    FocusScope.of(context).unfocus();
+    if (!silent) FocusScope.of(context).unfocus();
     _debounce?.cancel();
     safeSetState(() {
       _isGeocoding = true;
@@ -430,7 +411,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         'https://api.mapbox.com/geocoding/v5/mapbox.places/'
         '${Uri.encodeComponent(_buildQuery(street))}.json'
         '?access_token=${FFAppConstants.MapboxAccessToken}'
-        '&country=gt&limit=1&language=es',
+        '&country=gt&limit=5&language=es'
+        '${mapboxZoneFilter(_model.dropDownValue)}',
       );
       final response = await http.get(url);
 
@@ -438,22 +420,25 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final features = data['features'] as List<dynamic>?;
         if (features != null && features.isNotEmpty) {
-          final center = features.first['center'] as List<dynamic>;
+          final center =
+              bestAddressMatch(features, street)['center'] as List<dynamic>;
           // Mapbox returns [longitude, latitude].
           final lng = (center[0] as num).toDouble();
           final lat = (center[1] as num).toDouble();
           safeSetState(() {
             _model.selectedLat = lat;
             _model.selectedLng = lng;
+            _geocodedLat = lat;
+            _geocodedLng = lng;
           });
-        } else if (mounted) {
+        } else if (mounted && !silent) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('No se encontró esa dirección en el mapa.'),
             ),
           );
         }
-      } else if (mounted) {
+      } else if (mounted && !silent) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('No se pudo buscar la dirección. Intenta de nuevo.'),
@@ -461,7 +446,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         );
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && !silent) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Error al buscar la dirección.'),
@@ -482,12 +467,15 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
 
     _model.textController1 ??= TextEditingController();
     _model.textFieldFocusNode1 ??= FocusNode();
+    // Al salir del campo de dirección se marca el punto en el mapa.
+    _model.textFieldFocusNode1!.addListener(() {
+      if (!_model.textFieldFocusNode1!.hasFocus) {
+        _geocodeAddress(silent: true);
+      }
+    });
 
     _model.textController2 ??= TextEditingController();
     _model.textFieldFocusNode2 ??= FocusNode();
-
-    _model.alturaController ??= TextEditingController();
-    _model.alturaFocusNode ??= FocusNode();
 
     _loadCoverageData();
 
@@ -794,8 +782,12 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                   FormFieldController<String>(null),
                               // Sólo zonas con cobertura operativa de DOVIA.
                               options: _zoneOptions,
-                              onChanged: (val) => safeSetState(
-                                  () => _model.dropDownValue = val),
+                              onChanged: (val) {
+                                safeSetState(() => _model.dropDownValue = val);
+                                // La zona centra el mapa y afina la búsqueda
+                                // de la dirección.
+                                _geocodeAddress(silent: true);
+                              },
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 50.0,
                               textStyle:
@@ -820,22 +812,12 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                               maxHeight: 300.0,
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 0.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _fieldLabel('Calle'),
-                                ),
-                                const SizedBox(width: 8.0),
-                                SizedBox(
-                                  width: 90.0,
-                                  child: _fieldLabel('Altura'),
-                                ),
-                                const SizedBox(width: 8.0),
-                                const SizedBox(width: 52.0),
-                              ],
+                          Align(
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 20.0, 0.0, 0.0),
+                              child: _fieldLabel('Dirección de la propiedad'),
                             ),
                           ),
                           Padding(
@@ -852,7 +834,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                     enabled: true,
                                     obscureText: false,
                                     decoration: _addressFieldDecoration(
-                                        'Ej: 6a Avenida'),
+                                        'Escribe la dirección'),
                                     style:
                                         FlutterFlowTheme.of(context).bodyMedium,
                                     cursorColor: FlutterFlowTheme.of(context)
@@ -862,27 +844,6 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                     onChanged: _onStreetChanged,
                                     onFieldSubmitted: (_) => _geocodeAddress(),
                                     validator: _model.textController1Validator
-                                        .asValidator(context),
-                                  ),
-                                ),
-                                const SizedBox(width: 8.0),
-                                SizedBox(
-                                  width: 90.0,
-                                  child: TextFormField(
-                                    controller: _model.alturaController,
-                                    focusNode: _model.alturaFocusNode,
-                                    autofocus: false,
-                                    enabled: true,
-                                    keyboardType: TextInputType.number,
-                                    textInputAction: TextInputAction.search,
-                                    decoration: _addressFieldDecoration('1234'),
-                                    style:
-                                        FlutterFlowTheme.of(context).bodyMedium,
-                                    cursorColor: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    onChanged: (_) => safeSetState(() {}),
-                                    onFieldSubmitted: (_) => _geocodeAddress(),
-                                    validator: _model.alturaControllerValidator
                                         .asValidator(context),
                                   ),
                                 ),
@@ -909,11 +870,11 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: _suggestions.map((suggestion) {
                                     return InkWell(
-                                      onTap: () => _selectSuggestion(suggestion),
+                                      onTap: () =>
+                                          _selectSuggestion(suggestion),
                                       child: Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.fromSTEB(
-                                                12.0, 12.0, 12.0, 12.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(12.0, 12.0, 12.0, 12.0),
                                         child: Row(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -931,16 +892,16 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                                         8.0, 0.0, 0.0, 0.0),
                                                 child: Text(
                                                   suggestion['name'] as String,
-                                                  style:
-                                                      FlutterFlowTheme.of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            font: GoogleFonts
-                                                                .publicSans(),
-                                                            color: const Color(
-                                                                0xFF00444B),
-                                                            fontSize: 14.0,
-                                                          ),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .publicSans(),
+                                                        color: const Color(
+                                                            0xFF00444B),
+                                                        fontSize: 14.0,
+                                                      ),
                                                 ),
                                               ),
                                             ),
@@ -955,19 +916,30 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 14.0, 0.0, 0.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 300.0,
-                              child: custom_widgets.InteractiveMap(
-                                width: MediaQuery.sizeOf(context).width * 1.0,
+                            child: wrapWithModel(
+                              model: _model.drawMapComponentModel,
+                              updateCallback: () => safeSetState(() {}),
+                              child: DrawMapComponentWidget(
                                 height: 300.0,
-                                accessToken: FFAppConstants.MapboxAccessToken,
-                                startLat: _model.selectedLat ?? 14.634915,
-                                startLng: _model.selectedLng ?? -90.506882,
-                                onLocationSelected: (lat, lng) async {
+                                singlePointMode: true,
+                                centerLatitude:
+                                    kDoviaZoneCenters[_model.dropDownValue]?.$1,
+                                centerLongitude:
+                                    kDoviaZoneCenters[_model.dropDownValue]?.$2,
+                                markedLatitude: _geocodedLat,
+                                markedLongitude: _geocodedLng,
+                                // El punto marcado ya es la ubicación.
+                                showConfirmButton: false,
+                                onPointSelected: (lat, lng) async {
                                   safeSetState(() {
                                     _model.selectedLat = lat;
                                     _model.selectedLng = lng;
+                                  });
+                                },
+                                onPointCleared: () {
+                                  safeSetState(() {
+                                    _model.selectedLat = null;
+                                    _model.selectedLng = null;
                                   });
                                 },
                               ),
@@ -1155,13 +1127,16 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 90.0),
+                            // Deja el botón por encima de la barra de navegación
+                            // (92) y de los botones del celular.
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0,
+                                20.0,
+                                0.0,
+                                120.0 + MediaQuery.viewPaddingOf(context).bottom),
                             child: FFButtonWidget(
                               // Valida cobertura y registra la dirección antes
                               // de continuar el flujo que pidió la ubicación.
-                              // La altura no se exige: hay direcciones sin
-                              // número, y el punto exacto ya sale del mapa.
                               onPressed: (!_zonesLoaded ||
                                       _isSaving ||
                                       _model.dropDownValue == null ||

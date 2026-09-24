@@ -60,6 +60,9 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // Se abre desde abajo: el contenido termina sobre los botones de Android.
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).tertiary,
       ),

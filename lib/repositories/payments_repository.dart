@@ -463,6 +463,25 @@ class PaymentsRepository extends ChangeNotifier {
   }
 
   String _messageFrom(ApiCallResponse response, String fallback) {
+    final message = _userMessageFrom(response, fallback);
+    if (!kDebugMode) return message;
+
+    // Solo en debug: el backend responde errores internos con un mensaje
+    // genérico, así que se suma el origen y código para diagnosticar sin
+    // entrar a los logs de AWS.
+    debugPrint('[Payments] ${response.statusCode}: ${response.bodyText}');
+    final body = response.jsonBody;
+    final errors = body is Map ? body['errors'] : null;
+    final first = errors is List && errors.isNotEmpty ? errors.first : null;
+    final detail = [
+      'HTTP ${response.statusCode}',
+      if (first is Map && first['source'] != null) '${first['source']}',
+      if (first is Map && first['code'] != null) '${first['code']}',
+    ].join(' · ');
+    return '$message ($detail)';
+  }
+
+  String _userMessageFrom(ApiCallResponse response, String fallback) {
     final body = response.jsonBody;
     if (body is Map) {
       final msg = body['message'];

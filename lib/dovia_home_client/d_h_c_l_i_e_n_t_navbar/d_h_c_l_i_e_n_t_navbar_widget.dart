@@ -198,78 +198,84 @@ class _DHCLIENTNavbarWidgetState extends State<DHCLIENTNavbarWidget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
 
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width * 1.0,
-      height: _totalHeight,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Align(
-            alignment: const AlignmentDirectional(0.0, 1.0),
-            child: Container(
-              width: double.infinity,
-              height: _barHeight,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).secondaryBackground,
-                boxShadow: const [
-                  BoxShadow(
-                    blurRadius: 8.0,
-                    color: Color(0x33000000),
-                    offset: Offset(0.0, 2.0),
-                  )
-                ],
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    _navItem(
-                      asset: 'assets/images/IconoCasaLLave.svg',
-                      label: 'Propiedades',
-                      routeName: DOVIACLIENTMisPropiedadesWidget.routeName,
-                      onTap: () => _openRestricted(
-                          DOVIACLIENTMisPropiedadesWidget.routeName),
-                    ),
-                    _navItem(
-                      asset: 'assets/images/IconoCalendario.svg',
-                      label: 'Visitas',
-                      routeName: DOVIACLIENTMisVisitasWidget.routeName,
-                      onTap: () async {
-                        context
-                            .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
-                      },
-                    ),
-                    // Hueco para el botón central, que va por encima.
-                    const SizedBox(width: 72.0),
-                    _navItem(
-                      asset: 'assets/images/IconoMisOfertas.svg',
-                      label: 'Ofertas',
-                      routeName: DOVIACLIENTMisOfertasWidget.routeName,
-                      onTap: () => _openRestricted(
-                          DOVIACLIENTMisOfertasWidget.routeName),
-                    ),
-                    _navItem(
-                      asset: 'assets/images/IconoCorazon.svg',
-                      label: 'Favorito',
-                      routeName: DOVIACLIENTMisFavoritosWidget.routeName,
-                      onTap: () async {
-                        context
-                            .pushNamed(DOVIACLIENTMisFavoritosWidget.routeName);
-                      },
-                    ),
+    // Las pantallas de Dovia Home no usan SafeArea abajo: sin esto la barra
+    // queda debajo de los botones de navegación del celular. Si la pantalla
+    // ya tiene SafeArea, este no agrega nada.
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        height: _totalHeight,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Align(
+              alignment: const AlignmentDirectional(0.0, 1.0),
+              child: Container(
+                width: double.infinity,
+                height: _barHeight,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 8.0,
+                      color: Color(0x33000000),
+                      offset: Offset(0.0, 2.0),
+                    )
                   ],
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      _navItem(
+                        asset: 'assets/images/IconoCasaLLave.svg',
+                        label: 'Propiedades',
+                        routeName: DOVIACLIENTMisPropiedadesWidget.routeName,
+                        onTap: () => _openRestricted(
+                            DOVIACLIENTMisPropiedadesWidget.routeName),
+                      ),
+                      _navItem(
+                        asset: 'assets/images/IconoCalendario.svg',
+                        label: 'Visitas',
+                        routeName: DOVIACLIENTMisVisitasWidget.routeName,
+                        onTap: () async {
+                          context
+                              .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
+                        },
+                      ),
+                      // Hueco para el botón central, que va por encima.
+                      const SizedBox(width: 72.0),
+                      _navItem(
+                        asset: 'assets/images/IconoMisOfertas.svg',
+                        label: 'Ofertas',
+                        routeName: DOVIACLIENTMisOfertasWidget.routeName,
+                        onTap: () => _openRestricted(
+                            DOVIACLIENTMisOfertasWidget.routeName),
+                      ),
+                      _navItem(
+                        asset: 'assets/images/IconoCorazon.svg',
+                        label: 'Favorito',
+                        routeName: DOVIACLIENTMisFavoritosWidget.routeName,
+                        onTap: () async {
+                          context.pushNamed(
+                              DOVIACLIENTMisFavoritosWidget.routeName);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Align(
-            alignment: const AlignmentDirectional(0.0, -1.0),
-            child: _centerButton(),
-          ),
-        ],
+            Align(
+              alignment: const AlignmentDirectional(0.0, -1.0),
+              child: _centerButton(),
+            ),
+          ],
+        ),
       ),
     );
   }

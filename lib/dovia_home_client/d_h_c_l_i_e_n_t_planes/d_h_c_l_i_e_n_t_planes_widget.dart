@@ -364,7 +364,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
         // Entrada por Planes: antes de cobrar hay que saber dónde se va a
         // prestar el servicio.
         DHCLIENTUbicacionWidget.pendingNextRoute =
-            DCFormaPagoSuscripcion1Widget.routeName;
+            DCFormaPagoSuscripcion2Widget.routeName;
         context.pushNamed(DHCLIENTUbicacionWidget.routeName);
       },
       child: Container(

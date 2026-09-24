@@ -47,6 +47,9 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
       alignment: const AlignmentDirectional(0.0, 1.0),
       children: [
         Container(
+          // Se abre desde abajo: el contenido termina sobre los botones de Android.
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
           decoration: BoxDecoration(
             color: FlutterFlowTheme.of(context).tertiary,
             borderRadius: BorderRadius.circular(18.0),

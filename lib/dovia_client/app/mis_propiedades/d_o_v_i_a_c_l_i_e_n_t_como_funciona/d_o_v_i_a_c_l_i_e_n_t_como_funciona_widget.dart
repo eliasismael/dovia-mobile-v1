@@ -104,7 +104,7 @@ class _DOVIACLIENTComoFuncionaWidgetState
                             ),
                           ),
                           Text(
-                            '¿Cómo funciona\nDovia?',
+                            'Mis propiedades',
                             textAlign: TextAlign.center,
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium

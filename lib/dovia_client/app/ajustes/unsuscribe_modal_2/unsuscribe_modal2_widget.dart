@@ -44,6 +44,9 @@ class _UnsuscribeModal2WidgetState extends State<UnsuscribeModal2Widget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // Se abre desde abajo: el contenido termina sobre los botones de Android.
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
       width: MediaQuery.sizeOf(context).width * 1.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,

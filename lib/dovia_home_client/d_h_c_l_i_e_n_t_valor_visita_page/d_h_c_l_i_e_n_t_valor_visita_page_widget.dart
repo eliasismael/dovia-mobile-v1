@@ -377,7 +377,7 @@ class _DHCLIENTValorVisitaPageWidgetState
         _phase = _CheckoutPhase.failed;
         _paymentOrderId = order.id;
         _failureMessage =
-            'No pudimos abrir el pago en tu navegador. Intentá de nuevo.';
+            'No pudimos abrir el pago. Intentá de nuevo.';
       });
       return;
     }
@@ -424,6 +424,10 @@ class _DHCLIENTValorVisitaPageWidgetState
     try {
       final order =
           await context.read<PaymentsRepository>().awaitPaymentResolution(orderId);
+      if (!mounted) return;
+      // Pago resuelto: se cierra el checkout (en iOS) para mostrar el
+      // resultado sin que el cliente tenga que cerrarlo.
+      if (order != null) await closeDoviaHomeCheckout();
       if (!mounted) return;
 
       // Se agotó la espera sin novedad: no es un fallo, puede seguir

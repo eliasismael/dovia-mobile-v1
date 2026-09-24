@@ -58,6 +58,7 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
   Color backgroundColor = const Color(0xFFF5F5F5),
   bool includeDimensions = false,
   bool includeBlurHash = false,
+
   /// Permite elegir varias imágenes de una sola vez. Sólo aplica a la galería:
   /// la cámara devuelve una foto por captura.
   bool multiImage = false,
@@ -85,56 +86,59 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
       context: context,
       backgroundColor: backgroundColor,
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!kIsWeb) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                child: ListTile(
-                  title: Text(
-                    'Elegir origen',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.getFont(
-                      pickerFontFamily,
-                      color: textColor.applyAlpha(0.65),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 20,
+        return SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!kIsWeb) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                  child: ListTile(
+                    title: Text(
+                      'Elegir origen',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.getFont(
+                        pickerFontFamily,
+                        color: textColor.applyAlpha(0.65),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 20,
+                      ),
                     ),
+                    tileColor: backgroundColor,
+                    dense: false,
                   ),
-                  tileColor: backgroundColor,
-                  dense: false,
                 ),
-              ),
-              const Divider(),
+                const Divider(),
+              ],
+              if (allowPhoto && allowVideo) ...[
+                createUploadMediaListTile(
+                  'Galería (Foto)',
+                  MediaSource.photoGallery,
+                ),
+                const Divider(),
+                createUploadMediaListTile(
+                  'Galería (Video)',
+                  MediaSource.videoGallery,
+                ),
+              ] else if (allowPhoto)
+                createUploadMediaListTile(
+                  'Galería',
+                  MediaSource.photoGallery,
+                )
+              else
+                createUploadMediaListTile(
+                  'Galería',
+                  MediaSource.videoGallery,
+                ),
+              if (!kIsWeb) ...[
+                const Divider(),
+                createUploadMediaListTile('Cámara', MediaSource.camera),
+                const Divider(),
+              ],
+              const SizedBox(height: 10),
             ],
-            if (allowPhoto && allowVideo) ...[
-              createUploadMediaListTile(
-                'Galería (Foto)',
-                MediaSource.photoGallery,
-              ),
-              const Divider(),
-              createUploadMediaListTile(
-                'Galería (Video)',
-                MediaSource.videoGallery,
-              ),
-            ] else if (allowPhoto)
-              createUploadMediaListTile(
-                'Galería',
-                MediaSource.photoGallery,
-              )
-            else
-              createUploadMediaListTile(
-                'Galería',
-                MediaSource.videoGallery,
-              ),
-            if (!kIsWeb) ...[
-              const Divider(),
-              createUploadMediaListTile('Cámara', MediaSource.camera),
-              const Divider(),
-            ],
-            const SizedBox(height: 10),
-          ],
+          ),
         );
       });
   if (mediaSource == null) {

@@ -75,10 +75,10 @@ class _SubscriptionPaymentState extends State<SubscriptionPayment> {
           const SizedBox(height: 24),
 
           // Qué va a pasar al continuar. Se dice explícitamente porque el
-          // cobro ocurre fuera de la app y el cliente tiene que esperarlo.
+          // cobro lo procesa Recurrente y el cliente tiene que esperarlo.
           const Text(
-            'Te llevaremos al pago seguro de Recurrente para completar la '
-            'compra. Volvé a la app cuando termines.',
+            'Abriremos el pago seguro de Recurrente para completar la '
+            'compra, sin salir de la app.',
             style: TextStyle(
               color: darkTextColor,
               fontSize: 13,
