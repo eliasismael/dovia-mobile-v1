@@ -148,9 +148,8 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
       }
 
       final requestId = call.requestId(response.jsonBody);
-      final upload = requestId == null
-          ? null
-          : await _uploadImages(requestId, token);
+      final upload =
+          requestId == null ? null : await _uploadImages(requestId, token);
       if (!mounted) return;
 
       _showMessage(upload != null && upload.isPartial
@@ -191,7 +190,8 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
             DoviaHomeUpload(
               fileName: media[i].name ?? 'hallazgo_$i.jpg',
               bytes: media[i].bytes!,
-              mimeType: doviaHomeMimeTypeFor(media[i].name ?? 'hallazgo_$i.jpg'),
+              mimeType:
+                  doviaHomeMimeTypeFor(media[i].name ?? 'hallazgo_$i.jpg'),
             ),
       ],
       presign: (uploads) => presignCall.call(
@@ -339,15 +339,13 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
                                 ),
                                 errorBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                      color:
-                                          FlutterFlowTheme.of(context).error,
+                                      color: FlutterFlowTheme.of(context).error,
                                       width: 1.0),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 focusedErrorBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                      color:
-                                          FlutterFlowTheme.of(context).error,
+                                      color: FlutterFlowTheme.of(context).error,
                                       width: 1.0),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
@@ -391,8 +389,7 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
                           const SizedBox(height: 18.0),
                           FFButtonWidget(
                             onPressed: _model.isSubmitting ? null : _submit,
-                            text:
-                                _model.isSubmitting ? 'Enviando…' : 'Enviar',
+                            text: _model.isSubmitting ? 'Enviando…' : 'Enviar',
                             options: FFButtonOptions(
                               width: double.infinity,
                               height: 42.0,

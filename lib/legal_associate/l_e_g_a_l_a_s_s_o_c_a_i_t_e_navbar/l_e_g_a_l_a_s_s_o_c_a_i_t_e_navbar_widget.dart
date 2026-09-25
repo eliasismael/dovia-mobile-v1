@@ -1,6 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
+import '/shared_components/navbar_item_indicator/navbar_item_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_model.dart';
@@ -43,7 +44,7 @@ class _LEGALASSOCAITENavbarWidgetState
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      height: 69.0,
+      height: 62.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
         boxShadow: const [
@@ -59,62 +60,75 @@ class _LEGALASSOCAITENavbarWidgetState
         borderRadius: BorderRadius.circular(30.0),
       ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(25.0, 22.0, 25.0, 22.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(LEGALASSOCIATEProcesosWidget.routeName);
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(0.0),
-                child: SvgPicture.asset(
-                  'assets/images/apple-wallet.svg',
-                  width: 24.0,
-                  height: 24.0,
-                  fit: BoxFit.cover,
+            NavbarItemIndicator(
+              label: 'Procesos',
+              routeNames: [LEGALASSOCIATEProcesosWidget.routeName],
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  context.pushNamed(LEGALASSOCIATEProcesosWidget.routeName);
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(0.0),
+                  child: SvgPicture.asset(
+                    'assets/images/apple-wallet.svg',
+                    width: 24.0,
+                    height: 24.0,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
-            InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(LEGALASSOCIATENotificationsWidget.routeName);
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: SvgPicture.asset(
-                  'assets/images/DH_icono-navbar-notificaciones.svg',
-                  width: 24.0,
-                  height: 24.0,
-                  fit: BoxFit.none,
+            NavbarItemIndicator(
+              label: 'Notificaciones',
+              routeNames: [LEGALASSOCIATENotificationsWidget.routeName],
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  context
+                      .pushNamed(LEGALASSOCIATENotificationsWidget.routeName);
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: SvgPicture.asset(
+                    'assets/images/DH_icono-navbar-notificaciones.svg',
+                    width: 24.0,
+                    height: 24.0,
+                    fit: BoxFit.none,
+                  ),
                 ),
               ),
             ),
-            InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(LEGALASSOCIATEAjustesWidget.routeName);
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: SvgPicture.asset(
-                  'assets/images/DH_icono-navbar-ajustes.svg',
-                  width: 24.0,
-                  height: 24.0,
-                  fit: BoxFit.none,
+            NavbarItemIndicator(
+              label: 'Ajustes',
+              routeNames: [LEGALASSOCIATEAjustesWidget.routeName],
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  context.pushNamed(LEGALASSOCIATEAjustesWidget.routeName);
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: SvgPicture.asset(
+                    'assets/images/DH_icono-navbar-ajustes.svg',
+                    width: 24.0,
+                    height: 24.0,
+                    fit: BoxFit.none,
+                  ),
                 ),
               ),
             ),

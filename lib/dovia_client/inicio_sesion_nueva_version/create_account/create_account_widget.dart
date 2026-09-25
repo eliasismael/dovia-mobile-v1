@@ -471,8 +471,33 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                               }
                                               return;
                                             } else {
-                                              _model.signUpError =
-                                                  'No pudimos crear tu cuenta. Intenta de nuevo.';
+// El correo puede existir sin confirmar (p. ej. el usuario volvió
+// atrás desde la pantalla del código). Si el sign-up no lo
+// resolvió, se pide el reenvío del código y se sigue al paso
+// del código.
+                                              final resend =
+                                                  await DOVIAAPIAuthContextGroup
+                                                      .resendCodeNEWCall
+                                                      .call(
+                                                          email: FFAppState()
+                                                              .UserEmail);
+                                              if (!mounted) return;
+                                              if (resend.succeeded) {
+                                                _model.signUpError = null;
+                                                safeSetState(() {});
+                                                context.pushNamed(
+                                                    CreateAccount2Widget
+                                                        .routeName);
+                                                return;
+                                              }
+                                              final status =
+                                                  _model.response?.statusCode ??
+                                                      0;
+                                              _model.signUpError = status ==
+                                                          429 ||
+                                                      resend.statusCode == 429
+                                                  ? 'Hiciste demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
+                                                  : 'No pudimos crear tu cuenta. Intenta de nuevo.';
                                               safeSetState(() {});
                                               return;
                                             }

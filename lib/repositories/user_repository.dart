@@ -4,6 +4,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_users.dart';
 import '/core/result.dart';
 import '/domain/user_models.dart';
+import '/flutter_flow/flutter_flow_util.dart' show getJsonField;
 import '/flutter_flow/uploaded_file.dart';
 
 /// Single Source of Truth for the authenticated user's profile.
@@ -88,17 +89,25 @@ class UserRepository extends ChangeNotifier {
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIUserContextGroup.uploadProfilePictureCall
         .call(authToken: token, file: file);
+    debugPrint(
+        '[Foto de perfil] ${file.name} (${file.bytes?.length ?? 0} bytes) '
+        '-> ${response.statusCode}: ${response.bodyText}');
 
     _isLoading = false;
 
     if (!response.succeeded) {
-      _error = 'Error al subir la imagen';
+      final message = getJsonField(response.jsonBody, r'$.message')?.toString();
+      _error = message != null && message.isNotEmpty
+          ? 'Error al subir la imagen: $message'
+          : 'Error al subir la imagen (${response.statusCode})';
       notifyListeners();
       return Failure(_error!, statusCode: response.statusCode);
     }
 
     // Refresh profile to show new image
     await loadProfile(forceRefresh: true);
+    debugPrint(
+        '[Foto de perfil] avatar tras recargar: ${_profile?.profilePictureUrl}');
     notifyListeners();
     return const Success(true);
   }
@@ -198,11 +207,16 @@ class UserRepository extends ChangeNotifier {
       address: address,
       workArea: workArea,
     );
+    debugPrint('[Perfil] PATCH /users/$userId -> '
+        '${response.statusCode}: ${response.bodyText}');
 
     _isLoading = false;
 
     if (!response.succeeded) {
-      _error = 'Error al actualizar el perfil';
+      final message = getJsonField(response.jsonBody, r'$.message')?.toString();
+      _error = message != null && message.isNotEmpty
+          ? 'Error al actualizar el perfil: $message'
+          : 'Error al actualizar el perfil (${response.statusCode})';
       notifyListeners();
       return Failure(_error!, statusCode: response.statusCode);
     }

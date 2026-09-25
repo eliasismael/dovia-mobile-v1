@@ -223,7 +223,9 @@ class LegalHqProcess {
     final property = json['property'] as Map<String, dynamic>? ?? {};
     return LegalHqProcess(
       id: json['id']?.toString() ?? '',
-      category: json['category']?.toString() ?? '',
+      // `operationType` distingue contado y promesa de compra; `category`
+      // queda para respuestas que todavía no lo mandan.
+      category: (json['operationType'] ?? json['category'])?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       propertyId: json['propertyId']?.toString() ?? '',
       isAssignedToMe: isAssignedToMe,
@@ -1087,7 +1089,7 @@ LegalHqStatusStyle legalHqStatusStyle(String status) {
           'En revisión', _badgeYellowBg, _badgeYellowText);
     case 'LEGAL_HQ_REVIEW':
       return const LegalHqStatusStyle(
-          'En Revisión de Legal HQ', _badgeOrangeBg, _badgeOrangeText);
+          'Pendiente de revisión', _badgeYellowBg, _badgeYellowText);
     case 'REJECTED':
       return const LegalHqStatusStyle('Rechazado', _badgeRedBg, _badgeRedText);
     case 'APPROVED':
@@ -1113,19 +1115,26 @@ LegalHqStatusStyle legalHqStatusStyle(String status) {
   }
 }
 
-/// "Tipo" de operación que muestra la tarjeta. El backend maneja cuatro
-/// categorías; "Promesa de compra" y "Post-venta", que el diseño lista como
-/// tipos, todavía no existen como categoría propia del proceso legal.
-String legalHqOperationLabel(String category) {
+/// "Tipo" de operación que muestra la tarjeta. "Post-venta" no es una
+/// operación del backend: es una compraventa ya finalizada.
+String legalHqOperationLabel(String category, [String status = '']) {
+  if (status == 'FINISHED' &&
+      category != kCategoryPublication &&
+      category != kCategoryRent) {
+    return 'Post-venta';
+  }
   switch (category) {
     case kCategoryRent:
       return 'Arrendamiento';
     case kCategorySale:
+    case 'SALE_CASH':
       return 'Compra de contado';
+    case 'SALE_PURCHASE_PROMISE':
+      return 'Promesa de compra';
     case kCategoryMortgage:
       return 'Compra con hipoteca';
     case kCategoryPublication:
-      return 'Revisión de propiedad';
+      return 'Revisión de propiedad (pre-publicación)';
     default:
       return category.isNotEmpty ? category : 'Proceso legal';
   }

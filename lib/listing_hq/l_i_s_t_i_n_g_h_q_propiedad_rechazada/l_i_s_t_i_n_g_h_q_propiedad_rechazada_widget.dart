@@ -16,7 +16,7 @@ class LISTINGHQPropiedadRechazadaWidget extends StatefulWidget {
   const LISTINGHQPropiedadRechazadaWidget({
     super.key,
     required this.processId,
-    this.propertyName = 'Orchad House',
+    this.propertyName = 'Propiedad',
   });
 
   /// ID del proceso legal — necesario para:
@@ -39,7 +39,9 @@ class _LISTINGHQPropiedadRechazadaWidgetState
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = true;
+  bool _submitting = false;
   String _rejectionNote = '';
+  String? _propertyAddress;
   List<dynamic> _remoteDocuments = [];
   Map<String, dynamic>? _ownerData;
   Map<String, dynamic>? _legalData;
@@ -52,17 +54,41 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         authToken: currentAuthenticationToken,
       );
       if (response.succeeded) {
-        final body = response.jsonBody;
+        final raw = response.jsonBody;
+        final body = raw is Map && raw['data'] is Map ? raw['data'] : raw;
+        if (body is! Map) {
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+        final docs = body['documents'] as List? ?? [];
+        // La nota general del rechazo queda en el historial de estados; las de
+        // cada documento rechazado completan el detalle.
+        final notes = <String>[
+          if ((body['latestStatusNote']?.toString() ?? '').isNotEmpty)
+            body['latestStatusNote'].toString(),
+          for (final d in docs)
+            if (d is Map &&
+                (d['hqReviewDecision'] == 'rejected' ||
+                    d['status'] == 'rejected') &&
+                (d['note']?.toString() ?? '').isNotEmpty)
+              '${d['label'] ?? 'Documento'}: ${d['note']}',
+        ];
+        final property = body['property'];
         if (mounted) {
           setState(() {
-            _rejectionNote = body['rejectionNote'] ??
-                body['note'] ??
-                body['hqReviewNote'] ??
-                'No hay nota de rechazo especificada.';
-            final docs = body['documents'] as List? ?? [];
+            _rejectionNote = notes.isNotEmpty
+                ? notes.join('\n\n')
+                : 'Dovia Legal no dejó una nota para este rechazo.';
             _remoteDocuments = docs;
-            _ownerData = body['owner'];
-            _legalData = body['legalAssociate'] ?? body['legalOfficer'];
+            _ownerData = body['ownerProfile'] is Map
+                ? Map<String, dynamic>.from(body['ownerProfile'])
+                : null;
+            // Quien rechaza es Legal HQ; si no está, el asociado del caso.
+            final legal =
+                body['legalHqProfile'] ?? body['legalAssociateProfile'];
+            _legalData = legal is Map ? Map<String, dynamic>.from(legal) : null;
+            _propertyAddress =
+                property is Map ? property['fullAddress']?.toString() : null;
             _isLoading = false;
           });
         }
@@ -114,8 +140,14 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         );
         _fetchProcessData();
       } else {
+        debugPrint(
+            '[HQ Subir documento] ${response.statusCode}: ${response.bodyText}');
+        // POST /legal-processes/{id}/documents es solo para LEGAL_ASSOCIATE.
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al cargar documento.')),
+          SnackBar(
+              content: Text(response.statusCode == 403
+                  ? 'Por ahora solo Dovia Legal puede agregar documentos nuevos. Usá "Resubir" en el documento rechazado.'
+                  : 'Error al cargar documento.')),
         );
       }
     }
@@ -157,10 +189,90 @@ class _LISTINGHQPropiedadRechazadaWidgetState
     }
   }
 
+  String _profileName(Map<String, dynamic>? profile, String fallback) {
+    final name = profile?['fullName']?.toString().trim() ?? '';
+    return name.isEmpty ? fallback : name;
+  }
+
+  /// Número para WhatsApp: código de país y número, solo dígitos.
+  String? _profilePhone(Map<String, dynamic>? profile) {
+    final phone = profile?['phone'];
+    if (phone is! Map) return null;
+    final digits = '${phone['countryCode'] ?? ''}${phone['number'] ?? ''}'
+        .replaceAll(RegExp(r'[^0-9]'), '');
+    return digits.isEmpty ? null : digits;
+  }
+
+  Future<void> _contact(Map<String, dynamic>? profile) async {
+    final phone = _profilePhone(profile);
+    final email = profile?['email']?.toString() ?? '';
+    if (phone != null) {
+      await launchURL('https://wa.me/$phone');
+    } else if (email.isNotEmpty) {
+      await launchURL('mailto:$email');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('No hay un teléfono ni un correo de contacto.')),
+      );
+    }
+  }
+
+  Future<void> _resubmit() async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    final response = await DOVIAAPILegalProcessContextGroup
+        .resubmitToHQReviewListerHQCall
+        .call(
+      processId: widget.processId,
+      authToken: currentAuthenticationToken,
+    );
+    debugPrint(
+        '[HQ Reenviar Legal] ${response.statusCode}: ${response.bodyText}');
+    if (!mounted) return;
+    setState(() => _submitting = false);
+    if (response.succeeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Caso enviado a Revisión Legal HQ exitosamente.')),
+      );
+      context.goNamed('LISTING_HQ_Home');
+    } else {
+      final msg = getJsonField(response.jsonBody, r'$.message')?.toString();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.statusCode == 400
+              ? 'Todavía hay documentos rechazados o faltantes: reemplazalos antes de reenviar.'
+              : (msg ?? 'Error al enviar el caso.')),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
+    }
+  }
+
   Widget _buildDocCard(dynamic doc, int index) {
-    final docName = doc['title'] ?? doc['name'] ?? doc['type'] ?? 'Documento';
+    final docName = (doc['label'] ??
+            doc['originalName'] ??
+            doc['title'] ??
+            doc['name'] ??
+            doc['type'] ??
+            'Documento')
+        .toString();
+    final rejected =
+        doc['hqReviewDecision'] == 'rejected' || doc['status'] == 'rejected';
+    final missing = doc['status'] == 'missing';
+    final statusColor = rejected || missing
+        ? FlutterFlowTheme.of(context).error
+        : FlutterFlowTheme.of(context).primary;
+    final statusText = rejected
+        ? 'Rechazado, resubir'
+        : missing
+            ? 'Falta subir'
+            : doc['status'] == 'approved'
+                ? 'Aprobado'
+                : 'Enviado';
     return Container(
-      width: 160.0,
+      width: 220.0,
       margin: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -213,13 +325,21 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                 ),
                 const SizedBox(height: 12.0),
                 LinearPercentIndicator(
-                  percent: 1.0,
+                  percent: missing ? 0.0 : 1.0,
                   lineHeight: 8.0,
                   animation: true,
-                  progressColor: FlutterFlowTheme.of(context).primary,
+                  progressColor: statusColor,
                   backgroundColor: FlutterFlowTheme.of(context).accent1,
                   barRadius: const Radius.circular(50.0),
                   padding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 6.0),
+                Text(
+                  statusText,
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        font: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        color: statusColor,
+                      ),
                 ),
               ],
             ),
@@ -231,10 +351,12 @@ class _LISTINGHQPropiedadRechazadaWidgetState
               icon: const Icon(Icons.more_vert, size: 20),
               onSelected: (value) {
                 if (value == 'eliminar') {
+                  // DELETE /legal-processes/{id}/documents/{docId} es solo
+                  // para LEGAL_ASSOCIATE: el backend no deja borrar a HQ.
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text(
-                            'Función de eliminar no implementada completamente en backend.')),
+                            'Por ahora solo Dovia Legal puede eliminar documentos. Usá "Resubir" para reemplazarlo.')),
                   );
                 } else if (value == 'resubir') {
                   _handleReuploadDoc(index);
@@ -258,7 +380,9 @@ class _LISTINGHQPropiedadRechazadaWidgetState
   }
 
   Widget _buildContactCard(
-      {required String role, required String name, required String phone}) {
+      {required String role,
+      required String name,
+      required Map<String, dynamic>? profile}) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -299,10 +423,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
               ],
             ),
             InkWell(
-              onTap: () async {
-                final url = 'https://wa.me/$phone';
-                await launchURL(url);
-              },
+              onTap: () => _contact(profile),
               child: Container(
                 width: 45.0,
                 height: 45.0,
@@ -367,7 +488,9 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.propertyName,
+                                _propertyAddress ?? widget.propertyName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: FlutterFlowTheme.of(context)
                                     .bodyLarge
                                     .override(
@@ -418,7 +541,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                                 ),
                                 const SizedBox(height: 15.0),
                                 SizedBox(
-                                  height: 160.0,
+                                  height: 190.0,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     itemCount: _remoteDocuments.length,
@@ -510,26 +633,15 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                                 ),
                                 const SizedBox(height: 10.0),
                                 _buildContactCard(
-                                  role: 'Dovia Legal',
-                                  name: _legalData != null
-                                      ? "${_legalData!['firstName'] ?? ''} ${_legalData!['lastName'] ?? ''}"
-                                      : 'Abogado Dovia',
-                                  phone: _legalData != null
-                                      ? (_legalData!['phone'] ??
-                                          _legalData!['phoneNumber'] ??
-                                          '+0000000000')
-                                      : '+0000000000',
+                                  role:
+                                      'Dovia Legal (Encargado de los documentos)',
+                                  name: _profileName(_legalData, 'Sin asignar'),
+                                  profile: _legalData,
                                 ),
                                 _buildContactCard(
                                   role: 'Datos del propietario',
-                                  name: _ownerData != null
-                                      ? "${_ownerData!['firstName'] ?? ''} ${_ownerData!['lastName'] ?? ''}"
-                                      : 'María García',
-                                  phone: _ownerData != null
-                                      ? (_ownerData!['phone'] ??
-                                          _ownerData!['phoneNumber'] ??
-                                          '+0000000000')
-                                      : '+0000000000',
+                                  name: _profileName(_ownerData, 'Sin datos'),
+                                  profile: _ownerData,
                                 ),
                                 const SizedBox(
                                     height:
@@ -550,29 +662,10 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: FFButtonWidget(
-                        onPressed: () async {
-                          final response =
-                              await DOVIAAPILegalProcessContextGroup
-                                  .resubmitToHQReviewListerHQCall
-                                  .call(
-                            processId: widget.processId,
-                            authToken: currentAuthenticationToken,
-                          );
-                          if (response.succeeded) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Caso enviado a Revisión Legal HQ exitosamente.')),
-                            );
-                            if (mounted) context.pop();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Error al enviar el caso.')),
-                            );
-                          }
-                        },
-                        text: 'Enviar a Revision Legal HQ',
+                        onPressed: _submitting ? null : _resubmit,
+                        text: _submitting
+                            ? 'Enviando...'
+                            : 'Enviar a Revision Legal HQ',
                         options: FFButtonOptions(
                           width: double.infinity,
                           height: 50.0,

@@ -79,9 +79,6 @@ class _OPERATIVELISTINGHomeWidgetState
   Future<List<_VisitCardData>>? _upcomingFuture;
   Future<List<_VisitCardData>>? _pendingFuture;
 
-  // Cached resolved list — used by the header location icon
-  List<_VisitCardData> _resolvedUpcoming = [];
-
   static const Color _primary = Color(0xFF007376);
   static const Color _dark = Color(0xFF00444B);
   static const Color _pillBg = Color(0xFFCCE3E4);
@@ -117,7 +114,6 @@ class _OPERATIVELISTINGHomeWidgetState
           .where((v) => v.substatus != 'RESCHEDULE_REQUIRED' && !v.isOverdue)
           .toList()
         ..sort(bySlot);
-      _resolvedUpcoming = upcoming;
       return upcoming;
     });
     _pendingFuture = all.then((list) => list
@@ -310,25 +306,9 @@ class _OPERATIVELISTINGHomeWidgetState
                       wrapWithModel(
                         model: _model.oPERATIVELISTINGHeaderModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: OPERATIVELISTINGHeaderWidget(
+                        child: const OPERATIVELISTINGHeaderWidget(
                           titleText: 'Home',
                           showBack: false,
-                          onLocationTap: () {
-                            final next = _resolvedUpcoming.isNotEmpty
-                                ? _resolvedUpcoming.first
-                                : null;
-                            context.pushNamed(
-                              OPERATIVELISTINGPrimeraVisitaWidget.routeName,
-                              queryParameters: {
-                                'visitId': serializeParam(
-                                    next?.visitId ?? '', ParamType.String),
-                                'isPrimeraVisita':
-                                    serializeParam(true, ParamType.bool),
-                                'propertyName': serializeParam(
-                                    next?.propertyName ?? '', ParamType.String),
-                              }.withoutNulls,
-                            );
-                          },
                         ),
                       ),
                       Padding(

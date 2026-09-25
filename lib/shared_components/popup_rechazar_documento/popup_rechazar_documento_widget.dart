@@ -17,6 +17,7 @@ class PopupRechazarDocumentoWidget extends StatefulWidget {
 class _PopupRechazarDocumentoWidgetState
     extends State<PopupRechazarDocumentoWidget> {
   late PopupRechazarDocumentoModel _model;
+  bool _showMissingNote = false;
 
   @override
   void setState(VoidCallback callback) {
@@ -97,6 +98,9 @@ class _PopupRechazarDocumentoWidgetState
                     autofocus: false,
                     obscureText: false,
                     decoration: InputDecoration(
+                      errorText: _showMissingNote
+                          ? 'Escribí el motivo del rechazo.'
+                          : null,
                       hintText: 'Ej: RECORDAR QUE EL DEPÓSITO...',
                       hintStyle: FlutterFlowTheme.of(context)
                           .bodySmall
@@ -119,15 +123,15 @@ class _PopupRechazarDocumentoWidgetState
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       errorBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Color(0x00000000),
+                        borderSide: BorderSide(
+                          color: FlutterFlowTheme.of(context).error,
                           width: 1.0,
                         ),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       focusedErrorBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Color(0x00000000),
+                        borderSide: BorderSide(
+                          color: FlutterFlowTheme.of(context).error,
                           width: 1.0,
                         ),
                         borderRadius: BorderRadius.circular(8.0),
@@ -137,6 +141,11 @@ class _PopupRechazarDocumentoWidgetState
                           font: GoogleFonts.inter(),
                         ),
                     maxLines: 4,
+                    onChanged: (_) {
+                      if (_showMissingNote) {
+                        setState(() => _showMissingNote = false);
+                      }
+                    },
                     validator: _model.commentTextControllerValidator
                         .asValidator(context),
                   ),
@@ -146,7 +155,14 @@ class _PopupRechazarDocumentoWidgetState
                       const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
                   child: FFButtonWidget(
                     onPressed: () async {
-                      Navigator.pop(context, _model.commentTextController.text);
+                      final note = _model.commentTextController.text.trim();
+                      // El motivo es lo que ve quien tiene que volver a subir el
+                      // archivo. Vacío, el popup se cerraba y no pasaba nada.
+                      if (note.isEmpty) {
+                        setState(() => _showMissingNote = true);
+                        return;
+                      }
+                      Navigator.pop(context, note);
                     },
                     text: 'Confirmar y rechazar documento',
                     options: FFButtonOptions(

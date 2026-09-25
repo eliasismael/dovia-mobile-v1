@@ -126,8 +126,8 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
     // Se pagina hasta el final: los filtros corren client-side sobre lo que se
     // trajo, así que con una sola página filtrar por mes u oficio daría un
     // resultado que parece completo y no lo es.
-    final call = DOVIAAPIDoviaHomeContextGroup
-        .listAvailableAssociateServiceRequestsCall;
+    final call =
+        DOVIAAPIDoviaHomeContextGroup.listAvailableAssociateServiceRequestsCall;
     final jobsRequest = loadAllDoviaHomePages(
       fetchPage: (page, limit) =>
           call.call(authToken: token, page: page, limit: limit),

@@ -6,6 +6,7 @@ import '/legal_hq/legal_hq_process_data.dart';
 import '/legal_hq/l_e_g_a_l_h_q_procesos/l_e_g_a_l_h_q_procesos_widget.dart';
 import '/legal_hq/l_e_g_a_l_h_q_procesos_casos_con_hipoteca/l_e_g_a_l_h_q_procesos_casos_con_hipoteca_widget.dart';
 import '/legal_hq/l_e_g_a_l_h_q_revision_documentos_propiedades/l_e_g_a_l_h_q_revision_documentos_propiedades_widget.dart';
+import '/legal_hq/l_e_g_a_l_h_q_post_venta/l_e_g_a_l_h_q_post_venta_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -95,8 +96,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
 
     // Carril 3 — compraventas con crédito hipotecario. Se piden por categoría
     // (no por estado) para no perder las que aún no entraron al banco.
-    _mortgageFuture =
-        LegalHqProcessApi.fetchBoth(category: kCategoryMortgage);
+    _mortgageFuture = LegalHqProcessApi.fetchBoth(category: kCategoryMortgage);
   }
 
   /// Filtra por ID de inmueble o dirección con el texto de la búsqueda.
@@ -145,6 +145,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                       updateCallback: () => safeSetState(() {}),
                       child: const LegalHQHeaderWidget(
                         text: 'Home',
+                        showBack: false,
                       ),
                     ),
 
@@ -166,7 +167,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                             context,
                             title: 'Propiedades pendientes\n'
                                 'por revisión para publicar',
-                            onVerMas: _openProcesos,
+                            onVerMas: () => _openProcesos('propiedades'),
                           ),
                           const SizedBox(height: 14.0),
                           _buildFutureCarousel(
@@ -201,7 +202,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                           _buildSectionHeader(
                             context,
                             title: 'Propiedades pendientes\npor hipotecas',
-                            onVerMas: _openProcesos,
+                            onVerMas: () => _openProcesos('hipotecas'),
                           ),
                           const SizedBox(height: 14.0),
                           _buildFutureCarousel(
@@ -240,8 +241,11 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
 
   // ── Navegación ────────────────────────────────────────────────────────────
 
-  Future<void> _openProcesos() async {
-    await context.pushNamed(LEGALHQProcesosWidget.routeName);
+  Future<void> _openProcesos([String? filter]) async {
+    await context.pushNamed(
+      LEGALHQProcesosWidget.routeName,
+      queryParameters: {'filter': filter}.withoutNulls,
+    );
     if (mounted) safeSetState(_loadData);
   }
 
@@ -270,9 +274,16 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
 
     if (!mounted) return;
 
-    final routeName = process.category == kCategoryMortgage
-        ? LEGALHQProcesosCasosConHipotecaWidget.routeName
-        : LEGALHQRevisionDocumentosPropiedadesWidget.routeName;
+    // Mismo ruteo que el listado de Procesos: aprobados y finalizados se
+    // auditan desde el cierre de operación.
+    final String routeName;
+    if (process.category == kCategoryMortgage) {
+      routeName = LEGALHQProcesosCasosConHipotecaWidget.routeName;
+    } else if (process.status == 'APPROVED' || process.status == 'FINISHED') {
+      routeName = LEGALHQPostVentaWidget.routeName;
+    } else {
+      routeName = LEGALHQRevisionDocumentosPropiedadesWidget.routeName;
+    }
 
     await context.pushNamed(
       routeName,
@@ -647,6 +658,8 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
   String _paymentOrRequestLabel(LegalHqProcess process) {
     switch (process.category) {
       case kCategorySale:
+      case 'SALE_CASH':
+      case 'SALE_PURCHASE_PROMISE':
         return 'Pago al contado';
       case kCategoryMortgage:
         return 'Pago con hipoteca';

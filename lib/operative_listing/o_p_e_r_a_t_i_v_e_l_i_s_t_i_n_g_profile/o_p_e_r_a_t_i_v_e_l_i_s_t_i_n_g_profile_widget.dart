@@ -86,6 +86,7 @@ class _OPERATIVELISTINGProfileWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const OPERATIVELISTINGHeaderWidget(
                         titleText: 'Perfil',
+                        showLocation: false,
                       ),
                     ),
                     Padding(

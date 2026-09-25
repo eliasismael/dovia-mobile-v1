@@ -644,16 +644,41 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                               ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
-                          RichText(
-                            textScaler: MediaQuery.of(context).textScaler,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: widget.title!,
+                          Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: RichText(
+                                textScaler: MediaQuery.of(context).textScaler,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: widget.title!,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts.publicSans(
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .fontStyle,
+                                            ),
+                                            fontSize: 18.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                            lineHeight: 1.4,
+                                          ),
+                                    )
+                                  ],
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
-                                        font: GoogleFonts.publicSans(
+                                        font: GoogleFonts.inter(
                                           fontWeight: FontWeight.w600,
                                           fontStyle:
                                               FlutterFlowTheme.of(context)
@@ -668,27 +693,12 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                             .fontStyle,
                                         lineHeight: 1.4,
                                       ),
-                                )
-                              ],
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    fontSize: 18.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                    lineHeight: 1.4,
-                                  ),
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.max,
@@ -727,8 +737,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                 width: 40.0,
                                 height: 40.0,
                                 decoration: BoxDecoration(
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   shape: BoxShape.circle,
                                 ),
                                 child: InkWell(
@@ -738,13 +748,12 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
                                     context.pushNamed(
-                                        LISTINGHQDocumentosPendientesWidget
-                                            .routeName);
+                                        LISTINGHQDocumentosWidget.routeName);
                                   },
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
                                     child: SvgPicture.asset(
-                                      'assets/images/folder-alertW.svg',
+                                      'assets/images/folder-alert.svg',
                                       width: 8.0,
                                       height: 8.0,
                                       fit: BoxFit.none,

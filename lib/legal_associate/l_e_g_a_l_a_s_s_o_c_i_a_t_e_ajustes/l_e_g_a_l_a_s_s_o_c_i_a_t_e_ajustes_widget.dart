@@ -85,6 +85,7 @@ class _LEGALASSOCIATEAjustesWidgetState
                         children: [
                           Container(
                             child: custom_widgets.OperativeListingProfile(
+                              roleLabel: 'Dovia Legal Associate',
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: MediaQuery.sizeOf(context).height * 1.0,
                               onTermsAndConditions: () async {},

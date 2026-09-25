@@ -238,7 +238,8 @@ class _DHASSOCIATETrabajoAdicionalWidgetState
           borderRadius: BorderRadius.circular(8.0),
           child: bytes == null
               ? const SizedBox(width: 88.0)
-              : Image.memory(bytes, width: 88.0, height: 88.0, fit: BoxFit.cover),
+              : Image.memory(bytes,
+                  width: 88.0, height: 88.0, fit: BoxFit.cover),
         );
       },
     );

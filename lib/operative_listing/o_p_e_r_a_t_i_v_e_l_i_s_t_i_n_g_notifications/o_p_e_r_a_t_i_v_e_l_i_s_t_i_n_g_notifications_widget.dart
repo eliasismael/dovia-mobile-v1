@@ -68,6 +68,7 @@ class _OPERATIVELISTINGNotificationsWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const OPERATIVELISTINGHeaderWidget(
                         titleText: 'Notificaciones',
+                        showLocation: false,
                       ),
                     ),
                     Padding(

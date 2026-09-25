@@ -22,6 +22,15 @@ class Datos3NewModel extends FlutterFlowModel<Datos3NewWidget> {
   String? Function(BuildContext, String?)?
       descriptionInputTextControllerValidator;
 
+  /// Área dibujada en el mapa como `[longitud, latitud]`, o `null`.
+  List<List<double>>? areaCoordinates;
+
+  /// Mientras se guardan las preferencias (deshabilita los botones).
+  bool savingPreferences = false;
+
+  /// Error al guardar, mostrado en rojo arriba de los botones.
+  String? preferencesError;
+
   @override
   void initState(BuildContext context) {
     cornerGradientBackgroundModel =

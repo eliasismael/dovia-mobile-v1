@@ -82,6 +82,7 @@ class _LISTINGHQProfileWidgetState extends State<LISTINGHQProfileWidget> {
                         children: [
                           Container(
                             child: custom_widgets.OperativeListingProfile(
+                              roleLabel: 'Dovia Lister HQ',
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: MediaQuery.sizeOf(context).height * 1.0,
                               onTermsAndConditions: () async {},

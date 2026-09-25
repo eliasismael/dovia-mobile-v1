@@ -497,8 +497,8 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   /// pantalla de la cotización, en Estado 2 (sólo lectura + banner de
   /// espera): antes no había nada que ver ahí, pero ahora sí hay un
   /// presupuesto propio para releer.
-  Widget _buildSubmittedLane(CompanyQuoteBoard board,
-      List<CompanyQuoteSubmission> submissions) {
+  Widget _buildSubmittedLane(
+      CompanyQuoteBoard board, List<CompanyQuoteSubmission> submissions) {
     if (board.proposalsFailed) {
       return _buildEmptyState(
           CompanyQuoteBoard.errorMessage(board.proposalsErrorStatus));
@@ -577,8 +577,8 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
                               if (board == null)
                                 const SizedBox(
                                   height: 100.0,
-                                  child:
-                                      Center(child: CircularProgressIndicator()),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
                                 )
                               else if (board.categories.failed)
                                 _buildEmptyState(board.categories.errorMessage)

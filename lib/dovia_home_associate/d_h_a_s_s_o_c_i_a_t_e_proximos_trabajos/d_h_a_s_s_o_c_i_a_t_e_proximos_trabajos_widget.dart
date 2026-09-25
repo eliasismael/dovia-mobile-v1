@@ -129,8 +129,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
     // Y se pagina hasta el final: aceptados y terminados comparten este
     // listado, así que con una sola página el historial le comería el cupo a
     // los trabajos que todavía hay que hacer.
-    final call =
-        DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall;
+    final call = DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall;
     final jobsRequest = loadAllDoviaHomePages(
       fetchPage: (page, limit) =>
           call.call(authToken: token, page: page, limit: limit),

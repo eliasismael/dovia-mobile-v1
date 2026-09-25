@@ -203,6 +203,8 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                   visitId: widget.visitId,
                                   authToken: currentAuthenticationToken ?? '',
                                 );
+                                debugPrint(
+                                    '[HQ Publicar] POST /visits/${widget.visitId}/publish → ${res.statusCode}: ${res.bodyText}');
                                 if (!res.succeeded) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -263,9 +265,12 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                               // Process and upload images
                               final rawImages =
                                   data['images'] as Map<dynamic, dynamic>?;
-                              final Map<String, List<String>> finalizedImages =
-                                  {};
-                              String? finalVideo360Url;
+
+                              // Sección → URLs ya subidas, para que el formulario no las
+
+                              // vuelva a subir.
+
+                              final uploaded = <String, List<String>>{};
 
                               if (rawImages != null) {
                                 for (final entry in rawImages.entries) {
@@ -273,6 +278,7 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                   final files =
                                       entry.value as List<dynamic>? ?? [];
                                   final List<String> sectionUrls = [];
+                                  uploaded[sectionName] = sectionUrls;
 
                                   final bool isVideo =
                                       sectionName == 'Recorrido 360';
@@ -421,34 +427,17 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                           'Error al confirmar imágenes: ${confirmRes.jsonBody}');
                                     }
                                   }
-
-                                  if (isVideo) {
-                                    if (sectionUrls.isNotEmpty) {
-                                      finalVideo360Url = sectionUrls.first;
-                                    }
-                                  } else {
-                                    finalizedImages[zone] = sectionUrls;
-                                  }
                                 }
                               }
 
-                              final Map<String, dynamic> patchPayload = {
-                                'tipoVivienda': data['tipoVivienda'],
-                                'direccion': data['direccion'],
-                                'descripcion': data['descripcion'],
-                                'caracteristicas': data['caracteristicas'],
-                                'otrasCaracteristicas':
-                                    data['otrasCaracteristicas'],
-                                'amenidades': data['amenidades'],
-                                'starRatings': data['urbanCriteria'],
-                                'infoHq': data['infoHq'],
-                                'adicionales': data['adicionales'],
-                                'images': finalizedImages,
-                              };
+                              // Formato del backend. Las imágenes ya quedaron registradas con
+                              // images/confirm: el PATCH no tiene `images` ni `video360Url`.
+                              final Map<String, dynamic> patchPayload =
+                                  Map<String, dynamic>.from(
+                                      data['patchBody'] as Map);
 
-                              if (finalVideo360Url != null) {
-                                patchPayload['video360Url'] = finalVideo360Url;
-                              }
+                              debugPrint(
+                                  '[HQ Publicar] PATCH /properties/$propertyId body: ${jsonEncode(patchPayload)}');
 
                               final patchRes =
                                   await ApiManager.instance.makeApiCall(
@@ -471,10 +460,14 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                 alwaysAllowBody: false,
                               );
 
+                              debugPrint(
+                                  '[HQ Publicar] PATCH /properties/$propertyId → ${patchRes.statusCode}: ${patchRes.bodyText}');
+
                               if (!patchRes.succeeded) {
                                 throw Exception(
                                     'Error al guardar datos: ${patchRes.jsonBody}');
                               }
+                              return uploaded;
                             },
                           ),
                         );

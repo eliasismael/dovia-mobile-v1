@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_visor_pdf/l_i_s_t_i_n_g_h_q_visor_pdf_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +24,11 @@ export 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
 /// (es decir, sin operative lister asignado todavía). HQ elige fecha/hora y un
 /// Operative Lister disponible y confirma la visita.
 ///
-/// Nota: el flujo de "desvincular un operative ya asignado / reprogramar" no se
-/// implementa porque el backend no expone un endpoint de desvinculación para el
-/// rol LISTER_HQ (solo existe la vía admin, no usada por la app).
+/// También se abre con "Asignar de nuevo" para visitas en
+/// `RESCHEDULE_REQUIRED`: muestra al operative anterior y "Organizar
+/// información de la propiedad" lo quita solo en pantalla. No hay endpoint de
+/// desvinculación para LISTER_HQ; el reemplazo real ocurre al confirmar, porque
+/// `assign-operative-lister` acepta visitas en `RESCHEDULE_REQUIRED`.
 class LISTINGHQPropiedadAsignadaWidget extends StatefulWidget {
   const LISTINGHQPropiedadAsignadaWidget({
     super.key,
@@ -58,6 +61,9 @@ class _LISTINGHQPropiedadAsignadaWidgetState
   String _address = '—';
   String _description = '';
   String? _proposedDateText;
+  // URLs de los documentos que se abren desde "Documentos".
+  String? _agreementUrl;
+  String? _certificationUrl;
 
   /// Slots propuestos por el propietario (`{ 'date', 'time' }`), para el selector.
   final List<Map<String, String>> _proposedSlots = [];
@@ -196,16 +202,41 @@ class _LISTINGHQPropiedadAsignadaWidgetState
       }
     }
 
-    final listerData = data['lister'];
-    if (listerData is Map) {
+    // El detalle trae al operative actual en `operativeListing`; `lister` se
+    // mantiene por si alguna respuesta vieja lo usa.
+    final listerData = data['operativeListing'] ?? data['lister'];
+    if (listerData is Map && listerData['id'] != null) {
       _initialLister = {
         'id': listerData['id'],
-        'name':
-            '${listerData['firstName'] ?? listerData['name'] ?? ''} ${listerData['lastName'] ?? ''}'
-                .trim(),
+        'name': (listerData['fullName'] ??
+                '${listerData['firstName'] ?? listerData['name'] ?? ''} ${listerData['lastName'] ?? ''}')
+            .toString()
+            .trim(),
         'photoUrl': listerData['avatar'] ?? listerData['photoUrl'],
       };
       _selectedOperative = _initialLister;
+    }
+
+    if (visit is Map) {
+      _agreementUrl = _nonEmpty(visit['signedContractUrl']) ??
+          _nonEmpty(visit['unsignedContractUrl']);
+      final checklist = visit['documentChecklist'];
+      if (checklist is List) {
+        for (final doc in checklist) {
+          if (doc is Map &&
+              (doc['type']?.toString().toUpperCase() ?? '')
+                  .contains('CERTIFICATION')) {
+            _certificationUrl = _nonEmpty(doc['url']);
+          }
+        }
+      }
+      // Al pedir reagendar, la fecha que tenía el operative queda como
+      // asignación anterior.
+      final confirmed = visit['confirmedTimeSlot'] ?? visit['confirmedSlot'];
+      if (visit['substatus'] == 'RESCHEDULE_REQUIRED' && confirmed is Map) {
+        _rescheduleHistory.add(
+            'Fecha: ${confirmed['date'] ?? '—'}  Hora: ${confirmed['time'] ?? '—'}');
+      }
     }
 
     // Historial de reagendamiento desde el overview (mensajes del flujo).
@@ -240,6 +271,53 @@ class _LISTINGHQPropiedadAsignadaWidgetState
             .add([author, text].where((s) => s.isNotEmpty).join(': '));
       }
     }
+  }
+
+  String? _nonEmpty(dynamic v) {
+    final s = v?.toString() ?? '';
+    return s.isEmpty ? null : s;
+  }
+
+  void _openDocument(String name, String? url) {
+    if (url == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$name todavía no está disponible.')),
+      );
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LISTINGHQVisorPdfWidget(
+          documentName: name,
+          documentUrl: url,
+          isPdf: url.toLowerCase().contains('.pdf'),
+        ),
+      ),
+    );
+  }
+
+  Widget _documentLink(IconData icon, String name, String? url) {
+    final color = url != null
+        ? FlutterFlowTheme.of(context).primary
+        : FlutterFlowTheme.of(context).secondaryText;
+    return InkWell(
+      onTap: () => _openDocument(name, url),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 16),
+            const SizedBox(width: 4),
+            Text(name,
+                style: _subTextStyle().copyWith(
+                    color: color,
+                    decoration: url != null ? TextDecoration.underline : null)),
+          ],
+        ),
+      ),
+    );
   }
 
   String _propertyTypeFromListing(dynamic listingType) {
@@ -504,21 +582,13 @@ class _LISTINGHQPropiedadAsignadaWidgetState
           const SizedBox(height: 12.0),
           Text('Documentos', style: _sectionTitleStyle()),
           const SizedBox(height: 4.0),
-          Row(
+          Wrap(
+            spacing: 16,
             children: [
-              Icon(Icons.description,
-                  color: FlutterFlowTheme.of(context).primary, size: 16),
-              const SizedBox(width: 4),
-              Text('Acuerdo firmado',
-                  style: _subTextStyle()
-                      .copyWith(color: FlutterFlowTheme.of(context).primary)),
-              const SizedBox(width: 16),
-              Icon(Icons.verified_user,
-                  color: FlutterFlowTheme.of(context).primary, size: 16),
-              const SizedBox(width: 4),
-              Text('Certificación',
-                  style: _subTextStyle()
-                      .copyWith(color: FlutterFlowTheme.of(context).primary)),
+              _documentLink(
+                  Icons.description, 'Acuerdo firmado', _agreementUrl),
+              _documentLink(
+                  Icons.verified_user, 'Certificación', _certificationUrl),
             ],
           ),
           Padding(

@@ -85,6 +85,7 @@ class _LEGALHQAjustesWidgetState extends State<LEGALHQAjustesWidget> {
                                 0.0, 40.0, 0.0, 0.0),
                             child: Container(
                               child: custom_widgets.OperativeListingProfile(
+                                roleLabel: 'Dovia Legal HQ',
                                 width: MediaQuery.sizeOf(context).width * 1.0,
                                 height: MediaQuery.sizeOf(context).height * 1.0,
                                 onTermsAndConditions: () async {},

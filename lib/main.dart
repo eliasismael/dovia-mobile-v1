@@ -7,6 +7,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'auth/custom_auth/auth_util.dart';
 import 'auth/custom_auth/custom_auth_user_provider.dart';
+import 'auth/custom_auth/session_restore.dart';
 
 import 'flutter_flow/flutter_flow_util.dart';
 import 'repositories/index.dart';
@@ -17,6 +18,7 @@ void main() async {
   usePathUrlStrategy();
 
   await authManager.initialize();
+  await restoreSession();
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();

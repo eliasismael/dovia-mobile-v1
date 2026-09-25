@@ -326,9 +326,8 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
             icon: Icons.highlight_off,
             background: _isSubmitting ? _disabledGrey : _red,
             foreground: _isSubmitting ? _disabledText : Colors.white,
-            onPressed: blocked
-                ? null
-                : () => safeSetState(() => _isRejecting = true),
+            onPressed:
+                blocked ? null : () => safeSetState(() => _isRejecting = true),
           ),
         ),
       ],

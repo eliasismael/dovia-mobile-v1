@@ -495,7 +495,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
             padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
             child: Container(
               width: MediaQuery.sizeOf(context).width * 1.0,
-              padding: const EdgeInsetsDirectional.fromSTEB(13.0, 13.0, 13.0, 13.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(13.0, 13.0, 13.0, 13.0),
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).secondaryBackground,
                 borderRadius: BorderRadius.circular(10.0),
@@ -560,7 +561,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                     ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                 child: SizedBox(
                   width: MediaQuery.sizeOf(context).width * 1.0,
                   height: 200.0,
@@ -598,7 +600,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                     letterSpacing: 0.0,
                     fontWeight:
                         FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                   ),
             ),
           ),
@@ -613,8 +616,10 @@ class _DHASSOCIATETrabajoARealizarWidgetState
             options: FFButtonOptions(
               width: MediaQuery.sizeOf(context).width * 1.0,
               height: 42.0,
-              padding: const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
-              iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
+              iconPadding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
               color: FlutterFlowTheme.of(context).primary,
               textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                     font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),

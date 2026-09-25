@@ -11,7 +11,10 @@ import 'recover_password1_model.dart';
 export 'recover_password1_model.dart';
 
 class RecoverPassword1Widget extends StatefulWidget {
-  const RecoverPassword1Widget({super.key});
+  const RecoverPassword1Widget({super.key, this.email});
+
+  /// Correo precargado cuando se llega desde Ajustes.
+  final String? email;
 
   static String routeName = 'RecoverPassword_1';
   static String routePath = '/recoverPassword1';
@@ -30,7 +33,7 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
     super.initState();
     _model = createModel(context, () => RecoverPassword1Model());
 
-    _model.correoTextController ??= TextEditingController();
+    _model.correoTextController ??= TextEditingController(text: widget.email);
     _model.correoFocusNode ??= FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));

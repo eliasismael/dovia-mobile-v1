@@ -257,17 +257,18 @@ class UpdateUserProfileCall {
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  ${name != null ? '"name": "${escapeStringForJson(name)}",' : ''}
-  ${lastname != null ? '"lastname": "${escapeStringForJson(lastname)}",' : ''}
-  ${gender != null ? '"gender": "${escapeStringForJson(gender)}",' : ''}
-  ${nationality != null ? '"nationality": "${escapeStringForJson(nationality)}",' : ''}
-  ${(phoneCountryCode != null && phoneNumber != null) ? '"phone": { "countryCode": "${escapeStringForJson(phoneCountryCode)}", "number": "${escapeStringForJson(phoneNumber)}" },' : ''}
-  ${address != null ? '"address": "${escapeStringForJson(address)}",' : ''}
-  ${workArea != null ? '"workArea": $workArea,' : ''}
-  "_placeholder": null
-}''';
+    // Solo los campos que se mandan: el backend rechaza propiedades que no
+    // conoce ("Invalid request body").
+    final ffApiRequestBody = jsonEncode({
+      if (name != null) 'name': name,
+      if (lastname != null) 'lastname': lastname,
+      if (gender != null) 'gender': gender,
+      if (nationality != null) 'nationality': nationality,
+      if (phoneCountryCode != null && phoneNumber != null)
+        'phone': {'countryCode': phoneCountryCode, 'number': phoneNumber},
+      if (address != null) 'address': address,
+      if (workArea != null) 'workArea': jsonDecode(workArea),
+    });
     return ApiManager.instance.makeApiCall(
       callName: 'Update User Profile',
       apiUrl: '$baseUrl/users/$userId',

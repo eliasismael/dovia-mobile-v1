@@ -159,7 +159,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: RecoverPassword1Widget.routeName,
           path: RecoverPassword1Widget.routePath,
-          builder: (context, params) => const RecoverPassword1Widget(),
+          builder: (context, params) => RecoverPassword1Widget(
+            email: params.getParam('email', ParamType.String),
+          ),
         ),
         FFRoute(
           name: RecoverPassword2Widget.routeName,
@@ -1033,7 +1035,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: LEGALHQProcesosWidget.routeName,
           path: LEGALHQProcesosWidget.routePath,
-          builder: (context, params) => const LEGALHQProcesosWidget(),
+          builder: (context, params) => LEGALHQProcesosWidget(
+            filter: params.getParam('filter', ParamType.String),
+          ),
         ),
         FFRoute(
           name: LEGALHQRevisionDocumentosPropiedadesWidget.routeName,

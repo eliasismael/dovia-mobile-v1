@@ -232,6 +232,8 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                             status: 'rejected',
                                             note: note,
                                           );
+                                          debugPrint(
+                                              '[HQ Rechazar] ${res.statusCode}: ${res.bodyText}');
                                           if (res.succeeded) {
                                             // Volver al checklist para seguir
                                             // revisando el resto de documentos.
@@ -250,18 +252,19 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                           }
                                         }
                                       },
-                                      text: 'Rechazar documento',
+                                      text: 'Rechazar',
                                       options: FFButtonOptions(
                                         height: 48.0,
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                        color: Colors.transparent,
+                                        color: Colors.white,
                                         textStyle: FlutterFlowTheme.of(context)
                                             .titleSmall
                                             .override(
                                               font: GoogleFonts.inter(
                                                 fontWeight: FontWeight.w600,
                                               ),
+                                              fontSize: 14.0,
                                               color:
                                                   FlutterFlowTheme.of(context)
                                                       .primary,
@@ -347,7 +350,9 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                       options: FFButtonOptions(
                                         height: 48.0,
                                         padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                            .fromSTEB(12.0, 0.0, 12.0, 0.0),
+                                        maxLines: 2,
+                                        textAlign: TextAlign.center,
                                         color: FlutterFlowTheme.of(context)
                                             .primary,
                                         textStyle: FlutterFlowTheme.of(context)
@@ -357,6 +362,7 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                                 fontWeight: FontWeight.w600,
                                               ),
                                               color: Colors.white,
+                                              fontSize: 14.0,
                                             ),
                                         elevation: 0.0,
                                         borderRadius:

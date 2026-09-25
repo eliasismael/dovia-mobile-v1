@@ -28,6 +28,8 @@ class MapDrawingWidget extends StatefulWidget {
     this.singlePointMode,
     this.onPointSelected,
     this.onPointCleared,
+    this.onAreaChanged,
+    this.mapHeight,
     this.preselectInitialPoint = true,
     this.markedLatitude,
     this.markedLongitude,
@@ -58,6 +60,16 @@ class MapDrawingWidget extends StatefulWidget {
   /// Se invoca cuando el usuario toca "Limpiar" y se borra el punto. Sin esto,
   /// quien haya guardado las coordenadas se queda con un valor viejo.
   final VoidCallback? onPointCleared;
+
+  /// Se invoca cuando se termina de dibujar el área (con los puntos como
+  /// `[longitud, latitud]`, el formato que espera el backend) y con `null`
+  /// cuando se borra o se empieza a dibujar otra.
+  final void Function(List<List<double>>? coordinates)? onAreaChanged;
+
+  /// Alto fijo del mapa. Si se pasa, el widget toma el alto de su contenido
+  /// (mapa + barra + panel del área) en vez de repartir [height]: así el mapa
+  /// no se achica cuando aparece el panel del área dibujada.
+  final double? mapHeight;
 
   /// Si el punto inicial arranca marcado en modo single point.
   ///
@@ -222,6 +234,7 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
       _completedPolygonCoords = <ll.LatLng>[];
       _hasCompletedDrawing = false;
     });
+    widget.onAreaChanged?.call(null);
   }
 
   void _confirmArea() {
@@ -305,6 +318,7 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
       _completedPolygonCoords = <ll.LatLng>[];
       _hasCompletedDrawing = false;
     });
+    widget.onAreaChanged?.call(null);
   }
 
   void _onDrawUpdate(DragUpdateDetails details) {
@@ -335,6 +349,8 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
       _hasCompletedDrawing = true;
       _isDrawMode = false;
     });
+    widget.onAreaChanged?.call(
+        simplified.map((c) => <double>[c.longitude, c.latitude]).toList());
     _pulseController.stop();
     _pulseController.reset();
   }
@@ -418,13 +434,18 @@ class _MapDrawingWidgetState extends State<MapDrawingWidget>
         ),
       );
     }
+    final mapHeight = widget.mapHeight;
     return SizedBox(
       width: widget.width,
-      height: widget.height,
+      height: mapHeight == null ? widget.height : null,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: _buildMapArea()),
+          if (mapHeight == null)
+            Expanded(child: _buildMapArea())
+          else
+            SizedBox(height: mapHeight, child: _buildMapArea()),
           if (_isSinglePoint) ...[
             const SizedBox(height: 12),
             _buildSinglePointToolbar(),

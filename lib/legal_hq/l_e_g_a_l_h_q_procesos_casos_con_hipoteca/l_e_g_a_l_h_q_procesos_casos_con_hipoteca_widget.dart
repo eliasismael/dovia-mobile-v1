@@ -245,52 +245,52 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
     final blocker = _bankManagementBlocker(detail);
 
     return [
-        _buildAgreementAccordion(detail.agreement),
-        const SizedBox(height: 25.0),
-        _buildAlert('Documentacion a revisar y genera el convenio con Dovia'),
-        const SizedBox(height: 16.0),
-        _buildDocumentsGrid(detail),
-        const SizedBox(height: 20.0),
-        _buildAquaButton(
-          'Cargar Convenio',
-          busy: _uploadingAgreement,
-          onPressed: () => _uploadAgreement(detail),
-        ),
-        const SizedBox(height: 25.0),
-        _buildAlert(
-          'Comunícate con el cliente y el propietario en caso de que no se '
-          'firme el convenio',
-        ),
-        const SizedBox(height: 16.0),
-        _buildPartiesRow(detail),
-        const SizedBox(height: 25.0),
-        _buildAlert(
-          'Contacta al banco para iniciar el proceso de financiación.',
-          fontSize: 14.0,
-        ),
-        if (blocker != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: Text(
-              blocker,
-              style: GoogleFonts.publicSans(
-                color: _textDark,
-                fontSize: 12.0,
-                height: 16 / 12,
-              ),
+      _buildAgreementAccordion(detail.agreement),
+      const SizedBox(height: 25.0),
+      _buildAlert('Documentacion a revisar y genera el convenio con Dovia'),
+      const SizedBox(height: 16.0),
+      _buildDocumentsGrid(detail),
+      const SizedBox(height: 20.0),
+      _buildAquaButton(
+        'Cargar Convenio',
+        busy: _uploadingAgreement,
+        onPressed: () => _uploadAgreement(detail),
+      ),
+      const SizedBox(height: 25.0),
+      _buildAlert(
+        'Comunícate con el cliente y el propietario en caso de que no se '
+        'firme el convenio',
+      ),
+      const SizedBox(height: 16.0),
+      _buildPartiesRow(detail),
+      const SizedBox(height: 25.0),
+      _buildAlert(
+        'Contacta al banco para iniciar el proceso de financiación.',
+        fontSize: 14.0,
+      ),
+      if (blocker != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 12.0),
+          child: Text(
+            blocker,
+            style: GoogleFonts.publicSans(
+              color: _textDark,
+              fontSize: 12.0,
+              height: 16 / 12,
             ),
           ),
-        const SizedBox(height: 20.0),
-        _buildAquaButton(
-          'Continuar',
-          busy: _advancingStage,
-          // La transición solo existe mientras la gestión bancaria sigue
-          // abierta; después el expediente ya avanzó de etapa.
-          onPressed: process.status == 'BANK_MANAGEMENT_STARTED' &&
-                  blocker == null
-              ? () => _continue(detail)
-              : null,
         ),
+      const SizedBox(height: 20.0),
+      _buildAquaButton(
+        'Continuar',
+        busy: _advancingStage,
+        // La transición solo existe mientras la gestión bancaria sigue
+        // abierta; después el expediente ya avanzó de etapa.
+        onPressed:
+            process.status == 'BANK_MANAGEMENT_STARTED' && blocker == null
+                ? () => _continue(detail)
+                : null,
+      ),
     ];
   }
 
@@ -750,42 +750,45 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
               letterSpacing: 0.32,
             ),
           ),
-          const SizedBox(height: 16.0),
-          _buildTextField(
-            label: 'Banco',
-            controller: _model.bankController!,
-            focusNode: _model.bankFocusNode!,
-            keyboardType: TextInputType.text,
-            readOnly: readOnly,
-            onChanged: onChanged,
+          const SizedBox(height: 8.0),
+          // El diseño (desktop) va en dos columnas; en el celular se apilan.
+          _responsivePair(
+            _buildTextField(
+              label: 'Banco',
+              controller: _model.bankController!,
+              focusNode: _model.bankFocusNode!,
+              keyboardType: TextInputType.text,
+              readOnly: readOnly,
+              onChanged: onChanged,
+            ),
+            _buildTextField(
+              label: 'Numero de telefono',
+              controller: _model.phoneController!,
+              focusNode: _model.phoneFocusNode!,
+              keyboardType: TextInputType.phone,
+              readOnly: readOnly,
+              onChanged: onChanged,
+            ),
           ),
-          const SizedBox(height: 12.0),
-          _buildTextField(
-            label: 'Numero de telefono',
-            controller: _model.phoneController!,
-            focusNode: _model.phoneFocusNode!,
-            keyboardType: TextInputType.phone,
-            readOnly: readOnly,
-            onChanged: onChanged,
-          ),
-          const SizedBox(height: 12.0),
-          _buildTextField(
-            label: 'Nombre y Apellido',
-            controller: _model.agentNameController!,
-            focusNode: _model.agentNameFocusNode!,
-            keyboardType: TextInputType.name,
-            readOnly: readOnly,
-            onChanged: onChanged,
-          ),
-          const SizedBox(height: 12.0),
-          _buildTextField(
-            label: 'Email',
-            controller: _model.emailController!,
-            focusNode: _model.emailFocusNode!,
-            keyboardType: TextInputType.emailAddress,
-            readOnly: readOnly,
-            textInputAction: TextInputAction.done,
-            onChanged: onChanged,
+          const SizedBox(height: 10.0),
+          _responsivePair(
+            _buildTextField(
+              label: 'Nombre y Apellido',
+              controller: _model.agentNameController!,
+              focusNode: _model.agentNameFocusNode!,
+              keyboardType: TextInputType.name,
+              readOnly: readOnly,
+              onChanged: onChanged,
+            ),
+            _buildTextField(
+              label: 'Email',
+              controller: _model.emailController!,
+              focusNode: _model.emailFocusNode!,
+              keyboardType: TextInputType.emailAddress,
+              readOnly: readOnly,
+              textInputAction: TextInputAction.done,
+              onChanged: onChanged,
+            ),
           ),
         ],
       ),
@@ -808,11 +811,13 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
           label,
           style: GoogleFonts.publicSans(
             color: _textDark,
-            fontSize: 16.0,
-            letterSpacing: 0.32,
+            fontSize: 14.0,
+            letterSpacing: 0.28,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 12.0),
+        const SizedBox(height: 6.0),
         Container(
           height: 36.0,
           padding: const EdgeInsets.symmetric(horizontal: 13.0),
@@ -1294,20 +1299,39 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
   // ── Contacto de las partes ────────────────────────────────────────────────
 
   Widget _buildPartiesRow(LegalHqProcessDetail detail) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: _buildPartyCard('Información de propietario', detail.owner),
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: _buildPartyCard('Información de cliente', detail.client),
-          ),
-        ],
-      ),
+    return _responsivePair(
+      _buildPartyCard('Información de propietario', detail.owner),
+      _buildPartyCard('Información de cliente', detail.client),
+      spacing: 12.0,
+      stretch: true,
     );
+  }
+
+  /// Dos widgets lado a lado en pantallas anchas (el diseño es desktop) y
+  /// uno debajo del otro en el celular, donde a media pantalla no entran.
+  Widget _responsivePair(
+    Widget first,
+    Widget second, {
+    double spacing = 10.0,
+    bool stretch = false,
+  }) {
+    if (MediaQuery.sizeOf(context).width < 600.0) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [first, SizedBox(height: spacing), second],
+      );
+    }
+    final row = Row(
+      crossAxisAlignment:
+          stretch ? CrossAxisAlignment.stretch : CrossAxisAlignment.start,
+      children: [
+        Expanded(child: first),
+        SizedBox(width: spacing),
+        Expanded(child: second),
+      ],
+    );
+    return stretch ? IntrinsicHeight(child: row) : row;
   }
 
   Widget _buildPartyCard(String roleLabel, LegalHqParty party) {

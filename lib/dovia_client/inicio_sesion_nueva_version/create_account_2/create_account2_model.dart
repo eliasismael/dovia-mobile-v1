@@ -10,6 +10,18 @@ class CreateAccount2Model extends FlutterFlowModel<CreateAccount2Widget> {
 
   bool invalidCode = false;
 
+  /// Mensaje que se muestra en rojo debajo del código cuando es rechazado.
+  String codeError = 'Código incorrecto. Inténtalo de nuevo.';
+
+  /// Mientras se valida el código con el backend (muestra el spinner).
+  bool verifyingCode = false;
+
+  /// Mientras se pide un código nuevo (también muestra el spinner).
+  bool resendingCode = false;
+
+  /// Aviso informativo debajo del código (p. ej. "te enviamos uno nuevo").
+  String? codeInfo;
+
   ///  State fields for stateful widgets in this page.
 
   // Model for CornerGradientBackground component.

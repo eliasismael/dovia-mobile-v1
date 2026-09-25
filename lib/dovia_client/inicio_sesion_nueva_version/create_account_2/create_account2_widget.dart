@@ -49,113 +49,125 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
 
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
+    // El código se tipea con el teclado abierto (autoFocus): el botón volver
+    // del sistema primero lo cierra y recién el siguiente toque sale de la
+    // pantalla.
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
+    return PopScope(
+      canPop: !keyboardOpen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) FocusManager.instance.primaryFocus?.unfocus();
       },
-      child: Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        body: SizedBox(
-          width: MediaQuery.sizeOf(context).width * 1.0,
-          height: MediaQuery.sizeOf(context).height * 1.0,
-          child: Stack(
-            alignment: const AlignmentDirectional(0.0, -1.0),
-            children: [
-              wrapWithModel(
-                model: _model.cornerGradientBackgroundModel,
-                updateCallback: () => safeSetState(() {}),
-                child: const CornerGradientBackgroundWidget(),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 50.0, 0.0, 0.0),
-                        child: Container(
-                          width: 80.0,
-                          height: 100.0,
-                          decoration: const BoxDecoration(),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(0.0),
-                            child: SvgPicture.asset(
-                              'assets/images/D-verde.svg',
-                              width: 68.0,
-                              height: 88.0,
-                              fit: BoxFit.contain,
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: Scaffold(
+          key: scaffoldKey,
+          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+          body: SizedBox(
+            width: MediaQuery.sizeOf(context).width * 1.0,
+            height: MediaQuery.sizeOf(context).height * 1.0,
+            child: Stack(
+              alignment: const AlignmentDirectional(0.0, -1.0),
+              children: [
+                wrapWithModel(
+                  model: _model.cornerGradientBackgroundModel,
+                  updateCallback: () => safeSetState(() {}),
+                  child: const CornerGradientBackgroundWidget(),
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 0.0, 20.0, 0.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 50.0, 0.0, 0.0),
+                          child: Container(
+                            width: 80.0,
+                            height: 100.0,
+                            decoration: const BoxDecoration(),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(0.0),
+                              child: SvgPicture.asset(
+                                'assets/images/D-verde.svg',
+                                width: 68.0,
+                                height: 88.0,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 84.0, 0.0, 0.0),
-                        child: Text(
-                          'Ingresa el código que recibiste en tu correo',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    color: const Color(0xFF00444B),
-                                    fontSize: 30.0,
-                                    letterSpacing: 0.0,
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 84.0, 0.0, 0.0),
+                          child: Text(
+                            'Ingresa el código que recibiste en tu correo',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.publicSans(
                                     fontWeight: FontWeight.w600,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .fontStyle,
                                   ),
-                        ),
-                      ),
-                      Container(
-                        width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: 140.0,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(0.0),
-                        ),
-                        alignment: const AlignmentDirectional(-1.0, 0.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 39.0, 0.0, 0.0),
-                                child: Text(
-                                  'Ingresa el código',
-                                  textAlign: TextAlign.start,
-                                  style: FlutterFlowTheme.of(context)
+                                  color: const Color(0xFF00444B),
+                                  fontSize: 30.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                  fontStyle: FlutterFlowTheme.of(context)
                                       .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.publicSans(
+                                      .fontStyle,
+                                ),
+                          ),
+                        ),
+                        Container(
+                          // Sin alto fijo: con 140 px el código se recortaba al
+                          // sumar el spinner o el error debajo.
+                          width: MediaQuery.sizeOf(context).width * 1.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0.0),
+                          ),
+                          alignment: const AlignmentDirectional(-1.0, 0.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Align(
+                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 39.0, 0.0, 0.0),
+                                  child: Text(
+                                    'Ingresa el código',
+                                    textAlign: TextAlign.start,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.publicSans(
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          fontSize: 15.0,
+                                          letterSpacing: 0.0,
                                           fontWeight: FontWeight.w600,
                                           fontStyle:
                                               FlutterFlowTheme.of(context)
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Padding(
+                              Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 8.0, 0.0, 0.0),
                                 child: PinCodeTextField(
@@ -221,10 +233,17 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                   ),
                                   controller: _model.pinCodeController,
                                   onChanged: (_) async {
+                                    if (!_model.invalidCode &&
+                                        _model.codeInfo == null) return;
                                     _model.invalidCode = false;
+                                    _model.codeInfo = null;
                                     safeSetState(() {});
                                   },
                                   onCompleted: (_) async {
+                                    if (_model.verifyingCode) return;
+                                    _model.verifyingCode = true;
+                                    _model.invalidCode = false;
+                                    safeSetState(() {});
                                     _model.apiResultvj1 =
                                         await DOVIAAPIAuthContextGroup
                                             .verifyCodeStepNEWCall
@@ -233,31 +252,15 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                       email: FFAppState().UserEmail,
                                     );
 
+                                    _model.verifyingCode = false;
+                                    if (!mounted) return;
                                     if ((_model.apiResultvj1?.succeeded ??
                                         true)) {
                                       context.pushNamed(
                                           DatosCustomWidget.routeName);
                                     } else {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (alertDialogContext) {
-                                          return AlertDialog(
-                                            title:
-                                                const Text('ERROR EN CODIGO'),
-                                            content: Text((_model.apiResultvj1
-                                                        ?.jsonBody ??
-                                                    '')
-                                                .toString()),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    alertDialogContext),
-                                                child: const Text('Ok'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
+                                      _model.codeError = _verifyErrorMessage(
+                                          _model.apiResultvj1);
                                       _model.invalidCode = true;
                                       safeSetState(() {});
                                     }
@@ -270,148 +273,110 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                       .asValidator(context),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 12.0, 0.0, 0.0),
-                              child: Builder(
-                                builder: (context) {
-                                  if (_model.invalidCode) {
-                                    return Text(
-                                      'Código incorrecto. Inténtalo de nuevo.',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
+                              Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 12.0, 0.0, 0.0),
+                                // Alto fijo: si el spinner o el error sumaran alto, el
+                                // Expanded del código se achica y recorta los casilleros.
+                                child: SizedBox(
+                                  height: 44.0,
+                                  child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: Builder(
+                                      builder: (context) {
+                                        if (_model.verifyingCode ||
+                                            _model.resendingCode) {
+                                          return SizedBox(
+                                            width: 24.0,
+                                            height: 24.0,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              color:
                                                   FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
+                                                      .primary,
                                             ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .error,
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                    );
-                                  } else {
-                                    return Container(
-                                      width: 0.0,
-                                      height: 0.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 29.0, 0.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'No recibí un código, ',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      fontSize: 16.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
+                                          );
+                                        }
+                                        if (!_model.invalidCode &&
+                                            _model.codeInfo != null) {
+                                          return Text(
+                                            _model.codeInfo!,
+                                            textAlign: TextAlign.center,
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.inter(),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                  letterSpacing: 0.0,
+                                                ),
+                                          );
+                                        }
+                                        if (_model.invalidCode) {
+                                          return Text(
+                                            _model.codeError,
+                                            textAlign: TextAlign.center,
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.inter(
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontStyle,
+                                                  ),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .error,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                          );
+                                        } else {
+                                          return Container(
+                                            width: 0.0,
+                                            height: 0.0,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
+                                            ),
+                                          );
+                                        }
+                                      },
                                     ),
+                                  ),
+                                ),
                               ),
-                              InkWell(
-                                splashColor: Colors.transparent,
-                                focusColor: Colors.transparent,
-                                hoverColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                onTap: () async {
-                                  _model.apiResult4de =
-                                      await DOVIAAPIAuthContextGroup
-                                          .resendCodeNEWCall
-                                          .call(
-                                    email: FFAppState().UserEmail,
-                                  );
-
-                                  if ((_model.apiResult4de?.succeeded ??
-                                      true)) {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          content: const Text(
-                                              'CODIGO REENVIADO. INTRODUCE EL UEVO CODIGO'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child: const Text('Ok'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  } else {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (alertDialogContext) {
-                                        return AlertDialog(
-                                          title: const Text(
-                                              'ERROR ENVIANDO NUIEVO CODIGO'),
-                                          content: Text(
-                                              (_model.apiResult4de?.jsonBody ??
-                                                      '')
-                                                  .toString()),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(
-                                                  alertDialogContext),
-                                              child: const Text('Ok'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  }
-
-                                  safeSetState(() {});
-                                },
-                                child: Text(
-                                  'volver a enviar',
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 29.0, 0.0, 0.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'No recibí un código, ',
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -425,6 +390,8 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         fontSize: 16.0,
                                         letterSpacing: 0.0,
                                         fontWeight: FlutterFlowTheme.of(context)
@@ -435,31 +402,98 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                             .fontStyle,
                                       ),
                                 ),
-                              ),
-                            ],
+                                InkWell(
+                                  splashColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () async {
+                                    if (_model.resendingCode) return;
+                                    _model.resendingCode = true;
+                                    _model.invalidCode = false;
+                                    _model.codeInfo = null;
+                                    safeSetState(() {});
+                                    _model.apiResult4de =
+                                        await DOVIAAPIAuthContextGroup
+                                            .resendCodeNEWCall
+                                            .call(
+                                      email: FFAppState().UserEmail,
+                                    );
+                                    _model.resendingCode = false;
+                                    if (!mounted) return;
+                                    if ((_model.apiResult4de?.succeeded ??
+                                        true)) {
+                                      _model.pinCodeController?.clear();
+                                      _model.codeInfo =
+                                          'Te enviamos un código nuevo a tu correo.';
+                                    } else {
+                                      _model.codeError =
+                                          'No pudimos reenviar el código. Inténtalo de nuevo.';
+                                      _model.invalidCode = true;
+                                    }
+                                    safeSetState(() {});
+                                  },
+                                  child: Text(
+                                    'volver a enviar',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          fontSize: 16.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 63.0, 0.0, 0.0),
-                        child: FFButtonWidget(
-                          onPressed: () async {
-                            context.safePop();
-                          },
-                          text: 'Elige una opción diferente',
-                          options: FFButtonOptions(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: 42.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                20.0, 10.0, 20.0, 10.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: FlutterFlowTheme.of(context).primary,
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.publicSans(
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 63.0, 0.0, 0.0),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              context.safePop();
+                            },
+                            text: 'Elige una opción diferente',
+                            options: FFButtonOptions(
+                              width: MediaQuery.sizeOf(context).width * 1.0,
+                              height: 42.0,
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  20.0, 10.0, 20.0, 10.0),
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 0.0),
+                              color: FlutterFlowTheme.of(context).primary,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                                    color: Colors.white,
+                                    letterSpacing: 0.0,
                                     fontWeight: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .fontWeight,
@@ -467,28 +501,40 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                         .titleSmall
                                         .fontStyle,
                                   ),
-                                  color: Colors.white,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(25.0),
+                              elevation: 0.0,
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  /// Traduce el error de `/auth/verify` a un texto para el usuario.
+  String _verifyErrorMessage(ApiCallResponse? response) {
+    final body = response?.jsonBody;
+    final errors = body is Map ? body['errors'] : null;
+    final code = errors is List && errors.isNotEmpty && errors.first is Map
+        ? errors.first['code']
+        : null;
+    switch (code) {
+      case 'INVALID_VERIFICATION_CODE':
+        return 'Código incorrecto. Inténtalo de nuevo.';
+      case 'EXPIRED_VERIFICATION_CODE':
+      case 'CODE_EXPIRED':
+        return 'El código venció. Toca "volver a enviar" para recibir otro.';
+    }
+    if (response == null || response.statusCode <= 0) {
+      return 'No pudimos validar el código. Revisa tu conexión.';
+    }
+    return 'No pudimos validar el código. Inténtalo de nuevo.';
   }
 }

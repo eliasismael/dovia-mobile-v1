@@ -132,17 +132,17 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                         Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: const BoxDecoration(),
+                          // Logo alineado a la izquierda, con el mismo margen
+                          // que el título.
+                          alignment: AlignmentDirectional.centerStart,
                           child: Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
-                                283.0, 40.0, 59.0, 0.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: SvgPicture.asset(
-                                'assets/images/D-verde.svg',
-                                width: 48.0,
-                                height: 61.4,
-                                fit: BoxFit.contain,
-                              ),
+                                28.0, 48.0, 0.0, 0.0),
+                            child: SvgPicture.asset(
+                              'assets/images/D-verde.svg',
+                              width: 48.0,
+                              height: 61.4,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
@@ -415,8 +415,11 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                     },
                                   );
 
+                                  // Solo queda marcado si se leyó hasta el final y se tocó Aceptar;
+// cerrar el modal con volver no lo marca.
                                   safeSetState(() {
-                                    _model.checkboxValue = true;
+                                    _model.checkboxValue =
+                                        _model.terminosAceptados;
                                   });
                                 } else {
                                   await showDialog(
@@ -472,28 +475,26 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                                           FlutterFlowTheme.of(context)
                                               .alternate,
                                     ),
-                                    child: Checkbox(
-                                      value: _model.checkboxValue ??=
-                                          _model.terminosAceptados,
-                                      onChanged: _model.terminosAceptados
-                                          ? null
-                                          : (newValue) async {
-                                              safeSetState(() => _model
-                                                  .checkboxValue = newValue!);
-                                            },
-                                      side: const BorderSide(
-                                        width: 2,
-                                        color: Color(0xFF8A8A8A),
+                                    // El toque lo recibe la fila, que abre el modal de términos:
+// la casilla no se puede marcar a mano.
+                                    child: IgnorePointer(
+                                      child: Checkbox(
+                                        value: _model.terminosAceptados,
+                                        onChanged: (_) {},
+                                        side: const BorderSide(
+                                          width: 2,
+                                          color: Color(0xFF8A8A8A),
+                                        ),
+                                        fillColor:
+                                            WidgetStateProperty.resolveWith(
+                                          (states) => states.contains(
+                                                  WidgetState.selected)
+                                              ? FlutterFlowTheme.of(context)
+                                                  .primary
+                                              : Colors.white,
+                                        ),
+                                        checkColor: Colors.white,
                                       ),
-                                      fillColor:
-                                          WidgetStateProperty.resolveWith(
-                                        (states) => states
-                                                .contains(WidgetState.selected)
-                                            ? FlutterFlowTheme.of(context)
-                                                .primary
-                                            : Colors.white,
-                                      ),
-                                      checkColor: Colors.white,
                                     ),
                                   ),
                                   Flexible(

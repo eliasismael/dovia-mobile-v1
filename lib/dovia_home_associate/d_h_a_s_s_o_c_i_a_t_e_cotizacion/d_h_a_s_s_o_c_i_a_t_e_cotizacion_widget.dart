@@ -147,10 +147,14 @@ class _DHASSOCIATECotizacionWidgetState
     try {
       final response = _state == _QuoteState.approved
           ? await DOVIAAPIDoviaHomeContextGroup.getAssociateServiceRequestCall
-              .call(serviceRequestId: id, authToken: currentAuthenticationToken ?? '')
+              .call(
+                  serviceRequestId: id,
+                  authToken: currentAuthenticationToken ?? '')
           : await DOVIAAPIDoviaHomeContextGroup
               .getCompanyQuoteServiceRequestCall
-              .call(serviceRequestId: id, authToken: currentAuthenticationToken ?? '');
+              .call(
+                  serviceRequestId: id,
+                  authToken: currentAuthenticationToken ?? '');
       if (!mounted) return;
       if (!response.succeeded) return;
 
@@ -227,7 +231,8 @@ class _DHASSOCIATECotizacionWidgetState
   num? get _amount {
     final raw = _model.amountController?.text.trim() ?? '';
     if (raw.isEmpty) return null;
-    final normalized = raw.replaceAll(RegExp(r'[^0-9.,]'), '').replaceAll(',', '');
+    final normalized =
+        raw.replaceAll(RegExp(r'[^0-9.,]'), '').replaceAll(',', '');
     final value = num.tryParse(normalized);
     if (value == null || value <= 0) return null;
     return value;
@@ -512,13 +517,13 @@ class _DHASSOCIATECotizacionWidgetState
           borderRadius: BorderRadius.circular(10.0),
         ),
         errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-              color: FlutterFlowTheme.of(context).error, width: 1.0),
+          borderSide:
+              BorderSide(color: FlutterFlowTheme.of(context).error, width: 1.0),
           borderRadius: BorderRadius.circular(10.0),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-              color: FlutterFlowTheme.of(context).error, width: 1.0),
+          borderSide:
+              BorderSide(color: FlutterFlowTheme.of(context).error, width: 1.0),
           borderRadius: BorderRadius.circular(10.0),
         ),
         filled: true,
@@ -701,7 +706,8 @@ class _DHASSOCIATECotizacionWidgetState
 
   Widget _buildApprovedBanner() {
     final proposal = _model.proposal;
-    final dateLabel = proposal == null ? null : proposalDecidedDateLabel(proposal);
+    final dateLabel =
+        proposal == null ? null : proposalDecidedDateLabel(proposal);
     final text = dateLabel == null
         ? 'Tu cotización fue aceptada. Comunícate con el cliente para '
             'realizar el trabajo.'
@@ -728,11 +734,11 @@ class _DHASSOCIATECotizacionWidgetState
         iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
         color: Colors.transparent,
         textStyle: theme.titleSmall.override(
-              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-              color: enabled ? theme.primary : theme.secondaryText,
-              fontSize: 16.0,
-              letterSpacing: 0.0,
-            ),
+          font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+          color: enabled ? theme.primary : theme.secondaryText,
+          fontSize: 16.0,
+          letterSpacing: 0.0,
+        ),
         elevation: 0.0,
         borderRadius: BorderRadius.circular(25.0),
         borderSide: BorderSide(color: tint, width: 1.5),
@@ -754,11 +760,11 @@ class _DHASSOCIATECotizacionWidgetState
         iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
         color: theme.primary,
         textStyle: theme.titleSmall.override(
-              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-              color: Colors.white,
-              fontSize: 16.0,
-              letterSpacing: 0.0,
-            ),
+          font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+          color: Colors.white,
+          fontSize: 16.0,
+          letterSpacing: 0.0,
+        ),
         elevation: 0.0,
         borderRadius: BorderRadius.circular(25.0),
         disabledColor: theme.alternate,
@@ -1001,11 +1007,11 @@ class _ClientInfoDialog extends StatelessWidget {
               height: 53.0,
               color: Colors.transparent,
               textStyle: theme.titleSmall.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                    color: theme.primary,
-                    fontSize: 18.0,
-                    letterSpacing: 0.0,
-                  ),
+                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                color: theme.primary,
+                fontSize: 18.0,
+                letterSpacing: 0.0,
+              ),
               elevation: 0.0,
               borderRadius: BorderRadius.circular(25.0),
               borderSide: BorderSide(color: theme.primary, width: 2.0),

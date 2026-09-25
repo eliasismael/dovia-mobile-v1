@@ -2,6 +2,7 @@ import '/dovia_home_associate/associate_role.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
+import '/shared_components/navbar_item_indicator/navbar_item_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_navbar_model.dart';
@@ -51,21 +52,27 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
   /// el ítem de empresa la barra pasó a tener un número variable de ellos.
   Widget _navItem({
     required String asset,
+    required String label,
+    required List<String> routeNames,
     required VoidCallback onTap,
   }) =>
-      InkWell(
-        splashColor: Colors.transparent,
-        focusColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        onTap: onTap,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: SvgPicture.asset(
-            asset,
-            width: 24.0,
-            height: 24.0,
-            fit: BoxFit.none,
+      NavbarItemIndicator(
+        label: label,
+        routeNames: routeNames,
+        child: InkWell(
+          splashColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: onTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: SvgPicture.asset(
+              asset,
+              width: 24.0,
+              height: 24.0,
+              fit: BoxFit.none,
+            ),
           ),
         ),
       );
@@ -76,7 +83,7 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
 
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      height: 69.0,
+      height: 62.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
         boxShadow: const [
@@ -92,13 +99,18 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
         borderRadius: BorderRadius.circular(30.0),
       ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(25.0, 22.0, 25.0, 22.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             _navItem(
               asset: 'assets/images/DH_icono-navbar-home.svg',
+              label: 'Inicio',
+              routeNames: [
+                DHASSOCIATEEmpresaHomePageWidget.routeName,
+                DHASSOCIATEHomePageWidget.routeName
+              ],
               onTap: () => context.pushNamed(isCompany
                   ? DHASSOCIATEEmpresaHomePageWidget.routeName
                   : DHASSOCIATEHomePageWidget.routeName),
@@ -106,17 +118,24 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
             if (isCompany)
               _navItem(
                 asset: 'assets/images/page-edit.svg',
+                label: 'Cotizaciones',
+                routeNames: [DHASSOCIATECotizacionesWidget.routeName],
                 onTap: () =>
                     context.pushNamed(DHASSOCIATECotizacionesWidget.routeName),
               ),
             _navItem(
               asset: 'assets/images/DH_icono-navbar-notificaciones.svg',
+              label: 'Notificaciones',
+              routeNames: [DHASSOCIATENotificacionesWidget.routeName],
               onTap: () =>
                   context.pushNamed(DHASSOCIATENotificacionesWidget.routeName),
             ),
             _navItem(
               asset: 'assets/images/DH_icono-navbar-ajustes.svg',
-              onTap: () => context.pushNamed(DHASSOCIATEAjustesWidget.routeName),
+              label: 'Ajustes',
+              routeNames: [DHASSOCIATEAjustesWidget.routeName],
+              onTap: () =>
+                  context.pushNamed(DHASSOCIATEAjustesWidget.routeName),
             ),
           ],
         ),

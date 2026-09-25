@@ -79,13 +79,19 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   bool _notifNovedades = false;
   bool _notifInformeSemanal = false;
 
-  // Password controllers
-  final _currentPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _repeatPasswordController = TextEditingController();
-
   // Delete-account reason
   final _deleteReasonController = TextEditingController();
+
+  // Edición de datos personales (PATCH /users/{id}). Correo y edad no se
+  // pueden cambiar desde el backend, así que quedan de solo lectura.
+  bool _editingDatos = false;
+  bool _savingDatos = false;
+  final _nameController = TextEditingController();
+  final _lastnameController = TextEditingController();
+  final _nationalityController = TextEditingController();
+  final _phoneCodeController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
+  String? _editGender;
 
   // Avatar upload state
   Uint8List? _tempAvatarBytes;
@@ -118,9 +124,11 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
 
   @override
   void dispose() {
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _repeatPasswordController.dispose();
+    _nameController.dispose();
+    _lastnameController.dispose();
+    _nationalityController.dispose();
+    _phoneCodeController.dispose();
+    _phoneNumberController.dispose();
     _deleteReasonController.dispose();
     super.dispose();
   }
@@ -130,18 +138,12 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     final repo = context.watch<UserRepository>();
     final profile = repo.profile;
 
+    // Sin panel de fondo: las tarjetas van directo sobre el degradado de la
+    // pantalla, como en el resto de la app.
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFFBFBFB),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(15),
-          bottomLeft: Radius.circular(15),
-          bottomRight: Radius.circular(15),
-        ),
-      ),
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -239,13 +241,9 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 19, 16, 20),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(15),
-          bottomLeft: Radius.circular(15),
-          bottomRight: Radius.circular(15),
-        ),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,9 +270,15 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
 
   Widget _buildAvatarSection(UserRepository repo) {
     final profile = repo.profile;
-    final avatarUrl = profile?.profilePictureUrl != null
-        ? '${profile!.profilePictureUrl!}?v=$_avatarVersion'
-        : null;
+    // La URL suele venir firmada (S3): sumarle `?v=` rompe la firma y la
+    // imagen no carga. Solo se agrega en URLs sin query; para las firmadas
+    // alcanza con la key, que fuerza a recargarla tras cada subida.
+    final rawAvatar = profile?.profilePictureUrl ?? '';
+    final avatarUrl = rawAvatar.isEmpty
+        ? null
+        : rawAvatar.contains('?')
+            ? rawAvatar
+            : '$rawAvatar?v=$_avatarVersion';
 
     return Center(
       child: Column(
@@ -293,14 +297,19 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
                       : (avatarUrl != null
                           ? Image.network(
                               avatarUrl,
+                              key: ValueKey('$avatarUrl#$_avatarVersion'),
                               width: 76,
                               height: 76,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.person,
-                                size: 40,
-                                color: inputPlaceholder,
-                              ),
+                              errorBuilder: (_, error, __) {
+                                debugPrint(
+                                    '[Foto de perfil] no carga $avatarUrl: $error');
+                                return const Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: inputPlaceholder,
+                                );
+                              },
                             )
                           : const Icon(
                               Icons.person,
@@ -377,7 +386,26 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           ),
         ),
         const SizedBox(height: 14),
-        if (_datosPersonalesExpanded) ...[
+        if (_datosPersonalesExpanded && _editingDatos)
+          ..._buildDatosEditForm()
+        else if (_datosPersonalesExpanded) ...[
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed:
+                  profile == null ? null : () => _startEditingDatos(repo),
+              icon: const Icon(Icons.edit, size: 18, color: aqua),
+              label: const Text(
+                'Editar datos',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: aqua,
+                ),
+              ),
+            ),
+          ),
           Row(
             children: [
               Expanded(child: _readonlyField('Nombres', firstName)),
@@ -404,6 +432,195 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
         ],
       ],
     );
+  }
+
+  void _startEditingDatos(UserRepository repo) {
+    final profile = repo.profile;
+    _nameController.text = profile?.firstName ?? '';
+    _lastnameController.text = profile?.lastName ?? '';
+    _nationalityController.text = profile?.nationality ?? '';
+    _phoneCodeController.text = profile?.phoneCountryCode ?? '+502';
+    _phoneNumberController.text = profile?.phoneNumber ?? '';
+    _editGender = const {'MALE', 'FEMALE', 'OTHER'}.contains(profile?.gender)
+        ? profile!.gender
+        : null;
+    setState(() => _editingDatos = true);
+  }
+
+  List<Widget> _buildDatosEditForm() {
+    return [
+      _editableField('Nombres', _nameController),
+      const SizedBox(height: 14),
+      _editableField('Apellidos', _lastnameController),
+      const SizedBox(height: 14),
+      _editableField('Nacionalidad', _nationalityController),
+      const SizedBox(height: 14),
+      _fieldLabel('Sexo'),
+      const SizedBox(height: 8),
+      Container(
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        decoration: BoxDecoration(
+          color: backgroundGray,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: _editGender,
+            isExpanded: true,
+            hint: const Text('Seleccioná'),
+            items: const [
+              DropdownMenuItem(value: 'MALE', child: Text('Masculino')),
+              DropdownMenuItem(value: 'FEMALE', child: Text('Femenino')),
+              DropdownMenuItem(value: 'OTHER', child: Text('Otro')),
+            ],
+            onChanged: (v) => setState(() => _editGender = v),
+          ),
+        ),
+      ),
+      const SizedBox(height: 14),
+      _fieldLabel('Teléfono'),
+      const SizedBox(height: 8),
+      Row(
+        children: [
+          SizedBox(
+            width: 80,
+            child: _inputBox(_phoneCodeController, TextInputType.phone),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _inputBox(_phoneNumberController, TextInputType.phone),
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
+      Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _savingDatos
+                  ? null
+                  : () => setState(() => _editingDatos = false),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: aqua,
+                side: const BorderSide(color: aqua),
+                minimumSize: const Size.fromHeight(44),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100)),
+              ),
+              child: const Text('Cancelar'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _savingDatos ? null : _saveDatos,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: aqua,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(44),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100)),
+              ),
+              child: _savingDatos
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Guardar'),
+            ),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  Widget _fieldLabel(String label) => Text(
+        label,
+        style: const TextStyle(
+          fontFamily: 'Public Sans',
+          fontSize: 14,
+          color: textPrimary,
+          letterSpacing: 0.28,
+        ),
+      );
+
+  Widget _inputBox(TextEditingController controller, TextInputType type) {
+    return Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+        color: backgroundGray,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: type,
+        style: const TextStyle(
+          fontFamily: 'Public Sans',
+          fontSize: 15,
+          color: textPrimary,
+        ),
+        decoration: const InputDecoration(
+          isDense: true,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+  }
+
+  Widget _editableField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _fieldLabel(label),
+        const SizedBox(height: 8),
+        _inputBox(controller, TextInputType.text),
+      ],
+    );
+  }
+
+  Future<void> _saveDatos() async {
+    final name = _nameController.text.trim();
+    final lastname = _lastnameController.text.trim();
+    if (name.isEmpty || lastname.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Nombre y apellido no pueden quedar vacíos'),
+      ));
+      return;
+    }
+    final code = _phoneCodeController.text.trim();
+    final number = _phoneNumberController.text.replaceAll(RegExp(r'\s'), '');
+    final nationality = _nationalityController.text.trim();
+
+    setState(() => _savingDatos = true);
+    final result = await context.read<UserRepository>().updateProfile(
+          name: name,
+          lastname: lastname,
+          gender: _editGender,
+          nationality: nationality.isEmpty ? null : nationality,
+          phoneCountryCode: number.isEmpty ? null : code,
+          phoneNumber: number.isEmpty ? null : number,
+        );
+    if (!mounted) return;
+    setState(() => _savingDatos = false);
+    switch (result) {
+      case Success():
+        setState(() => _editingDatos = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Datos actualizados'),
+          backgroundColor: aqua,
+        ));
+      case Failure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+          backgroundColor: deleteRed,
+        ));
+    }
   }
 
   String _genderLabel(String? gender) {
@@ -660,26 +877,18 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           ),
           const SizedBox(height: 10),
           Container(height: 1, color: borderColor),
-          const SizedBox(height: 20),
-          _PasswordField(
-            label: 'Contraseña actual',
-            controller: _currentPasswordController,
+          const SizedBox(height: 16),
+          const Text(
+            'Te enviaremos un código a tu correo para crear una contraseña nueva.',
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 14,
+              color: Color(0xFF00444B),
+            ),
           ),
-          const SizedBox(height: 14),
-          _PasswordField(
-            label: 'Contraseña nueva',
-            controller: _newPasswordController,
-            helperText: 'Debe tener 8 caracteres',
-          ),
-          const SizedBox(height: 14),
-          _PasswordField(
-            label: 'Repetir contraseña nueva',
-            controller: _repeatPasswordController,
-            helperText: 'Debe ser igual a la nueva contraseña',
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           _buildSolidButton(
-              label: 'Actualizar contraseña', onTap: _handleUpdatePassword),
+              label: 'Cambiar contraseña', onTap: _handleUpdatePassword),
         ],
       ),
     );
@@ -943,7 +1152,14 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   Future<void> _pickAvatar() async {
     final repo = context.read<UserRepository>();
     final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // Las fotos del celular pesan varios MB y el backend las rechaza por
+    // tamaño: se achican a un avatar razonable antes de subirlas.
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
     if (image == null) return;
 
     final bytes = await image.readAsBytes();
@@ -1019,30 +1235,14 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     }
   }
 
+  /// El cambio de contraseña va por el flujo verificado de recuperación:
+  /// se abre con el correo del usuario ya cargado para mandarle el código.
   void _handleUpdatePassword() {
-    final current = _currentPasswordController.text;
-    final next = _newPasswordController.text;
-    final repeat = _repeatPasswordController.text;
-
-    if (current.isEmpty || next.isEmpty || repeat.isEmpty) {
-      _showSnack('Completa todos los campos de contraseña');
-      return;
-    }
-    if (next.length < 8) {
-      _showSnack('La nueva contraseña debe tener al menos 8 caracteres');
-      return;
-    }
-    if (next != repeat) {
-      _showSnack('Las contraseñas no coinciden');
-      return;
-    }
-    // Credential changes go through the verified recover-password flow.
-    context.pushNamed('RecoverPassword_1');
-  }
-
-  void _showSnack(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    final email = context.read<UserRepository>().profile?.email ?? '';
+    context.pushNamed(
+      'RecoverPassword_1',
+      queryParameters: {if (email.isNotEmpty) 'email': email},
+    );
   }
 
   void _openTermsModal() {
@@ -1324,108 +1524,6 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
 }
 
 // ─── Password Field (self-contained StatefulWidget to avoid null-bool issues) ──
-
-class _PasswordField extends StatefulWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? helperText;
-
-  const _PasswordField({
-    required this.label,
-    required this.controller,
-    this.helperText,
-  });
-
-  @override
-  State<_PasswordField> createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<_PasswordField> {
-  bool _obscure = true;
-
-  static const Color textPrimary = Color(0xFF00444B);
-  static const Color backgroundGray = Color(0xFFFAFAFA);
-  static const Color inputPlaceholder = Color(0xFF888888);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label,
-          style: const TextStyle(
-            fontFamily: 'Public Sans',
-            fontSize: 16,
-            fontWeight: FontWeight.normal,
-            color: textPrimary,
-            letterSpacing: 0.32,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          height: 42,
-          decoration: BoxDecoration(
-            color: backgroundGray,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: widget.controller,
-                  obscureText: _obscure,
-                  style: const TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 16,
-                    color: textPrimary,
-                  ),
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    border: InputBorder.none,
-                    isDense: true,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => setState(() => _obscure = !_obscure),
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: Icon(
-                    _obscure
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    size: 20,
-                    color: inputPlaceholder,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (widget.helperText != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            widget.helperText!,
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-              color: textPrimary,
-              letterSpacing: 0.28,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ─── Terms & Conditions Modal ──────────────────────────────────────────────────
 
 class _TermsModal extends StatelessWidget {
   const _TermsModal();

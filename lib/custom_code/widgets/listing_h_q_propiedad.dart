@@ -15,8 +15,8 @@ class ListingHQPropiedad extends StatefulWidget {
   final double? width;
   final double? height;
 
-  final VoidCallback? onGuardar;
-  final VoidCallback? onPublicar;
+  final Future<void> Function()? onGuardar;
+  final Future<void> Function()? onPublicar;
   final VoidCallback? onAddServicio;
   final VoidCallback? onAddAreaAdicional;
   final Function(Map<String, dynamic>)? onSave;
@@ -137,6 +137,66 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     'Salud y hospitales': 0,
     'Movilidad': 0,
   };
+
+  // Datos que el formulario no edita pero `PATCH /properties/{id}` reemplaza
+  // junto con `features`: se reenvían tal como llegaron.
+  Map<String, dynamic> _origGeneral = {};
+  String? _origNeighborhoodDescription;
+
+  // Claves del backend para cada opción; lo que no está acá lo agregó el
+  // Operative o el HQ y va en `additionalProperties`, igual que en el checklist.
+  static const Map<String, String> _kSpaces = {
+    'Sala': 'livingRoom',
+    'Comedor': 'diningRoom',
+    'Lavandería': 'laundryArea',
+    'Cuarto de servicio': 'serviceRoom',
+    'Amueblado': 'furnished',
+    'Cocina': 'kitchen',
+  };
+  static const Map<String, String> _kOthers = {
+    'Pet Frendly': 'petFriendly',
+    'Permitido para Airbnb': 'allowedForAirbnb',
+    'Permitido subarrendar': 'allowedToSublet',
+  };
+  static const Map<String, String> _kPropertyAmenities = {
+    'A/C': 'airConditioning',
+    'Jardín': 'garden',
+    'Área de churrasquera': 'bbqArea',
+    'Cocina con isla': 'islandKitchen',
+    'Sala de exterior': 'outdoorLivingRoom',
+    'Tina': 'bathtub',
+  };
+  static const Map<String, String> _kCommonAreas = {
+    'Piscina': 'pool',
+    'Parque de juegos': 'playground',
+    'Gimnasio': 'gym',
+    'Coworking': 'coworking',
+    'Salón de eventos': 'eventHall',
+    'Yoga Deck': 'yogaDeck',
+    'Cocina para eventos': 'eventKitchen',
+  };
+  static const Map<String, String> _kNeighborhood = {
+    'Caminabilidad': 'walkable',
+    'Áreas verdes': 'greenAreas',
+    'Recreación': 'recreation',
+    'Servicios esenciales': 'essentialServices',
+    'Colegios': 'schools',
+    'Comercio y servicios': 'commerceAndServices',
+    'Conectividad vial': 'roadConnectivity',
+    'Seguridad': 'security',
+    'Zona turística': 'touristZone',
+    'Gastronomía': 'gastronomy',
+    'Vida urbana': 'urbanLife',
+    'Universidades': 'universities',
+    'Centros corporativos': 'corporateCenters',
+    'Tranquilidad y silencio': 'tranquilityAndSilence',
+    'Salud y hospitales': 'healthAndHospitals',
+    'Movilidad': 'mobility',
+  };
+
+  /// Acción en curso ('guardar' o 'publicar'): muestra el spinner en su
+  /// botón y bloquea los dos para no mandar dos veces.
+  String? _busyAction;
 
   // Selected criteria (max 3)
   final Set<String> _selectedCriteria = {};
@@ -277,6 +337,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
       // ── Características numéricas ─────────────────────────────────────────
       final gen = sub(sub(prop, 'features'), 'general');
+      _origGeneral = Map<String, dynamic>.from(gen);
       _habitaciones = (gen['bedrooms'] ?? gen['habitaciones'])?.toString();
       _banos = (gen['bathrooms'] ?? gen['banos'])?.toString();
       _parqueo =
@@ -334,6 +395,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
       // ── Criterios de calificación (star ratings) ──────────────────────────
       final hood = sub(sub(prop, 'features'), 'neighborhood');
+      _origNeighborhoodDescription = hood['description']?.toString();
       void setRating(String label, dynamic raw) {
         if (raw == null) return;
         final val = (raw is num ? raw : num.tryParse(raw.toString()) ?? 0)
@@ -355,7 +417,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       setRating('Colegios', hood['schools']);
       setRating('Conectividad vial', hood['roadConnectivity']);
       setRating('Seguridad', hood['security']);
-      setRating('Zona turística', hood['touristArea']);
+      setRating('Zona turística', hood['touristZone'] ?? hood['touristArea']);
       setRating('Gastronomía', hood['gastronomy']);
       setRating('Vida urbana', hood['urbanLife']);
       setRating('Universidades', hood['universities']);
@@ -385,7 +447,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
       final q = infoHQ['questions']?.toString() ?? '';
       if (q.isNotEmpty) _dudasController.text = q;
-      final c = infoHQ['teachingConsiderations']?.toString() ?? '';
+      final c =
+          (infoHQ['showingConsiderations'] ?? infoHQ['teachingConsiderations'])
+                  ?.toString() ??
+              '';
       if (c.isNotEmpty) _consideracionesController.text = c;
       final i = infoHQ['visitorInstructions']?.toString() ?? '';
       if (i.isNotEmpty) _instruccionesController.text = i;
@@ -551,8 +616,82 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     }
   }
 
+  int? _count(String? v) =>
+      v == null ? null : int.tryParse(v.replaceAll('+', ''));
+
+  String? _text(TextEditingController c) {
+    final t = c.text.trim();
+    return t.isEmpty ? null : t;
+  }
+
+  Map<String, dynamic> _checks(
+      Map<String, bool> items, Map<String, String> keys) {
+    final out = <String, dynamic>{};
+    final extra = <String, bool>{};
+    items.forEach((label, value) {
+      final key = keys[label];
+      if (key != null) {
+        out[key] = value;
+      } else {
+        extra[label] = value;
+      }
+    });
+    if (extra.isNotEmpty) out['additionalProperties'] = extra;
+    return out;
+  }
+
+  /// Cuerpo de `PATCH /properties/{id}` con el formato del backend, el mismo
+  /// que envía el checklist del Operative. Las imágenes no van acá: quedan
+  /// registradas en la propiedad con `images/confirm`.
+  Map<String, dynamic> buildPatchBody() {
+    final general = <String, dynamic>{
+      ..._origGeneral,
+      if (_count(_habitaciones) != null) 'bedrooms': _count(_habitaciones),
+      if (_count(_banos) != null) 'bathrooms': _count(_banos),
+      if (_count(_mediosBanos) != null) 'halfBathrooms': _count(_mediosBanos),
+      if (_count(_parqueo) != null) 'parkingSpots': _count(_parqueo),
+      if (_count(_pisos) != null) 'floors': _count(_pisos),
+    };
+    final neighborhood = <String, dynamic>{
+      if (_origNeighborhoodDescription?.isNotEmpty == true)
+        'description': _origNeighborhoodDescription,
+    };
+    _starRatings.forEach((label, stars) {
+      final key = _kNeighborhood[label];
+      if (key != null && stars > 0) neighborhood[key] = stars;
+    });
+    final propertyType = _labelToPropertyType(_tipoVivienda);
+    return {
+      if (propertyType != null) 'propertyType': propertyType,
+      if (_text(_descripcionController) != null)
+        'description': _text(_descripcionController),
+      'features': {
+        'general': general,
+        'spaces': _checks(_generalCharacteristics, _kSpaces),
+        'others': _checks(_otherCharacteristics, _kOthers),
+        'amenities': {
+          'property': _checks(_propiedadAmenities, _kPropertyAmenities),
+          'commonAreas': _checks(_areasComunes, _kCommonAreas),
+        },
+        'neighborhood': neighborhood,
+      },
+      'infoHQ': {
+        'services': _servicios,
+        if (_hasDanos != null) 'hasDamages': _hasDanos == 'Si',
+        if (_text(_dudasController) != null)
+          'questions': _text(_dudasController),
+        if (_text(_consideracionesController) != null)
+          'showingConsiderations': _text(_consideracionesController),
+        if (_text(_instruccionesController) != null)
+          'visitorInstructions': _text(_instruccionesController),
+        if (_text(_complejoController) != null)
+          'complexNotes': _text(_complejoController),
+      },
+    };
+  }
+
   // ==================== DATA COLLECTION ====================
-  Future<void> _handleAction(VoidCallback? actionCallback,
+  Future<void> _handleAction(Future<void> Function()? actionCallback,
       {bool isPublish = false}) async {
     if (isPublish) {
       if (!validateForm()) return;
@@ -586,18 +725,45 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         'complejo': _complejoController.text,
       },
       'images': _images,
+      'patchBody': buildPatchBody(),
     };
 
     if (widget.onSave != null) {
-      final res = widget.onSave!(data);
-      if (res is Future) {
-        await res;
+      dynamic res = widget.onSave!(data);
+      if (res is Future) res = await res;
+      // Las fotos ya subidas vuelven como URL: así un segundo Guardar o el
+      // Publicar no las suben de nuevo.
+      if (res is Map && mounted) {
+        setState(() {
+          res.forEach((section, urls) {
+            if (urls is List) {
+              _images[section.toString()] =
+                  urls.map((u) => XFile(u.toString())).toList();
+            }
+          });
+        });
       }
     }
     if (actionCallback != null) {
-      actionCallback();
+      await actionCallback();
     }
   }
+
+  Future<void> _runAction(String action, Future<void> Function() run) async {
+    if (_busyAction != null) return;
+    setState(() => _busyAction = action);
+    try {
+      await run();
+    } finally {
+      if (mounted) setState(() => _busyAction = null);
+    }
+  }
+
+  Widget _buttonSpinner(Color color) => SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2, color: color),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -997,32 +1163,12 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         // "Añadir área adicional" button
         GestureDetector(
           onTap: () async {
-            String newArea = '';
-            final added = await showDialog<bool>(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: const Text('Añadir área adicional'),
-                content: TextField(
-                  onChanged: (v) => newArea = v,
-                  decoration:
-                      const InputDecoration(hintText: 'Ej: Jardín trasero'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancelar'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Añadir'),
-                  ),
-                ],
-              ),
-            );
-            if (added == true && newArea.trim().isNotEmpty) {
+            final newArea = await _askText('Añadir área adicional',
+                hint: 'Ej: Jardín trasero');
+            if (newArea != null) {
               setState(() {
-                if (!_imageSections.contains(newArea.trim())) {
-                  _imageSections.add(newArea.trim());
+                if (!_imageSections.contains(newArea)) {
+                  _imageSections.add(newArea);
                 }
               });
             }
@@ -1196,7 +1342,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         // Guardar button (outline)
         Expanded(
           child: GestureDetector(
-            onTap: () async {
+            onTap: () => _runAction('guardar', () async {
               _saveState();
               try {
                 await _handleAction(widget.onGuardar);
@@ -1209,7 +1355,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                   ),
                 );
               }
-            },
+            }),
             child: Container(
               height: 42,
               decoration: BoxDecoration(
@@ -1217,16 +1363,18 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                 borderRadius: BorderRadius.circular(25),
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'Guardar',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: primaryColor,
-                  height: 14 / 16,
-                ),
-              ),
+              child: _busyAction == 'guardar'
+                  ? _buttonSpinner(primaryColor)
+                  : const Text(
+                      'Guardar',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                        height: 14 / 16,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -1234,7 +1382,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         // Publicar button (filled)
         Expanded(
           child: GestureDetector(
-            onTap: () async {
+            onTap: () => _runAction('publicar', () async {
               try {
                 await _handleAction(widget.onPublicar, isPublish: true);
               } catch (e) {
@@ -1246,7 +1394,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                   ),
                 );
               }
-            },
+            }),
             child: Container(
               height: 42,
               decoration: BoxDecoration(
@@ -1255,16 +1403,18 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                 borderRadius: BorderRadius.circular(25),
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'Publicar',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  height: 14 / 16,
-                ),
-              ),
+              child: _busyAction == 'publicar'
+                  ? _buttonSpinner(Colors.white)
+                  : const Text(
+                      'Publicar',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        height: 14 / 16,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -1362,6 +1512,18 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   // ==================== REUSABLE: DYNAMIC ADD DIALOG ====================
   Future<void> _showAddDialog(
       String displayTitle, Map<String, bool> targetMap) async {
+    final value = await _askText(displayTitle);
+    if (value != null) {
+      setState(() {
+        targetMap[value] = true;
+      });
+    }
+  }
+
+  /// Pide un texto con el estilo de los diálogos de la app. Devuelve null si
+  /// se cierra sin escribir nada.
+  Future<String?> _askText(String displayTitle,
+      {String hint = 'Escribe aquí...'}) async {
     String newValue = '';
     final added = await showDialog<bool>(
       context: context,
@@ -1412,12 +1574,12 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                       fontSize: 14,
                       color: textColor,
                     ),
-                    decoration: const InputDecoration(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       border: InputBorder.none,
-                      hintText: 'Escribe aquí...',
-                      hintStyle: TextStyle(
+                      hintText: hint,
+                      hintStyle: const TextStyle(
                         fontFamily: 'Public Sans',
                         fontSize: 14,
                         color: placeholderColor,
@@ -1456,11 +1618,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       },
     );
 
-    if (added == true && newValue.trim().isNotEmpty) {
-      setState(() {
-        targetMap[newValue.trim()] = true;
-      });
-    }
+    final value = newValue.trim();
+    return added == true && value.isNotEmpty ? value : null;
   }
 
   // ==================== REUSABLE: READ-ONLY FIELD ====================

@@ -108,8 +108,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                               ? const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 80.0),
                                   child: Center(
-                                    child: CircularProgressIndicator(
-                                        color: _aqua),
+                                    child:
+                                        CircularProgressIndicator(color: _aqua),
                                   ),
                                 )
                               : detail == null

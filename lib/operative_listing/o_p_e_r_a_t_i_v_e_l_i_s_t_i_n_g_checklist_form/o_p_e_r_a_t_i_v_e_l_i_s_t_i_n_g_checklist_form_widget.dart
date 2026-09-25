@@ -298,6 +298,7 @@ class _OPERATIVELISTINGChecklistFormWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const OPERATIVELISTINGHeaderWidget(
                         titleText: 'Checklist',
+                        showLocation: false,
                       ),
                     ),
                     Padding(

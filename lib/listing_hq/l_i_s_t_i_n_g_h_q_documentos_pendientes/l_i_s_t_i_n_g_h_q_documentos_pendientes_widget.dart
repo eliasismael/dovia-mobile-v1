@@ -78,31 +78,38 @@ class _LISTINGHQDocumentosPendientesWidgetState
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 35.0,
-                                  height: 35.0,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        FlutterFlowTheme.of(context).alternate,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/IconoVolverAtras.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
+                                InkWell(
+                                  onTap: () => context.safePop(),
+                                  child: Container(
+                                    width: 35.0,
+                                    height: 35.0,
+                                    decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context)
+                                          .alternate,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: SvgPicture.asset(
+                                        'assets/images/IconoVolverAtras.svg',
+                                        width: 200.0,
+                                        height: 200.0,
+                                        fit: BoxFit.none,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(0.0),
-                                  child: SvgPicture.asset(
-                                    'assets/images/D-verde.svg',
-                                    width: 28.0,
-                                    height: 36.0,
-                                    fit: BoxFit.cover,
+                                InkWell(
+                                  onTap: () => context
+                                      .goNamed(LISTINGHQHomeWidget.routeName),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(0.0),
+                                    child: SvgPicture.asset(
+                                      'assets/images/D-verde.svg',
+                                      width: 28.0,
+                                      height: 36.0,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ].divide(const SizedBox(width: 8.0)),
@@ -202,8 +209,7 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
                                     context.pushNamed(
-                                        LISTINGHQDocumentosPendientesWidget
-                                            .routeName);
+                                        LISTINGHQDocumentosWidget.routeName);
                                   },
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
@@ -282,8 +288,8 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                       ),
                                       Container(
                                         width:
-                                            MediaQuery.sizeOf(context).width *
-                                                0.6,
+                                            MediaQuery.sizeOf(context).width -
+                                                170.0,
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
@@ -561,8 +567,8 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                       ),
                                       Container(
                                         width:
-                                            MediaQuery.sizeOf(context).width *
-                                                0.6,
+                                            MediaQuery.sizeOf(context).width -
+                                                170.0,
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,
@@ -840,8 +846,8 @@ class _LISTINGHQDocumentosPendientesWidgetState
                                       ),
                                       Container(
                                         width:
-                                            MediaQuery.sizeOf(context).width *
-                                                0.6,
+                                            MediaQuery.sizeOf(context).width -
+                                                170.0,
                                         height:
                                             MediaQuery.sizeOf(context).height *
                                                 0.1,

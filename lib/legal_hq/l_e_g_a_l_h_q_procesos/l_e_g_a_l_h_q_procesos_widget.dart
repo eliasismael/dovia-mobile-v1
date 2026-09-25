@@ -74,7 +74,11 @@ extension _ProcesosFilterX on _ProcesosFilter {
 }
 
 class LEGALHQProcesosWidget extends StatefulWidget {
-  const LEGALHQProcesosWidget({super.key});
+  const LEGALHQProcesosWidget({super.key, this.filter});
+
+  /// Filtro inicial (`propiedades`, `hipotecas`...) al entrar desde el
+  /// "Ver más" de un carril del Home.
+  final String? filter;
 
   static String routeName = 'LEGAL_HQ_Procesos';
   static String routePath = '/lEGALHQProcesos';
@@ -102,6 +106,8 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => LEGALHQProcesosModel());
+    _filter = _ProcesosFilter.values.firstWhere((f) => f.name == widget.filter,
+        orElse: () => _ProcesosFilter.todos);
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
     _loadData();
@@ -138,7 +144,9 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
         .where((process) =>
             process.propertyId.toLowerCase().contains(query) ||
             process.address.toLowerCase().contains(query) ||
-            process.propertyName.toLowerCase().contains(query))
+            process.propertyName.toLowerCase().contains(query) ||
+            process.ownerName.toLowerCase().contains(query) ||
+            process.clientName.toLowerCase().contains(query))
         .toList();
   }
 
@@ -234,7 +242,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                   decoration: InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
-                    hintText: 'Buscar por ID o dirección',
+                    hintText: 'Buscar por propiedad, ID, propietario o cliente',
                     hintStyle: GoogleFonts.publicSans(
                       color: FlutterFlowTheme.of(context).secondaryText,
                       fontSize: 15.0,
@@ -284,7 +292,8 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
           children: _ProcesosFilter.values.map((filter) {
             final isSelected = filter == _filter;
             return Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
               child: GestureDetector(
                 onTap: () => _selectFilter(filter),
                 child: Container(
@@ -351,7 +360,8 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
           children: [
             for (final process in items)
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 15.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 15.0),
                 child: _buildProcessCard(context, process),
               ),
           ],
@@ -399,7 +409,8 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8.0),
-                _cardLine('Tipo: ${legalHqOperationLabel(process.category)}'),
+                _cardLine(
+                    'Tipo: ${legalHqOperationLabel(process.category, process.status)}'),
                 if (process.clientName.isNotEmpty) ...[
                   const SizedBox(height: 8.0),
                   _cardLine('Cliente: ${process.clientName}'),
@@ -431,8 +442,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                         alignment: AlignmentDirectional.centerEnd,
                         child: Container(
                           height: 23.0,
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 14.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 14.0),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: statusStyle.background,

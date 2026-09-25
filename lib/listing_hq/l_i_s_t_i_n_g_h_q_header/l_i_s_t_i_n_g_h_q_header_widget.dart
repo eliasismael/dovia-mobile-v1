@@ -186,8 +186,7 @@ class _LISTINGHQHeaderWidgetState extends State<LISTINGHQHeaderWidget> {
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () async {
-                    context.pushNamed(
-                        LISTINGHQDocumentosPendientesWidget.routeName);
+                    context.pushNamed(LISTINGHQDocumentosWidget.routeName);
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
