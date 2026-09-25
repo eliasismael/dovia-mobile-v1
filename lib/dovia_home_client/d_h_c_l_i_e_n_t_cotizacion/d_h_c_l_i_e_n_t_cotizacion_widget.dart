@@ -474,8 +474,6 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
-                      showNotifications: true,
-                      showSettings: true,
                       title: 'Cotización',
                       showMap: false,
                       showCurrency: false,

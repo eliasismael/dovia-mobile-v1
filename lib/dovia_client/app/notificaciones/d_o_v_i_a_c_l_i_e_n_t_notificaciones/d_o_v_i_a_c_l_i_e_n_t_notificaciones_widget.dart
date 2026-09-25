@@ -70,6 +70,7 @@ class _DOVIACLIENTNotificacionesWidgetState
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Notificaciones',
                         showCurrency: false,
+                        showMap: false,
                       ),
                     ),
                     const Padding(

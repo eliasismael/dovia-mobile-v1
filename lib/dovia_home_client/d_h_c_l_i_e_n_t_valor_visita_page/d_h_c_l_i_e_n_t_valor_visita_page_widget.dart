@@ -811,8 +811,6 @@ class _DHCLIENTValorVisitaPageWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
-                      showNotifications: true,
-                      showSettings: true,
                       title: 'Valor de la visita',
                       hideActions: true,
                     ),

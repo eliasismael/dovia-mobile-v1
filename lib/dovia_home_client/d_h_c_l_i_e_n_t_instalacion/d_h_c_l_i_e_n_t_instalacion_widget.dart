@@ -393,8 +393,6 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: DOVIASHAREDHeaderWidget(
-                      showNotifications: true,
-                      showSettings: true,
                       title: DHCLIENTInstalacionWidget.serviceTitle,
                       showCurrency: false,
                       showMap: false,

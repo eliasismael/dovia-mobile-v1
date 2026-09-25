@@ -83,6 +83,7 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Ajustes',
                         showCurrency: false,
+                        showMap: false,
                       ),
                     ),
                     Padding(

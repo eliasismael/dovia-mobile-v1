@@ -426,8 +426,6 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
-                      showNotifications: true,
-                      showSettings: true,
                       title: 'Fuera de alcance',
                     ),
                   ),
