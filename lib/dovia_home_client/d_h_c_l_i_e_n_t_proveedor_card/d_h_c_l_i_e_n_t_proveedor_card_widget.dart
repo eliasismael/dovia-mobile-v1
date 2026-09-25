@@ -208,17 +208,65 @@ class _DHCLIENTProveedorCardWidgetState
     );
   }
 
+  /// Botón con ícono y texto, redondeado y con sombra suave.
+  Widget _pillButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    Color foreground = Colors.white,
+    double width = 104,
+  }) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 6,
+            color: Color(0x33000000),
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: foreground, size: 14),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: GoogleFonts.publicSans(
+              color: foreground,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(6.0),
+        borderRadius: BorderRadius.circular(20.0),
         border: Border.all(
           color: FlutterFlowTheme.of(context).primary,
           width: 1.0,
         ),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 12.0,
+            color: Color(0x26000000),
+            offset: Offset(0.0, 4.0),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(16.0, 24.0, 16.0, 16.0),
@@ -257,7 +305,7 @@ class _DHCLIENTProveedorCardWidgetState
   Widget _buildAdvisorCard() {
     const primaryColor = Color(0xFF00444B);
     const badgeBg = Color(0x3370ACAD);
-    const idBadgeBg = Color(0x4D007376);
+    const idBadgeBg = Color(0x1F007376);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -296,17 +344,11 @@ class _DHCLIENTProveedorCardWidgetState
                     const SnackBar(content: Text('Soporte de emergencia')),
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.warning_amber_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                child: _pillButton(
+                  icon: Icons.warning_amber_rounded,
+                  label: 'Reportar',
+                  color: const Color(0xFFFDE3E3),
+                  foreground: const Color(0xFFC62828),
                 ),
               ),
               if (!widget.showDownloadId &&
@@ -316,17 +358,11 @@ class _DHCLIENTProveedorCardWidgetState
                 // WhatsApp / Chat icon (teal)
                 GestureDetector(
                   onTap: _openWhatsApp,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.chat_bubble_outline,
-                      color: Colors.white,
-                      size: 16,
-                    ),
+                  child: _pillButton(
+                    icon: Icons.chat_bubble_outline,
+                    label: 'Mensaje',
+                    color: const Color(0xFFDDEFEF),
+                    foreground: FlutterFlowTheme.of(context).primary,
                   ),
                 ),
               ],
@@ -365,12 +401,12 @@ class _DHCLIENTProveedorCardWidgetState
           textAlign: TextAlign.center,
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.publicSans(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
                 color: primaryColor,
                 fontSize: 16.0,
                 letterSpacing: 0.07,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 lineHeight: 1.6,
               ),
         ),
@@ -444,10 +480,10 @@ class _DHCLIENTProveedorCardWidgetState
         if (widget.advisorId != null && widget.advisorId!.isNotEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: idBadgeBg,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               children: [
@@ -459,41 +495,37 @@ class _DHCLIENTProveedorCardWidgetState
                         : TextAlign.start,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.publicSans(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                           color: primaryColor,
                           fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           letterSpacing: 0.07,
                         ),
                   ),
                 ),
-                if (!widget.showDownloadId)
-                  GestureDetector(
-                    onTap: _callPhone,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF7F7F7),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x3370ACAD),
-                            blurRadius: 2.7,
-                            offset: const Offset(0, 2.7),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.phone_outlined,
-                        size: 18,
-                        color: FlutterFlowTheme.of(context).primary,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
+
+        // Botón "Llamar" al asociado.
+        if (!widget.showDownloadId &&
+            widget.phoneNumber != null &&
+            widget.phoneNumber!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Center(
+            child: GestureDetector(
+              onTap: _callPhone,
+              child: _pillButton(
+                icon: Icons.phone_outlined,
+                label: 'Llamar',
+                color: const Color(0xFFB2D4D5),
+                foreground: FlutterFlowTheme.of(context).primary,
+                width: 140,
+              ),
+            ),
+          ),
+        ],
 
         // Botón "Descargar ID": abre/descarga el documento de identidad
         // verificado del asociado.
@@ -542,7 +574,7 @@ class _DHCLIENTProveedorCardWidgetState
             ),
             TextSpan(
               text: value,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ],
         ),

@@ -138,16 +138,6 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
   late String _propertyStatus;
   bool _isLoadingProperty = true;
 
-  // ─── Accordion state ──────────────────────────────────────────────────────
-  bool _internalInfoExpanded = false;
-  bool _documentsExpanded = false;
-
-  // ─── Animation controllers for accordions ─────────────────────────────────
-  late AnimationController _internalInfoController;
-  late AnimationController _documentsController;
-  late Animation<double> _internalInfoAnimation;
-  late Animation<double> _documentsAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -155,23 +145,6 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
     _propertyStatus = widget.propertyStatus ?? '';
     _model = createModel(
         context, () => DOVIACLIENTMisPropiedadesPropiedadPublicadaModel());
-
-    _internalInfoController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _documentsController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _internalInfoAnimation = CurvedAnimation(
-      parent: _internalInfoController,
-      curve: Curves.easeInOut,
-    );
-    _documentsAnimation = CurvedAnimation(
-      parent: _documentsController,
-      curve: Curves.easeInOut,
-    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
     _loadPropertyData();
@@ -182,8 +155,6 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
 
   @override
   void dispose() {
-    _internalInfoController.dispose();
-    _documentsController.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -446,6 +417,34 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             ? (getJsonField(rentInfo, r'''$.rentalConditions.others''') ?? '')
                 .toString()
             : '');
+    String propText(String path) {
+      final v =
+          _propertyData != null ? getJsonField(_propertyData, path) : null;
+      return v == null ? '' : v.toString();
+    }
+
+    final nombreCtrl = TextEditingController(text: propText(r'''$.name'''));
+    var descripcion = propText(r'''$.description.raw''');
+    if (descripcion.isEmpty) {
+      final d = _propertyData != null
+          ? getJsonField(_propertyData, r'''$.description''')
+          : null;
+      if (d is String) descripcion = d;
+    }
+    final descripcionCtrl = TextEditingController(text: descripcion);
+    final usosCtrl = TextEditingController(
+        text: rentInfo != null
+            ? (getJsonField(rentInfo, r'''$.rentalConditions.allowedUses''') ??
+                    '')
+                .toString()
+            : '');
+    final disponibleCtrl = TextEditingController(
+        text: rentInfo != null
+            ? (getJsonField(
+                        rentInfo, r'''$.rentalConditions.availableFrom''') ??
+                    '')
+                .toString()
+            : '');
 
     showGeneralDialog(
       context: context,
@@ -469,6 +468,10 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
         precioRentaCtrl: precioRentaCtrl,
         tiempoMinimoCtrl: tiempoMinimoCtrl,
         otrosCtrl: otrosCtrl,
+        nombreCtrl: nombreCtrl,
+        descripcionCtrl: descripcionCtrl,
+        usosCtrl: usosCtrl,
+        disponibleCtrl: disponibleCtrl,
         onSave: (hasSale, hasRent) async {
           final newListing = <String>[
             if (hasSale) 'SALE',
@@ -499,13 +502,20 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                 ? int.tryParse(tiempoMinimoCtrl.text)
                 : null,
             othersRent: hasRent ? otrosCtrl.text : null,
+            allowedUses: hasRent ? usosCtrl.text.trim() : null,
+            availableFrom: hasRent ? disponibleCtrl.text.trim() : null,
+            name:
+                nombreCtrl.text.trim().isEmpty ? null : nombreCtrl.text.trim(),
+            description: descripcionCtrl.text.trim().isEmpty
+                ? null
+                : descripcionCtrl.text.trim(),
           );
 
           if (res.succeeded) {
             await _loadPropertyData();
             messenger.showSnackBar(
               SnackBar(
-                content: const Text('Precio actualizado correctamente'),
+                content: const Text('Propiedad actualizada correctamente'),
                 backgroundColor: _primary,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
@@ -693,9 +703,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
         children: [
           Text(
             value.toString(),
-            style: GoogleFonts.inter(
+            style: GoogleFonts.publicSans(
               fontSize: 28,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: _primary,
             ),
           ),
@@ -703,7 +713,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           Text(
             label,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.publicSans(
               fontSize: 11,
               fontWeight: FontWeight.w500,
               color: FlutterFlowTheme.of(context).secondaryText,
@@ -719,9 +729,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
       padding: const EdgeInsets.only(top: 28, bottom: 10),
       child: Text(
         title,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.publicSans(
           fontSize: 15,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: _primaryDark,
         ),
       ),
@@ -760,18 +770,18 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(statusLabel,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: FlutterFlowTheme.of(context).primaryText)),
                 const SizedBox(height: 4),
                 Text(buyerName,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 12,
                         color: FlutterFlowTheme.of(context).secondaryText)),
                 const SizedBox(height: 4),
                 Text(date,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: _primary)),
@@ -893,31 +903,31 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Propuesta recibida',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: FlutterFlowTheme.of(context).primaryText)),
                 const SizedBox(height: 4),
                 Text(typeLabel,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 12,
                         color: FlutterFlowTheme.of(context).secondaryText)),
                 if (buyerName.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(buyerName,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.publicSans(
                           fontSize: 12,
                           color: FlutterFlowTheme.of(context).secondaryText)),
                 ],
                 const SizedBox(height: 4),
                 Text(rawAmount == null ? '—' : 'Q$proposedAmountStr',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: _primary)),
                 if (dateLabel.isNotEmpty)
                   Text(dateLabel,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.publicSans(
                           fontSize: 11,
                           color: FlutterFlowTheme.of(context).secondaryText)),
               ],
@@ -1024,34 +1034,34 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                       child: Text('Oferta aceptada (En Acuerdo)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.publicSans(
                               fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                               color: _bannerGreen)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Text(typeLabel,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 12,
                         color: FlutterFlowTheme.of(context).secondaryText)),
                 if (buyerName.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(buyerName,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.publicSans(
                           fontSize: 12,
                           color: FlutterFlowTheme.of(context).secondaryText)),
                 ],
                 const SizedBox(height: 4),
                 Text(rawAmount == null ? '—' : 'Q$proposedAmountStr',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.publicSans(
                         fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: _primary)),
                 if (dateLabel.isNotEmpty)
                   Text(dateLabel,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.publicSans(
                           fontSize: 11,
                           color: FlutterFlowTheme.of(context).secondaryText)),
               ],
@@ -1090,7 +1100,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text('Ver acuerdo',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.publicSans(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w600)),
@@ -1112,7 +1122,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
       child: Text(
         message,
         textAlign: TextAlign.center,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.publicSans(
           fontSize: 13,
           color: FlutterFlowTheme.of(context).secondaryText,
         ),
@@ -1176,21 +1186,19 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                   offset: Offset(0, 3)),
             ],
           ),
-          padding: const EdgeInsets.fromLTRB(16, 16, 50, 16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Property name + type chips
               Row(
                 children: [
-                  const Icon(Icons.home_rounded, color: _primary, size: 20),
-                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       name.isNotEmpty ? name : 'Mi propiedad',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.publicSans(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: _primaryDark,
                       ),
                     ),
@@ -1206,7 +1214,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                   Expanded(
                     child: Text(
                       address,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.publicSans(
                         fontSize: 12,
                         color: const Color(0xFF888888),
                       ),
@@ -1237,30 +1245,6 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
             ],
           ),
         ),
-        // ── Pencil icon ───────────────────────────────────────────────────────
-        Positioned(
-          top: 12,
-          right: 12,
-          child: GestureDetector(
-            onTap: _showEditModal,
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: _primary,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                      color: _primary.withOpacity(0.35),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3)),
-                ],
-              ),
-              child:
-                  const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -1278,7 +1262,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           Icon(icon, color: _primary, size: 13),
           const SizedBox(width: 4),
           Text(label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.publicSans(
                   fontSize: 12, fontWeight: FontWeight.w600, color: _primary)),
         ],
       ),
@@ -1292,457 +1276,17 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.publicSans(
                   fontSize: small ? 12 : 14,
                   color: small
                       ? const Color(0xFF888888)
                       : FlutterFlowTheme.of(context).primaryText,
                   fontWeight: small ? FontWeight.w400 : FontWeight.w600)),
           Text(value,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.publicSans(
                   fontSize: small ? 12 : 14,
                   color: small ? const Color(0xFF888888) : _primary,
-                  fontWeight: small ? FontWeight.w400 : FontWeight.w700)),
-        ],
-      ),
-    );
-  }
-
-  // ─── Accordion: Información Interna Dovia ─────────────────────────────────
-  Widget _internalInfoAccordion() {
-    // Extract internal info fields from property data
-    final infoClient = _propertyData != null
-        ? getJsonField(_propertyData, r'''$.infoClient''')
-        : null;
-    final infoLister = _propertyData != null
-        ? getJsonField(_propertyData, r'''$.infoLister''')
-        : null;
-    final infoHQ = _propertyData != null
-        ? getJsonField(_propertyData, r'''$.infoHQ''')
-        : null;
-
-    return _accordionSection(
-      title: 'Información Interna Dovia',
-      isExpanded: _internalInfoExpanded,
-      animation: _internalInfoAnimation,
-      onToggle: () {
-        safeSetState(() {
-          _internalInfoExpanded = !_internalInfoExpanded;
-          if (_internalInfoExpanded) {
-            _internalInfoController.forward();
-          } else {
-            _internalInfoController.reverse();
-          }
-        });
-      },
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (infoClient != null) ...[
-            _internalFieldGroup(
-              'Del propietario',
-              [
-                _fieldItem(
-                    'Instrucciones de ingreso',
-                    getJsonField(infoClient, r'''$.accessInstructions''')
-                        ?.toString()),
-                _fieldItem(
-                    'Consideraciones arquitectónicas',
-                    getJsonField(
-                            infoClient, r'''$.architecturalConsiderations''')
-                        ?.toString()),
-                _fieldItem(
-                    'Características importantes',
-                    getJsonField(infoClient, r'''$.importantFeatures''')
-                        ?.toString()),
-                _fieldItem('Nota de acceso',
-                    getJsonField(infoClient, r'''$.accessNotes''')?.toString()),
-              ],
-            ),
-          ],
-          if (infoLister != null) ...[
-            const SizedBox(height: 12),
-            _internalFieldGroup(
-              'Del Lister',
-              [
-                _fieldItem('Notas del lister',
-                    getJsonField(infoLister, r'''$.notes''')?.toString()),
-                _fieldItem(
-                    'Consideraciones de visita',
-                    getJsonField(infoLister, r'''$.visitConsiderations''')
-                        ?.toString()),
-              ],
-            ),
-          ],
-          if (infoHQ != null) ...[
-            const SizedBox(height: 12),
-            _internalFieldGroup(
-              'De HQ / Fotógrafo',
-              [
-                _fieldItem(
-                    'Consideraciones de muestra',
-                    getJsonField(infoHQ, r'''$.showingConsiderations''')
-                        ?.toString()),
-                _fieldItem('Notas internas',
-                    getJsonField(infoHQ, r'''$.internalNotes''')?.toString()),
-              ],
-            ),
-          ],
-          if (infoClient == null && infoLister == null && infoHQ == null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'No hay información interna disponible por el momento.',
-                style: GoogleFonts.inter(
-                    fontSize: 13, color: const Color(0xFF888888)),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _internalFieldGroup(String groupTitle, List<Widget> fields) {
-    final nonEmpty = fields.where((w) => w is! SizedBox).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          groupTitle,
-          style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: _primary,
-              letterSpacing: 0.5),
-        ),
-        const SizedBox(height: 6),
-        ...nonEmpty,
-      ],
-    );
-  }
-
-  Widget _fieldItem(String label, String? value) {
-    if (value == null || value.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: FlutterFlowTheme.of(context).primaryText),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-                fontSize: 13,
-                color: FlutterFlowTheme.of(context).secondaryText),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── Accordion: Documentos Internos ──────────────────────────────────────
-  Widget _documentsAccordion() {
-    final docs = _propertyData != null
-        ? getJsonField(_propertyData, r'''$.documents''')
-        : null;
-
-    List<dynamic> docList = [];
-    if (docs is List) {
-      docList = docs;
-    } else if (docs is Map) {
-      // If documents is a map with named keys, convert to list
-      docs.forEach((k, v) {
-        if (v is String && v.isNotEmpty) {
-          docList.add({'type': k, 'url': v});
-        } else if (v is Map) {
-          docList.add({...v as Map<String, dynamic>, 'type': k});
-        }
-      });
-    }
-
-    // Also check for top-level document URLs
-    final certUrl =
-        getJsonField(_propertyData, r'''$.certificationUrl''')?.toString();
-    final receiptUrl =
-        getJsonField(_propertyData, r'''$.receiptUrl''')?.toString();
-    final contractUrl =
-        getJsonField(_propertyData, r'''$.contractUrl''')?.toString();
-    if (certUrl?.isNotEmpty == true &&
-        docList.where((d) => d['type'] == 'certification').isEmpty) {
-      docList.add({
-        'type': 'property-certification',
-        'url': certUrl,
-        'label': 'Certificación'
-      });
-    }
-    if (receiptUrl?.isNotEmpty == true) {
-      docList.add({'type': 'receipt', 'url': receiptUrl, 'label': 'Recibo'});
-    }
-    if (contractUrl?.isNotEmpty == true) {
-      docList
-          .add({'type': 'contract', 'url': contractUrl, 'label': 'Contrato'});
-    }
-
-    return _accordionSection(
-      title: 'Documentos internos de DOVIA',
-      isExpanded: _documentsExpanded,
-      animation: _documentsAnimation,
-      onToggle: () {
-        safeSetState(() {
-          _documentsExpanded = !_documentsExpanded;
-          if (_documentsExpanded) {
-            _documentsController.forward();
-          } else {
-            _documentsController.reverse();
-          }
-        });
-      },
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (docList.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'No hay documentos disponibles por el momento.',
-                style: GoogleFonts.inter(
-                    fontSize: 13, color: const Color(0xFF888888)),
-              ),
-            )
-          else
-            ...docList.map((doc) => _documentRow(doc)),
-        ],
-      ),
-    );
-  }
-
-  Widget _documentRow(dynamic doc) {
-    final type = (doc['type'] ?? '').toString();
-    final url = (doc['url'] ?? '').toString();
-    final label = (doc['label'] ?? _labelForDocType(type)).toString();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
-      ),
-      child: ListTile(
-        leading: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: _primary.withOpacity(0.10),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child:
-              const Icon(Icons.description_outlined, color: _primary, size: 20),
-        ),
-        title: Text(
-          label,
-          style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: FlutterFlowTheme.of(context).primaryText),
-        ),
-        subtitle: Text(
-          _extensionLabel(url),
-          style:
-              GoogleFonts.inter(fontSize: 11, color: const Color(0xFF888888)),
-        ),
-        trailing: url.isNotEmpty
-            ? TextButton(
-                onPressed: () => _openDocument(url, label),
-                style: TextButton.styleFrom(
-                  foregroundColor: _primary,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                ),
-                child: Text('Ver más',
-                    style: GoogleFonts.inter(
-                        fontSize: 13, fontWeight: FontWeight.w600)),
-              )
-            : null,
-      ),
-    );
-  }
-
-  String _labelForDocType(String type) {
-    const labels = {
-      'property-certification': 'Certificación',
-      'owner-document': 'Documento del propietario',
-      'certification': 'Certificación',
-      'receipt': 'Recibo',
-      'contract': 'Contrato',
-    };
-    return labels[type] ?? type;
-  }
-
-  String _extensionLabel(String url) {
-    if (url.isEmpty) return 'Sin archivo';
-    if (url.toLowerCase().endsWith('.pdf')) return 'PDF';
-    if (url.toLowerCase().contains('.jpg') ||
-        url.toLowerCase().contains('.jpeg') ||
-        url.toLowerCase().contains('.png')) {
-      return 'Imagen';
-    }
-    return 'Documento';
-  }
-
-  void _openDocument(String url, String label) {
-    // Open URL in a viewer dialog (read-only, no upload/edit/delete buttons)
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => Dialog(
-        insetPadding: const EdgeInsets.all(20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: const BoxDecoration(
-                color: _bannerGreen,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.description_outlined,
-                      color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(ctx),
-                    child:
-                        const Icon(Icons.close, color: Colors.white, size: 22),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const Icon(Icons.open_in_new_rounded,
-                      color: _primary, size: 48),
-                  const SizedBox(height: 12),
-                  Text(
-                    'El documento se abrirá en el visor del dispositivo.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: FlutterFlowTheme.of(ctx).primaryText),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                      label: const Text('Abrir documento'),
-                      style: FilledButton.styleFrom(
-                          backgroundColor: _primary,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24))),
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        // Open URL natively
-                        // ignore: deprecated_member_use
-                        // launchUrl(Uri.parse(url));
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ─── Accordion generic builder ─────────────────────────────────────────────
-  Widget _accordionSection({
-    required String title,
-    required bool isExpanded,
-    required Animation<double> animation,
-    required VoidCallback onToggle,
-    required Widget content,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x0D000000), blurRadius: 8, offset: Offset(0, 2)),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header row
-          InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: onToggle,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: _primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.info_outline_rounded,
-                        color: _primary, size: 18),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: _primaryDark),
-                    ),
-                  ),
-                  AnimatedRotation(
-                    turns: isExpanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 300),
-                    child: const Icon(Icons.keyboard_arrow_down_rounded,
-                        color: _primary, size: 24),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Animated content
-          SizeTransition(
-            sizeFactor: animation,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: content,
-            ),
-          ),
+                  fontWeight: small ? FontWeight.w400 : FontWeight.w600)),
         ],
       ),
     );
@@ -1808,26 +1352,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             ],
                           ),
 
-                          // ── INFORMACIÓN PÚBLICA (siempre visible) ─────────
+                          // ── INFORMACIÓN PÚBLICA ───────────────────────────
                           const SizedBox(height: 24),
-                          Text(
-                            'Información pública',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF888888),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
                           _publicInfoCard(),
-
-                          // ── INFORMACIÓN INTERNA (acordeón) ────────────────
-                          const SizedBox(height: 16),
-                          _internalInfoAccordion(),
-
-                          // ── DOCUMENTOS INTERNOS (acordeón) ────────────────
-                          _documentsAccordion(),
 
                           // ── VISITAS PENDIENTES ─────────────────────────────
                           _sectionTitle('Confirma próximas visitas'),
@@ -1952,25 +1479,18 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             height: 48,
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                    color: _primary, width: 1.5),
+                                backgroundColor: _primary,
+                                elevation: 0,
+                                shadowColor: Colors.black54,
+                                side: BorderSide.none,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24)),
                               ),
-                              onPressed: () {
-                                context.pushNamed(
-                                  DOVIACLIENTMisPropiedadesVenderRentarWidget
-                                      .routeName,
-                                  queryParameters: {
-                                    'propertyId': serializeParam(
-                                        widget.propertyId, ParamType.String),
-                                  }.withoutNulls,
-                                );
-                              },
+                              onPressed: _showEditModal,
                               child: Text(
                                 'Editar información completa de tu propiedad',
-                                style: GoogleFonts.inter(
-                                  color: _primary,
+                                style: GoogleFonts.publicSans(
+                                  color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
                                 ),
@@ -2009,7 +1529,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                         Expanded(
                                           child: Text(
                                             'Esta propiedad está pausada y no se muestra en el mapa ni en búsquedas.',
-                                            style: GoogleFonts.inter(
+                                            style: GoogleFonts.publicSans(
                                               fontSize: 12,
                                               color: const Color(0xFFE85D75),
                                               fontWeight: FontWeight.w500,
@@ -2032,9 +1552,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                       onPressed: _reactivarPropiedad,
                                       child: Text(
                                         'Activar propiedad',
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.publicSans(
                                           color: Colors.white,
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w600,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -2052,6 +1572,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                     height: 48,
                                     child: OutlinedButton(
                                       style: OutlinedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        elevation: 0,
+                                        shadowColor: Colors.black54,
                                         side: const BorderSide(
                                             color: _primary, width: 1.5),
                                         shape: RoundedRectangleBorder(
@@ -2060,9 +1583,9 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                       ),
                                       onPressed: _showPausaModal,
                                       child: Text(
-                                        'Propiedad en pausa',
+                                        'Pausar propiedad',
                                         textAlign: TextAlign.center,
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.publicSans(
                                           color: _primary,
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13,
@@ -2077,18 +1600,20 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                     height: 48,
                                     child: OutlinedButton(
                                       style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                            color: _errorRed, width: 1.5),
+                                        backgroundColor: _errorRed,
+                                        elevation: 0,
+                                        shadowColor: Colors.black54,
+                                        side: BorderSide.none,
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(24)),
                                       ),
                                       onPressed: _showNoDisponibleModal,
                                       child: Text(
-                                        'No disponible',
+                                        'Marcar como no disponible',
                                         textAlign: TextAlign.center,
-                                        style: GoogleFonts.inter(
-                                          color: _errorRed,
+                                        style: GoogleFonts.publicSans(
+                                          color: Colors.white,
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13,
                                         ),
@@ -2118,7 +1643,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 0.0, 15.0, 100.0),
+                            0.0, 0.0, 15.0, 12.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
@@ -2158,6 +1683,10 @@ class _EditPriceModal extends StatefulWidget {
   final TextEditingController precioRentaCtrl;
   final TextEditingController tiempoMinimoCtrl;
   final TextEditingController otrosCtrl;
+  final TextEditingController nombreCtrl;
+  final TextEditingController descripcionCtrl;
+  final TextEditingController usosCtrl;
+  final TextEditingController disponibleCtrl;
   final Future<void> Function(bool hasSale, bool hasRent) onSave;
 
   const _EditPriceModal({
@@ -2171,6 +1700,10 @@ class _EditPriceModal extends StatefulWidget {
     required this.precioRentaCtrl,
     required this.tiempoMinimoCtrl,
     required this.otrosCtrl,
+    required this.nombreCtrl,
+    required this.descripcionCtrl,
+    required this.usosCtrl,
+    required this.disponibleCtrl,
     required this.onSave,
   });
 
@@ -2182,6 +1715,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
   late bool _hasSale;
   late bool _hasRent;
   bool _isSaving = false;
+  final ScrollController _scrollController = ScrollController();
 
   // ── Validation ─────────────────────────────────────────────────────────────
   // Map of fieldKey -> error message. Empty string / null = no error.
@@ -2193,6 +1727,9 @@ class _EditPriceModalState extends State<_EditPriceModal> {
     if (!_hasSale && !_hasRent) {
       // Edge case: nothing selected — shouldn't reach save but guard anyway
       return false;
+    }
+    if (widget.nombreCtrl.text.trim().isEmpty) {
+      errors['name'] = 'El nombre es requerido';
     }
     if (_hasSale && widget.precioVentaCtrl.text.trim().isEmpty) {
       errors['salePrice'] = 'El precio de venta es requerido';
@@ -2244,6 +1781,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     widget.precioVentaCtrl.removeListener(_updateAmountToReceive);
     super.dispose();
   }
@@ -2254,6 +1792,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
     String hint = '',
     bool isNumeric = true,
     String? fieldKey, // optional: key into _fieldErrors for validation
+    int maxLines = 1,
   }) {
     final hasError =
         fieldKey != null && (_fieldErrors[fieldKey]?.isNotEmpty == true);
@@ -2264,7 +1803,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.publicSans(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: hasError ? const Color(0xFFD32F2F) : widget.primaryDarkColor,
@@ -2275,15 +1814,20 @@ class _EditPriceModalState extends State<_EditPriceModal> {
           controller: controller,
           keyboardType: isNumeric
               ? const TextInputType.numberWithOptions(decimal: true)
-              : TextInputType.text,
+              : (maxLines > 1 ? TextInputType.multiline : TextInputType.text),
+          minLines: 1,
+          maxLines: maxLines,
+          textCapitalization: isNumeric
+              ? TextCapitalization.none
+              : TextCapitalization.sentences,
           inputFormatters: isNumeric
               ? [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))]
               : null,
           onChanged: fieldKey != null ? (_) => _clearError(fieldKey) : null,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle:
-                GoogleFonts.inter(fontSize: 14, color: const Color(0xFFAAAAAA)),
+            hintStyle: GoogleFonts.publicSans(
+                fontSize: 14, color: const Color(0xFFAAAAAA)),
             isDense: true,
             filled: true,
             fillColor:
@@ -2303,7 +1847,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          style: GoogleFonts.inter(fontSize: 14),
+          style: GoogleFonts.publicSans(fontSize: 14),
         ),
         // Error message
         if (errorText != null)
@@ -2316,7 +1860,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                 const SizedBox(width: 4),
                 Text(
                   errorText,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.publicSans(
                     fontSize: 12,
                     color: const Color(0xFFD32F2F),
                     fontWeight: FontWeight.w500,
@@ -2337,6 +1881,10 @@ class _EditPriceModalState extends State<_EditPriceModal> {
         color: Colors.transparent,
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
+          // Como máximo el 80 % del alto; el resto se recorre con scroll.
+          constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.8),
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -2348,304 +1896,350 @@ class _EditPriceModalState extends State<_EditPriceModal> {
               ),
             ],
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Header ────────────────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Editar precio y condiciones',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: widget.primaryDarkColor,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF0F0F0),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.close_rounded,
-                              size: 18, color: Color(0xFF555555)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '¿Qué te gustaría hacer?',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: widget.primaryDarkColor,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Puedes seleccionar ambas',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: widget.primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                  ),
-                ),
-
-                // ── Venta / Renta toggle buttons ──────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _toggleButton(
-                          label: 'Venta',
-                          selected: _hasSale,
-                          onTap: () => setState(() {
-                            _hasSale = !_hasSale;
-                            // Clear sale error when deselecting
-                            if (!_hasSale) _fieldErrors.remove('salePrice');
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _toggleButton(
-                          label: 'Renta',
-                          selected: _hasRent,
-                          onTap: () => setState(() {
-                            _hasRent = !_hasRent;
-                            // Clear rent error when deselecting
-                            if (!_hasRent) _fieldErrors.remove('monthlyRent');
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // ── Sale fields ───────────────────────────────────────────
-                if (_hasSale)
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          child: Scrollbar(
+              controller: _scrollController,
+              thumbVisibility: true,
+              radius: const Radius.circular(8),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Header ────────────────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      child: Row(
                         children: [
-                          _dividerLabel('Datos de Venta'),
-                          _inputField(
-                            label:
-                                'Precio de venta (incluyendo comisión Dovia 3.5% + IVA)',
-                            controller: widget.precioVentaCtrl,
-                            hint: 'Ej: 250000',
-                            fieldKey: 'salePrice',
-                          ),
-                          // Cantidad a recibir: read-only, auto-calculated
-                          if (_amountToReceiveDisplay.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 14),
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEFF8F8),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                      color:
-                                          widget.primaryColor.withOpacity(0.3)),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Cantidad a recibir (calculado)',
-                                      style: GoogleFonts.inter(
-                                          fontSize: 12,
-                                          color: widget.primaryColor,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    Text(
-                                      _amountToReceiveDisplay,
-                                      style: GoogleFonts.inter(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: widget.primaryColor),
-                                    ),
-                                  ],
-                                ),
+                          Expanded(
+                            child: Text(
+                              'Editar información de tu propiedad',
+                              style: GoogleFonts.publicSans(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: widget.primaryDarkColor,
                               ),
                             ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _inputField(
-                                  label: 'Mantenimiento',
-                                  controller: widget.mantenimientoCtrl,
-                                  hint: 'Ej: 500',
-                                ),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF0F0F0),
+                                shape: BoxShape.circle,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _inputField(
-                                  label: 'Imp. único inmuebles',
-                                  controller: widget.impuestoCtrl,
-                                  hint: 'Ej: 200',
-                                ),
-                              ),
-                            ],
+                              child: const Icon(Icons.close_rounded,
+                                  size: 18, color: Color(0xFF555555)),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                // ── Rent fields (dynamic expansion) ──────────────────────
-                if (_hasRent)
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                    // ── Datos generales ───────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _dividerLabel('Datos de Renta'),
                           _inputField(
-                            label:
-                                'Precio de renta mensual (incluyendo IVA y mantenimiento)',
-                            controller: widget.precioRentaCtrl,
-                            hint: 'Ej: 1500',
-                            fieldKey: 'monthlyRent',
+                            label: 'Nombre de la propiedad',
+                            controller: widget.nombreCtrl,
+                            hint: 'Ej: Casa en zona 15',
+                            isNumeric: false,
+                            fieldKey: 'name',
                           ),
-                          Text(
-                            'Comisión Dovia: un mes de renta',
-                            style: GoogleFonts.inter(
-                                fontSize: 12, color: const Color(0xFF888888)),
+                          _inputField(
+                            label: 'Descripción',
+                            controller: widget.descripcionCtrl,
+                            hint: 'Contá lo mejor de tu propiedad',
+                            isNumeric: false,
+                            maxLines: 5,
                           ),
-                          const SizedBox(height: 14),
+                        ],
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            'Condiciones de renta',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                            '¿Qué te gustaría hacer?',
+                            style: GoogleFonts.publicSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                               color: widget.primaryDarkColor,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _inputField(
-                                  label: 'Tiempo mínimo (meses)',
-                                  controller: widget.tiempoMinimoCtrl,
-                                  hint: 'Ej: 12',
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _inputField(
-                                  label: 'Otros',
-                                  controller: widget.otrosCtrl,
-                                  hint: 'Ej: mascotas',
-                                  isNumeric: false,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 2),
+                          Text(
+                            'Puedes seleccionar ambas',
+                            style: GoogleFonts.publicSans(
+                              fontSize: 13,
+                              color: widget.primaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+
+                    // ── Venta / Renta toggle buttons ──────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _toggleButton(
+                              label: 'Venta',
+                              selected: _hasSale,
+                              onTap: () => setState(() {
+                                _hasSale = !_hasSale;
+                                // Clear sale error when deselecting
+                                if (!_hasSale) _fieldErrors.remove('salePrice');
+                              }),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _toggleButton(
+                              label: 'Renta',
+                              selected: _hasRent,
+                              onTap: () => setState(() {
+                                _hasRent = !_hasRent;
+                                // Clear rent error when deselecting
+                                if (!_hasRent)
+                                  _fieldErrors.remove('monthlyRent');
+                              }),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                // ── Buttons: Cancelar / Guardar ───────────────────────────
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                                color: widget.primaryColor, width: 1.5),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          onPressed:
-                              _isSaving ? null : () => Navigator.pop(context),
-                          child: Text(
-                            'Cancelar',
-                            style: GoogleFonts.inter(
-                                color: widget.primaryColor,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: widget.primaryColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          onPressed: _isSaving
-                              ? null
-                              : () async {
-                                  if (!_hasSale && !_hasRent) return;
-                                  // Validate required fields before saving
-                                  if (!_validate()) return;
-                                  setState(() => _isSaving = true);
-                                  await widget.onSave(_hasSale, _hasRent);
-                                  if (mounted) Navigator.pop(context);
-                                },
-                          child: _isSaving
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2))
-                              : Text(
-                                  'Aceptar',
-                                  style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700),
+                    const SizedBox(height: 20),
+
+                    // ── Sale fields ───────────────────────────────────────────
+                    if (_hasSale)
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _dividerLabel('Datos de Venta'),
+                              _inputField(
+                                label:
+                                    'Precio de venta (incluyendo comisión Dovia 3.5% + IVA)',
+                                controller: widget.precioVentaCtrl,
+                                hint: 'Ej: 250000',
+                                fieldKey: 'salePrice',
+                              ),
+                              // Cantidad a recibir: read-only, auto-calculated
+                              if (_amountToReceiveDisplay.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 14),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF8F8),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: widget.primaryColor
+                                              .withOpacity(0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Cantidad a recibir (calculado)',
+                                          style: GoogleFonts.publicSans(
+                                              fontSize: 12,
+                                              color: widget.primaryColor,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                        Text(
+                                          _amountToReceiveDisplay,
+                                          style: GoogleFonts.publicSans(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: widget.primaryColor),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _inputField(
+                                      label: 'Mantenimiento',
+                                      controller: widget.mantenimientoCtrl,
+                                      hint: 'Ej: 500',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _inputField(
+                                      label: 'Imp. único inmuebles',
+                                      controller: widget.impuestoCtrl,
+                                      hint: 'Ej: 200',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+
+                    // ── Rent fields (dynamic expansion) ──────────────────────
+                    if (_hasRent)
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _dividerLabel('Datos de Renta'),
+                              _inputField(
+                                label:
+                                    'Precio de renta mensual (incluyendo IVA y mantenimiento)',
+                                controller: widget.precioRentaCtrl,
+                                hint: 'Ej: 1500',
+                                fieldKey: 'monthlyRent',
+                              ),
+                              Text(
+                                'Comisión Dovia: un mes de renta',
+                                style: GoogleFonts.publicSans(
+                                    fontSize: 12,
+                                    color: const Color(0xFF888888)),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                'Condiciones de renta',
+                                style: GoogleFonts.publicSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: widget.primaryDarkColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _inputField(
+                                      label: 'Tiempo mínimo (meses)',
+                                      controller: widget.tiempoMinimoCtrl,
+                                      hint: 'Ej: 12',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _inputField(
+                                      label: 'Otros',
+                                      controller: widget.otrosCtrl,
+                                      hint: 'Ej: mascotas',
+                                      isNumeric: false,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              _inputField(
+                                label: 'Usos permitidos',
+                                controller: widget.usosCtrl,
+                                hint: 'Ej: vivienda, oficina',
+                                isNumeric: false,
+                              ),
+                              _inputField(
+                                label: 'Disponible desde',
+                                controller: widget.disponibleCtrl,
+                                hint: 'Ej: 01/11/2026',
+                                isNumeric: false,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    // ── Buttons: Cancelar / Guardar ───────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                    color: widget.primaryColor, width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              onPressed: _isSaving
+                                  ? null
+                                  : () => Navigator.pop(context),
+                              child: Text(
+                                'Cancelar',
+                                style: GoogleFonts.publicSans(
+                                    color: widget.primaryColor,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: widget.primaryColor,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              onPressed: _isSaving
+                                  ? null
+                                  : () async {
+                                      if (!_hasSale && !_hasRent) return;
+                                      // Validate required fields before saving
+                                      if (!_validate()) return;
+                                      setState(() => _isSaving = true);
+                                      await widget.onSave(_hasSale, _hasRent);
+                                      if (mounted) Navigator.pop(context);
+                                    },
+                              child: _isSaving
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                          color: Colors.white, strokeWidth: 2))
+                                  : Text(
+                                      'Aceptar',
+                                      style: GoogleFonts.publicSans(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              )),
         ),
       ),
     );
@@ -2672,7 +2266,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
         alignment: Alignment.center,
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.publicSans(
             fontSize: 15,
             fontWeight: FontWeight.w600,
             color: selected ? Colors.white : widget.primaryColor,
@@ -2694,9 +2288,9 @@ class _EditPriceModalState extends State<_EditPriceModal> {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.publicSans(
                 fontSize: 12,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: widget.primaryColor,
                 letterSpacing: 0.5,
               ),
@@ -2767,8 +2361,9 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            // Cabecera con los colores de Dovia; sólo el botón final es rojo.
             decoration: BoxDecoration(
-              color: widget.errorColor,
+              color: widget.primaryColor,
             ),
             child: Column(
               children: [
@@ -2787,12 +2382,12 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '¿Estás seguro de poner la propiedad no disponible?',
+                  '¿Estás seguro de marcar la propiedad como no disponible?',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.publicSans(
                     color: Colors.white,
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     height: 1.3,
                   ),
                 ),
@@ -2809,7 +2404,7 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                 // Explanatory text
                 Text(
                   'Al marcar la propiedad como no disponible:',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.publicSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF333333),
@@ -2824,10 +2419,10 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                 const SizedBox(height: 4),
                 Text(
                   'Esta acción es definitiva.',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.publicSans(
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: widget.errorColor,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF00444B),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -2835,7 +2430,7 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                 // Motivo (optional textarea)
                 Text(
                   'Motivo (opcional)',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.publicSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF444444),
@@ -2848,29 +2443,28 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                   maxLength: 500,
                   keyboardType: TextInputType.multiline,
                   textCapitalization: TextCapitalization.sentences,
-                  style: GoogleFonts.inter(fontSize: 13),
+                  style: GoogleFonts.publicSans(fontSize: 13),
                   decoration: InputDecoration(
                     hintText:
                         'Ej: La propiedad ya fue vendida de forma privada…',
-                    hintStyle: GoogleFonts.inter(
+                    hintStyle: GoogleFonts.publicSans(
                         fontSize: 13, color: const Color(0xFFAAAAAA)),
                     filled: true,
                     fillColor: const Color(0xFFF7F7F7),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                      borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                      borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide(color: widget.errorColor, width: 1.5),
+                      borderSide: BorderSide.none,
                     ),
                     contentPadding: const EdgeInsets.all(12),
-                    counterStyle: GoogleFonts.inter(
+                    counterStyle: GoogleFonts.publicSans(
                         fontSize: 11, color: const Color(0xFFAAAAAA)),
                   ),
                 ),
@@ -2881,24 +2475,24 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                   children: [
                     // Cancelar
                     Expanded(
-                      child: SizedBox(
-                        height: 46,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 46),
                         child: OutlinedButton(
                           onPressed: _isLoading
                               ? null
                               : () => Navigator.of(context).pop(),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                                color: Color(0xFFCCCCCC), width: 1.5),
+                            side: BorderSide(
+                                color: widget.primaryColor, width: 1.5),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(100)),
                           ),
                           child: Text(
                             'Cancelar',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.publicSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF555555),
+                              color: widget.primaryColor,
                             ),
                           ),
                         ),
@@ -2907,8 +2501,8 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                     const SizedBox(width: 12),
                     // No disponible
                     Expanded(
-                      child: SizedBox(
-                        height: 46,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 46),
                         child: FilledButton(
                           onPressed: _isLoading ? null : _handleConfirm,
                           style: FilledButton.styleFrom(
@@ -2925,12 +2519,15 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                                   child: CircularProgressIndicator(
                                       color: Colors.white, strokeWidth: 2),
                                 )
+                              // Si no entra en una línea, baja a la segunda.
                               : Text(
-                                  'No disponible',
-                                  style: GoogleFonts.inter(
+                                  'Marcar como no disponible',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.publicSans(
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w600,
                                     color: Colors.white,
+                                    height: 1.2,
                                   ),
                                 ),
                         ),
@@ -2953,12 +2550,13 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 5, right: 7),
+            // Centrada con la primera línea del texto.
+            padding: const EdgeInsets.only(top: 7, right: 8),
             child: Container(
               width: 5,
               height: 5,
               decoration: BoxDecoration(
-                color: widget.errorColor,
+                color: widget.primaryColor,
                 shape: BoxShape.circle,
               ),
             ),
@@ -2966,7 +2564,7 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.publicSans(
                   fontSize: 13, color: const Color(0xFF555555), height: 1.4),
             ),
           ),
@@ -3030,11 +2628,15 @@ class _PausaModalState extends State<_PausaModal> {
           children: [
             // ── Close button (top-right) ──────────────────────────────────
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Mismo ancho que la X: el título queda centrado.
+                const SizedBox(width: 16),
                 Expanded(
                   // Title
                   child: Text(
-                    '¿Quieres pausar la publicacion de la propiedad?',
+                    '¿Quieres pausar la publicación de la propiedad?',
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.publicSans(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -3057,7 +2659,8 @@ class _PausaModalState extends State<_PausaModal> {
 
             // ── Subtitle ─────────────────────────────────────────────────
             Text(
-              'No se mostrara la propiedad hasta que lo vuelvas activar.',
+              'No se mostrará la propiedad hasta que la vuelvas a activar.',
+              textAlign: TextAlign.center,
               style: GoogleFonts.publicSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -3151,12 +2754,17 @@ class _PausaModalState extends State<_PausaModal> {
                               child: CircularProgressIndicator(
                                   color: Colors.white, strokeWidth: 2),
                             )
-                          : Text(
-                              'Pausar Propiedad',
-                              style: GoogleFonts.publicSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
+                          // En una línea: si no entra, se achica.
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Pausar propiedad',
+                                maxLines: 1,
+                                style: GoogleFonts.publicSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                     ),

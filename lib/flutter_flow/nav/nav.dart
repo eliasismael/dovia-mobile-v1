@@ -1148,6 +1148,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'title',
               ParamType.String,
             ),
+            listingFilter: params.getParam(
+              'listingFilter',
+              ParamType.String,
+            ),
           ),
         ),
         FFRoute(

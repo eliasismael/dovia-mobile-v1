@@ -280,7 +280,6 @@ class _ProposalScreenState extends State<ProposalScreen> {
           _buildProcessStatus(),
           const SizedBox(height: 24),
           _buildStepContent(),
-          const SizedBox(height: 180),
         ],
       ),
     );

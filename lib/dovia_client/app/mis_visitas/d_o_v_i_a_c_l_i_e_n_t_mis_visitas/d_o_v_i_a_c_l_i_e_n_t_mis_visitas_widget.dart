@@ -191,6 +191,8 @@ class _DOVIACLIENTMisVisitasWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Mis visitas',
+                        showMap: false,
+                        showCurrency: false,
                       ),
                     ),
                     Padding(
@@ -494,6 +496,7 @@ class _VisitCard extends StatefulWidget {
     required this.visitDate,
     required this.visitTime,
     required this.imageUrl,
+    this.fillHeight = true,
     required this.showingAgentId,
     required this.cardType,
     this.visitSubstatus = '',
@@ -508,6 +511,10 @@ class _VisitCard extends StatefulWidget {
   final String visitDate;
   final String visitTime;
   final String imageUrl;
+
+  /// En los carruseles la tarjeta tiene alto fijo y el botón va al fondo;
+  /// en la grilla de "Ver más" mide sólo lo que ocupa su contenido.
+  final bool fillHeight;
   final String showingAgentId;
   final String visitSubstatus;
   final String visitStatus;
@@ -646,17 +653,10 @@ class _VisitCardState extends State<_VisitCard> {
   }
 
   Future<void> _onRescheduleTap(BuildContext ctx) async {
-    final result = await showModalBottomSheet<bool>(
-      context: ctx,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SizedBox(
-        height: MediaQuery.of(ctx).size.height * 0.9,
-        child: RescheduleVisitWidget(
-          visitId: widget.visitId,
-          visitSubstatus: widget.visitSubstatus,
-        ),
-      ),
+    final result = await showRescheduleVisitSheet(
+      ctx,
+      visitId: widget.visitId,
+      visitSubstatus: widget.visitSubstatus,
     );
     if (result == true) widget.onRescheduleSuccess?.call();
   }
@@ -796,19 +796,20 @@ class _VisitCardState extends State<_VisitCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Image ─────────────────────────────────────────────────
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: _displayImage.isNotEmpty
-                  ? Image.network(
-                      _displayImage,
-                      width: double.infinity,
-                      height: 95,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(),
-                    )
-                  : _placeholder(),
-            ),
-            const SizedBox(height: 8),
+            // Si la propiedad no tiene fotos no se muestra ninguna imagen.
+            if (_displayImage.isNotEmpty) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  _displayImage,
+                  width: double.infinity,
+                  height: 95,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             // ── Property name ──────────────────────────────────────────
             Text(
               _displayName,
@@ -867,7 +868,10 @@ class _VisitCardState extends State<_VisitCard> {
                         color: Colors.grey)),
             ],
             const SizedBox(height: 10),
-            const Spacer(),
+            if (widget.fillHeight)
+              const Spacer()
+            else
+              const SizedBox(height: 12),
             // ── Actions ───────────────────────────────────────────────
             ..._buildActions(context),
           ],
@@ -988,15 +992,6 @@ class _VisitCardState extends State<_VisitCard> {
       ),
     );
   }
-
-  Widget _placeholder() {
-    return Container(
-      width: double.infinity,
-      height: 95,
-      decoration: const BoxDecoration(color: Color(0xFFEFEFEF)),
-      child: const Icon(Icons.home_outlined, color: Colors.grey, size: 36),
-    );
-  }
 }
 
 class _VerMasScreen extends StatefulWidget {
@@ -1027,84 +1022,145 @@ class _VerMasScreenState extends State<_VerMasScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        iconTheme:
-            IconThemeData(color: FlutterFlowTheme.of(context).primaryText),
-        title: Text(
-          title,
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                color: FlutterFlowTheme.of(context).primaryText,
-                fontSize: 18.0,
-              ),
-        ),
-        elevation: 0,
-      ),
+      // Mismo SafeArea que la pantalla de Mis Visitas, para que el header
+      // quede a la misma altura.
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              mainAxisExtent: cardType == _CardType.completed ? 260 : 290,
+        top: true,
+        child: Stack(
+          children: [
+            const CornerGradientBackgroundWidget(),
+            Column(
+              children: [
+                DOVIASHAREDHeaderWidget(
+                  title: title,
+                  showLogo: false,
+                  showMap: false,
+                  showCurrency: false,
+                  hideActions: true,
+                ),
+                Expanded(
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    // Dos columnas; cada tarjeta mide lo que ocupa su contenido.
+                    final cardWidth = (constraints.maxWidth - 32 - 10) / 2;
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+                      child: Wrap(
+                        spacing: 10,
+                        runSpacing: 14,
+                        children: List.generate(items.length, (index) {
+                          final v = items[index];
+                          // Cada tarjeta entra desde la izquierda, una tras otra.
+                          return _SlideInFromLeft(
+                            delay: Duration(milliseconds: 90 * index),
+                            child: SizedBox(
+                              width: cardWidth,
+                              child: _buildItem(v),
+                            ),
+                          );
+                        }),
+                      ),
+                    );
+                  }),
+                ),
+              ],
             ),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final v = items[index];
-              final visitId = v['visitId']?.toString() ??
-                  v['id']?.toString() ??
-                  v['_id']?.toString() ??
-                  '';
-              final showingAgentId = v['showingAgentId']?.toString() ?? '';
-              final property = v['property'];
-              final propertyId = property is Map
-                  ? (property['id']?.toString() ?? '')
-                  : (v['propertyId']?.toString() ?? '');
-              final slot = v['confirmedTimeSlot'];
-              final visitDate =
-                  slot is Map ? slot['date']?.toString() ?? '' : '';
-              final visitTime =
-                  slot is Map ? slot['time']?.toString() ?? '' : '';
-              final imageUrl = property is Map
-                  ? (firstPropertyPhotoUrl(
-                          Map<String, dynamic>.from(property)) ??
-                      '')
-                  : '';
-              final propertyName = property is Map
-                  ? (property['name']?.toString() ??
-                      property['title']?.toString() ??
-                      'Propiedad')
-                  : 'Propiedad';
-              final visitSubstatus = v['substatus']?.toString() ?? '';
-              final visitStatus = v['status']?.toString() ?? '';
-              final proposed = v['proposedTimeSlots'];
-              final proposedSlots = proposed is List ? proposed : <dynamic>[];
-
-              return _VisitCard(
-                visitId: visitId,
-                propertyId: propertyId,
-                propertyName: propertyName,
-                visitDate: visitDate,
-                visitTime: visitTime,
-                imageUrl: imageUrl,
-                showingAgentId: showingAgentId,
-                visitSubstatus: visitSubstatus,
-                visitStatus: visitStatus,
-                proposedTimeSlots: proposedSlots,
-                cardType: cardType,
-                // Cancelada o reprogramada: sale de la grilla y se recarga
-                // la pantalla de atrás.
-                onRescheduleSuccess: () {
-                  setState(() => items.remove(v));
-                  widget.onChanged?.call();
-                },
-              );
-            },
-          ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildItem(dynamic v) {
+    final visitId = v['visitId']?.toString() ??
+        v['id']?.toString() ??
+        v['_id']?.toString() ??
+        '';
+    final showingAgentId = v['showingAgentId']?.toString() ?? '';
+    final property = v['property'];
+    final propertyId = property is Map
+        ? (property['id']?.toString() ?? '')
+        : (v['propertyId']?.toString() ?? '');
+    final slot = v['confirmedTimeSlot'];
+    final visitDate = slot is Map ? slot['date']?.toString() ?? '' : '';
+    final visitTime = slot is Map ? slot['time']?.toString() ?? '' : '';
+    final imageUrl = property is Map
+        ? (firstPropertyPhotoUrl(Map<String, dynamic>.from(property)) ?? '')
+        : '';
+    final propertyName = property is Map
+        ? (property['name']?.toString() ??
+            property['title']?.toString() ??
+            'Propiedad')
+        : 'Propiedad';
+    final visitSubstatus = v['substatus']?.toString() ?? '';
+    final visitStatus = v['status']?.toString() ?? '';
+    final proposed = v['proposedTimeSlots'];
+    final proposedSlots = proposed is List ? proposed : <dynamic>[];
+
+    return _VisitCard(
+      visitId: visitId,
+      propertyId: propertyId,
+      propertyName: propertyName,
+      visitDate: visitDate,
+      visitTime: visitTime,
+      imageUrl: imageUrl,
+      fillHeight: false,
+      showingAgentId: showingAgentId,
+      visitSubstatus: visitSubstatus,
+      visitStatus: visitStatus,
+      proposedTimeSlots: proposedSlots,
+      cardType: cardType,
+      // Cancelada o reprogramada: sale de la grilla y se recarga
+      // la pantalla de atrás.
+      onRescheduleSuccess: () {
+        setState(() => items.remove(v));
+        widget.onChanged?.call();
+      },
+    );
+  }
+}
+
+/// Entra desde la izquierda con un fundido, después de [delay].
+class _SlideInFromLeft extends StatefulWidget {
+  const _SlideInFromLeft({required this.child, this.delay = Duration.zero});
+
+  final Widget child;
+  final Duration delay;
+
+  @override
+  State<_SlideInFromLeft> createState() => _SlideInFromLeftState();
+}
+
+class _SlideInFromLeftState extends State<_SlideInFromLeft>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 450),
+  );
+  late final Animation<double> _curve =
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(widget.delay, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _curve,
+      child: SlideTransition(
+        position: Tween(begin: const Offset(-0.35, 0), end: Offset.zero)
+            .animate(_curve),
+        child: widget.child,
       ),
     );
   }

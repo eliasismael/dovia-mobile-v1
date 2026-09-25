@@ -3,6 +3,7 @@
 // Imports custom functions
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '/shared_components/carousel_arrow/carousel_arrow_button.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -37,7 +38,8 @@ class AllPhotosWidget extends StatefulWidget {
 class _AllPhotosWidgetState extends State<AllPhotosWidget> {
   static const Color primaryColor = Color(0xFF007376);
   static const Color textColor = Color(0xFF00444B);
-  static const Color backgroundColor = Colors.white;
+  // Transparente: el fondo con gradiente lo pone la pantalla.
+  static const Color backgroundColor = Colors.transparent;
   static const Color overlayColor = Colors.black87;
 
   bool _isViewerOpen = false;
@@ -179,16 +181,7 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
         Container(
           width: widget.width ?? double.infinity,
           height: widget.height ?? double.infinity,
-          decoration: const BoxDecoration(
-            color: backgroundColor,
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x0D000000), // rgba(0,0,0,0.05)
-                blurRadius: 4,
-                offset: Offset(0, -4),
-              ),
-            ],
-          ),
+          decoration: const BoxDecoration(color: backgroundColor),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -352,7 +345,8 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
   Widget _buildHeader() {
     return Padding(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 24,
+        // Misma altura de header que el resto de las pantallas.
+        top: MediaQuery.of(context).padding.top + 42,
         left: 20,
         right: 20,
         bottom: 10,
@@ -409,25 +403,6 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
                 ),
               ),
             ),
-            // Right side (Message icon)
-            Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF7F7F7),
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.chat_bubble_outline,
-                    size: 20,
-                    color: textColor,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -481,7 +456,7 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
               },
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Row(
@@ -559,15 +534,6 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
     required bool isLeft,
     required VoidCallback onTap,
   }) {
-    return IconButton(
-      onPressed: onTap,
-      icon: Icon(
-        isLeft
-            ? Icons.arrow_back_ios_new_rounded
-            : Icons.arrow_forward_ios_rounded,
-      ),
-      iconSize: 28,
-      color: primaryColor,
-    );
+    return CarouselArrowButton(isLeft: isLeft, onTap: onTap);
   }
 }

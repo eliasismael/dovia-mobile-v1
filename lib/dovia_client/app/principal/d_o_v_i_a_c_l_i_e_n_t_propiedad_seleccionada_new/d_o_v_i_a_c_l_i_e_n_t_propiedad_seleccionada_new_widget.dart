@@ -1,3 +1,4 @@
+import '/shared_components/carousel_arrow/carousel_arrow_button.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/principal/todas_las_fotos/todas_las_fotos_widget.dart';
 import '/dovia_client/app/principal/agendar_cita/agendar_cita_widget.dart';
@@ -244,12 +245,131 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     return urls.map(_carouselItem).toList();
   }
 
+  List<String> get _availabilityLabels {
+    final types = _listingType.join(' ').toUpperCase();
+    return [
+      if (types.contains('SALE')) 'Venta',
+      if (types.contains('RENT')) 'Renta',
+    ];
+  }
+
+  String get _propertyTypeLabel {
+    switch (_propertyType.toUpperCase()) {
+      case 'HOUSE':
+        return 'Casa';
+      case 'APARTMENT':
+        return 'Departamento';
+      case 'PENTHOUSE':
+        return 'Penthouse';
+      case 'STUDIO':
+        return 'Estudio';
+      case 'FARM':
+        return 'Finca';
+      case 'LOT':
+        return 'Terreno';
+      default:
+        return _propertyType.isEmpty
+            ? ''
+            : '${_propertyType[0]}${_propertyType.substring(1).toLowerCase()}';
+    }
+  }
+
+  Widget _infoChip(
+    String label,
+    IconData icon, {
+    required Color background,
+    required Color foreground,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(100.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14.0, color: foreground),
+          const SizedBox(width: 5.0),
+          Text(
+            label,
+            style: GoogleFonts.publicSans(
+              fontSize: 13.0,
+              fontWeight: FontWeight.w600,
+              color: foreground,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Dato destacado (precio o metros): valor arriba, etiqueta abajo.
+  Widget _statBox(String value, String label) {
+    return Container(
+      height: 64.0,
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).accent1,
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: GoogleFonts.publicSans(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: FlutterFlowTheme.of(context).primaryText,
+              ),
+            ),
+          ),
+          const SizedBox(height: 3.0),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.publicSans(
+              fontSize: 11.0,
+              fontWeight: FontWeight.w500,
+              color: FlutterFlowTheme.of(context).secondaryText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Desplegables de la ficha con esquinas redondeadas y sombra suave.
+  Widget _roundedSection(Widget child) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8.0, bottom: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 8.0,
+            color: Color(0x14000000),
+            offset: Offset(0.0, 2.0),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.0),
+        child: child,
+      ),
+    );
+  }
+
   Widget _carouselArrow(IconData icon, VoidCallback onTap) {
-    return IconButton(
-      onPressed: onTap,
-      icon: Icon(icon),
-      iconSize: 28.0,
-      color: FlutterFlowTheme.of(context).primary,
+    return CarouselArrowButton(
+      isLeft: icon == Icons.arrow_back_ios_new_rounded,
+      onTap: onTap,
     );
   }
 
@@ -941,26 +1061,37 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  CarouselSlider(
-                                    items: _carouselItems(),
-                                    carouselController:
-                                        _model.carouselController ??=
-                                            CarouselSliderController(),
-                                    options: CarouselOptions(
-                                      height: 220.0,
-                                      initialPage: 0,
-                                      viewportFraction: 0.92,
-                                      disableCenter: false,
-                                      enlargeCenterPage: false,
-                                      enlargeFactor: 0.0,
-                                      enableInfiniteScroll: false,
-                                      scrollDirection: Axis.horizontal,
-                                      autoPlay: false,
-                                      onPageChanged: (index, _) =>
-                                          _model.carouselCurrentIndex = index,
+                                  // Las fotos llegan hasta los bordes de la
+                                  // pantalla, sin el margen del contenido.
+                                  SizedBox(
+                                    height: 220.0,
+                                    child: OverflowBox(
+                                      minWidth:
+                                          MediaQuery.sizeOf(context).width,
+                                      maxWidth:
+                                          MediaQuery.sizeOf(context).width,
+                                      child: CarouselSlider(
+                                        items: _carouselItems(),
+                                        carouselController:
+                                            _model.carouselController ??=
+                                                CarouselSliderController(),
+                                        options: CarouselOptions(
+                                          height: 220.0,
+                                          initialPage: 0,
+                                          viewportFraction: 0.92,
+                                          disableCenter: false,
+                                          enlargeCenterPage: false,
+                                          enlargeFactor: 0.0,
+                                          enableInfiniteScroll: false,
+                                          scrollDirection: Axis.horizontal,
+                                          autoPlay: false,
+                                          onPageChanged: (index, _) => _model
+                                              .carouselCurrentIndex = index,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 6.0),
+                                  const SizedBox(height: 12.0),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -1202,210 +1333,6 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                             if (!widget.isReadOnly)
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                    60.0, 22.0, 60.0, 0.0),
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        blurRadius: 4.0,
-                                        color: Color(0x33000000),
-                                        offset: Offset(
-                                          0.0,
-                                          2.0,
-                                        ),
-                                      )
-                                    ],
-                                    borderRadius: BorderRadius.circular(100.0),
-                                  ),
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            4.0, 4.0, 4.0, 4.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                _model.ventaORenta = 'venta';
-                                                safeSetState(() {});
-                                              },
-                                              child: AnimatedContainer(
-                                                duration: const Duration(
-                                                    milliseconds: 250),
-                                                curve: Curves.easeInOut,
-                                                width: double.infinity,
-                                                height: 36.0,
-                                                decoration: BoxDecoration(
-                                                  color: _model.ventaORenta ==
-                                                          'venta'
-                                                      ? FlutterFlowTheme.of(
-                                                              context)
-                                                          .accent1
-                                                      : FlutterFlowTheme.of(
-                                                              context)
-                                                          .tertiary,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100.0),
-                                                ),
-                                                child: Align(
-                                                  alignment:
-                                                      const AlignmentDirectional(
-                                                          0.0, 0.0),
-                                                  child: Text(
-                                                    'Venta',
-                                                    style:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .inter(
-                                                                fontWeight: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontWeight,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                              ),
-                                                              color: _model
-                                                                          .ventaORenta ==
-                                                                      'venta'
-                                                                  ? FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText
-                                                                  : FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryText,
-                                                              fontSize: 14.0,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontWeight,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                            ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                _model.ventaORenta = 'renta';
-                                                safeSetState(() {});
-                                              },
-                                              child: AnimatedContainer(
-                                                duration: const Duration(
-                                                    milliseconds: 250),
-                                                curve: Curves.easeInOut,
-                                                width: double.infinity,
-                                                height: 36.0,
-                                                decoration: BoxDecoration(
-                                                  color: _model.ventaORenta ==
-                                                          'renta'
-                                                      ? FlutterFlowTheme.of(
-                                                              context)
-                                                          .accent1
-                                                      : FlutterFlowTheme.of(
-                                                              context)
-                                                          .tertiary,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100.0),
-                                                ),
-                                                child: Align(
-                                                  alignment:
-                                                      const AlignmentDirectional(
-                                                          0.0, 0.0),
-                                                  child: Text(
-                                                    'Renta',
-                                                    textAlign: TextAlign.center,
-                                                    style:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .override(
-                                                              font: GoogleFonts
-                                                                  .inter(
-                                                                fontWeight: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontWeight,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .fontStyle,
-                                                              ),
-                                                              color: _model
-                                                                          .ventaORenta ==
-                                                                      'renta'
-                                                                  ? FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText
-                                                                  : FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .secondaryText,
-                                                              fontSize: 14.0,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontWeight,
-                                                              fontStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .fontStyle,
-                                                            ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ].divide(const SizedBox(width: 20.0)),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (!widget.isReadOnly)
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
@@ -1566,454 +1493,135 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                   ].divide(const SizedBox(width: 8.0)),
                                 ),
                               ),
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 20.0, 0.0, 0.0),
-                                child: Container(
-                                  decoration: const BoxDecoration(),
-                                  child: RichText(
-                                    textScaler:
-                                        MediaQuery.of(context).textScaler,
-                                    text: TextSpan(
+                            // Etiquetas (tipo de propiedad y para qué está
+                            // disponible), dirección y descripción.
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 22.0, 0.0, 0.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_propertyTypeLabel.isNotEmpty ||
+                                      _availabilityLabels.isNotEmpty)
+                                    Wrap(
+                                      spacing: 8.0,
+                                      runSpacing: 8.0,
                                       children: [
-                                        TextSpan(
-                                          text: _propertyType.isNotEmpty
-                                              ? '${_propertyType[0]}${_propertyType.substring(1).toLowerCase()}\n'
-                                              : '',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                        ),
-                                        TextSpan(
-                                          text: _address.isNotEmpty
-                                              ? '$_address\n'
-                                              : '',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight: FontWeight.bold,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                        ),
-                                        TextSpan(
-                                          text: '',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                        ),
-                                        TextSpan(
-                                          text: _description,
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle: FontStyle.italic,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                        )
-                                      ],
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            letterSpacing: 0.3,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.3,
+                                        if (_propertyTypeLabel.isNotEmpty)
+                                          _infoChip(
+                                            _propertyTypeLabel,
+                                            Icons.home_work_outlined,
+                                            background: const Color(0xFFECEFF1),
+                                            foreground: const Color(0xFF455A64),
                                           ),
+                                        ..._availabilityLabels.map(
+                                          (label) => _infoChip(
+                                            label,
+                                            label == 'Venta'
+                                                ? Icons.sell_outlined
+                                                : Icons.key_outlined,
+                                            background: const Color(0xFFDDEFEF),
+                                            foreground:
+                                                FlutterFlowTheme.of(context)
+                                                    .primary,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ),
+                                  if (_address.isNotEmpty) ...[
+                                    const SizedBox(height: 14.0),
+                                    Text(
+                                      _address,
+                                      style: GoogleFonts.publicSans(
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.w700,
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ],
+                                  if (_description.isNotEmpty) ...[
+                                    const SizedBox(height: 10.0),
+                                    Text(
+                                      _description,
+                                      style: GoogleFonts.publicSans(
+                                        fontSize: 14.0,
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Row(
-                                mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Expanded(
-                                    child: Container(
-                                      width: MediaQuery.sizeOf(context).width *
-                                          0.5,
-                                      height: 44.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .accent1,
-                                        borderRadius:
-                                            BorderRadius.circular(6.0),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            _price.isNotEmpty
-                                                ? 'Q$_price'
-                                                : '—',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  fontSize: 10.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                          Text(
-                                            'Precio más impuestos',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  fontSize: 10.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ].divide(const SizedBox(height: 5.0)),
-                                      ),
+                                    child: _statBox(
+                                      _price.isNotEmpty ? 'Q$_price' : '—',
+                                      'Precio más impuestos',
                                     ),
                                   ),
+                                  const SizedBox(width: 8.0),
                                   Expanded(
-                                    child: Container(
-                                      width: MediaQuery.sizeOf(context).width *
-                                          0.5,
-                                      height: 44.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .accent1,
-                                        borderRadius:
-                                            BorderRadius.circular(6.0),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            _landArea.isNotEmpty
-                                                ? _landArea
-                                                : '—',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.publicSans(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  fontSize: 10.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                          Text(
-                                            'M2 de terreno',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  fontSize: 10.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ].divide(const SizedBox(height: 5.0)),
-                                      ),
+                                    child: _statBox(
+                                      _landArea.isNotEmpty
+                                          ? '$_landArea m²'
+                                          : '—',
+                                      'Terreno',
                                     ),
                                   ),
+                                  const SizedBox(width: 8.0),
                                   Expanded(
-                                    child: Container(
-                                      width: MediaQuery.sizeOf(context).width *
-                                          0.5,
-                                      height: 44.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .accent1,
-                                        borderRadius:
-                                            BorderRadius.circular(6.0),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            _constructionArea.isNotEmpty
-                                                ? _constructionArea
-                                                : '—',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  fontSize: 10.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                          Text(
-                                            'M2 de construcciónc',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  fontSize: 10.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ].divide(const SizedBox(height: 5.0)),
-                                      ),
+                                    child: _statBox(
+                                      _constructionArea.isNotEmpty
+                                          ? '$_constructionArea m²'
+                                          : '—',
+                                      'Construcción',
                                     ),
                                   ),
-                                ].divide(const SizedBox(width: 8.0)),
+                                ],
                               ),
                             ),
                             SingleChildScrollView(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(
-                                    decoration: const BoxDecoration(),
-                                    child: wrapWithModel(
-                                      model:
-                                          _model.propiedadCaracteristicasModel,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PropiedadCaracteristicasWidget(
-                                        bedrooms: _bedrooms,
-                                        bathrooms: _bathrooms,
-                                        halfBathrooms: _halfBathrooms,
-                                        parkingSpots: _parkingSpots,
-                                        floors: _floors,
-                                      ),
+                                  _roundedSection(wrapWithModel(
+                                    model: _model.propiedadCaracteristicasModel,
+                                    updateCallback: () => safeSetState(() {}),
+                                    child: PropiedadCaracteristicasWidget(
+                                      bedrooms: _bedrooms,
+                                      bathrooms: _bathrooms,
+                                      halfBathrooms: _halfBathrooms,
+                                      parkingSpots: _parkingSpots,
+                                      floors: _floors,
                                     ),
-                                  ),
-                                  Container(
-                                    child: wrapWithModel(
-                                      model: _model.porpiedadesAmenidadesModel,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PorpiedadesAmenidadesWidget(
-                                        amenities: _amenitiesData,
-                                      ),
+                                  )),
+                                  _roundedSection(wrapWithModel(
+                                    model: _model.porpiedadesAmenidadesModel,
+                                    updateCallback: () => safeSetState(() {}),
+                                    child: PorpiedadesAmenidadesWidget(
+                                      amenities: _amenitiesData,
                                     ),
-                                  ),
-                                  Container(
-                                    child: wrapWithModel(
-                                      model:
-                                          _model.propiedadesSobreElSectorModel,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PropiedadesSobreElSectorWidget(
-                                        description: _sectorDescription,
-                                        caminableRating: _caminableRating,
-                                        comercialRating: _comercialRating,
-                                        verdesRating: _verdesRating,
-                                        lat: _lat,
-                                        lng: _lng,
-                                      ),
+                                  )),
+                                  _roundedSection(wrapWithModel(
+                                    model: _model.propiedadesSobreElSectorModel,
+                                    updateCallback: () => safeSetState(() {}),
+                                    child: PropiedadesSobreElSectorWidget(
+                                      description: _sectorDescription,
+                                      caminableRating: _caminableRating,
+                                      comercialRating: _comercialRating,
+                                      verdesRating: _verdesRating,
+                                      lat: _lat,
+                                      lng: _lng,
                                     ),
-                                  ),
+                                  )),
                                 ],
                               ),
                             ),

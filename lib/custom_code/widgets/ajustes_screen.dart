@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '/repositories/user_repository.dart';
+import '/repositories/payments_repository.dart';
+import '/domain/payment_models.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
@@ -43,7 +45,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
   bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureRepeat = true;
-  bool _subscriptionActive = true;
+  bool _cancellingSubscription = false;
 
   final _cancelReasonCtrl = TextEditingController();
   final _deleteReasonCtrl = TextEditingController();
@@ -63,6 +65,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
     // Load fresh profile on first render (cached if already loaded).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserRepository>().loadProfile();
+      // Suscripción real de Dovia Home y catálogo (para el nombre del plan).
+      final payments = context.read<PaymentsRepository>();
+      payments.loadCurrentSubscription(forceRefresh: true);
+      payments.loadPlans();
     });
   }
 
@@ -93,11 +99,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
     final avatarUrl = profile?.profilePictureUrl != null
         ? '${profile!.profilePictureUrl!}?v=$_avatarVersion'
         : null;
-
-    // Renewal date: today + 30 days as mock
-    final renewalDate = DateTime.now().add(const Duration(days: 30));
-    final renewalStr =
-        '${renewalDate.day.toString().padLeft(2, '0')}/${renewalDate.month.toString().padLeft(2, '0')}/${renewalDate.year}';
 
     if (repo.isLoading && profile == null) {
       return const Center(
@@ -344,7 +345,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   fontWeight: FontWeight.w600,
                   color: _textPrimary)),
           const SizedBox(height: 20),
-          _buildSubscriptionCard(renewalStr),
+          _buildSubscriptionCard(),
           const SizedBox(height: 36),
           _divider(),
           const SizedBox(height: 28),
@@ -429,7 +430,141 @@ class _AjustesScreenState extends State<AjustesScreen> {
   }
 
   // ── SUBSCRIPTION CARD ─────────────────────────────────────────────
-  Widget _buildSubscriptionCard(String renewalDate) {
+  String _formatDate(String? iso) {
+    final d = iso == null ? null : DateTime.tryParse(iso)?.toLocal();
+    if (d == null) return '—';
+    return '${d.day.toString().padLeft(2, '0')}/'
+        '${d.month.toString().padLeft(2, '0')}/${d.year}';
+  }
+
+  Widget _buildSubscriptionCard() {
+    final payments = context.watch<PaymentsRepository>();
+    final sub = payments.currentSubscription;
+    final loading = !payments.subscriptionLoaded;
+    final hasSub = sub != null && sub.keepsBenefits;
+
+    SubscriptionPlan? plan;
+    if (sub != null) {
+      for (final p in payments.plans) {
+        if (p.id == sub.planId) plan = p;
+      }
+    }
+    final planName = (plan?.name ?? 'DOVIA HOME').toUpperCase();
+    final amount = sub?.amount ?? plan?.amount;
+    final currency = sub?.currency ?? plan?.currency;
+    final amountStr = amount == null
+        ? null
+        : '${currency == PaymentCurrency.usd ? 'USD ' : 'Q'}'
+            '${amount % 1 == 0 ? amount.toInt() : amount}';
+
+    Widget content;
+    if (loading) {
+      content = const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator(color: _aqua)),
+      );
+    } else if (!hasSub) {
+      content = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _planBadge('SIN SUSCRIPCIÓN', _textSecondary),
+        const SizedBox(height: 12),
+        const Text(
+            'Suscribite a Dovia Home y tené servicios de mantenimiento, '
+            'descuentos y atención de emergencias para tu propiedad.',
+            style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 13,
+                color: _textSecondary)),
+        const SizedBox(height: 16),
+        ..._benefits(),
+        const SizedBox(height: 18),
+        SizedBox(
+          width: double.infinity,
+          height: 44,
+          child: ElevatedButton(
+            onPressed: () => context.pushNamed('DH_CLIENT_PlanesPage'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _aqua,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
+            ),
+            child: const Text('Suscribirme',
+                style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white)),
+          ),
+        ),
+      ]);
+    } else {
+      final cancelScheduled = sub.isCancelScheduled;
+      content = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _planBadge(planName, _aqua),
+        const SizedBox(height: 10),
+        if (amountStr != null)
+          RichText(
+            text: TextSpan(children: [
+              TextSpan(
+                  text: amountStr,
+                  style: const TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: _textPrimary)),
+              TextSpan(
+                  text: plan?.periodLabel ?? ' /mes',
+                  style: const TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 14,
+                      color: _textSecondary)),
+            ]),
+          ),
+        const SizedBox(height: 4),
+        Text(
+          cancelScheduled
+              ? 'Cancelada. Tenés los beneficios hasta el '
+                  '${_formatDate(sub.currentPeriodEnd)}'
+              : sub.isPastDue
+                  ? 'Pago pendiente. Revisá tu método de pago.'
+                  : 'Se renueva el ${_formatDate(sub.currentPeriodEnd)}',
+          style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 12,
+              color: sub.isPastDue ? _softRed : _textSecondary),
+        ),
+        ..._benefitsSection(),
+        if (!cancelScheduled) ...[
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton(
+              onPressed:
+                  _cancellingSubscription ? null : _showCancelSubscriptionFlow,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: _softRed),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)),
+              ),
+              child: _cancellingSubscription
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: _softRed))
+                  : const Text('Cancelar suscripción',
+                      style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: _softRed)),
+            ),
+          ),
+        ],
+      ]);
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -444,106 +579,53 @@ class _AjustesScreenState extends State<AjustesScreen> {
               offset: const Offset(0, 2))
         ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-                color: _subscriptionActive ? _aqua : _textSecondary,
-                borderRadius: BorderRadius.circular(6)),
-            child: Text(
-              _subscriptionActive ? 'DOVIA BASIC' : 'PLAN FREE',
-              style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1),
-            ),
-          ),
-        ]),
-        const SizedBox(height: 10),
-        if (_subscriptionActive) ...[
-          RichText(
-            text: const TextSpan(children: [
-              TextSpan(
-                  text: 'Q30',
-                  style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: _textPrimary)),
-              TextSpan(
-                  text: '/mes',
-                  style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 14,
-                      color: _textSecondary)),
-            ]),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Se renueva el $renewalDate',
-            style: const TextStyle(
-                fontFamily: 'Public Sans', fontSize: 12, color: _textSecondary),
-          ),
-          const SizedBox(height: 4),
-          const Text('Tu propiedad, siempre al día.',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  color: _textSecondary)),
-          const SizedBox(height: 18),
-          // Benefits
-          _buildBenefit('2 servicios mensuales'),
-          const SizedBox(height: 4),
-          _buildBenefit('10% de descuento en cotizaciones adicionales'),
-          const SizedBox(height: 4),
-          _buildBenefit('Atención de emergencias en menos de 24h'),
-          const SizedBox(height: 4),
-          _buildBenefit('Garantía DOVIA en todos los trabajos'),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: OutlinedButton(
-              onPressed: _showCancelSubscriptionFlow,
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: _softRed),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
-              ),
-              child: const Text('Cancelar suscripción',
-                  style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: _softRed)),
-            ),
-          ),
-        ] else ...[
-          const SizedBox(height: 8),
-          const Text('No tienes ningún plan activo.',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  color: _textSecondary)),
-        ]
-      ]),
+      child: content,
     );
   }
 
-  Widget _buildBenefit(String text) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Icon(Icons.check_circle_outline, size: 15, color: _aqua),
-      const SizedBox(width: 8),
-      Expanded(
-          child: Text(text,
-              style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 12,
-                  color: _textPrimary))),
-    ]);
+  static const _benefitTexts = [
+    '2 servicios mensuales',
+    '10% de descuento en cotizaciones adicionales',
+    'Atención de emergencias en menos de 24h',
+    'Garantía DOVIA en todos los trabajos',
+  ];
+
+  List<Widget> _benefits() => [
+        for (final b in _benefitTexts) ...[
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.check_circle_outline, size: 15, color: _aqua),
+            const SizedBox(width: 8),
+            Expanded(
+                child: Text(b,
+                    style: const TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 12,
+                        color: _textPrimary))),
+          ]),
+          const SizedBox(height: 4),
+        ],
+      ];
+
+  List<Widget> _benefitsSection() => [
+        const SizedBox(height: 16),
+        ..._benefits(),
+      ];
+
+  Widget _planBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(6)),
+      child: Text(
+        text,
+        style: const TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 1),
+      ),
+    );
   }
 
   // ── TERMS MODAL ───────────────────────────────────────────────────
@@ -631,7 +713,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
   void _showCancelSubscriptionFlow() {
     _showConfirmBottomSheet(
       title: '¿Estás seguro que deseas cancelar tu suscripción?',
-      subtitle: 'Perderás acceso a los beneficios exclusivos de DOVIA BASIC.',
+      subtitle: 'Conservás los beneficios hasta el fin del período ya pagado.',
       confirmLabel: 'Continuar',
       isDestructive: true,
       onConfirm: () {
@@ -640,11 +722,20 @@ class _AjustesScreenState extends State<AjustesScreen> {
           title: '¿Por qué deseas cancelar?',
           controller: _cancelReasonCtrl,
           onConfirm: () async {
-            await widget.onCancelSubscription?.call();
-            setState(() => _subscriptionActive = false);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('Suscripción cancelada correctamente.')));
+            setState(() => _cancellingSubscription = true);
+            final result = await context
+                .read<PaymentsRepository>()
+                .cancelCurrentSubscription();
+            if (!mounted) return;
+            setState(() => _cancellingSubscription = false);
+            switch (result) {
+              case Success():
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Suscripción cancelada correctamente.'),
+                    backgroundColor: _aqua));
+              case Failure(:final message):
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(message), backgroundColor: _softRed));
             }
           },
         );

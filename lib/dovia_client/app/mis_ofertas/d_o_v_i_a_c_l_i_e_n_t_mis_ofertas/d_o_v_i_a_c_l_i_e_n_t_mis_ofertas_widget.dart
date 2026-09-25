@@ -115,7 +115,7 @@ class _DOVIACLIENTMisOfertasWidgetState
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
+                          20.0, 24.0, 20.0, 100.0),
                       child: _buildBody(),
                     ),
                   ],
@@ -131,7 +131,7 @@ class _DOVIACLIENTMisOfertasWidgetState
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 0.0, 15.0, 100.0),
+                            0.0, 0.0, 15.0, 12.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
@@ -213,12 +213,24 @@ class _DOVIACLIENTMisOfertasWidgetState
       );
     }
 
+    // Si hay alguna oferta aceptada, ese carril va primero: es lo más
+    // importante que tiene en curso el usuario.
+    final lanes = _board.inLane(ClientOfferLane.aceptada).isNotEmpty
+        ? const [
+            ClientOfferLane.aceptada,
+            ClientOfferLane.realizadas,
+            ClientOfferLane.contraoferta,
+          ]
+        : const [
+            ClientOfferLane.realizadas,
+            ClientOfferLane.contraoferta,
+            ClientOfferLane.aceptada,
+          ];
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
-        _lane(ClientOfferLane.realizadas, topPadding: 8.0),
-        _lane(ClientOfferLane.contraoferta),
-        _lane(ClientOfferLane.aceptada),
+        for (var i = 0; i < lanes.length; i++)
+          i == 0 ? _lane(lanes[i], topPadding: 8.0) : _lane(lanes[i]),
       ],
     );
   }
@@ -340,28 +352,17 @@ class _DOVIACLIENTMisOfertasWidgetState
     }
   }
 
-  /// "Ver más" del carril, en la píldora del diseño.
+  /// "Ver más" del carril: texto sin fondo, igual que en Mis Visitas.
   Widget _verMasPill(ClientOfferLane lane) {
     return InkWell(
       onTap: () => _openLaneList(lane),
-      borderRadius: BorderRadius.circular(99.0),
-      child: Container(
-        height: 30.0,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFFCCE3E4),
-          borderRadius: BorderRadius.circular(99.0),
-        ),
-        child: Text(
-          'Ver más',
-          style: FlutterFlowTheme.of(context).titleSmall.override(
-                font: GoogleFonts.publicSans(),
-                color: FlutterFlowTheme.of(context).primary,
-                fontSize: 14.0,
-                letterSpacing: 0.0,
-              ),
-        ),
+      child: Text(
+        'Ver más',
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+              color: FlutterFlowTheme.of(context).primary,
+              fontSize: 14.0,
+            ),
       ),
     );
   }

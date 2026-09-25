@@ -109,44 +109,33 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
                 updateCallback: () => safeSetState(() {}),
                 child: const CornerGradientBackgroundWidget(),
               ),
-              SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    wrapWithModel(
-                      model: _model.dOVIASHAREDHeaderModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
-                        title: 'Tu propuesta',
-                        showMap: false,
-                        showCurrency: false,
-                        showLogo: false,
-                        hideActions: true,
-                      ),
+              // El header queda fijo y la propuesta ocupa el resto: ella misma
+              // hace scroll y deja lugar para la navbar, sin espacio de más.
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  wrapWithModel(
+                    model: _model.dOVIASHAREDHeaderModel,
+                    updateCallback: () => safeSetState(() {}),
+                    child: const DOVIASHAREDHeaderWidget(
+                      title: 'Tu propuesta',
+                      showMap: false,
+                      showCurrency: false,
+                      showLogo: false,
+                      hideActions: true,
                     ),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 0.0, 0.0, 100.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: MediaQuery.sizeOf(context).height * 1.0,
-                            child: custom_widgets.ProposalScreen(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: MediaQuery.sizeOf(context).height * 1.0,
-                              state: widget.propuestaState ?? 'pending',
-                              paymentMethod: widget.paymentMethod ?? '',
-                              offerData: _offerData,
-                              ratedRoles: widget.ratedRoles ?? '',
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                  Expanded(
+                    child: custom_widgets.ProposalScreen(
+                      width: MediaQuery.sizeOf(context).width * 1.0,
+                      height: double.infinity,
+                      state: widget.propuestaState ?? 'pending',
+                      paymentMethod: widget.paymentMethod ?? '',
+                      offerData: _offerData,
+                      ratedRoles: widget.ratedRoles ?? '',
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               Align(
                 alignment: const AlignmentDirectional(0.0, 0.0),
@@ -158,7 +147,7 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 0.0, 15.0, 100.0),
+                            0.0, 0.0, 15.0, 12.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),

@@ -140,7 +140,9 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              // Aire de sobra a los costados: un título largo baja de línea
+              // antes de acercarse a la flecha o a los íconos.
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: RichText(
                 textScaler: MediaQuery.of(context).textScaler,
                 text: TextSpan(
@@ -180,11 +182,14 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
           if (widget.hideActions)
-            const SizedBox(width: 88.0)
+            // Mismo ancho que la flecha (y el logo) de la izquierda, para
+            // que el título quede centrado en la pantalla.
+            SizedBox(width: widget.showLogo ? 71.0 : 35.0)
           else
             Column(
               mainAxisSize: MainAxisSize.max,

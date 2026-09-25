@@ -97,7 +97,7 @@ class _FavoriteFolderCollageWidgetState
             return Container(
               color: const Color(0xFFE9EFF2),
               alignment: Alignment.center,
-              child: const Icon(Icons.home_outlined,
+              child: const Icon(Icons.folder_outlined,
                   size: 40, color: Color(0xFF7FA9AA)),
             );
           case 1:

@@ -407,6 +407,8 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                         title: _propertyName.isNotEmpty
                             ? 'Mi visita en $_propertyName'
                             : 'Mi visita',
+                        showCurrency: false,
+                        showMap: false,
                       ),
                     ),
                     if (_isLoading)
@@ -424,7 +426,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                             // Header row: property type + Contactar button
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 53.0, 0.0, 0.0),
+                                  0.0, 12.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -466,14 +468,14 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                     },
                                     text: 'Contactar a DOVIA',
                                     options: FFButtonOptions(
-                                      height: 40.0,
+                                      height: 34.0,
                                       padding:
                                           const EdgeInsetsDirectional.fromSTEB(
-                                              20.0, 6.0, 20.0, 6.0),
+                                              14.0, 4.0, 14.0, 4.0),
                                       iconPadding:
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
-                                      color: const Color(0x2E007376),
+                                      color: const Color(0xFFD6E8E8),
                                       textStyle: FlutterFlowTheme.of(context)
                                           .titleSmall
                                           .override(
@@ -482,11 +484,11 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                             ),
                                             color: FlutterFlowTheme.of(context)
                                                 .primaryText,
-                                            fontSize: 14.0,
+                                            fontSize: 13.0,
                                             letterSpacing: 0.0,
                                             fontWeight: FontWeight.normal,
                                           ),
-                                      elevation: 0.0,
+                                      elevation: 3.0,
                                       borderRadius: BorderRadius.circular(24.0),
                                     ),
                                   ),
@@ -511,11 +513,15 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                       : null,
                                   type: getJsonField(
                                       _propertyData, r'$.listingType'),
-                                  price: getJsonField(_propertyData,
-                                              r'$.offerOptions[0].price') !=
-                                          null
-                                      ? '${getJsonField(_propertyData, r'$.offerOptions[0].currency') ?? 'USD'} ${getJsonField(_propertyData, r'$.offerOptions[0].price')}'
-                                      : null,
+                                  // El precio viene en `price` (quetzales);
+                                  // venta o renta quedan de respaldo.
+                                  price: (getJsonField(
+                                              _propertyData, r'$.price') ??
+                                          getJsonField(_propertyData,
+                                              r'$.saleInfo.salePrice') ??
+                                          getJsonField(_propertyData,
+                                              r'$.rentInfo.monthlyRent'))
+                                      ?.toString(),
                                   landArea: castToType<double>(getJsonField(
                                       _propertyData,
                                       r'$.features.general.landArea')),
@@ -600,7 +606,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                             // Ofertar button
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 36.0, 0.0, 0.0),
+                                  0.0, 20.0, 0.0, 0.0),
                               child: FFButtonWidget(
                                 onPressed: () {
                                   context.pushNamed(
@@ -630,7 +636,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                         color: Colors.white,
                                         letterSpacing: 0.0,
                                       ),
-                                  elevation: 2.0,
+                                  elevation: 3.0,
                                   borderRadius: BorderRadius.circular(24.0),
                                 ),
                               ),
@@ -639,7 +645,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                             // Cancel visit button
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 36.0, 0.0, 0.0),
+                                  0.0, 16.0, 0.0, 0.0),
                               child: FFButtonWidget(
                                 onPressed: _isCancelling ? null : _cancelVisit,
                                 text: _isCancelling
@@ -665,7 +671,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.normal,
                                       ),
-                                  elevation: 0.0,
+                                  elevation: 3.0,
                                   borderSide: BorderSide(
                                     color: FlutterFlowTheme.of(context).primary,
                                     width: 1.0,
@@ -678,28 +684,13 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                             // Reagendar button
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 18.0, 0.0, 0.0),
+                                  0.0, 12.0, 0.0, 0.0),
                               child: FFButtonWidget(
                                 onPressed: () {
-                                  showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    enableDrag: false,
-                                    context: context,
-                                    builder: (context) {
-                                      return Padding(
-                                        padding:
-                                            MediaQuery.viewInsetsOf(context),
-                                        child: Wrap(
-                                          children: [
-                                            RescheduleVisitWidget(
-                                              visitId: widget.visitId ?? '',
-                                              visitSubstatus: _visitSubstatus,
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
+                                  showRescheduleVisitSheet(
+                                    context,
+                                    visitId: widget.visitId ?? '',
+                                    visitSubstatus: _visitSubstatus,
                                   );
                                 },
                                 text: 'Reagendar visita',
@@ -723,7 +714,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.normal,
                                       ),
-                                  elevation: 0.0,
+                                  elevation: 3.0,
                                   borderSide: BorderSide(
                                     color: FlutterFlowTheme.of(context).primary,
                                     width: 1.0,
@@ -847,9 +838,10 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
               child: Align(
-                alignment: const AlignmentDirectional(-1.0, 0.0),
+                alignment: const AlignmentDirectional(0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: onButtonPressed,
                   text: buttonLabel,
@@ -859,7 +851,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                         20.0, 0.0, 20.0, 0.0),
                     iconPadding: const EdgeInsetsDirectional.fromSTEB(
                         0.0, 0.0, 0.0, 0.0),
-                    color: const Color(0x37007376),
+                    color: const Color(0xFFD6E8E8),
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           font: GoogleFonts.publicSans(
                             fontWeight: FlutterFlowTheme.of(context)
@@ -872,7 +864,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                           color: FlutterFlowTheme.of(context).primary,
                           letterSpacing: 0.0,
                         ),
-                    elevation: 0.0,
+                    elevation: 3.0,
                     borderRadius: BorderRadius.circular(24.0),
                   ),
                 ),

@@ -106,8 +106,10 @@ class _PropiedadCaracteristicasWidgetState
 
   @override
   Widget build(BuildContext context) {
+    // Sin margen propio: el espacio lo pone quien lo ubica, así las
+    // esquinas redondeadas del contenedor coinciden con el desplegable.
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+      padding: EdgeInsets.zero,
       child: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
         decoration: const BoxDecoration(),

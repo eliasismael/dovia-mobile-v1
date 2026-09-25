@@ -93,8 +93,9 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
             children: [
               const CornerGradientBackgroundWidget(),
               Padding(
+                // Misma altura de header que el resto de las pantallas.
                 padding: const EdgeInsetsDirectional.fromSTEB(
-                    20.0, 20.0, 20.0, 20.0),
+                    20.0, 42.0, 20.0, 20.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -159,6 +160,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                           const SizedBox(width: 35.0),
                         ],
                       ),
+                      const SizedBox(height: 28.0),
                       FutureBuilder<ApiCallResponse>(
                         future: DOVIAAPIFavoriteContextGroup
                             .getFavoritesInFolderCall
@@ -194,6 +196,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                               return ListView.builder(
                                 padding: EdgeInsets.zero,
                                 shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
                                 scrollDirection: Axis.vertical,
                                 itemCount: eachFavoriteInFolder.length,
                                 itemBuilder:
@@ -461,7 +464,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 0.0, 15.0, 100.0),
+                            0.0, 0.0, 15.0, 12.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),

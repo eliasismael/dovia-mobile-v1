@@ -60,6 +60,11 @@ class _TusFavoritosCarpetasModalWidgetState
   final _foldersScroll = ScrollController();
   bool _togglingFavorite = false;
 
+  bool get _hasProperty {
+    final id = widget.houseId?.trim() ?? '';
+    return id.isNotEmpty && id != '-';
+  }
+
   Widget _propertyPhoto({required double width, required double height}) {
     const fallback = 'assets/images/casa_card_sobreMiVisita.png';
     final url = widget.propertyImage?.trim() ?? '';
@@ -80,6 +85,9 @@ class _TusFavoritosCarpetasModalWidgetState
   // Carpeta que se está guardando/quitando: muestra un spinner en su botón.
   String? _busyFolderId;
   bool _creatingFolder = false;
+
+  /// Se tocó Guardar sin nombre: el campo se muestra en error.
+  bool _nameMissing = false;
 
   static const Color _aqua = Color(0xFF007376);
 
@@ -251,8 +259,12 @@ class _TusFavoritosCarpetasModalWidgetState
 
         return Container(
           width: MediaQuery.sizeOf(context).width * 1.0,
-          // Ocupa siempre media pantalla: así entran varias carpetas a la vista.
-          height: MediaQuery.sizeOf(context).height * 0.5,
+          // La lista de carpetas ocupa media pantalla; crear una carpeta
+          // desde cero mide sólo lo que ocupa el formulario.
+          height: widget.isCreatingNewFolderPARAM == true ||
+                  _model.isCreatingNewFolder
+              ? null
+              : MediaQuery.sizeOf(context).height * 0.5,
           decoration: BoxDecoration(
             color: FlutterFlowTheme.of(context).secondaryBackground,
             boxShadow: const [
@@ -895,7 +907,7 @@ class _TusFavoritosCarpetasModalWidgetState
                         20.0, 20.0, 20.0, 20.0),
                     child: SingleChildScrollView(
                       child: Column(
-                        mainAxisSize: MainAxisSize.max,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
                             mainAxisSize: MainAxisSize.max,
@@ -907,6 +919,11 @@ class _TusFavoritosCarpetasModalWidgetState
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
+                                  // Abierto sólo para crear: Cancelar cierra.
+                                  if (widget.isCreatingNewFolderPARAM == true) {
+                                    Navigator.pop(context);
+                                    return;
+                                  }
                                   _model.isCreatingNewFolder = false;
                                   safeSetState(() {});
                                 },
@@ -941,8 +958,8 @@ class _TusFavoritosCarpetasModalWidgetState
                                     final folderName =
                                         _model.textController.text.trim();
                                     if (folderName.isEmpty) {
-                                      await _showFolderNotice('Falta el nombre',
-                                          'Escribí un nombre para la carpeta.');
+                                      // Sin pop-up: el campo se marca en rojo.
+                                      safeSetState(() => _nameMissing = true);
                                       return;
                                     }
                                     safeSetState(() => _creatingFolder = true);
@@ -1096,17 +1113,20 @@ class _TusFavoritosCarpetasModalWidgetState
                                   ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 12.0, 0.0, 0.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: _propertyPhoto(
-                                width: 187.0,
-                                height: 110.0,
+                          // Sin casa (crear carpeta desde Favoritos) no
+                          // hay foto que mostrar.
+                          if (_hasProperty)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 12.0, 0.0, 0.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: _propertyPhoto(
+                                  width: 187.0,
+                                  height: 110.0,
+                                ),
                               ),
                             ),
-                          ),
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
@@ -1114,25 +1134,12 @@ class _TusFavoritosCarpetasModalWidgetState
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
                                 'Nombre de la carpeta',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                ),
                               ),
                             ),
                           ),
@@ -1175,6 +1182,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                                   .fontStyle,
                                         ),
                                     hintText: 'Escribe el nombre de la carpeta',
+                                    errorText: _nameMissing
+                                        ? 'Escribí un nombre para la carpeta'
+                                        : null,
                                     hintStyle: FlutterFlowTheme.of(context)
                                         .labelMedium
                                         .override(
@@ -1188,7 +1198,7 @@ class _TusFavoritosCarpetasModalWidgetState
                                                     .labelMedium
                                                     .fontStyle,
                                           ),
-                                          fontSize: 10.0,
+                                          fontSize: 13.0,
                                           letterSpacing: 0.0,
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
@@ -1230,8 +1240,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     filled: true,
-                                    fillColor: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
+                                    fillColor: const Color(0xFFF2F4F5),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 14.0, vertical: 14.0),
                                   ),
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
@@ -1254,6 +1265,11 @@ class _TusFavoritosCarpetasModalWidgetState
                                             .bodyMedium
                                             .fontStyle,
                                       ),
+                                  onChanged: (_) {
+                                    if (_nameMissing) {
+                                      safeSetState(() => _nameMissing = false);
+                                    }
+                                  },
                                   cursorColor:
                                       FlutterFlowTheme.of(context).primaryText,
                                   enableInteractiveSelection: true,

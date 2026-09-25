@@ -1029,6 +1029,8 @@ class _SHOWINGPropiedadDetalleWidgetState
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  // El desplegable ya no trae margen propio.
+                                  const SizedBox(height: 20.0),
                                   Container(
                                     decoration: const BoxDecoration(),
                                     child: wrapWithModel(

@@ -350,20 +350,18 @@ class OwnerProposal {
     return 'contado';
   }
 
-  /// Avance del proceso legal, de 0 a 5, para la barra segmentada de la
-  /// tarjeta. El paso 1 es la negociación, ya cerrada en este carril.
+  /// Avance del proceso legal, de 0 a 4, para la barra segmentada de la
+  /// tarjeta: negociación (ya cerrada en este carril), estructuración del
+  /// acuerdo, firma de contrato y cierre.
   int get legalProgressSteps {
     switch (processStatus) {
       case 'completed':
-        return 5;
-      case 'contract_signing':
         return 4;
-      case 'agreement_structuring':
+      case 'contract_signing':
         return 3;
-      case 'awaiting_legal_review':
-        return 2;
       default:
-        return 2; // recién aceptada, a la espera del asociado legal
+        // Recién aceptada, esperando al asociado legal o estructurando.
+        return 2;
     }
   }
 

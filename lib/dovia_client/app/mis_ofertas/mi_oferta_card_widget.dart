@@ -205,7 +205,7 @@ class MiOfertaCardWidget extends StatelessWidget {
   /// Barra segmentada de 5 pasos del proceso legal, la misma trazabilidad que
   /// ve el propietario en su carril de ofertas aceptadas.
   Widget _progressBar() {
-    const totalSteps = 5;
+    const totalSteps = 4;
     final filled = offer.legalProgressSteps.clamp(0, totalSteps);
     return ClipRRect(
       borderRadius: BorderRadius.circular(100.0),

@@ -167,7 +167,7 @@ class PropuestaRecienteCardWidget extends StatelessWidget {
   /// Barra segmentada de 5 pasos del proceso legal (mismo comportamiento que
   /// ve el comprador en su carril de "Oferta aceptada").
   Widget _progressBar() {
-    const totalSteps = 5;
+    const totalSteps = 4;
     final filled = proposal.legalProgressSteps.clamp(0, totalSteps);
     return ClipRRect(
       borderRadius: BorderRadius.circular(100.0),

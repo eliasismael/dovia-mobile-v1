@@ -38,18 +38,38 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
     super.dispose();
   }
 
+  /// Abre el chat con soporte (desde "Mensajes" o "Hacer una pregunta").
+  Future<void> _openChat() async {
+    await showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: false,
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: MediaQuery.viewInsetsOf(context),
+          child: const DoviaSuupportMessagesWidget(),
+        );
+      },
+    ).then((value) => safeSetState(() {}));
+  }
+
   @override
   Widget build(BuildContext context) {
     // La hoja ocupa el alto que le da quien la abre. El panel pedía el alto de
     // la pantalla entera, así que en las pantallas que lo limitan al 70 %
     // —Ajustes, el perfil de lister— desbordaba justo ese 30 % restante.
+    // La hoja se abre a pantalla completa y el bottom sheet le saca los
+    // márgenes del sistema, así que se toman de la ventana: la barra de
+    // estado arriba y los botones de Android abajo.
+    final view = MediaQueryData.fromView(View.of(context));
+    final safeTop = view.viewPadding.top;
+    final safeBottom = view.viewPadding.bottom;
     return Stack(
       alignment: const AlignmentDirectional(0.0, 1.0),
       children: [
         Container(
           // Se abre desde abajo: el contenido termina sobre los botones de Android.
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
           decoration: BoxDecoration(
             color: FlutterFlowTheme.of(context).tertiary,
             borderRadius: BorderRadius.circular(18.0),
@@ -72,8 +92,8 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
             child: Padding(
               // El 120 de abajo reserva la franja donde flota la barra de
               // Inicio / Mensajes, apoyada al fondo del Stack.
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 120.0),
+              padding: EdgeInsetsDirectional.fromSTEB(
+                  20.0, safeTop + 24.0, 20.0, 120.0 + safeBottom),
               // Con la hoja recortada el contenido no siempre entra, así
               // que rueda en vez de desbordar.
               child: SingleChildScrollView(
@@ -165,78 +185,87 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           0.0, 27.0, 0.0, 0.0),
-                      child: Container(
-                        width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: 100.0,
-                        decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          boxShadow: const [
-                            BoxShadow(
-                              blurRadius: 4.0,
-                              color: Color(0x33000000),
-                              offset: Offset(
-                                0.0,
-                                2.0,
+                      child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: _openChat,
+                          child: Container(
+                            width: MediaQuery.sizeOf(context).width * 1.0,
+                            height: 100.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              boxShadow: const [
+                                BoxShadow(
+                                  blurRadius: 4.0,
+                                  color: Color(0x33000000),
+                                  offset: Offset(
+                                    0.0,
+                                    2.0,
+                                  ),
+                                )
+                              ],
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  14.0, 14.0, 14.0, 14.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Hacer una pregunta',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.bold,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                          lineHeight: 1.5,
+                                        ),
+                                  ),
+                                  Text(
+                                    'Chatea con servicio al cliente',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          fontSize: 12.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                  ),
+                                ],
                               ),
-                            )
-                          ],
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              14.0, 14.0, 14.0, 14.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Hacer una pregunta',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                      lineHeight: 1.5,
-                                    ),
-                              ),
-                              Text(
-                                'Chatea con servicio al cliente',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 12.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                            ),
+                          )),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
@@ -298,8 +327,8 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
           ),
         ),
         Padding(
-          padding:
-              const EdgeInsetsDirectional.fromSTEB(20.0, 120.0, 20.0, 20.0),
+          padding: EdgeInsetsDirectional.fromSTEB(
+              20.0, 120.0, 20.0, 20.0 + safeBottom),
           child: Container(
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).tertiary,
@@ -373,20 +402,7 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
                     focusColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
-                    onTap: () async {
-                      await showModalBottomSheet(
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        enableDrag: false,
-                        context: context,
-                        builder: (context) {
-                          return Padding(
-                            padding: MediaQuery.viewInsetsOf(context),
-                            child: const DoviaSuupportMessagesWidget(),
-                          );
-                        },
-                      ).then((value) => safeSetState(() {}));
-                    },
+                    onTap: _openChat,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

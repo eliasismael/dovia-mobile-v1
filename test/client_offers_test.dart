@@ -206,12 +206,12 @@ void main() {
           processStatus: processStatus,
         )).legalProgressSteps;
 
-    test('la barra avanza con los cinco pasos reales', () {
+    test('la barra avanza con los cuatro pasos reales', () {
       expect(steps(null), 2, reason: 'recien aceptada');
       expect(steps('awaiting_legal_review'), 2);
-      expect(steps('agreement_structuring'), 3);
-      expect(steps('contract_signing'), 4);
-      expect(steps('completed'), 5);
+      expect(steps('agreement_structuring'), 2);
+      expect(steps('contract_signing'), 3);
+      expect(steps('completed'), 4);
     });
 
     test('solo completed cierra el proceso', () {
@@ -241,9 +241,9 @@ void main() {
               updatedAt: '2026-08-25T10:00:00.000Z'),
         ]);
 
-    test('"Ofertas realizadas" es el pipeline general: las lleva todas', () {
+    test('"Ofertas realizadas" lleva todas menos las aceptadas', () {
       expect(board().inLane(ClientOfferLane.realizadas).map((o) => o.offerId),
-          ['d', 'b', 'a', 'c']);
+          ['d', 'b', 'a']);
     });
 
     test('los otros dos carriles son subconjuntos suyos', () {
@@ -256,7 +256,7 @@ void main() {
     test('ordena de la mas reciente a la mas vieja', () {
       final realizadas = board().inLane(ClientOfferLane.realizadas);
       expect(realizadas.first.offerId, 'd');
-      expect(realizadas.last.offerId, 'c');
+      expect(realizadas.last.offerId, 'a');
     });
 
     test('el carrusel acota cuantas tarjetas muestra', () {

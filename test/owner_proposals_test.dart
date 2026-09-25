@@ -366,7 +366,7 @@ void main() {
   });
 
   group('Proceso legal', () {
-    test('avanza la barra segun los cinco pasos reales del proceso', () {
+    test('avanza la barra segun los cuatro pasos reales del proceso', () {
       int steps(String? processStatus) => OwnerProposal.fromJson(_offer(
             offerStatus: 'ACCEPTED',
             processStatus: processStatus,
@@ -375,9 +375,9 @@ void main() {
       // 1 es la negociacion, ya cerrada en este carril.
       expect(steps(null), 2, reason: 'recien aceptada');
       expect(steps('awaiting_legal_review'), 2);
-      expect(steps('agreement_structuring'), 3);
-      expect(steps('contract_signing'), 4);
-      expect(steps('completed'), 5);
+      expect(steps('agreement_structuring'), 2);
+      expect(steps('contract_signing'), 3);
+      expect(steps('completed'), 4);
     });
 
     test('reconoce la calificacion en las formas que puede mandar el backend',

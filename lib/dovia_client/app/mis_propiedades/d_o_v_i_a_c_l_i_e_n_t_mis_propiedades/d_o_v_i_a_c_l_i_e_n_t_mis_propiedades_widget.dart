@@ -236,11 +236,11 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                 options: FFButtonOptions(
                                   height: 40.0,
                                   padding: const EdgeInsetsDirectional.fromSTEB(
-                                      20.0, 0.0, 20.0, 0.0),
+                                      26.0, 0.0, 26.0, 0.0),
                                   iconPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 0.0, 0.0, 0.0),
-                                  color: const Color(0x30007376),
+                                  color: FlutterFlowTheme.of(context).primary,
                                   textStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .override(
@@ -254,8 +254,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                   .titleSmall
                                                   .fontStyle,
                                         ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
+                                        color: Colors.white,
                                         letterSpacing: 0.0,
                                         fontWeight: FlutterFlowTheme.of(context)
                                             .titleSmall
@@ -330,6 +329,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                         ListView.separated(
                                           padding: EdgeInsets.zero,
                                           shrinkWrap: true,
+                                          // La lista crece dentro del scroll
+                                          // de la pantalla: sin scroll propio
+                                          // para que el gesto sobre las cards
+                                          // mueva la página.
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
                                           scrollDirection: Axis.vertical,
                                           itemCount: _showAllPublished
                                               ? filteredPublished.length
@@ -373,6 +378,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                 },
                                                 child: custom_widgets
                                                     .DoviaClientHouseCard(
+                                                  showFavorite: false,
                                                   width:
                                                       MediaQuery.sizeOf(context)
                                                               .width *
@@ -391,7 +397,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                       eachOwnPropertyItem,
                                                       r'''$.listingType'''),
                                                   price:
-                                                      '${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].currency''')?.toString() ?? 'USD'} ${getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].price''')?.toString() ?? '0'}',
+                                                      '${getJsonField(eachOwnPropertyItem, r'''$.price''') ?? getJsonField(eachOwnPropertyItem, r'''$.saleInfo.salePrice''') ?? getJsonField(eachOwnPropertyItem, r'''$.rentInfo.monthlyRent''') ?? getJsonField(eachOwnPropertyItem, r'''$.offerOptions[0].price''') ?? 0}',
                                                   landArea: castToType<double>(
                                                       getJsonField(
                                                           eachOwnPropertyItem,
@@ -819,7 +825,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 0.0, 15.0, 100.0),
+                            0.0, 0.0, 15.0, 12.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),
@@ -902,29 +908,22 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                   ],
                 ],
               ),
-              FFButtonWidget(
-                onPressed: () async {
+              // "Ver más" como texto, igual que en las otras pantallas.
+              InkWell(
+                onTap: () async {
                   await context.pushNamed(
                       DOVIACLIENTPropuestasRecientesWidget.routeName);
                   if (!mounted) return;
                   await _loadProposals();
                 },
-                text: 'Ver más',
-                options: FFButtonOptions(
-                  height: 30.0,
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      20.0, 0.0, 20.0, 0.0),
-                  iconPadding:
-                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                  color: const Color(0xFFCCE3E4),
-                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                        font: GoogleFonts.publicSans(),
+                child: Text(
+                  'Ver más',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font:
+                            GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                         color: FlutterFlowTheme.of(context).primary,
                         fontSize: 14.0,
-                        letterSpacing: 0.0,
                       ),
-                  elevation: 0.0,
-                  borderRadius: BorderRadius.circular(99.0),
                 ),
               ),
             ],

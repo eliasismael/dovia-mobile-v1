@@ -1,3 +1,4 @@
+import '/shared_components/dovia_bottom_sheet/dovia_bottom_sheet.dart';
 import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
@@ -6,7 +7,6 @@ import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favorit
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
@@ -77,6 +77,21 @@ class _DOVIACLIENTMisFavoritosWidgetState
   String _modalImage(dynamic house) => house is Map
       ? firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? ''
       : '';
+
+  /// "Ver más" como texto sin fondo, igual que en Mis Visitas y Mis Ofertas.
+  Widget _verMasLink({required VoidCallback onTap, required String text}) {
+    return InkWell(
+      onTap: onTap,
+      child: Text(
+        text,
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+              color: FlutterFlowTheme.of(context).primary,
+              fontSize: 14.0,
+            ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,100 +167,13 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                 Row(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    FFButtonWidget(
-                                      onPressed: () {
+                                    _verMasLink(
+                                      onTap: () {
                                         context.pushNamed(
                                             DOVIACLIENTMisFavoritosCarpetasWidget
                                                 .routeName);
                                       },
                                       text: 'Ver más',
-                                      options: FFButtonOptions(
-                                        height: 30.0,
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(20.0, 0.0, 20.0, 0.0),
-                                        iconPadding: const EdgeInsetsDirectional
-                                            .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                        color: const Color(0x30007376),
-                                        textStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .override(
-                                              font: GoogleFonts.publicSans(
-                                                fontWeight: FontWeight.normal,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .fontStyle,
-                                              ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              fontSize: 14.0,
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.normal,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontStyle,
-                                            ),
-                                        elevation: 0.0,
-                                        borderRadius:
-                                            BorderRadius.circular(24.0),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              8.0, 0.0, 0.0, 0.0),
-                                      child: InkWell(
-                                        splashColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        onTap: () async {
-                                          await showModalBottomSheet(
-                                            isScrollControlled: true,
-                                            backgroundColor: Colors.transparent,
-                                            enableDrag: false,
-                                            context: context,
-                                            builder: (context) {
-                                              return GestureDetector(
-                                                onTap: () =>
-                                                    FocusScope.of(context)
-                                                        .unfocus(),
-                                                child: Padding(
-                                                  padding:
-                                                      MediaQuery.viewInsetsOf(
-                                                          context),
-                                                  child:
-                                                      const TusFavoritosCarpetasModalWidget(
-                                                    isCreatingNewFolderPARAM:
-                                                        true,
-                                                    houseId: '',
-                                                    propertyName: '',
-                                                    propertyImage: '',
-                                                    propertyIsFavorite: false,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ).then(
-                                              (value) => safeSetState(() {}));
-                                        },
-                                        child: Container(
-                                          width: 30.0,
-                                          height: 30.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .primary,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.add,
-                                            color: Colors.white,
-                                            size: 20.0,
-                                          ),
-                                        ),
-                                      ),
                                     ),
                                   ],
                                 ),
@@ -370,6 +298,33 @@ class _DOVIACLIENTMisFavoritosWidgetState
                           ),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 20.0, 0.0, 0.0),
+                            child: wrapWithModel(
+                              model: _model.primaryButtonModel,
+                              updateCallback: () => safeSetState(() {}),
+                              child: PrimaryButtonWidget(
+                                text: 'Crear carpeta',
+                                onTap: () {
+                                  // Sin await: el botón no queda con spinner
+                                  // mientras el modal está abierto.
+                                  showDoviaBottomSheet(
+                                    context,
+                                    child:
+                                        const TusFavoritosCarpetasModalWidget(
+                                      isCreatingNewFolderPARAM: true,
+                                      houseId: '-',
+                                      propertyName: '-',
+                                      propertyImage: '',
+                                      propertyIsFavorite: false,
+                                    ),
+                                  ).then((value) => safeSetState(() {}));
+                                  return Future.value();
+                                },
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 30.0, 0.0, 0.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -402,8 +357,8 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                         ),
                                   ),
                                 ),
-                                FFButtonWidget(
-                                  onPressed: () {
+                                _verMasLink(
+                                  onTap: () {
                                     setState(() {
                                       _showAllDefaultFavorites =
                                           !_showAllDefaultFavorites;
@@ -412,38 +367,6 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                   text: _showAllDefaultFavorites
                                       ? 'Ver menos'
                                       : 'Ver más',
-                                  options: FFButtonOptions(
-                                    height: 30.0,
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            20.0, 0.0, 20.0, 0.0),
-                                    iconPadding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 0.0, 0.0, 0.0),
-                                    color: const Color(0x30007376),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          font: GoogleFonts.publicSans(
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          fontSize: 14.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(24.0),
-                                  ),
                                 ),
                               ],
                             ),
@@ -497,6 +420,11 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                   return ListView.builder(
                                     padding: EdgeInsets.zero,
                                     shrinkWrap: true,
+                                    // Crece dentro del scroll de la pantalla:
+                                    // sin scroll propio, el gesto sobre una
+                                    // tarjeta mueve la página.
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     scrollDirection: Axis.vertical,
                                     itemCount: _showAllDefaultFavorites
                                         ? favoriteHouse.length
@@ -637,46 +565,6 @@ class _DOVIACLIENTMisFavoritosWidgetState
                               );
                             },
                           ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.primaryButtonModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: PrimaryButtonWidget(
-                                text: 'Crear carpeta',
-                                onTap: () async {
-                                  await showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    enableDrag: false,
-                                    context: context,
-                                    builder: (context) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          FocusScope.of(context).unfocus();
-                                          FocusManager.instance.primaryFocus
-                                              ?.unfocus();
-                                        },
-                                        child: Padding(
-                                          padding:
-                                              MediaQuery.viewInsetsOf(context),
-                                          child:
-                                              const TusFavoritosCarpetasModalWidget(
-                                            isCreatingNewFolderPARAM: true,
-                                            houseId: '-',
-                                            propertyName: '-',
-                                            propertyImage: '',
-                                            propertyIsFavorite: false,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ).then((value) => safeSetState(() {}));
-                                },
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -693,7 +581,7 @@ class _DOVIACLIENTMisFavoritosWidgetState
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 0.0, 15.0, 100.0),
+                            0.0, 0.0, 15.0, 12.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),

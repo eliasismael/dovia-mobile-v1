@@ -51,14 +51,15 @@ class _MisPropiedadesHouseCardWidgetState
     final typeName =
         getJsonField(widget.property, r'''$.propertyType.name''') as String? ??
             'Casa';
-    final propPrice =
-        getJsonField(widget.property, r'''$.offerOptions[0].price''')
-                ?.toString() ??
-            '0';
-    final currency =
-        getJsonField(widget.property, r'''$.offerOptions[0].currency''')
-                ?.toString() ??
-            'USD';
+    // El precio del backend es siempre en quetzales (`price`); los campos
+    // viejos quedan como respaldo.
+    final propPrice = (getJsonField(widget.property, r'''$.price''') ??
+            getJsonField(widget.property, r'''$.saleInfo.salePrice''') ??
+            getJsonField(widget.property, r'''$.rentInfo.monthlyRent''') ??
+            getJsonField(widget.property, r'''$.offerOptions[0].price''') ??
+            0)
+        .toString();
+    const currency = 'Q';
     final bedrooms =
         getJsonField(widget.property, r'''$.features.general.bedrooms''')
                 ?.toString() ??
@@ -252,7 +253,7 @@ class _MisPropiedadesHouseCardWidgetState
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           0.0, 8.0, 0.0, 0.0),
                       child: Text(
-                        '$currency ${NumberFormat.decimalPattern().format(int.tryParse(propPrice) ?? 0)}',
+                        '$currency ${NumberFormat.decimalPattern().format(num.tryParse(propPrice)?.round() ?? 0)}',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               font: GoogleFonts.inter(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -522,7 +523,7 @@ class _MisPropiedadesHouseCardWidgetState
                       lineHeight: 12.0,
                       animation: true,
                       animateFromLastPercent: true,
-                      progressColor: const Color(0xFF32D74B),
+                      progressColor: const Color(0xFF007376),
                       backgroundColor: FlutterFlowTheme.of(context)
                           .secondaryText
                           .withOpacity(0.2),

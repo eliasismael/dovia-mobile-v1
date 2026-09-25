@@ -4,6 +4,55 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 
+/// Abre el pop-up de reagendar como hoja inferior de Dovia: esquinas de
+/// arriba redondeadas, sombra, fondo oscurecido y animaciones suaves. Al
+/// cerrarse sube apenas un instante y después baja.
+Future<bool?> showRescheduleVisitSheet(
+  BuildContext context, {
+  required String visitId,
+  String visitSubstatus = '',
+}) {
+  return showGeneralDialog<bool>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'Cerrar',
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 520),
+    pageBuilder: (ctx, _, __) => Align(
+      alignment: Alignment.bottomCenter,
+      child: RescheduleVisitWidget(
+        visitId: visitId,
+        visitSubstatus: visitSubstatus,
+      ),
+    ),
+    transitionBuilder: (ctx, animation, _, child) {
+      final closing = animation.status == AnimationStatus.reverse;
+      final Animation<Offset> offset = closing
+          // Al cerrar (la animación va de 1 a 0): primero sube un poco y
+          // enseguida baja hasta salir.
+          ? TweenSequence<Offset>([
+              // Tramo final del cierre: cae de golpe hasta salir.
+              TweenSequenceItem(
+                tween: Tween(
+                        begin: const Offset(0, 1), end: const Offset(0, -0.05))
+                    .chain(CurveTween(curve: Curves.easeOutCubic)),
+                weight: 55,
+              ),
+              // Primer tramo del cierre: sube despacio un momento.
+              TweenSequenceItem(
+                tween: Tween(begin: const Offset(0, -0.05), end: Offset.zero)
+                    .chain(CurveTween(curve: Curves.easeIn)),
+                weight: 45,
+              ),
+            ]).animate(animation)
+          : Tween(begin: const Offset(0, 1), end: Offset.zero)
+              .chain(CurveTween(curve: Curves.easeOutCubic))
+              .animate(animation);
+      return SlideTransition(position: offset, child: child);
+    },
+  );
+}
+
 class RescheduleVisitWidget extends StatefulWidget {
   final String visitId;
 
@@ -228,12 +277,29 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: lightGrey,
-      child: SafeArea(
-        child: _canReschedule || _isRescheduleRequested
-            ? _buildForm()
-            : _buildBlockedInfo(),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: double.infinity,
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.9),
+        decoration: const BoxDecoration(
+          color: lightGrey,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 24,
+              color: Color(0x40000000),
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: _canReschedule || _isRescheduleRequested
+              ? _buildForm()
+              : _buildBlockedInfo(),
+        ),
       ),
     );
   }
@@ -273,32 +339,40 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Close
-          Align(
-            alignment: Alignment.topRight,
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: const Icon(Icons.close, size: 24, color: darkTextColor),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Icon
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE8F5F5),
-              shape: BoxShape.circle,
-            ),
-            child:
-                const Icon(Icons.event_repeat, size: 40, color: primaryColor),
+          // Ícono centrado; la X queda arriba a la derecha.
+          Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              // Ocupa todo el ancho para que la X quede en el borde.
+              const SizedBox(width: double.infinity),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE8F5F5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.event_repeat,
+                    size: 40, color: primaryColor),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child:
+                      const Icon(Icons.close, size: 24, color: darkTextColor),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
 
           const Text(
             'Solicitar reagendamiento',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 20,
@@ -311,6 +385,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
 
           const Text(
             'Tu visita ya está confirmada. Si deseas reagendar, puedes enviar una solicitud para proponer nuevos horarios.',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 14,
@@ -415,68 +490,70 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: Icon(Icons.close, size: 24, color: darkTextColor),
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: Icon(Icons.close, size: 24, color: darkTextColor),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Reagendar visita',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: darkTextColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Selecciona hasta 3 nuevas fechas y horas de preferencia en orden prioritario:',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: darkTextColor,
-                  height: 1.36,
-                ),
-              ),
-              const SizedBox(height: 12),
-              RichText(
-                text: const TextSpan(
+                const SizedBox(height: 8),
+                const Text(
+                  'Reagendar visita',
                   style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 14,
-                      color: darkTextColor),
-                  children: [
-                    TextSpan(text: 'Selecciona '),
-                    TextSpan(
-                      text: '2 fechas obligatorias',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(text: ' y una opcional'),
-                  ],
+                    fontFamily: 'Public Sans',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: darkTextColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              _buildSlot(0, isRequired: true),
-              const SizedBox(height: 16),
-              _buildSlot(1, isRequired: true),
-              const SizedBox(height: 16),
-              _buildSlot(2, isRequired: false),
-              const SizedBox(height: 24),
-            ],
+                const SizedBox(height: 12),
+                const Text(
+                  'Selecciona hasta 3 nuevas fechas y horas de preferencia en orden prioritario:',
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: darkTextColor,
+                    height: 1.36,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                RichText(
+                  text: const TextSpan(
+                    style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 14,
+                        color: darkTextColor),
+                    children: [
+                      TextSpan(text: 'Selecciona '),
+                      TextSpan(
+                        text: '2 fechas obligatorias',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      TextSpan(text: ' y una opcional'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSlot(0, isRequired: true),
+                const SizedBox(height: 16),
+                _buildSlot(1, isRequired: true),
+                const SizedBox(height: 16),
+                _buildSlot(2, isRequired: false),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
         if (_errorMessage != null)

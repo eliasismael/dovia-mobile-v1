@@ -1,3 +1,7 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import '/domain/property_owner.dart';
+import 'dart:async';
+
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -71,12 +75,35 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   /// Cuantas tarjetas muestra cada carrusel del Home.
   static const int _carouselSize = 5;
 
-  /// Pagina que esta viendo cada carrusel, por clave.
+  /// Cuántos bloques extra de [_carouselSize] cargó cada carrusel, por clave.
+  /// Los bloques se acumulan: el carrusel muestra todo lo cargado y se
+  /// recorre libremente con el gesto.
   final Map<String, int> _carouselPages = <String, int>{};
+
+  /// Scroll horizontal de cada carrusel, por clave.
+  final Map<String, ScrollController> _carouselControllers =
+      <String, ScrollController>{};
+
+  /// Ancho de una tarjeta más la separación entre tarjetas.
+  static const double _carouselItemExtent = 210.0 + 16.0;
+
+  ScrollController _carouselController(String carouselKey) =>
+      _carouselControllers.putIfAbsent(carouselKey, ScrollController.new);
+
+  /// Vuelve todos los carruseles al principio (cambió el filtro).
+  void _resetCarousels() {
+    _carouselPages.clear();
+    for (final controller in _carouselControllers.values) {
+      if (controller.hasClients) controller.jumpTo(0);
+    }
+  }
 
   /// Los botones Comprar y Rentar filtran los carruseles por tipo de
   /// operacion. Sin ninguno seleccionado se muestran todas las propiedades.
   List<dynamic> _filterByListingType(List<dynamic> houses) {
+    // El usuario no ve sus propias publicaciones ni en los carruseles ni en
+    // la búsqueda.
+    houses = houses.where((house) => !isOwnProperty(house)).toList();
     final selected = _model.comprarORentar;
     if (selected.isEmpty) {
       return houses;
@@ -93,19 +120,164 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     }).toList();
   }
 
-  /// El bloque de propiedades que le toca mostrar al carrusel.
-  List<dynamic> _carouselPage(String carouselKey, List<dynamic> houses) {
-    final start = (_carouselPages[carouselKey] ?? 0) * _carouselSize;
-    if (start >= houses.length) {
-      return houses.take(_carouselSize).toList();
-    }
-    return houses.skip(start).take(_carouselSize).toList();
+  static const _listingHintKey = 'home_listing_hint_seen';
+  bool _showListingHint = false;
+
+  Future<void> _loadListingHint() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(
+        () => _showListingHint = !(prefs.getBool(_listingHintKey) ?? false));
   }
 
-  void _moveCarousel(String carouselKey, int step) {
-    final page = (_carouselPages[carouselKey] ?? 0) + step;
-    _carouselPages[carouselKey] = page < 0 ? 0 : page;
+  Future<void> _dismissListingHint() async {
+    if (!_showListingHint) return;
+    setState(() => _showListingHint = false);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_listingHintKey, true);
+  }
+
+  /// Botón Comprar/Rentar. Seleccionado: verde oscuro con texto e ícono
+  /// blancos. Si el otro está seleccionado, queda gris como desactivado.
+  /// Los cambios se animan.
+  Widget _listingToggle(String value, String label, String asset) {
+    const duration = Duration(milliseconds: 450);
+    const curve = Curves.easeInOutCubic;
+    const dark = Color(0xFF007376);
+    const grey = Color(0xFF9E9E9E);
+    final selected = _model.comprarORentar == value;
+    final otherSelected = _model.comprarORentar.isNotEmpty && !selected;
+    final theme = FlutterFlowTheme.of(context);
+    final Color background = selected
+        ? dark
+        : otherSelected
+            ? const Color(0xFFF0F0F0)
+            : const Color(0xFFE6ECED);
+    final Color foreground = selected
+        ? Colors.white
+        : otherSelected
+            ? grey
+            : theme.primaryText;
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 10.0),
+      child: GestureDetector(
+        onTap: () {
+          _dismissListingHint();
+          _handleRestrictedAction(() {
+            _model.comprarORentar = selected ? '' : value;
+            _resetCarousels();
+            safeSetState(() {});
+          });
+        },
+        child: AnimatedScale(
+          scale: selected ? 1.03 : 1.0,
+          duration: duration,
+          curve: curve,
+          child: AnimatedContainer(
+            duration: duration,
+            curve: curve,
+            width: 144.0,
+            height: 34.0,
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: BorderRadius.circular(24.0),
+              boxShadow: [
+                BoxShadow(
+                  color: selected
+                      ? const Color(0x33000000)
+                      : const Color(0x00000000),
+                  blurRadius: 10.0,
+                  offset: const Offset(0.0, 3.0),
+                ),
+              ],
+            ),
+            child: TweenAnimationBuilder<Color?>(
+              tween: ColorTween(end: foreground),
+              duration: duration,
+              curve: curve,
+              builder: (context, color, _) => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    asset,
+                    width: 20.0,
+                    height: 20.0,
+                    fit: BoxFit.cover,
+                    // El ícono siempre toma el color del texto: el SVG del
+                    // carrito es claro y no se veía sobre el fondo.
+                    colorFilter: color == null
+                        ? null
+                        : ColorFilter.mode(color, BlendMode.srcIn),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    label,
+                    style: theme.bodyMedium.override(
+                      font: GoogleFonts.inter(
+                        fontWeight:
+                            selected ? FontWeight.w500 : FontWeight.normal,
+                      ),
+                      color: color,
+                      fontSize: 14.0,
+                      letterSpacing: 0.0,
+                      fontWeight:
+                          selected ? FontWeight.w500 : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Las propiedades cargadas hasta ahora en el carrusel.
+  List<dynamic> _carouselPage(String carouselKey, List<dynamic> houses) {
+    final loaded = ((_carouselPages[carouselKey] ?? 0) + 1) * _carouselSize;
+    return houses.take(loaded).toList();
+  }
+
+  /// Carga el siguiente bloque y lleva el carrusel a su primera tarjeta.
+  void _loadMoreCarousel(String carouselKey, int total,
+      {bool scrollToNew = false}) {
+    final page = _carouselPages[carouselKey] ?? 0;
+    final loaded = (page + 1) * _carouselSize;
+    if (loaded >= total) return;
+    _carouselPages[carouselKey] = page + 1;
     safeSetState(() {});
+    // Con el gesto no se mueve nada: las nuevas ya están cargadas antes de
+    // llegar al borde y el scroll sigue de forma natural. Sólo la flecha
+    // lleva a la primera de las nuevas.
+    if (!scrollToNew) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = _carouselControllers[carouselKey];
+      if (controller == null || !controller.hasClients) return;
+      final target = (loaded * _carouselItemExtent)
+          .clamp(0.0, controller.position.maxScrollExtent);
+      controller.animateTo(target,
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOutCubic);
+    });
+  }
+
+  /// Las flechas avanzan o retroceden un ancho de pantalla; al llegar al
+  /// final, la de avanzar carga el bloque siguiente.
+  void _moveCarousel(String carouselKey, int step, int total) {
+    final controller = _carouselController(carouselKey);
+    if (!controller.hasClients) return;
+    final position = controller.position;
+    if (step > 0 && position.pixels >= position.maxScrollExtent - 1) {
+      _loadMoreCarousel(carouselKey, total, scrollToNew: true);
+      return;
+    }
+    final target = (position.pixels + step * position.viewportDimension)
+        .clamp(0.0, position.maxScrollExtent);
+    controller.animateTo(target,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeInOutCubic);
   }
 
   /// Flecha discreta dentro de un circulo claro.
@@ -143,44 +315,67 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   }
 
   /// Las flechas van superpuestas al carrusel para no robarle ancho a la
-  /// pantalla. La de volver solo aparece cuando hay algo atras.
+  /// pantalla. La de volver solo aparece cuando hay algo atras. Al llegar al
+  /// final con el gesto se cargan solas las siguientes propiedades.
   Widget _withCarouselArrows({
     required String carouselKey,
     required int total,
     required Widget child,
   }) {
-    final page = _carouselPages[carouselKey] ?? 0;
-    final hasPrevious = page > 0;
-    final hasNext = (page + 1) * _carouselSize < total;
+    final controller = _carouselController(carouselKey);
+    bool hasMore() =>
+        ((_carouselPages[carouselKey] ?? 0) + 1) * _carouselSize < total;
 
     return Stack(
       children: [
-        // La clave cambia con la pagina para que el carrusel vuelva a
-        // arrancar desde la izquierda al avanzar o retroceder.
-        KeyedSubtree(
-          key: ValueKey('$carouselKey-$page'),
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.axis != Axis.horizontal) return false;
+            // Scroll infinito estándar: se carga el bloque siguiente un poco
+            // antes de llegar al final, así nunca se siente el tope.
+            final nearEnd = notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 2 * _carouselItemExtent;
+            if (notification is ScrollUpdateNotification &&
+                nearEnd &&
+                hasMore()) {
+              _loadMoreCarousel(carouselKey, total);
+            }
+            return false;
+          },
           child: child,
         ),
-        if (hasPrevious)
-          Positioned.fill(
-            child: Align(
-              alignment: const AlignmentDirectional(-1.0, 0.0),
-              child: _carouselArrow(
-                icon: Icons.chevron_left,
-                onTap: () => _moveCarousel(carouselKey, -1),
+        AnimatedBuilder(
+          animation: controller,
+          builder: (context, _) {
+            final hasClients = controller.hasClients;
+            final pixels = hasClients ? controller.position.pixels : 0.0;
+            final max = hasClients ? controller.position.maxScrollExtent : 0.0;
+            final hasPrevious = pixels > 1;
+            final hasNext = pixels < max - 1 || hasMore();
+            return Positioned.fill(
+              child: Stack(
+                children: [
+                  if (hasPrevious)
+                    Align(
+                      alignment: const AlignmentDirectional(-1.0, 0.0),
+                      child: _carouselArrow(
+                        icon: Icons.chevron_left,
+                        onTap: () => _moveCarousel(carouselKey, -1, total),
+                      ),
+                    ),
+                  if (hasNext)
+                    Align(
+                      alignment: const AlignmentDirectional(1.0, 0.0),
+                      child: _carouselArrow(
+                        icon: Icons.chevron_right,
+                        onTap: () => _moveCarousel(carouselKey, 1, total),
+                      ),
+                    ),
+                ],
               ),
-            ),
-          ),
-        if (hasNext)
-          Positioned.fill(
-            child: Align(
-              alignment: const AlignmentDirectional(1.0, 0.0),
-              child: _carouselArrow(
-                icon: Icons.chevron_right,
-                onTap: () => _moveCarousel(carouselKey, 1),
-              ),
-            ),
-          ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -251,6 +446,454 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     });
   }
 
+  // ── Búsqueda del Home ─────────────────────────────────────────────────
+  // Al empezar a escribir se traen de nuevo todas las propiedades publicadas
+  // y se filtran en la app por nombre, descripción, dirección, tipo y precio.
+  // Mientras hay texto, los carruseles se reemplazan por uno solo con las
+  // coincidencias.
+
+  String _searchQuery = '';
+  Timer? _searchDebounce;
+  List<dynamic>? _searchPool;
+  bool _searchLoading = false;
+  String? _searchError;
+  int _searchRequest = 0;
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    final query = value.trim();
+    if (query.isEmpty) {
+      // Se borró la búsqueda: la próxima vuelve a pedir las propiedades.
+      _searchRequest++;
+      safeSetState(() {
+        _searchQuery = '';
+        _searchPool = null;
+        _searchLoading = false;
+        _searchError = null;
+      });
+      return;
+    }
+    if (_searchQuery.isEmpty && _searchPool == null && !_searchLoading) {
+      _fetchSearchPool();
+    }
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      _carouselPages.remove('busqueda');
+      final c = _carouselControllers['busqueda'];
+      if (c != null && c.hasClients) c.jumpTo(0);
+      safeSetState(() => _searchQuery = query);
+    });
+  }
+
+  Future<void> _fetchSearchPool() async {
+    final request = ++_searchRequest;
+    safeSetState(() {
+      _searchLoading = true;
+      _searchError = null;
+    });
+    const pageSize = 100;
+    final all = <dynamic>[];
+    String? error;
+    for (var page = 1; page <= 20; page++) {
+      final res = await DOVIAAPIPropertyContextGroup.listPropertiesCall.call(
+        page: '$page',
+        limit: '$pageSize',
+        authToken: currentAuthenticationToken,
+      );
+      if (!res.succeeded) {
+        error = 'No se pudieron cargar las propiedades.';
+        break;
+      }
+      final data = getJsonField(res.jsonBody, r'''$.data''');
+      if (data is! List || data.isEmpty) break;
+      all.addAll(data);
+      if (data.length < pageSize) break;
+    }
+    if (!mounted || request != _searchRequest) return;
+    safeSetState(() {
+      _searchLoading = false;
+      _searchPool = all;
+      _searchError = all.isEmpty ? error : null;
+    });
+  }
+
+  static String _normalize(String input) {
+    var s = input.toLowerCase();
+    const from = 'áàäâéèëêíìïîóòöôúùüûñ';
+    const to = 'aaaaeeeeiiiioooouuuun';
+    for (var i = 0; i < from.length; i++) {
+      s = s.replaceAll(from[i], to[i]);
+    }
+    return s;
+  }
+
+  String _searchText(dynamic house) {
+    String field(String path) {
+      final v = getJsonField(house, path);
+      return v == null ? '' : v.toString();
+    }
+
+    final price = field(r'''$.price''');
+    return _normalize([
+      field(r'''$.name'''),
+      field(r'''$.description.raw'''),
+      field(r'''$.description'''),
+      field(r'''$.location.address.fullAddress'''),
+      field(r'''$.address'''),
+      field(r'''$.propertyType'''),
+      field(r'''$.listingType'''),
+      price,
+      price.replaceAll(RegExp(r'[^0-9]'), ''),
+    ].join(' '));
+  }
+
+  List<dynamic> _searchResults() {
+    final pool = _filterByListingType(_searchPool ?? const []);
+    final words = _normalize(_searchQuery)
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .map(
+            (w) => w.replaceAll(RegExp(r'^(q|\$)(?=\d)|(?<=\d)[.,](?=\d)'), ''))
+        .toList();
+    return pool.where((house) {
+      final text = _searchText(house);
+      return words.every(text.contains);
+    }).toList();
+  }
+
+  Widget _buildSearchResults() {
+    final theme = FlutterFlowTheme.of(context);
+    final titleStyle = theme.bodyMedium.override(
+      font: GoogleFonts.inter(),
+      letterSpacing: 0.0,
+    );
+
+    Widget body;
+    if (_searchLoading || (_searchPool == null && _searchError == null)) {
+      body = Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        child: Center(
+          child: CircularProgressIndicator(color: theme.primary),
+        ),
+      );
+    } else if (_searchError != null) {
+      body = Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        child: Column(
+          children: [
+            Text(_searchError!, style: titleStyle),
+            TextButton(
+              onPressed: _fetchSearchPool,
+              child: const Text('Reintentar'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      final results = _searchResults();
+      if (results.isEmpty) {
+        body = Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40.0),
+          child: Column(
+            children: [
+              Icon(Icons.search_off_rounded,
+                  size: 44.0, color: theme.secondaryText),
+              const SizedBox(height: 10.0),
+              Text(
+                'No encontramos propiedades con "$_searchQuery"',
+                textAlign: TextAlign.center,
+                style: titleStyle.copyWith(color: theme.secondaryText),
+              ),
+            ],
+          ),
+        );
+      } else {
+        final page = _carouselPage('busqueda', results);
+        body = _withCarouselArrows(
+          carouselKey: 'busqueda',
+          total: results.length,
+          child: SingleChildScrollView(
+            controller: _carouselController('busqueda'),
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: page
+                  .map<Widget>((house) => _houseCardItem(house))
+                  .toList()
+                  .divide(const SizedBox(width: 16.0)),
+            ),
+          ),
+        );
+      }
+    }
+
+    final count = (!_searchLoading && _searchPool != null)
+        ? _searchResults().length
+        : null;
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 4.0, 20.0, 0.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            count == null
+                ? 'Buscando…'
+                : count == 1
+                    ? '1 resultado'
+                    : '$count resultados',
+            style: titleStyle,
+          ),
+          const SizedBox(height: 8.0),
+          body,
+        ],
+      ),
+    );
+  }
+
+  /// Tarjeta de una propiedad, igual en los carruseles y en la búsqueda.
+  Widget _houseCardItem(dynamic eachHouseItem) {
+    return Builder(
+      builder: (context) => InkWell(
+        splashColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: () async {
+          context.pushNamed(
+            DOVIACLIENTPropiedadSeleccionadaNewWidget.routeName,
+            queryParameters: {
+              'propertyId': serializeParam(
+                getJsonField(
+                  eachHouseItem,
+                  r'''$.id''',
+                ).toString(),
+                ParamType.String,
+              ),
+            }.withoutNulls,
+          );
+        },
+        onLongPress: () async {
+          await showDialog(
+            context: context,
+            builder: (dialogContext) {
+              return Dialog(
+                elevation: 0,
+                insetPadding: EdgeInsets.zero,
+                backgroundColor: Colors.transparent,
+                alignment: const AlignmentDirectional(0.0, 0.0)
+                    .resolve(Directionality.of(context)),
+                child: GestureDetector(
+                  onTap: () {
+                    FocusScope.of(dialogContext).unfocus();
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  },
+                  child: AgregarFavoritoACarpetaWidget(
+                    houseId: getJsonField(
+                      eachHouseItem,
+                      r'''$.id''',
+                    ).toString(),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: custom_widgets.DoviaClientHouseCard(
+          width: 210.0,
+          height: 0.0,
+          imageUrl: _houseImageUrl(eachHouseItem),
+          isFavorite: _isHouseFavorite(eachHouseItem),
+          name: getJsonField(
+            eachHouseItem,
+            r'''$.name''',
+          ).toString(),
+          type: getJsonField(
+            eachHouseItem,
+            r'''$.listingType''',
+          ).toString(),
+          price: getJsonField(
+            eachHouseItem,
+            r'''$.price''',
+          ).toString(),
+          propertyType:
+              getJsonField(eachHouseItem, r'''$.propertyType''')?.toString(),
+          constructionArea: castToType<int>(getJsonField(
+              eachHouseItem, r'''$.features.general.constructionArea''')),
+          landArea: castToType<double>(
+              getJsonField(eachHouseItem, r'''$.features.general.landArea''')),
+          bedrooms: castToType<int>(
+              getJsonField(eachHouseItem, r'''$.features.general.bedrooms''')),
+          bathrooms: castToType<int>(
+              getJsonField(eachHouseItem, r'''$.features.general.bathrooms''')),
+          hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') ==
+                  true ||
+              getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() ==
+                  'true',
+          originalPrice:
+              getJsonField(eachHouseItem, r'''$.originalPrice''')?.toString(),
+          propertyId: getJsonField(
+            eachHouseItem,
+            r'''$.id''',
+          ).toString(),
+          authToken: currentAuthenticationToken,
+          onAddToFavorites: () async {
+            if (FFAppState().UserRole != 'VISITOR') {
+              _model.addFavoriteNew = await DOVIAAPIFavoriteContextGroup
+                  .addPropertyToFavoritesCall
+                  .call(
+                propertyId: getJsonField(
+                  eachHouseItem,
+                  r'''$.id''',
+                ).toString(),
+                authToken: currentAuthenticationToken,
+              );
+
+              final addFavoriteResponse = _model.addFavoriteNew;
+              final isAlreadyFavorite =
+                  (addFavoriteResponse?.statusCode == 409) ||
+                      (addFavoriteResponse?.jsonBody ?? '')
+                          .toString()
+                          .toLowerCase()
+                          .contains('already');
+
+              if ((addFavoriteResponse?.succeeded ?? false) ||
+                  isAlreadyFavorite) {
+                await showModalBottomSheet(
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  enableDrag: false,
+                  context: context,
+                  builder: (context) {
+                    return GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).unfocus();
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      },
+                      child: Padding(
+                        padding: MediaQuery.viewInsetsOf(context),
+                        child: TusFavoritosCarpetasModalWidget(
+                          isCreatingNewFolderPARAM: false,
+                          houseId: getJsonField(
+                            eachHouseItem,
+                            r'''$.id''',
+                          ).toString(),
+                          propertyName: getJsonField(
+                            eachHouseItem,
+                            r'''$.name''',
+                          ).toString(),
+                          propertyImage: _modalImage(eachHouseItem),
+                          propertyIsFavorite: true,
+                        ),
+                      ),
+                    );
+                  },
+                ).then((value) => safeSetState(() {}));
+              } else {
+                await showDialog(
+                  context: context,
+                  builder: (alertDialogContext) {
+                    return AlertDialog(
+                      title: const Text('Error'),
+                      content: Text(
+                          (addFavoriteResponse?.jsonBody ?? '').toString()),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(alertDialogContext),
+                          child: const Text('Ok'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            } else {
+              await showDialog(
+                context: context,
+                builder: (dialogContext) {
+                  return Dialog(
+                    elevation: 0,
+                    insetPadding: EdgeInsets.zero,
+                    backgroundColor: Colors.transparent,
+                    alignment: const AlignmentDirectional(0.0, 0.0)
+                        .resolve(Directionality.of(context)),
+                    child: GestureDetector(
+                      onTap: () {
+                        FocusScope.of(dialogContext).unfocus();
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      },
+                      child: const VisitorRestrictionPopupWidget(),
+                    ),
+                  );
+                },
+              );
+            }
+
+            safeSetState(() {});
+          },
+          onRemoveFromFavorites: () async {
+            await showModalBottomSheet(
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              enableDrag: false,
+              context: context,
+              builder: (context) {
+                return GestureDetector(
+                  onTap: () {
+                    FocusScope.of(context).unfocus();
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  },
+                  child: Padding(
+                    padding: MediaQuery.viewInsetsOf(context),
+                    child: TusFavoritosCarpetasModalWidget(
+                      isCreatingNewFolderPARAM: false,
+                      houseId: getJsonField(
+                        eachHouseItem,
+                        r'''$.id''',
+                      ).toString(),
+                      propertyName: getJsonField(
+                        eachHouseItem,
+                        r'''$.name''',
+                      ).toString(),
+                      propertyImage: _modalImage(eachHouseItem),
+                      propertyIsFavorite: true,
+                    ),
+                  ),
+                );
+              },
+            ).then((value) => safeSetState(() {}));
+
+            safeSetState(() {});
+          },
+        ),
+      ),
+    );
+  }
+
+  /// "Ver más" como texto sin fondo, igual que en Mis Visitas y Mis Ofertas.
+  Widget _verMasLink({required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Text(
+        'Ver más',
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+              color: FlutterFlowTheme.of(context).primary,
+              fontSize: 14.0,
+            ),
+      ),
+    );
+  }
+
+  /// Títulos de los carruseles del home, como los de las otras pantallas.
+  TextStyle get _carouselTitleStyle =>
+      FlutterFlowTheme.of(context).bodyMedium.override(
+            font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+            fontSize: 17.0,
+            letterSpacing: 0.33,
+            fontWeight: FontWeight.w600,
+            lineHeight: 1.3,
+          );
+
   @override
   void initState() {
     super.initState();
@@ -258,8 +901,12 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
+    _loadListingHint();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      safeSetState(() {});
+      // Primero las propias, para sacarlas de los carruseles.
+      await loadOwnPropertyIds();
       safeSetState(() {});
       await _refreshFavoritePropertyIds();
     });
@@ -267,6 +914,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
 
   @override
   void dispose() {
+    for (final controller in _carouselControllers.values) {
+      controller.dispose();
+    }
+    _searchDebounce?.cancel();
     _model.dispose();
 
     super.dispose();
@@ -349,6 +1000,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
+        // El teclado tapa la barra de navegación en vez de empujarla.
+        resizeToAvoidBottomInset: false,
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
@@ -567,6 +1220,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           ),
                                           child: TextFormField(
                                             controller: _model.textController,
+                                            onChanged: _onSearchChanged,
+                                            textInputAction:
+                                                TextInputAction.search,
                                             focusNode:
                                                 _model.textFieldFocusNode,
                                             autofocus: false,
@@ -636,6 +1292,22 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                 Icons.search_rounded,
                                                 size: 20.0,
                                               ),
+                                              suffixIcon: _searchQuery
+                                                          .isEmpty &&
+                                                      !_searchLoading
+                                                  ? null
+                                                  : IconButton(
+                                                      icon: const Icon(
+                                                          Icons.close_rounded,
+                                                          size: 18.0),
+                                                      onPressed: () {
+                                                        _model.textController
+                                                            ?.clear();
+                                                        _onSearchChanged('');
+                                                        FocusScope.of(context)
+                                                            .unfocus();
+                                                      },
+                                                    ),
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
@@ -681,242 +1353,63 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         child: Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               10.0, 10.0, 10.0, 10.0),
-                          child: Row(
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 10.0, 0.0, 10.0),
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    _handleRestrictedAction(() {
-                                      _model.comprarORentar =
-                                          _model.comprarORentar == 'comprar'
-                                              ? ''
-                                              : 'comprar';
-                                      _carouselPages.clear();
-                                      safeSetState(() {});
-                                    });
-                                  },
-                                  child: Container(
-                                    width: 144.0,
-                                    height: 30.0,
-                                    decoration: BoxDecoration(
-                                      color: _model.comprarORentar == 'comprar'
-                                          ? const Color(0x32007376)
-                                          : FlutterFlowTheme.of(context)
-                                              .tertiary,
-                                      borderRadius: BorderRadius.circular(24.0),
-                                    ),
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              20.0, 0.0, 20.0, 0.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(0.0),
-                                            child: SvgPicture.asset(
-                                              'assets/images/cart-alt.svg',
-                                              width: 20.0,
-                                              height: 20.0,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          Align(
-                                            alignment:
-                                                const AlignmentDirectional(
-                                                    0.0, 0.0),
-                                            child: Text(
-                                              'Comprar',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontWeight,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        color: _model
-                                                                    .comprarORentar ==
-                                                                'comprar'
-                                                            ? FlutterFlowTheme
-                                                                    .of(context)
-                                                                .primaryText
-                                                            : FlutterFlowTheme
-                                                                    .of(context)
-                                                                .secondaryText,
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
-                                            ),
-                                          ),
-                                        ].divide(const SizedBox(width: 8.0)),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _listingToggle('comprar', 'Comprar',
+                                      'assets/images/cart-alt.svg'),
+                                  _listingToggle('rentar', 'Rentar',
+                                      'assets/images/page-edit.svg'),
+                                ].divide(const SizedBox(width: 20.0)),
                               ),
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 10.0, 0.0, 10.0),
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    _handleRestrictedAction(() {
-                                      _model.comprarORentar =
-                                          _model.comprarORentar == 'rentar'
-                                              ? ''
-                                              : 'rentar';
-                                      _carouselPages.clear();
-                                      safeSetState(() {});
-                                    });
-                                  },
-                                  child: Container(
-                                    width: 144.0,
-                                    height: 30.0,
-                                    decoration: BoxDecoration(
-                                      color: _model.comprarORentar == 'rentar'
-                                          ? const Color(0x32007376)
-                                          : FlutterFlowTheme.of(context)
-                                              .tertiary,
-                                      borderRadius: BorderRadius.circular(25.0),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(0.0),
-                                          child: SvgPicture.asset(
-                                            'assets/images/page-edit.svg',
-                                            width: 20.0,
-                                            height: 20.0,
-                                            fit: BoxFit.cover,
+                              // Ayuda solo la primera vez: se va al tocar Comprar o Rentar.
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 350),
+                                curve: Curves.easeInOut,
+                                child: _showListingHint
+                                    ? Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 6.0),
+                                        child: Text(
+                                          'Elegí si querés comprar o rentar para ver propiedades',
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.0,
+                                            color: const Color(0xFF9E9E9E),
                                           ),
                                         ),
-                                        Align(
-                                          alignment: const AlignmentDirectional(
-                                              0.0, 0.0),
-                                          child: Text(
-                                            'Rentar',
-                                            textAlign: TextAlign.center,
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .bodyMedium
-                                                            .fontStyle,
-                                                  ),
-                                                  color:
-                                                      _model.comprarORentar ==
-                                                              'rentar'
-                                                          ? FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primaryText
-                                                          : FlutterFlowTheme.of(
-                                                                  context)
-                                                              .secondaryText,
-                                                  fontSize: 14.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ),
-                                      ].divide(const SizedBox(width: 8.0)),
-                                    ),
-                                  ),
-                                ),
+                                      )
+                                    : const SizedBox(width: double.infinity),
                               ),
-                            ].divide(const SizedBox(width: 20.0)),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 4.0, 20.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Lo nuevo',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                              FFButtonWidget(
-                                onPressed: () async {
+                    if (_searchQuery.isNotEmpty)
+                      _buildSearchResults()
+                    else ...[
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 4.0, 20.0, 0.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Lo nuevo',
+                                  style: _carouselTitleStyle,
+                                ),
+                                _verMasLink(onTap: () async {
                                   _handleRestrictedAction(() {
                                     context.pushNamed(
                                       DOVIACLIENTVerMasPropiedadesWidget
@@ -926,554 +1419,172 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           'Lo nuevo',
                                           ParamType.String,
                                         ),
+                                        // Mismo filtro Comprar/Rentar que el
+                                        // carrusel.
+                                        'listingFilter': serializeParam(
+                                          _model.comprarORentar,
+                                          ParamType.String,
+                                        ),
                                       }.withoutNulls,
                                     );
                                   });
-                                },
-                                text: 'Ver mas',
-                                options: FFButtonOptions(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).accent1,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        fontSize: 14.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 8.0, 20.0, 0.0),
-                          child: FutureBuilder<ApiCallResponse>(
-                            future: DOVIAAPIPropertyContextGroup
-                                .listPropertiesCall
-                                .call(
-                              limit: '40',
-                              authToken: currentAuthenticationToken,
+                                }),
+                              ],
                             ),
-                            builder: (context, snapshot) {
-                              // Customize what your widget looks like when it's loading.
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: SizedBox(
-                                    width: 50.0,
-                                    height: 50.0,
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        FlutterFlowTheme.of(context).primary,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-                              final rowListPropertiesResponse = snapshot.data!;
-
-                              return Builder(
-                                builder: (context) {
-                                  final allHouses =
-                                      _filterByListingType(getJsonField(
-                                            rowListPropertiesResponse.jsonBody,
-                                            r'''$.data''',
-                                          ) as List? ??
-                                          []);
-                                  final eachHouse =
-                                      _carouselPage('loNuevo', allHouses);
-
-                                  return _withCarouselArrows(
-                                    carouselKey: 'loNuevo',
-                                    total: allHouses.length,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: List.generate(
-                                            eachHouse.length, (eachHouseIndex) {
-                                          final eachHouseItem =
-                                              eachHouse[eachHouseIndex];
-                                          return Builder(
-                                            builder: (context) => InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                context.pushNamed(
-                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                      .routeName,
-                                                  queryParameters: {
-                                                    'propertyId':
-                                                        serializeParam(
-                                                      getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.id''',
-                                                      ).toString(),
-                                                      ParamType.String,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              },
-                                              onLongPress: () async {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            AgregarFavoritoACarpetaWidget(
-                                                          houseId: getJsonField(
-                                                            eachHouseItem,
-                                                            r'''$.id''',
-                                                          ).toString(),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                );
-                                              },
-                                              child: custom_widgets
-                                                  .DoviaClientHouseCard(
-                                                width: 210.0,
-                                                height: 0.0,
-                                                imageUrl: _houseImageUrl(
-                                                    eachHouseItem),
-                                                isFavorite: _isHouseFavorite(
-                                                    eachHouseItem),
-                                                name: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.name''',
-                                                ).toString(),
-                                                type: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.listingType''',
-                                                ).toString(),
-                                                price: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.price''',
-                                                ).toString(),
-                                                propertyType: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.propertyType''')
-                                                    ?.toString(),
-                                                hasDiscount: getJsonField(
-                                                            eachHouseItem,
-                                                            r'''$.hasDiscount''') ==
-                                                        true ||
-                                                    getJsonField(eachHouseItem,
-                                                                r'''$.hasDiscount''')
-                                                            .toString() ==
-                                                        'true',
-                                                originalPrice: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.originalPrice''')
-                                                    ?.toString(),
-                                                propertyId: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.id''',
-                                                ).toString(),
-                                                authToken:
-                                                    currentAuthenticationToken,
-                                                onAddToFavorites: () async {
-                                                  if (FFAppState().UserRole !=
-                                                      'VISITOR') {
-                                                    _model.addFavoriteNew =
-                                                        await DOVIAAPIFavoriteContextGroup
-                                                            .addPropertyToFavoritesCall
-                                                            .call(
-                                                      propertyId: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.id''',
-                                                      ).toString(),
-                                                      authToken:
-                                                          currentAuthenticationToken,
-                                                    );
-
-                                                    final addFavoriteResponse =
-                                                        _model.addFavoriteNew;
-                                                    final isAlreadyFavorite =
-                                                        (addFavoriteResponse
-                                                                    ?.statusCode ==
-                                                                409) ||
-                                                            (addFavoriteResponse
-                                                                        ?.jsonBody ??
-                                                                    '')
-                                                                .toString()
-                                                                .toLowerCase()
-                                                                .contains(
-                                                                    'already');
-
-                                                    if ((addFavoriteResponse
-                                                                ?.succeeded ??
-                                                            false) ||
-                                                        isAlreadyFavorite) {
-                                                      await showModalBottomSheet(
-                                                        isScrollControlled:
-                                                            true,
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        enableDrag: false,
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return GestureDetector(
-                                                            onTap: () {
-                                                              FocusScope.of(
-                                                                      context)
-                                                                  .unfocus();
-                                                              FocusManager
-                                                                  .instance
-                                                                  .primaryFocus
-                                                                  ?.unfocus();
-                                                            },
-                                                            child: Padding(
-                                                              padding: MediaQuery
-                                                                  .viewInsetsOf(
-                                                                      context),
-                                                              child:
-                                                                  TusFavoritosCarpetasModalWidget(
-                                                                isCreatingNewFolderPARAM:
-                                                                    false,
-                                                                houseId:
-                                                                    getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.id''',
-                                                                ).toString(),
-                                                                propertyName:
-                                                                    getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.name''',
-                                                                ).toString(),
-                                                                propertyImage:
-                                                                    _modalImage(
-                                                                        eachHouseItem),
-                                                                propertyIsFavorite:
-                                                                    true,
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ).then((value) =>
-                                                          safeSetState(() {}));
-                                                    } else {
-                                                      await showDialog(
-                                                        context: context,
-                                                        builder:
-                                                            (alertDialogContext) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                                'Error'),
-                                                            content: Text(
-                                                                (addFavoriteResponse
-                                                                            ?.jsonBody ??
-                                                                        '')
-                                                                    .toString()),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        alertDialogContext),
-                                                                child:
-                                                                    const Text(
-                                                                        'Ok'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    }
-                                                  } else {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder: (dialogContext) {
-                                                        return Dialog(
-                                                          elevation: 0,
-                                                          insetPadding:
-                                                              EdgeInsets.zero,
-                                                          backgroundColor:
-                                                              Colors
-                                                                  .transparent,
-                                                          alignment: const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                          child:
-                                                              GestureDetector(
-                                                            onTap: () {
-                                                              FocusScope.of(
-                                                                      dialogContext)
-                                                                  .unfocus();
-                                                              FocusManager
-                                                                  .instance
-                                                                  .primaryFocus
-                                                                  ?.unfocus();
-                                                            },
-                                                            child:
-                                                                const VisitorRestrictionPopupWidget(),
-                                                          ),
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-
-                                                  safeSetState(() {});
-                                                },
-                                                onRemoveFromFavorites:
-                                                    () async {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    enableDrag: false,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child: Padding(
-                                                          padding: MediaQuery
-                                                              .viewInsetsOf(
-                                                                  context),
-                                                          child:
-                                                              TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM:
-                                                                false,
-                                                            houseId:
-                                                                getJsonField(
-                                                              eachHouseItem,
-                                                              r'''$.id''',
-                                                            ).toString(),
-                                                            propertyName:
-                                                                getJsonField(
-                                                              eachHouseItem,
-                                                              r'''$.name''',
-                                                            ).toString(),
-                                                            propertyImage:
-                                                                _modalImage(
-                                                                    eachHouseItem),
-                                                            propertyIsFavorite:
-                                                                true,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  ).then((value) =>
-                                                      safeSetState(() {}));
-
-                                                  safeSetState(() {});
-                                                },
-                                              ),
-                                            ),
-                                          );
-                                        }).divide(const SizedBox(width: 16.0)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 8.0, 20.0, 0.0),
+                            child: FutureBuilder<ApiCallResponse>(
+                              future: DOVIAAPIPropertyContextGroup
+                                  .listPropertiesCall
+                                  .call(
+                                limit: '40',
+                                authToken: currentAuthenticationToken,
+                              ),
+                              builder: (context, snapshot) {
+                                // Customize what your widget looks like when it's loading.
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 50.0,
+                                      height: 50.0,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          FlutterFlowTheme.of(context).primary,
+                                        ),
                                       ),
                                     ),
                                   );
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Proyectos Nuevos',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
+                                }
+                                final rowListPropertiesResponse =
+                                    snapshot.data!;
+
+                                return Builder(
+                                  builder: (context) {
+                                    final allHouses =
+                                        _filterByListingType(getJsonField(
+                                              rowListPropertiesResponse
+                                                  .jsonBody,
+                                              r'''$.data''',
+                                            ) as List? ??
+                                            []);
+                                    final eachHouse =
+                                        _carouselPage('loNuevo', allHouses);
+
+                                    return _withCarouselArrows(
+                                      carouselKey: 'loNuevo',
+                                      total: allHouses.length,
+                                      child: SingleChildScrollView(
+                                        controller:
+                                            _carouselController('loNuevo'),
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children:
+                                              List.generate(eachHouse.length,
+                                                  (eachHouseIndex) {
+                                            final eachHouseItem =
+                                                eachHouse[eachHouseIndex];
+                                            return _houseCardItem(
+                                                eachHouseItem);
+                                          }).divide(
+                                                  const SizedBox(width: 16.0)),
+                                        ),
                                       ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                              FFButtonWidget(
-                                onPressed: () async {
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 20.0, 20.0, 0.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Proyectos Nuevos',
+                                  style: _carouselTitleStyle,
+                                ),
+                                _verMasLink(onTap: () async {
                                   _handleRestrictedAction(() async {
                                     await launchURL(
                                         'https://dovia.app/desarrollos');
                                   });
-                                },
-                                text: 'Ver mas',
-                                options: FFButtonOptions(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).accent1,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        fontSize: 14.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: List.generate(3, (index) {
-                                return Builder(
-                                  builder: (context) => InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      _handleRestrictedAction(() async {
-                                        await launchURL(
-                                            'https://dovia.app/desarrollos');
-                                      });
-                                    },
-                                    child: custom_widgets.DoviaClientHouseCard(
-                                      width: 210.0,
-                                      height: 0.0,
-                                      imageUrl:
-                                          'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',
-                                      name: 'Desarrollo Especial',
-                                      type: 'Preventa',
-                                      price: 'Q 1,000,000',
-                                      propertyType: 'Edificio',
-                                    ),
-                                  ),
-                                );
-                              }).divide(const SizedBox(width: 16.0)),
+                                }),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Recomendado',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 20.0, 20.0, 0.0),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: List.generate(3, (index) {
+                                  return Builder(
+                                    builder: (context) => InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        _handleRestrictedAction(() async {
+                                          await launchURL(
+                                              'https://dovia.app/desarrollos');
+                                        });
+                                      },
+                                      child:
+                                          custom_widgets.DoviaClientHouseCard(
+                                        width: 210.0,
+                                        height: 0.0,
+                                        imageUrl:
+                                            'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',
+                                        name: 'Desarrollo Especial',
+                                        type: 'Preventa',
+                                        price: 'Q 1,000,000',
+                                        propertyType: 'Edificio',
                                       ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
                                     ),
+                                  );
+                                }).divide(const SizedBox(width: 16.0)),
                               ),
-                              FFButtonWidget(
-                                onPressed: () async {
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 20.0, 20.0, 0.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Recomendado',
+                                  style: _carouselTitleStyle,
+                                ),
+                                _verMasLink(onTap: () async {
                                   _handleRestrictedAction(() {
                                     context.pushNamed(
                                       DOVIACLIENTVerMasPropiedadesWidget
@@ -1483,441 +1594,430 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           'Recomendado',
                                           ParamType.String,
                                         ),
+                                        // Mismo filtro Comprar/Rentar que el
+                                        // carrusel.
+                                        'listingFilter': serializeParam(
+                                          _model.comprarORentar,
+                                          ParamType.String,
+                                        ),
                                       }.withoutNulls,
                                     );
                                   });
-                                },
-                                text: 'Ver mas',
-                                options: FFButtonOptions(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).accent1,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        fontSize: 14.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
-                          child: FutureBuilder<ApiCallResponse>(
-                            future: DOVIAAPIPropertyContextGroup
-                                .listPropertiesCall
-                                .call(
-                              limit: '40',
-                              authToken: currentAuthenticationToken,
+                                }),
+                              ],
                             ),
-                            builder: (context, snapshot) {
-                              // Customize what your widget looks like when it's loading.
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: SizedBox(
-                                    width: 50.0,
-                                    height: 50.0,
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        FlutterFlowTheme.of(context).primary,
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 20.0, 20.0, 0.0),
+                            child: FutureBuilder<ApiCallResponse>(
+                              future: DOVIAAPIPropertyContextGroup
+                                  .listPropertiesCall
+                                  .call(
+                                limit: '40',
+                                authToken: currentAuthenticationToken,
+                              ),
+                              builder: (context, snapshot) {
+                                // Customize what your widget looks like when it's loading.
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 50.0,
+                                      height: 50.0,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          FlutterFlowTheme.of(context).primary,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              }
-                              final rowListPropertiesResponse = snapshot.data!;
+                                  );
+                                }
+                                final rowListPropertiesResponse =
+                                    snapshot.data!;
 
-                              return Builder(
-                                builder: (context) {
-                                  final allHouses =
-                                      _filterByListingType(getJsonField(
-                                            rowListPropertiesResponse.jsonBody,
-                                            r'''$.data''',
-                                          ) as List? ??
-                                          []);
-                                  final eachHouse =
-                                      _carouselPage('recomendado', allHouses);
+                                return Builder(
+                                  builder: (context) {
+                                    final allHouses =
+                                        _filterByListingType(getJsonField(
+                                              rowListPropertiesResponse
+                                                  .jsonBody,
+                                              r'''$.data''',
+                                            ) as List? ??
+                                            []);
+                                    final eachHouse =
+                                        _carouselPage('recomendado', allHouses);
 
-                                  return _withCarouselArrows(
-                                    carouselKey: 'recomendado',
-                                    total: allHouses.length,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: List.generate(
-                                            eachHouse.length, (eachHouseIndex) {
-                                          final eachHouseItem =
-                                              eachHouse[eachHouseIndex];
-                                          return Builder(
-                                            builder: (context) => InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                context.pushNamed(
-                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                      .routeName,
-                                                  queryParameters: {
-                                                    'propertyId':
-                                                        serializeParam(
-                                                      getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.id''',
-                                                      ).toString(),
-                                                      ParamType.String,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              },
-                                              onLongPress: () async {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            AgregarFavoritoACarpetaWidget(
-                                                          houseId: getJsonField(
-                                                            eachHouseItem,
-                                                            r'''$.id''',
-                                                          ).toString(),
-                                                        ),
+                                    return _withCarouselArrows(
+                                      carouselKey: 'recomendado',
+                                      total: allHouses.length,
+                                      child: SingleChildScrollView(
+                                        controller:
+                                            _carouselController('recomendado'),
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children:
+                                              List.generate(eachHouse.length,
+                                                  (eachHouseIndex) {
+                                            final eachHouseItem =
+                                                eachHouse[eachHouseIndex];
+                                            return Builder(
+                                              builder: (context) => InkWell(
+                                                splashColor: Colors.transparent,
+                                                focusColor: Colors.transparent,
+                                                hoverColor: Colors.transparent,
+                                                highlightColor:
+                                                    Colors.transparent,
+                                                onTap: () async {
+                                                  context.pushNamed(
+                                                    DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                        .routeName,
+                                                    queryParameters: {
+                                                      'propertyId':
+                                                          serializeParam(
+                                                        getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.id''',
+                                                        ).toString(),
+                                                        ParamType.String,
                                                       ),
-                                                    );
-                                                  },
-                                                );
-                                              },
-                                              child: custom_widgets
-                                                  .DoviaClientHouseCard(
-                                                width: 210.0,
-                                                height: 0.0,
-                                                imageUrl: _houseImageUrl(
-                                                    eachHouseItem),
-                                                isFavorite: _isHouseFavorite(
-                                                    eachHouseItem),
-                                                name: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.name''',
-                                                ).toString(),
-                                                type: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.listingType''',
-                                                ).toString(),
-                                                price: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.price''',
-                                                ).toString(),
-                                                propertyType: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.propertyType''')
-                                                    ?.toString(),
-                                                hasDiscount: getJsonField(
-                                                            eachHouseItem,
-                                                            r'''$.hasDiscount''') ==
-                                                        true ||
-                                                    getJsonField(eachHouseItem,
-                                                                r'''$.hasDiscount''')
-                                                            .toString() ==
-                                                        'true',
-                                                originalPrice: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.originalPrice''')
-                                                    ?.toString(),
-                                                propertyId: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.id''',
-                                                ).toString(),
-                                                authToken:
-                                                    currentAuthenticationToken,
-                                                onAddToFavorites: () async {
-                                                  if (FFAppState().UserRole !=
-                                                      'VISITOR') {
-                                                    _model.addFvoriteRecommended =
-                                                        await DOVIAAPIFavoriteContextGroup
-                                                            .addPropertyToFavoritesCall
-                                                            .call(
-                                                      propertyId: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.id''',
-                                                      ).toString(),
-                                                      authToken:
-                                                          currentAuthenticationToken,
-                                                    );
-
-                                                    final addFavoriteResponse =
-                                                        _model
-                                                            .addFvoriteRecommended;
-                                                    final isAlreadyFavorite =
-                                                        (addFavoriteResponse
-                                                                    ?.statusCode ==
-                                                                409) ||
-                                                            (addFavoriteResponse
-                                                                        ?.jsonBody ??
-                                                                    '')
-                                                                .toString()
-                                                                .toLowerCase()
-                                                                .contains(
-                                                                    'already');
-
-                                                    if ((addFavoriteResponse
-                                                                ?.succeeded ??
-                                                            false) ||
-                                                        isAlreadyFavorite) {
-                                                      await showModalBottomSheet(
-                                                        isScrollControlled:
-                                                            true,
+                                                    }.withoutNulls,
+                                                  );
+                                                },
+                                                onLongPress: () async {
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder: (dialogContext) {
+                                                      return Dialog(
+                                                        elevation: 0,
+                                                        insetPadding:
+                                                            EdgeInsets.zero,
                                                         backgroundColor:
                                                             Colors.transparent,
-                                                        enableDrag: false,
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return GestureDetector(
-                                                            onTap: () {
-                                                              FocusScope.of(
-                                                                      context)
-                                                                  .unfocus();
-                                                              FocusManager
-                                                                  .instance
-                                                                  .primaryFocus
-                                                                  ?.unfocus();
-                                                            },
-                                                            child: Padding(
-                                                              padding: MediaQuery
-                                                                  .viewInsetsOf(
-                                                                      context),
-                                                              child:
-                                                                  TusFavoritosCarpetasModalWidget(
-                                                                isCreatingNewFolderPARAM:
-                                                                    false,
-                                                                houseId:
-                                                                    getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.id''',
-                                                                ).toString(),
-                                                                propertyName:
-                                                                    getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.name''',
-                                                                ).toString(),
-                                                                propertyImage:
-                                                                    _modalImage(
-                                                                        eachHouseItem),
-                                                                propertyIsFavorite:
-                                                                    true,
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ).then((value) =>
-                                                          safeSetState(() {}));
-                                                    } else {
-                                                      await showDialog(
-                                                        context: context,
-                                                        builder:
-                                                            (alertDialogContext) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                                'Error'),
-                                                            content: Text(
-                                                                (addFavoriteResponse
-                                                                            ?.jsonBody ??
-                                                                        '')
-                                                                    .toString()),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        alertDialogContext),
-                                                                child:
-                                                                    const Text(
-                                                                        'Ok'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    }
-                                                  } else {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder: (dialogContext) {
-                                                        return Dialog(
-                                                          elevation: 0,
-                                                          insetPadding:
-                                                              EdgeInsets.zero,
-                                                          backgroundColor:
-                                                              Colors
-                                                                  .transparent,
-                                                          alignment: const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
+                                                        alignment:
+                                                            const AlignmentDirectional(
+                                                                    0.0, 0.0)
+                                                                .resolve(
+                                                                    Directionality.of(
+                                                                        context)),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    dialogContext)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
                                                           child:
-                                                              GestureDetector(
-                                                            onTap: () {
-                                                              FocusScope.of(
-                                                                      dialogContext)
-                                                                  .unfocus();
-                                                              FocusManager
-                                                                  .instance
-                                                                  .primaryFocus
-                                                                  ?.unfocus();
-                                                            },
-                                                            child:
-                                                                const VisitorRestrictionPopupWidget(),
-                                                          ),
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-
-                                                  safeSetState(() {});
-                                                },
-                                                onRemoveFromFavorites:
-                                                    () async {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    enableDrag: false,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child: Padding(
-                                                          padding: MediaQuery
-                                                              .viewInsetsOf(
-                                                                  context),
-                                                          child:
-                                                              TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM:
-                                                                false,
+                                                              AgregarFavoritoACarpetaWidget(
                                                             houseId:
                                                                 getJsonField(
                                                               eachHouseItem,
                                                               r'''$.id''',
                                                             ).toString(),
-                                                            propertyName:
-                                                                getJsonField(
-                                                              eachHouseItem,
-                                                              r'''$.name''',
-                                                            ).toString(),
-                                                            propertyImage:
-                                                                _modalImage(
-                                                                    eachHouseItem),
-                                                            propertyIsFavorite:
-                                                                true,
                                                           ),
                                                         ),
                                                       );
                                                     },
-                                                  ).then((value) =>
-                                                      safeSetState(() {}));
-
-                                                  safeSetState(() {});
+                                                  );
                                                 },
+                                                child: custom_widgets
+                                                    .DoviaClientHouseCard(
+                                                  width: 210.0,
+                                                  height: 0.0,
+                                                  imageUrl: _houseImageUrl(
+                                                      eachHouseItem),
+                                                  isFavorite: _isHouseFavorite(
+                                                      eachHouseItem),
+                                                  name: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.name''',
+                                                  ).toString(),
+                                                  type: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.listingType''',
+                                                  ).toString(),
+                                                  price: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.price''',
+                                                  ).toString(),
+                                                  constructionArea: castToType<
+                                                          int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.constructionArea''')),
+                                                  landArea: castToType<double>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.landArea''')),
+                                                  bedrooms: castToType<int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.bedrooms''')),
+                                                  bathrooms: castToType<int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.bathrooms''')),
+                                                  propertyType: getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.propertyType''')
+                                                      ?.toString(),
+                                                  hasDiscount: getJsonField(
+                                                              eachHouseItem,
+                                                              r'''$.hasDiscount''') ==
+                                                          true ||
+                                                      getJsonField(
+                                                                  eachHouseItem,
+                                                                  r'''$.hasDiscount''')
+                                                              .toString() ==
+                                                          'true',
+                                                  originalPrice: getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.originalPrice''')
+                                                      ?.toString(),
+                                                  propertyId: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.id''',
+                                                  ).toString(),
+                                                  authToken:
+                                                      currentAuthenticationToken,
+                                                  onAddToFavorites: () async {
+                                                    if (FFAppState().UserRole !=
+                                                        'VISITOR') {
+                                                      _model.addFvoriteRecommended =
+                                                          await DOVIAAPIFavoriteContextGroup
+                                                              .addPropertyToFavoritesCall
+                                                              .call(
+                                                        propertyId:
+                                                            getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.id''',
+                                                        ).toString(),
+                                                        authToken:
+                                                            currentAuthenticationToken,
+                                                      );
+
+                                                      final addFavoriteResponse =
+                                                          _model
+                                                              .addFvoriteRecommended;
+                                                      final isAlreadyFavorite =
+                                                          (addFavoriteResponse
+                                                                      ?.statusCode ==
+                                                                  409) ||
+                                                              (addFavoriteResponse
+                                                                          ?.jsonBody ??
+                                                                      '')
+                                                                  .toString()
+                                                                  .toLowerCase()
+                                                                  .contains(
+                                                                      'already');
+
+                                                      if ((addFavoriteResponse
+                                                                  ?.succeeded ??
+                                                              false) ||
+                                                          isAlreadyFavorite) {
+                                                        await showModalBottomSheet(
+                                                          isScrollControlled:
+                                                              true,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          enableDrag: false,
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return GestureDetector(
+                                                              onTap: () {
+                                                                FocusScope.of(
+                                                                        context)
+                                                                    .unfocus();
+                                                                FocusManager
+                                                                    .instance
+                                                                    .primaryFocus
+                                                                    ?.unfocus();
+                                                              },
+                                                              child: Padding(
+                                                                padding: MediaQuery
+                                                                    .viewInsetsOf(
+                                                                        context),
+                                                                child:
+                                                                    TusFavoritosCarpetasModalWidget(
+                                                                  isCreatingNewFolderPARAM:
+                                                                      false,
+                                                                  houseId:
+                                                                      getJsonField(
+                                                                    eachHouseItem,
+                                                                    r'''$.id''',
+                                                                  ).toString(),
+                                                                  propertyName:
+                                                                      getJsonField(
+                                                                    eachHouseItem,
+                                                                    r'''$.name''',
+                                                                  ).toString(),
+                                                                  propertyImage:
+                                                                      _modalImage(
+                                                                          eachHouseItem),
+                                                                  propertyIsFavorite:
+                                                                      true,
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ).then((value) =>
+                                                            safeSetState(
+                                                                () {}));
+                                                      } else {
+                                                        await showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (alertDialogContext) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                  'Error'),
+                                                              content: Text(
+                                                                  (addFavoriteResponse
+                                                                              ?.jsonBody ??
+                                                                          '')
+                                                                      .toString()),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          alertDialogContext),
+                                                                  child:
+                                                                      const Text(
+                                                                          'Ok'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                      }
+                                                    } else {
+                                                      await showDialog(
+                                                        context: context,
+                                                        builder:
+                                                            (dialogContext) {
+                                                          return Dialog(
+                                                            elevation: 0,
+                                                            insetPadding:
+                                                                EdgeInsets.zero,
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            alignment: const AlignmentDirectional(
+                                                                    0.0, 0.0)
+                                                                .resolve(
+                                                                    Directionality.of(
+                                                                        context)),
+                                                            child:
+                                                                GestureDetector(
+                                                              onTap: () {
+                                                                FocusScope.of(
+                                                                        dialogContext)
+                                                                    .unfocus();
+                                                                FocusManager
+                                                                    .instance
+                                                                    .primaryFocus
+                                                                    ?.unfocus();
+                                                              },
+                                                              child:
+                                                                  const VisitorRestrictionPopupWidget(),
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    }
+
+                                                    safeSetState(() {});
+                                                  },
+                                                  onRemoveFromFavorites:
+                                                      () async {
+                                                    await showModalBottomSheet(
+                                                      isScrollControlled: true,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      enableDrag: false,
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    context)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
+                                                          child: Padding(
+                                                            padding: MediaQuery
+                                                                .viewInsetsOf(
+                                                                    context),
+                                                            child:
+                                                                TusFavoritosCarpetasModalWidget(
+                                                              isCreatingNewFolderPARAM:
+                                                                  false,
+                                                              houseId:
+                                                                  getJsonField(
+                                                                eachHouseItem,
+                                                                r'''$.id''',
+                                                              ).toString(),
+                                                              propertyName:
+                                                                  getJsonField(
+                                                                eachHouseItem,
+                                                                r'''$.name''',
+                                                              ).toString(),
+                                                              propertyImage:
+                                                                  _modalImage(
+                                                                      eachHouseItem),
+                                                              propertyIsFavorite:
+                                                                  true,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ).then((value) =>
+                                                        safeSetState(() {}));
+
+                                                    safeSetState(() {});
+                                                  },
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        }).divide(const SizedBox(width: 16.0)),
+                                            );
+                                          }).divide(
+                                                  const SizedBox(width: 16.0)),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Visto recientemente',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                              FFButtonWidget(
-                                onPressed: () async {
+                        ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 20.0, 20.0, 0.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Visto recientemente',
+                                  style: _carouselTitleStyle,
+                                ),
+                                _verMasLink(onTap: () async {
                                   _handleRestrictedAction(() {
                                     context.pushNamed(
                                       DOVIACLIENTVerMasPropiedadesWidget
@@ -1927,405 +2027,414 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                           'Visto recientemente',
                                           ParamType.String,
                                         ),
+                                        // Mismo filtro Comprar/Rentar que el
+                                        // carrusel.
+                                        'listingFilter': serializeParam(
+                                          _model.comprarORentar,
+                                          ParamType.String,
+                                        ),
                                       }.withoutNulls,
                                     );
                                   });
-                                },
-                                text: 'Ver mas',
-                                options: FFButtonOptions(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).accent1,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        fontSize: 14.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
-                          child: FutureBuilder<ApiCallResponse>(
-                            future: DOVIAAPIPropertyContextGroup
-                                .listPropertiesCall
-                                .call(
-                              limit: '40',
-                              authToken: currentAuthenticationToken,
+                                }),
+                              ],
                             ),
-                            builder: (context, snapshot) {
-                              // Customize what your widget looks like when it's loading.
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: SizedBox(
-                                    width: 50.0,
-                                    height: 50.0,
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        FlutterFlowTheme.of(context).primary,
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 20.0, 20.0, 0.0),
+                            child: FutureBuilder<ApiCallResponse>(
+                              future: DOVIAAPIPropertyContextGroup
+                                  .listPropertiesCall
+                                  .call(
+                                limit: '40',
+                                authToken: currentAuthenticationToken,
+                              ),
+                              builder: (context, snapshot) {
+                                // Customize what your widget looks like when it's loading.
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 50.0,
+                                      height: 50.0,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          FlutterFlowTheme.of(context).primary,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              }
-                              final rowListPropertiesResponse = snapshot.data!;
+                                  );
+                                }
+                                final rowListPropertiesResponse =
+                                    snapshot.data!;
 
-                              return Builder(
-                                builder: (context) {
-                                  final allHouses =
-                                      _filterByListingType(getJsonField(
-                                            rowListPropertiesResponse.jsonBody,
-                                            r'''$.data''',
-                                          ) as List? ??
-                                          []);
-                                  final eachHouse = _carouselPage(
-                                      'vistoRecientemente', allHouses);
+                                return Builder(
+                                  builder: (context) {
+                                    final allHouses =
+                                        _filterByListingType(getJsonField(
+                                              rowListPropertiesResponse
+                                                  .jsonBody,
+                                              r'''$.data''',
+                                            ) as List? ??
+                                            []);
+                                    final eachHouse = _carouselPage(
+                                        'vistoRecientemente', allHouses);
 
-                                  return _withCarouselArrows(
-                                    carouselKey: 'vistoRecientemente',
-                                    total: allHouses.length,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: List.generate(
-                                            eachHouse.length, (eachHouseIndex) {
-                                          final eachHouseItem =
-                                              eachHouse[eachHouseIndex];
-                                          return Builder(
-                                            builder: (context) => InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              onTap: () async {
-                                                context.pushNamed(
-                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                      .routeName,
-                                                  queryParameters: {
-                                                    'propertyId':
-                                                        serializeParam(
-                                                      getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.id''',
-                                                      ).toString(),
-                                                      ParamType.String,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              },
-                                              onLongPress: () async {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            AgregarFavoritoACarpetaWidget(
-                                                          houseId: getJsonField(
-                                                            eachHouseItem,
-                                                            r'''$.id''',
-                                                          ).toString(),
-                                                        ),
+                                    return _withCarouselArrows(
+                                      carouselKey: 'vistoRecientemente',
+                                      total: allHouses.length,
+                                      child: SingleChildScrollView(
+                                        controller: _carouselController(
+                                            'vistoRecientemente'),
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children:
+                                              List.generate(eachHouse.length,
+                                                  (eachHouseIndex) {
+                                            final eachHouseItem =
+                                                eachHouse[eachHouseIndex];
+                                            return Builder(
+                                              builder: (context) => InkWell(
+                                                splashColor: Colors.transparent,
+                                                focusColor: Colors.transparent,
+                                                hoverColor: Colors.transparent,
+                                                highlightColor:
+                                                    Colors.transparent,
+                                                onTap: () async {
+                                                  context.pushNamed(
+                                                    DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                        .routeName,
+                                                    queryParameters: {
+                                                      'propertyId':
+                                                          serializeParam(
+                                                        getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.id''',
+                                                        ).toString(),
+                                                        ParamType.String,
                                                       ),
-                                                    );
-                                                  },
-                                                );
-                                              },
-                                              child: custom_widgets
-                                                  .DoviaClientHouseCard(
-                                                width: 210.0,
-                                                height: 0.0,
-                                                imageUrl: _houseImageUrl(
-                                                    eachHouseItem),
-                                                isFavorite: _isHouseFavorite(
-                                                    eachHouseItem),
-                                                name: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.name''',
-                                                ).toString(),
-                                                type: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.listingType''',
-                                                ).toString(),
-                                                price: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.price''',
-                                                ).toString(),
-                                                propertyType: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.propertyType''')
-                                                    ?.toString(),
-                                                hasDiscount: getJsonField(
-                                                            eachHouseItem,
-                                                            r'''$.hasDiscount''') ==
-                                                        true ||
-                                                    getJsonField(eachHouseItem,
-                                                                r'''$.hasDiscount''')
-                                                            .toString() ==
-                                                        'true',
-                                                originalPrice: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.originalPrice''')
-                                                    ?.toString(),
-                                                propertyId: getJsonField(
-                                                  eachHouseItem,
-                                                  r'''$.id''',
-                                                ).toString(),
-                                                authToken:
-                                                    currentAuthenticationToken,
-                                                onAddToFavorites: () async {
-                                                  if (FFAppState().UserRole !=
-                                                      'VISITOR') {
-                                                    _model.addFavoriteViewedRecently =
-                                                        await DOVIAAPIFavoriteContextGroup
-                                                            .addPropertyToFavoritesCall
-                                                            .call(
-                                                      propertyId: getJsonField(
-                                                        eachHouseItem,
-                                                        r'''$.id''',
-                                                      ).toString(),
-                                                      authToken:
-                                                          currentAuthenticationToken,
-                                                    );
-
-                                                    final addFavoriteResponse =
-                                                        _model
-                                                            .addFavoriteViewedRecently;
-                                                    final isAlreadyFavorite =
-                                                        (addFavoriteResponse
-                                                                    ?.statusCode ==
-                                                                409) ||
-                                                            (addFavoriteResponse
-                                                                        ?.jsonBody ??
-                                                                    '')
-                                                                .toString()
-                                                                .toLowerCase()
-                                                                .contains(
-                                                                    'already');
-
-                                                    if ((addFavoriteResponse
-                                                                ?.succeeded ??
-                                                            false) ||
-                                                        isAlreadyFavorite) {
-                                                      await showModalBottomSheet(
-                                                        isScrollControlled:
-                                                            true,
+                                                    }.withoutNulls,
+                                                  );
+                                                },
+                                                onLongPress: () async {
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder: (dialogContext) {
+                                                      return Dialog(
+                                                        elevation: 0,
+                                                        insetPadding:
+                                                            EdgeInsets.zero,
                                                         backgroundColor:
                                                             Colors.transparent,
-                                                        enableDrag: false,
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return GestureDetector(
-                                                            onTap: () {
-                                                              FocusScope.of(
-                                                                      context)
-                                                                  .unfocus();
-                                                              FocusManager
-                                                                  .instance
-                                                                  .primaryFocus
-                                                                  ?.unfocus();
-                                                            },
-                                                            child: Padding(
-                                                              padding: MediaQuery
-                                                                  .viewInsetsOf(
-                                                                      context),
-                                                              child:
-                                                                  TusFavoritosCarpetasModalWidget(
-                                                                isCreatingNewFolderPARAM:
-                                                                    false,
-                                                                houseId:
-                                                                    getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.id''',
-                                                                ).toString(),
-                                                                propertyName:
-                                                                    getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.name''',
-                                                                ).toString(),
-                                                                propertyImage:
-                                                                    _modalImage(
-                                                                        eachHouseItem),
-                                                                propertyIsFavorite:
-                                                                    true,
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ).then((value) =>
-                                                          safeSetState(() {}));
-                                                    } else {
-                                                      await showDialog(
-                                                        context: context,
-                                                        builder:
-                                                            (alertDialogContext) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                                'Error'),
-                                                            content: Text(
-                                                                (addFavoriteResponse
-                                                                            ?.jsonBody ??
-                                                                        '')
-                                                                    .toString()),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        alertDialogContext),
-                                                                child:
-                                                                    const Text(
-                                                                        'Ok'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    }
-                                                  } else {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder: (dialogContext) {
-                                                        return Dialog(
-                                                          elevation: 0,
-                                                          insetPadding:
-                                                              EdgeInsets.zero,
-                                                          backgroundColor:
-                                                              Colors
-                                                                  .transparent,
-                                                          alignment: const AlignmentDirectional(
-                                                                  0.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
+                                                        alignment:
+                                                            const AlignmentDirectional(
+                                                                    0.0, 0.0)
+                                                                .resolve(
+                                                                    Directionality.of(
+                                                                        context)),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    dialogContext)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
                                                           child:
-                                                              GestureDetector(
-                                                            onTap: () {
-                                                              FocusScope.of(
-                                                                      dialogContext)
-                                                                  .unfocus();
-                                                              FocusManager
-                                                                  .instance
-                                                                  .primaryFocus
-                                                                  ?.unfocus();
-                                                            },
-                                                            child:
-                                                                const VisitorRestrictionPopupWidget(),
-                                                          ),
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-
-                                                  safeSetState(() {});
-                                                },
-                                                onRemoveFromFavorites:
-                                                    () async {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    enableDrag: false,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(context)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child: Padding(
-                                                          padding: MediaQuery
-                                                              .viewInsetsOf(
-                                                                  context),
-                                                          child:
-                                                              TusFavoritosCarpetasModalWidget(
-                                                            isCreatingNewFolderPARAM:
-                                                                false,
-                                                            houseId: getJsonField(
-                                                                    eachHouseItem,
-                                                                    r'''$.id''')
-                                                                .toString(),
-                                                            propertyName: getJsonField(
-                                                                    eachHouseItem,
-                                                                    r'''$.name''')
-                                                                .toString(),
-                                                            propertyImage:
-                                                                _modalImage(
-                                                                    eachHouseItem),
-                                                            propertyIsFavorite:
-                                                                true,
+                                                              AgregarFavoritoACarpetaWidget(
+                                                            houseId:
+                                                                getJsonField(
+                                                              eachHouseItem,
+                                                              r'''$.id''',
+                                                            ).toString(),
                                                           ),
                                                         ),
                                                       );
                                                     },
-                                                  ).then((value) =>
-                                                      safeSetState(() {}));
-
-                                                  safeSetState(() {});
+                                                  );
                                                 },
+                                                child: custom_widgets
+                                                    .DoviaClientHouseCard(
+                                                  width: 210.0,
+                                                  height: 0.0,
+                                                  imageUrl: _houseImageUrl(
+                                                      eachHouseItem),
+                                                  isFavorite: _isHouseFavorite(
+                                                      eachHouseItem),
+                                                  name: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.name''',
+                                                  ).toString(),
+                                                  type: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.listingType''',
+                                                  ).toString(),
+                                                  price: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.price''',
+                                                  ).toString(),
+                                                  constructionArea: castToType<
+                                                          int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.constructionArea''')),
+                                                  landArea: castToType<double>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.landArea''')),
+                                                  bedrooms: castToType<int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.bedrooms''')),
+                                                  bathrooms: castToType<int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.bathrooms''')),
+                                                  propertyType: getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.propertyType''')
+                                                      ?.toString(),
+                                                  hasDiscount: getJsonField(
+                                                              eachHouseItem,
+                                                              r'''$.hasDiscount''') ==
+                                                          true ||
+                                                      getJsonField(
+                                                                  eachHouseItem,
+                                                                  r'''$.hasDiscount''')
+                                                              .toString() ==
+                                                          'true',
+                                                  originalPrice: getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.originalPrice''')
+                                                      ?.toString(),
+                                                  propertyId: getJsonField(
+                                                    eachHouseItem,
+                                                    r'''$.id''',
+                                                  ).toString(),
+                                                  authToken:
+                                                      currentAuthenticationToken,
+                                                  onAddToFavorites: () async {
+                                                    if (FFAppState().UserRole !=
+                                                        'VISITOR') {
+                                                      _model.addFavoriteViewedRecently =
+                                                          await DOVIAAPIFavoriteContextGroup
+                                                              .addPropertyToFavoritesCall
+                                                              .call(
+                                                        propertyId:
+                                                            getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.id''',
+                                                        ).toString(),
+                                                        authToken:
+                                                            currentAuthenticationToken,
+                                                      );
+
+                                                      final addFavoriteResponse =
+                                                          _model
+                                                              .addFavoriteViewedRecently;
+                                                      final isAlreadyFavorite =
+                                                          (addFavoriteResponse
+                                                                      ?.statusCode ==
+                                                                  409) ||
+                                                              (addFavoriteResponse
+                                                                          ?.jsonBody ??
+                                                                      '')
+                                                                  .toString()
+                                                                  .toLowerCase()
+                                                                  .contains(
+                                                                      'already');
+
+                                                      if ((addFavoriteResponse
+                                                                  ?.succeeded ??
+                                                              false) ||
+                                                          isAlreadyFavorite) {
+                                                        await showModalBottomSheet(
+                                                          isScrollControlled:
+                                                              true,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          enableDrag: false,
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return GestureDetector(
+                                                              onTap: () {
+                                                                FocusScope.of(
+                                                                        context)
+                                                                    .unfocus();
+                                                                FocusManager
+                                                                    .instance
+                                                                    .primaryFocus
+                                                                    ?.unfocus();
+                                                              },
+                                                              child: Padding(
+                                                                padding: MediaQuery
+                                                                    .viewInsetsOf(
+                                                                        context),
+                                                                child:
+                                                                    TusFavoritosCarpetasModalWidget(
+                                                                  isCreatingNewFolderPARAM:
+                                                                      false,
+                                                                  houseId:
+                                                                      getJsonField(
+                                                                    eachHouseItem,
+                                                                    r'''$.id''',
+                                                                  ).toString(),
+                                                                  propertyName:
+                                                                      getJsonField(
+                                                                    eachHouseItem,
+                                                                    r'''$.name''',
+                                                                  ).toString(),
+                                                                  propertyImage:
+                                                                      _modalImage(
+                                                                          eachHouseItem),
+                                                                  propertyIsFavorite:
+                                                                      true,
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ).then((value) =>
+                                                            safeSetState(
+                                                                () {}));
+                                                      } else {
+                                                        await showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (alertDialogContext) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                  'Error'),
+                                                              content: Text(
+                                                                  (addFavoriteResponse
+                                                                              ?.jsonBody ??
+                                                                          '')
+                                                                      .toString()),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          alertDialogContext),
+                                                                  child:
+                                                                      const Text(
+                                                                          'Ok'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                      }
+                                                    } else {
+                                                      await showDialog(
+                                                        context: context,
+                                                        builder:
+                                                            (dialogContext) {
+                                                          return Dialog(
+                                                            elevation: 0,
+                                                            insetPadding:
+                                                                EdgeInsets.zero,
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            alignment: const AlignmentDirectional(
+                                                                    0.0, 0.0)
+                                                                .resolve(
+                                                                    Directionality.of(
+                                                                        context)),
+                                                            child:
+                                                                GestureDetector(
+                                                              onTap: () {
+                                                                FocusScope.of(
+                                                                        dialogContext)
+                                                                    .unfocus();
+                                                                FocusManager
+                                                                    .instance
+                                                                    .primaryFocus
+                                                                    ?.unfocus();
+                                                              },
+                                                              child:
+                                                                  const VisitorRestrictionPopupWidget(),
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    }
+
+                                                    safeSetState(() {});
+                                                  },
+                                                  onRemoveFromFavorites:
+                                                      () async {
+                                                    await showModalBottomSheet(
+                                                      isScrollControlled: true,
+                                                      backgroundColor:
+                                                          Colors.transparent,
+                                                      enableDrag: false,
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    context)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
+                                                          child: Padding(
+                                                            padding: MediaQuery
+                                                                .viewInsetsOf(
+                                                                    context),
+                                                            child:
+                                                                TusFavoritosCarpetasModalWidget(
+                                                              isCreatingNewFolderPARAM:
+                                                                  false,
+                                                              houseId: getJsonField(
+                                                                      eachHouseItem,
+                                                                      r'''$.id''')
+                                                                  .toString(),
+                                                              propertyName: getJsonField(
+                                                                      eachHouseItem,
+                                                                      r'''$.name''')
+                                                                  .toString(),
+                                                              propertyImage:
+                                                                  _modalImage(
+                                                                      eachHouseItem),
+                                                              propertyIsFavorite:
+                                                                  true,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ).then((value) =>
+                                                        safeSetState(() {}));
+
+                                                    safeSetState(() {});
+                                                  },
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        }).divide(const SizedBox(width: 16.0)),
+                                            );
+                                          }).divide(
+                                                  const SizedBox(width: 16.0)),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                     // Aire al pie para que la ultima fila no quede debajo
                     // de la barra de navegacion, que va flotando encima.
                     const SizedBox(height: 110.0),

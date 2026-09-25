@@ -27,6 +27,13 @@ class DoviaClientHouseCard extends StatefulWidget {
   final String? originalPrice;
   final String? propertyType;
 
+  /// En las propiedades del propio usuario no va el corazón.
+  final bool showFavorite;
+
+  /// Versión chica para grillas de dos columnas: foto más baja y las
+  /// medidas acomodadas en varias líneas si no entran en una.
+  final bool compact;
+
   const DoviaClientHouseCard({
     super.key,
     this.width,
@@ -41,6 +48,8 @@ class DoviaClientHouseCard extends StatefulWidget {
     this.propertyId,
     this.authToken,
     this.onAddToFavorites,
+    this.showFavorite = true,
+    this.compact = false,
     this.onRemoveFromFavorites,
     this.bedrooms,
     this.bathrooms,
@@ -126,6 +135,29 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
     }
   }
 
+  /// Ícono según el tipo que cargó Lister HQ en el checklist. El backend lo
+  /// manda en inglés (`APARTMENT`, `HOUSE`, ...); también se aceptan los
+  /// nombres en español.
+  static IconData _typologyIcon(String type) {
+    final t = type.toUpperCase();
+    if (t.contains('APARTMENT') ||
+        t.contains('DEPARTAMENTO') ||
+        t.contains('APARTAMENTO') ||
+        t.contains('PENTHOUSE') ||
+        t.contains('STUDIO') ||
+        t.contains('ESTUDIO') ||
+        t.contains('EDIFICIO')) {
+      return Icons.apartment;
+    }
+    if (t.contains('LOT') || t.contains('TERRENO') || t.contains('LAND')) {
+      return Icons.landscape;
+    }
+    if (t.contains('FARM') || t.contains('FINCA')) {
+      return Icons.agriculture;
+    }
+    return Icons.house;
+  }
+
   Future<void> _handleHeartTap() async {
     // Un invitado no puede guardar nada: la acción sólo abre el modal de
     // registro, así que el corazón no debe encenderse.
@@ -199,7 +231,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 140,
+            height: widget.compact ? 100 : 140,
             child: Stack(
               children: [
                 ClipRRect(
@@ -211,7 +243,8 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                 ),
 
                 // Typology Icon
-                if (widget.propertyType != null)
+                if ((widget.propertyType ?? '').trim().isNotEmpty &&
+                    widget.propertyType != 'null')
                   Positioned(
                     top: 12,
                     left: 12,
@@ -222,14 +255,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        (widget.propertyType!
-                                    .toLowerCase()
-                                    .contains('departamento') ||
-                                widget.propertyType!
-                                    .toLowerCase()
-                                    .contains('edificio'))
-                            ? Icons.apartment
-                            : Icons.house,
+                        _typologyIcon(widget.propertyType!),
                         color: const Color(0xFF00444B),
                         size: 20,
                       ),
@@ -237,38 +263,40 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   ),
 
                 // Heart Button Logic
-                Positioned(
-                  top: 12,
-                  right: 12, // Moved to right since typology icon is on left
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(50),
-                      onTap: _handleHeartTap,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: _isFavorite
-                              ? const Color(0xFFFFEAEA).withOpacity(0.9)
-                              : const Color(0xFFD0E6E8).withOpacity(0.8),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: _isFavorite
-                              ? Colors.red
-                              : const Color(0xFF00444B),
-                          size: 20,
+                if (widget.showFavorite)
+                  Positioned(
+                    top: 12,
+                    right: 12, // Moved to right since typology icon is on left
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(50),
+                        onTap: _handleHeartTap,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            // Mismo fondo siempre: solo el corazón cambia.
+                            color: const Color(0xFFD0E6E8).withOpacity(0.8),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: _isFavorite
+                                ? Colors.red
+                                : const Color(0xFF00444B),
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: EdgeInsets.all(widget.compact ? 10.0 : 12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -280,7 +308,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                     Text(
                       _formatPrice(widget.price),
                       style: GoogleFonts.raleway(
-                        fontSize: 16,
+                        fontSize: widget.compact ? 14 : 16,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF007376),
                       ),
@@ -306,6 +334,8 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   (widget.name == null || widget.name!.isEmpty)
                       ? "Propiedad sin nombre"
                       : widget.name!,
+                  maxLines: widget.compact ? 1 : null,
+                  overflow: widget.compact ? TextOverflow.ellipsis : null,
                   style: GoogleFonts.publicSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -320,16 +350,34 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                     color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildSpecItem("${widget.constructionArea ?? 0} M2"),
-                    _buildSpecItem("${widget.landArea?.toInt() ?? 0} M2"),
-                    _buildSpecItem("${widget.bedrooms ?? 0} Hab."),
-                    _buildSpecItem("${widget.bathrooms ?? 0} Baños"),
-                  ],
-                ),
+                SizedBox(height: widget.compact ? 6 : 8),
+                if (widget.compact)
+                  // Todo en una línea, achicándose si no entra.
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        _buildSpecItem("${widget.constructionArea ?? 0} M2"),
+                        const SizedBox(width: 8),
+                        _buildSpecItem("${widget.landArea?.toInt() ?? 0} M2"),
+                        const SizedBox(width: 8),
+                        _buildSpecItem("${widget.bedrooms ?? 0} Hab."),
+                        const SizedBox(width: 8),
+                        _buildSpecItem("${widget.bathrooms ?? 0} Baños"),
+                      ],
+                    ),
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSpecItem("${widget.constructionArea ?? 0} M2"),
+                      _buildSpecItem("${widget.landArea?.toInt() ?? 0} M2"),
+                      _buildSpecItem("${widget.bedrooms ?? 0} Hab."),
+                      _buildSpecItem("${widget.bathrooms ?? 0} Baños"),
+                    ],
+                  ),
               ],
             ),
           ),

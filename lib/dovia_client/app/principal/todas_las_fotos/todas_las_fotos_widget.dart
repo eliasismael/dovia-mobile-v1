@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/custom_code/widgets/all_photos_widget.dart' show PhotoCategory;
 import 'package:flutter/material.dart';
+import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'todas_las_fotos_model.dart';
 export 'todas_las_fotos_model.dart';
 
@@ -86,20 +87,25 @@ class _TodasLasFotosWidgetState extends State<TodasLasFotosWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      body: SafeArea(
-        top: false,
-        child: SizedBox(
-          width: MediaQuery.sizeOf(context).width * 1.0,
-          height: MediaQuery.sizeOf(context).height * 1.0,
-          child: custom_widgets.AllPhotosWidget(
-            width: MediaQuery.sizeOf(context).width * 1.0,
-            height: MediaQuery.sizeOf(context).height * 1.0,
-            categories: _buildCategories(),
-            onClose: () async {
-              Navigator.pop(context);
-            },
+      body: Stack(
+        children: [
+          const CornerGradientBackgroundWidget(),
+          SafeArea(
+            top: false,
+            child: SizedBox(
+              width: MediaQuery.sizeOf(context).width * 1.0,
+              height: MediaQuery.sizeOf(context).height * 1.0,
+              child: custom_widgets.AllPhotosWidget(
+                width: MediaQuery.sizeOf(context).width * 1.0,
+                height: MediaQuery.sizeOf(context).height * 1.0,
+                categories: _buildCategories(),
+                onClose: () async {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

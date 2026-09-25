@@ -5,6 +5,7 @@ import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favorit
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -58,9 +59,11 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
           top: true,
           child: Stack(
             children: [
+              const CornerGradientBackgroundWidget(),
               Padding(
+                // Misma altura de header que el resto de las pantallas.
                 padding:
-                    const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
+                    const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -98,24 +101,16 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                           ),
                           Text(
                             'Carpetas',
+                            textAlign: TextAlign.center,
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
+                                  font: GoogleFonts.publicSans(
+                                      fontWeight: FontWeight.w600),
+                                  fontSize: 18.0,
                                   letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
+                                  fontWeight: FontWeight.w600,
+                                  lineHeight: 1.4,
                                 ),
                           ),
                           InkWell(
@@ -174,7 +169,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                       ),
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 20.0, 0.0, 0.0),
+                            0.0, 32.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: const BoxDecoration(),
@@ -224,6 +219,8 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                       childAspectRatio: 0.8,
                                     ),
                                     shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     scrollDirection: Axis.vertical,
                                     itemCount: eachFolder.length,
                                     itemBuilder: (context, eachFolderIndex) {
@@ -514,7 +511,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                       alignment: const AlignmentDirectional(1.0, 0.0),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 0.0, 15.0, 100.0),
+                            0.0, 0.0, 15.0, 12.0),
                         child: wrapWithModel(
                           model: _model.fixedDoviaIconModel,
                           updateCallback: () => safeSetState(() {}),

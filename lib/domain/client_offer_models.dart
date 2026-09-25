@@ -431,20 +431,18 @@ class ClientOffer {
   String get detailState =>
       processStatus.isNotEmpty ? processStatus : offerStatus.toLowerCase();
 
-  /// Avance del proceso legal, de 0 a 5, para la barra segmentada. El paso 1
-  /// es la negociación, ya cerrada en este carril.
+  /// Avance del proceso legal, de 0 a 4, para la barra segmentada. Son los
+  /// mismos cuatro pasos de "Tu propuesta": negociación (ya cerrada en este
+  /// carril), estructuración del acuerdo, firma de contrato y cierre.
   int get legalProgressSteps {
     switch (processStatus) {
       case 'completed':
-        return 5;
-      case 'contract_signing':
         return 4;
-      case 'agreement_structuring':
+      case 'contract_signing':
         return 3;
-      case 'awaiting_legal_review':
-        return 2;
       default:
-        return 2; // recién aceptada, a la espera del asociado legal
+        // Recién aceptada, esperando al asociado legal o estructurando.
+        return 2;
     }
   }
 
@@ -497,11 +495,14 @@ class ClientOffersBoard {
 
   /// Ofertas de un carril, de la más reciente a la más vieja.
   ///
-  /// "Ofertas realizadas" es el pipeline general y por diseño muestra TODAS
-  /// las ofertas en cualquier estado; los otros dos carriles son subconjuntos
-  /// suyos (la misma oferta aparece en "realizadas" y en "contraoferta").
+  /// "Ofertas realizadas" es el pipeline general: muestra las ofertas en
+  /// cualquier estado salvo las aceptadas, que sólo aparecen en su carril
+  /// (una en contraoferta sí aparece en "realizadas" y en "contraoferta").
   List<ClientOffer> inLane(ClientOfferLane lane) {
-    if (lane == ClientOfferLane.realizadas) return _newestFirst(all);
+    if (lane == ClientOfferLane.realizadas) {
+      return _newestFirst(
+          all.where((o) => o.lane != ClientOfferLane.aceptada));
+    }
     return _newestFirst(all.where((o) => o.lane == lane));
   }
 

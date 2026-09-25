@@ -18,6 +18,54 @@ class _DoviaSuupportMessagesWidgetState
     extends State<DoviaSuupportMessagesWidget> {
   late DoviaSuupportMessagesModel _model;
 
+  /// Mensajes que el usuario envió en esta conversación.
+  final List<String> _messages = [];
+  final ScrollController _messagesScroll = ScrollController();
+
+  void _send() {
+    final text = _model.textController?.text.trim() ?? '';
+    if (text.isEmpty) return;
+    setState(() {
+      _messages.add(text);
+      _model.textController?.clear();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_messagesScroll.hasClients) {
+        _messagesScroll.animateTo(_messagesScroll.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+      }
+    });
+  }
+
+  Widget _messageBubble(String text) {
+    return Align(
+      alignment: AlignmentDirectional.centerEnd,
+      child: Container(
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.75),
+        margin: const EdgeInsets.only(top: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).primary,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16.0),
+            topRight: Radius.circular(16.0),
+            bottomLeft: Radius.circular(16.0),
+            bottomRight: Radius.circular(4.0),
+          ),
+        ),
+        child: Text(
+          text,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.inter(),
+                color: Colors.white,
+                letterSpacing: 0.0,
+              ),
+        ),
+      ),
+    );
+  }
+
   @override
   void setState(VoidCallback callback) {
     super.setState(callback);
@@ -37,6 +85,7 @@ class _DoviaSuupportMessagesWidgetState
 
   @override
   void dispose() {
+    _messagesScroll.dispose();
     _model.maybeDispose();
 
     super.dispose();
@@ -44,134 +93,159 @@ class _DoviaSuupportMessagesWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Stack(
-          alignment: const AlignmentDirectional(0.0, 1.0),
-          children: [
-            Container(
-              // Se abre desde abajo: el contenido termina sobre los botones de Android.
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.viewPaddingOf(context).bottom),
-              width: MediaQuery.sizeOf(context).width * 1.0,
-              height: MediaQuery.sizeOf(context).height * 1.0,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).tertiary,
-                borderRadius: BorderRadius.circular(18.0),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(20.0, 30.0, 20.0, 0.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: const BoxDecoration(),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              InkWell(
-                                splashColor: Colors.transparent,
-                                focusColor: Colors.transparent,
-                                hoverColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                onTap: () async {
-                                  context.safePop();
-                                },
-                                child: Container(
-                                  width: 35.0,
-                                  height: 35.0,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        FlutterFlowTheme.of(context).alternate,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/IconoVolverAtras.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
+    // Se abre a pantalla completa y el bottom sheet le saca los márgenes del
+    // sistema: se toman de la ventana (barra de estado y botones de Android).
+    final view = MediaQueryData.fromView(View.of(context));
+    final safeTop = view.viewPadding.top;
+    // Con el teclado abierto la hoja se achica a lo que queda libre y el
+    // margen de los botones de Android ya no hace falta.
+    // `MediaQuery.viewInsetsOf` hace que se reconstruya cuando el teclado
+    // se abre o se cierra (leer solo la ventana no avisa de los cambios).
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom > 0
+        ? MediaQuery.viewInsetsOf(context).bottom
+        : view.viewInsets.bottom;
+    final safeBottom = keyboard > 0 ? 0.0 : view.viewPadding.bottom;
+    return LayoutBuilder(builder: (context, constraints) {
+      // Ocupa exactamente lo que le deja la hoja (ya descontado el teclado).
+      final sheetHeight = constraints.maxHeight.isFinite
+          ? constraints.maxHeight
+          : view.size.height - keyboard;
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Stack(
+            alignment: const AlignmentDirectional(0.0, 1.0),
+            children: [
+              Container(
+                width: MediaQuery.sizeOf(context).width * 1.0,
+                height: sheetHeight,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).tertiary,
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                      20.0, safeTop + 24.0, 20.0, 0.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            decoration: const BoxDecoration(),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                InkWell(
+                                  splashColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () async {
+                                    context.safePop();
+                                  },
+                                  child: Container(
+                                    width: 35.0,
+                                    height: 35.0,
+                                    decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context)
+                                          .alternate,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: SvgPicture.asset(
+                                        'assets/images/IconoVolverAtras.svg',
+                                        width: 200.0,
+                                        height: 200.0,
+                                        fit: BoxFit.none,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(0.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/D-verde.svg',
-                                  width: 28.0,
-                                  height: 36.0,
-                                  fit: BoxFit.cover,
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(0.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/D-verde.svg',
+                                    width: 28.0,
+                                    height: 36.0,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
-                            ].divide(const SizedBox(width: 8.0)),
-                          ),
-                        ),
-                        InkWell(
-                          splashColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onTap: () async {
-                            Navigator.pop(context);
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: SvgPicture.asset(
-                              'assets/images/CloseIcon.svg',
-                              width: 32.0,
-                              height: 32.0,
-                              fit: BoxFit.none,
+                              ].divide(const SizedBox(width: 8.0)),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 27.0, 0.0, 0.0),
-                      child: Container(
-                        width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: 100.0,
-                        decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          boxShadow: const [
-                            BoxShadow(
-                              blurRadius: 4.0,
-                              color: Color(0x33000000),
-                              offset: Offset(
-                                0.0,
-                                2.0,
+                          InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              Navigator.pop(context);
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: SvgPicture.asset(
+                                'assets/images/CloseIcon.svg',
+                                width: 32.0,
+                                height: 32.0,
+                                fit: BoxFit.none,
                               ),
-                            )
-                          ],
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              14.0, 14.0, 14.0, 14.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '👋 ¿Necesitas ayuda? Chatea con uno de nuestros asesores y resuelve tus dudas en tiempo real. Estamos aquí para acompañarte.',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 27.0, 0.0, 0.0),
+                        child: Container(
+                          width: MediaQuery.sizeOf(context).width * 1.0,
+                          height: 100.0,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            boxShadow: const [
+                              BoxShadow(
+                                blurRadius: 4.0,
+                                color: Color(0x33000000),
+                                offset: Offset(
+                                  0.0,
+                                  2.0,
+                                ),
+                              )
+                            ],
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                14.0, 14.0, 14.0, 14.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '👋 ¿Necesitas ayuda? Chatea con uno de nuestros asesores y resuelve tus dudas en tiempo real. Estamos aquí para acompañarte.',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        fontSize: 12.0,
+                                        letterSpacing: 0.0,
                                         fontWeight: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .fontWeight,
@@ -179,56 +253,63 @@ class _DoviaSuupportMessagesWidgetState
                                             .bodyMedium
                                             .fontStyle,
                                       ),
-                                      fontSize: 12.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: ListView(
+                          controller: _messagesScroll,
+                          padding: EdgeInsets.only(
+                              top: 6.0, bottom: 110.0 + safeBottom),
+                          children: _messages.map(_messageBubble).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(20.0, 120.0, 20.0, 20.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).tertiary,
-                  boxShadow: const [
-                    BoxShadow(
-                      blurRadius: 4.0,
-                      color: Color(0x4B000000),
-                      offset: Offset(
-                        0.0,
-                        2.0,
-                      ),
-                    )
-                  ],
-                  borderRadius: BorderRadius.circular(26.0),
-                ),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width * 1.0,
-                  child: TextFormField(
-                    controller: _model.textController,
-                    focusNode: _model.textFieldFocusNode,
-                    autofocus: false,
-                    enabled: true,
-                    obscureText: false,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      labelStyle:
-                          FlutterFlowTheme.of(context).labelMedium.override(
-                                font: GoogleFonts.publicSans(
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                    20.0, 120.0, 20.0, 20.0 + safeBottom),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).tertiary,
+                    boxShadow: const [
+                      BoxShadow(
+                        blurRadius: 4.0,
+                        color: Color(0x4B000000),
+                        offset: Offset(
+                          0.0,
+                          2.0,
+                        ),
+                      )
+                    ],
+                    borderRadius: BorderRadius.circular(26.0),
+                  ),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width * 1.0,
+                    child: TextFormField(
+                      controller: _model.textController,
+                      focusNode: _model.textFieldFocusNode,
+                      autofocus: false,
+                      enabled: true,
+                      obscureText: false,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        labelStyle:
+                            FlutterFlowTheme.of(context).labelMedium.override(
+                                  font: GoogleFonts.publicSans(
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .fontStyle,
+                                  ),
+                                  letterSpacing: 0.0,
                                   fontWeight: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .fontWeight,
@@ -236,18 +317,18 @@ class _DoviaSuupportMessagesWidgetState
                                       .labelMedium
                                       .fontStyle,
                                 ),
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .fontStyle,
-                              ),
-                      hintText: 'Haz una regunta...',
-                      hintStyle:
-                          FlutterFlowTheme.of(context).labelMedium.override(
-                                font: GoogleFonts.inter(
+                        hintText: 'Haz una pregunta...',
+                        hintStyle:
+                            FlutterFlowTheme.of(context).labelMedium.override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .fontStyle,
+                                  ),
+                                  letterSpacing: 0.0,
                                   fontWeight: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .fontWeight,
@@ -255,50 +336,71 @@ class _DoviaSuupportMessagesWidgetState
                                       .labelMedium
                                       .fontStyle,
                                 ),
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .fontStyle,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: FlutterFlowTheme.of(context).primary,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Color(0x00000000),
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: FlutterFlowTheme.of(context).error,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: FlutterFlowTheme.of(context).error,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(24.0),
+                        ),
+                        filled: true,
+                        fillColor:
+                            FlutterFlowTheme.of(context).secondaryBackground,
+                        contentPadding: const EdgeInsetsDirectional.fromSTEB(
+                            16.0, 22.0, 0.0, 22.0),
+                        suffixIconConstraints: const BoxConstraints(
+                            minWidth: 48.0, minHeight: 40.0),
+                        suffixIcon: Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 8.0),
+                          // Círculo propio: el estilo de IconButton no pinta
+                          // el fondo con el tema de la app.
+                          child: Material(
+                            color: FlutterFlowTheme.of(context).primary,
+                            shape: const CircleBorder(),
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTap: _send,
+                              child: const SizedBox(
+                                width: 40.0,
+                                height: 40.0,
+                                child: Icon(Icons.send_rounded,
+                                    color: Colors.white, size: 20.0),
                               ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: FlutterFlowTheme.of(context).primary,
-                          width: 2.0,
+                            ),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(24.0),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Color(0x00000000),
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: FlutterFlowTheme.of(context).error,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: FlutterFlowTheme.of(context).error,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                      filled: true,
-                      fillColor:
-                          FlutterFlowTheme.of(context).secondaryBackground,
-                      contentPadding: const EdgeInsetsDirectional.fromSTEB(
-                          10.0, 36.0, 0.0, 36.0),
-                    ),
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.inter(
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontStyle,
+                            ),
+                            letterSpacing: 0.0,
                             fontWeight: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .fontWeight,
@@ -306,25 +408,22 @@ class _DoviaSuupportMessagesWidgetState
                                 .bodyMedium
                                 .fontStyle,
                           ),
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                    maxLines: null,
-                    cursorColor: FlutterFlowTheme.of(context).primaryText,
-                    enableInteractiveSelection: true,
-                    validator:
-                        _model.textControllerValidator.asValidator(context),
+                      maxLines: 4,
+                      minLines: 1,
+                      textInputAction: TextInputAction.send,
+                      onFieldSubmitted: (_) => _send(),
+                      cursorColor: FlutterFlowTheme.of(context).primaryText,
+                      enableInteractiveSelection: true,
+                      validator:
+                          _model.textControllerValidator.asValidator(context),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    );
+            ],
+          ),
+        ],
+      );
+    });
   }
 }

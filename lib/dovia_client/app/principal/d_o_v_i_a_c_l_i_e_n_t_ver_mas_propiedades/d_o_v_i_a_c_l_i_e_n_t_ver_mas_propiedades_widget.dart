@@ -1,3 +1,4 @@
+import '/domain/property_owner.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -20,9 +21,13 @@ class DOVIACLIENTVerMasPropiedadesWidget extends StatefulWidget {
   const DOVIACLIENTVerMasPropiedadesWidget({
     super.key,
     required this.title,
+    this.listingFilter,
   });
 
   final String? title;
+
+  /// 'comprar', 'rentar' o vacío: el mismo filtro que tenía el home.
+  final String? listingFilter;
 
   static String routeName = 'DOVIA_CLIENT_VerMasPropiedades';
   static String routePath = '/dOVIACLIENTVerMasPropiedades';
@@ -43,7 +48,11 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
     super.initState();
     _model = createModel(context, () => DOVIACLIENTVerMasPropiedadesModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      safeSetState(() {});
+      await loadOwnPropertyIds();
+      safeSetState(() {});
+    });
   }
 
   @override
@@ -66,6 +75,18 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
   String _modalImage(dynamic house) => house is Map
       ? firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? ''
       : '';
+
+  bool _matchesListingFilter(dynamic house) {
+    final selected = widget.listingFilter ?? '';
+    if (selected.isEmpty) return true;
+    final wanted = selected == 'rentar' ? 'RENT' : 'SALE';
+    final listingType = getJsonField(house, r'''$.listingType''');
+    if (listingType is List) {
+      return listingType
+          .any((type) => type.toString().toUpperCase().contains(wanted));
+    }
+    return listingType.toString().toUpperCase().contains(wanted);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,22 +116,26 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
                         title: widget.title!,
+                        showCurrency: false,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
+                          12.0, 0.0, 12.0, 100.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
-                                20.0, 20.0, 20.0, 0.0),
+                                0.0, 20.0, 0.0, 0.0),
                             child: FutureBuilder<ApiCallResponse>(
                               future: DOVIAAPIPropertyContextGroup
                                   .listPropertiesCall
                                   .call(
-                                limit: '5',
+                                // La misma consulta que los carruseles del
+                                // home: acá se ven todas de una, hacia abajo.
+                                limit: '40',
+                                authToken: currentAuthenticationToken,
                               ),
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
@@ -136,267 +161,312 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                     final eachHouse = getJsonField(
                                       listViewListPropertiesResponse.jsonBody,
                                       r'''$.data''',
-                                    ).toList();
+                                    )
+                                        .toList()
+                                        .where((h) => !isOwnProperty(h))
+                                        .where(_matchesListingFilter)
+                                        .toList();
 
+                                    // Dos tarjetas por fila.
                                     return ListView.separated(
                                       padding: EdgeInsets.zero,
                                       shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
                                       scrollDirection: Axis.vertical,
-                                      itemCount: eachHouse.length,
+                                      itemCount: (eachHouse.length + 1) ~/ 2,
                                       separatorBuilder: (_, __) =>
-                                          const SizedBox(height: 20.0),
-                                      itemBuilder: (context, eachHouseIndex) {
-                                        final eachHouseItem =
-                                            eachHouse[eachHouseIndex];
-                                        return Builder(
-                                          builder: (context) => InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              context.pushNamed(
-                                                DOVIACLIENTPropiedadSeleccionadaNewWidget
-                                                    .routeName,
-                                                queryParameters: {
-                                                  'propertyId': serializeParam(
-                                                    getJsonField(
-                                                      eachHouseItem,
-                                                      r'''$.id''',
-                                                    ).toString(),
-                                                    ParamType.String,
-                                                  ),
-                                                }.withoutNulls,
-                                              );
-                                            },
-                                            onLongPress: () async {
-                                              await showDialog(
-                                                context: context,
-                                                builder: (dialogContext) {
-                                                  return Dialog(
-                                                    elevation: 0,
-                                                    insetPadding:
-                                                        EdgeInsets.zero,
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    alignment:
-                                                        const AlignmentDirectional(
-                                                                0.0, 0.0)
-                                                            .resolve(
-                                                                Directionality.of(
-                                                                    context)),
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        FocusScope.of(
-                                                                dialogContext)
-                                                            .unfocus();
-                                                        FocusManager.instance
-                                                            .primaryFocus
-                                                            ?.unfocus();
-                                                      },
-                                                      child:
-                                                          AgregarFavoritoACarpetaWidget(
-                                                        houseId: getJsonField(
-                                                          eachHouseItem,
-                                                          r'''$.id''',
-                                                        ).toString(),
-                                                      ),
+                                          const SizedBox(height: 16.0),
+                                      itemBuilder: (context, rowIndex) {
+                                        Widget cell(int eachHouseIndex) {
+                                          final eachHouseItem =
+                                              eachHouse[eachHouseIndex];
+                                          return Builder(
+                                            builder: (context) => InkWell(
+                                              splashColor: Colors.transparent,
+                                              focusColor: Colors.transparent,
+                                              hoverColor: Colors.transparent,
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              onTap: () async {
+                                                context.pushNamed(
+                                                  DOVIACLIENTPropiedadSeleccionadaNewWidget
+                                                      .routeName,
+                                                  queryParameters: {
+                                                    'propertyId':
+                                                        serializeParam(
+                                                      getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      ParamType.String,
                                                     ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            child: custom_widgets
-                                                .DoviaClientHouseCard(
-                                              width: 210.0,
-                                              height: 0.0,
-                                              imageUrl:
-                                                  _houseImageUrl(eachHouseItem),
-                                              isFavorite: getJsonField(
-                                                eachHouseItem,
-                                                r'''$.isFavorite''',
-                                              ),
-                                              name: getJsonField(
-                                                eachHouseItem,
-                                                r'''$.name''',
-                                              ).toString(),
-                                              type: getJsonField(
-                                                eachHouseItem,
-                                                r'''$.listingType''',
-                                              ).toString(),
-                                              price: getJsonField(
-                                                eachHouseItem,
-                                                r'''$.price''',
-                                              ).toString(),
-                                              onAddToFavorites: () async {
-                                                if (FFAppState().UserRole !=
-                                                    'VISITOR') {
-                                                  _model.apiResult9li =
-                                                      await DOVIAAPIFavoriteContextGroup
-                                                          .addPropertyToFavoritesCall
-                                                          .call(
-                                                    propertyId: getJsonField(
-                                                      eachHouseItem,
-                                                      r'''$.id''',
-                                                    ).toString(),
-                                                    authToken:
-                                                        currentAuthenticationToken,
-                                                  );
-
-                                                  if ((_model.apiResult9li
-                                                          ?.succeeded ??
-                                                      true)) {
-                                                    await showModalBottomSheet(
-                                                      isScrollControlled: true,
+                                                  }.withoutNulls,
+                                                );
+                                              },
+                                              onLongPress: () async {
+                                                await showDialog(
+                                                  context: context,
+                                                  builder: (dialogContext) {
+                                                    return Dialog(
+                                                      elevation: 0,
+                                                      insetPadding:
+                                                          EdgeInsets.zero,
                                                       backgroundColor:
                                                           Colors.transparent,
-                                                      enableDrag: false,
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return GestureDetector(
-                                                          onTap: () {
-                                                            FocusScope.of(
-                                                                    context)
-                                                                .unfocus();
-                                                            FocusManager
-                                                                .instance
-                                                                .primaryFocus
-                                                                ?.unfocus();
-                                                          },
-                                                          child: Padding(
-                                                            padding: MediaQuery
-                                                                .viewInsetsOf(
-                                                                    context),
-                                                            child:
-                                                                TusFavoritosCarpetasModalWidget(
-                                                              isCreatingNewFolderPARAM:
-                                                                  false,
-                                                              houseId: getJsonField(
-                                                                      eachHouseItem,
-                                                                      r'''$.id''')
-                                                                  .toString(),
-                                                              propertyName: getJsonField(
-                                                                      eachHouseItem,
-                                                                      r'''$.name''')
-                                                                  .toString(),
-                                                              propertyImage:
-                                                                  _modalImage(
-                                                                      eachHouseItem),
-                                                              propertyIsFavorite:
-                                                                  false,
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ).then((value) =>
-                                                        safeSetState(() {}));
-                                                  } else {
-                                                    await showDialog(
-                                                      context: context,
-                                                      builder:
-                                                          (alertDialogContext) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                              'Error'),
-                                                          content: Text((_model
-                                                                  .apiResult9li
-                                                                  ?.bodyText ??
-                                                              '')),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext),
-                                                              child: const Text(
-                                                                  'Ok'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-                                                } else {
-                                                  await showDialog(
-                                                    context: context,
-                                                    builder: (dialogContext) {
-                                                      return Dialog(
-                                                        elevation: 0,
-                                                        insetPadding:
-                                                            EdgeInsets.zero,
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        alignment:
-                                                            const AlignmentDirectional(
-                                                                    0.0, 0.0)
-                                                                .resolve(
-                                                                    Directionality.of(
-                                                                        context)),
-                                                        child: GestureDetector(
-                                                          onTap: () {
-                                                            FocusScope.of(
-                                                                    dialogContext)
-                                                                .unfocus();
-                                                            FocusManager
-                                                                .instance
-                                                                .primaryFocus
-                                                                ?.unfocus();
-                                                          },
-                                                          child:
-                                                              const VisitorRestrictionPopupWidget(),
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                }
-                                                safeSetState(() {});
-                                              },
-                                              onRemoveFromFavorites: () async {
-                                                await showModalBottomSheet(
-                                                  isScrollControlled: true,
-                                                  backgroundColor:
-                                                      Colors.transparent,
-                                                  enableDrag: false,
-                                                  context: context,
-                                                  builder: (context) {
-                                                    return GestureDetector(
-                                                      onTap: () {
-                                                        FocusScope.of(context)
-                                                            .unfocus();
-                                                        FocusManager.instance
-                                                            .primaryFocus
-                                                            ?.unfocus();
-                                                      },
-                                                      child: Padding(
-                                                        padding: MediaQuery
-                                                            .viewInsetsOf(
-                                                                context),
+                                                      alignment:
+                                                          const AlignmentDirectional(
+                                                                  0.0, 0.0)
+                                                              .resolve(
+                                                                  Directionality.of(
+                                                                      context)),
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          FocusScope.of(
+                                                                  dialogContext)
+                                                              .unfocus();
+                                                          FocusManager.instance
+                                                              .primaryFocus
+                                                              ?.unfocus();
+                                                        },
                                                         child:
-                                                            TusFavoritosCarpetasModalWidget(
-                                                          isCreatingNewFolderPARAM:
-                                                              false,
+                                                            AgregarFavoritoACarpetaWidget(
                                                           houseId: getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.id''')
-                                                              .toString(),
-                                                          propertyName: getJsonField(
-                                                                  eachHouseItem,
-                                                                  r'''$.name''')
-                                                              .toString(),
-                                                          propertyImage:
-                                                              _modalImage(
-                                                                  eachHouseItem),
-                                                          propertyIsFavorite:
-                                                              true,
+                                                            eachHouseItem,
+                                                            r'''$.id''',
+                                                          ).toString(),
                                                         ),
                                                       ),
                                                     );
                                                   },
-                                                ).then((value) =>
-                                                    safeSetState(() {}));
-                                                safeSetState(() {});
+                                                );
                                               },
+                                              child: custom_widgets
+                                                  .DoviaClientHouseCard(
+                                                width: double.infinity,
+                                                height: 0.0,
+                                                compact: true,
+                                                imageUrl: _houseImageUrl(
+                                                    eachHouseItem),
+                                                isFavorite: getJsonField(
+                                                  eachHouseItem,
+                                                  r'''$.isFavorite''',
+                                                ),
+                                                name: getJsonField(
+                                                  eachHouseItem,
+                                                  r'''$.name''',
+                                                ).toString(),
+                                                type: getJsonField(
+                                                  eachHouseItem,
+                                                  r'''$.listingType''',
+                                                ).toString(),
+                                                price: getJsonField(
+                                                  eachHouseItem,
+                                                  r'''$.price''',
+                                                ).toString(),
+                                                constructionArea: castToType<
+                                                        int>(
+                                                    getJsonField(eachHouseItem,
+                                                        r'''$.features.general.constructionArea''')),
+                                                landArea: castToType<double>(
+                                                    getJsonField(eachHouseItem,
+                                                        r'''$.features.general.landArea''')),
+                                                bedrooms: castToType<int>(
+                                                    getJsonField(eachHouseItem,
+                                                        r'''$.features.general.bedrooms''')),
+                                                bathrooms: castToType<int>(
+                                                    getJsonField(eachHouseItem,
+                                                        r'''$.features.general.bathrooms''')),
+                                                onAddToFavorites: () async {
+                                                  if (FFAppState().UserRole !=
+                                                      'VISITOR') {
+                                                    _model.apiResult9li =
+                                                        await DOVIAAPIFavoriteContextGroup
+                                                            .addPropertyToFavoritesCall
+                                                            .call(
+                                                      propertyId: getJsonField(
+                                                        eachHouseItem,
+                                                        r'''$.id''',
+                                                      ).toString(),
+                                                      authToken:
+                                                          currentAuthenticationToken,
+                                                    );
+
+                                                    if ((_model.apiResult9li
+                                                            ?.succeeded ??
+                                                        true)) {
+                                                      await showModalBottomSheet(
+                                                        isScrollControlled:
+                                                            true,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        enableDrag: false,
+                                                        context: context,
+                                                        builder: (context) {
+                                                          return GestureDetector(
+                                                            onTap: () {
+                                                              FocusScope.of(
+                                                                      context)
+                                                                  .unfocus();
+                                                              FocusManager
+                                                                  .instance
+                                                                  .primaryFocus
+                                                                  ?.unfocus();
+                                                            },
+                                                            child: Padding(
+                                                              padding: MediaQuery
+                                                                  .viewInsetsOf(
+                                                                      context),
+                                                              child:
+                                                                  TusFavoritosCarpetasModalWidget(
+                                                                isCreatingNewFolderPARAM:
+                                                                    false,
+                                                                houseId: getJsonField(
+                                                                        eachHouseItem,
+                                                                        r'''$.id''')
+                                                                    .toString(),
+                                                                propertyName: getJsonField(
+                                                                        eachHouseItem,
+                                                                        r'''$.name''')
+                                                                    .toString(),
+                                                                propertyImage:
+                                                                    _modalImage(
+                                                                        eachHouseItem),
+                                                                propertyIsFavorite:
+                                                                    false,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ).then((value) =>
+                                                          safeSetState(() {}));
+                                                    } else {
+                                                      await showDialog(
+                                                        context: context,
+                                                        builder:
+                                                            (alertDialogContext) {
+                                                          return AlertDialog(
+                                                            title: const Text(
+                                                                'Error'),
+                                                            content: Text((_model
+                                                                    .apiResult9li
+                                                                    ?.bodyText ??
+                                                                '')),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        alertDialogContext),
+                                                                child:
+                                                                    const Text(
+                                                                        'Ok'),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    }
+                                                  } else {
+                                                    await showDialog(
+                                                      context: context,
+                                                      builder: (dialogContext) {
+                                                        return Dialog(
+                                                          elevation: 0,
+                                                          insetPadding:
+                                                              EdgeInsets.zero,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          alignment: const AlignmentDirectional(
+                                                                  0.0, 0.0)
+                                                              .resolve(
+                                                                  Directionality.of(
+                                                                      context)),
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              FocusScope.of(
+                                                                      dialogContext)
+                                                                  .unfocus();
+                                                              FocusManager
+                                                                  .instance
+                                                                  .primaryFocus
+                                                                  ?.unfocus();
+                                                            },
+                                                            child:
+                                                                const VisitorRestrictionPopupWidget(),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                  safeSetState(() {});
+                                                },
+                                                onRemoveFromFavorites:
+                                                    () async {
+                                                  await showModalBottomSheet(
+                                                    isScrollControlled: true,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    enableDrag: false,
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          FocusScope.of(context)
+                                                              .unfocus();
+                                                          FocusManager.instance
+                                                              .primaryFocus
+                                                              ?.unfocus();
+                                                        },
+                                                        child: Padding(
+                                                          padding: MediaQuery
+                                                              .viewInsetsOf(
+                                                                  context),
+                                                          child:
+                                                              TusFavoritosCarpetasModalWidget(
+                                                            isCreatingNewFolderPARAM:
+                                                                false,
+                                                            houseId: getJsonField(
+                                                                    eachHouseItem,
+                                                                    r'''$.id''')
+                                                                .toString(),
+                                                            propertyName: getJsonField(
+                                                                    eachHouseItem,
+                                                                    r'''$.name''')
+                                                                .toString(),
+                                                            propertyImage:
+                                                                _modalImage(
+                                                                    eachHouseItem),
+                                                            propertyIsFavorite:
+                                                                true,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ).then((value) =>
+                                                      safeSetState(() {}));
+                                                  safeSetState(() {});
+                                                },
+                                              ),
                                             ),
-                                          ),
+                                          );
+                                        }
+
+                                        final first = rowIndex * 2;
+                                        return Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(child: cell(first)),
+                                            const SizedBox(width: 10.0),
+                                            Expanded(
+                                              child:
+                                                  first + 1 < eachHouse.length
+                                                      ? cell(first + 1)
+                                                      : const SizedBox(),
+                                            ),
+                                          ],
                                         );
                                       },
                                     );
