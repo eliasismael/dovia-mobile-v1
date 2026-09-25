@@ -140,8 +140,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
       title: 'Categoría del servicio',
       categories: _scope?.categories ?? const [],
       selectedId: _selectedCategoryId,
-      emptyMessage:
-          'Este servicio todavía no tiene categorías disponibles.',
+      emptyMessage: 'Este servicio todavía no tiene categorías disponibles.',
     );
     if (category == null || !mounted) return;
     safeSetState(() => _selectedCategoryId = category.id);
@@ -192,7 +191,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
           'servicio',
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.publicSans(
-                  fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                  fontWeight:
+                      FlutterFlowTheme.of(context).bodyMedium.fontWeight,
                   fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                 ),
                 fontSize: 16.0,
@@ -254,17 +254,20 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
             Text(title, style: titleStyle),
             for (final line in lines)
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
                 child: Text(line, style: bodyStyle),
               ),
             if (secondTitle != null)
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                 child: Text(secondTitle, style: titleStyle),
               ),
             for (final line in secondLines)
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 2.0, 0.0, 0.0),
                 child: Text(line, style: bodyStyle),
               ),
           ],
@@ -341,8 +344,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                   focusColor: Colors.transparent,
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
-                  onTap: () => safeSetState(
-                      () => _model.uploadedPhotos.removeAt(index)),
+                  onTap: () =>
+                      safeSetState(() => _model.uploadedPhotos.removeAt(index)),
                   child: Container(
                     width: 22.0,
                     height: 22.0,
@@ -409,13 +412,21 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 18.0, 0.0, 0.0),
                           child: Align(
-                          alignment: const AlignmentDirectional(-1.0, 0.0),
-                          child: Text(
-                            'Cuéntanos que necesitas ',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
+                            alignment: const AlignmentDirectional(-1.0, 0.0),
+                            child: Text(
+                              'Cuéntanos que necesitas ',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    font: GoogleFonts.publicSans(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                                    letterSpacing: 0.3,
                                     fontWeight: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .fontWeight,
@@ -423,15 +434,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                         .bodyMedium
                                         .fontStyle,
                                   ),
-                                  letterSpacing: 0.3,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                          ),
+                            ),
                           ),
                         ),
                         Padding(
@@ -630,7 +633,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                       height: 24.0,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.0,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
                                           FlutterFlowTheme.of(context).primary,
                                         ),
                                       ),
@@ -671,7 +675,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                                       // deriva al cobro (ValorVisita): el pago
                                       // custom exige un serviceId que todavía
                                       // no existe.
-                                      DHCLIENTAgendaWidget.nextRouteAfterSubmit =
+                                      DHCLIENTAgendaWidget
+                                              .nextRouteAfterSubmit =
                                           DHCLIENTValorVisitaPageWidget
                                               .routeName;
                                       context.pushNamed(

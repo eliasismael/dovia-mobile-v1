@@ -51,7 +51,8 @@ class OffersRepository extends ChangeNotifier {
   /// Propiedades del dueño indexadas por id, para completar las ofertas.
   Future<Map<String, Map<String, dynamic>>> _loadMyPropertiesById(
       String token) async {
-    final response = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall.call(
+    final response =
+        await DOVIAAPIPropertyContextGroup.getMyPropertiesCall.call(
       authToken: token,
       page: '1',
       limit: '100',
@@ -241,9 +242,9 @@ class OffersRepository extends ChangeNotifier {
     required String targetRole,
     required double stars,
   }) async {
-    final response =
-        await DOVIAAPIAssociateFeedbackContextGroup.createOfferAssociateRatingCall
-            .call(
+    final response = await DOVIAAPIAssociateFeedbackContextGroup
+        .createOfferAssociateRatingCall
+        .call(
       offerId: offerId,
       authToken: currentAuthenticationToken ?? '',
       targetRole: targetRole,
@@ -266,9 +267,9 @@ class OffersRepository extends ChangeNotifier {
     required String targetRole,
     required String message,
   }) async {
-    final response =
-        await DOVIAAPIAssociateFeedbackContextGroup.createOfferAssociateReportCall
-            .call(
+    final response = await DOVIAAPIAssociateFeedbackContextGroup
+        .createOfferAssociateReportCall
+        .call(
       offerId: offerId,
       authToken: currentAuthenticationToken ?? '',
       targetRole: targetRole,
@@ -329,7 +330,8 @@ class OffersRepository extends ChangeNotifier {
 
     final offerJson = _extractObject(response.jsonBody);
     if (offerJson == null) {
-      return const Failure('La contraoferta recibida no tiene un formato válido.');
+      return const Failure(
+          'La contraoferta recibida no tiene un formato válido.');
     }
     return Success(ClientCounterOfferDetail.fromJson(offerJson));
   }

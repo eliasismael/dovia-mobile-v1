@@ -7,8 +7,8 @@ import 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_contraoferta_detalle_widget.dart'
     show DOVIACLIENTMisOfertasContraofertaDetalleWidget;
 import 'package:flutter/material.dart';
 
-class DOVIACLIENTMisOfertasContraofertaDetalleModel extends FlutterFlowModel<
-    DOVIACLIENTMisOfertasContraofertaDetalleWidget> {
+class DOVIACLIENTMisOfertasContraofertaDetalleModel
+    extends FlutterFlowModel<DOVIACLIENTMisOfertasContraofertaDetalleWidget> {
   late CornerGradientBackgroundModel cornerGradientBackgroundModel;
   late DOVIASHAREDHeaderModel dOVIASHAREDHeaderModel;
   late FixedDoviaIconModel fixedDoviaIconModel;

@@ -50,8 +50,7 @@ String? _firstStr(List<dynamic> candidates) {
   return null;
 }
 
-String proposalId(Map<String, dynamic> proposal) =>
-    _str(proposal['id']) ?? '';
+String proposalId(Map<String, dynamic> proposal) => _str(proposal['id']) ?? '';
 
 /// Tipo de propuesta.
 ///

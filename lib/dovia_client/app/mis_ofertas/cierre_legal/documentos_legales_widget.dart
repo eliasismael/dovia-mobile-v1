@@ -78,8 +78,8 @@ class DocumentosLegalesWidget extends StatelessWidget {
                   color: _iconBg,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.download_outlined,
-                    color: _aqua, size: 18),
+                child:
+                    const Icon(Icons.download_outlined, color: _aqua, size: 18),
               ),
             ),
           ] else

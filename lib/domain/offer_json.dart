@@ -68,6 +68,17 @@ String? firstPropertyPhotoUrl(Map<String, dynamic>? property) {
       offerStr(property['coverPhoto']);
   if (single != null) return single;
 
+  // La "Foto principal" que carga Lister HQ es la miniatura. Si se cambió,
+  // la más reciente queda al final.
+  final images = property['images'];
+  if (images is Map && images['principal'] is List) {
+    final principal = (images['principal'] as List)
+        .map((e) => offerStr(e))
+        .whereType<String>()
+        .toList();
+    if (principal.isNotEmpty) return principal.last;
+  }
+
   for (final key in const ['photos', 'images']) {
     final value = property[key];
     final url = _urlFrom(value);

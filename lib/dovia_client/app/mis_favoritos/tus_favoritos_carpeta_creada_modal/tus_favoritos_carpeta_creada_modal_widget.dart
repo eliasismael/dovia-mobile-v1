@@ -52,7 +52,14 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
             constraints: const BoxConstraints(maxWidth: 340.0),
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).secondaryBackground,
-              borderRadius: BorderRadius.circular(10.4),
+              borderRadius: BorderRadius.circular(24.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 18.0,
+                  offset: Offset(0.0, 6.0),
+                ),
+              ],
             ),
             child: Padding(
               padding:
@@ -107,6 +114,29 @@ class _TusFavoritosCarpetaCreadaModalWidgetState
                                 .bodyMedium
                                 .fontStyle,
                           ),
+                    ),
+                  ),
+                  const SizedBox(height: 22.0),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: FlutterFlowTheme.of(context).primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        minimumSize: const Size.fromHeight(46.0),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100.0)),
+                      ),
+                      child: const Text(
+                        'Aceptar',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ],

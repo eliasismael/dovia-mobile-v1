@@ -290,48 +290,48 @@ class _DHCLIENTProveedorCardWidgetState
             children: [
               // Report / emergency icon (red)
               GestureDetector(
-              onTap: () {
-                // report/emergency action — placeholder
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Soporte de emergencia')),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-            ),
-            if (!widget.showDownloadId &&
-                widget.phoneNumber != null &&
-                widget.phoneNumber!.isNotEmpty) ...[
-              const SizedBox(width: 12),
-              // WhatsApp / Chat icon (teal)
-              GestureDetector(
-                onTap: _openWhatsApp,
+                onTap: () {
+                  // report/emergency action — placeholder
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Soporte de emergencia')),
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primary,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.chat_bubble_outline,
+                    Icons.warning_amber_rounded,
                     color: Colors.white,
                     size: 16,
                   ),
                 ),
               ),
+              if (!widget.showDownloadId &&
+                  widget.phoneNumber != null &&
+                  widget.phoneNumber!.isNotEmpty) ...[
+                const SizedBox(width: 12),
+                // WhatsApp / Chat icon (teal)
+                GestureDetector(
+                  onTap: _openWhatsApp,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.chat_bubble_outline,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
-        ),
+          ),
 
         const SizedBox(height: 10),
 
@@ -454,8 +454,9 @@ class _DHCLIENTProveedorCardWidgetState
                 Expanded(
                   child: Text(
                     'ID: ${widget.advisorId!.length > 8 ? widget.advisorId!.substring(0, 8).toUpperCase() : widget.advisorId!.toUpperCase()}',
-                    textAlign:
-                        widget.showDownloadId ? TextAlign.center : TextAlign.start,
+                    textAlign: widget.showDownloadId
+                        ? TextAlign.center
+                        : TextAlign.start,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.publicSans(
                             fontWeight: FontWeight.w600,

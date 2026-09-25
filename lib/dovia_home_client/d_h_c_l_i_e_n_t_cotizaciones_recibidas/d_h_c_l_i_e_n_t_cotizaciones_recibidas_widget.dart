@@ -63,7 +63,6 @@ class DHCLIENTCotizacionesRecibidasWidget extends StatefulWidget {
       _DHCLIENTCotizacionesRecibidasWidgetState();
 }
 
-
 class _DHCLIENTCotizacionesRecibidasWidgetState
     extends State<DHCLIENTCotizacionesRecibidasWidget> {
   late DHCLIENTCotizacionesRecibidasModel _model;
@@ -336,9 +335,9 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     try {
       final ApiCallResponse response;
       if (proposalIsOutOfScope(rejected)) {
-        response =
-            await DOVIAAPIDoviaHomeContextGroup.rejectOutOfScopeProposalCall
-                .call(
+        response = await DOVIAAPIDoviaHomeContextGroup
+            .rejectOutOfScopeProposalCall
+            .call(
           proposalId: proposalId(rejected),
           authToken: currentAuthenticationToken ?? '',
         );
@@ -746,20 +745,23 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     final selected = _selected(proposals);
     // Sólo una propuesta viva admite decisión: una ya aceptada o rechazada se
     // sigue mostrando en el historial, pero no se vuelve a operar.
-    final actionable =
-        selected != null && proposalIsActionable(selected) && !_model.isAccepting;
+    final actionable = selected != null &&
+        proposalIsActionable(selected) &&
+        !_model.isAccepting;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         FFButtonWidget(
-          onPressed:
-              actionable ? () async => _acceptSelected(proposals, isPremium) : null,
+          onPressed: actionable
+              ? () async => _acceptSelected(proposals, isPremium)
+              : null,
           text: _model.isAccepting ? 'Aceptando…' : 'Continuar',
           options: FFButtonOptions(
             width: double.infinity,
             height: 50.0,
             padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-            iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+            iconPadding:
+                const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
             color: const Color(0xFF007376),
             disabledColor: const Color(0xFFDFDFDF),
             disabledTextColor: const Color(0xFF6A6A6A),
@@ -781,7 +783,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
             width: double.infinity,
             height: 50.0,
             padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-            iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+            iconPadding:
+                const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
             color: Colors.transparent,
             disabledColor: Colors.transparent,
             disabledTextColor: const Color(0xFF6A6A6A),

@@ -37,8 +37,8 @@ Future<void> openOwnerProposal(
       queryParameters: {
         'paymentMethod':
             serializeParam(proposal.normalizedPaymentMethod, ParamType.String),
-        'proposedAmount':
-            serializeParam(proposal.proposedAmount?.toString(), ParamType.String),
+        'proposedAmount': serializeParam(
+            proposal.proposedAmount?.toString(), ParamType.String),
         'offerId': serializeParam(proposal.offerId, ParamType.String),
       }.withoutNulls,
     );

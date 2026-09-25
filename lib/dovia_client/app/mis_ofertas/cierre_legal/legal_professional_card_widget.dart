@@ -37,6 +37,7 @@ class LegalProfessionalCardWidget extends StatelessWidget {
 
   static const Color _aqua = Color(0xFF007376);
   static const Color _text = Color(0xFF00444B);
+
   /// `rgba(112,172,173,0.2)` del diseño.
   static const Color _chipBg = Color(0x3370ACAD);
   static const Color _border = Color(0xFF007376);

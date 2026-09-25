@@ -182,10 +182,10 @@ class DOVIAAPIDoviaHomeContextGroup {
 /// malformada llegan las dos como 400.
 String doviaHomeErrorCode(ApiCallResponse response) =>
     (getJsonField(response.jsonBody, r'''$.errorCode''') ??
-                getJsonField(response.jsonBody, r'''$.code''') ??
-                getJsonField(response.jsonBody, r'''$.errors[0].code'''))
-            ?.toString() ??
-        '';
+            getJsonField(response.jsonBody, r'''$.code''') ??
+            getJsonField(response.jsonBody, r'''$.errors[0].code'''))
+        ?.toString() ??
+    '';
 
 /// Mensaje de dominio que acompaña al rechazo, o null si la respuesta no trae
 /// uno (Ej: un fallo de red). El sobre de error de Dovia Home lo entrega en
@@ -2352,8 +2352,7 @@ class AuthorizeOutOfScopeRequestCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Authorize Out Of Scope Request',
-      apiUrl:
-          '$baseUrl/dovia-home/out-of-scope-requests/$requestId/authorize',
+      apiUrl: '$baseUrl/dovia-home/out-of-scope-requests/$requestId/authorize',
       callType: ApiCallType.POST,
       headers: {
         if (authToken != null && authToken.isNotEmpty)
@@ -2474,8 +2473,7 @@ class GetAssociateOutOfScopeRequestCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Get Associate Out Of Scope Request',
-      apiUrl:
-          '$baseUrl/dovia-home/associate/out-of-scope-requests/$requestId',
+      apiUrl: '$baseUrl/dovia-home/associate/out-of-scope-requests/$requestId',
       callType: ApiCallType.GET,
       headers: {
         if (authToken != null && authToken.isNotEmpty)

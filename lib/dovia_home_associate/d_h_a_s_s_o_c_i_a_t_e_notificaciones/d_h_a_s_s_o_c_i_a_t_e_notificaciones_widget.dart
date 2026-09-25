@@ -1,6 +1,6 @@
+import '/shared_components/notifications_inbox/notifications_inbox_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_notification_card/d_h_a_s_s_o_c_i_a_t_e_notification_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
@@ -71,68 +71,10 @@ class _DHASSOCIATENotificacionesWidgetState
                         tittleText: 'Notificaciones',
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 35.0, 20.0, 0.0),
-                      child: Container(
-                        width: MediaQuery.sizeOf(context).width * 1.0,
-                        decoration: const BoxDecoration(),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    10.0, 0.0, 10.0, 0.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    wrapWithModel(
-                                      model: _model
-                                          .dHASSOCIATENotificationCardModel1,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child:
-                                          const DHASSOCIATENotificationCardWidget(),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model
-                                          .dHASSOCIATENotificationCardModel2,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child:
-                                          const DHASSOCIATENotificationCardWidget(),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model
-                                          .dHASSOCIATENotificationCardModel3,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child:
-                                          const DHASSOCIATENotificationCardWidget(),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model
-                                          .dHASSOCIATENotificationCardModel4,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child:
-                                          const DHASSOCIATENotificationCardWidget(),
-                                    ),
-                                  ]
-                                      .divide(const SizedBox(height: 10.0))
-                                      .addToStart(const SizedBox(height: 10.0))
-                                      .addToEnd(const SizedBox(height: 10.0)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    const Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 20.0, 100.0),
+                      child: NotificationsInboxWidget(),
                     ),
                   ],
                 ),

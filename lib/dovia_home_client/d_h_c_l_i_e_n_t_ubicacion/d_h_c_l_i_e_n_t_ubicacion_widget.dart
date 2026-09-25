@@ -1133,7 +1133,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                 0.0,
                                 20.0,
                                 0.0,
-                                120.0 + MediaQuery.viewPaddingOf(context).bottom),
+                                120.0 +
+                                    MediaQuery.viewPaddingOf(context).bottom),
                             child: FFButtonWidget(
                               // Valida cobertura y registra la dirección antes
                               // de continuar el flujo que pidió la ubicación.

@@ -325,7 +325,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     final id = srId(data);
     // Desde el Dashboard sí se confirma la visita (no es modo consulta).
     DHCLIENTCasaAWidget.readOnly = false;
-    DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
+    DHCLIENTCasaAWidget.alreadyConfirmed =
+        DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
         .then((_) => safeSetState(() {}));
@@ -598,7 +599,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// endpoint de propuestas no siempre anida el detalle completo.
   String _proposalRequestTitle(Map<String, dynamic> proposal) {
     final request = proposal['serviceRequest'];
-    final requestMap = request is Map ? Map<String, dynamic>.from(request) : null;
+    final requestMap =
+        request is Map ? Map<String, dynamic>.from(request) : null;
     final detail = requestMap?['serviceDetail'];
     return _str(detail is Map ? detail['label'] : null) ??
         _str(requestMap?['title']) ??
@@ -688,8 +690,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     final diagnoses = <String, _OutOfScopeDiagnosis>{};
     for (final id in order) {
       final data = requests[id]!;
-      final statusLabel = _outOfScopeSubStatuses[
-          (_str(data['subStatus']) ?? '').toUpperCase()];
+      final statusLabel =
+          _outOfScopeSubStatuses[(_str(data['subStatus']) ?? '').toUpperCase()];
       if (statusLabel == null) continue;
 
       final diagnosisId = _diagnosisIdOf(data);
@@ -873,8 +875,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
       // Si el backend no informa la solicitud la propuesta se muestra igual (al
       // tocarla se abre el listado completo), pero entonces no hay con qué
       // agruparla: se la trata como una cotización aparte.
-      final key =
-          requestId ?? _str(data['id']) ?? 'proposal_${cards.length}';
+      final key = requestId ?? _str(data['id']) ?? 'proposal_${cards.length}';
       if (!seenRequestIds.add(key)) continue;
       cards.add(_QuoteCard(
         title: _proposalRequestTitle(data),
@@ -1054,8 +1055,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  SvgPicture.asset(srServiceIconAsset(title)),
+              child: SvgPicture.asset(srServiceIconAsset(title)),
             ),
           ),
           const SizedBox(width: 16),
@@ -1418,7 +1418,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           future: _upcomingVisitsFuture,
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             }
                             final response = snapshot.data!;
                             if (!response.succeeded) {
@@ -1530,7 +1531,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           future: _completedVisitsFuture,
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             }
                             final response = snapshot.data!;
                             if (!response.succeeded) {
@@ -1543,12 +1545,12 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             if (visits.isEmpty) {
                               return const SizedBox.shrink();
                             }
-                            
+
                             return Column(
                               children: visits.take(2).map((visitData) {
                                 final data = visitData as Map<String, dynamic>;
                                 final title = data['serviceName'] ?? 'Servicio';
-                                
+
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 12.0),
                                   child: Container(
@@ -1556,7 +1558,10 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(color: FlutterFlowTheme.of(context).alternate, width: 1),
+                                      border: Border.all(
+                                          color: FlutterFlowTheme.of(context)
+                                              .alternate,
+                                          width: 1),
                                     ),
                                     child: Row(
                                       children: [
@@ -1564,26 +1569,35 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                           width: 40,
                                           height: 40,
                                           decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context).alternate,
-                                            borderRadius: BorderRadius.circular(8),
+                                            color: FlutterFlowTheme.of(context)
+                                                .alternate,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),
-                                            child: SvgPicture.asset('assets/images/IconoServicioPlomeria.svg'),
+                                            child: SvgPicture.asset(
+                                                'assets/images/IconoServicioPlomeria.svg'),
                                           ),
                                         ),
                                         const SizedBox(width: 16),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(title,
                                                   style: GoogleFonts.publicSans(
-                                                      fontWeight: FontWeight.w600, fontSize: 14)),
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14)),
                                               const SizedBox(height: 4),
                                               Text('Visita realizada',
                                                   style: GoogleFonts.inter(
-                                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .secondaryText,
                                                       fontSize: 12)),
                                             ],
                                           ),

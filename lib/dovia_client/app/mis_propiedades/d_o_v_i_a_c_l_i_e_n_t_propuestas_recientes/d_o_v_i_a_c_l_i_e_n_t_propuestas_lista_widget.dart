@@ -129,8 +129,8 @@ class _DOVIACLIENTPropuestasListaWidgetState
                           PropuestasFilterBarWidget(
                             filters: _lane.filters,
                             selected: _selectedFilter,
-                            onSelected: (filter) => safeSetState(
-                                () => _selectedFilter = filter),
+                            onSelected: (filter) =>
+                                safeSetState(() => _selectedFilter = filter),
                           ),
                           const SizedBox(height: 20.0),
                           _buildBody(),
@@ -249,8 +249,7 @@ class _DOVIACLIENTPropuestasListaWidgetState
         final columns = available < preferredCardWidth * 2 + spacing
             ? 1
             : (available + spacing) ~/ (preferredCardWidth + spacing);
-        final cardWidth =
-            (available - spacing * (columns - 1)) / columns;
+        final cardWidth = (available - spacing * (columns - 1)) / columns;
 
         return Wrap(
           spacing: spacing,

@@ -107,9 +107,8 @@ class _NegociacionContraofertaWidgetState
   Future<void> _sendCounterOffer() async {
     final data = <String, dynamic>{
       'paymentMethod': widget.view.paymentMethodApiValue,
-      'currency': widget.view.currency == 'Quetzales'
-          ? 'GTQ'
-          : widget.view.currency,
+      'currency':
+          widget.view.currency == 'Quetzales' ? 'GTQ' : widget.view.currency,
     };
 
     for (final entry in _inputs.entries) {
@@ -440,8 +439,9 @@ class _NegociacionContraofertaWidgetState
           child: SizedBox(
             height: 42,
             child: FilledButton(
-              onPressed:
-                  _isActioning || _isRejecting || _isCountering ? null : _accept,
+              onPressed: _isActioning || _isRejecting || _isCountering
+                  ? null
+                  : _accept,
               style: FilledButton.styleFrom(
                 backgroundColor: _aqua,
                 disabledBackgroundColor: _aqua.withOpacity(0.4),

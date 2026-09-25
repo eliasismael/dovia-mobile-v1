@@ -16,10 +16,10 @@ class DOVIAAPIAssociateFeedbackContextGroup {
       CreateOfferAssociateRatingCall();
   static CreateOfferAssociateReportCall createOfferAssociateReportCall =
       CreateOfferAssociateReportCall();
-  static CreateDoviaHomeAssociateRatingCall
-      createDoviaHomeAssociateRatingCall = CreateDoviaHomeAssociateRatingCall();
-  static CreateDoviaHomeAssociateReportCall
-      createDoviaHomeAssociateReportCall = CreateDoviaHomeAssociateReportCall();
+  static CreateDoviaHomeAssociateRatingCall createDoviaHomeAssociateRatingCall =
+      CreateDoviaHomeAssociateRatingCall();
+  static CreateDoviaHomeAssociateReportCall createDoviaHomeAssociateReportCall =
+      CreateDoviaHomeAssociateReportCall();
   static PresignDoviaHomeReportImagesCall presignDoviaHomeReportImagesCall =
       PresignDoviaHomeReportImagesCall();
   static ConfirmDoviaHomeReportImagesCall confirmDoviaHomeReportImagesCall =
@@ -292,10 +292,9 @@ class CreateDoviaHomeAssociateReportCall {
     );
   }
 
-  String? id(dynamic response) =>
-      (getJsonField(response, r'''$.data.id''') ??
-              getJsonField(response, r'''$.id'''))
-          ?.toString();
+  String? id(dynamic response) => (getJsonField(response, r'''$.data.id''') ??
+          getJsonField(response, r'''$.id'''))
+      ?.toString();
 }
 
 /// POST /associate-feedback/dovia-home/services/{serviceRequestId}/reports/images/presign

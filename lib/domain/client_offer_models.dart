@@ -511,8 +511,7 @@ class ClientOffersBoard {
   /// carril completo (ver [ClientOffer.acceptedFilter]).
   List<ClientOffer> byFilter(ClientOfferFilter filter) => _newestFirst(
         all.where((offer) => switch (filter) {
-              ClientOfferFilter.enviada =>
-                offer.isSentAwaitingOwnerResponse,
+              ClientOfferFilter.enviada => offer.isSentAwaitingOwnerResponse,
               ClientOfferFilter.rechazada => offer.wasRejectedByOwner,
               // Toda negociación viva, no sólo la que espera respuesta del
               // cliente: si el cliente ya recontraofertó, la pelota está del
@@ -521,8 +520,7 @@ class ClientOffersBoard {
               ClientOfferFilter.contraofertaEnviada =>
                 offer.lane == ClientOfferLane.contraoferta && offer.isActive,
               ClientOfferFilter.contraofertaRechazada =>
-                offer.lane == ClientOfferLane.contraoferta &&
-                    offer.isTerminal,
+                offer.lane == ClientOfferLane.contraoferta && offer.isTerminal,
               ClientOfferFilter.procesoLegal ||
               ClientOfferFilter.finalizada ||
               ClientOfferFilter.calificada =>

@@ -199,8 +199,8 @@ class _InteractiveMapState extends State<InteractiveMap> {
                 elevation: 2.0,
                 child: InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: () =>
-                      _mapController.move(_selectedPoint, _mapController.camera.zoom),
+                  onTap: () => _mapController.move(
+                      _selectedPoint, _mapController.camera.zoom),
                   child: const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Icon(

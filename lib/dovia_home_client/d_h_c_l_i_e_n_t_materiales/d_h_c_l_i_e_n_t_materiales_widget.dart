@@ -539,7 +539,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                         else ...[
                           _sectionLabel('Material'),
                           const SizedBox(height: 12.0),
-                          _readOnlyBox(_model.materialText, hint: _materialHint),
+                          _readOnlyBox(_model.materialText,
+                              hint: _materialHint),
                           const SizedBox(height: 18.0),
                           _sectionLabel('Precio cotizado'),
                           const SizedBox(height: 12.0),
@@ -824,7 +825,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
   }
 
   /// Botón primario a ancho completo, con el mismo estilo que [Pagar].
-  Widget _primaryAction({required String text, required VoidCallback? onPressed}) =>
+  Widget _primaryAction(
+          {required String text, required VoidCallback? onPressed}) =>
       FFButtonWidget(
         onPressed: onPressed,
         text: text,
@@ -832,8 +834,7 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
           width: double.infinity,
           height: 42.0,
           padding: const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
-          iconPadding:
-              const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+          iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
           color: FlutterFlowTheme.of(context).primary,
           textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                 font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),

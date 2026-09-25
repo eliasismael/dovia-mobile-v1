@@ -175,8 +175,7 @@ class _DCFormaPagoSuscripcion2WidgetState
       safeSetState(() {
         _phase = _CheckoutPhase.failed;
         _paymentOrderId = order.id;
-        _failureMessage =
-            'No pudimos abrir el pago. Intentá de nuevo.';
+        _failureMessage = 'No pudimos abrir el pago. Intentá de nuevo.';
       });
       return;
     }
@@ -309,7 +308,8 @@ class _DCFormaPagoSuscripcion2WidgetState
                 ),
           ),
           const SizedBox(height: 24.0),
-          _primaryButton('Ya completé el pago', () async => _pollUntilResolved()),
+          _primaryButton(
+              'Ya completé el pago', () async => _pollUntilResolved()),
         ],
       ),
     );

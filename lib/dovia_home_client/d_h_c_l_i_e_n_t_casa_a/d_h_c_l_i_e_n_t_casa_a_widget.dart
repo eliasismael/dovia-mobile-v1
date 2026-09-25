@@ -126,13 +126,15 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   Map<String, dynamic>? get _data => _serviceData;
 
-  Map? get _address => _data?['address'] is Map ? _data!['address'] as Map : null;
+  Map? get _address =>
+      _data?['address'] is Map ? _data!['address'] as Map : null;
 
   /// Asignación del trabajo: `{ userId, assignedAt }`. **No trae el perfil**;
   /// los datos del profesional viven en [_associateProfile].
   Map? get _associate {
-    final a =
-        _data?['associate'] ?? _data?['assignedAssociate'] ?? _data?['homeAssociate'];
+    final a = _data?['associate'] ??
+        _data?['assignedAssociate'] ??
+        _data?['homeAssociate'];
     return a is Map ? a : null;
   }
 
@@ -277,12 +279,12 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
       _associate?['name'],
     ]);
     if (direct != null) return direct;
-    final first =
-        _firstString([_associateProfile?['firstName'], _associate?['firstName']]) ??
-            '';
-    final last =
-        _firstString([_associateProfile?['lastName'], _associate?['lastName']]) ??
-            '';
+    final first = _firstString(
+            [_associateProfile?['firstName'], _associate?['firstName']]) ??
+        '';
+    final last = _firstString(
+            [_associateProfile?['lastName'], _associate?['lastName']]) ??
+        '';
     return '$first $last'.trim();
   }
 
@@ -442,8 +444,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
     safeSetState(() => _isClosingQuote = true);
     try {
-      final response =
-          await DOVIAAPIDoviaHomeContextGroup.closeQuoteCall.call(
+      final response = await DOVIAAPIDoviaHomeContextGroup.closeQuoteCall.call(
         serviceRequestId: id,
         authToken: currentAuthenticationToken ?? '',
       );
@@ -551,12 +552,11 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   // UI helpers.
   // ---------------------------------------------------------------------------
 
-  TextStyle get _labelStyle =>
-      FlutterFlowTheme.of(context).bodyMedium.override(
-            font: GoogleFonts.inter(),
-            fontSize: 16.0,
-            letterSpacing: 0.0,
-          );
+  TextStyle get _labelStyle => FlutterFlowTheme.of(context).bodyMedium.override(
+        font: GoogleFonts.inter(),
+        fontSize: 16.0,
+        letterSpacing: 0.0,
+      );
 
   Widget _sectionLabel(String text) => Text(text, style: _labelStyle);
 
@@ -915,9 +915,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
     // Una cotización todavía circulando entre proveedores se puede cerrar. Es
     // la acción opuesta a aceptar una propuesta y ocupa el mismo lugar, así que
     // sólo aparece cuando no hay visita que confirmar.
-    final showCerrarCotizacion = !DHCLIENTCasaAWidget.readOnly &&
-        !showAceptar &&
-        _canCloseQuote;
+    final showCerrarCotizacion =
+        !DHCLIENTCasaAWidget.readOnly && !showAceptar && _canCloseQuote;
 
     return GestureDetector(
       onTap: () {
@@ -930,8 +929,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
         bottomNavigationBar: showAceptar
             ? SafeArea(
                 child: Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(20.0, 8.0, 20.0, 12.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 8.0, 20.0, 12.0),
                   child: FFButtonWidget(
                     onPressed: _confirmVisit,
                     text: 'Aceptar',
@@ -1046,8 +1045,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                             ),
                           ),
                           if (_hasSavings) _savingsBanner(),
-                          _labeledSection(
-                              'Debe tener listo:', _readOnlyBox(_mustHaveReady)),
+                          _labeledSection('Debe tener listo:',
+                              _readOnlyBox(_mustHaveReady)),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 21.0, 0.0, 0.0),

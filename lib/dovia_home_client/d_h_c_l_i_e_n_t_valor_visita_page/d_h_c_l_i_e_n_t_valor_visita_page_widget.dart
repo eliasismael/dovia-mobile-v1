@@ -98,13 +98,16 @@ class _DHCLIENTValorVisitaPageWidgetState
   /// a primer plano disparen dos cadenas en paralelo.
   bool _polling = false;
 
-  num? get _amount => _requestData == null ? null : srPriceAmount(_requestData!);
+  num? get _amount =>
+      _requestData == null ? null : srPriceAmount(_requestData!);
   num? get _subscriberAmount =>
       _requestData == null ? null : srSubscriberPriceAmount(_requestData!);
-  String get _currency =>
-      _requestData == null ? PaymentCurrency.gtq : srPriceCurrency(_requestData!);
-  String get _serviceName =>
-      _requestData == null ? 'Servicio Dovia Home' : srServiceName(_requestData!);
+  String get _currency => _requestData == null
+      ? PaymentCurrency.gtq
+      : srPriceCurrency(_requestData!);
+  String get _serviceName => _requestData == null
+      ? 'Servicio Dovia Home'
+      : srServiceName(_requestData!);
 
   @override
   void initState() {
@@ -218,7 +221,8 @@ class _DHCLIENTValorVisitaPageWidgetState
 
     final serviceRequestId = DHCLIENTValorVisitaPageWidget.serviceRequestId;
     if (serviceRequestId != null) {
-      final result = await payments.getPaymentStatus(serviceId: serviceRequestId);
+      final result =
+          await payments.getPaymentStatus(serviceId: serviceRequestId);
       if (!mounted) return;
       final order = result.dataOrNull;
       if (order != null) {
@@ -281,13 +285,14 @@ class _DHCLIENTValorVisitaPageWidgetState
       _failureMessage = null;
     });
 
-    final result = await context.read<PaymentsRepository>().createCustomCheckout(
-          paymentType: PaymentType.normalService,
-          amount: amount,
-          currency: _currency,
-          serviceId: serviceRequestId,
-          description: _serviceName,
-        );
+    final result =
+        await context.read<PaymentsRepository>().createCustomCheckout(
+              paymentType: PaymentType.normalService,
+              amount: amount,
+              currency: _currency,
+              serviceId: serviceRequestId,
+              description: _serviceName,
+            );
     if (!mounted) return;
 
     switch (result) {
@@ -345,13 +350,14 @@ class _DHCLIENTValorVisitaPageWidgetState
       _failureMessage = null;
     });
 
-    final result = await context.read<PaymentsRepository>().createCustomCheckout(
-          paymentType: PaymentType.normalService,
-          amount: amount,
-          currency: _currency,
-          serviceId: serviceRequestId,
-          description: _serviceName,
-        );
+    final result =
+        await context.read<PaymentsRepository>().createCustomCheckout(
+              paymentType: PaymentType.normalService,
+              amount: amount,
+              currency: _currency,
+              serviceId: serviceRequestId,
+              description: _serviceName,
+            );
     if (!mounted) return;
 
     switch (result) {
@@ -367,7 +373,8 @@ class _DHCLIENTValorVisitaPageWidgetState
   // Checkout compartido — abrir, sondear, reanudar.
   // ---------------------------------------------------------------------------
 
-  Future<void> _openCheckout(PaymentOrder order, {required String method}) async {
+  Future<void> _openCheckout(PaymentOrder order,
+      {required String method}) async {
     _pendingMethod = method;
     final opened = await launchDoviaHomeCheckout(order.checkoutUrl);
     if (!mounted) return;
@@ -376,8 +383,7 @@ class _DHCLIENTValorVisitaPageWidgetState
       safeSetState(() {
         _phase = _CheckoutPhase.failed;
         _paymentOrderId = order.id;
-        _failureMessage =
-            'No pudimos abrir el pago. Intentá de nuevo.';
+        _failureMessage = 'No pudimos abrir el pago. Intentá de nuevo.';
       });
       return;
     }
@@ -422,8 +428,9 @@ class _DHCLIENTValorVisitaPageWidgetState
 
     _polling = true;
     try {
-      final order =
-          await context.read<PaymentsRepository>().awaitPaymentResolution(orderId);
+      final order = await context
+          .read<PaymentsRepository>()
+          .awaitPaymentResolution(orderId);
       if (!mounted) return;
       // Pago resuelto: se cierra el checkout (en iOS) para mostrar el
       // resultado sin que el cliente tenga que cerrarlo.
@@ -433,7 +440,8 @@ class _DHCLIENTValorVisitaPageWidgetState
       // Se agotó la espera sin novedad: no es un fallo, puede seguir
       // procesándose.
       if (order == null) {
-        _showError('Seguimos procesando tu pago. Te avisamos apenas se confirme.');
+        _showError(
+            'Seguimos procesando tu pago. Te avisamos apenas se confirme.');
         safeSetState(() => _phase = _CheckoutPhase.idle);
         return;
       }
@@ -648,7 +656,8 @@ class _DHCLIENTValorVisitaPageWidgetState
                 child: Text(
                   'Reintentar el pago',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                        font:
+                            GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                         color: const Color(0xFF007376),
                         fontSize: 13.0,
                       ),

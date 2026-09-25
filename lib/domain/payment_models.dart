@@ -121,7 +121,8 @@ class PaymentOrder {
       amount: data['amount'] as num?,
       currency: data['currency'] as String?,
       checkoutUrl: _nonEmpty(data['checkoutUrl']) ?? _nonEmpty(data['url']),
-      checkoutId: _nonEmpty(data['checkoutId']) ?? _nonEmpty(data['checkout_id']),
+      checkoutId:
+          _nonEmpty(data['checkoutId']) ?? _nonEmpty(data['checkout_id']),
       serviceId: _nonEmpty(data['serviceId']),
       planId: _nonEmpty(data['planId']),
       origin: _nonEmpty(data['origin']),
@@ -273,8 +274,7 @@ class Subscription {
 
   /// La suscripcion aun conserva beneficios (lo que retorna
   /// `GET /subscriptions/current`).
-  bool get keepsBenefits =>
-      isActive || isPastDue || isCancelScheduled;
+  bool get keepsBenefits => isActive || isPastDue || isCancelScheduled;
 
   factory Subscription.fromJson(Map<String, dynamic> json) {
     final data = json['data'] as Map<String, dynamic>? ?? json;

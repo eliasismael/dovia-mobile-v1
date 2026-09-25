@@ -530,9 +530,9 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
+                                        'Todos los documentos',
                                         'Pendiente',
                                         'Revision legal',
-                                        'Todos los documentos'
                                       ].map((tab) {
                                         final isActive =
                                             _model.activeTab == tab;

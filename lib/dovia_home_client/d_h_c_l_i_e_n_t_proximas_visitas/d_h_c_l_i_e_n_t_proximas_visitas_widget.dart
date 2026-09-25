@@ -132,8 +132,8 @@ class _DHCLIENTProximasVisitasWidgetState
                   children: [
                     if (widget.isEmergency)
                       Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 6.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 0.0, 6.0),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8.0, vertical: 3.0),

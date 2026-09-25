@@ -213,8 +213,7 @@ class ClientCounterOfferContent extends StatefulWidget {
       _ClientCounterOfferContentState();
 }
 
-class _ClientCounterOfferContentState
-    extends State<ClientCounterOfferContent> {
+class _ClientCounterOfferContentState extends State<ClientCounterOfferContent> {
   static const Color _aqua = Color(0xFF007376);
   static const Color _text = Color(0xFF00444B);
   static const Color _disabled = Color(0xFFD9D7D7);
@@ -245,7 +244,9 @@ class _ClientCounterOfferContentState
     for (final field in widget.detail.ownerTerms.fields) {
       if (!field.editable) continue;
       _controllers[field.key] = TextEditingController(
-          text: _isMoney(field.key) ? formatAmountText(field.value) : field.value);
+          text: _isMoney(field.key)
+              ? formatAmountText(field.value)
+              : field.value);
     }
     _rejectReasonController.addListener(_refresh);
   }
@@ -344,7 +345,8 @@ class _ClientCounterOfferContentState
           Row(
             children: [
               for (var index = 0; index < labels.length; index++) ...[
-                Expanded(child: _step(labels[index].$1, labels[index].$2, index)),
+                Expanded(
+                    child: _step(labels[index].$1, labels[index].$2, index)),
                 if (index < labels.length - 1)
                   Expanded(
                     child: Container(
@@ -530,7 +532,8 @@ class _ClientCounterOfferContentState
     bool useControllers,
   ) {
     final controller = useControllers ? _controllers[field.key] : null;
-    final displayed = field.value.isEmpty ? '—' : '${field.value}${field.suffix}';
+    final displayed =
+        field.value.isEmpty ? '—' : '${field.value}${field.suffix}';
     final locked = readOnly || !field.editable;
     return Padding(
       padding: const EdgeInsets.only(bottom: 14.0),
@@ -543,9 +546,8 @@ class _ClientCounterOfferContentState
             Container(
               width: double.infinity,
               constraints: BoxConstraints(
-                minHeight: field.kind == CounterOfferFieldKind.textArea
-                    ? 92.0
-                    : 42.0,
+                minHeight:
+                    field.kind == CounterOfferFieldKind.textArea ? 92.0 : 42.0,
               ),
               padding: const EdgeInsets.symmetric(
                 horizontal: 14.0,
@@ -635,7 +637,8 @@ class _ClientCounterOfferContentState
         height: 39.0,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected && !editable ? const Color(0xFF70ACAD) : Colors.white,
+          color:
+              isSelected && !editable ? const Color(0xFF70ACAD) : Colors.white,
           borderRadius: BorderRadius.circular(25.0),
           border: Border.all(color: _aqua),
         ),
@@ -851,7 +854,8 @@ class _ClientCounterOfferContentState
     final requiredAmount = _controllers[CounterOfferFieldKey.proposedAmount];
     if (requiredAmount != null &&
         num.tryParse(requiredAmount.text.replaceAll(',', '')) == null) {
-      setState(() => _validationMessage = 'Ingresa una propuesta económica válida.');
+      setState(
+          () => _validationMessage = 'Ingresa una propuesta económica válida.');
       return;
     }
     final payload = widget.detail.ownerTerms.toCounterOfferPayload(

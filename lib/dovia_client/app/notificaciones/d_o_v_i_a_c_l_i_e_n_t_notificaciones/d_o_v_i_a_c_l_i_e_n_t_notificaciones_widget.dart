@@ -1,10 +1,10 @@
+import '/shared_components/notifications_inbox/notifications_inbox_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
-import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_notificaciones_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_notificaciones_model.dart';
@@ -69,58 +69,13 @@ class _DOVIACLIENTNotificacionesWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Notificaciones',
+                        showCurrency: false,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: 130.0,
-                            child: custom_widgets.NotificationCard(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 130.0,
-                              label: 'asdas',
-                              timeAgo: 'asdasd',
-                              title: 'asdsad',
-                              description: 'asdsadasdasdasdasdasdasdasdsad',
-                              footerDate: 'asdasdasdas',
-                            ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: 130.0,
-                            child: custom_widgets.NotificationCard(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 130.0,
-                              label: 'asdas',
-                              timeAgo: 'asdasd',
-                              title: 'asdsad',
-                              description: 'asdsadasdasdasdasdasdasdasdsad',
-                              footerDate: 'asdasdasdas',
-                            ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: 130.0,
-                            child: custom_widgets.NotificationCard(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 130.0,
-                              label: 'asdas',
-                              timeAgo: 'asdasd',
-                              title: 'asdsad',
-                              description: 'asdsadasdasdasdasdasdasdasdsad',
-                              footerDate: 'asdasdasdas',
-                            ),
-                          ),
-                        ]
-                            .divide(const SizedBox(height: 12.0))
-                            .addToStart(const SizedBox(height: 12.0))
-                            .addToEnd(const SizedBox(height: 12.0)),
-                      ),
+                    const Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          20.0, 20.0, 20.0, 100.0),
+                      child: NotificationsInboxWidget(),
                     ),
                   ],
                 ),

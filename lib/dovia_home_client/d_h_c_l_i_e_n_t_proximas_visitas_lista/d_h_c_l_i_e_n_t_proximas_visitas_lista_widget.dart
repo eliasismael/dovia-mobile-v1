@@ -63,8 +63,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
     // filtro `status`: el backend rechaza el string multi-valor
     // ("status invalido", 400), así que las solicitudes finalizadas se excluyen
     // client-side ([_finalizedStatuses]) junto con el resto de filtros de la UI.
-    _visitsFuture =
-        DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+    _visitsFuture = DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
       authToken: token,
       limit: 50,
     );
@@ -97,8 +96,8 @@ class _DHCLIENTProximasVisitasListaWidgetState
       _model.dateFilter != null;
 
   /// Solo "Próximas visitas": excluye las solicitudes ya finalizadas.
-  bool _isUpcoming(Map<String, dynamic> data) =>
-      !_finalizedStatuses.contains((srString(data['status']) ?? '').toUpperCase());
+  bool _isUpcoming(Map<String, dynamic> data) => !_finalizedStatuses
+      .contains((srString(data['status']) ?? '').toUpperCase());
 
   List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> visits) {
     return visits.where((data) {
@@ -109,7 +108,9 @@ class _DHCLIENTProximasVisitasListaWidgetState
         return false;
       }
       final status = _model.statusFilter;
-      if (status != null && status != _allOption && _statusLabel(data) != status) {
+      if (status != null &&
+          status != _allOption &&
+          _statusLabel(data) != status) {
         return false;
       }
       final date = _model.dateFilter;
@@ -189,7 +190,8 @@ class _DHCLIENTProximasVisitasListaWidgetState
     // asociado se muestra/oculta dentro del detalle según el estatus.
     final id = srId(data);
     DHCLIENTCasaAWidget.readOnly = true;
-    DHCLIENTCasaAWidget.alreadyConfirmed = DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
+    DHCLIENTCasaAWidget.alreadyConfirmed =
+        DHCLIENTHomepageWidget.confirmedVisitIds.contains(id);
     context
         .pushNamed(DHCLIENTCasaAWidget.routeName)
         .then((_) => safeSetState(() {}));
@@ -313,7 +315,8 @@ class _DHCLIENTProximasVisitasListaWidgetState
                                         status: status,
                                         isEmergency: srIsEmergency(data),
                                         showRedDot: status == 'Confirmar',
-                                        icom: srServiceIconAsset(srServiceName(data)),
+                                        icom: srServiceIconAsset(
+                                            srServiceName(data)),
                                       ),
                                     ),
                                   );
@@ -495,8 +498,9 @@ class _DHCLIENTProximasVisitasListaWidgetState
 
   Widget _dateField() {
     final date = _model.dateFilter;
-    final label =
-        date != null ? DateFormat('dd/MM/yyyy').format(date) : 'Selecciona la fecha';
+    final label = date != null
+        ? DateFormat('dd/MM/yyyy').format(date)
+        : 'Selecciona la fecha';
     return InkWell(
       onTap: _pickDate,
       borderRadius: BorderRadius.circular(12.0),

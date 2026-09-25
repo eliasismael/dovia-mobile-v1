@@ -641,8 +641,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
   /// tiempo restante para que el dueño decida a tiempo.
   Widget _responseDeadlineChip() {
     final started = DateTime.tryParse(
-            _resolveField([r'''$.updatedAt''', r'''$.lastOfferAt''']))
-        ?? DateTime.tryParse(_resolveField([r'''$.createdAt''']));
+            _resolveField([r'''$.updatedAt''', r'''$.lastOfferAt'''])) ??
+        DateTime.tryParse(_resolveField([r'''$.createdAt''']));
     if (started == null) return const SizedBox.shrink();
 
     final deadline = started.add(const Duration(days: kOwnerProposalSlaDays));
@@ -663,8 +663,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.schedule_rounded,
-            size: 16,
-            color: overdue ? _errorRed : const Color(0xFFF57E00)),
+            size: 16, color: overdue ? _errorRed : const Color(0xFFF57E00)),
         const SizedBox(width: 6),
         Text(label,
             style: GoogleFonts.inter(
@@ -1088,8 +1087,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
               child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: _primary),
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25)),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             onPressed: _isActioning
@@ -1110,8 +1109,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
             style: FilledButton.styleFrom(
               backgroundColor: _errorRed,
               disabledBackgroundColor: _errorRed.withOpacity(0.4),
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25)),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             onPressed: _isActioning || _rejectReasonCtrl.text.trim().isEmpty

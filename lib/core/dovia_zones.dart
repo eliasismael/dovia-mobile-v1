@@ -32,8 +32,8 @@ String mapboxZoneFilter(String? zone) {
 /// "5a Avenida" y "5 Avenida" son la misma calle.
 String normalizeStreetName(String s) => s
     .toLowerCase()
-    .replaceAllMapped(RegExp(r'(\d+)\s*(a|ª|era|da|ta|ma|va|na)\b'),
-        (m) => m.group(1)!)
+    .replaceAllMapped(
+        RegExp(r'(\d+)\s*(a|ª|era|da|ta|ma|va|na)\b'), (m) => m.group(1)!)
     .replaceAll(RegExp(r'\s+'), ' ')
     .trim();
 

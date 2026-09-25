@@ -139,9 +139,8 @@ class _ListingHQMatchmakingSelectorWidgetState
   /// se descartan las horas ya pasadas si la fecha es hoy.
   List<TimeOfDay> _slotsForDate(DateTime date) {
     final now = DateTime.now();
-    final isToday = date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+    final isToday =
+        date.year == now.year && date.month == now.month && date.day == now.day;
     final slotMinutes = _kSlotDuration.inMinutes;
 
     final result = <int>{};
@@ -154,7 +153,8 @@ class _ListingHQMatchmakingSelectorWidgetState
       final end = _parseHhMm(range['endTime']);
       if (start == null || end == null) continue;
 
-      for (var m = _minutes(start); m + slotMinutes <= _minutes(end);
+      for (var m = _minutes(start);
+          m + slotMinutes <= _minutes(end);
           m += slotMinutes) {
         if (isToday && m <= now.hour * 60 + now.minute) continue;
         result.add(m);
@@ -162,9 +162,7 @@ class _ListingHQMatchmakingSelectorWidgetState
     }
 
     final sorted = result.toList()..sort();
-    return sorted
-        .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
-        .toList();
+    return sorted.map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60)).toList();
   }
 
   /// Primera fecha, desde hoy, que caiga en un día ofrecido y todavía tenga
@@ -578,85 +576,86 @@ class _ListingHQMatchmakingSelectorWidgetState
           final email = operative['email'] as String? ?? '';
           final matchesSearch =
               _search.trim().isNotEmpty && _matches(operative, _search);
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: InkWell(
-            onTap: () {
-              setState(() {
-                _selectedOperative = operative;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedOperative = operative;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: isSelected
+                        ? colorScheme.primary
+                        : (matchesSearch
+                            ? const Color(0xFFE8A200)
+                            : colorScheme.alternate),
+                    width: isSelected || matchesSearch ? 2 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
                   color: isSelected
-                      ? colorScheme.primary
+                      ? colorScheme.primary.withValues(alpha: 0.05)
                       : (matchesSearch
-                          ? const Color(0xFFE8A200)
-                          : colorScheme.alternate),
-                  width: isSelected || matchesSearch ? 2 : 1,
+                          ? const Color(0xFFFFF1CC)
+                          : Colors.transparent),
                 ),
-                borderRadius: BorderRadius.circular(8),
-                color: isSelected
-                    ? colorScheme.primary.withValues(alpha: 0.05)
-                    : (matchesSearch
-                        ? const Color(0xFFFFF1CC)
-                        : Colors.transparent),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: (operative['photoUrl'] as String?)
-                                ?.isNotEmpty ??
-                            false
-                        ? NetworkImage(operative['photoUrl'] as String)
-                        : null,
-                    // Sin este callback, una URL de avatar rota tira excepción
-                    // en cada repintado.
-                    onBackgroundImageError:
-                        (operative['photoUrl'] as String?)?.isNotEmpty ?? false
-                            ? (_, __) {}
-                            : null,
-                    child: (operative['photoUrl'] as String?)?.isNotEmpty ??
-                            false
-                        ? null
-                        : const Icon(Icons.person),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          operative['name'] as String? ?? '',
-                          style: colorScheme.bodyMedium.override(
-                            fontFamily: 'Public Sans',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (email.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            email,
-                            style: colorScheme.bodySmall.override(
-                              fontFamily: 'Public Sans',
-                              color: colorScheme.secondaryText,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage:
+                          (operative['photoUrl'] as String?)?.isNotEmpty ??
+                                  false
+                              ? NetworkImage(operative['photoUrl'] as String)
+                              : null,
+                      // Sin este callback, una URL de avatar rota tira excepción
+                      // en cada repintado.
+                      onBackgroundImageError:
+                          (operative['photoUrl'] as String?)?.isNotEmpty ??
+                                  false
+                              ? (_, __) {}
+                              : null,
+                      child: (operative['photoUrl'] as String?)?.isNotEmpty ??
+                              false
+                          ? null
+                          : const Icon(Icons.person),
                     ),
-                  ),
-                  if (isSelected)
-                    Icon(Icons.check_circle, color: colorScheme.primary),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            operative['name'] as String? ?? '',
+                            style: colorScheme.bodyMedium.override(
+                              fontFamily: 'Public Sans',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (email.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              email,
+                              style: colorScheme.bodySmall.override(
+                                fontFamily: 'Public Sans',
+                                color: colorScheme.secondaryText,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (isSelected)
+                      Icon(Icons.check_circle, color: colorScheme.primary),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
+          );
         }),
       ],
     );
@@ -709,8 +708,8 @@ class _ListingHQMatchmakingSelectorWidgetState
       spacing: 8,
       runSpacing: 8,
       children: slots.map((slot) {
-        final selected = _selectedTime != null &&
-            _minutes(slot) == _minutes(_selectedTime!);
+        final selected =
+            _selectedTime != null && _minutes(slot) == _minutes(_selectedTime!);
         return ChoiceChip(
           label: Text(_formatTime(slot)),
           selected: selected,
@@ -738,7 +737,8 @@ class _ListingHQMatchmakingSelectorWidgetState
     // disponibilidad semanal, no fechas concretas.
     if (_hasRanges) {
       return _ranges.map((range) {
-        final weekday = _kWeekdayByName[range['dayOfWeek']?.toUpperCase() ?? ''];
+        final weekday =
+            _kWeekdayByName[range['dayOfWeek']?.toUpperCase() ?? ''];
         final label = _kWeekdayLabel[weekday] ?? (range['dayOfWeek'] ?? '');
         final start = range['startTime'] ?? '';
         final end = range['endTime'] ?? '';

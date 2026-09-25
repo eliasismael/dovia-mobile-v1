@@ -327,7 +327,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     decoration: BoxDecoration(
                                                       color: FlutterFlowTheme
                                                               .of(context)
-                                                          .secondaryBackground.withValues(alpha: 0.0),
+                                                          .secondaryBackground
+                                                          .withValues(
+                                                              alpha: 0.0),
                                                     ),
                                                     child: Column(
                                                       mainAxisSize:
@@ -544,7 +546,9 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     decoration: BoxDecoration(
                                                       color: FlutterFlowTheme
                                                               .of(context)
-                                                          .secondaryBackground.withValues(alpha: 0.0),
+                                                          .secondaryBackground
+                                                          .withValues(
+                                                              alpha: 0.0),
                                                     ),
                                                     child: Column(
                                                       mainAxisSize:

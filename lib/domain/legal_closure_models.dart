@@ -97,8 +97,7 @@ class LegalDocument {
   });
 
   /// Listo para descargar: hay archivo y nadie lo rechazó.
-  bool get isReady =>
-      url.isNotEmpty && _readyDocumentStatuses.contains(status);
+  bool get isReady => url.isNotEmpty && _readyDocumentStatuses.contains(status);
 
   static LegalDocument? fromJson(dynamic json) {
     final map = offerAsMap(json);

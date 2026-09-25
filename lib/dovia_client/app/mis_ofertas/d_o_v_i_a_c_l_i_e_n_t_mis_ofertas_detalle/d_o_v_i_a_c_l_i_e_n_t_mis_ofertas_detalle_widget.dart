@@ -496,8 +496,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
                   padding: const EdgeInsets.only(bottom: 4.0),
                   child: Text(
                     '• $rule',
-                    style:
-                        GoogleFonts.publicSans(fontSize: 14.0, color: _text),
+                    style: GoogleFonts.publicSans(fontSize: 14.0, color: _text),
                   ),
                 ),
             ],

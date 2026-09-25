@@ -113,7 +113,6 @@ class _DOVIACLIENTMisOfertasWidgetState
                         showLogo: false,
                       ),
                     ),
-                    _searchField(),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 0.0, 20.0, 100.0),
@@ -159,36 +158,6 @@ class _DOVIACLIENTMisOfertasWidgetState
 
   /// Barra de búsqueda de la cabecera del diseño. Filtra por el nombre del
   /// inmueble sobre las ofertas ya cargadas.
-  Widget _searchField() {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 16.0),
-      child: TextFormField(
-        controller: _model.searchController,
-        focusNode: _model.searchFocusNode,
-        decoration: InputDecoration(
-          hintText: 'Búsqueda con IA',
-          hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.inter(),
-                color: FlutterFlowTheme.of(context).secondaryText,
-              ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: FlutterFlowTheme.of(context).secondaryText,
-            size: 24.0,
-          ),
-          filled: true,
-          fillColor: FlutterFlowTheme.of(context).secondaryBackground,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24.0),
-            borderSide: BorderSide.none,
-          ),
-        ),
-        style: FlutterFlowTheme.of(context).bodyMedium,
-        onChanged: (_) => safeSetState(() {}),
-      ),
-    );
-  }
-
   List<ClientOffer> _visible(ClientOfferLane lane) {
     final query = (_model.searchController?.text ?? '').trim().toLowerCase();
     final offers = _board.recentIn(lane);

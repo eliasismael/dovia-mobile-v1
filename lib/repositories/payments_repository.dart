@@ -33,7 +33,8 @@ class PaymentsRepository extends ChangeNotifier {
 
   List<SubscriptionPlan> get plans => _plans;
   Subscription? get currentSubscription => _currentSubscription;
-  bool get hasActiveSubscription => _currentSubscription?.keepsBenefits ?? false;
+  bool get hasActiveSubscription =>
+      _currentSubscription?.keepsBenefits ?? false;
 
   /// Si ya se resolvió el estado de suscripción. Permite a la UI distinguir
   /// "todavía no sé" de "no tiene suscripción" y así no mostrarle upsells de
@@ -71,7 +72,8 @@ class PaymentsRepository extends ChangeNotifier {
       return Failure(_error!, statusCode: response.statusCode);
     }
 
-    _plans = _listFrom(response.jsonBody).map(SubscriptionPlan.fromJson).toList();
+    _plans =
+        _listFrom(response.jsonBody).map(SubscriptionPlan.fromJson).toList();
     notifyListeners();
     return Success(_plans);
   }
@@ -93,7 +95,8 @@ class PaymentsRepository extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    final response = await DOVIAAPIPaymentContextGroup.getCurrentSubscriptionCall
+    final response = await DOVIAAPIPaymentContextGroup
+        .getCurrentSubscriptionCall
         .call(authToken: _token);
 
     _isLoading = false;
@@ -112,8 +115,7 @@ class PaymentsRepository extends ChangeNotifier {
     }
 
     final body = response.jsonBody as Map<String, dynamic>?;
-    _currentSubscription =
-        body == null ? null : Subscription.fromJson(body);
+    _currentSubscription = body == null ? null : Subscription.fromJson(body);
     _subscriptionLoaded = true;
     notifyListeners();
     return Success(_currentSubscription);
@@ -257,7 +259,8 @@ class PaymentsRepository extends ChangeNotifier {
     String? checkoutId,
     String? serviceId,
   }) async {
-    final response = await DOVIAAPIPaymentContextGroup.getPaymentStatusCall.call(
+    final response =
+        await DOVIAAPIPaymentContextGroup.getPaymentStatusCall.call(
       paymentOrderId: paymentOrderId,
       checkoutId: checkoutId,
       serviceId: serviceId,
@@ -325,7 +328,8 @@ class PaymentsRepository extends ChangeNotifier {
       );
     }
 
-    return Success(_listFrom(response.jsonBody).map(Subscription.fromJson).toList());
+    return Success(
+        _listFrom(response.jsonBody).map(Subscription.fromJson).toList());
   }
 
   /// Crea un plan y lo sincroniza con Recurrente

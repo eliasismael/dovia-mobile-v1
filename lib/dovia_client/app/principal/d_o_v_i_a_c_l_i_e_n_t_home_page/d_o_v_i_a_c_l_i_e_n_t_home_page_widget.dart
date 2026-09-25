@@ -1,3 +1,4 @@
+import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/components/agregar_favorito_a_carpeta_widget.dart';
@@ -334,6 +335,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
       ),
     );
   }
+
+  /// Foto principal de la casa para el modal de carpetas de favoritos.
+  String _modalImage(dynamic house) => house is Map
+      ? firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? ''
+      : '';
 
   @override
   Widget build(BuildContext context) {
@@ -1029,9 +1035,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 builder: (context) {
                                   final allHouses =
                                       _filterByListingType(getJsonField(
-                                    rowListPropertiesResponse.jsonBody,
-                                    r'''$.data''',
-                                  ) as List? ?? []);
+                                            rowListPropertiesResponse.jsonBody,
+                                            r'''$.data''',
+                                          ) as List? ??
+                                          []);
                                   final eachHouse =
                                       _carouselPage('loNuevo', allHouses);
 
@@ -1062,7 +1069,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   DOVIACLIENTPropiedadSeleccionadaNewWidget
                                                       .routeName,
                                                   queryParameters: {
-                                                    'propertyId': serializeParam(
+                                                    'propertyId':
+                                                        serializeParam(
                                                       getJsonField(
                                                         eachHouseItem,
                                                         r'''$.id''',
@@ -1221,7 +1229,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                   r'''$.name''',
                                                                 ).toString(),
                                                                 propertyImage:
-                                                                    '',
+                                                                    _modalImage(
+                                                                        eachHouseItem),
                                                                 propertyIsFavorite:
                                                                     true,
                                                               ),
@@ -1329,7 +1338,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                               eachHouseItem,
                                                               r'''$.name''',
                                                             ).toString(),
-                                                            propertyImage: '',
+                                                            propertyImage:
+                                                                _modalImage(
+                                                                    eachHouseItem),
                                                             propertyIsFavorite:
                                                                 true,
                                                           ),
@@ -1581,9 +1592,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 builder: (context) {
                                   final allHouses =
                                       _filterByListingType(getJsonField(
-                                    rowListPropertiesResponse.jsonBody,
-                                    r'''$.data''',
-                                  ) as List? ?? []);
+                                            rowListPropertiesResponse.jsonBody,
+                                            r'''$.data''',
+                                          ) as List? ??
+                                          []);
                                   final eachHouse =
                                       _carouselPage('recomendado', allHouses);
 
@@ -1614,7 +1626,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   DOVIACLIENTPropiedadSeleccionadaNewWidget
                                                       .routeName,
                                                   queryParameters: {
-                                                    'propertyId': serializeParam(
+                                                    'propertyId':
+                                                        serializeParam(
                                                       getJsonField(
                                                         eachHouseItem,
                                                         r'''$.id''',
@@ -1774,7 +1787,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                   r'''$.name''',
                                                                 ).toString(),
                                                                 propertyImage:
-                                                                    '',
+                                                                    _modalImage(
+                                                                        eachHouseItem),
                                                                 propertyIsFavorite:
                                                                     true,
                                                               ),
@@ -1882,7 +1896,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                               eachHouseItem,
                                                               r'''$.name''',
                                                             ).toString(),
-                                                            propertyImage: '',
+                                                            propertyImage:
+                                                                _modalImage(
+                                                                    eachHouseItem),
                                                             propertyIsFavorite:
                                                                 true,
                                                           ),
@@ -2020,9 +2036,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 builder: (context) {
                                   final allHouses =
                                       _filterByListingType(getJsonField(
-                                    rowListPropertiesResponse.jsonBody,
-                                    r'''$.data''',
-                                  ) as List? ?? []);
+                                            rowListPropertiesResponse.jsonBody,
+                                            r'''$.data''',
+                                          ) as List? ??
+                                          []);
                                   final eachHouse = _carouselPage(
                                       'vistoRecientemente', allHouses);
 
@@ -2053,7 +2070,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                   DOVIACLIENTPropiedadSeleccionadaNewWidget
                                                       .routeName,
                                                   queryParameters: {
-                                                    'propertyId': serializeParam(
+                                                    'propertyId':
+                                                        serializeParam(
                                                       getJsonField(
                                                         eachHouseItem,
                                                         r'''$.id''',
@@ -2213,7 +2231,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                   r'''$.name''',
                                                                 ).toString(),
                                                                 propertyImage:
-                                                                    '',
+                                                                    _modalImage(
+                                                                        eachHouseItem),
                                                                 propertyIsFavorite:
                                                                     true,
                                                               ),
@@ -2319,7 +2338,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                     eachHouseItem,
                                                                     r'''$.name''')
                                                                 .toString(),
-                                                            propertyImage: '',
+                                                            propertyImage:
+                                                                _modalImage(
+                                                                    eachHouseItem),
                                                             propertyIsFavorite:
                                                                 true,
                                                           ),

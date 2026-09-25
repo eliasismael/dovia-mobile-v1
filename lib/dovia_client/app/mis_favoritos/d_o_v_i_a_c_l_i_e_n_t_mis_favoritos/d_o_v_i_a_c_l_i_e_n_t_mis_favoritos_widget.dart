@@ -1,3 +1,5 @@
+import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
+import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
@@ -71,6 +73,11 @@ class _DOVIACLIENTMisFavoritosWidgetState
     return firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? '';
   }
 
+  /// Foto principal de la casa para el modal de carpetas de favoritos.
+  String _modalImage(dynamic house) => house is Map
+      ? firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? ''
+      : '';
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -99,6 +106,7 @@ class _DOVIACLIENTMisFavoritosWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
                         title: 'Mis Favoritos',
+                        showCurrency: false,
                       ),
                     ),
                     Padding(
@@ -274,8 +282,7 @@ class _DOVIACLIENTMisFavoritosWidgetState
 
                                   if (eachFolder.isEmpty) {
                                     return const Center(
-                                        child: Text(
-                                            "Aún no tienes carpetas"));
+                                        child: Text("Aún no tienes carpetas"));
                                   }
 
                                   return ListView.separated(
@@ -324,27 +331,12 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                                     color: FlutterFlowTheme.of(
                                                             context)
                                                         .secondaryBackground,
-                                                    child: GridView(
-                                                      physics:
-                                                          const NeverScrollableScrollPhysics(),
-                                                      gridDelegate:
-                                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                                        crossAxisCount: 2,
-                                                      ),
-                                                      children: [
-                                                        Image.network(
-                                                            'https://picsum.photos/seed/${eachFolderIndex}1/200/200',
-                                                            fit: BoxFit.cover),
-                                                        Image.network(
-                                                            'https://picsum.photos/seed/${eachFolderIndex}2/200/200',
-                                                            fit: BoxFit.cover),
-                                                        Image.network(
-                                                            'https://picsum.photos/seed/${eachFolderIndex}3/200/200',
-                                                            fit: BoxFit.cover),
-                                                        Image.network(
-                                                            'https://picsum.photos/seed/${eachFolderIndex}4/200/200',
-                                                            fit: BoxFit.cover),
-                                                      ],
+                                                    child:
+                                                        FavoriteFolderCollageWidget(
+                                                      folderId: getJsonField(
+                                                              eachFolderItem,
+                                                              r'''$.id''')
+                                                          .toString(),
                                                     ),
                                                   ),
                                                 ),
@@ -494,11 +486,11 @@ class _DOVIACLIENTMisFavoritosWidgetState
 
                                   if (favoriteHouse.isEmpty) {
                                     return const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 24.0),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 24.0),
                                       child: Center(
-                                          child: Text(
-                                              'Aún no tienes favoritos')),
+                                          child:
+                                              Text('Aún no tienes favoritos')),
                                     );
                                   }
 
@@ -542,8 +534,8 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                                   'Keyq7t_${favoriteHouseIndex}_of_${favoriteHouse.length}'),
                                               width: double.infinity,
                                               height: 0.0,
-                                              imageUrl:
-                                                  _houseImageUrl(favoriteHouseItem),
+                                              imageUrl: _houseImageUrl(
+                                                  favoriteHouseItem),
                                               isFavorite: true,
                                               name: getJsonField(
                                                       favoriteHouseItem,
@@ -623,7 +615,9 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                                             favoriteHouseItem,
                                                             r'''$.name''',
                                                           ).toString(),
-                                                          propertyImage: '',
+                                                          propertyImage:
+                                                              _modalImage(
+                                                                  favoriteHouseItem),
                                                           propertyIsFavorite:
                                                               true,
                                                         ),

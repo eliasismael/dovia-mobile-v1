@@ -39,10 +39,8 @@ class AmountInputFormatter extends TextInputFormatter {
 
     // Cuántos caracteres que no son coma había antes del cursor.
     final cursor = newValue.selection.end.clamp(0, newValue.text.length);
-    var significant = newValue.text
-        .substring(0, cursor)
-        .replaceAll(',', '')
-        .length;
+    var significant =
+        newValue.text.substring(0, cursor).replaceAll(',', '').length;
     // Los ceros a la izquierda que se quitaron no cuentan.
     significant -= raw.length - integer.length - decimals.length;
     var offset = 0;

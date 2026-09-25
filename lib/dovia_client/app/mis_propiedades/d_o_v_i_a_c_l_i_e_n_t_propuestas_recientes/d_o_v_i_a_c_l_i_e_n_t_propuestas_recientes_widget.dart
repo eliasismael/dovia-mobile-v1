@@ -48,8 +48,7 @@ class _DOVIACLIENTPropuestasRecientesWidgetState
   @override
   void initState() {
     super.initState();
-    _model =
-        createModel(context, () => DOVIACLIENTPropuestasRecientesModel());
+    _model = createModel(context, () => DOVIACLIENTPropuestasRecientesModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       safeSetState(() {});

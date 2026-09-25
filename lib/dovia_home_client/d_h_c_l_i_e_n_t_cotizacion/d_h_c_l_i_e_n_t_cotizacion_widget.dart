@@ -291,8 +291,9 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       });
     }
 
-    final presignRes =
-        await DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall.call(
+    final presignRes = await DOVIAAPIDoviaHomeContextGroup
+        .presignServiceRequestImagesCall
+        .call(
       serviceRequestId: serviceRequestId,
       uploads: uploads,
       authToken: currentAuthenticationToken ?? '',
@@ -333,8 +334,9 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     }
 
     if (storageKeys.isEmpty) return 0;
-    final confirmRes =
-        await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestImagesCall.call(
+    final confirmRes = await DOVIAAPIDoviaHomeContextGroup
+        .confirmServiceRequestImagesCall
+        .call(
       serviceRequestId: serviceRequestId,
       storageKeys: storageKeys,
       authToken: currentAuthenticationToken ?? '',
@@ -367,8 +369,9 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     final selectedPhotos = _model.uploadedPhotos.length;
     safeSetState(() => _model.isSubmitting = true);
     try {
-      final response =
-          await DOVIAAPIDoviaHomeContextGroup.createQuoteServiceRequestCall.call(
+      final response = await DOVIAAPIDoviaHomeContextGroup
+          .createQuoteServiceRequestCall
+          .call(
         description: _model.textController!.text.trim(),
         addressId: addressId,
         authToken: currentAuthenticationToken ?? '',
@@ -800,7 +803,8 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
           // Una opción por propiedad registrada: tocarlas sólo selecciona.
           for (var i = 0; i < _addresses.length; i++)
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
               child: _locationOption(
                 label: _addressLabel(_addresses[i], index: i),
                 selected: _selectedAddressId == _addressId(_addresses[i]),
@@ -853,8 +857,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
             width: 1.5,
           ),
         ),
-        padding:
-            const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 10.0, 20.0, 10.0),
         alignment: const AlignmentDirectional(0.0, 0.0),
         child: Text(
           label,

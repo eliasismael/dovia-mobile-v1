@@ -179,7 +179,11 @@ const List<String> _legalProcessOrder = [
 ];
 
 /// El backend tambien marca el rechazo en `processStatus`.
-const Set<String> _terminalProcessStatuses = {'rejected', 'cancelled', 'expired'};
+const Set<String> _terminalProcessStatuses = {
+  'rejected',
+  'cancelled',
+  'expired'
+};
 
 class OwnerProposal {
   final String offerId;
@@ -230,8 +234,10 @@ class OwnerProposal {
     Map<String, dynamic>? property,
   }) {
     final active = offerAsMap(json['activeOfferData']);
-    final original = offerAsMap(json['originalOfferData']) ?? offerAsMap(json['offerData']);
-    final counter = offerAsMap(json['counterOfferData']) ?? offerAsMap(json['counterOffer']);
+    final original =
+        offerAsMap(json['originalOfferData']) ?? offerAsMap(json['offerData']);
+    final counter = offerAsMap(json['counterOfferData']) ??
+        offerAsMap(json['counterOffer']);
     final propertyJson = offerAsMap(json['property']) ?? offerAsMap(property);
 
     String pick(String key) =>
@@ -242,7 +248,10 @@ class OwnerProposal {
         '';
 
     return OwnerProposal(
-      offerId: offerStr(json['offerId']) ?? offerStr(json['id']) ?? offerStr(json['_id']) ?? '',
+      offerId: offerStr(json['offerId']) ??
+          offerStr(json['id']) ??
+          offerStr(json['_id']) ??
+          '',
       propertyId: offerStr(propertyJson?['id']) ??
           offerStr(json['propertyId']) ??
           offerStr(propertyJson?['_id']) ??
@@ -255,7 +264,8 @@ class OwnerProposal {
       offerType: (offerStr(json['offerType']) ?? '').toUpperCase(),
       paymentMethod: pick('paymentMethod'),
       offerStatus:
-          (offerStr(json['offerStatus']) ?? offerStr(json['status']) ?? '').toUpperCase(),
+          (offerStr(json['offerStatus']) ?? offerStr(json['status']) ?? '')
+              .toUpperCase(),
       processStatus: offerProcessStatus(json),
       lastOfferBy: (offerStr(json['lastOfferBy']) ?? '').toUpperCase(),
       pendingResponseBy:
@@ -265,7 +275,8 @@ class OwnerProposal {
           offerNum(original?['proposedAmount']) ??
           offerNum(json['proposedAmount']) ??
           offerNum(json['amount']),
-      currency: (pick('currency').isEmpty ? 'USD' : pick('currency')).toUpperCase(),
+      currency:
+          (pick('currency').isEmpty ? 'USD' : pick('currency')).toUpperCase(),
       buyerName: offerStr(offerAsMap(active?['buyerInfo'])?['name']) ??
           offerStr(offerAsMap(original?['buyerInfo'])?['name']) ??
           offerStr(offerAsMap(json['client'])?['name']) ??

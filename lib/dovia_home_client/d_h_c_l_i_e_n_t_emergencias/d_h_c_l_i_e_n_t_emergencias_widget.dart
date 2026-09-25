@@ -185,8 +185,8 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                   focusColor: Colors.transparent,
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
-                  onTap: () => safeSetState(
-                      () => _model.uploadedPhotos.removeAt(index)),
+                  onTap: () =>
+                      safeSetState(() => _model.uploadedPhotos.removeAt(index)),
                   child: Container(
                     width: 22.0,
                     height: 22.0,

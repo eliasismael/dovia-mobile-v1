@@ -103,8 +103,7 @@ class _ReportarProblemaModalWidgetState
                 ),
                 onPressed: _messageCtrl.text.trim().isEmpty
                     ? null
-                    : () =>
-                        Navigator.of(context).pop(_messageCtrl.text.trim()),
+                    : () => Navigator.of(context).pop(_messageCtrl.text.trim()),
                 child: Text(
                   'Enviar',
                   style: GoogleFonts.publicSans(

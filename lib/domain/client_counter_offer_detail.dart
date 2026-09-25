@@ -135,7 +135,8 @@ class CounterOfferTerms {
 
     switch (normalizedMethod) {
       case 'hipoteca':
-        add(CounterOfferFieldKey.bankName, 'Banco', data['bankName'], half: true);
+        add(CounterOfferFieldKey.bankName, 'Banco', data['bankName'],
+            half: true);
         add(
           CounterOfferFieldKey.proposedAmount,
           'Propuesta económica',
@@ -358,8 +359,7 @@ String _normalizePaymentMethod(String raw) {
 }
 
 num? _parseNumber(String value) {
-  final sanitized = value
-      .replaceAll(RegExp(r'[^0-9,.-]'), '')
-      .replaceAll(',', '');
+  final sanitized =
+      value.replaceAll(RegExp(r'[^0-9,.-]'), '').replaceAll(',', '');
   return num.tryParse(sanitized);
 }

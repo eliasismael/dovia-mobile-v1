@@ -98,6 +98,8 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
   // Maps a UI section name to a backend `zone` slug matching `^[a-z0-9][a-z0-9-_]{0,39}$`.
   String _zoneForSection(String sectionName) {
     switch (sectionName) {
+      case 'Foto principal':
+        return 'principal';
       case 'Habitaciones':
         return 'habitacion';
       case 'Sala':

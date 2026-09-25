@@ -1,3 +1,4 @@
+import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpeta_creada_modal/tus_favoritos_carpeta_creada_modal_widget.dart';
@@ -58,6 +59,131 @@ class _TusFavoritosCarpetasModalWidgetState
   late bool _isFavorite = widget.propertyIsFavorite ?? true;
   final _foldersScroll = ScrollController();
   bool _togglingFavorite = false;
+
+  Widget _propertyPhoto({required double width, required double height}) {
+    const fallback = 'assets/images/casa_card_sobreMiVisita.png';
+    final url = widget.propertyImage?.trim() ?? '';
+    if (url.isEmpty) {
+      return Image.asset(fallback,
+          width: width, height: height, fit: BoxFit.cover);
+    }
+    return Image.network(
+      url,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset(fallback,
+          width: width, height: height, fit: BoxFit.cover),
+    );
+  }
+
+  // Carpeta que se está guardando/quitando: muestra un spinner en su botón.
+  String? _busyFolderId;
+  bool _creatingFolder = false;
+
+  static const Color _aqua = Color(0xFF007376);
+
+  Widget _folderToggle({required bool checked, required bool busy}) {
+    return Container(
+      width: 34.0,
+      height: 34.0,
+      decoration: BoxDecoration(
+        color: checked ? _aqua : Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: _aqua, width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x1A000000), blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: busy
+          ? Padding(
+              padding: const EdgeInsets.all(8),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: checked ? Colors.white : _aqua,
+              ),
+            )
+          : Icon(
+              checked ? Icons.check_rounded : Icons.add_rounded,
+              size: 20,
+              color: checked ? Colors.white : _aqua,
+            ),
+    );
+  }
+
+  Future<void> _showFolderNotice(String title, String message) {
+    return showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF4E5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.folder_copy_outlined,
+                    color: Color(0xFFE08A00), size: 26),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF00444B),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 14,
+                  color: Color(0xFF555555),
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _aqua,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100)),
+                  ),
+                  child: const Text('Entendido'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _folderNameExists(String name) async {
+    final res = await DOVIAAPIFavoriteContextGroup.getAllFavoriteFoldersCall
+        .call(authToken: currentAuthenticationToken);
+    final names = DOVIAAPIFavoriteContextGroup.getAllFavoriteFoldersCall
+            .folderName(res.jsonBody) ??
+        const <String>[];
+    final wanted = name.trim().toLowerCase();
+    return names.any((n) => n.trim().toLowerCase() == wanted);
+  }
 
   Future<void> _toggleFavorite() async {
     final propertyId = widget.houseId;
@@ -199,7 +325,8 @@ class _TusFavoritosCarpetasModalWidgetState
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
+                              Expanded(
+                                  child: Container(
                                 decoration: BoxDecoration(
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
@@ -214,15 +341,14 @@ class _TusFavoritosCarpetasModalWidgetState
                                       child: ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(8.0),
-                                        child: Image.asset(
-                                          'assets/images/casa_card_sobreMiVisita.png',
-                                          width: 53.0,
-                                          height: 79.0,
-                                          fit: BoxFit.cover,
+                                        child: _propertyPhoto(
+                                          width: 96.0,
+                                          height: 72.0,
                                         ),
                                       ),
                                     ),
-                                    Column(
+                                    Expanded(
+                                        child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Align(
@@ -233,6 +359,8 @@ class _TusFavoritosCarpetasModalWidgetState
                                               widget.propertyName,
                                               '[propertyName]',
                                             ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.start,
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
@@ -264,10 +392,10 @@ class _TusFavoritosCarpetasModalWidgetState
                                           ),
                                         ),
                                       ],
-                                    ),
+                                    )),
                                   ],
                                 ),
-                              ),
+                              )),
                               InkWell(
                                 splashColor: Colors.transparent,
                                 focusColor: Colors.transparent,
@@ -473,7 +601,8 @@ class _TusFavoritosCarpetasModalWidgetState
                                                             MainAxisAlignment
                                                                 .spaceBetween,
                                                         children: [
-                                                          Container(
+                                                          Expanded(
+                                                              child: Container(
                                                             decoration:
                                                                 const BoxDecoration(),
                                                             child: Row(
@@ -494,19 +623,23 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                     borderRadius:
                                                                         BorderRadius.circular(
                                                                             8.0),
-                                                                    child: Image
-                                                                        .asset(
-                                                                      'assets/images/casa_card_sobreMiVisita.png',
+                                                                    child:
+                                                                        SizedBox(
                                                                       width:
-                                                                          53.0,
+                                                                          96.0,
                                                                       height:
-                                                                          79.0,
-                                                                      fit: BoxFit
-                                                                          .cover,
+                                                                          72.0,
+                                                                      child:
+                                                                          FavoriteFolderCollageWidget(
+                                                                        folderId:
+                                                                            getJsonField(eachFolderItem, r'''$.id''').toString(),
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                 ),
-                                                                Column(
+                                                                Expanded(
+                                                                    child:
+                                                                        Column(
                                                                   mainAxisSize:
                                                                       MainAxisSize
                                                                           .max,
@@ -525,6 +658,10 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                           eachFolderItem,
                                                                           r'''$.name''',
                                                                         ).toString(),
+                                                                        maxLines:
+                                                                            2,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
                                                                         textAlign:
                                                                             TextAlign.start,
                                                                         style: FlutterFlowTheme.of(context)
@@ -541,10 +678,10 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                       ),
                                                                     ),
                                                                   ],
-                                                                ),
+                                                                )),
                                                               ],
                                                             ),
-                                                          ),
+                                                          )),
                                                           Builder(
                                                             builder: (context) {
                                                               if ((DOVIAAPIFavoriteContextGroup
@@ -575,6 +712,16 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                           .transparent,
                                                                   onTap:
                                                                       () async {
+                                                                    if (_busyFolderId !=
+                                                                        null) {
+                                                                      return;
+                                                                    }
+                                                                    safeSetState(() =>
+                                                                        _busyFolderId =
+                                                                            getJsonField(
+                                                                          eachFolderItem,
+                                                                          r'''$.id''',
+                                                                        ).toString());
                                                                     final removeResult =
                                                                         await DOVIAAPIFavoriteContextGroup
                                                                             .removeFavoriteFromFolderCall
@@ -591,6 +738,10 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                               .houseId,
                                                                     );
 
+                                                                    _busyFolderId =
+                                                                        null;
+                                                                    FavoriteFolderCollageWidget
+                                                                        .invalidate();
                                                                     if (!removeResult
                                                                         .succeeded) {
                                                                       await showDialog(
@@ -618,40 +769,14 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                         () {});
                                                                   },
                                                                   child:
-                                                                      Container(
-                                                                    width: 30.0,
-                                                                    height:
-                                                                        30.0,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .primaryText,
-                                                                      shape: BoxShape
-                                                                          .circle,
-                                                                      border:
-                                                                          Border
-                                                                              .all(
-                                                                        color: FlutterFlowTheme.of(context)
-                                                                            .primaryText,
-                                                                      ),
-                                                                    ),
-                                                                    child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              8.0),
-                                                                      child: SvgPicture
-                                                                          .asset(
-                                                                        'assets/images/check.svg',
-                                                                        width:
-                                                                            200.0,
-                                                                        height:
-                                                                            200.0,
-                                                                        fit: BoxFit
-                                                                            .none,
-                                                                      ),
-                                                                    ),
+                                                                      _folderToggle(
+                                                                    checked:
+                                                                        true,
+                                                                    busy: _busyFolderId ==
+                                                                        getJsonField(
+                                                                          eachFolderItem,
+                                                                          r'''$.id''',
+                                                                        ).toString(),
                                                                   ),
                                                                 );
                                                               } else {
@@ -668,6 +793,16 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                           .transparent,
                                                                   onTap:
                                                                       () async {
+                                                                    if (_busyFolderId !=
+                                                                        null) {
+                                                                      return;
+                                                                    }
+                                                                    safeSetState(() =>
+                                                                        _busyFolderId =
+                                                                            getJsonField(
+                                                                          eachFolderItem,
+                                                                          r'''$.id''',
+                                                                        ).toString());
                                                                     _model.apiResultvbr =
                                                                         await DOVIAAPIFavoriteContextGroup
                                                                             .addPropertyToFavoritesCall
@@ -684,6 +819,10 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                               .houseId,
                                                                     );
 
+                                                                    _busyFolderId =
+                                                                        null;
+                                                                    FavoriteFolderCollageWidget
+                                                                        .invalidate();
                                                                     if ((_model
                                                                             .apiResultvbr
                                                                             ?.succeeded ??
@@ -717,37 +856,14 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                         () {});
                                                                   },
                                                                   child:
-                                                                      Container(
-                                                                    width: 30.0,
-                                                                    height:
-                                                                        30.0,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      shape: BoxShape
-                                                                          .circle,
-                                                                      border:
-                                                                          Border
-                                                                              .all(
-                                                                        color: FlutterFlowTheme.of(context)
-                                                                            .primaryText,
-                                                                      ),
-                                                                    ),
-                                                                    child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              8.0),
-                                                                      child: SvgPicture
-                                                                          .asset(
-                                                                        'assets/images/plus.svg',
-                                                                        width:
-                                                                            200.0,
-                                                                        height:
-                                                                            200.0,
-                                                                        fit: BoxFit
-                                                                            .none,
-                                                                      ),
-                                                                    ),
+                                                                      _folderToggle(
+                                                                    checked:
+                                                                        false,
+                                                                    busy: _busyFolderId ==
+                                                                        getJsonField(
+                                                                          eachFolderItem,
+                                                                          r'''$.id''',
+                                                                        ).toString(),
                                                                   ),
                                                                 );
                                                               }
@@ -821,13 +937,31 @@ class _TusFavoritosCarpetasModalWidgetState
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
+                                    if (_creatingFolder) return;
+                                    final folderName =
+                                        _model.textController.text.trim();
+                                    if (folderName.isEmpty) {
+                                      await _showFolderNotice('Falta el nombre',
+                                          'Escribí un nombre para la carpeta.');
+                                      return;
+                                    }
+                                    safeSetState(() => _creatingFolder = true);
+                                    if (await _folderNameExists(folderName)) {
+                                      safeSetState(
+                                          () => _creatingFolder = false);
+                                      await _showFolderNotice(
+                                          'Ya tenés esa carpeta',
+                                          'Ya existe una carpeta llamada "$folderName". Elegí otro nombre.');
+                                      return;
+                                    }
                                     _model.apiResult3ce =
                                         await DOVIAAPIFavoriteContextGroup
                                             .createFavoriteFolderCall
                                             .call(
-                                      folderName: _model.textController.text,
+                                      folderName: folderName,
                                       authToken: currentAuthenticationToken,
                                     );
+                                    _creatingFolder = false;
 
                                     if ((_model.apiResult3ce?.succeeded ??
                                         true)) {
@@ -887,48 +1021,53 @@ class _TusFavoritosCarpetasModalWidgetState
                                         safeSetState(() {});
                                       }
                                     } else {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (alertDialogContext) {
-                                          return AlertDialog(
-                                            title: const Text('error'),
-                                            content: Text((_model.apiResult3ce
-                                                        ?.jsonBody ??
-                                                    '')
-                                                .toString()),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    alertDialogContext),
-                                                child: const Text('Ok'),
-                                              ),
-                                            ],
-                                          );
-                                        },
+                                      final body =
+                                          (_model.apiResult3ce?.jsonBody ?? '')
+                                              .toString()
+                                              .toLowerCase();
+                                      final duplicated =
+                                          _model.apiResult3ce?.statusCode ==
+                                                  409 ||
+                                              body.contains('exist') ||
+                                              body.contains('duplic');
+                                      await _showFolderNotice(
+                                        duplicated
+                                            ? 'Ya tenés esa carpeta'
+                                            : 'No se pudo crear la carpeta',
+                                        duplicated
+                                            ? 'Ya existe una carpeta llamada "$folderName". Elegí otro nombre.'
+                                            : 'Probá de nuevo en unos segundos.',
                                       );
                                     }
 
                                     safeSetState(() {});
                                   },
-                                  child: Text(
-                                    'Guardar',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
+                                  child: Container(
+                                    height: 40,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 22),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: _aqua,
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                    child: _creatingFolder
+                                        ? const SizedBox(
+                                            width: 18,
+                                            height: 18,
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white),
+                                          )
+                                        : const Text(
+                                            'Guardar',
+                                            style: TextStyle(
+                                              fontFamily: 'Public Sans',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
                                           ),
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
                                   ),
                                 ),
                               ),
@@ -962,11 +1101,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                 0.0, 12.0, 0.0, 0.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
-                              child: Image.asset(
-                                'assets/images/casa_card_sobreMiVisita.png',
+                              child: _propertyPhoto(
                                 width: 187.0,
                                 height: 110.0,
-                                fit: BoxFit.cover,
                               ),
                             ),
                           ),

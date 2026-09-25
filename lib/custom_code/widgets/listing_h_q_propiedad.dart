@@ -203,6 +203,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   // ==================== IMAGE UPLOAD SECTIONS ====================
   List<String> _imageSections = [
+    // Una sola foto: es la miniatura de la propiedad al publicarla.
+    'Foto principal',
     'Habitaciones',
     'Sala',
     'Comedor',
@@ -511,7 +513,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   bool validateForm() {
     bool hasError = false;
 
-    final requiredSections = ['Habitaciones', 'Sala', 'Comedor', 'Cocina'];
+    final requiredSections = [
+      'Foto principal',
+      'Habitaciones',
+      'Sala',
+      'Comedor',
+      'Cocina',
+    ];
     for (final section in requiredSections) {
       if (_images[section] == null || _images[section]!.isEmpty) {
         hasError = true;
@@ -522,7 +530,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       hasError = true;
     }
 
-    if (_selectedCriteria.length < 3) {
+    if (_selectedCriteria.length < 3 ||
+        _selectedCriteria.any((c) => (_starRatings[c] ?? 0) == 0)) {
       hasError = true;
     }
 
@@ -551,6 +560,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   String _getSectionKeyFromCategory(String category) {
     switch (category.toLowerCase()) {
+      case 'principal':
+        return 'Foto principal';
       case 'habitacion':
       case 'habitaciones':
         return 'Habitaciones';
@@ -767,9 +778,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width ?? double.infinity,
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
@@ -1015,7 +1025,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           const SizedBox(height: 12),
           // Instruction text
           const Text(
-            'Selecciona máximo 3 criterios y califica de 1 a 5 estrellas',
+            'Selecciona mínimo 3 criterios y califica de 1 a 5 estrellas',
             style: TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 12,
@@ -1024,34 +1034,31 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             ),
           ),
           const SizedBox(height: 12),
-          // Criteria selector button
-          GestureDetector(
-            onTap: () {
-              // Could open a modal/bottom sheet for criteria selection
-            },
-            child: Container(
-              height: 54,
-              decoration: BoxDecoration(
-                color: inputBackground,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                'Selecciona el criterio',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: placeholderColor.withValues(alpha: 0.5),
-                ),
-              ),
+          Text(
+            '${_selectedCriteria.length} seleccionados (mínimo 3)',
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 12,
+              color: placeholderColor,
             ),
           ),
-          const SizedBox(height: 16),
-          // Star rating items
-          ..._starRatings.entries.map(
-            (entry) => _buildStarRatingItem(entry.key, entry.value),
-          ),
+          const SizedBox(height: 12),
+          // Dos tarjetas por fila: se tocan para elegirlas y las estrellas
+          // marcan el valor.
+          LayoutBuilder(builder: (context, constraints) {
+            const spacing = 10.0;
+            final w = (constraints.maxWidth - spacing) / 2;
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: _starRatings.entries
+                  .map((e) => SizedBox(
+                        width: w,
+                        child: _buildStarRatingItem(e.key, e.value),
+                      ))
+                  .toList(),
+            );
+          }),
           const SizedBox(height: 10),
         ],
       ],
@@ -1224,112 +1231,158 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             letterSpacing: 0.32,
           ),
         ),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: () async {
-            final List<XFile>? selectedImages = await _picker.pickMultiImage();
-            if (selectedImages != null && selectedImages.isNotEmpty) {
-              setState(() {
-                _images[label] = [...imagesForSection, ...selectedImages];
-              });
-            }
-          },
-          child: Container(
-            width: double.infinity,
-            height: 104,
-            decoration: BoxDecoration(
-              color: inputBackground,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Icon(
-                Icons.add_photo_alternate_outlined,
-                size: 24,
-                color: placeholderColor.withValues(alpha: 0.5),
-              ),
-            ),
-          ),
-        ),
-        if (imagesForSection.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 80,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: imagesForSection.length,
-              itemBuilder: (context, index) {
-                final file = imagesForSection[index];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: (kIsWeb ||
-                                file.path.startsWith('http') ||
-                                file.path.startsWith('https'))
-                            ? Image.network(
-                                file.path,
-                                height: 80,
-                                width: 80,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return _imagePlaceholder(
-                                    const Center(
-                                      child: SizedBox(
-                                        height: 18,
-                                        width: 18,
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 2),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _imagePlaceholder(
-                                  const Icon(Icons.broken_image_outlined,
-                                      size: 24, color: Color(0xFF9E9E9E)),
-                                ),
-                              )
-                            : Image.file(File(file.path),
-                                height: 80, width: 80, fit: BoxFit.cover),
-                      ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _images[label]?.removeAt(index);
-                            });
-                          },
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close,
-                                size: 16, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+        if (label == 'Foto principal') ...[
+          const SizedBox(height: 4),
+          Text(
+            'Será la miniatura de la propiedad al publicarla.',
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 13,
+              color: placeholderColor,
             ),
           ),
         ],
+        const SizedBox(height: 12),
+        if (imagesForSection.isEmpty)
+          GestureDetector(
+            onTap: () => _pickImagesFor(label),
+            child: Container(
+              width: double.infinity,
+              height: 104,
+              decoration: BoxDecoration(
+                color: inputBackground,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.add_photo_alternate_outlined,
+                  size: 24,
+                  color: placeholderColor.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          )
+        else
+          _buildImageGrid(label, imagesForSection),
         const SizedBox(height: 12),
       ],
     );
   }
 
+  Future<void> _pickImagesFor(String label) async {
+    if (label == 'Foto principal') {
+      final image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() => _images[label] = [image]);
+      }
+      return;
+    }
+    final List<XFile> selectedImages = await _picker.pickMultiImage();
+    if (selectedImages.isNotEmpty) {
+      setState(() {
+        _images[label] = [...(_images[label] ?? []), ...selectedImages];
+      });
+    }
+  }
+
+  /// Grilla que ocupa todo el ancho: con más fotos hay más columnas (hasta 4)
+  /// y cada miniatura se achica. La última celda es el botón + para agregar.
+  Widget _buildImageGrid(String label, List<XFile> images) {
+    final single = label == 'Foto principal';
+    final tiles = images.length + (single ? 0 : 1);
+    final columns = tiles.clamp(1, 4);
+    const spacing = 8.0;
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      final tileWidth = (width - spacing * (columns - 1)) / columns;
+      final tileHeight = single ? 180.0 : tileWidth.clamp(0.0, 160.0);
+
+      return Wrap(
+        spacing: spacing,
+        runSpacing: spacing,
+        children: [
+          for (int i = 0; i < images.length; i++)
+            _imageTile(label, images[i], i, tileWidth, tileHeight),
+          if (!single)
+            GestureDetector(
+              onTap: () => _pickImagesFor(label),
+              child: Container(
+                width: tileWidth,
+                height: tileHeight,
+                decoration: BoxDecoration(
+                  color: addButtonBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.add, size: 28, color: primaryColor),
+              ),
+            ),
+        ],
+      );
+    });
+  }
+
+  Widget _imageTile(
+      String label, XFile file, int index, double width, double height) {
+    final isRemote = kIsWeb || file.path.startsWith('http');
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: isRemote
+                  ? Image.network(
+                      file.path,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return _imagePlaceholder(
+                          const Center(
+                            child: SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          _imagePlaceholder(
+                        const Icon(Icons.broken_image_outlined,
+                            size: 24, color: Color(0xFF9E9E9E)),
+                      ),
+                    )
+                  : Image.file(File(file.path), fit: BoxFit.cover),
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _images[label]?.removeAt(index);
+                });
+              },
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, size: 16, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _imagePlaceholder(Widget child) {
     return Container(
-      height: 80,
-      width: 80,
       color: const Color(0xFFF0F0F0),
       child: child,
     );
@@ -2108,77 +2161,91 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   }
 
   // ==================== REUSABLE: STAR RATING ITEM ====================
+  void _toggleCriterion(String label) {
+    setState(() {
+      if (_selectedCriteria.remove(label)) {
+        _starRatings[label] = 0;
+      } else {
+        _selectedCriteria.add(label);
+      }
+    });
+  }
+
   Widget _buildStarRatingItem(String label, int rating) {
-    return Container(
-      height: 171,
-      margin: const EdgeInsets.only(bottom: 23),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Icon placeholder (circle)
-          Container(
-            width: 54,
-            height: 54,
-            decoration: const BoxDecoration(
-              color: addButtonBg,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.star_outline_rounded,
-              color: primaryColor,
-              size: 27,
-            ),
+    final selected = _selectedCriteria.contains(label);
+    return GestureDetector(
+      onTap: () => _toggleCriterion(label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? alertBg : inputBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? primaryColor : borderColor,
+            width: selected ? 1.5 : 1,
           ),
-          const SizedBox(height: 8),
-          // Label
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: textColor,
-              height: 23.2 / 16,
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: selected ? primaryColor : addButtonBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                selected ? Icons.check : Icons.star_outline_rounded,
+                color: selected ? Colors.white : primaryColor,
+                size: 22,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          // Star rating row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    // Tapping the same star again clears the rating (allows
-                    // HQ to remove a star level), otherwise sets it.
-                    if (_starRatings[label] == index + 1) {
-                      _starRatings[label] = index;
-                    } else {
-                      _starRatings[label] = index + 1;
-                    }
-                    if (_starRatings[label]! > 0) {
-                      _selectedCriteria.add(label);
-                    } else {
-                      _selectedCriteria.remove(label);
-                    }
-                  });
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: index < 4 ? 5 : 0,
-                  ),
-                  child: Icon(
-                    index < rating ? Icons.star : Icons.star_border,
-                    size: 24,
-                    color: index < rating
-                        ? const Color(0xFFFFC107)
-                        : placeholderColor.withValues(alpha: 0.4),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 36,
+              child: Center(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                 ),
-              );
-            }),
-          ),
-        ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(5, (index) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedCriteria.add(label);
+                        _starRatings[label] = index + 1;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: Icon(
+                        index < rating ? Icons.star : Icons.star_border,
+                        size: 24,
+                        color: index < rating
+                            ? const Color(0xFFFFC107)
+                            : placeholderColor.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

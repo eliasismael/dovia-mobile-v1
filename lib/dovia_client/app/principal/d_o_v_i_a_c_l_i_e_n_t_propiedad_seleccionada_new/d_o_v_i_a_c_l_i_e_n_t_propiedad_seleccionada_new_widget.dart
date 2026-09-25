@@ -125,6 +125,15 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
       final imagesList = <String>[];
       final mainImg = d?['image']?.toString() ?? '';
       if (mainImg.isNotEmpty) imagesList.add(mainImg);
+      // La foto principal va primero en la galería.
+      if (imagesObj is Map && imagesObj['principal'] is List) {
+        final principal = (imagesObj['principal'] as List)
+            .map((e) => e?.toString() ?? '')
+            .where((s) => s.isNotEmpty);
+        if (principal.isNotEmpty && !imagesList.contains(principal.last)) {
+          imagesList.add(principal.last);
+        }
+      }
       final imagesByRoom = <String, List<String>>{};
       if (imagesObj is Map) {
         imagesObj.forEach((room, value) {

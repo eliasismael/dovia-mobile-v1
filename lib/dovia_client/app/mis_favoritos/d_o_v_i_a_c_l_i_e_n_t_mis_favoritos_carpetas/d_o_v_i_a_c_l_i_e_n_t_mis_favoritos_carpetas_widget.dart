@@ -1,3 +1,4 @@
+import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
@@ -272,65 +273,20 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                           1.0,
                                                   decoration:
                                                       const BoxDecoration(),
-                                                  child: GridView(
-                                                    padding: EdgeInsets.zero,
-                                                    gridDelegate:
-                                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                                      crossAxisCount: 2,
-                                                      crossAxisSpacing: 0.0,
-                                                      mainAxisSpacing: 0.0,
-                                                      childAspectRatio: 1.0,
+                                                  child: AspectRatio(
+                                                    aspectRatio: 1.0,
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                      child:
+                                                          FavoriteFolderCollageWidget(
+                                                        folderId: getJsonField(
+                                                                eachFolderItem,
+                                                                r'''$.id''')
+                                                            .toString(),
+                                                      ),
                                                     ),
-                                                    primary: false,
-                                                    shrinkWrap: true,
-                                                    scrollDirection:
-                                                        Axis.vertical,
-                                                    children: [
-                                                      ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
-                                                        child: Image.network(
-                                                          'https://picsum.photos/seed/408/600',
-                                                          width: 200.0,
-                                                          height: 200.0,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                      ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
-                                                        child: Image.network(
-                                                          'https://picsum.photos/seed/40/600',
-                                                          width: 200.0,
-                                                          height: 200.0,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                      ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
-                                                        child: Image.network(
-                                                          'https://picsum.photos/seed/117/600',
-                                                          width: 200.0,
-                                                          height: 200.0,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                      ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
-                                                        child: Image.network(
-                                                          'https://picsum.photos/seed/595/600',
-                                                          width: 200.0,
-                                                          height: 200.0,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ],
                                                   ),
                                                 ),
                                                 Padding(

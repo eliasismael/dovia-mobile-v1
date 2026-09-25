@@ -133,8 +133,8 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
   /// Fecha programada (appointment.scheduledAt) o, si no existe, la de creación.
   DateTime? _visitDate(Map<String, dynamic> data) {
     final apt = data['appointment'];
-    final raw = _str(apt is Map ? apt['scheduledAt'] : null) ??
-        _str(data['createdAt']);
+    final raw =
+        _str(apt is Map ? apt['scheduledAt'] : null) ?? _str(data['createdAt']);
     if (raw == null) return null;
     return DateTime.tryParse(raw)?.toLocal();
   }
@@ -217,7 +217,9 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
         return false;
       }
       final status = _model.statusFilter;
-      if (status != null && status != _allOption && _statusLabel(data) != status) {
+      if (status != null &&
+          status != _allOption &&
+          _statusLabel(data) != status) {
         return false;
       }
       final date = _model.dateFilter;
@@ -507,8 +509,9 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
 
   Widget _dateField() {
     final date = _model.dateFilter;
-    final label =
-        date != null ? DateFormat('dd/MM/yyyy').format(date) : 'Selecciona la fecha';
+    final label = date != null
+        ? DateFormat('dd/MM/yyyy').format(date)
+        : 'Selecciona la fecha';
     return InkWell(
       onTap: _pickDate,
       borderRadius: BorderRadius.circular(12.0),

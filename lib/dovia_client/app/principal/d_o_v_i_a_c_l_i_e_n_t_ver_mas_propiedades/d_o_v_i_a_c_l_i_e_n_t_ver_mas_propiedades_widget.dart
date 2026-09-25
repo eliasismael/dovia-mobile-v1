@@ -1,3 +1,4 @@
+import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/components/agregar_favorito_a_carpeta_widget.dart';
@@ -60,6 +61,11 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
     }
     return firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? '';
   }
+
+  /// Foto principal de la casa para el modal de carpetas de favoritos.
+  String _modalImage(dynamic house) => house is Map
+      ? firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? ''
+      : '';
 
   @override
   Widget build(BuildContext context) {
@@ -273,7 +279,9 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                                                       eachHouseItem,
                                                                       r'''$.name''')
                                                                   .toString(),
-                                                              propertyImage: '',
+                                                              propertyImage:
+                                                                  _modalImage(
+                                                                      eachHouseItem),
                                                               propertyIsFavorite:
                                                                   false,
                                                             ),
@@ -374,7 +382,9 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                                                   eachHouseItem,
                                                                   r'''$.name''')
                                                               .toString(),
-                                                          propertyImage: '',
+                                                          propertyImage:
+                                                              _modalImage(
+                                                                  eachHouseItem),
                                                           propertyIsFavorite:
                                                               true,
                                                         ),

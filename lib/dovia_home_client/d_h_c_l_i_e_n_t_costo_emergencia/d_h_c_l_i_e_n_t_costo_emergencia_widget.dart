@@ -112,7 +112,8 @@ class _DHCLIENTCostoEmergenciaWidgetState
   /// queda en false: ahí el pago sólo desbloquea el botón inferior.
   bool _finishWhenPaid = false;
 
-  num? get _amount => _requestData == null ? null : srPriceAmount(_requestData!);
+  num? get _amount =>
+      _requestData == null ? null : srPriceAmount(_requestData!);
 
   @override
   void initState() {
@@ -265,9 +266,9 @@ class _DHCLIENTCostoEmergenciaWidgetState
       return null;
     }
 
-    final response =
-        await DOVIAAPIDoviaHomeContextGroup.createEmergencyServiceRequestCall
-            .call(
+    final response = await DOVIAAPIDoviaHomeContextGroup
+        .createEmergencyServiceRequestCall
+        .call(
       categoryId: categoryId,
       description: DHCLIENTCostoEmergenciaWidget.description ?? '',
       addressId: addressId,
@@ -332,8 +333,9 @@ class _DHCLIENTCostoEmergenciaWidgetState
       });
     }
 
-    final presignRes =
-        await DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall.call(
+    final presignRes = await DOVIAAPIDoviaHomeContextGroup
+        .presignServiceRequestImagesCall
+        .call(
       serviceRequestId: serviceRequestId,
       uploads: uploads,
       authToken: token,
@@ -435,8 +437,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
       safeSetState(() {
         _phase = _CheckoutPhase.failed;
         _paymentOrderId = order.id;
-        _failureMessage =
-            'No pudimos abrir el pago. Intentá de nuevo.';
+        _failureMessage = 'No pudimos abrir el pago. Intentá de nuevo.';
       });
       return;
     }
@@ -1101,7 +1102,8 @@ class _DHCLIENTCostoEmergenciaWidgetState
             if (paid)
               const Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 8.0, 0.0),
-                child: Icon(Icons.check_circle, color: Colors.white, size: 20.0),
+                child:
+                    Icon(Icons.check_circle, color: Colors.white, size: 20.0),
               ),
             Text(
               paid ? 'Pagado' : text,

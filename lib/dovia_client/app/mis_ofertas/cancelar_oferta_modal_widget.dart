@@ -118,8 +118,8 @@ class _CancelarOfertaModalWidgetState extends State<CancelarOfertaModalWidget> {
                       ),
                       child: Text(
                         'Cancelar',
-                        style: GoogleFonts.publicSans(
-                            fontSize: 16, color: _aqua),
+                        style:
+                            GoogleFonts.publicSans(fontSize: 16, color: _aqua),
                       ),
                     ),
                   ),
@@ -130,13 +130,12 @@ class _CancelarOfertaModalWidgetState extends State<CancelarOfertaModalWidget> {
                     height: 42,
                     child: FilledButton(
                       onPressed: _canConfirm
-                          ? () => Navigator.of(context)
-                              .pop(_reasonCtrl.text.trim())
+                          ? () =>
+                              Navigator.of(context).pop(_reasonCtrl.text.trim())
                           : null,
                       style: FilledButton.styleFrom(
                         backgroundColor: _destructive,
-                        disabledBackgroundColor:
-                            _destructive.withOpacity(0.5),
+                        disabledBackgroundColor: _destructive.withOpacity(0.5),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25)),
                       ),

@@ -67,17 +67,11 @@ enum _DocType {
 }
 
 class _OperativeListingProfileState extends State<OperativeListingProfile> {
-  int _selectedTab = 0;
   bool _datosPersonalesExpanded = true;
   bool _gananciasExpanded = false;
   bool _documentacionExpanded = false;
 
   // Notification toggles
-  bool _notifDailyListing = false;
-  bool _notifRecomendaciones = false;
-  bool _notifTips = false;
-  bool _notifNovedades = false;
-  bool _notifInformeSemanal = false;
 
   // Delete-account reason
   final _deleteReasonController = TextEditingController();
@@ -108,7 +102,6 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   static const Color inputPlaceholder = Color(0xFF888888);
   static const Color borderColor = Color(0xFFE9EFF2);
   static const Color badgeTextColor = Color(0xFFCCE3E4);
-  static const Color tabActiveBg = Color(0xFFCCE3E4);
   static const Color deleteRed = Color(0xFFF93A3A);
 
   @override
@@ -147,89 +140,28 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildTabBar(),
-            const SizedBox(height: 20),
-            if (_selectedTab == 0) ...[
-              if (repo.isLoading && profile == null)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 60),
-                  child: Center(
-                    child: CircularProgressIndicator(color: aqua),
-                  ),
-                )
-              else ...[
-                _buildPerfilCard(repo),
-                const SizedBox(height: 16),
-                _buildGananciasCard(repo),
-                const SizedBox(height: 16),
-                _buildDocumentacionCard(repo),
-                const SizedBox(height: 16),
-                _buildCambioContrasenaCard(),
-                const SizedBox(height: 16),
-                _buildSoporteYLegalSection(),
-                const SizedBox(height: 16),
-                _buildAccionesCriticasSection(),
-                const SizedBox(height: 16),
-              ],
-            ] else ...[
-              _buildNotificacionesTab(),
+            if (repo.isLoading && profile == null)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 60),
+                child: Center(
+                  child: CircularProgressIndicator(color: aqua),
+                ),
+              )
+            else ...[
+              _buildPerfilCard(repo),
+              const SizedBox(height: 16),
+              _buildGananciasCard(repo),
+              const SizedBox(height: 16),
+              _buildDocumentacionCard(repo),
+              const SizedBox(height: 16),
+              _buildCambioContrasenaCard(),
+              const SizedBox(height: 16),
+              _buildSoporteYLegalSection(),
+              const SizedBox(height: 16),
+              _buildAccionesCriticasSection(),
+              const SizedBox(height: 16),
             ],
           ],
-        ),
-      ),
-    );
-  }
-
-  // ─── Tab Bar ──────────────────────────────────────────────────────────────────
-
-  Widget _buildTabBar() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(100),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF007376).withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildTabItem(0, 'Perfil y seguridad'),
-          _buildTabItem(1, 'Configuración de notificaciones'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabItem(int index, String label) {
-    final bool isSelected = _selectedTab == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedTab = index),
-        child: Container(
-          height: 46,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isSelected ? tabActiveBg : Colors.transparent,
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.normal,
-              color: isSelected ? aqua : inputPlaceholder,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
         ),
       ),
     );
@@ -1031,119 +963,6 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           _buildDeleteButton(),
         ],
       ),
-    );
-  }
-
-  // ─── Notificaciones Tab ───────────────────────────────────────────────────────
-
-  Widget _buildNotificacionesTab() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Notificaciones',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: aqua,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(height: 1, color: borderColor),
-          const SizedBox(height: 16),
-          _buildNotificationSwitch(
-            title: 'Daily listing',
-            subtitle:
-                'Recibe notificaciones cuando publiquemos nuevas propiedades que pueden interesarte',
-            value: _notifDailyListing,
-            onChanged: (val) => setState(() => _notifDailyListing = val),
-          ),
-          const SizedBox(height: 16),
-          _buildNotificationSwitch(
-            title: 'Recomendaciones',
-            subtitle:
-                'Recibe notificaciones cuando encontremos propiedades que se ajusten a tus búsquedas recientes.',
-            value: _notifRecomendaciones,
-            onChanged: (val) => setState(() => _notifRecomendaciones = val),
-          ),
-          const SizedBox(height: 16),
-          _buildNotificationSwitch(
-            title: 'Tips',
-            subtitle: 'Recibe notificaciones con tips semanales',
-            value: _notifTips,
-            onChanged: (val) => setState(() => _notifTips = val),
-          ),
-          const SizedBox(height: 16),
-          _buildNotificationSwitch(
-            title: 'Novedades',
-            subtitle: 'Recibe notificaciones sobre novedades en Dovia',
-            value: _notifNovedades,
-            onChanged: (val) => setState(() => _notifNovedades = val),
-          ),
-          const SizedBox(height: 16),
-          _buildNotificationSwitch(
-            title: 'Informe semanal',
-            subtitle:
-                'Recibe un informe semanal sobre la interacción que tuvo tu propiedad.',
-            value: _notifInformeSemanal,
-            onChanged: (val) => setState(() => _notifInformeSemanal = val),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotificationSwitch({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: textPrimary,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  color: inputPlaceholder,
-                  height: 1.3,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 16),
-        Switch.adaptive(
-          value: value,
-          onChanged: onChanged,
-          activeColor: Colors.white,
-          activeTrackColor: aqua,
-        ),
-      ],
     );
   }
 

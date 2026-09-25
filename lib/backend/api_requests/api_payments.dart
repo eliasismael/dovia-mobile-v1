@@ -210,7 +210,8 @@ class GetPaymentStatusCall {
       params: {
         if (paymentOrderId != null && paymentOrderId.isNotEmpty)
           'paymentOrderId': paymentOrderId,
-        if (checkoutId != null && checkoutId.isNotEmpty) 'checkoutId': checkoutId,
+        if (checkoutId != null && checkoutId.isNotEmpty)
+          'checkoutId': checkoutId,
         if (serviceId != null && serviceId.isNotEmpty) 'serviceId': serviceId,
       },
       returnBody: true,

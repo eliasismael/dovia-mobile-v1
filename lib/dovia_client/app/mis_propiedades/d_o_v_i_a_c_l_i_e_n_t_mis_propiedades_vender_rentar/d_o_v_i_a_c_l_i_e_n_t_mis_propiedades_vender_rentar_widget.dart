@@ -268,8 +268,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     final price = parseAmount(_model.precioVentaTextController?.text);
     final text = price == null
         ? ''
-        : formatAmountText(
-            (price * (1 - _doviaCommission)).toStringAsFixed(2));
+        : formatAmountText((price * (1 - _doviaCommission)).toStringAsFixed(2));
     if (target.text != text) target.text = text;
   }
 
@@ -345,9 +344,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     final filename = file.originalFilename.trim().isNotEmpty
         ? file.originalFilename.trim()
         : (file.name ?? '').trim();
-    final isImage = RegExp(r'\.(png|jpe?g|gif|webp|bmp|heic|heif)$',
-            caseSensitive: false)
-        .hasMatch(filename);
+    final isImage =
+        RegExp(r'\.(png|jpe?g|gif|webp|bmp|heic|heif)$', caseSensitive: false)
+            .hasMatch(filename);
 
     if (isImage) {
       return Image.memory(
@@ -379,8 +378,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
             overflow: TextOverflow.ellipsis,
             style: FlutterFlowTheme.of(context).bodyMedium.override(
                   font: GoogleFonts.inter(
-                    fontWeight: FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                    fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                    fontWeight:
+                        FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                   ),
                   fontSize: 13.0,
                   letterSpacing: 0.0,
@@ -608,14 +609,17 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 0.0, 8.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(key: _fieldKey('descripcionPropiedad'),
+                              child: TextFormField(
+                                key: _fieldKey('descripcionPropiedad'),
                                 controller:
                                     _model.descripcionPropiedadTextController,
                                 focusNode: _model.descripcionPropiedadFocusNode,
                                 autofocus: false,
                                 enabled: true,
                                 obscureText: false,
-                                decoration: InputDecoration(errorText: _fieldErrors['descripcionPropiedad'],
+                                decoration: InputDecoration(
+                                  errorText:
+                                      _fieldErrors['descripcionPropiedad'],
                                   isDense: true,
                                   labelStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
@@ -690,8 +694,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).secondaryBackground,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 40.0, 0.0, 40.0),
@@ -793,7 +797,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
-                                              child: TextFormField(key: _fieldKey('precioVenta'),
+                                              child: TextFormField(
+                                                key: _fieldKey('precioVenta'),
                                                 controller: _model
                                                     .precioVentaTextController,
                                                 focusNode:
@@ -805,10 +810,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                         .numberWithOptions(
                                                         decimal: true),
                                                 inputFormatters: [
-                                                  AmountInputFormatter(decimalDigits: 0),
+                                                  AmountInputFormatter(
+                                                      decimalDigits: 0),
                                                 ],
                                                 obscureText: false,
-                                                decoration: InputDecoration(prefixText: '${currencySymbol()} ',errorText: _fieldErrors['precioVenta'],
+                                                decoration: InputDecoration(
+                                                  prefixText:
+                                                      '${currencySymbol()} ',
+                                                  errorText: _fieldErrors[
+                                                      'precioVenta'],
                                                   isDense: true,
                                                   labelStyle: FlutterFlowTheme
                                                           .of(context)
@@ -1011,7 +1021,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
-                                              child: TextFormField(key: _fieldKey('cantidadARecibir'),
+                                              child: TextFormField(
+                                                key: _fieldKey(
+                                                    'cantidadARecibir'),
                                                 controller: _model
                                                     .cantidadARecibirTextController,
                                                 focusNode: _model
@@ -1029,7 +1041,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   AmountInputFormatter(),
                                                 ],
                                                 obscureText: false,
-                                                decoration: InputDecoration(prefixText: '${currencySymbol()} ',errorText: _fieldErrors['cantidadARecibir'],
+                                                decoration: InputDecoration(
+                                                  prefixText:
+                                                      '${currencySymbol()} ',
+                                                  errorText: _fieldErrors[
+                                                      'cantidadARecibir'],
                                                   isDense: true,
                                                   labelStyle: FlutterFlowTheme
                                                           .of(context)
@@ -1059,7 +1075,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                 .labelMedium
                                                                 .fontStyle,
                                                       ),
-                                                  hintText: 'Se calcula con el precio de venta',
+                                                  hintText:
+                                                      'Se calcula con el precio de venta',
                                                   hintStyle: FlutterFlowTheme
                                                           .of(context)
                                                       .labelMedium
@@ -1232,7 +1249,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
-                                              child: TextFormField(key: _fieldKey('mantenimiento'),
+                                              child: TextFormField(
+                                                key: _fieldKey('mantenimiento'),
                                                 controller: _model
                                                     .mantenimientoTextController,
                                                 focusNode: _model
@@ -1244,10 +1262,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                         .numberWithOptions(
                                                         decimal: true),
                                                 inputFormatters: [
-                                                  AmountInputFormatter(decimalDigits: 0),
+                                                  AmountInputFormatter(
+                                                      decimalDigits: 0),
                                                 ],
                                                 obscureText: false,
-                                                decoration: InputDecoration(prefixText: '${currencySymbol()} ',errorText: _fieldErrors['mantenimiento'],
+                                                decoration: InputDecoration(
+                                                  prefixText:
+                                                      '${currencySymbol()} ',
+                                                  errorText: _fieldErrors[
+                                                      'mantenimiento'],
                                                   isDense: true,
                                                   labelStyle: FlutterFlowTheme
                                                           .of(context)
@@ -1450,7 +1473,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
-                                              child: TextFormField(key: _fieldKey('impustoUnicoInmuebles'),
+                                              child: TextFormField(
+                                                key: _fieldKey(
+                                                    'impustoUnicoInmuebles'),
                                                 controller: _model
                                                     .impustoUnicoInmueblesTextController,
                                                 focusNode: _model
@@ -1462,10 +1487,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                         .numberWithOptions(
                                                         decimal: true),
                                                 inputFormatters: [
-                                                  AmountInputFormatter(decimalDigits: 0),
+                                                  AmountInputFormatter(
+                                                      decimalDigits: 0),
                                                 ],
                                                 obscureText: false,
-                                                decoration: InputDecoration(prefixText: '${currencySymbol()} ',errorText: _fieldErrors['impustoUnicoInmuebles'],
+                                                decoration: InputDecoration(
+                                                  prefixText:
+                                                      '${currencySymbol()} ',
+                                                  errorText: _fieldErrors[
+                                                      'impustoUnicoInmuebles'],
                                                   isDense: true,
                                                   labelStyle: FlutterFlowTheme
                                                           .of(context)
@@ -1703,7 +1733,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
-                                              child: TextFormField(key: _fieldKey('precioRentaMensual'),
+                                              child: TextFormField(
+                                                key: _fieldKey(
+                                                    'precioRentaMensual'),
                                                 controller: _model
                                                     .precioRentaMensualTextController,
                                                 focusNode: _model
@@ -1718,7 +1750,11 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                   AmountInputFormatter(),
                                                 ],
                                                 obscureText: false,
-                                                decoration: InputDecoration(prefixText: '${currencySymbol()} ',errorText: _fieldErrors['precioRentaMensual'],
+                                                decoration: InputDecoration(
+                                                  prefixText:
+                                                      '${currencySymbol()} ',
+                                                  errorText: _fieldErrors[
+                                                      'precioRentaMensual'],
                                                   isDense: true,
                                                   labelStyle: FlutterFlowTheme
                                                           .of(context)
@@ -2216,7 +2252,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
-                                              child: TextFormField(key: _fieldKey('tiempoMinimo'),
+                                              child: TextFormField(
+                                                key: _fieldKey('tiempoMinimo'),
                                                 controller: _model
                                                     .tiempoMinimoTextController,
                                                 focusNode: _model
@@ -2228,10 +2265,13 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                         .numberWithOptions(
                                                         decimal: true),
                                                 inputFormatters: [
-                                                  FilteringTextInputFormatter.digitsOnly,
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly,
                                                 ],
                                                 obscureText: false,
-                                                decoration: InputDecoration(errorText: _fieldErrors['tiempoMinimo'],
+                                                decoration: InputDecoration(
+                                                  errorText: _fieldErrors[
+                                                      'tiempoMinimo'],
                                                   isDense: true,
                                                   labelStyle: FlutterFlowTheme
                                                           .of(context)
@@ -2590,7 +2630,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                                                 .labelMedium
                                                                 .fontStyle,
                                                       ),
-                                                  hintText: 'Ej. no se permiten mascotas',
+                                                  hintText:
+                                                      'Ej. no se permiten mascotas',
                                                   hintStyle: FlutterFlowTheme
                                                           .of(context)
                                                       .labelMedium
@@ -2922,7 +2963,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 0.0, 8.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(key: _fieldKey('direccionPropiedad'),
+                              child: TextFormField(
+                                key: _fieldKey('direccionPropiedad'),
                                 controller:
                                     _model.direccionPropiedadTextController,
                                 focusNode: _model.direccionPropiedadFocusNode,
@@ -2937,7 +2979,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 autofocus: false,
                                 enabled: true,
                                 obscureText: false,
-                                decoration: InputDecoration(errorText: _fieldErrors['direccionPropiedad'],
+                                decoration: InputDecoration(
+                                  errorText: _fieldErrors['direccionPropiedad'],
                                   isDense: true,
                                   labelStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
@@ -3011,8 +3054,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).secondaryBackground,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3055,7 +3098,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                               child: DrawMapComponentWidget(
                                 height: 300.0,
                                 singlePointMode: true,
-                                centerLatitude: kDoviaZoneCenters[_model.zonaValue]?.$1,
+                                centerLatitude:
+                                    kDoviaZoneCenters[_model.zonaValue]?.$1,
                                 centerLongitude:
                                     kDoviaZoneCenters[_model.zonaValue]?.$2,
                                 markedLatitude: _geocodedLatitude,
@@ -3188,7 +3232,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: _uploadPreview(
-                                  _model.uploadedLocalFile_certifiacionDePropiedad,
+                                  _model
+                                      .uploadedLocalFile_certifiacionDePropiedad,
                                 ),
                               ),
                             ),
@@ -3233,13 +3278,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 0.0, 8.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(key: _fieldKey('finca'),
+                              child: TextFormField(
+                                key: _fieldKey('finca'),
                                 controller: _model.fincaTextController,
                                 focusNode: _model.fincaFocusNode,
                                 autofocus: false,
                                 enabled: true,
                                 obscureText: false,
-                                decoration: InputDecoration(errorText: _fieldErrors['finca'],
+                                decoration: InputDecoration(
+                                  errorText: _fieldErrors['finca'],
                                   isDense: true,
                                   labelStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
@@ -3313,8 +3360,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).secondaryBackground,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3387,13 +3434,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 0.0, 8.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(key: _fieldKey('folio'),
+                              child: TextFormField(
+                                key: _fieldKey('folio'),
                                 controller: _model.folioTextController,
                                 focusNode: _model.folioFocusNode,
                                 autofocus: false,
                                 enabled: true,
                                 obscureText: false,
-                                decoration: InputDecoration(errorText: _fieldErrors['folio'],
+                                decoration: InputDecoration(
+                                  errorText: _fieldErrors['folio'],
                                   isDense: true,
                                   labelStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
@@ -3467,8 +3516,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).secondaryBackground,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3541,13 +3590,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 0.0, 8.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(key: _fieldKey('libro'),
+                              child: TextFormField(
+                                key: _fieldKey('libro'),
                                 controller: _model.libroTextController,
                                 focusNode: _model.libroFocusNode,
                                 autofocus: false,
                                 enabled: true,
                                 obscureText: false,
-                                decoration: InputDecoration(errorText: _fieldErrors['libro'],
+                                decoration: InputDecoration(
+                                  errorText: _fieldErrors['libro'],
                                   isDense: true,
                                   labelStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
@@ -3621,8 +3672,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).secondaryBackground,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3757,14 +3808,16 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 0.0, 8.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(key: _fieldKey('nombrePropietario'),
+                              child: TextFormField(
+                                key: _fieldKey('nombrePropietario'),
                                 controller:
                                     _model.nombrePropietarioTextController,
                                 focusNode: _model.nombrePropietarioFocusNode,
                                 autofocus: false,
                                 enabled: true,
                                 obscureText: false,
-                                decoration: InputDecoration(errorText: _fieldErrors['nombrePropietario'],
+                                decoration: InputDecoration(
+                                  errorText: _fieldErrors['nombrePropietario'],
                                   isDense: true,
                                   labelStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
@@ -3787,7 +3840,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                             .labelMedium
                                             .fontStyle,
                                       ),
-                                  hintText: _isCompany ? 'Nombre de la sociedad' : 'Nombre completo',
+                                  hintText: _isCompany
+                                      ? 'Nombre de la sociedad'
+                                      : 'Nombre completo',
                                   hintStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .override(
@@ -3838,8 +3893,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).secondaryBackground,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -3914,7 +3969,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 0.0, 8.0, 0.0, 0.0),
                             child: SizedBox(
                               width: MediaQuery.sizeOf(context).width * 1.0,
-                              child: TextFormField(key: _fieldKey('nombreRepresentanteLegal'),
+                              child: TextFormField(
+                                key: _fieldKey('nombreRepresentanteLegal'),
                                 controller: _model
                                     .nombreRepresentanteLegalTextController,
                                 focusNode:
@@ -3922,7 +3978,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                 autofocus: false,
                                 enabled: true,
                                 obscureText: false,
-                                decoration: InputDecoration(errorText: _fieldErrors['nombreRepresentanteLegal'],
+                                decoration: InputDecoration(
+                                  errorText:
+                                      _fieldErrors['nombreRepresentanteLegal'],
                                   isDense: true,
                                   labelStyle: FlutterFlowTheme.of(context)
                                       .labelMedium
@@ -3996,8 +4054,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   filled: true,
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).secondaryBackground,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
                                   contentPadding:
                                       const EdgeInsetsDirectional.fromSTEB(
                                           20.0, 20.0, 0.0, 20.0),
@@ -4187,12 +4245,15 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                       follio: _model.folioTextController.text,
                                       libro: _model.libroTextController.text,
                                       salePrice: int.tryParse(_model
-                                          .precioVentaTextController.text.replaceAll(',', '')),
+                                          .precioVentaTextController.text
+                                          .replaceAll(',', '')),
                                       maintenanceFee: int.tryParse(_model
-                                          .mantenimientoTextController.text.replaceAll(',', '')),
+                                          .mantenimientoTextController.text
+                                          .replaceAll(',', '')),
                                       singlePropertyTax: int.tryParse(_model
                                           .impustoUnicoInmueblesTextController
-                                          .text.replaceAll(',', '')),
+                                          .text
+                                          .replaceAll(',', '')),
                                       isCompanyOwned: _model
                                               .nombreRepresentanteLegalTextController
                                               .text !=
@@ -4245,7 +4306,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                         libro: _model.libroTextController.text,
                                         monthlyRent: double.tryParse(_model
                                             .precioRentaMensualTextController
-                                            .text.replaceAll(',', '')),
+                                            .text
+                                            .replaceAll(',', '')),
                                         minimumTimeRent: int.tryParse(_model
                                             .tiempoMinimoTextController.text),
                                         othersRent: _model
@@ -4313,16 +4375,19 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                           libro:
                                               _model.libroTextController.text,
                                           salePrice: double.tryParse(_model
-                                              .precioVentaTextController.text.replaceAll(',', '')),
+                                              .precioVentaTextController.text
+                                              .replaceAll(',', '')),
                                           maintenanceFee: double.tryParse(_model
-                                              .mantenimientoTextController
-                                              .text.replaceAll(',', '')),
+                                              .mantenimientoTextController.text
+                                              .replaceAll(',', '')),
                                           singlePropertyTax: double.tryParse(_model
                                               .impustoUnicoInmueblesTextController
-                                              .text.replaceAll(',', '')),
+                                              .text
+                                              .replaceAll(',', '')),
                                           monthlyRent: double.tryParse(_model
                                               .precioRentaMensualTextController
-                                              .text.replaceAll(',', '')),
+                                              .text
+                                              .replaceAll(',', '')),
                                           minimumTimeRent: int.tryParse(_model
                                               .tiempoMinimoTextController.text),
                                           othersRent: _model

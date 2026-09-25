@@ -226,15 +226,14 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                         // y cuándo se realizó.
                         Text(
                           'Trabajo - ${jobTitle ?? 'Servicio'}',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w600),
-                                fontSize: 16.0,
-                                letterSpacing: 0.32,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
+                                    fontSize: 16.0,
+                                    letterSpacing: 0.32,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         if (jobDateLabel != null) ...[
                           const SizedBox(height: 12.0),
@@ -252,13 +251,12 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                         const SizedBox(height: 28.0),
                         Text(
                           '¿Cómo estuvo el trabajo que solicitaste?',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.publicSans(),
-                                fontSize: 16.0,
-                                letterSpacing: 0.32,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(),
+                                    fontSize: 16.0,
+                                    letterSpacing: 0.32,
+                                  ),
                         ),
                         const SizedBox(height: 26.0),
                         // 5 estrellas seleccionables (1 a 5). Arranca sin
@@ -275,7 +273,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                             direction: Axis.horizontal,
                             initialRating: _model.ratingBarValue ?? 0.0,
                             minRating: 1.0,
-                            unratedColor: FlutterFlowTheme.of(context).alternate,
+                            unratedColor:
+                                FlutterFlowTheme.of(context).alternate,
                             itemCount: 5,
                             itemSize: 48.0,
                             glowColor: FlutterFlowTheme.of(context).primary,
@@ -284,15 +283,14 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                         const SizedBox(height: 28.0),
                         Text(
                           'Si deseas, puedes dejar un comentario',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w500),
-                                fontSize: 16.0,
-                                letterSpacing: 0.32,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w500),
+                                    fontSize: 16.0,
+                                    letterSpacing: 0.32,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                         const SizedBox(height: 12.0),
                         _buildComentario(),
@@ -318,7 +316,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.w600,
                                 ),
-                            disabledColor: FlutterFlowTheme.of(context).alternate,
+                            disabledColor:
+                                FlutterFlowTheme.of(context).alternate,
                             disabledTextColor:
                                 FlutterFlowTheme.of(context).secondaryText,
                             elevation: 0.0,

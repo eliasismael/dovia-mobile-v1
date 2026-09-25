@@ -203,7 +203,8 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
 
   /// True cuando ya hay un operative lister asignado. El detalle expone su
   /// perfil en `data.operativeListing` (null mientras no hay asignación).
-  bool _listerAssigned(dynamic body) => _sectionMap(body, 'operativeListing') != null;
+  bool _listerAssigned(dynamic body) =>
+      _sectionMap(body, 'operativeListing') != null;
 
   Future<void> _saveInstructions() async {
     final visitId = widget.visitId?.trim();
@@ -335,22 +336,20 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
     // El detalle de la visita lo expone en `visit.unsignedContractUrl`, así que
     // está disponible en cualquier momento y desde cualquier dispositivo. Se
     // conserva la lectura a nivel de `data` como respaldo.
-    final unsignedContractUrl =
-        (visit?['unsignedContractUrl'] ?? _dataMap(body)?['unsignedContractUrl'])
-                ?.toString() ??
-            '';
+    final unsignedContractUrl = (visit?['unsignedContractUrl'] ??
+                _dataMap(body)?['unsignedContractUrl'])
+            ?.toString() ??
+        '';
 
     // Operative Lister asignado (`data.operativeListing`) y su slot confirmado.
     final operativeListing = _sectionMap(body, 'operativeListing');
     final confirmedSlot = visit?['confirmedTimeSlot'];
     final listerName = operativeListing?['fullName']?.toString() ?? '';
     final listerPhoto = operativeListing?['avatar']?.toString() ?? '';
-    final scheduledDate = confirmedSlot is Map
-        ? confirmedSlot['date']?.toString() ?? ''
-        : '';
-    final scheduledTime = confirmedSlot is Map
-        ? confirmedSlot['time']?.toString() ?? ''
-        : '';
+    final scheduledDate =
+        confirmedSlot is Map ? confirmedSlot['date']?.toString() ?? '' : '';
+    final scheduledTime =
+        confirmedSlot is Map ? confirmedSlot['time']?.toString() ?? '' : '';
     final listerCredentialUrl =
         operativeListing?['identificationDocumentUrl']?.toString() ?? '';
 
@@ -1407,12 +1406,10 @@ class _Step4Content extends StatelessWidget {
         ? Map<String, dynamic>.from(root!['property'] as Map)
         : null;
     // El detalle expone la foto como `image` y el tipo como `propertyType`.
-    final imageUrl = (prop?['image'] ??
-            prop?['mainImageUrl'] ??
-            prop?['imageUrl'] ??
-            '')
-        .toString()
-        .trim();
+    final imageUrl =
+        (prop?['image'] ?? prop?['mainImageUrl'] ?? prop?['imageUrl'] ?? '')
+            .toString()
+            .trim();
     final propertyName = (prop?['name'] ?? '').toString().trim();
     final propertyType = prop?['propertyType'] ?? prop?['type'];
     final saleInfo = prop?['saleInfo'];

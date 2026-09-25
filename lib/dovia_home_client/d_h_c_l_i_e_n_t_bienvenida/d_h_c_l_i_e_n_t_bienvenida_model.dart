@@ -22,8 +22,7 @@ class DHCLIENTBienvenidaModel
     cornerGradientBackgroundModel =
         createModel(context, () => CornerGradientBackgroundModel());
     fixedDoviaIconModel = createModel(context, () => FixedDoviaIconModel());
-    dHCLIENTNavbarModel =
-        createModel(context, () => DHCLIENTNavbarModel());
+    dHCLIENTNavbarModel = createModel(context, () => DHCLIENTNavbarModel());
   }
 
   @override

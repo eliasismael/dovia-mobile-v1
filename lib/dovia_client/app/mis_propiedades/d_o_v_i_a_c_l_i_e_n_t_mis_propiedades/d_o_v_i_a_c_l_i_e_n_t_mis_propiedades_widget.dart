@@ -1,3 +1,4 @@
+import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/core/result.dart';
@@ -145,6 +146,11 @@ class _DOVIACLIENTMisPropiedadesWidgetState
 
     super.dispose();
   }
+
+  /// Foto principal de la casa para el modal de carpetas de favoritos.
+  String _modalImage(dynamic house) => house is Map
+      ? firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? ''
+      : '';
 
   @override
   Widget build(BuildContext context) {
@@ -461,7 +467,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                                           r'''$.name''')
                                                                       .toString(),
                                                                   propertyImage:
-                                                                      '',
+                                                                      _modalImage(
+                                                                          eachOwnPropertyItem),
                                                                   propertyIsFavorite:
                                                                       false,
                                                                 ),
@@ -569,7 +576,9 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                                       eachOwnPropertyItem,
                                                                       r'''$.name''')
                                                                   .toString(),
-                                                              propertyImage: '',
+                                                              propertyImage:
+                                                                  _modalImage(
+                                                                      eachOwnPropertyItem),
                                                               propertyIsFavorite:
                                                                   true,
                                                             ),

@@ -178,7 +178,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
     );
   }
 
-  Widget _buildBeneficiosBadgeIcon({required double size, required IconData icon}) {
+  Widget _buildBeneficiosBadgeIcon(
+      {required double size, required IconData icon}) {
     return Container(
       width: size,
       height: size,
@@ -221,8 +222,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -319,8 +319,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                   ),
             ),
             Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
               child: Text(
                 'Cada servicio cubre un alcance estándar. Si durante la visita se detecta que el trabajo requiere más tiempo, materiales o un proyecto mayor, DOVIA te enviará una propuesta clara antes de continuar. Nada se hace sin tu aprobación.',
                 textAlign: TextAlign.center,
@@ -473,7 +472,8 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        0.0, 12.0, 0.0, 0.0),
                     child: Text(
                       'Plan diseñado para 1 propiedad registrada en DOVIA. Mantén tu hogar en perfectas condiciones con nuestro servicio integral.',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(

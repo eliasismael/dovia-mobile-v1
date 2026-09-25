@@ -1,3 +1,5 @@
+import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
+import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -89,6 +91,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
           top: true,
           child: Stack(
             children: [
+              const CornerGradientBackgroundWidget(),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(
                     20.0, 20.0, 20.0, 20.0),
@@ -152,34 +155,8 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                       .fontStyle,
                                 ),
                           ),
-                          InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context.pushNamed(
-                                  DOVIACLIENTMisFavoritosWidget.routeName);
-                            },
-                            child: Container(
-                              width: 35.0,
-                              height: 35.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/plus.svg',
-                                  width: 24.0,
-                                  height: 24.0,
-                                  fit: BoxFit.none,
-                                ),
-                              ),
-                            ),
-                          ),
+                          // Mismo ancho que el botón de volver: mantiene el título centrado.
+                          const SizedBox(width: 35.0),
                         ],
                       ),
                       FutureBuilder<ApiCallResponse>(
@@ -252,8 +229,8 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                             'Key76k_${eachFavoriteInFolderIndex}_of_${eachFavoriteInFolder.length}'),
                                         width: double.infinity,
                                         height: 0.0,
-                                        imageUrl:
-                                            _houseImageUrl(eachFavoriteInFolderItem),
+                                        imageUrl: _houseImageUrl(
+                                            eachFavoriteInFolderItem),
                                         isFavorite: true,
                                         name: getJsonField(
                                                 eachFavoriteInFolderItem,
@@ -330,12 +307,23 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                                                 MainAxisSize
                                                                     .min,
                                                             children: <Widget>[
-                                                              const Icon(
-                                                                  Icons
-                                                                      .warning_rounded,
-                                                                  color: Colors
-                                                                      .amber,
-                                                                  size: 60),
+                                                              Container(
+                                                                width: 64,
+                                                                height: 64,
+                                                                decoration:
+                                                                    const BoxDecoration(
+                                                                  color: Color(
+                                                                      0xFFCCE3E4),
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                ),
+                                                                child: const Icon(
+                                                                    Icons
+                                                                        .heart_broken_outlined,
+                                                                    color: Color(
+                                                                        0xFF007376),
+                                                                    size: 32),
+                                                              ),
                                                               const SizedBox(
                                                                   height: 16.0),
                                                               Text(
@@ -360,16 +348,38 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                                                     MainAxisAlignment
                                                                         .spaceEvenly,
                                                                 children: [
-                                                                  TextButton(
+                                                                  OutlinedButton(
                                                                     onPressed: () =>
                                                                         Navigator.of(alertDialogContext)
                                                                             .pop(false),
+                                                                    style: OutlinedButton
+                                                                        .styleFrom(
+                                                                      foregroundColor:
+                                                                          const Color(
+                                                                              0xFF007376),
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .white,
+                                                                      side: const BorderSide(
+                                                                          color: Color(
+                                                                              0xFF007376),
+                                                                          width:
+                                                                              1.5),
+                                                                      elevation:
+                                                                          2,
+                                                                      shadowColor:
+                                                                          const Color(
+                                                                              0x33000000),
+                                                                      shape: RoundedRectangleBorder(
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(100)),
+                                                                    ),
                                                                     child:
                                                                         const Text(
                                                                       "Cancelar",
                                                                       style: TextStyle(
-                                                                          color: Colors
-                                                                              .grey,
+                                                                          color: Color(
+                                                                              0xFF007376),
                                                                           fontSize:
                                                                               16),
                                                                     ),
@@ -381,12 +391,14 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                                                     style: ElevatedButton
                                                                         .styleFrom(
                                                                       backgroundColor:
-                                                                          Colors
-                                                                              .amber,
+                                                                          const Color(
+                                                                              0xFF007376),
+                                                                      elevation:
+                                                                          0,
                                                                       shape:
                                                                           RoundedRectangleBorder(
                                                                         borderRadius:
-                                                                            BorderRadius.circular(10),
+                                                                            BorderRadius.circular(100),
                                                                       ),
                                                                     ),
                                                                     child:
@@ -421,6 +433,8 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                               authToken:
                                                   currentAuthenticationToken,
                                             );
+                                            FavoriteFolderCollageWidget
+                                                .invalidate();
                                             safeSetState(() {});
                                           }
                                         },

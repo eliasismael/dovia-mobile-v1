@@ -83,7 +83,8 @@ class _PremiumUpsellPopupWidgetState extends State<PremiumUpsellPopupWidget> {
                     ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
+                padding:
+                    const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
                     if (widget.dismissOnTap) {

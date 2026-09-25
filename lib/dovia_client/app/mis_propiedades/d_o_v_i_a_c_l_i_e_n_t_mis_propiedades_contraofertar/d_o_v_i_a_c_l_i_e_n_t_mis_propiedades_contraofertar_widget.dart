@@ -486,9 +486,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               controller: _amountCtrl,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                AmountInputFormatter()
-              ],
+              inputFormatters: [AmountInputFormatter()],
               decoration: InputDecoration(
                 hintText: 'Ej. 150,000',
                 hintStyle: GoogleFonts.inter(
@@ -585,9 +583,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                 controller: _reservationCtrl,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  AmountInputFormatter()
-                ],
+                inputFormatters: [AmountInputFormatter()],
                 decoration: InputDecoration(
                   hintText: 'Ej. 10,000',
                   hintStyle: GoogleFonts.inter(
@@ -621,9 +617,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
                         controller: _finalPaymentCtrl,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
-                        inputFormatters: [
-                          AmountInputFormatter()
-                        ],
+                        inputFormatters: [AmountInputFormatter()],
                         decoration: InputDecoration(
                           hintText: 'Ej. 140,000',
                           hintStyle: GoogleFonts.inter(
