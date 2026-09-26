@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/checkout_launcher.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_material_aprobado/d_h_c_l_i_e_n_t_material_aprobado_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
@@ -504,7 +505,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -514,6 +516,7 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       title: 'Materiales',
                       showMap: false,
                       showCurrency: false,
@@ -573,7 +576,7 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

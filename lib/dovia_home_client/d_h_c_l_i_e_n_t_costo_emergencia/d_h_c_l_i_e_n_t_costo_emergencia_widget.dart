@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/core/result.dart';
 import '/domain/payment_models.dart';
 import '/dovia_home_client/checkout_launcher.dart';
@@ -106,6 +107,11 @@ class _DHCLIENTCostoEmergenciaWidgetState
   String? _pendingMethod;
   String? _failureMessage;
   bool _polling = false;
+  bool _checkingPayment = false;
+
+  /// Orden de un intento anterior que quedó abierta sin pagar. Pagar la
+  /// reabre en vez de crear otro cobro para la misma solicitud.
+  PaymentOrder? _openOrder;
 
   /// El cobro se lanzó desde [Siguiente] (escenario Premium), así que al
   /// confirmarse hay que cerrar el flujo sin pedir otro tap. Desde [Contratar]
@@ -218,12 +224,14 @@ class _DHCLIENTCostoEmergenciaWidgetState
     }
     if (order.status == PaymentStatus.pending ||
         order.status == PaymentStatus.inProcess) {
+      // Un checkout abierto y abandonado queda PENDING para siempre: no se
+      // entra a "confirmando" (el spinner no terminaría nunca). Se deja la
+      // opción de pagar, que reabre esa misma orden.
       safeSetState(() {
         _paymentOrderId = order.id;
         _pendingMethod = method;
-        _phase = _CheckoutPhase.waiting;
+        _openOrder = order;
       });
-      _pollUntilResolved();
       return;
     }
     if (order.isResumable) {
@@ -401,6 +409,16 @@ class _DHCLIENTCostoEmergenciaWidgetState
 
     final payments = context.read<PaymentsRepository>();
     _finishWhenPaid = finishWhenPaid;
+
+    final openOrder = _openOrder;
+    if (openOrder != null && (openOrder.checkoutUrl ?? '').isNotEmpty) {
+      await _openCheckout(
+        openOrder,
+        method: payments.hasActiveSubscription ? 'subscription' : 'direct',
+      );
+      return;
+    }
+
     safeSetState(() {
       _phase = _CheckoutPhase.creating;
       _failureMessage = null;
@@ -430,6 +448,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
   Future<void> _openCheckout(PaymentOrder order,
       {required String method}) async {
     _pendingMethod = method;
+    _openOrder = order;
     final opened = await launchDoviaHomeCheckout(order.checkoutUrl);
     if (!mounted) return;
 
@@ -519,6 +538,35 @@ class _DHCLIENTCostoEmergenciaWidgetState
       _polling = false;
     }
   }
+
+  /// "Ya completé el pago": consulta una vez y le dice al cliente qué pasó, en
+  /// vez de sumarse en silencio al sondeo que ya corre.
+  Future<void> _checkPaymentNow() async {
+    final serviceRequestId = DHCLIENTCostoEmergenciaWidget.serviceRequestId;
+    if (serviceRequestId == null || _checkingPayment) return;
+    safeSetState(() => _checkingPayment = true);
+    final result = await context
+        .read<PaymentsRepository>()
+        .getPaymentStatus(serviceId: serviceRequestId);
+    if (!mounted) return;
+    safeSetState(() => _checkingPayment = false);
+    final order = result.dataOrNull;
+    if (order != null && order.isPaid) {
+      await closeDoviaHomeCheckout();
+      safeSetState(() {
+        _paidMethod = _pendingMethod ?? 'direct';
+        _phase = _CheckoutPhase.idle;
+      });
+      if (_finishWhenPaid) await _finish();
+      return;
+    }
+    _showError('Todavía no recibimos la confirmación del pago. Si ya pagaste, '
+        'puede tardar unos segundos.');
+  }
+
+  /// Sale de la espera sin cancelar la orden: el cliente puede volver a abrir
+  /// el pago cuando quiera.
+  void _stopWaiting() => safeSetState(() => _phase = _CheckoutPhase.idle);
 
   /// Escenario Free — [Contratar]: cobra el monto total. Sólo al confirmarse el
   /// cobro se desbloquea el botón inferior [Siguiente].
@@ -644,7 +692,8 @@ class _DHCLIENTCostoEmergenciaWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -652,6 +701,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       title: 'Costo fijo mínimo\ndel trabajo',
                       hideActions: true,
                     ),
@@ -683,7 +733,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(
@@ -994,11 +1044,22 @@ class _DHCLIENTCostoEmergenciaWidgetState
                 ),
               ),
               TextButton(
-                onPressed: _pollUntilResolved,
+                onPressed: _checkingPayment ? null : _checkPaymentNow,
                 child: Text(
-                  'Ya completé el pago',
+                  _checkingPayment ? 'Verificando…' : 'Ya completé el pago',
                   style: GoogleFonts.publicSans(
                     color: const Color(0xFF007376),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.0,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: _stopWaiting,
+                child: Text(
+                  'Todavía no pagué',
+                  style: GoogleFonts.publicSans(
+                    color: const Color(0xFF6A6A6A),
                     fontSize: 13.0,
                   ),
                 ),

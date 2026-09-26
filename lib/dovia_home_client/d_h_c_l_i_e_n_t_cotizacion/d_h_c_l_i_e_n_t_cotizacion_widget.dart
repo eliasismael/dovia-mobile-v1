@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/subscription_renewal_notice.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
@@ -470,7 +471,8 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -479,6 +481,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       title: 'Cotización',
                       showMap: false,
                       showCurrency: false,
@@ -518,7 +521,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                     _requirementForm(),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

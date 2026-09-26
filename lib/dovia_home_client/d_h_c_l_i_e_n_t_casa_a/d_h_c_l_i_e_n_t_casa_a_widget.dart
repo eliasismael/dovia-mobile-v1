@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 import '/core/external_links.dart';
@@ -61,6 +62,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   late DHCLIENTCasaAModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
 
   /// Solicitud a renderizar. Nace con el resumen que inyecta la pantalla que
   /// navegó hasta acá y se completa con el detalle real en [_loadDetail].
@@ -113,6 +115,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -552,66 +555,179 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   // UI helpers.
   // ---------------------------------------------------------------------------
 
-  TextStyle get _labelStyle => FlutterFlowTheme.of(context).bodyMedium.override(
-        font: GoogleFonts.inter(),
-        fontSize: 16.0,
-        letterSpacing: 0.0,
-      );
+  static const List<BoxShadow> _cardShadow = [
+    BoxShadow(
+      color: Color(0x14000000),
+      blurRadius: 12.0,
+      offset: Offset(0.0, 4.0),
+    ),
+  ];
 
-  Widget _sectionLabel(String text) => Text(text, style: _labelStyle);
-
-  /// Caja de solo lectura (campo bloqueado). Muestra [value] o [hint] si vacío.
-  Widget _readOnlyBox(String value, {String hint = 'xxxx'}) {
-    final hasValue = value.isNotEmpty;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).alternate,
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Text(
-        hasValue ? value : hint,
-        textAlign: TextAlign.center,
-        style: FlutterFlowTheme.of(context).bodyMedium.override(
-              font: GoogleFonts.inter(),
-              fontSize: 15.0,
-              letterSpacing: 0.0,
-              color: hasValue
-                  ? FlutterFlowTheme.of(context).primaryText
-                  : FlutterFlowTheme.of(context).secondaryText,
-            ),
-      ),
-    );
-  }
-
-  Widget _labeledSection(String label, Widget field) => Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(0.0, 19.0, 0.0, 0.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sectionLabel(label),
-            const SizedBox(height: 12.0),
-            field,
-          ],
+  /// Tarjeta blanca de las secciones del detalle.
+  Widget _card({String? title, required List<Widget> children}) => Padding(
+        padding: const EdgeInsets.only(top: 16.0),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: _cardShadow,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (title != null) ...[
+                Text(
+                  title,
+                  style: GoogleFonts.publicSans(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
+                    color: FlutterFlowTheme.of(context).primary,
+                  ),
+                ),
+                const SizedBox(height: 14.0),
+              ],
+              ...children,
+            ],
+          ),
         ),
       );
 
-  Widget _dateField() {
-    final d = _scheduledAt;
-    final dd = d != null ? DateFormat('dd').format(d) : '';
-    final mm = d != null ? DateFormat('MM').format(d) : '';
-    final yyyy = d != null ? DateFormat('yyyy').format(d) : '';
-    return Row(
-      children: [
-        Expanded(child: _readOnlyBox(dd, hint: 'DD')),
-        const SizedBox(width: 8.0),
-        Expanded(child: _readOnlyBox(mm, hint: 'MM')),
-        const SizedBox(width: 8.0),
-        Expanded(child: _readOnlyBox(yyyy, hint: 'AAAA')),
-      ],
+  /// Fila ícono + etiqueta + valor. Sin valor se aclara que no hay dato en
+  /// vez de mostrar el "xxxx" del mockup.
+  Widget _infoRow(IconData icon, String label, String value,
+      {bool last = false}) {
+    final hasValue = value.trim().isNotEmpty;
+    return Padding(
+      padding: EdgeInsets.only(bottom: last ? 0.0 : 14.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34.0,
+            height: 34.0,
+            decoration: BoxDecoration(
+              color: const Color(0x2670ACAD),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Icon(icon,
+                size: 18.0, color: FlutterFlowTheme.of(context).primary),
+          ),
+          const SizedBox(width: 12.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w500,
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                  ),
+                ),
+                const SizedBox(height: 2.0),
+                Text(
+                  hasValue ? value.trim() : 'Sin indicaciones',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.0,
+                    fontWeight: hasValue ? FontWeight.w500 : FontWeight.w400,
+                    color: hasValue
+                        ? FlutterFlowTheme.of(context).primaryText
+                        : FlutterFlowTheme.of(context).secondaryText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  /// Cabecera con el ícono del servicio, su nombre y la fecha de la visita.
+  Widget _serviceSummaryCard() {
+    final data = _data;
+    final name = data != null ? srServiceName(data) : 'Servicio';
+    final date = data != null ? srFormattedDate(data) : '';
+    final asset = data != null ? srIconAsset(data) : kQuoteIconAsset;
+    final Widget icon = asset == kQuoteIconAsset
+        ? const Icon(Icons.request_quote_outlined,
+            color: Colors.white, size: 26.0)
+        : asset.endsWith('IconoCaja.svg')
+            ? const Icon(Icons.home_repair_service_outlined,
+                color: Colors.white, size: 26.0)
+            : SvgPicture.asset(
+                asset,
+                width: 26.0,
+                height: 26.0,
+                colorFilter:
+                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              );
+    final year = _scheduledAt?.year;
+    return _card(children: [
+      Row(
+        children: [
+          Container(
+            width: 52.0,
+            height: 52.0,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFF007376),
+              borderRadius: BorderRadius.circular(14.0),
+            ),
+            child: icon,
+          ),
+          const SizedBox(width: 14.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.publicSans(
+                    fontSize: 17.0,
+                    fontWeight: FontWeight.w600,
+                    color: FlutterFlowTheme.of(context).primary,
+                  ),
+                ),
+                if (date.isNotEmpty) ...[
+                  const SizedBox(height: 3.0),
+                  Text(
+                    year != null ? '$date de $year' : date,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.w500,
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    ]);
+  }
+
+  Widget _detailsCard() => _card(title: 'Detalles de la visita', children: [
+        _infoRow(Icons.location_on_outlined, 'Dirección exacta', _exactAddress),
+        _infoRow(Icons.directions_outlined, 'Instrucciones para llegar',
+            _arrivalInstructions),
+        _infoRow(Icons.meeting_room_outlined, 'Instrucciones para ingresar',
+            _entryInstructions),
+        _infoRow(Icons.checklist_rounded, 'Debe tener listo', _mustHaveReady,
+            last: true),
+      ]);
+
+  Widget _workCard() => _card(title: 'Trabajo solicitado', children: [
+        if (_categoryLabel.isNotEmpty)
+          _infoRow(Icons.category_outlined, 'Categoría', _categoryLabel),
+        if (_workDescription.isNotEmpty)
+          _infoRow(Icons.notes_rounded, 'Descripción', _workDescription),
+        _photosRow(),
+      ]);
 
   Widget _photoPlaceholder() => Container(
         width: 60.0,
@@ -752,11 +868,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 28.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(6.0),
-          border: Border.all(
-            color: FlutterFlowTheme.of(context).primary,
-            width: 1.0,
-          ),
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: _cardShadow,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -798,11 +911,8 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 28.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(6.0),
-          border: Border.all(
-            color: FlutterFlowTheme.of(context).primary,
-            width: 1.0,
-          ),
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: _cardShadow,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -826,9 +936,19 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
         ),
       );
 
+  /// Cabecera: la calle donde se pidió el servicio (hasta la primera coma;
+  /// la dirección completa está en "Detalles de la visita"). El backend no
+  /// tiene nombre de casa, así que "Casa" queda sólo si no hay dirección.
+  String get _headerTitle {
+    final address = _exactAddress.trim();
+    if (address.isEmpty) return DHCLIENTCasaAWidget.houseName;
+    return address.split(',').first.trim();
+  }
+
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+      padding: EdgeInsetsDirectional.fromSTEB(
+          20.0, MediaQuery.viewPaddingOf(context).top + 34.0, 20.0, 8.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -863,8 +983,9 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text(
-                DHCLIENTCasaAWidget.houseName,
+                _headerTitle,
                 maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                       fontSize: 20.0,
@@ -949,37 +1070,7 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
                   ),
                 ),
               )
-            : showCerrarCotizacion
-                ? SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 8.0, 20.0, 12.0),
-                      child: FFButtonWidget(
-                        onPressed: _isClosingQuote ? null : _closeQuote,
-                        text: _isClosingQuote
-                            ? 'Cerrando…'
-                            : 'Cerrar solicitud de cotización',
-                        options: FFButtonOptions(
-                          width: double.infinity,
-                          height: 43.0,
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          textStyle: GoogleFonts.publicSans(
-                            color: FlutterFlowTheme.of(context).primary,
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          elevation: 0.0,
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(24.0),
-                        ),
-                      ),
-                    ),
-                  )
-                : null,
+            : null,
         body: Stack(
           children: [
             wrapWithModel(
@@ -990,99 +1081,113 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
             Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                _buildHeader(),
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Acción pendiente del cliente: va primero para que
-                          // no quede tapada por el detalle de la visita.
-                          if (_pendingExtraMaterials != null)
-                            _extraMaterialsBanner(),
-                          _labeledSection(
-                              'Dirección exacta', _readOnlyBox(_exactAddress)),
-                          _labeledSection('Fecha', _dateField()),
-                          _labeledSection('Instrucciones para llegar',
-                              _readOnlyBox(_arrivalInstructions)),
-                          _labeledSection('Instrucciones para ingresar',
-                              _readOnlyBox(_entryInstructions)),
-                          _labeledSection(
-                            'Trabajos consistentes en:',
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (_categoryLabel.isNotEmpty) ...[
-                                  Text(
-                                    'Categoría:\n$_categoryLabel',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(),
-                                          letterSpacing: 0.0,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 12.0),
-                                ],
-                                if (_workDescription.isNotEmpty) ...[
-                                  Text(
-                                    'Descripción:\n$_workDescription',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(),
-                                          letterSpacing: 0.0,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 12.0),
-                                ],
-                                _photosRow(),
-                              ],
-                            ),
-                          ),
-                          if (_hasSavings) _savingsBanner(),
-                          _labeledSection('Debe tener listo:',
-                              _readOnlyBox(_mustHaveReady)),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 21.0, 0.0, 0.0),
-                            // Regla de renderizado del asociado: con perfil de
-                            // persona va la tarjeta de seguridad; asignado sin
-                            // perfil (proveedor empresa) va el aviso de
-                            // proveedor asignado; y si nadie tomó el trabajo
-                            // ("Pendiente"), el placeholder de búsqueda.
-                            child: !_hasAssociatePersonProfile
-                                ? (_associateAssigned
-                                    ? _assignedProviderPlaceholder()
-                                    : _searchingAssociatePlaceholder())
-                                : wrapWithModel(
-                                    model: _model.dHCLIENTProveedorCardModel,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: DHCLIENTProveedorCardWidget(
-                                      isAssigned: true,
-                                      roleLabel: 'Dovia Home Associate',
-                                      fullName: _associateName.isNotEmpty
-                                          ? _associateName
-                                          : 'Nombre Apellido',
-                                      age: _associateAge,
-                                      avatarUrl: _associateAvatar,
-                                      phoneNumber: _associatePhone,
-                                      advisorId: _associateId,
-                                      about: _associateAbout,
-                                      showDownloadId: true,
-                                      idDocumentUrl: _associateIdDoc,
+                  child: StatusBarClip(
+                      child: Scrollbar(
+                          controller: _scrollController,
+                          thumbVisibility: true,
+                          child: SingleChildScrollView(
+                            controller: _scrollController,
+                            child: Column(children: [
+                              _buildHeader(),
+                              Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    20.0, 0.0, 20.0, 20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Acción pendiente del cliente: va primero para que
+                                    // no quede tapada por el detalle de la visita.
+                                    if (_pendingExtraMaterials != null)
+                                      _extraMaterialsBanner(),
+                                    _serviceSummaryCard(),
+                                    _detailsCard(),
+                                    _workCard(),
+                                    if (_hasSavings) _savingsBanner(),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 21.0, 0.0, 0.0),
+                                      // Regla de renderizado del asociado: con perfil de
+                                      // persona va la tarjeta de seguridad; asignado sin
+                                      // perfil (proveedor empresa) va el aviso de
+                                      // proveedor asignado; y si nadie tomó el trabajo
+                                      // ("Pendiente"), el placeholder de búsqueda.
+                                      child: !_hasAssociatePersonProfile
+                                          ? (_associateAssigned
+                                              ? _assignedProviderPlaceholder()
+                                              : _searchingAssociatePlaceholder())
+                                          : wrapWithModel(
+                                              model: _model
+                                                  .dHCLIENTProveedorCardModel,
+                                              updateCallback: () =>
+                                                  safeSetState(() {}),
+                                              child:
+                                                  DHCLIENTProveedorCardWidget(
+                                                isAssigned: true,
+                                                roleLabel:
+                                                    'Dovia Home Associate',
+                                                fullName:
+                                                    _associateName.isNotEmpty
+                                                        ? _associateName
+                                                        : 'Nombre Apellido',
+                                                age: _associateAge,
+                                                avatarUrl: _associateAvatar,
+                                                phoneNumber: _associatePhone,
+                                                advisorId: _associateId,
+                                                about: _associateAbout,
+                                                showDownloadId: true,
+                                                idDocumentUrl: _associateIdDoc,
+                                              ),
+                                            ),
                                     ),
-                                  ),
-                          ),
-                          const SizedBox(height: 20.0),
-                        ],
-                      ),
-                    ),
-                  ),
+                                    // Cerrar la cotización va al final del contenido,
+                                    // no fija sobre la pantalla.
+                                    if (showCerrarCotizacion)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 24.0),
+                                        child: FFButtonWidget(
+                                          onPressed: _isClosingQuote
+                                              ? null
+                                              : _closeQuote,
+                                          text: _isClosingQuote
+                                              ? 'Cerrando…'
+                                              : 'Cerrar solicitud de cotización',
+                                          options: FFButtonOptions(
+                                            width: double.infinity,
+                                            height: 43.0,
+                                            color: Colors.white,
+                                            textStyle: GoogleFonts.publicSans(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            elevation: 0.0,
+                                            borderSide: BorderSide(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                              width: 1.0,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(24.0),
+                                          ),
+                                        ),
+                                      ),
+                                    // Termina sobre los botones de Android.
+                                    SizedBox(
+                                        height: 20.0 +
+                                            MediaQuery.viewPaddingOf(context)
+                                                .bottom),
+                                  ],
+                                ),
+                              ),
+                            ]),
+                          ))),
                 ),
               ],
             ),

@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/category_picker.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/service_catalog.dart';
@@ -430,7 +431,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -438,6 +440,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       title: DHCLIENTInstalacionWidget.serviceTitle,
                       showCurrency: false,
                       showMap: false,
@@ -801,7 +804,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

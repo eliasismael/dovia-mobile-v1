@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -418,7 +419,8 @@ class _DHCLIENTFueraDeAlcanceWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -426,6 +428,9 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
+                      showMap: false,
+                      showCurrency: false,
                       title: 'Fuera de alcance',
                     ),
                   ),
@@ -797,7 +802,7 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

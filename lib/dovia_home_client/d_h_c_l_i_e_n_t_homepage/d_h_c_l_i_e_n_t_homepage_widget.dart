@@ -1,3 +1,5 @@
+import '/dovia_home_client/pending_payment.dart';
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/subscription_renewal_notice.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
@@ -359,6 +361,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// hay una visita tomada por un asociado pendiente de confirmar. Al volver
   /// refresca el Dashboard.
   void _openVisitDetail(Map<String, dynamic> data) {
+    // Sin pagar: se retoma el cobro, no hay visita que mostrar todavía.
+    if (srAwaitsPayment(data)) {
+      openPendingPayment(context, data).then((_) => safeSetState(() {}));
+      return;
+    }
     DHCLIENTCasaAWidget.requestData = data;
     DHCLIENTCasaAWidget.houseName = srHouseName(data);
     final id = srId(data);
@@ -793,6 +800,21 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// El encabezado se pinta siempre que la sección se muestre —igual que
   /// "Visitas Finalizadas"—: tiene que existir en el Dashboard aunque todavía
   /// no haya cotizaciones, si no el cliente no sabe que el espacio está ahí.
+  /// "Ver todo" como el "Ver más" del home de Dovia: texto sin fondo.
+  Widget _verTodoLink(VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Text(
+        'Ver todo',
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+              color: FlutterFlowTheme.of(context).primary,
+              fontSize: 14.0,
+            ),
+      ),
+    );
+  }
+
   Widget _quotesSection(Widget content) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 50.0),
@@ -810,24 +832,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                       color: FlutterFlowTheme.of(context).primary,
                     ),
               ),
-              FFButtonWidget(
-                onPressed: () {
-                  // Sin solicitud fijada la pantalla lista todas las propuestas
-                  // recibidas por el cliente.
-                  _openProposals(null);
-                },
-                text: 'Ver todo',
-                options: FFButtonOptions(
-                  height: 30.0,
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  color: const Color(0xFFCCE3E4),
-                  textStyle: GoogleFonts.publicSans(
-                      color: FlutterFlowTheme.of(context).primary,
-                      fontSize: 14.0),
-                  borderRadius: BorderRadius.circular(24.0),
-                  elevation: 0,
-                ),
-              ),
+              _verTodoLink(() {
+                // Sin solicitud fijada la pantalla lista todas las propuestas
+                // recibidas por el cliente.
+                _openProposals(null);
+              }),
             ],
           ),
           const SizedBox(height: 12),
@@ -1212,7 +1221,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -1220,6 +1230,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Dovia Home',
@@ -1458,25 +1469,10 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                     color: FlutterFlowTheme.of(context).primary,
                                   ),
                             ),
-                            FFButtonWidget(
-                              onPressed: () {
-                                context.pushNamed(
-                                    DHCLIENTProximasVisitasListaWidget
-                                        .routeName);
-                              },
-                              text: 'Ver todo',
-                              options: FFButtonOptions(
-                                height: 30.0,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                color: const Color(0xFFCCE3E4),
-                                textStyle: GoogleFonts.publicSans(
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    fontSize: 14.0),
-                                borderRadius: BorderRadius.circular(24.0),
-                                elevation: 0,
-                              ),
-                            ),
+                            _verTodoLink(() {
+                              context.pushNamed(
+                                  DHCLIENTProximasVisitasListaWidget.routeName);
+                            }),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -1498,6 +1494,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                               date: '${visit.date} · ${visit.time}',
                               status: visit.status,
                               isEmergency: visit.isEmergency,
+                              icom: srServiceIconAsset(visit.service),
                             ),
                           ),
                         ),
@@ -1560,6 +1557,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                       status: status,
                                       isEmergency: srIsEmergency(data),
                                       showRedDot: status == 'Confirmar',
+                                      icom: srIconAsset(data),
                                     ),
                                   ),
                                 );
@@ -1584,25 +1582,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                     color: FlutterFlowTheme.of(context).primary,
                                   ),
                             ),
-                            FFButtonWidget(
-                              onPressed: () {
-                                context.pushNamed(
-                                    DHCLIENTVisitasFinalizadasListaWidget
-                                        .routeName);
-                              },
-                              text: 'Ver todo',
-                              options: FFButtonOptions(
-                                height: 30.0,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                color: const Color(0xFFCCE3E4),
-                                textStyle: GoogleFonts.publicSans(
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    fontSize: 14.0),
-                                borderRadius: BorderRadius.circular(24.0),
-                                elevation: 0,
-                              ),
-                            ),
+                            _verTodoLink(() {
+                              context.pushNamed(
+                                  DHCLIENTVisitasFinalizadasListaWidget
+                                      .routeName);
+                            }),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -1733,7 +1717,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

@@ -108,6 +108,22 @@ String srServiceIconAsset(String serviceName) {
   }
 }
 
+/// Ícono de la solicitud: el de su servicio; en una cotización, el del
+/// servicio que la originó si el backend lo trae.
+String srIconAsset(Map<String, dynamic> data) {
+  if (srIsQuote(data)) {
+    final detail = data['serviceDetail'];
+    final label = srString(detail is Map ? detail['label'] : null) ??
+        srString(data['serviceName']);
+    return label == null ? kQuoteIconAsset : srServiceIconAsset(label);
+  }
+  return srServiceIconAsset(srServiceName(data));
+}
+
+/// Marca para las cotizaciones sin servicio: la tarjeta pinta un ícono de
+/// cotización en vez de un SVG.
+const String kQuoteIconAsset = 'quote';
+
 /// Fecha de la visita agendada. Null mientras la solicitud no tenga fecha (Ej:
 /// una cotización esperando propuestas). Deliberadamente **no** cae a
 /// `createdAt`: pintar la fecha de creación en el lugar de la fecha de visita
@@ -191,6 +207,15 @@ num? _firstNum(List<dynamic> candidates) {
 /// `status`/`subStatus` de la solicitud: una solicitud puede estar `TAKEN` y
 /// seguir sin pagarse (Ej: se creó en Agenda y el cliente todavía no cobró en
 /// ValorVisita).
+/// Solicitud creada pero sin cobrar: el backend la crea al abrir la pantalla
+/// de pago (necesita su precio) con `subStatus: PAYMENT_PENDING`, y la deja así
+/// hasta que el pago se confirma. Todavía nadie la busca ni la atiende.
+bool srAwaitsPayment(Map<String, dynamic> data) =>
+    (srString(data['status']) ?? '').toUpperCase() == 'PENDING' &&
+    (srString(data['subStatus']) ?? '').toUpperCase() == 'PAYMENT_PENDING';
+
+const String kPaymentPendingStatusLabel = 'Pago pendiente';
+
 bool srIsPaid(Map<String, dynamic> data) {
   final payment = _asMap(data['payment']) ?? _asMap(data['paymentOrder']);
   final status = srString(payment?['status']) ?? '';
@@ -285,6 +310,8 @@ String srFormatAmount(num amount, String currency) {
 String srStatusLabel(Map<String, dynamic> data, Set<String> confirmedIds) {
   final status = (srString(data['status']) ?? 'PENDING').toUpperCase();
   final subStatus = (srString(data['subStatus']) ?? '').toUpperCase();
+
+  if (srAwaitsPayment(data)) return kPaymentPendingStatusLabel;
 
   if (status == 'TAKEN' &&
       srIsConfirmable(data) &&

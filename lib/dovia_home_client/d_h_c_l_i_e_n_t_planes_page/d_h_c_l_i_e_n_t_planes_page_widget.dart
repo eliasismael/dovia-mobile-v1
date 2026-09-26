@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_planes/d_h_c_l_i_e_n_t_planes_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -70,7 +71,8 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -78,6 +80,7 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       showMap: false,
                       showCurrency: false,
                       showSettings: true,
@@ -151,7 +154,7 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

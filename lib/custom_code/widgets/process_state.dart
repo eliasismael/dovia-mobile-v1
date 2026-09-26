@@ -45,107 +45,111 @@ class ProcessState extends StatelessWidget {
     final titles = _titles;
     final count = titles.length;
 
-    return Container(
-      width: width ?? double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Title
-          const Text(
-            'Estado de tu proceso',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: _textDark,
-              letterSpacing: 0.1,
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        width: width ?? double.infinity,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.07),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: 14),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title
+            const Text(
+              'Estado de tu proceso',
+              style: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: _textDark,
+                letterSpacing: 0.1,
+              ),
+            ),
+            const SizedBox(height: 14),
 
-          // Circles + connectors row
-          Row(
-            children: [
-              for (int i = 1; i <= count; i++) ...[
-                _StepCircle(state: _stateOf(i)),
-                if (i < count) _Connector(active: i < currentStep),
-              ],
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // "PASO N" labels row
-          Row(
-            children: [
-              for (int i = 1; i <= count; i++) ...[
-                SizedBox(
-                  width: 72,
-                  child: Text(
-                    'PASO $i',
-                    style: const TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
-                      color: _gray,
+            // Cada paso ocupa el mismo ancho (Expanded) en todas las filas, así
+            // el círculo, el título y la etiqueta quedan alineados aunque un
+            // título ocupe dos líneas. Antes eran anchos fijos de 72 px con
+            // Spacer y los títulos largos se desbordaban.
+            Row(
+              children: [
+                for (int i = 1; i <= count; i++)
+                  Expanded(
+                    child: Row(
+                      children: [
+                        _StepCircle(state: _stateOf(i)),
+                        if (i < count) _Connector(active: i < currentStep),
+                      ],
                     ),
                   ),
-                ),
-                if (i < count) const Spacer(),
               ],
-            ],
-          ),
-          const SizedBox(height: 2),
-
-          // Step title row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (int i = 1; i <= count; i++) ...[
-                SizedBox(
-                  width: 72,
-                  child: Text(
-                    titles[i - 1],
-                    style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 11,
-                      fontWeight: _stateOf(i) == _StepState.pending
-                          ? FontWeight.w400
-                          : FontWeight.w600,
-                      color:
-                          _stateOf(i) == _StepState.pending ? _gray : _textDark,
-                      height: 1.35,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 1; i <= count; i++)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'PASO $i',
+                            style: const TextStyle(
+                              fontFamily: 'Public Sans',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w400,
+                              color: _gray,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            titles[i - 1],
+                            style: TextStyle(
+                              fontFamily: 'Public Sans',
+                              fontSize: 11,
+                              fontWeight: _stateOf(i) == _StepState.pending
+                                  ? FontWeight.w400
+                                  : FontWeight.w600,
+                              color: _stateOf(i) == _StepState.pending
+                                  ? _gray
+                                  : _textDark,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                if (i < count) const Spacer(),
               ],
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Status badges row
-          Row(
-            children: [
-              for (int i = 1; i <= count; i++) ...[
-                _StatusBadge(state: _stateOf(i)),
-                if (i < count) const Spacer(),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                for (int i = 1; i <= count; i++)
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: _StatusBadge(state: _stateOf(i)),
+                    ),
+                  ),
               ],
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -277,7 +281,7 @@ class _StatusBadge extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(6),

@@ -606,6 +606,7 @@ class LegalHqAppointment {
     required this.id,
     required this.scheduledAt,
     this.address = '',
+    this.arrivalInstructions = '',
     this.status = '',
     this.cancelReason = '',
   });
@@ -613,6 +614,7 @@ class LegalHqAppointment {
   final String id;
   final DateTime? scheduledAt;
   final String address;
+  final String arrivalInstructions;
 
   /// `SCHEDULED` | `COMPLETED` | `CANCELLED` | `RESCHEDULED`
   final String status;
@@ -624,6 +626,7 @@ class LegalHqAppointment {
         scheduledAt:
             DateTime.tryParse(json['scheduledAt']?.toString() ?? '')?.toLocal(),
         address: json['address']?.toString() ?? '',
+        arrivalInstructions: json['arrivalInstructions']?.toString() ?? '',
         status: json['status']?.toString() ?? '',
         cancelReason: json['cancelReason']?.toString() ?? '',
       );
@@ -1078,18 +1081,26 @@ const Color _badgeBlueText = Color(0xFF065EDA);
 /// Etiqueta y colores del "Estado actual" que muestra cada tarjeta.
 LegalHqStatusStyle legalHqStatusStyle(String status) {
   switch (status) {
+    // Las etapas del Legal Associate se nombran igual que en su pantalla: antes
+    // todas decían "En revisión" y parecía que ya le tocaba a Legal HQ.
     case 'NOT_STARTED':
       return const LegalHqStatusStyle(
-          'Pendiente de revisión', _badgeYellowBg, _badgeYellowText);
+          'Sin iniciar', _badgeYellowBg, _badgeYellowText);
     case 'IN_PROGRESS':
+      return const LegalHqStatusStyle(
+          'En documentación', _badgeYellowBg, _badgeYellowText);
     case 'DRAFTING':
+      return const LegalHqStatusStyle(
+          'En redacción', _badgeYellowBg, _badgeYellowText);
     case 'MEETING_COORDINATION':
+      return const LegalHqStatusStyle(
+          'Coordinando reunión', _badgeYellowBg, _badgeYellowText);
     case 'MEETING_SCHEDULED':
       return const LegalHqStatusStyle(
-          'En revisión', _badgeYellowBg, _badgeYellowText);
+          'Reunión agendada', _badgeYellowBg, _badgeYellowText);
     case 'LEGAL_HQ_REVIEW':
       return const LegalHqStatusStyle(
-          'Pendiente de revisión', _badgeYellowBg, _badgeYellowText);
+          'Pendiente de tu revisión', _badgeOrangeBg, _badgeOrangeText);
     case 'REJECTED':
       return const LegalHqStatusStyle('Rechazado', _badgeRedBg, _badgeRedText);
     case 'APPROVED':
@@ -1152,6 +1163,14 @@ class LegalHqDocumentProgress {
 const int kDocumentProgressSegments = 5;
 
 LegalHqDocumentProgress legalHqDocumentProgress(LegalHqDocument document) {
+  // El comprobante de pago a DOVIA no pasa por la revisión de Legal HQ: el
+  // backend lo acepta con el proceso ya aprobado y sólo exige que exista para
+  // finalizar. Mostrarlo "en revisión" hacía pensar que faltaba aprobarlo.
+  if (document.type == 'DOVIA_PAYMENT_PROOF') {
+    return document.hasFile
+        ? const LegalHqDocumentProgress('Cargado por el cliente', 5)
+        : const LegalHqDocumentProgress('Pendiente de carga', 1);
+  }
   if (document.hqReviewDecision == 'approved') {
     return const LegalHqDocumentProgress('Aprobado', 5);
   }
@@ -1164,7 +1183,7 @@ LegalHqDocumentProgress legalHqDocumentProgress(LegalHqDocument document) {
     case 'approved':
       // Aprobado por el asociado o el Lister HQ, pero el Legal HQ todavía no
       // toma su decisión: sigue en revisión desde su punto de vista.
-      return const LegalHqDocumentProgress('En proceso de revisión', 3);
+      return const LegalHqDocumentProgress('Aprobado por el asociado', 3);
     case 'rejected':
       return const LegalHqDocumentProgress('Rechazado por revisión previa', 3);
     default:

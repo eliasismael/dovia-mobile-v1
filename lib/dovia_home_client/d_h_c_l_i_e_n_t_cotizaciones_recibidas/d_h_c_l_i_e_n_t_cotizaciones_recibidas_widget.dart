@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/checkout_launcher.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_agenda/d_h_c_l_i_e_n_t_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_instalacion/d_h_c_l_i_e_n_t_instalacion_widget.dart';
@@ -396,7 +397,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -404,6 +406,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Cotizaciones Recibidas',
@@ -476,7 +479,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

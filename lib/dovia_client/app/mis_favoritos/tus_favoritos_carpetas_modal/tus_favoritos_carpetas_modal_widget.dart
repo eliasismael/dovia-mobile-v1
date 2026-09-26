@@ -6,7 +6,6 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'tus_favoritos_carpetas_modal_model.dart';
 export 'tus_favoritos_carpetas_modal_model.dart';
@@ -414,30 +413,20 @@ class _TusFavoritosCarpetasModalWidgetState
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: _toggleFavorite,
+                                // Igual que el corazón de las tarjetas.
                                 child: Container(
-                                  width: 30.0,
-                                  height: 30.0,
+                                  padding: const EdgeInsets.all(6.0),
                                   decoration: BoxDecoration(
-                                    color: _isFavorite
-                                        ? FlutterFlowTheme.of(context)
-                                            .primaryText
-                                        : null,
+                                    color: const Color(0xFFD0E6E8)
+                                        .withValues(alpha: 0.8),
                                     shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                    ),
                                   ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      _isFavorite
-                                          ? 'assets/images/whiteHeart.svg'
-                                          : 'assets/images/plus.svg',
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.none,
-                                    ),
+                                  child: Icon(
+                                    _isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: const Color(0xFF00444B),
+                                    size: 20.0,
                                   ),
                                 ),
                               ),

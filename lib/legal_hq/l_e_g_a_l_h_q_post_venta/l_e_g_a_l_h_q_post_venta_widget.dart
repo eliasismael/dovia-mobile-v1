@@ -1,3 +1,4 @@
+import '/legal_hq/legal_hq_finish_card.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_hq/l_e_g_a_l_h_q_documento/l_e_g_a_l_h_q_documento_widget.dart';
@@ -284,6 +285,17 @@ class _LEGALHQPostVentaWidgetState extends State<LEGALHQPostVentaWidget> {
               reviewable[index],
             ),
           ),
+
+        if (detail.process.status == 'APPROVED' &&
+            (detail.process.category == 'SALE' ||
+                detail.process.category == 'RENT')) ...[
+          const SizedBox(height: 28.0),
+          LegalHqFinishCard(
+            detail: detail,
+            processId: widget.processId ?? '',
+            onFinished: () => safeSetState(_loadData),
+          ),
+        ],
 
         const SizedBox(height: 30.0),
 

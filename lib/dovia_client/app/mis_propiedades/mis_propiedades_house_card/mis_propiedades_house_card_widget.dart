@@ -88,7 +88,11 @@ class _MisPropiedadesHouseCardWidgetState
     String statusText = 'Pendiente';
     Color statusColor = const Color(0xFFF99032);
     double percent = 0.25;
-    if (isPaused) {
+    if (statusKey == 'SOLD' || statusKey == 'RENTED') {
+      statusText = statusKey == 'SOLD' ? 'Vendida' : 'Rentada';
+      statusColor = const Color(0xFF007376);
+      percent = 1.0;
+    } else if (isPaused) {
       statusText = 'Pausada';
       statusColor = const Color(0xFFE85D75);
       percent = 1.0;

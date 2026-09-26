@@ -588,6 +588,12 @@ class _SignInWidgetState extends State<SignInWidget> {
                               );
 
                               if ((_model.apiResultbr7?.succeeded ?? true)) {
+                                // El inicio de sesión se apila sobre esta
+                                // pantalla, que sigue viva: sin esto, al
+                                // cerrar sesión volvía con el correo y la
+                                // contraseña del usuario anterior escritos.
+                                _model.correoInputTextController?.clear();
+                                _model.passwordInputTextController?.clear();
                                 final idToken = DOVIAAPIAuthContextGroup
                                     .signInNEWCall
                                     .idToken(

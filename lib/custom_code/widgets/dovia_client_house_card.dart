@@ -283,9 +283,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                             _isFavorite
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            color: _isFavorite
-                                ? Colors.red
-                                : const Color(0xFF00444B),
+                            color: const Color(0xFF00444B),
                             size: 20,
                           ),
                         ),

@@ -112,12 +112,14 @@ class _LegalProcess {
 /// Carousel 1: New assignments (not started yet)
 const _kNewStatuses = 'NOT_STARTED';
 
-/// Carousel 2: In progress (all active statuses)
+/// Carousel 2: In progress (all active statuses). APPROVED sigue abierto:
+/// falta el comprobante de pago a DOVIA y finalizar el trámite.
 const _kInProgressStatuses =
-    'IN_PROGRESS,DRAFTING,MEETING_COORDINATION,MEETING_SCHEDULED,LEGAL_HQ_REVIEW,REJECTED';
+    'IN_PROGRESS,DRAFTING,MEETING_COORDINATION,MEETING_SCHEDULED,LEGAL_HQ_REVIEW,REJECTED,APPROVED';
 
-/// Carousel 3: Completed
-const _kCompletedStatuses = 'APPROVED,FINISHED';
+/// Carousel 3: Completed — sólo trámites finalizados (FINISHED). Antes entraba
+/// también APPROVED y se mostraba "Vendido" sin el pago a DOVIA.
+const _kCompletedStatuses = 'FINISHED';
 
 // ── Main page widget ────────────────────────────────────────────────────────
 
@@ -145,7 +147,6 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
 
   final _searchController = TextEditingController();
   String _query = '';
-  String? _startingId;
 
   // ── Colors (from existing codebase) ───────────────────────────────────────
 
@@ -332,7 +333,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                           const SizedBox(height: 14.0),
                           _buildFutureCarousel<_LegalProcess>(
                             future: _newAssignmentsFuture,
-                            height: 164.0,
+                            height: 158.0,
                             emptyMessage: 'No tienes nuevas asignaciones',
                             cardBuilder: (process) =>
                                 _buildAssignedCard(context, process),
@@ -356,7 +357,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                           const SizedBox(height: 14.0),
                           _buildFutureCarousel<_LegalProcess>(
                             future: _inProgressFuture,
-                            height: 155.0,
+                            height: 136.0,
                             emptyMessage: 'No tienes procesos en curso',
                             cardBuilder: (process) => _buildPropertyCard(
                               context,
@@ -383,7 +384,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                           const SizedBox(height: 14.0),
                           _buildFutureCarousel<_LegalProcess>(
                             future: _completedFuture,
-                            height: 155.0,
+                            height: 136.0,
                             emptyMessage: 'Aún no tienes procesos completados',
                             cardBuilder: (process) => _buildPropertyCard(
                               context,
@@ -528,102 +529,138 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
 
   // ── Carousel 1: Assigned property card ────────────────────────────────────
 
+  // ── Tarjetas ──────────────────────────────────────────────────────────────
+
+  static const List<BoxShadow> _cardShadow = [
+    BoxShadow(
+      color: Color(0x14000000),
+      blurRadius: 10.0,
+      offset: Offset(0.0, 3.0),
+    ),
+  ];
+
+  /// Marco común: blanco, esquinas redondeadas y sombra suave. Deja margen
+  /// vertical para que la sombra no quede cortada por el carrusel.
+  Widget _cardFrame({required Widget child, VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16.0),
+          child: Container(
+            width: 290.0,
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: _cardShadow,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _cardTitle(_LegalProcess process) => Text(
+        process.name.isNotEmpty
+            ? process.name
+            : _propertyTypeLabel(process.propertyType),
+        style: GoogleFonts.publicSans(
+          color: _textDark,
+          fontSize: 15.0,
+          fontWeight: FontWeight.w600,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+
+  Widget _cardLine(IconData icon, String text) => Row(
+        children: [
+          Icon(icon, size: 14.0, color: _aqua),
+          const SizedBox(width: 4.0),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.publicSans(
+                color: const Color(0xFF6A6A6A),
+                fontSize: 12.5,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+
   Widget _buildAssignedCard(BuildContext context, _LegalProcess process) {
     final formattedDate = _formatDate(process.createdAt);
     final formattedTime = _formatTime(process.createdAt);
 
-    return Container(
-      width: 280.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      padding: const EdgeInsets.all(10.0),
+    return _cardFrame(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Property image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: _buildPropertyImage(process.imageUrl),
-          ),
-          const SizedBox(width: 14.0),
-          // Text column
+          // Sólo con fotos subidas: sin foto no se inventa una casa genérica.
+          if (process.imageUrl.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: _buildPropertyImage(process.imageUrl),
+            ),
+            const SizedBox(width: 12.0),
+          ],
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Dirección: ${process.address.isNotEmpty ? process.address : 'Sin dirección'}',
-                  style: GoogleFonts.publicSans(
-                    color: _aqua,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.normal,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                _cardTitle(process),
                 const SizedBox(height: 4.0),
-                Text(
-                  formattedDate,
-                  style: GoogleFonts.publicSans(
-                    color: _textDark,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  'Hora: $formattedTime',
-                  style: GoogleFonts.publicSans(
-                    color: _textDark,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.normal,
-                  ),
+                _cardLine(
+                  Icons.location_on_outlined,
+                  process.address.isNotEmpty
+                      ? process.address
+                      : 'Sin dirección',
                 ),
                 const SizedBox(height: 2.0),
-                // Commission highlighted ("Podrás ganar: X")
+                _cardLine(
+                    Icons.event_outlined, '$formattedDate · $formattedTime'),
+                const SizedBox(height: 6.0),
                 Text(
                   'Podrás ganar: ${_formatCommission(process.commission)}',
                   style: GoogleFonts.publicSans(
                     color: _aqua,
-                    fontSize: 15.0,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8.0),
-                // "Iniciar Proceso" button
                 SizedBox(
                   width: double.infinity,
-                  height: 29.0,
+                  height: 32.0,
                   child: ElevatedButton(
-                    onPressed: _startingId != null
-                        ? null
-                        : () => _startProcess(process),
+                    onPressed: () => _openProcess(process),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _aqua,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.0),
-                        side: const BorderSide(color: _aqua),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     ),
-                    child: _startingId == process.id
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
-                          )
-                        : Text(
-                            'Iniciar Proceso',
-                            style: GoogleFonts.publicSans(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
+                    child: Text(
+                      'Ver detalles',
+                      style: GoogleFonts.publicSans(
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -634,23 +671,9 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
     );
   }
 
-  /// Marca el trámite como iniciado y abre el paso a paso legal.
-  Future<void> _startProcess(_LegalProcess process) async {
-    safeSetState(() => _startingId = process.id);
-    final res = await DOVIAAPILegalProcessContextGroup.startLegalProcessCall
-        .call(processId: process.id, authToken: currentAuthenticationToken);
-    if (!mounted) return;
-    safeSetState(() => _startingId = null);
-    if (!res.succeeded) {
-      final msg = getJsonField(res.jsonBody, r'$.message')?.toString();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(msg != null && msg.isNotEmpty
-            ? msg
-            : 'No se pudo iniciar el proceso'),
-        backgroundColor: Colors.red,
-      ));
-      return;
-    }
+  /// Abre el detalle del trámite. Iniciarlo es una decisión que se toma ahí,
+  /// después de ver el acuerdo y los documentos.
+  Future<void> _openProcess(_LegalProcess process) async {
     await context.pushNamed(
       LEGALASSOCIATEProcesos2Widget.routeName,
       queryParameters: {
@@ -668,7 +691,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
     _LegalProcess process, {
     required bool isCompleted,
   }) {
-    return GestureDetector(
+    return _cardFrame(
       onTap: isCompleted
           ? () {
               // Open the read-only history / final PDFs for this deal
@@ -685,71 +708,37 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
               );
             }
           : null,
-      child: Container(
-        width: 280.0,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        padding: const EdgeInsets.all(10.0),
-        child: Row(
-          children: [
-            // Property image
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Sólo con fotos subidas: sin foto no se inventa una casa genérica.
+          if (process.imageUrl.isNotEmpty) ...[
             ClipRRect(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(12.0),
               child: _buildPropertyImage(process.imageUrl),
             ),
-            const SizedBox(width: 14.0),
-            // Text column
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    process.name.isNotEmpty
-                        ? process.name
-                        : (process.address.isNotEmpty
-                            ? process.address
-                            : _propertyTypeLabel(process.propertyType)),
-                    style: GoogleFonts.publicSans(
-                      color: _textDark,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    'Descripción:',
-                    style: GoogleFonts.publicSans(
-                      color: _aqua,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  Text(
-                    process.description.isNotEmpty
-                        ? process.description
-                        : _categoryLabel(process.category),
-                    style: GoogleFonts.publicSans(
-                      color: _aqua,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.normal,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10.0),
-                  // Status badge
-                  _buildStatusBadge(
-                      process.status, process.category, isCompleted),
-                ],
-              ),
-            ),
+            const SizedBox(width: 12.0),
           ],
-        ),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _cardTitle(process),
+                const SizedBox(height: 4.0),
+                _cardLine(
+                    Icons.sell_outlined, _categoryLabel(process.category)),
+                if (process.address.isNotEmpty) ...[
+                  const SizedBox(height: 2.0),
+                  _cardLine(Icons.location_on_outlined, process.address),
+                ],
+                const SizedBox(height: 10.0),
+                _buildStatusBadge(
+                    process.status, process.category, isCompleted),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -760,21 +749,21 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
     if (imageUrl.isNotEmpty) {
       return Image.network(
         imageUrl,
-        width: 72.0,
-        height: 96.0,
+        width: 80.0,
+        height: 92.0,
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => Image.asset(
           'assets/images/casa_card_sobreMiVisita.png',
-          width: 72.0,
-          height: 96.0,
+          width: 80.0,
+          height: 92.0,
           fit: BoxFit.cover,
         ),
       );
     }
     return Image.asset(
       'assets/images/casa_card_sobreMiVisita.png',
-      width: 72.0,
-      height: 96.0,
+      width: 80.0,
+      height: 92.0,
       fit: BoxFit.cover,
     );
   }
@@ -816,6 +805,11 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
           bgColor = _badgeOrangeBg;
           textColor = _badgeOrangeText;
           break;
+        case 'APPROVED':
+          label = 'Aprobado – falta finalizar';
+          bgColor = _badgeYellowBg;
+          textColor = _badgeYellowText;
+          break;
         case 'REJECTED':
           label = 'Rechazado – corregir';
           bgColor = _badgeOrangeBg;
@@ -830,19 +824,19 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
     }
 
     return Container(
-      width: double.infinity,
-      height: 23.0,
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(100.0),
       ),
-      alignment: Alignment.center,
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: GoogleFonts.publicSans(
           color: textColor,
-          fontSize: 14.0,
-          fontWeight: FontWeight.normal,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

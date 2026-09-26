@@ -223,19 +223,79 @@ class _LEGALASSOCIATEProcesos2WidgetState
   Future<void> _delete(LegalHqDocument doc) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar documento'),
-        content: Text('¿Eliminar "${doc.fileName}"? Podés volver a cargarlo '
-            'después.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar')),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child:
-                  const Text('Eliminar', style: TextStyle(color: Colors.red))),
-        ],
+      barrierColor: const Color(0x99000000),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.white,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.delete_outline,
+                    color: Colors.red, size: 24),
+              ),
+              const SizedBox(height: 12),
+              _text('Eliminar documento',
+                  size: 17, weight: FontWeight.w700, align: TextAlign.center),
+              const SizedBox(height: 8),
+              _text(
+                '¿Eliminar "${doc.fileName}"? Podés volver a cargarlo '
+                'después.',
+                size: 14,
+                color: const Color(0xFF6A6A6A),
+                align: TextAlign.center,
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 42,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: _primary),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24)),
+                        ),
+                        child: _text('Cancelar',
+                            color: _primary, weight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 42,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24)),
+                        ),
+                        child: _text('Eliminar',
+                            color: Colors.white, weight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
     if (ok != true) return;
@@ -258,6 +318,17 @@ class _LEGALASSOCIATEProcesos2WidgetState
     _load();
   }
 
+  Future<void> _uploadInto(LegalHqDocument doc) => _uploadWith(
+        (file) => DOVIAAPILegalProcessContextGroup
+            .uploadLegalProcessDocumentCall
+            .call(
+          processId: _processId,
+          documentId: doc.id,
+          authToken: currentAuthenticationToken,
+          file: file,
+        ),
+      );
+
   Future<void> _uploadCustomDocument() => _uploadWith(
         (file) => DOVIAAPILegalProcessContextGroup
             .createLegalProcessDocumentCall
@@ -267,6 +338,23 @@ class _LEGALASSOCIATEProcesos2WidgetState
           file: file,
         ),
       );
+
+  /// Toma el trámite (NOT_STARTED -> IN_PROGRESS) y recarga la pantalla, que
+  /// pasa a habilitar la revisión y carga de documentos.
+  Future<void> _startOnly() async {
+    safeSetState(() => _continuing = true);
+    final start = await DOVIAAPILegalProcessContextGroup.startLegalProcessCall
+        .call(processId: _processId, authToken: currentAuthenticationToken);
+    if (!mounted) return;
+    safeSetState(() => _continuing = false);
+    if (!start.succeeded) {
+      _snack(_backendMessage(start, 'No se pudo iniciar el proceso'),
+          error: true);
+      return;
+    }
+    _snack('Proceso iniciado');
+    await _load();
+  }
 
   /// Pasa el trámite a "En redacción". El backend exige que todos los
   /// documentos requeridos o cargados estén marcados como correctos.
@@ -458,42 +546,6 @@ class _LEGALASSOCIATEProcesos2WidgetState
     return _detail?.process.rejectionReasons ?? const [];
   }
 
-  Future<void> _reuploadRejected() async {
-    final rejected = _rejectedDocuments;
-    if (rejected.isEmpty) {
-      _snack('No hay documentos rechazados para volver a cargar');
-      return;
-    }
-    var doc = rejected.first;
-    if (rejected.length > 1) {
-      final picked = await showDialog<LegalHqDocument>(
-        context: context,
-        builder: (ctx) => SimpleDialog(
-          title: const Text('¿Qué documento vas a volver a cargar?'),
-          children: [
-            for (final d in rejected)
-              SimpleDialogOption(
-                onPressed: () => Navigator.pop(ctx, d),
-                child: Text(d.label),
-              ),
-          ],
-        ),
-      );
-      if (picked == null) return;
-      doc = picked;
-    }
-    await _uploadWith(
-      (file) =>
-          DOVIAAPILegalProcessContextGroup.uploadLegalProcessDocumentCall.call(
-        processId: _processId,
-        documentId: doc.id,
-        authToken: currentAuthenticationToken,
-        file: file,
-      ),
-      ok: 'Documento corregido cargado',
-    );
-  }
-
   Future<void> _resubmitToHq() async {
     final blocking = (_detail?.documents ?? const <LegalHqDocument>[])
         .where((d) => d.status == 'rejected' || d.status == 'missing')
@@ -509,26 +561,9 @@ class _LEGALASSOCIATEProcesos2WidgetState
     await _run(
       () => DOVIAAPILegalProcessContextGroup.resubmitToHQReviewCall
           .call(processId: _processId, authToken: currentAuthenticationToken),
-      ok: 'Reenviado a Legal HQ',
-      fail: 'No se pudo reenviar a Legal HQ',
+      ok: 'Le avisamos a Legal HQ de los cambios',
+      fail: 'No se pudo notificar a Legal HQ',
     );
-  }
-
-  /// Cierra el trámite aprobado. El backend exige el comprobante de pago a
-  /// DOVIA, que sube el cliente desde su app.
-  Future<void> _finish() async {
-    if (!(_detail?.hasPaymentProof ?? false)) {
-      _snack('Falta que el cliente cargue el comprobante de pago a DOVIA',
-          error: true);
-      return;
-    }
-    final ok = await _run(
-      () => DOVIAAPILegalProcessContextGroup.finishLegalProcessCall
-          .call(processId: _processId, authToken: currentAuthenticationToken),
-      ok: 'Proceso finalizado. Avisamos al cliente y al propietario.',
-      fail: 'No se pudo finalizar el proceso',
-    );
-    if (ok && mounted) context.safePop();
   }
 
   // ── Contacto ──────────────────────────────────────────────────────────────
@@ -638,6 +673,24 @@ class _LEGALASSOCIATEProcesos2WidgetState
 
   // Paso 1 — Pendiente de cláusulas.
   Widget _buildClauses(LegalHqProcessDetail d) {
+    // Sin iniciar: el backend rechaza cargar o validar documentos y avanzar
+    // (sólo acepta IN_PROGRESS o REJECTED). Se muestra la información para
+    // decidir y la única acción posible es tomar el trámite.
+    if (d.process.status == 'NOT_STARTED') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildAgreement(d.agreement),
+          const SizedBox(height: 20),
+          _buildBanner('Iniciá el proceso para empezar a revisar y cargar la '
+              'documentación.'),
+          const SizedBox(height: 16),
+          _buildDocuments(d.documents, editable: false),
+          const SizedBox(height: 20),
+          _primaryButton('Iniciar proceso', _startOnly),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -661,7 +714,31 @@ class _LEGALASSOCIATEProcesos2WidgetState
           align: TextAlign.center,
         ),
         const SizedBox(height: 10),
-        _primaryButton('Continuar', _advanceToDrafting),
+        // Igual que el backend: todos los requeridos y todos los cargados
+        // tienen que estar aprobados para pasar a redacción.
+        Builder(builder: (context) {
+          final pending = d.documents
+              .where((doc) =>
+                  (doc.required_ || doc.hasFile) && doc.status != 'approved')
+              .length;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _primaryButton(
+                  'Continuar', pending == 0 ? _advanceToDrafting : null),
+              if (pending > 0) ...[
+                const SizedBox(height: 8),
+                _text(
+                  'Para avanzar, marcá como correctos todos los documentos '
+                  '($pending pendiente${pending == 1 ? '' : 's'}).',
+                  size: 12,
+                  color: const Color(0xFF8A8A8A),
+                  align: TextAlign.center,
+                ),
+              ],
+            ],
+          );
+        }),
       ],
     );
   }
@@ -937,14 +1014,45 @@ class _LEGALASSOCIATEProcesos2WidgetState
         ),
         const SizedBox(height: 16),
         _sectionLabel('Documentos'),
-        _uploadStrip('Volver a cargar documento', actions: [
-          _stripIcon(
-              Icons.upload, 'Volver a cargar documento', _reuploadRejected),
-        ]),
-        const SizedBox(height: 16),
-        _buildDocuments(_filedDocuments(d), editable: false, showStatus: true),
+        _text(
+          'Volvé a subir sólo los documentos rechazados. Los que Legal HQ ya '
+          'aprobó no hace falta tocarlos.',
+          size: 12,
+          color: const Color(0xFF8A8A8A),
+        ),
+        const SizedBox(height: 12),
+        _buildDocuments(_filedDocuments(d),
+            editable: false, showStatus: true, correcting: true),
         const SizedBox(height: 24),
-        _primaryButton('Reenviar a Legal HQ', _resubmitToHq),
+        // Este paso sólo existe con el proceso rechazado, así que el botón
+        // nunca aparece antes del primer rechazo. Se habilita con la misma
+        // regla del backend: ningún documento rechazado ni sin cargar.
+        Builder(builder: (context) {
+          final pending = d.documents
+              .where((doc) =>
+                  doc.status == 'rejected' ||
+                  doc.status == 'missing' ||
+                  doc.hqReviewDecision == 'rejected')
+              .length;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _primaryButton('Notificar cambios a Legal HQ',
+                  pending == 0 ? _resubmitToHq : null),
+              const SizedBox(height: 8),
+              _text(
+                pending == 0
+                    ? 'Legal HQ recibirá un aviso para revisar los documentos '
+                        'corregidos.'
+                    : 'Debés reemplazar todos los documentos que Legal HQ '
+                        'rechazó ($pending pendiente${pending == 1 ? '' : 's'}).',
+                size: 12,
+                color: const Color(0xFF8A8A8A),
+                align: TextAlign.center,
+              ),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -962,13 +1070,15 @@ class _LEGALASSOCIATEProcesos2WidgetState
           [
             // En APPROVED el backend no deja cargar documentos al asociado:
             // el único que falta, el comprobante de pago, lo sube el cliente.
+            // Legal HQ revisa el comprobante de pago y es quien finaliza.
             _buildBanner(finished
                 ? 'El trámite está finalizado.'
                 : d.hasPaymentProof
-                    ? 'El cliente ya cargó el comprobante de pago. Revisá los '
-                        'documentos y finalizá el proceso.'
+                    ? 'El cliente ya cargó el comprobante de pago. Legal HQ lo '
+                        'va a revisar y finalizar el proceso.'
                     : 'Legal HQ aprobó el trámite. Falta que el cliente cargue '
-                        'el comprobante de pago a DOVIA para poder finalizarlo.'),
+                        'el comprobante de pago a DOVIA; después Legal HQ lo '
+                        'revisa y finaliza el proceso.'),
             const SizedBox(height: 12),
             _buildDocuments(_filedDocuments(d), editable: false),
           ],
@@ -976,11 +1086,6 @@ class _LEGALASSOCIATEProcesos2WidgetState
         if (d.meetingNotes.isNotEmpty) ...[
           const SizedBox(height: 8),
           _meetingNotesAccordion(d),
-        ],
-        if (!finished) ...[
-          const SizedBox(height: 32),
-          _primaryButton('Finalizar proceso y notificar',
-              d.hasPaymentProof ? _finish : null),
         ],
       ],
     );
@@ -1292,6 +1397,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
     List<LegalHqDocument> docs, {
     required bool editable,
     bool? showStatus,
+    bool correcting = false,
   }) {
     if (docs.isEmpty) {
       return _text('Todavía no hay documentos cargados.',
@@ -1309,7 +1415,9 @@ class _LEGALASSOCIATEProcesos2WidgetState
             SizedBox(
               width: w,
               child: _docCard(d,
-                  editable: editable, showStatus: showStatus ?? editable),
+                  editable: editable,
+                  showStatus: showStatus ?? editable,
+                  correcting: correcting),
             ),
         ],
       );
@@ -1320,13 +1428,24 @@ class _LEGALASSOCIATEProcesos2WidgetState
     LegalHqDocument d, {
     required bool editable,
     required bool showStatus,
+    bool correcting = false,
   }) {
-    final (Color bar, String label) = switch (d.status) {
-      'approved' => (_primary, 'Correcto'),
-      'rejected' => (Colors.red, editable ? 'Observado' : 'Rechazado'),
-      'submitted' => (const Color(0xFFF5A700), 'Por revisar'),
-      _ => (const Color(0xFFBDBDBD), 'Falta cargar'),
-    };
+    // Corrección: lo que manda es la decisión de Legal HQ. Rechazado se vuelve
+    // a subir; aprobado ya no se toca; lo re-subido espera la nueva revisión.
+    final rejectedByHq =
+        d.hqReviewDecision == 'rejected' || d.status == 'rejected';
+    final (Color bar, String label) = correcting
+        ? (rejectedByHq
+            ? (Colors.red, 'Rechazado por Legal HQ')
+            : d.hqReviewDecision == 'approved'
+                ? (_primary, 'Aprobado por Legal HQ')
+                : (const Color(0xFFF5A700), 'Corregido, por revisar'))
+        : switch (d.status) {
+            'approved' => (_primary, 'Correcto'),
+            'rejected' => (Colors.red, editable ? 'Observado' : 'Rechazado'),
+            'submitted' => (const Color(0xFFF5A700), 'Por revisar'),
+            _ => (const Color(0xFFBDBDBD), 'Falta cargar'),
+          };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1346,11 +1465,6 @@ class _LEGALASSOCIATEProcesos2WidgetState
                       : _text(d.hasFile ? (d.isPdf ? 'PDF' : 'Imagen') : '—',
                           color: d.hasFile ? Colors.white : _textDark),
                 ),
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: _docMenu(d, editable: editable),
-                ),
               ],
             ),
           ),
@@ -1366,130 +1480,209 @@ class _LEGALASSOCIATEProcesos2WidgetState
           const SizedBox(height: 2),
           _text(label, size: 11, color: bar),
         ],
+        if (correcting && rejectedByHq && d.note.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          _text(d.note, size: 11.5, color: Colors.red),
+        ],
+        if (correcting && rejectedByHq) ...[
+          const SizedBox(height: 8),
+          _docAction(Icons.upload_file_outlined, 'Subir corregido', Colors.red,
+              () => _uploadInto(d)),
+        ],
+        // Todas las acciones a la vista (antes estaban en un menú "⋮"). Ver y
+        // descargar abren el mismo archivo, así que queda uno solo.
+        const SizedBox(height: 8),
+        if (d.hasFile)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _docAction(
+                  Icons.visibility_outlined, 'Ver', _primary, () => _open(d)),
+              if (editable && d.status != 'approved')
+                _docAction(Icons.check_circle_outline, 'Correcto', _primary,
+                    () => _review(d, true)),
+              if (editable && d.status != 'rejected')
+                _docAction(Icons.report_gmailerrorred_outlined, 'Observar',
+                    const Color(0xFFD97706), () => _review(d, false)),
+              if (editable)
+                _docAction(Icons.delete_outline, 'Eliminar', Colors.red,
+                    () => _delete(d)),
+            ],
+          )
+        else if (editable)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _docAction(Icons.upload_file_outlined, 'Cargar', _primary,
+                  () => _uploadInto(d)),
+            ],
+          ),
       ],
     );
   }
 
-  Widget _docMenu(LegalHqDocument d, {required bool editable}) {
-    return PopupMenuButton<String>(
-      tooltip: 'Opciones',
-      icon: Container(
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(4),
+  /// Acción de la tarjeta: botón de ancho completo, una debajo de la otra.
+  Widget _docAction(
+      IconData icon, String label, Color color, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: SizedBox(
+        height: 32,
+        child: TextButton.icon(
+          onPressed: _busyDocId != null ? null : onTap,
+          icon: Icon(icon, size: 16, color: color),
+          label: _text(label, size: 12, color: color, weight: FontWeight.w600),
+          style: TextButton.styleFrom(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            backgroundColor: color.withValues(alpha: 0.08),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
         ),
-        child: const Icon(Icons.more_vert, size: 18, color: Colors.white),
       ),
-      onSelected: (v) {
-        switch (v) {
-          case 'ver':
-          case 'descargar':
-            _open(d);
-          case 'aprobar':
-            _review(d, true);
-          case 'observar':
-            _review(d, false);
-          case 'eliminar':
-            _delete(d);
-        }
-      },
-      itemBuilder: (_) => [
-        if (d.hasFile) ...[
-          const PopupMenuItem(value: 'ver', child: Text('Ver')),
-          const PopupMenuItem(value: 'descargar', child: Text('Descargar')),
-          if (editable) ...[
-            if (d.status != 'approved')
-              const PopupMenuItem(
-                  value: 'aprobar', child: Text('Marcar como correcto')),
-            if (d.status != 'rejected')
-              const PopupMenuItem(
-                  value: 'observar', child: Text('Pedir corrección')),
-            const PopupMenuItem(
-                value: 'eliminar',
-                child: Text('Eliminar', style: TextStyle(color: Colors.red))),
-          ],
-        ] else
-          const PopupMenuItem(
-              enabled: false, child: Text('Todavía no se cargó')),
-      ],
     );
   }
 
   Widget _buildParties(LegalHqProcessDetail d) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildParty('Información de propietario', d.owner),
+          _buildParty('Propietario', d.owner),
           const SizedBox(height: 12),
-          _buildParty('Información de cliente', d.client),
+          _buildParty('Cliente', d.client),
         ],
       );
 
   Widget _buildParty(String title, LegalHqParty p) {
+    final initials = p.nameLabel
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .take(2)
+        .map((w) => w[0].toUpperCase())
+        .join();
+
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFF8FC1C3)),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: _pill,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: _text(title, size: 13, color: _primary),
+          // Cabecera: iniciales, nombre y rol.
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF007376),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  initials.isEmpty ? '?' : initials,
+                  style: GoogleFonts.publicSans(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _text(p.nameLabel, weight: FontWeight.w700, size: 16),
+                    const SizedBox(height: 2),
+                    _text(title, size: 12, color: const Color(0xFF6A6A6A)),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          _text(p.nameLabel,
-              weight: FontWeight.w700, size: 16, align: TextAlign.center),
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
+          const Divider(height: 1, color: Color(0xFFEDEFEF)),
+          const SizedBox(height: 12),
           Row(children: [
-            Expanded(child: _text('Sexo: ${p.genderLabel}', size: 13)),
-            Expanded(
-                child: _text('Nacionalidad: ${p.nationalityLabel}', size: 13)),
+            Expanded(child: _partyField('Sexo', p.genderLabel)),
+            Expanded(child: _partyField('Edad', p.ageLabel)),
           ]),
-          const SizedBox(height: 4),
+          const SizedBox(height: 10),
           Row(children: [
-            Expanded(child: _text('Edad: ${p.ageLabel}', size: 13)),
-            Expanded(child: _text('Teléfono: ${p.phoneLabel}', size: 13)),
+            Expanded(child: _partyField('Nacionalidad', p.nationalityLabel)),
+            Expanded(child: _partyField('Teléfono', p.phoneLabel)),
           ]),
           if (p.phone.isNotEmpty) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _call(p),
-                    icon: const Icon(Icons.call, size: 18, color: _primary),
-                    label: _text('Llamar', color: _primary, size: 13),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: _primary),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24)),
-                    ),
+                  child: _partyAction(
+                    icon: Icons.call_outlined,
+                    label: 'Llamar',
+                    filled: false,
+                    onTap: () => _call(p),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _whatsapp(p),
-                    icon: const Icon(Icons.chat, size: 18, color: _primary),
-                    label: _text('WhatsApp', color: _primary, size: 13),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: _primary),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24)),
-                    ),
+                  child: _partyAction(
+                    icon: Icons.chat_outlined,
+                    label: 'WhatsApp',
+                    filled: true,
+                    onTap: () => _whatsapp(p),
                   ),
                 ),
               ],
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  /// Dato de la persona: etiqueta chica gris y valor debajo.
+  Widget _partyField(String label, String value) => Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _text(label, size: 11.5, color: const Color(0xFF8A8A8A)),
+            const SizedBox(height: 2),
+            _text(value, size: 13.5, weight: FontWeight.w500),
+          ],
+        ),
+      );
+
+  Widget _partyAction({
+    required IconData icon,
+    required String label,
+    required bool filled,
+    required VoidCallback onTap,
+  }) {
+    final fg = filled ? Colors.white : _primary;
+    return SizedBox(
+      height: 40,
+      child: TextButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 18, color: fg),
+        label: _text(label, color: fg, size: 13, weight: FontWeight.w600),
+        style: TextButton.styleFrom(
+          backgroundColor: filled ? _primary : const Color(0x1A007376),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        ),
       ),
     );
   }
@@ -1504,21 +1697,83 @@ class _LEGALASSOCIATEProcesos2WidgetState
     final controller = TextEditingController();
     return showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(hintText: hint),
+      barrierColor: const Color(0x99000000),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.white,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+          child: StatefulBuilder(
+            builder: (ctx, setLocal) => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _text(title, size: 17, weight: FontWeight.w700),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  maxLines: 3,
+                  onChanged: (_) => setLocal(() {}),
+                  style: GoogleFonts.publicSans(fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: GoogleFonts.publicSans(
+                        fontSize: 14, color: const Color(0xFF9A9A9A)),
+                    filled: true,
+                    fillColor: const Color(0xFFF3F5F5),
+                    contentPadding: const EdgeInsets.all(12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: _primary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 42,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: _primary),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24)),
+                          ),
+                          child: _text('Cancelar',
+                              color: _primary, weight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: SizedBox(
+                        height: 42,
+                        child: ElevatedButton(
+                          // Sin texto no hay nada que enviar.
+                          onPressed: controller.text.trim().isEmpty
+                              ? null
+                              : () =>
+                                  Navigator.pop(ctx, controller.text.trim()),
+                          style: _buttonStyle(),
+                          child: _text(action,
+                              color: Colors.white, weight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar')),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-              child: Text(action)),
-        ],
       ),
     );
   }
@@ -1681,14 +1936,40 @@ class _ScheduleMeetingDialogState extends State<_ScheduleMeetingDialog> {
       initialDate: _date ?? now,
       firstDate: DateTime(now.year, now.month, now.day),
       lastDate: now.add(const Duration(days: 365)),
+      builder: _doviaPickerTheme,
     );
     if (picked != null) setState(() => _date = picked);
   }
+
+  /// Calendario y reloj con los colores de Dovia en vez del azul de Material.
+  Widget _doviaPickerTheme(BuildContext context, Widget? child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF007376),
+            onPrimary: Colors.white,
+            onSurface: Color(0xFF00444B),
+            surface: Colors.white,
+          ),
+          dialogTheme: DialogThemeData(
+            backgroundColor: Colors.white,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF007376),
+              textStyle: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+        child: child!,
+      );
 
   Future<void> _pickTime() async {
     final picked = await showTimePicker(
       context: context,
       initialTime: _time ?? const TimeOfDay(hour: 10, minute: 0),
+      builder: _doviaPickerTheme,
     );
     if (picked != null) setState(() => _time = picked);
   }

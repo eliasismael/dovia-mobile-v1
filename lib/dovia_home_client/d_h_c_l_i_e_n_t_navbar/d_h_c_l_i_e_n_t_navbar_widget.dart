@@ -29,8 +29,9 @@ class _DHCLIENTNavbarWidgetState extends State<DHCLIENTNavbarWidget> {
   late DHCLIENTNavbarModel _model;
 
   /// Alto total: la barra más lo que el botón central sobresale por arriba.
-  static const double _barHeight = 70.0;
-  static const double _totalHeight = 92.0;
+  // Mismo alto que la barra de Dovia común.
+  static const double _barHeight = 62.0;
+  static const double _totalHeight = 84.0;
 
   @override
   void setState(VoidCallback callback) {
@@ -167,14 +168,20 @@ class _DHCLIENTNavbarWidgetState extends State<DHCLIENTNavbarWidget> {
           Container(
             width: 56.0,
             height: 56.0,
+            // Degradé y sombra más marcada: se distingue del
+            // resto de la barra en vez de ser un círculo verde plano.
             decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).primary,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF0A8A8D), Color(0xFF00444B)],
+              ),
               shape: BoxShape.circle,
               boxShadow: const [
                 BoxShadow(
-                  blurRadius: 10.0,
-                  color: Color(0x33007376),
-                  offset: Offset(0.0, 4.0),
+                  blurRadius: 14.0,
+                  color: Color(0x5500444B),
+                  offset: Offset(0.0, 5.0),
                 )
               ],
             ),
@@ -232,13 +239,14 @@ class _DHCLIENTNavbarWidgetState extends State<DHCLIENTNavbarWidget> {
                       offset: Offset(0.0, 2.0),
                     )
                   ],
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(24.0),
                 ),
                 child: Padding(
                   padding:
                       const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       _navItem(
                         asset: 'assets/images/IconoCasaLLave.svg',

@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -590,7 +591,8 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -598,6 +600,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       title: 'Dovia Home',
                       showMap: false,
                       showCurrency: false,
@@ -636,7 +639,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                       color: Colors.white,
-                                      fontSize: 17.0,
+                                      fontSize: 15.0,
                                     ),
                               ),
                             ),
@@ -652,7 +655,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                       color: const Color(0xFF00444B),
                                       fontWeight: FontWeight.w600,
                                     ),
-                                    fontSize: 24.0,
+                                    fontSize: 20.0,
                                     lineHeight: 1.36,
                                   ),
                             ),
@@ -669,7 +672,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                       color: const Color(0xFF00444B),
                                       fontWeight: FontWeight.normal,
                                     ),
-                                    fontSize: 16.0,
+                                    fontSize: 14.0,
                                   ),
                             ),
                           ),
@@ -688,7 +691,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                       .override(
                                         font: GoogleFonts.publicSans(),
                                         color: const Color(0xFF00444B),
-                                        fontSize: 16.0,
+                                        fontSize: 14.0,
                                         letterSpacing: 0.32,
                                       ),
                                 ),
@@ -747,7 +750,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                       color: const Color(0xFF00444B),
-                                      fontSize: 17.0,
+                                      fontSize: 15.0,
                                       letterSpacing: 0.34,
                                     ),
                               ),
@@ -767,7 +770,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                                         color: const Color(0xFF00444B),
                                         fontWeight: FontWeight.normal,
                                       ),
-                                      fontSize: 16.0,
+                                      fontSize: 14.0,
                                     ),
                               ),
                             ),
@@ -1188,7 +1191,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

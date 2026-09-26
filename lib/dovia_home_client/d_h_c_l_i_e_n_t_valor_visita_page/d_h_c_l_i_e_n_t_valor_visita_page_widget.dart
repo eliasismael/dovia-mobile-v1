@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/subscription_renewal_notice.dart';
 import '/core/result.dart';
 import '/domain/payment_models.dart';
@@ -947,7 +948,8 @@ class _DHCLIENTValorVisitaPageWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -955,6 +957,7 @@ class _DHCLIENTValorVisitaPageWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
                       title: 'Valor de la visita',
                       hideActions: true,
                     ),
@@ -1025,7 +1028,7 @@ class _DHCLIENTValorVisitaPageWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

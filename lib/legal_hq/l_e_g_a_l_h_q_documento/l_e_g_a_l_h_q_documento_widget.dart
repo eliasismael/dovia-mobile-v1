@@ -1,3 +1,4 @@
+import '/backend/api_requests/api_dovia_home.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
@@ -71,6 +72,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => LEGALHQDocumentoModel());
+    _loadProcessStatus();
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
@@ -140,6 +142,28 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                           if (widget.readOnly) ...[
                             const SizedBox(height: 16.0),
                             _buildReadOnlyNotice(context),
+                          ] else if (!_statusLoaded) ...[
+                            const SizedBox(height: 16.0),
+                            const Center(
+                              child: SizedBox(
+                                width: 22.0,
+                                height: 22.0,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  color: _aqua,
+                                ),
+                              ),
+                            ),
+                          ] else if (_awaitingSubmission) ...[
+                            const SizedBox(height: 16.0),
+                            _buildNotSubmittedNotice(),
+                          ] else if ((_hqDecision != null || _processClosed) &&
+                              !_changingDecision) ...[
+                            const SizedBox(height: 16.0),
+                            _buildDecisionState(),
+                          ] else if (_changingDecision) ...[
+                            const SizedBox(height: 16.0),
+                            _buildRejectionForm(context),
                           ] else ...[
                             const SizedBox(height: 16.0),
                             _buildDecisionButtons(context),
@@ -302,6 +326,138 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
     );
   }
 
+  /// Estado del proceso. El backend sólo acepta decisiones de Legal HQ en
+  /// LEGAL_HQ_REVIEW o REJECTED: antes, el Legal Associate tiene que iniciar
+  /// el proceso, juntar los documentos y enviarlo a revisión.
+  String? _processStatus;
+
+  /// Hasta saber el estado no se muestran ni los botones ni el aviso: si no,
+  /// los botones aparecen un instante y después los reemplaza el aviso.
+  bool _statusLoaded = false;
+
+  Future<void> _loadProcessStatus() async {
+    final id = widget.processId ?? '';
+    if (id.isEmpty) {
+      safeSetState(() => _statusLoaded = true);
+      return;
+    }
+    final detail = await LegalHqProcessApi.fetchDetail(id);
+    if (!mounted) return;
+    String? decision;
+    for (final doc in detail?.documents ?? const <LegalHqDocument>[]) {
+      if (doc.id == widget.documentId) {
+        decision = doc.hqReviewDecision;
+        break;
+      }
+    }
+    safeSetState(() {
+      _processStatus = detail?.process.status;
+      _hqDecision = (decision ?? '').isEmpty ? null : decision;
+      _statusLoaded = true;
+    });
+  }
+
+  /// Decisión que ya tomó Legal HQ sobre este documento (`approved` /
+  /// `rejected`), o null si todavía no lo revisó.
+  String? _hqDecision;
+
+  /// El backend deja pasar un documento aprobado a rechazado (Ej: fue un
+  /// error) mientras el proceso siga en revisión o rechazado. Lo inverso no:
+  /// un rechazado sólo se destraba con un archivo nuevo del asociado.
+  bool _changingDecision = false;
+
+  bool get _processClosed =>
+      _processStatus == 'APPROVED' || _processStatus == 'FINISHED';
+
+  Widget _plainNotice(String text) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14.0),
+        decoration: BoxDecoration(
+          color: const Color(0x2670ACAD),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Text(
+          text,
+          style: GoogleFonts.publicSans(
+            color: _textDark,
+            fontSize: 13.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+
+  Widget _buildDecisionState() {
+    if (_processClosed) {
+      return _plainNotice('El proceso ya fue aprobado: las decisiones sobre '
+          'sus documentos quedaron cerradas.');
+    }
+    if (_hqDecision == 'rejected') {
+      return _plainNotice('Rechazaste este documento. El Legal Associate tiene '
+          'que volver a subirlo corregido para que puedas revisarlo de nuevo.');
+    }
+    // Aprobado.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _plainNotice('Ya aprobaste este documento.'),
+        const SizedBox(height: 12.0),
+        SizedBox(
+          height: 44.0,
+          child: OutlinedButton(
+            onPressed: () => safeSetState(() {
+              _changingDecision = true;
+              _isRejecting = true;
+            }),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: _red),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24.0)),
+            ),
+            child: Text(
+              'Me equivoqué, rechazarlo',
+              style: GoogleFonts.publicSans(
+                color: _red,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  bool get _awaitingSubmission {
+    final status = _processStatus;
+    return status != null &&
+        status != 'LEGAL_HQ_REVIEW' &&
+        status != 'REJECTED' &&
+        status != 'APPROVED' &&
+        status != 'FINISHED';
+  }
+
+  Widget _buildNotSubmittedNotice() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E8),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Text(
+        'Podrás aprobar o rechazar este documento cuando el proceso '
+        'esté "Pendiente de tu revisión". Ahora está '
+        '"${legalHqStatusStyle(_processStatus ?? '').label}": el Legal '
+        'Associate todavía no lo envió a revisión de Legal HQ.',
+        style: GoogleFonts.publicSans(
+          color: const Color(0xFF8A4B0B),
+          fontSize: 13.0,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   // ── Aprobar / Rechazar ────────────────────────────────────────────────────
 
   Widget _buildDecisionButtons(BuildContext context) {
@@ -314,9 +470,10 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
           child: _decisionButton(
             label: 'Aprobar',
             icon: Icons.check_circle_outline,
-            background: blocked ? _disabledGrey : _aqua,
-            foreground: blocked ? _disabledText : Colors.white,
+            background: blocked ? _aqua.withValues(alpha: 0.35) : _aqua,
+            foreground: Colors.white,
             onPressed: blocked ? null : _approveDocument,
+            loading: _approving,
           ),
         ),
         const SizedBox(width: 12.0),
@@ -324,8 +481,8 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
           child: _decisionButton(
             label: 'Rechazar',
             icon: Icons.highlight_off,
-            background: _isSubmitting ? _disabledGrey : _red,
-            foreground: _isSubmitting ? _disabledText : Colors.white,
+            background: blocked ? _red.withValues(alpha: 0.35) : _red,
+            foreground: Colors.white,
             onPressed:
                 blocked ? null : () => safeSetState(() => _isRejecting = true),
           ),
@@ -340,6 +497,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
     required Color background,
     required Color foreground,
     required VoidCallback? onPressed,
+    bool loading = false,
   }) {
     return SizedBox(
       height: 44.0,
@@ -358,7 +516,15 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18.0, color: foreground),
+            if (loading)
+              SizedBox(
+                width: 16.0,
+                height: 16.0,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2.0, color: foreground),
+              )
+            else
+              Icon(icon, size: 18.0, color: foreground),
             const SizedBox(width: 8.0),
             Flexible(
               child: Text(
@@ -394,9 +560,15 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
           ),
         ),
         const SizedBox(height: 6.0),
+        // Quien corrige es quien carga los documentos del proceso: el Listing
+        // HQ en publicaciones y el Legal Associate en ventas y rentas (el
+        // backend le avisa a él, no al propietario).
         Text(
-          'Le indicaremos al propietario que deberá revisar las observaciones '
-          'y volver a subir el documento corregido.',
+          _isPublication
+              ? 'Le avisaremos al Listing HQ para que revise las observaciones '
+                  'y vuelva a subir el documento corregido.'
+              : 'Le avisaremos al Legal Associate para que revise las '
+                  'observaciones y vuelva a subir el documento corregido.',
           style: GoogleFonts.publicSans(
             color: _aqua,
             fontSize: 12.0,
@@ -468,7 +640,10 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
               ? null
               : () {
                   _model.textController?.clear();
-                  safeSetState(() => _isRejecting = false);
+                  safeSetState(() {
+                    _isRejecting = false;
+                    _changingDecision = false;
+                  });
                 },
           child: Text(
             'Cancelar',
@@ -485,9 +660,18 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
 
   // ── Acciones ──────────────────────────────────────────────────────────────
 
+  /// Aprobación en curso: el botón muestra un spinner desde el toque hasta
+  /// que aparece el popup de resultado.
+  bool _approving = false;
+
   Future<void> _approveDocument() async {
+    safeSetState(() => _approving = true);
     final result = await _submitDecision(status: 'approved');
-    if (result == null || !mounted) return;
+    if (!mounted) return;
+    if (result == null) {
+      safeSetState(() => _approving = false);
+      return;
+    }
 
     // El backend recalcula el estado del proceso a partir de las decisiones de
     // todos los documentos: solo cuando quedan todos aprobados pasa a APPROVED.
@@ -495,6 +679,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
     if (!mounted) return;
 
     final processApproved = detail?.process.status == 'APPROVED';
+    safeSetState(() => _approving = false);
     await _showResultPopup(
       title: 'Se aprobó con éxito',
       text: processApproved
@@ -544,14 +729,22 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
     );
 
     if (!mounted) return null;
-    safeSetState(() => _isSubmitting = false);
 
+    // Con éxito los botones siguen bloqueados hasta que el popup devuelve al
+    // expediente: si se liberaban acá, volvían un instante a su color fuerte.
     if (!response.succeeded) {
+      safeSetState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(status == 'approved'
-              ? 'No se pudo aprobar el documento'
-              : 'No se pudo enviar el rechazo'),
+          // El motivo del backend (Ej: el proceso no está en revisión o no
+          // está asignado a este Legal HQ) dice qué hacer; el genérico no.
+          content: Text([
+            status == 'approved'
+                ? 'No se pudo aprobar el documento'
+                : 'No se pudo enviar el rechazo',
+            if (doviaHomeErrorMessage(response) != null)
+              doviaHomeErrorMessage(response)!,
+          ].join(': ')),
         ),
       );
       return null;

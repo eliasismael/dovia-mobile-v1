@@ -166,14 +166,20 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
           Container(
             width: 56.0,
             height: 56.0,
+            // Degradé y sombra más marcada: se distingue del
+            // resto de la barra en vez de ser un círculo verde plano.
             decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).primary,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF0A8A8D), Color(0xFF00444B)],
+              ),
               shape: BoxShape.circle,
               boxShadow: const [
                 BoxShadow(
-                  blurRadius: 10.0,
-                  color: Color(0x33007376),
-                  offset: Offset(0.0, 4.0),
+                  blurRadius: 14.0,
+                  color: Color(0x5500444B),
+                  offset: Offset(0.0, 5.0),
                 )
               ],
             ),

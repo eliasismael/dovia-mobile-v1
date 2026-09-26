@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_e_problema_enviado/d_h_c_l_i_e_n_t_e_problema_enviado_widget.dart';
@@ -318,7 +319,8 @@ class _DHCLIENTReportarProblemaWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -326,6 +328,8 @@ class _DHCLIENTReportarProblemaWidgetState
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
+                      showMap: false,
                       showNotifications: true,
                       showSettings: true,
                       // Título de pantalla en plural, como el diseño (el botón
@@ -388,7 +392,7 @@ class _DHCLIENTReportarProblemaWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

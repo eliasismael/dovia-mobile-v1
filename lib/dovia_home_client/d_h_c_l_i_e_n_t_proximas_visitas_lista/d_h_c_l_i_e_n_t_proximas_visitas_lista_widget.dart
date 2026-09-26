@@ -1,3 +1,4 @@
+import '/dovia_home_client/pending_payment.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
@@ -183,6 +184,11 @@ class _DHCLIENTProximasVisitasListaWidgetState
   /// Abre el detalle de la solicitud en **modo consulta** (solo lectura). Sin
   /// botón "Aceptar" y sin edición de campos: es estrictamente un registro.
   void _openDetail(Map<String, dynamic> data) {
+    // Sin pagar: se retoma el cobro, no hay visita que mostrar todavía.
+    if (srAwaitsPayment(data)) {
+      openPendingPayment(context, data).then((_) => safeSetState(() {}));
+      return;
+    }
     DHCLIENTCasaAWidget.requestData = data;
     DHCLIENTCasaAWidget.houseName = srHouseName(data);
     // Modo consulta: este listado es un registro, no el flujo de confirmación,
@@ -315,8 +321,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
                                         status: status,
                                         isEmergency: srIsEmergency(data),
                                         showRedDot: status == 'Confirmar',
-                                        icom: srServiceIconAsset(
-                                            srServiceName(data)),
+                                        icom: srIconAsset(data),
                                       ),
                                     ),
                                   );
@@ -365,7 +370,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 12.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 34.0, 20.0, 12.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,

@@ -23,6 +23,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showNotifications = false,
     this.showSettings = false,
     this.onChatTap,
+    this.topPadding = 42.0,
   }) : title = title ?? '[title]';
 
   final String title;
@@ -45,6 +46,10 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   /// soporte de DOVIA; las pantallas donde el interlocutor es otro (Ej: el
   /// asociado que está en la casa del cliente) lo redirigen con este parámetro.
   final VoidCallback? onChatTap;
+
+  /// Margen superior del header. Dovia Home lo usa más bajo para quedar a
+  /// la altura del resto de la app.
+  final double topPadding;
 
   @override
   State<DOVIASHAREDHeaderWidget> createState() =>
@@ -78,7 +83,8 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+      padding:
+          EdgeInsetsDirectional.fromSTEB(20.0, widget.topPadding, 20.0, 0.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

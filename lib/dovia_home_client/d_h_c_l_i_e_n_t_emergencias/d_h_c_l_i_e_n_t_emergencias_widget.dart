@@ -1,3 +1,4 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/category_picker.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/service_catalog.dart';
@@ -10,7 +11,6 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -153,59 +153,102 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
   }
 
   Widget _buildPhotoThumbnails() {
+    final photos = _model.uploadedPhotos;
+    final columns = (photos.length + 1).clamp(1, 4);
+    const spacing = 8.0;
+
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-      child: Wrap(
-        spacing: 10.0,
-        runSpacing: 10.0,
-        children: List.generate(_model.uploadedPhotos.length, (index) {
-          final photo = _model.uploadedPhotos[index];
-          return Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: photo.bytes != null
-                    ? Image.memory(
-                        photo.bytes!,
-                        width: 90.0,
-                        height: 90.0,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: 90.0,
-                        height: 90.0,
-                        color: FlutterFlowTheme.of(context).alternate,
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+      child: LayoutBuilder(builder: (context, constraints) {
+        final tileWidth =
+            (constraints.maxWidth - spacing * (columns - 1)) / columns;
+        final tileHeight = tileWidth.clamp(0.0, 160.0);
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (var index = 0; index < photos.length; index++)
+              SizedBox(
+                width: tileWidth,
+                height: tileHeight,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: photos[index].bytes != null
+                            ? Image.memory(
+                                photos[index].bytes!,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                color: FlutterFlowTheme.of(context).alternate,
+                              ),
                       ),
-              ),
-              Positioned(
-                top: 4.0,
-                right: 4.0,
-                child: InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () =>
-                      safeSetState(() => _model.uploadedPhotos.removeAt(index)),
-                  child: Container(
-                    width: 22.0,
-                    height: 22.0,
-                    decoration: const BoxDecoration(
-                      color: Color(0xCC000000),
-                      shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 16.0,
+                    Positioned(
+                      top: 4.0,
+                      right: 4.0,
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () => safeSetState(() => photos.removeAt(index)),
+                        child: Container(
+                          width: 22.0,
+                          height: 22.0,
+                          decoration: const BoxDecoration(
+                            color: Color(0xCC000000),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 16.0,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          );
-        }),
-      ),
+            InkWell(
+              splashColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              onTap: _model.isPhotoUploading ? null : _pickPhotos,
+              child: Container(
+                width: tileWidth,
+                height: tileHeight,
+                decoration: BoxDecoration(
+                  color: const Color(0x2670ACAD),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                alignment: Alignment.center,
+                child: _model.isPhotoUploading
+                    ? SizedBox(
+                        width: 22.0,
+                        height: 22.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            FlutterFlowTheme.of(context).primary,
+                          ),
+                        ),
+                      )
+                    : Icon(
+                        Icons.add,
+                        size: 28.0,
+                        color: FlutterFlowTheme.of(context).primary,
+                      ),
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -226,7 +269,8 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            StatusBarClip(
+                child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -234,12 +278,15 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      topPadding: 58.0,
+                      showMap: false,
+                      showCurrency: false,
                       title: 'Emergencias',
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 0.0, 20.0, 100.0),
+                        20.0, 0.0, 20.0, 150.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,6 +462,7 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 24.0),
                         Align(
                           alignment: const AlignmentDirectional(-1.0, 0.0),
                           child: Text(
@@ -471,51 +519,79 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                           ),
                         ),
                         // Zona de carga de fotografías (opcional).
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 10.0, 0.0, 0.0),
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: _model.isPhotoUploading ? null : _pickPhotos,
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width * 1.0,
-                              height: 104.0,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFAFAFA),
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: _model.isPhotoUploading
-                                  ? SizedBox(
-                                      width: 24.0,
-                                      height: 24.0,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.0,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          FlutterFlowTheme.of(context).primary,
+                        if (_model.uploadedPhotos.isEmpty)
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 10.0, 0.0, 0.0),
+                            child: InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap:
+                                  _model.isPhotoUploading ? null : _pickPhotos,
+                              child: Container(
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                height: 104.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                child: _model.isPhotoUploading
+                                    ? SizedBox(
+                                        width: 24.0,
+                                        height: 24.0,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.0,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            FlutterFlowTheme.of(context)
+                                                .primary,
+                                          ),
                                         ),
+                                      )
+                                    : Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            decoration: const BoxDecoration(
+                                              color: Color(0x2670ACAD),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.add_a_photo_outlined,
+                                              size: 20.0,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8.0),
+                                          Text(
+                                            'Toca para agregar fotos',
+                                            style: GoogleFonts.publicSans(
+                                              fontSize: 13.0,
+                                              fontWeight: FontWeight.w500,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    )
-                                  : SvgPicture.asset(
-                                      'assets/images/AddMediaImage.svg',
-                                      width: 24.0,
-                                      height: 24.0,
-                                      fit: BoxFit.contain,
-                                    ),
+                              ),
                             ),
-                          ),
-                        ),
-                        if (_model.uploadedPhotos.isNotEmpty)
+                          )
+                        else
                           _buildPhotoThumbnails(),
                         Align(
                           alignment: const AlignmentDirectional(0.0, 1.0),
                           child: Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 150.0, 0.0, 0.0),
+                                0.0, 28.0, 0.0, 0.0),
                             child: FFButtonWidget(
                               // Sólo se habilita con el tipo de emergencia y
                               // la descripción cargados.
@@ -587,7 +663,7 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

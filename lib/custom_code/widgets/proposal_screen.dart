@@ -1,3 +1,4 @@
+import '/shared_components/legal_meeting_card/legal_meeting_card_widget.dart';
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
@@ -11,6 +12,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/upload_data.dart';
 import '/flutter_flow/uploaded_file.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
+import '/shared_components/legal_associate_card/legal_associate_card_widget.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 // Force refresh: 2026-05-04 17:15
@@ -601,59 +603,84 @@ class _ProposalScreenState extends State<ProposalScreen> {
             style: TextStyle(fontSize: 12, color: Color(0xFF004D4F)),
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            height: 220,
-            child: FutureBuilder<ApiCallResponse>(
-              future: DOVIAAPIUserContextGroup.listUsersByRoleCall.call(
-                role: 'LEGAL_ASSOCIATE',
-                page: '1',
-                limit: '50',
-                authToken: currentAuthenticationToken,
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
+          FutureBuilder<ApiCallResponse>(
+            future: DOVIAAPIUserContextGroup.listUsersByRoleCall.call(
+              role: 'LEGAL_ASSOCIATE',
+              page: '1',
+              limit: '50',
+              authToken: currentAuthenticationToken,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox(
+                  height: 120,
+                  child: Center(
                     child: CircularProgressIndicator(
                       valueColor:
                           AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
                     ),
-                  );
-                }
-                if (snapshot.hasError ||
-                    !snapshot.hasData ||
-                    !(snapshot.data?.succeeded ?? false)) {
-                  return const Center(
-                      child: Text("Error al cargar los asociados legales."));
-                }
+                  ),
+                );
+              }
+              if (snapshot.hasError ||
+                  !snapshot.hasData ||
+                  !(snapshot.data?.succeeded ?? false)) {
+                // Ya eligió: igual se muestra su asociado con lo que trae
+                // la oferta.
+                if (_associateSubmitted) return _buildChosenAssociate(null);
+                return const SizedBox(
+                  height: 120,
+                  child: Center(
+                      child: Text("Error al cargar los asociados legales.")),
+                );
+              }
 
-                final jsonBody = snapshot.data!.jsonBody;
-                dynamic rawData = jsonBody['data'];
-                if (rawData is String) {
-                  try {
-                    rawData = jsonDecode(rawData);
-                  } catch (_) {}
-                }
-                final List<dynamic> items = List<dynamic>.of(rawData is List
-                    ? rawData
-                    : (rawData is Map
-                        ? rawData['items'] as List<dynamic>? ?? []
-                        : []));
-                bool isTestAssociate(dynamic user) =>
-                    user is Map &&
-                    user['email']?.toString().toLowerCase() ==
-                        _testLegalAssociateEmail;
-                // TEMPORAL: el de pruebas va primero.
-                items.sort((a, b) =>
-                    (isTestAssociate(b) ? 1 : 0) -
-                    (isTestAssociate(a) ? 1 : 0));
+              final jsonBody = snapshot.data!.jsonBody;
+              dynamic rawData = jsonBody['data'];
+              if (rawData is String) {
+                try {
+                  rawData = jsonDecode(rawData);
+                } catch (_) {}
+              }
+              final List<dynamic> items = List<dynamic>.of(rawData is List
+                  ? rawData
+                  : (rawData is Map
+                      ? rawData['items'] as List<dynamic>? ?? []
+                      : []));
+              bool isTestAssociate(dynamic user) =>
+                  user is Map &&
+                  user['email']?.toString().toLowerCase() ==
+                      _testLegalAssociateEmail;
+              // TEMPORAL: el de pruebas va primero.
+              items.sort((a, b) =>
+                  (isTestAssociate(b) ? 1 : 0) - (isTestAssociate(a) ? 1 : 0));
 
-                if (items.isEmpty) {
-                  return const Center(
+              // Ya eligió: sólo su asociado, con la misma tarjeta que ve el
+              // propietario. Las demás opciones ya no aplican.
+              if (_associateSubmitted) {
+                Map? chosen;
+                for (final user in items) {
+                  if (user is Map &&
+                      user['id']?.toString() == _selectedLegalAssociateId) {
+                    chosen = user;
+                    break;
+                  }
+                }
+                return _buildChosenAssociate(chosen);
+              }
+
+              if (items.isEmpty) {
+                return const SizedBox(
+                  height: 120,
+                  child: Center(
                       child: Text(
-                          "No hay asociados disponibles en este momento."));
-                }
+                          "No hay asociados disponibles en este momento.")),
+                );
+              }
 
-                return ListView(
+              return SizedBox(
+                height: 220,
+                child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: items.map((user) {
                     final id = user['id']?.toString();
@@ -680,9 +707,9 @@ class _ProposalScreenState extends State<ProposalScreen> {
                       },
                     );
                   }).toList(),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 24),
           const Text(
@@ -857,34 +884,17 @@ class _ProposalScreenState extends State<ProposalScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSelectedAssociateCard(),
-        const SizedBox(height: 24),
+        // Misma tarjeta del asociado que en el paso anterior.
+        _buildChosenAssociate(null),
+        const SizedBox(height: 20),
         if (!isCompleted && !isContractSigned) ...[
-          _buildMobileField("Firma de acuerdo", "x"),
-          _buildMobileField("Dirección exacta", "x"),
-          const Text(
-            "Fecha",
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF00444B),
-              fontWeight: FontWeight.normal,
-            ),
+          LegalMeetingCardWidget(
+            processId: widget.offerData is Map
+                ? (widget.offerData['legalProcessId'] ??
+                        widget.offerData['legalProcess']?['id'])
+                    ?.toString()
+                : null,
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: _buildMobileSmallField("DD")),
-              const SizedBox(width: 17),
-              Expanded(child: _buildMobileSmallField("MM")),
-              const SizedBox(width: 17),
-              Expanded(child: _buildMobileSmallField("AAAA")),
-            ],
-          ),
-          const SizedBox(height: 18),
-          _buildMobileField("Instrucciones para llegar", "x\nx\nx",
-              isTextArea: true),
-          const SizedBox(height: 5),
-          _buildMobileSecondaryButton("Abrir ubicación"),
           const SizedBox(height: 24),
         ],
         if (isCompleted)
@@ -892,7 +902,27 @@ class _ProposalScreenState extends State<ProposalScreen> {
             isUploading: false,
             onTap: null, // Ya subido
           ),
-        if (!isCompleted && isContractSigned) ...[
+        // El backend sólo acepta el comprobante con el proceso APROBADO por
+        // Legal HQ. "Contrato firmado" llega antes (al enviarlo a revisión),
+        // así que mientras Legal HQ revisa sólo se avisa.
+        if (!isCompleted && isContractSigned && !_legalProcessApproved) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: const Color(0x2670ACAD),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Text(
+              'El contrato firmado está en revisión de Legal HQ. Podrás subir '
+              'el comprobante de pago a Dovia cuando apruebe la documentación.',
+              style: TextStyle(
+                  fontSize: 14, color: Color(0xFF00444B), height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+        if (!isCompleted && isContractSigned && _legalProcessApproved) ...[
           _buildPaymentProofUpload(
             isUploading: _isUploadingPaymentProof,
             onTap: _isUploadingPaymentProof ? null : _uploadPaymentProof,
@@ -1194,96 +1224,6 @@ class _ProposalScreenState extends State<ProposalScreen> {
     );
   }
 
-  Widget _buildMobileField(String label, String placeholder,
-      {bool isTextArea = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.normal,
-            color: Color(0xFF00444B),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          height: isTextArea ? 104 : 42,
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAFAFA),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: isTextArea
-              ? const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("x",
-                        style:
-                            TextStyle(color: Color(0xFF888888), fontSize: 14)),
-                    Text("x",
-                        style:
-                            TextStyle(color: Color(0xFF888888), fontSize: 14)),
-                    Text("x",
-                        style:
-                            TextStyle(color: Color(0xFF888888), fontSize: 14)),
-                  ],
-                )
-              : Text(
-                  placeholder,
-                  style: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 14,
-                  ),
-                ),
-        ),
-        const SizedBox(height: 18),
-      ],
-    );
-  }
-
-  Widget _buildMobileSmallField(String placeholder) {
-    return Container(
-      height: 42,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Center(
-        child: Text(
-          placeholder,
-          style: const TextStyle(
-            color: Color(0xFF888888),
-            fontSize: 15,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMobileSecondaryButton(String text) {
-    return Container(
-      height: 27,
-      width: 134,
-      decoration: BoxDecoration(
-        color: const Color(0x3370ACAD),
-        borderRadius: BorderRadius.circular(65),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Color(0xFF00444B),
-            fontSize: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPaymentProofUpload(
       {required bool isUploading, required VoidCallback? onTap}) {
     return InkWell(
@@ -1337,6 +1277,17 @@ class _ProposalScreenState extends State<ProposalScreen> {
         ),
       ),
     );
+  }
+
+  /// Proceso legal aprobado por Legal HQ: recién ahí el comprador puede subir
+  /// el comprobante de pago a Dovia.
+  bool get _legalProcessApproved {
+    final data = widget.offerData;
+    if (data is! Map) return false;
+    final status = data['legalProcess'] is Map
+        ? data['legalProcess']['status']?.toString().toUpperCase()
+        : null;
+    return status == 'APPROVED';
   }
 
   Widget _buildPaymentNotification() {
@@ -1479,98 +1430,42 @@ class _ProposalScreenState extends State<ProposalScreen> {
     );
   }
 
-  Widget _buildSelectedAssociateCard() {
-    final associate = widget.offerData?['legalAssociate'] ??
-        widget.offerData?['legalProcess']?['legalAssociate'];
-
-    String name = "Nombre Apellido";
-    String phone = "Teléfono";
-    String email = "Mail";
-
-    if (associate != null && associate is Map) {
-      if (associate['fullName'] != null) {
-        if (associate['fullName'] is Map) {
-          name =
-              "${associate['fullName']['name'] ?? ''} ${associate['fullName']['lastname'] ?? ''}"
-                  .trim();
-        } else {
-          name = associate['fullName'].toString();
-        }
-      } else if (associate['name'] != null || associate['lastname'] != null) {
-        name =
-            "${associate['name'] ?? ''} ${associate['lastname'] ?? ''}".trim();
+  /// Asociado ya elegido. Prioriza el perfil que trae la oferta
+  /// (`legalAssociateProfile`, el mismo que usa la pantalla del propietario) y
+  /// completa con el usuario del listado.
+  Widget _buildChosenAssociate(Map? user) {
+    final profile = widget.offerData?['legalAssociateProfile'];
+    String? pick(List<dynamic> values) {
+      for (final v in values) {
+        final text = v?.toString().trim() ?? '';
+        if (text.isNotEmpty && text != 'null') return text;
       }
-      if (name.isEmpty) name = "Nombre Apellido";
-
-      phone = associate['phoneNumber']?.toString() ??
-          associate['phone']?.toString() ??
-          "Teléfono";
-      email = associate['email']?.toString() ?? "Mail";
+      return null;
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(
-          top: 23.9, bottom: 15.9, left: 15.9, right: 15.9),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(5.47),
-        border: Border.all(color: const Color(0xFF007376), width: 0.5),
-      ),
-      child: Column(
-        children: [
-          const CircleAvatar(
-            radius: 49.8,
-            backgroundImage: AssetImage(
-              'assets/images/ae3f449657ae0dc947fdf904e0ea70a030a118f3.png',
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0x3370ACAD),
-              borderRadius: BorderRadius.circular(65),
-            ),
-            child: const Text(
-              "Dovia Legal",
-              style: TextStyle(fontSize: 14, color: Color(0xFF00444B)),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF00444B),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                child: Text(
-                  phone,
-                  style:
-                      const TextStyle(fontSize: 14, color: Color(0xFF00444B)),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  email,
-                  style:
-                      const TextStyle(fontSize: 14, color: Color(0xFF00444B)),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    String? userName;
+    if (user != null) {
+      final fullName = user['fullName'];
+      userName = fullName is Map
+          ? "${fullName['name'] ?? ''} ${fullName['lastname'] ?? ''}".trim()
+          : "${user['name'] ?? ''} ${user['lastname'] ?? ''}".trim();
+    }
+    final profilePhone = profile is Map ? profile['phone'] : null;
+    final phone = profilePhone is Map && profilePhone['number'] != null
+        ? '${profilePhone['countryCode'] ?? ''} ${profilePhone['number']}'
+            .trim()
+        : pick([user?['phoneNumber'], user?['phone']]);
+
+    return LegalAssociateCardWidget(
+      name: pick([profile is Map ? profile['fullName'] : null, userName]) ??
+          'Legal Associate',
+      photoUrl: pick([
+        profile is Map ? profile['avatar'] : null,
+        user?['avatar'],
+        user?['profilePicture'],
+      ]),
+      phone: phone,
+      email: pick([profile is Map ? profile['email'] : null, user?['email']]),
     );
   }
 
@@ -1629,10 +1524,17 @@ class _ProposalScreenState extends State<ProposalScreen> {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFFFAFAFA),
-          borderRadius: BorderRadius.circular(10.7),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x12000000),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           children: [

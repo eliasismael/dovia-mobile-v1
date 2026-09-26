@@ -75,7 +75,6 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                         children: [
                           SizedBox(
                             width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: 250.0,
                             child: custom_widgets.ProcessState(
                               width: MediaQuery.sizeOf(context).width * 1.0,
                               height: 250.0,

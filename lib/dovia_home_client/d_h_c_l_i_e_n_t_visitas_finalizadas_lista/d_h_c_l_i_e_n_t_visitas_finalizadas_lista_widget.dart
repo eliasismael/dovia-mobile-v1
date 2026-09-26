@@ -1,3 +1,4 @@
+import '/dovia_home_client/service_request_fields.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -334,6 +335,7 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
                                         title: _serviceName(data),
                                         date: _formattedDate(data),
                                         status: _statusLabel(data),
+                                        icom: srIconAsset(data),
                                       ),
                                     ),
                                   ),
@@ -381,7 +383,7 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 12.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 34.0, 20.0, 12.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
