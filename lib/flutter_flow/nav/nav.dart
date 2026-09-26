@@ -1,3 +1,4 @@
+import '/auth/registration_progress.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -83,6 +84,14 @@ class AppStateNotifier extends ChangeNotifier {
 /// Home de cada rol. Con la sesión abierta, al abrir o reiniciar la app se
 /// entra al home del rol guardado, igual que al iniciar sesión.
 Widget homeForRole(String role) {
+  // Registro a medias: se retoma donde quedó, no se entra al home.
+  switch (RegistrationProgress.step) {
+    case RegistrationProgress.idAndTerms:
+      RegistrationProgress.resumedAfterRestart = true;
+      return const Datos2Widget();
+    case RegistrationProgress.associateForm:
+      return const FormAssociateWidget();
+  }
   switch (role) {
     case 'SHOWING_AGENT':
       return const SHOWINGHomeWidget();

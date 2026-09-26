@@ -235,6 +235,39 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   }
 
   /// Las propiedades cargadas hasta ahora en el carrusel.
+  /// Recién registrado o con el token recién renovado, la primera consulta
+  /// puede fallar y el carrusel quedaba vacío hasta que algo reconstruía la
+  /// pantalla. Mientras falle se sigue mostrando el spinner y se reintenta.
+  int _carouselRetries = 0;
+  bool _carouselRetryScheduled = false;
+
+  bool _carouselReady(ApiCallResponse response) {
+    if (response.succeeded) return true;
+    if (_carouselRetries >= 6) return true;
+    if (!_carouselRetryScheduled) {
+      _carouselRetryScheduled = true;
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!mounted) return;
+        _carouselRetryScheduled = false;
+        _carouselRetries++;
+        safeSetState(() {});
+      });
+    }
+    return false;
+  }
+
+  Widget _carouselEmpty(String text) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            text,
+            style: GoogleFonts.publicSans(
+                color: const Color(0xFF8A8A8A), fontSize: 13.0),
+          ),
+        ),
+      );
+
   List<dynamic> _carouselPage(String carouselKey, List<dynamic> houses) {
     final loaded = ((_carouselPages[carouselKey] ?? 0) + 1) * _carouselSize;
     return houses.take(loaded).toList();
@@ -1451,7 +1484,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               ),
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData) {
+                                if (!snapshot.hasData ||
+                                    !_carouselReady(snapshot.data!)) {
                                   return Center(
                                     child: SizedBox(
                                       width: 50.0,
@@ -1477,6 +1511,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               r'''$.data''',
                                             ) as List? ??
                                             []);
+                                    if (allHouses.isEmpty) {
+                                      return _carouselEmpty(
+                                          'No hay propiedades nuevas por ahora.');
+                                    }
                                     final eachHouse =
                                         _carouselPage('loNuevo', allHouses);
 
@@ -1626,7 +1664,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               ),
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData) {
+                                if (!snapshot.hasData ||
+                                    !_carouselReady(snapshot.data!)) {
                                   return Center(
                                     child: SizedBox(
                                       width: 50.0,
@@ -1652,6 +1691,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               r'''$.data''',
                                             ) as List? ??
                                             []);
+                                    if (allHouses.isEmpty) {
+                                      return _carouselEmpty(
+                                          'No hay recomendaciones por ahora.');
+                                    }
                                     final eachHouse =
                                         _carouselPage('recomendado', allHouses);
 
@@ -2059,7 +2102,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               ),
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData) {
+                                if (!snapshot.hasData ||
+                                    !_carouselReady(snapshot.data!)) {
                                   return Center(
                                     child: SizedBox(
                                       width: 50.0,
@@ -2085,6 +2129,10 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                               r'''$.data''',
                                             ) as List? ??
                                             []);
+                                    if (allHouses.isEmpty) {
+                                      return _carouselEmpty(
+                                          'Todavía no viste propiedades.');
+                                    }
                                     final eachHouse = _carouselPage(
                                         'vistoRecientemente', allHouses);
 

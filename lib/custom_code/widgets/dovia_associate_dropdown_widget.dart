@@ -36,37 +36,30 @@ class _DoviaAssociateDropdownWidgetState
   static const Color separatorColor = Color(0xFFE9EFF2);
   static const Color arrowColor = Color(0xFF00444B);
 
-  // Track which dropdowns are expanded
-  final List<bool> _expandedStates = [false, false, false, false];
+  // Todas cerradas al entrar; se abren con la flecha.
+  final List<bool> _expandedStates = [false, false, false];
 
-  // Hardcoded items
   static const List<String> _titles = [
-    'DOVIA SHOWING ASSOCIATE',
-    'DOVIA LISTER ASSOCIATE',
-    'DOVIA HOME ASSOCIATE',
-    'DOVIA LEGAL ASSOCIATE',
+    'Enseña propiedades',
+    'Servicios para el hogar',
+    'Servicios legales',
   ];
 
   static const List<List<String>> _descriptions = [
     [
-      'Showing Associate enseña propiedades a potenciales compradores o inquilinos.',
-      'Acepta solo las visitas que desea y gana por cada cierre.',
-      'Forma parte de una red profesional respaldada por DOVIA',
+      'Acompaña a clientes de DOVIA en visitas a propiedades asignadas.',
+      'Participa en el proceso comercial y genera ingresos cuando la transacción se concreta.',
+      'Forma parte de una red profesional respaldada por DOVIA.',
     ],
     [
-      'Lister Associate acompaña al propietario en el proceso de publicación para atraer interesados.',
-      'Realiza visitas y registra información de la propiedad.',
-      'Valida y gestiona información de propiedades.',
+      'Brinda servicios a clientes de DOVIA Home según su especialidad.',
+      'Elige sus asignaciones y genera ingresos por cada servicio completado.',
+      'Forma parte de la red profesional de servicios del hogar de DOVIA.',
     ],
     [
-      'Home Associate atiende servicios y proyectos del hogar según su especialidad.',
-      'Elige sus asignaciones y gana por cada trabajo completado.',
-      'Integra la red profesional de servicios del hogar de DOVIA.',
-    ],
-    [
-      'Legal Associate elabora contratos, acuerdos y documentos cuando una negociación avanza.',
-      'Acepta los casos que desea y gana por cada trabajo completado.',
-      'Opera como parte de la red legal profesional que trabaja junto a DOVIA.',
+      'Apoya a clientes de DOVIA en procesos legales relacionados a propiedades.',
+      'Gestiona contratos, acuerdos y documentación en cada operación.',
+      'Genera ingresos por cada caso o servicio completado. Opera como parte de la red legal profesional verificada de DOVIA.',
     ],
   ];
 
@@ -75,10 +68,8 @@ class _DoviaAssociateDropdownWidgetState
       case 0:
         return widget.onShowingAssociateTap;
       case 1:
-        return widget.onListerAssociateTap;
-      case 2:
         return widget.onHomeAssociateTap;
-      case 3:
+      case 2:
         return widget.onLegalAssociateTap;
       default:
         return null;
@@ -118,9 +109,9 @@ class _DoviaAssociateDropdownWidgetState
         borderRadius: BorderRadius.circular(15),
         child: SingleChildScrollView(
           padding:
-              const EdgeInsets.only(top: 5, bottom: 20, left: 30, right: 30),
+              const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: Column(
-            children: List.generate(4, (index) {
+            children: List.generate(_titles.length, (index) {
               return _buildDropdownItem(index);
             }),
           ),
@@ -163,10 +154,9 @@ class _DoviaAssociateDropdownWidgetState
                         _titles[index],
                         style: const TextStyle(
                           fontFamily: 'Public Sans',
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
-                          height: 14 / 16,
                           letterSpacing: 0,
                         ),
                         textAlign: TextAlign.center,
@@ -208,7 +198,7 @@ class _DoviaAssociateDropdownWidgetState
           crossFadeState:
               isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
           firstChild: Padding(
-            padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+            padding: const EdgeInsets.fromLTRB(4, 10, 4, 6),
             child: _buildDescriptionText(_descriptions[index]),
           ),
           secondChild: const SizedBox.shrink(),
@@ -230,10 +220,10 @@ class _DoviaAssociateDropdownWidgetState
       TextSpan(children: spans),
       style: const TextStyle(
         fontFamily: 'Public Sans',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: FontWeight.w400,
         color: textColor,
-        height: 1.5,
+        height: 1.4,
         letterSpacing: 0,
       ),
     );

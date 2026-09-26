@@ -1,3 +1,5 @@
+import '/auth/registration_progress.dart';
+import '/auth/pending_associate_role.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/backend/schema/enums/enums.dart';
@@ -476,13 +478,13 @@ class _SignInWidgetState extends State<SignInWidget> {
                         ),
                       ),
                       Align(
-                        alignment: const AlignmentDirectional(1.0, 0.0),
+                        alignment: const AlignmentDirectional(0.0, 0.0),
                         child: Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 8.0, 0.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               InkWell(
                                 splashColor: Colors.transparent,
@@ -495,7 +497,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 },
                                 child: Text(
                                   '¿Olvidaste tu contraseña?',
-                                  textAlign: TextAlign.end,
+                                  textAlign: TextAlign.center,
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(
@@ -641,6 +643,49 @@ class _SignInWidgetState extends State<SignInWidget> {
                                   'HQ_ADMIN',
                                 ];
 
+                                if (!context.mounted) return;
+
+                                // Registro a medias: se retoma el paso que
+                                // falta en vez de entrar al home.
+                                final signInBody =
+                                    _model.apiResultbr7?.jsonBody ?? '';
+                                final roleSelected = DOVIAAPIAuthContextGroup
+                                    .signInNEWCall
+                                    .isRoleSelected(signInBody);
+                                if (roleSelected == false) {
+                                  await RegistrationProgress.set(
+                                      RegistrationProgress.idAndTerms);
+                                  RegistrationProgress.resumedAfterRestart =
+                                      true;
+                                  if (!context.mounted) return;
+                                  context.goNamed(Datos2Widget.routeName);
+                                  return;
+                                }
+                                if (associateRoles.contains(userRole)) {
+                                  final profileDone = DOVIAAPIAuthContextGroup
+                                      .signInNEWCall
+                                      .isAssociateProfileComplete(signInBody);
+                                  final verified = DOVIAAPIAuthContextGroup
+                                      .signInNEWCall
+                                      .verified(signInBody);
+                                  final submitted = await RegistrationProgress
+                                      .associateSubmitted(currentUserUid);
+                                  if (!context.mounted) return;
+                                  if (RegistrationProgress.step ==
+                                          RegistrationProgress.associateForm ||
+                                      (profileDone == false &&
+                                          verified != true &&
+                                          !submitted)) {
+                                    FFAppState().UserRole = userRole ?? '';
+                                    await RegistrationProgress.set(
+                                        RegistrationProgress.associateForm);
+                                    if (!context.mounted) return;
+                                    context
+                                        .goNamed(FormAssociateWidget.routeName);
+                                    return;
+                                  }
+                                }
+                                await RegistrationProgress.clear();
                                 if (!context.mounted) return;
 
                                 if (associateRoles.contains(userRole)) {
@@ -893,6 +938,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                                             0.0, 0.0, 6.0, 0.0),
                                     child: Container(
                                       height: 42.0,
+                                      alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFF4F4F4),
                                         borderRadius:
@@ -903,8 +949,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                                             BorderRadius.circular(0.0),
                                         child: SvgPicture.asset(
                                           'assets/images/AppleLogo.svg',
-                                          width: 200.0,
-                                          height: 200.0,
+                                          width: 19.0,
+                                          height: 19.0,
                                           fit: BoxFit.contain,
                                         ),
                                       ),
@@ -918,6 +964,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                                             6.0, 0.0, 6.0, 0.0),
                                     child: Container(
                                       height: 42.0,
+                                      alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFF4F4F4),
                                         borderRadius:
@@ -928,9 +975,9 @@ class _SignInWidgetState extends State<SignInWidget> {
                                             BorderRadius.circular(5.0),
                                         child: SvgPicture.asset(
                                           'assets/images/GoogleLogo.svg',
-                                          width: 13.0,
-                                          height: 13.0,
-                                          fit: BoxFit.none,
+                                          width: 19.0,
+                                          height: 19.0,
+                                          fit: BoxFit.contain,
                                         ),
                                       ),
                                     ),
@@ -943,6 +990,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                                             6.0, 0.0, 0.0, 0.0),
                                     child: Container(
                                       height: 42.0,
+                                      alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFF4F4F4),
                                         borderRadius:
@@ -953,9 +1001,9 @@ class _SignInWidgetState extends State<SignInWidget> {
                                             BorderRadius.circular(0.0),
                                         child: SvgPicture.asset(
                                           'assets/images/FacebookLogo.svg',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.none,
+                                          width: 19.0,
+                                          height: 19.0,
+                                          fit: BoxFit.contain,
                                         ),
                                       ),
                                     ),
@@ -983,8 +1031,11 @@ class _SignInWidgetState extends State<SignInWidget> {
                             const SizedBox(height: 4.0),
                             _footerLink(
                               'Regístrate como usuario',
-                              () => context
-                                  .pushNamed(CreateAccountWidget.routeName),
+                              () {
+                                PendingAssociateRole.clear();
+                                context
+                                    .pushNamed(CreateAccountWidget.routeName);
+                              },
                             ),
                             _footerDivider(),
                             _footerLink('Ingresa como visita', () {
@@ -1017,7 +1068,7 @@ class _SignInWidgetState extends State<SignInWidget> {
         highlightColor: Colors.transparent,
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
+          padding: const EdgeInsets.symmetric(vertical: 6.0),
           child: Text(
             text,
             style: GoogleFonts.publicSans(
@@ -1030,7 +1081,7 @@ class _SignInWidgetState extends State<SignInWidget> {
       );
 
   Widget _footerDivider() => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
+        padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 4.0),
         child: Row(
           children: [
             Expanded(child: Divider(thickness: 1.0, color: Color(0xFFD9D9D9))),

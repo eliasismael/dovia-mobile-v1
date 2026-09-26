@@ -1,3 +1,4 @@
+import '/auth/registration_progress.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -244,6 +245,18 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                     _model.verifyingCode = true;
                                     _model.invalidCode = false;
                                     safeSetState(() {});
+                                    // Retomando un registro a medias: el
+                                    // código se confirma en el formulario de
+                                    // datos, junto con la contraseña.
+                                    if (RegistrationProgress.isResuming(
+                                        FFAppState().UserEmail)) {
+                                      RegistrationProgress.resumeCode =
+                                          _model.pinCodeController!.text;
+                                      _model.verifyingCode = false;
+                                      context.pushNamed(
+                                          DatosCustomWidget.routeName);
+                                      return;
+                                    }
                                     _model.apiResultvj1 =
                                         await DOVIAAPIAuthContextGroup
                                             .verifyCodeStepNEWCall
@@ -414,11 +427,18 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                     _model.codeInfo = null;
                                     safeSetState(() {});
                                     _model.apiResult4de =
-                                        await DOVIAAPIAuthContextGroup
-                                            .resendCodeNEWCall
-                                            .call(
-                                      email: FFAppState().UserEmail,
-                                    );
+                                        RegistrationProgress.isResuming(
+                                                FFAppState().UserEmail)
+                                            ? await DOVIAAPIAuthContextGroup
+                                                .forgotPasswordNEWCall
+                                                .call(
+                                                email: FFAppState().UserEmail,
+                                              )
+                                            : await DOVIAAPIAuthContextGroup
+                                                .resendCodeNEWCall
+                                                .call(
+                                                email: FFAppState().UserEmail,
+                                              );
                                     _model.resendingCode = false;
                                     if (!mounted) return;
                                     if ((_model.apiResult4de?.succeeded ??

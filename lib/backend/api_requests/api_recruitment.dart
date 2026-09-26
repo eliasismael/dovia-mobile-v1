@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'api_manager.dart';
 import 'api_config.dart';
 
@@ -101,15 +103,14 @@ class GetAvailableSlotsCall {
 }
 
 class CreateFirstContactCall {
+  /// [scheduledAt]: fecha y hora de la entrevista en ISO 8601 UTC.
   Future<ApiCallResponse> call({
     String? bearerAuth = '',
+    required String scheduledAt,
   }) async {
     final baseUrl = DoviaAPIRecruitmentGroup.getBaseUrl();
 
-    const ffApiRequestBody = '''
-{
-  "scheduledAt": "2026-02-15T10:00:00Z"
-}''';
+    final ffApiRequestBody = jsonEncode({'scheduledAt': scheduledAt});
     return ApiManager.instance.makeApiCall(
       callName: 'Create First Contact',
       apiUrl: '$baseUrl/recruitment/appointments/first-contact',

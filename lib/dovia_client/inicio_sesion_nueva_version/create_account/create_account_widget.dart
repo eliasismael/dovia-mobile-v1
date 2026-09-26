@@ -1,3 +1,4 @@
+import '/auth/registration_progress.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -455,9 +456,38 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                             )?.toString();
                                             if (errorCode ==
                                                 'PASSWORD_RECOVERY_REQUIRED') {
-                                              _model.signUpError =
-                                                  'Tu cuenta existe pero el registro está incompleto. Recupera tu contraseña para continuar.';
+                                              // Ya verificó el correo pero no
+                                              // completó sus datos. Se le
+                                              // manda un código nuevo (el de
+                                              // recuperación, el único que el
+                                              // backend acepta para un correo
+                                              // confirmado) y sigue como en
+                                              // el registro normal.
+                                              final email =
+                                                  FFAppState().UserEmail;
+                                              final forgot =
+                                                  await DOVIAAPIAuthContextGroup
+                                                      .forgotPasswordNEWCall
+                                                      .call(email: email);
+                                              if (!mounted) return;
+                                              if (!forgot.succeeded) {
+                                                _model.signUpError =
+                                                    'Tu registro quedó incompleto. Recupera tu contraseña para continuar.';
+                                                safeSetState(() {});
+                                                return;
+                                              }
+                                              RegistrationProgress.resumeEmail =
+                                                  email;
+                                              _model.signUpError = null;
                                               safeSetState(() {});
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    'Tu registro quedó a medias. Te enviamos un código para continuar.'),
+                                              ));
+                                              context.pushNamed(
+                                                  CreateAccount2Widget
+                                                      .routeName);
                                               return;
                                             }
                                             if ((_model.response?.statusCode ??

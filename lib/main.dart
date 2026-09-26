@@ -1,3 +1,4 @@
+import '/auth/registration_progress.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ void main() async {
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
+  await RegistrationProgress.load();
 
   runApp(MultiProvider(
     providers: [

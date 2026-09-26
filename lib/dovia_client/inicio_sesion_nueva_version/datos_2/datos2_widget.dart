@@ -1,3 +1,6 @@
+import '/auth/registration_progress.dart';
+import '/backend/api_requests/api_users.dart';
+import '/auth/pending_associate_role.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/components/terminos_y_condiciones_scrolleable_widget.dart';
@@ -30,6 +33,49 @@ class _Datos2WidgetState extends State<Datos2Widget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _enviando = false;
+
+  /// Sólo al retomar el registro después de cerrar la app: correo con el que
+  /// se estaba registrando y opción de empezar con otro.
+  bool _resumed = false;
+  String _resumeEmail = '';
+
+  /// Rol de asociado guardado al elegirlo antes de registrarse; null = cliente.
+  String? _resumeRole;
+
+  static String _roleLabel(String? role) => switch (role) {
+        'SHOWING_AGENT' => 'Showing Associate',
+        'HOME_ASSOCIATE' => 'Home Associate',
+        'LEGAL_ASSOCIATE' => 'Legal Associate',
+        'OPERATIVE_LISTER' => 'Lister Associate',
+        null => 'cliente',
+        _ => 'asociado',
+      };
+
+  Future<void> _loadResumeEmail() async {
+    final role = await PendingAssociateRole.get();
+    if (mounted) safeSetState(() => _resumeRole = role);
+    final res = await DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall
+        .call(authToken: currentAuthenticationToken);
+    final email = res.succeeded
+        ? getJsonField(res.jsonBody, r'$.data.email')?.toString()
+        : null;
+    if (!mounted) return;
+    safeSetState(() => _resumeEmail =
+        (email != null && email.isNotEmpty) ? email : FFAppState().UserEmail);
+  }
+
+  /// Descarta el registro a medias y vuelve a crear la cuenta con otro correo.
+  /// El rol de asociado elegido se conserva: sólo cambia el correo.
+  Future<void> _registerWithOtherEmail({bool asClient = false}) async {
+    await RegistrationProgress.clear();
+    // "Como cliente": descarta el rol de asociado y el registro sigue como
+    // cliente.
+    if (asClient) await PendingAssociateRole.clear();
+    await authManager.signOut();
+    if (!mounted) return;
+    context.goNamedAuth(CreateAccountWidget.routeName, context.mounted);
+  }
+
   String? _error;
 
   Future<void> _continuarComoCliente() async {
@@ -38,12 +84,17 @@ class _Datos2WidgetState extends State<Datos2Widget> {
       _error = null;
     });
 
+    // Si eligió un rol de asociado antes de registrarse, la solicitud va acá.
+    final pendingRole = await PendingAssociateRole.get();
+    final role = pendingRole ?? 'CLIENT';
     final res = await DOVIAAPIAuthContextGroup.selectRoleCall.call(
-      role: 'CLIENT',
+      role: role,
       authToken: currentAuthenticationToken,
     );
 
-    if (!res.succeeded) {
+    // 409: el rol ya estaba elegido (retomó el registro después de cerrar la
+    // app en este paso); se sigue con la identificación.
+    if (!res.succeeded && res.statusCode != 409) {
       safeSetState(() {
         _enviando = false;
         _error = 'No pudimos continuar. Intenta de nuevo.';
@@ -74,19 +125,59 @@ class _Datos2WidgetState extends State<Datos2Widget> {
         tokenExpiration: currentAuthTokenExpiration,
         authUid: currentUserUid,
       );
-      FFAppState().UserRole = 'CLIENT';
+      FFAppState().UserRole = role;
       FFAppState().update(() {});
+    }
+
+    // La identificación se sube a su documento del perfil
+    // (POST /users/{id}/documents/identification-document).
+    final idPhoto = _model.uploadedLocalFile_uploadData5so;
+    if (idPhoto.bytes != null && idPhoto.bytes!.isNotEmpty) {
+      final up = await DOVIAAPIUserContextGroup.uploadUserDocumentCall.call(
+        userId: currentUserUid,
+        documentType: 'identification-document',
+        authToken: currentAuthenticationToken,
+        file: idPhoto,
+      );
+      if (!up.succeeded) {
+        final m = getJsonField(up.jsonBody, r'$.message')?.toString();
+        safeSetState(() {
+          _enviando = false;
+          _error = (m != null && m.isNotEmpty)
+              ? 'No pudimos subir tu identificación: $m'
+              : 'No pudimos subir tu identificación. Intenta de nuevo.';
+        });
+        return;
+      }
+      RegistrationIdDocument.uploaded = idPhoto;
     }
 
     if (!mounted) return;
     safeSetState(() => _enviando = false);
-    context.pushNamed(Datos3NewWidget.routeName);
+    // goNamed: el paso ya hecho sale de la pila y no se puede volver.
+    if (pendingRole != null) {
+      await RegistrationProgress.set(RegistrationProgress.associateForm);
+      await PendingAssociateRole.clear();
+      if (!mounted) return;
+      // Sigue el flujo normal del asociado: formulario y "solicitud en
+      // revisión".
+      context.goNamed(FormAssociateWidget.routeName);
+      return;
+    }
+    await RegistrationProgress.clear();
+    if (!mounted) return;
+    context.goNamed(Datos3NewWidget.routeName);
   }
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => Datos2Model());
+    if (RegistrationProgress.resumedAfterRestart) {
+      RegistrationProgress.resumedAfterRestart = false;
+      _resumed = true;
+      _loadResumeEmail();
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -629,6 +720,49 @@ class _Datos2WidgetState extends State<Datos2Widget> {
                               ),
                             ),
                           ),
+                        if (_resumed) ...[
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 12.0, 20.0, 0.0),
+                            child: Text(
+                              _resumeEmail.isEmpty
+                                  ? 'Estás continuando tu registro como ${_roleLabel(_resumeRole)}.'
+                                  : 'Estás continuando tu registro como ${_roleLabel(_resumeRole)} con $_resumeEmail',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.publicSans(
+                                color: const Color(0xFF6A6A6A),
+                                fontSize: 13.0,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed:
+                                _enviando ? null : _registerWithOtherEmail,
+                            child: Text(
+                              'Registrarme con otro correo',
+                              style: GoogleFonts.publicSans(
+                                color: const Color(0xFF007376),
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          if (_resumeRole != null)
+                            TextButton(
+                              onPressed: _enviando
+                                  ? null
+                                  : () =>
+                                      _registerWithOtherEmail(asClient: true),
+                              child: Text(
+                                'Registrarme como cliente con otro correo',
+                                style: GoogleFonts.publicSans(
+                                  color: const Color(0xFF007376),
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
                       ],
                     ),
                   ),

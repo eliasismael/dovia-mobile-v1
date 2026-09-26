@@ -112,10 +112,10 @@ class _TerminosYCondicionesScrolleableWidgetState
               ),
               child: SizedBox(
                 width: MediaQuery.sizeOf(context).width * 1.0,
-                height: 400.0,
+                height: MediaQuery.sizeOf(context).height * 0.45,
                 child: custom_widgets.TermsScroller(
                   width: MediaQuery.sizeOf(context).width * 1.0,
-                  height: 400.0,
+                  height: MediaQuery.sizeOf(context).height * 0.45,
                   titulo: 'Términos y condiciones de uso de Dovia',
                   terminos: FFAppConstants.TermsAndConditions,
                   onBottomReached: () async {
@@ -130,17 +130,18 @@ class _TerminosYCondicionesScrolleableWidgetState
             alignment: const AlignmentDirectional(0.0, 1.0),
             child: Container(
               width: MediaQuery.sizeOf(context).width * 1.0,
-              height: 150.0,
               decoration: const BoxDecoration(),
+              // Sin alto fijo: el texto de aceptación puede ocupar varias
+              // líneas y empujaba el botón fuera del diálogo.
               child: Padding(
                 padding:
-                    const EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 0.0),
+                    const EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 20.0),
                 child: Column(
-                  mainAxisSize: MainAxisSize.max,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 40.0, 0.0, 0.0),
+                          0.0, 20.0, 0.0, 0.0),
                       child: Text(
                         'Al aceptar, significa que he leído y acepto los términos y condiciones de uso',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -161,7 +162,7 @@ class _TerminosYCondicionesScrolleableWidgetState
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 20.0, 0.0, 0.0),
+                          0.0, 16.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: !_model.hasCompletedScroll
                             ? null

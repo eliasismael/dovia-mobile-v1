@@ -7,7 +7,12 @@ import 'package:flutter/material.dart';
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 import 'package:provider/provider.dart';
-import 'package:file_picker/file_picker.dart';
+import '/flutter_flow/upload_data.dart';
+import '/auth/custom_auth/auth_util.dart';
+import '/auth/pending_associate_role.dart';
+import '/backend/api_requests/api_manager.dart';
+import '/backend/api_requests/api_recruitment.dart';
+import '/backend/api_requests/api_users.dart';
 import 'package:image_picker/image_picker.dart';
 
 class DoviaAssociateFormWidget extends StatefulWidget {
@@ -59,23 +64,43 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
   final _correoController = TextEditingController();
   final _direccionController = TextEditingController();
 
-  // ── Validation errors ────────────────────────────────────────────────────────
-  String? _nombreError;
-  String? _apellidosError;
-  String? _edadError;
-  String? _telefonoError;
-  String? _direccionError;
-
   // ── Date / time (internal state) ─────────────────────────────────────────────
   DateTime? _fechaEntrevista;
   TimeOfDay? _horaEntrevista;
 
   // ── Document uploads (internal state) ────────────────────────────────────────
   // Each stores the picked file name for display; bytes for actual upload.
-  PlatformFile? _fileAntecedentesPenales;
-  PlatformFile? _fileAntecedentesPoliciacos;
-  PlatformFile? _fileRecibo;
-  PlatformFile? _fileFotografiaId;
+  FFUploadedFile? _fileAntecedentesPenales;
+  FFUploadedFile? _fileAntecedentesPoliciacos;
+  FFUploadedFile? _fileRecibo;
+  FFUploadedFile? _fileFotografiaId;
+
+  final _scrollController = ScrollController();
+
+  /// Documentos que ya están en el perfil (GET /users/me), por tipo. Se
+  /// muestran como cargados aunque la app se haya cerrado después de subirlos.
+  Map<String, String> _remoteDocs = const {};
+
+  Future<void> _loadRemoteDocs() async {
+    final res = await DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall
+        .call(authToken: currentAuthenticationToken);
+    if (!mounted || !res.succeeded) return;
+    String? url(String field) {
+      final v = getJsonField(res.jsonBody, '\$.data.$field')?.toString();
+      return (v == null || v.isEmpty || v == 'null') ? null : v;
+    }
+
+    final docs = <String, String>{
+      for (final e in const {
+        'identification-document': 'identificationDocumentUrl',
+        'criminal-record': 'criminalRecordUrl',
+        'police-record': 'policeRecordUrl',
+        'utility-bill': 'utilityBillUrl',
+      }.entries)
+        if (url(e.value) != null) e.key: url(e.value)!,
+    };
+    setState(() => _remoteDocs = docs);
+  }
 
   // ── Profile photo (internal state) ───────────────────────────────────────────
   Uint8List? _profileImageBytes;
@@ -85,60 +110,16 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
   double? _mapLongitude;
 
   // ── Form completeness ────────────────────────────────────────────────────────
-  bool get _isFormComplete {
-    return _nombresController.text.trim().isNotEmpty &&
-        _nombreError == null &&
-        _apellidosController.text.trim().isNotEmpty &&
-        _apellidosError == null &&
-        _sexoController.text.trim().isNotEmpty &&
-        _nacionalidadController.text.trim().isNotEmpty &&
-        _edadController.text.trim().isNotEmpty &&
-        _edadError == null &&
-        _telefonoController.text.trim().isNotEmpty &&
-        _telefonoError == null &&
-        _correoController.text.trim().isNotEmpty &&
-        _direccionController.text.trim().isNotEmpty &&
-        _direccionError == null &&
-        _fechaEntrevista != null &&
-        _horaEntrevista != null;
-  }
+  /// Lo único obligatorio según el backend es la cita de primer contacto
+  /// (`scheduledAt`). Datos personales vienen del registro; dirección, foto y
+  /// documentos son opcionales.
+  bool get _isFormComplete => _missingFields.isEmpty;
 
-  // ── Validation ───────────────────────────────────────────────────────────────
-  void _validateNombres(String v) => setState(() {
-        _nombreError = v.trim().isEmpty
-            ? 'Campo requerido'
-            : !RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$').hasMatch(v.trim())
-                ? 'Solo letras'
-                : null;
-      });
-
-  void _validateApellidos(String v) => setState(() {
-        _apellidosError = v.trim().isEmpty
-            ? 'Campo requerido'
-            : !RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$').hasMatch(v.trim())
-                ? 'Solo letras'
-                : null;
-      });
-
-  void _validateEdad(String v) => setState(() {
-        final n = int.tryParse(v.trim());
-        _edadError = v.trim().isEmpty
-            ? 'Campo requerido'
-            : (n == null || n < 13 || n > 120)
-                ? 'Edad inválida'
-                : null;
-      });
-
-  void _validateTelefono(String v) => setState(() {
-        _telefonoError = v.trim().isEmpty
-            ? 'Campo requerido'
-            : !RegExp(r'^\d+$').hasMatch(v.trim())
-                ? 'Solo números'
-                : null;
-      });
-
-  void _validateDireccion(String v) => setState(
-      () => _direccionError = v.trim().isEmpty ? 'Campo requerido' : null);
+  /// Qué falta para poder enviar, en el orden del formulario.
+  List<String> get _missingFields => [
+        if (_fechaEntrevista == null) 'fecha de la entrevista',
+        if (_horaEntrevista == null) 'hora de la entrevista',
+      ];
 
   // ── Date / time pickers ──────────────────────────────────────────────────────
   Future<void> _pickFecha() async {
@@ -195,16 +176,115 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     }
   }
 
-  // ── File picker ──────────────────────────────────────────────────────────────
-  Future<void> _pickFile(void Function(PlatformFile file) onPicked) async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      withData: true,
+  // ── Foto por campo ───────────────────────────────────────────────────────────
+  /// Mismo selector que el resto de la app (cámara o galería). Una sola foto
+  /// por campo: elegir otra reemplaza la anterior.
+  Future<void> _pickFile(void Function(FFUploadedFile file) onPicked) async {
+    final selected = await selectMediaWithSourceBottomSheet(
+      context: context,
+      allowPhoto: true,
+      pickerFontFamily: 'Public Sans',
     );
-    if (result != null && result.files.isNotEmpty) {
-      setState(() => onPicked(result.files.first));
+    if (selected == null || selected.isEmpty) return;
+    final m = selected.first;
+    if (!mounted || !validateFileFormat(m.storagePath, context)) return;
+    setState(() => onPicked(FFUploadedFile(
+          name: m.storagePath.split('/').last,
+          bytes: m.bytes,
+          height: m.dimensions?.height,
+          width: m.dimensions?.width,
+          blurHash: m.blurHash,
+          originalFilename: m.originalFilename,
+        )));
+  }
+
+  // ── Envío ────────────────────────────────────────────────────────────────────
+  bool _sending = false;
+
+  /// Arma la solicitud en el orden que pide el backend: la cita de primer
+  /// contacto toma los documentos "del perfil del usuario" al crearse, así que
+  /// foto, documentos y datos van antes; la cita, al final.
+  Future<void> _submit() async {
+    if (_sending) return;
+    setState(() => _sending = true);
+    final token = currentAuthenticationToken ?? '';
+    final userId = currentUserUid;
+    String? error;
+
+    String failMsg(ApiCallResponse res, String what) {
+      final m = getJsonField(res.jsonBody, r'$.message')?.toString();
+      return (m != null && m.isNotEmpty) ? '$what: $m' : 'No se pudo $what.';
     }
+
+    try {
+      final photo = _profileImageBytes;
+      if (photo != null) {
+        final res =
+            await DOVIAAPIUserContextGroup.uploadProfilePictureCall.call(
+          authToken: token,
+          file: FFUploadedFile(name: 'perfil.jpg', bytes: photo),
+        );
+        if (!res.succeeded) error = failMsg(res, 'subir la foto de perfil');
+      }
+
+      final docs = <String, FFUploadedFile?>{
+        'identification-document': _fileFotografiaId,
+        'criminal-record': _fileAntecedentesPenales,
+        'police-record': _fileAntecedentesPoliciacos,
+        'utility-bill': _fileRecibo,
+      };
+      for (final e in docs.entries) {
+        if (error != null) break;
+        final file = e.value;
+        if (file == null) continue;
+        if (identical(file, RegistrationIdDocument.uploaded)) continue;
+        final res = await DOVIAAPIUserContextGroup.uploadUserDocumentCall.call(
+          userId: userId,
+          documentType: e.key,
+          authToken: token,
+          file: file,
+        );
+        if (!res.succeeded) error = failMsg(res, 'subir un documento');
+      }
+
+      if (error == null) {
+        final address = _direccionController.text.trim();
+        if (address.isNotEmpty) {
+          final res = await DOVIAAPIUserContextGroup.updateUserProfileCall.call(
+            userId: userId,
+            authToken: token,
+            address: address,
+          );
+          if (!res.succeeded) error = failMsg(res, 'guardar tu dirección');
+        }
+      }
+
+      if (error == null) {
+        final f = _fechaEntrevista!;
+        final h = _horaEntrevista!;
+        final scheduledAt =
+            DateTime(f.year, f.month, f.day, h.hour, h.minute).toUtc();
+        final res = await DoviaAPIRecruitmentGroup.createFirstContactCall.call(
+          bearerAuth: token,
+          scheduledAt: scheduledAt.toIso8601String(),
+        );
+        // 409: la solicitud ya existía (p. ej. un reintento); se sigue igual.
+        if (!res.succeeded && res.statusCode != 409) {
+          error = failMsg(res, 'agendar la entrevista');
+        }
+      }
+    } catch (_) {
+      error = 'No se pudo enviar la solicitud. Revisa tu conexión.';
+    }
+
+    if (!mounted) return;
+    setState(() => _sending = false);
+    if (error != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error)));
+      return;
+    }
+    widget.onEnviar?.call();
   }
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
@@ -213,6 +293,9 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _loadRemoteDocs();
+      final idDoc = RegistrationIdDocument.uploaded;
+      if (idDoc != null) setState(() => _fileFotografiaId = idDoc);
       final appState = Provider.of<FFAppState>(context, listen: false);
       final userData = appState.UserData;
 
@@ -262,6 +345,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     _telefonoController.dispose();
     _correoController.dispose();
     _direccionController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -281,49 +365,62 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
-        child: SingleChildScrollView(
-          padding:
-              const EdgeInsets.only(top: 56, bottom: 40, left: 30, right: 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildProfileSection(),
-              const SizedBox(height: 30),
-              _buildFormFields(),
-              const SizedBox(height: 14),
-              _buildMapSection(),
-              const SizedBox(height: 30),
-              // Date / time BEFORE documents (as in Figma)
-              _buildDateTimeSection(),
-              const SizedBox(height: 19),
-              _buildDocumentUpload(
-                'Fotografía del ID (Opcional)',
-                _fileFotografiaId,
-                () => _pickFile((f) => _fileFotografiaId = f),
-              ),
-              const SizedBox(height: 19),
-              _buildDocumentUpload(
-                'Debes cargar tus antecedentes penales (Opcional)',
-                _fileAntecedentesPenales,
-                () => _pickFile((f) => _fileAntecedentesPenales = f),
-              ),
-              const SizedBox(height: 19),
-              _buildDocumentUpload(
-                'Debes cargar tus antecedentes policiacos (Opcional)',
-                _fileAntecedentesPoliciacos,
-                () => _pickFile((f) => _fileAntecedentesPoliciacos = f),
-              ),
-              const SizedBox(height: 19),
-              _buildDocumentUpload(
-                'Debes cargar el recibo de agua, luz o teléfono de vivienda (Opcional)',
-                _fileRecibo,
-                () => _pickFile((f) => _fileRecibo = f),
-              ),
-              const SizedBox(height: 19),
-              _buildDisclaimer(),
-              const SizedBox(height: 19),
-              _buildSubmitButton(),
-            ],
+        child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding:
+                const EdgeInsets.only(top: 56, bottom: 40, left: 30, right: 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildProfileSection(),
+                const SizedBox(height: 30),
+                _buildFormFields(),
+                const SizedBox(height: 14),
+                _buildMapSection(),
+                const SizedBox(height: 30),
+                // Date / time BEFORE documents (as in Figma)
+                _buildDateTimeSection(),
+                const SizedBox(height: 19),
+                _buildDocumentUpload(
+                  'Fotografía del ID (opcional)',
+                  _fileFotografiaId,
+                  () => _pickFile((f) => _fileFotografiaId = f),
+                  () => setState(() => _fileFotografiaId = null),
+                  remoteUrl: _remoteDocs['identification-document'],
+                ),
+                const SizedBox(height: 19),
+                _buildDocumentUpload(
+                  'Antecedentes penales (opcional)',
+                  _fileAntecedentesPenales,
+                  () => _pickFile((f) => _fileAntecedentesPenales = f),
+                  () => setState(() => _fileAntecedentesPenales = null),
+                  remoteUrl: _remoteDocs['criminal-record'],
+                ),
+                const SizedBox(height: 19),
+                _buildDocumentUpload(
+                  'Antecedentes policiales (opcional)',
+                  _fileAntecedentesPoliciacos,
+                  () => _pickFile((f) => _fileAntecedentesPoliciacos = f),
+                  () => setState(() => _fileAntecedentesPoliciacos = null),
+                  remoteUrl: _remoteDocs['police-record'],
+                ),
+                const SizedBox(height: 19),
+                _buildDocumentUpload(
+                  'Recibo de agua, luz o teléfono de la vivienda (opcional)',
+                  _fileRecibo,
+                  () => _pickFile((f) => _fileRecibo = f),
+                  () => setState(() => _fileRecibo = null),
+                  remoteUrl: _remoteDocs['utility-bill'],
+                ),
+                const SizedBox(height: 19),
+                _buildDisclaimer(),
+                const SizedBox(height: 19),
+                _buildSubmitButton(),
+              ],
+            ),
           ),
         ),
       ),
@@ -377,6 +474,33 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
             ],
           ),
         ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: _pickProfileImage,
+          child: Text(
+            _profileImageBytes == null
+                ? 'Agrega una foto de perfil'
+                : 'Cambiar foto de perfil',
+            style: const TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: aquaColor,
+            ),
+          ),
+        ),
+        if (_profileImageBytes == null) ...[
+          const SizedBox(height: 2),
+          const Text(
+            'Ayuda a que los clientes te reconozcan.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 12,
+              color: Color(0xFF6A6A6A),
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         Container(
           height: 34,
@@ -402,62 +526,69 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
   }
 
   // ── Form fields ──────────────────────────────────────────────────────────────
+  /// Los datos personales vienen del registro: se muestran sólo para
+  /// revisar. Lo único que se completa acá es la dirección.
   Widget _buildFormFields() {
     return Column(
       children: [
         _buildTwoColumnRow(
-          _buildInputField('Nombres', _nombresController, 'Laura',
-              errorText: _nombreError, onChanged: _validateNombres),
-          _buildInputField('Apellidos', _apellidosController, 'Martinez',
-              errorText: _apellidosError, onChanged: _validateApellidos),
+          _buildInputField('Nombres', _nombresController, '', readOnly: true),
+          _buildInputField('Apellidos', _apellidosController, '',
+              readOnly: true),
         ),
         const SizedBox(height: 14),
         _buildTwoColumnRow(
-          _buildInputField('Sexo', _sexoController, 'Femenino',
-              onChanged: (_) => setState(() {})),
-          _buildInputField(
-              'Nacionalidad', _nacionalidadController, 'Colombiana',
-              onChanged: (_) => setState(() {})),
+          _buildInputField('Sexo', _sexoController, '', readOnly: true),
+          _buildInputField('Nacionalidad', _nacionalidadController, '',
+              readOnly: true),
         ),
         const SizedBox(height: 14),
         _buildTwoColumnRow(
-          _buildInputField('Edad', _edadController, '28',
-              keyboardType: TextInputType.number,
-              errorText: _edadError,
-              onChanged: _validateEdad),
+          _buildInputField('Edad', _edadController, '', readOnly: true),
           _buildPhoneField(),
         ),
         const SizedBox(height: 14),
         _buildTwoColumnRow(
-          _buildInputField(
-            'Correo',
-            _correoController,
-            'correo@ejemplo.com',
-            keyboardType: TextInputType.emailAddress,
-            readOnly: true,
-          ),
+          _buildInputField('Correo', _correoController, '', readOnly: true),
           _buildInputField(
             'Dirección de vivienda',
             _direccionController,
             'Calle 123',
-            errorText: _direccionError,
-            onChanged: _validateDireccion,
           ),
         ),
       ],
     );
   }
 
+  /// En el celular los campos van uno debajo del otro.
   Widget _buildTwoColumnRow(Widget left, Widget right) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(child: left),
-        const SizedBox(width: 14),
-        Expanded(child: right),
+        left,
+        const SizedBox(height: 14),
+        right,
       ],
     );
   }
+
+  /// Etiqueta de campo obligatorio: texto + asterisco rojo.
+  Widget _requiredLabel(String label,
+          {double fontSize = 14, bool required = true}) =>
+      Text.rich(
+        TextSpan(children: [
+          TextSpan(text: label),
+          if (required)
+            const TextSpan(text: ' *', style: TextStyle(color: errorColor)),
+        ]),
+        style: TextStyle(
+          fontFamily: 'Public Sans',
+          fontSize: fontSize,
+          fontWeight: FontWeight.w400,
+          color: textColor,
+          letterSpacing: 0.28,
+        ),
+      );
 
   Widget _buildInputField(
     String label,
@@ -465,6 +596,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     String placeholder, {
     TextInputType keyboardType = TextInputType.text,
     bool readOnly = false,
+    bool required = false,
     String? errorText,
     void Function(String)? onChanged,
   }) {
@@ -472,14 +604,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: textColor,
-              letterSpacing: 0.28,
-            )),
+        _requiredLabel(label, required: required),
         const SizedBox(height: 12),
         Container(
           height: 42,
@@ -531,14 +656,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Teléfono',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: textColor,
-              letterSpacing: 0.28,
-            )),
+        _requiredLabel('Teléfono', required: false),
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,9 +665,11 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
               width: 56,
               height: 42,
               decoration: BoxDecoration(
-                  color: inputBg, borderRadius: BorderRadius.circular(10)),
+                  color: const Color(0xFFF0F0F0),
+                  borderRadius: BorderRadius.circular(10)),
               child: TextField(
                 controller: _telefonoCodeController,
+                readOnly: true,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontFamily: 'Public Sans',
@@ -572,16 +692,13 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
                   Container(
                     height: 42,
                     decoration: BoxDecoration(
-                      color: inputBg,
+                      color: const Color(0xFFF0F0F0),
                       borderRadius: BorderRadius.circular(10),
-                      border: _telefonoError != null
-                          ? Border.all(color: errorColor, width: 1.5)
-                          : Border.all(color: Colors.transparent),
+                      border: Border.all(color: Colors.transparent),
                     ),
                     child: TextField(
                       controller: _telefonoController,
-                      keyboardType: TextInputType.phone,
-                      onChanged: _validateTelefono,
+                      readOnly: true,
                       style: const TextStyle(
                           fontFamily: 'Public Sans',
                           fontSize: 14,
@@ -599,14 +716,6 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
                       ),
                     ),
                   ),
-                  if (_telefonoError != null) ...[
-                    const SizedBox(height: 4),
-                    Text(_telefonoError!,
-                        style: const TextStyle(
-                            fontFamily: 'Public Sans',
-                            fontSize: 11,
-                            color: errorColor)),
-                  ],
                 ],
               ),
             ),
@@ -683,14 +792,9 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Selecciona la fecha para que DOVIA se comunique con vos y coordinar una entrevista',
-          style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: textColor,
-              letterSpacing: 0.32),
+        _requiredLabel(
+          'Selecciona la fecha y la hora para que DOVIA se comunique contigo y coordine una entrevista',
+          fontSize: 16,
         ),
         const SizedBox(height: 12),
         Container(
@@ -767,69 +871,139 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
   // ── Document upload ──────────────────────────────────────────────────────────
   Widget _buildDocumentUpload(
     String label,
-    PlatformFile? file,
-    VoidCallback onTap,
-  ) {
-    final uploaded = file != null;
+    FFUploadedFile? file,
+    VoidCallback onPick,
+    VoidCallback onRemove, {
+    String? remoteUrl,
+  }) {
+    final bytes = file?.bytes;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: textColor,
-                    letterSpacing: 0.32),
-              ),
-            ),
-            if (uploaded)
-              const Icon(Icons.check_circle, color: aquaColor, size: 20),
-          ],
+        Text(
+          label,
+          style: const TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: textColor,
+              letterSpacing: 0.32),
         ),
         const SizedBox(height: 12),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 104,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: uploaded ? const Color(0xFFE8F5E9) : inputBg,
-              borderRadius: BorderRadius.circular(10),
-              border:
-                  uploaded ? Border.all(color: aquaColor.withAlpha(100)) : null,
-            ),
-            child: uploaded
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.insert_drive_file,
-                          size: 28, color: aquaColor.withAlpha(200)),
-                      const SizedBox(height: 6),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          file.name,
-                          style: TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 12,
-                              color: textColor.withAlpha(180)),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ],
-                  )
-                : Center(
-                    child: Icon(Icons.note_add_outlined,
-                        size: 24, color: textColor.withAlpha(128)),
+        if (bytes == null && remoteUrl != null)
+          // Ya subido antes: se ve lo guardado y tocando se reemplaza.
+          GestureDetector(
+            onTap: onPick,
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    remoteUrl,
+                    height: 160,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 104,
+                      width: double.infinity,
+                      color: inputBg,
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.insert_drive_file_outlined,
+                          size: 28, color: aquaColor),
+                    ),
                   ),
+                ),
+                Positioned(
+                  left: 8,
+                  bottom: 8,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xCC000000),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: const Text(
+                      'Ya cargado · Toca para reemplazar',
+                      style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 11,
+                          color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (bytes == null)
+          GestureDetector(
+            onTap: onPick,
+            child: Container(
+              height: 104,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: inputBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Color(0x2670ACAD),
+                    child: Icon(Icons.add_a_photo_outlined,
+                        size: 20, color: aquaColor),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Toca para agregar una foto',
+                    style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: aquaColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          SizedBox(
+            height: 160,
+            width: double.infinity,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: onPick,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.memory(bytes, fit: BoxFit.cover),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: GestureDetector(
+                    onTap: onRemove,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: Color(0xCC000000),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close,
+                          color: Colors.white, size: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -853,6 +1027,25 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
   // ── Submit ───────────────────────────────────────────────────────────────────
   Widget _buildSubmitButton() {
     final enabled = _isFormComplete;
+    final missing = _missingFields;
+    return Column(children: [
+      _submitButton(enabled),
+      if (!enabled && missing.isNotEmpty) ...[
+        const SizedBox(height: 10),
+        Text(
+          'Falta completar: ${missing.join(', ')}.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 13,
+            color: Color(0xFF6A6A6A),
+          ),
+        ),
+      ],
+    ]);
+  }
+
+  Widget _submitButton(bool enabled) {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 607),
@@ -860,7 +1053,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
           width: double.infinity,
           height: 42,
           child: GestureDetector(
-            onTap: enabled ? widget.onEnviar : null,
+            onTap: enabled && !_sending ? _submit : null,
             child: Container(
               decoration: BoxDecoration(
                 color: enabled ? aquaColor : aquaColor.withAlpha(100),
@@ -869,16 +1062,23 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
                 borderRadius: BorderRadius.circular(25),
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'Enviar',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  height: 14 / 16,
-                ),
-              ),
+              child: _sending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text(
+                      'Enviar',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        height: 14 / 16,
+                      ),
+                    ),
             ),
           ),
         ),

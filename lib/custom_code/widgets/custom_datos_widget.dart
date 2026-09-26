@@ -1,3 +1,4 @@
+import '/auth/registration_progress.dart';
 // Automatic FlutterFlow imports
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -708,6 +709,9 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                                           context)
                                                       .secondaryText,
                                                   size: 24.0),
+                                              fillColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
                                               elevation: 2.0,
                                               borderColor: Colors.transparent,
                                               borderWidth: 0.0,
@@ -781,6 +785,9 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                                           context)
                                                       .secondaryText,
                                                   size: 24.0),
+                                              fillColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
                                               elevation: 2.0,
                                               borderColor: Colors.transparent,
                                               borderWidth: 0.0,
@@ -898,6 +905,9 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                                           context)
                                                       .secondaryText,
                                                   size: 24.0),
+                                              fillColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
                                               elevation: 2.0,
                                               borderColor: Colors.transparent,
                                               borderWidth: 0.0,
@@ -1037,6 +1047,38 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                       onPressed: !isFormValid
                           ? null
                           : () async {
+                              final email = FFAppState().UserEmail;
+                              final resumeCode =
+                                  RegistrationProgress.resumeCode;
+                              if (RegistrationProgress.isResuming(email) &&
+                                  resumeCode != null) {
+                                // Registro retomado: el código de
+                                // recuperación prueba que el correo es suyo y
+                                // deja la contraseña que eligió acá.
+                                final confirm = await DOVIAAPIAuthContextGroup
+                                    .confirmForgotPasswordNEWCall
+                                    .call(
+                                  email: email,
+                                  code: resumeCode,
+                                  newPassword: passwordInputTextController.text,
+                                  confirmNewPassword:
+                                      confirmPasswordInputTextController.text,
+                                );
+                                if (!context.mounted) return;
+                                if (!confirm.succeeded) {
+                                  final m = getJsonField(
+                                          confirm.jsonBody, r'$.message')
+                                      ?.toString();
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(m != null && m.isNotEmpty
+                                        ? m
+                                        : 'El código no es válido o venció. Vuelve atrás y pide uno nuevo.'),
+                                  ));
+                                  return;
+                                }
+                                RegistrationProgress.clearResume();
+                              }
                               response = await DOVIAAPIAuthContextGroup
                                   .completeRegistrationStepNEWCall
                                   .call(
@@ -1100,6 +1142,9 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                 );
 
                                 // go en vez de push: el registro ya se completó en el backend y volver a este form da 400.
+                                await RegistrationProgress.set(
+                                    RegistrationProgress.idAndTerms);
+                                if (!context.mounted) return;
                                 context.goNamed('Datos_2');
                               } else {
                                 await showDialog(
