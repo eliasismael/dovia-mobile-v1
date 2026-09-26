@@ -67,9 +67,7 @@ void main() {
       ['enviada', 'pendiente'],
     );
     expect(
-      board
-          .byFilter(ClientOfferFilter.rechazada)
-          .map((offer) => offer.offerId),
+      board.byFilter(ClientOfferFilter.rechazada).map((offer) => offer.offerId),
       ['rechazada'],
     );
     expect(
@@ -115,8 +113,8 @@ void main() {
       rejectedBy: 'OWNER',
       counterOfferCount: 1,
     ));
-    final enNegociacion =
-        ClientOffer.fromJson(_offer(id: 'contraoferta', status: 'COUNTER_OFFER'));
+    final enNegociacion = ClientOffer.fromJson(
+        _offer(id: 'contraoferta', status: 'COUNTER_OFFER'));
 
     expect(opensReadOnlyOfferDetail(enviada), isTrue);
     expect(opensReadOnlyOfferDetail(rechazadaTrasContraoferta), isTrue);
@@ -125,8 +123,18 @@ void main() {
 
   group('Pestañas de Contraofertas', () {
     ClientOffersBoard board() => ClientOffersBoard.fromOffers([
-          _offer(id: 'en-curso', status: 'COUNTER_OFFER'),
-          _offer(id: 'recontraoferta', status: 'COUNTER_OFFER'),
+          _offer(
+            id: 'en-curso',
+            status: 'COUNTER_OFFER',
+            pendingResponseBy: 'CLIENT',
+            lastOfferBy: 'OWNER',
+          ),
+          _offer(
+            id: 'recontraoferta',
+            status: 'COUNTER_OFFER',
+            pendingResponseBy: 'OWNER',
+            lastOfferBy: 'CLIENT',
+          ),
           _offer(
             id: 'caida',
             status: 'REJECTED',
@@ -140,17 +148,26 @@ void main() {
     test('el menú del diseño, en orden', () {
       expect(
         ClientOfferLane.contraoferta.filters.map((filter) => filter.label),
-        ['Enviado', 'Rechazada'],
+        ['Recibidas', 'Enviadas', 'Rechazada'],
       );
       expect(ClientOfferLane.contraoferta.listTitle, 'Contraofertas');
     });
 
-    test('las negociaciones vivas van a Enviado', () {
+    test('la contraoferta del propietario va a Recibidas', () {
+      expect(
+        board()
+            .byFilter(ClientOfferFilter.contraofertaRecibida)
+            .map((offer) => offer.offerId),
+        ['en-curso'],
+      );
+    });
+
+    test('la contraoferta del cliente va a Enviadas', () {
       expect(
         board()
             .byFilter(ClientOfferFilter.contraofertaEnviada)
             .map((offer) => offer.offerId),
-        ['en-curso', 'recontraoferta'],
+        ['recontraoferta'],
       );
     });
 
@@ -163,7 +180,7 @@ void main() {
       );
     });
 
-    test('las dos pestañas reparten el carril sin perder ni duplicar', () {
+    test('las tres pestañas reparten el carril sin perder ni duplicar', () {
       final carril =
           board().inLane(ClientOfferLane.contraoferta).map((o) => o.offerId);
       final enPestanas = ClientOfferLane.contraoferta.filters
@@ -231,7 +248,8 @@ void main() {
     });
 
     test('las tres pestañas reparten el carril sin perder ni duplicar', () {
-      final carril = board().inLane(ClientOfferLane.aceptada).map((o) => o.offerId);
+      final carril =
+          board().inLane(ClientOfferLane.aceptada).map((o) => o.offerId);
       final enPestanas = ClientOfferLane.aceptada.filters
           .expand((filter) => board().byFilter(filter))
           .map((offer) => offer.offerId);
@@ -397,11 +415,19 @@ void main() {
       board
           .byFilterInLane(
             ClientOfferLane.contraoferta,
+            ClientOfferFilter.contraofertaRecibida,
+          )
+          .map((offer) => offer.offerId),
+      ['espera-cliente'],
+    );
+    expect(
+      board
+          .byFilterInLane(
+            ClientOfferLane.contraoferta,
             ClientOfferFilter.contraofertaEnviada,
           )
-          .map((offer) => offer.offerId)
-          .toSet(),
-      {'espera-cliente', 'espera-dueno'},
+          .map((offer) => offer.offerId),
+      ['espera-dueno'],
       reason: 'la ronda que espera al dueño sigue viva: no puede desaparecer',
     );
     expect(

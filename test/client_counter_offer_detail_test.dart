@@ -148,6 +148,25 @@ void main() {
     expect(payload['considerations'], 'Entrega inmediata');
   });
 
+  test('al contado sólo manda los campos que admite el esquema', () {
+    final terms = CounterOfferTerms.fromJson({
+      'paymentMethod': 'cash',
+      'currency': 'USD',
+      'proposedAmount': 500,
+      'estimatedPaymentTime': 7,
+      'considerations': '100 usd más',
+    }, offerType: 'PURCHASE');
+
+    final payload = terms.toCounterOfferPayload(
+      {CounterOfferFieldKey.proposedAmount: '550'},
+      selectedCurrency: 'USD',
+    );
+
+    expect(payload.keys.toSet(),
+        {'paymentMethod', 'currency', 'proposedAmount', 'considerations'});
+    expect(payload['proposedAmount'], 550);
+  });
+
   test('un rechazo previo queda en historial sin acciones resolutivas', () {
     final detail = ClientCounterOfferDetail.fromJson(_detail(
       status: 'REJECTED_BY_CLIENT',

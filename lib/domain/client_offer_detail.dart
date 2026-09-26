@@ -57,6 +57,9 @@ class ClientOfferDetail {
   /// Todavía se puede retirar la oferta.
   final bool canWithdraw;
 
+  /// Oferta inicial sin respuesta del propietario: se retira cancelándola.
+  final bool isInitialOffer;
+
   /// Lo que publicó el propietario, arriba del formulario.
   final List<OfferDetailSection> ownerSections;
 
@@ -76,6 +79,7 @@ class ClientOfferDetail {
     required this.isRejected,
     required this.rejectionReason,
     required this.canWithdraw,
+    this.isInitialOffer = false,
     required this.ownerSections,
     required this.proposalSections,
     this.isRent = false,
@@ -102,6 +106,7 @@ class ClientOfferDetail {
       isRejected: isRejected,
       rejectionReason: offer.rejectionReason,
       canWithdraw: offer.isCancellable,
+      isInitialOffer: offer.isSentAwaitingOwnerResponse,
       ownerSections: [
         OfferDetailSection(
           title: 'Características que proporcionó el propietario',

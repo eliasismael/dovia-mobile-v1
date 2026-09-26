@@ -1,3 +1,4 @@
+import '/dovia_home_client/subscription_renewal_notice.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
 import '/dovia_home_client/proposal_fields.dart';
@@ -121,6 +122,10 @@ class DHCLIENTHomepageWidget extends StatefulWidget {
   /// Agenda agrega aquí la nueva solicitud antes de redirigir al Dashboard.
   static final List<ScheduledVisit> upcomingVisits = [];
 
+  /// Dueño de [upcomingVisits]: la lista es estática y sobrevive al cierre de
+  /// sesión, así que se vacía si entra otro usuario.
+  static String? _upcomingVisitsOwner;
+
   /// Ids de solicitudes cuya visita el cliente ya confirmó ("Programada").
   /// Se maneja client-side porque el backend no tiene dónde registrarlo: en el
   /// inventario del contexto (59 rutas, verificado el 2026-08-17) no hay
@@ -167,6 +172,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     super.initState();
     _model = createModel(context, () => DHCLIENTHomepageModel());
 
+    if (DHCLIENTHomepageWidget._upcomingVisitsOwner != currentUserUid) {
+      DHCLIENTHomepageWidget.upcomingVisits.clear();
+      DHCLIENTHomepageWidget._upcomingVisitsOwner = currentUserUid;
+    }
+
     _loadDashboardData();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -188,10 +198,33 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     // todas sin filtro y se excluye FINISHED client-side; para las finalizadas
     // se filtra directamente por FINISHED.
     _upcomingVisitsFuture =
-        DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
+        DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall
+            .call(
       authToken: token,
       limit: 20,
-    );
+    )
+            .then((response) {
+      // Cuando el backend ya devuelve una solicitud pintada de forma
+      // optimista, manda la del backend (con estado real y detalle
+      // navegable) y la optimista se descarta.
+      if (response.succeeded) {
+        final backendIds = (DOVIAAPIDoviaHomeContextGroup
+                    .listServiceRequestsCall
+                    .requestsList(response.jsonBody) ??
+                [])
+            .whereType<Map>()
+            .map((e) => srId(Map<String, dynamic>.from(e)))
+            .where((id) => id.isNotEmpty)
+            .toSet();
+        final before = DHCLIENTHomepageWidget.upcomingVisits.length;
+        DHCLIENTHomepageWidget.upcomingVisits
+            .removeWhere((v) => v.id != null && backendIds.contains(v.id));
+        if (DHCLIENTHomepageWidget.upcomingVisits.length != before) {
+          safeSetState(() {});
+        }
+      }
+      return response;
+    });
     _completedVisitsFuture =
         DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall.call(
       authToken: token,
@@ -231,17 +264,23 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   }
 
   Widget _buildServiceCard(String title, String iconPath,
-      {bool isEmergency = false, VoidCallback? onTap}) {
+      {bool isEmergency = false, VoidCallback? onTap, double width = 100.0}) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        width: 100.0,
+        width: width,
         height: 100.0,
         decoration: BoxDecoration(
-          color: isEmergency
-              ? FlutterFlowTheme.of(context).success
-              : FlutterFlowTheme.of(context).alternate,
+          color:
+              isEmergency ? FlutterFlowTheme.of(context).success : Colors.white,
           borderRadius: BorderRadius.circular(8.0),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x26000000),
+              blurRadius: 14.0,
+              offset: Offset(0.0, 4.0),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -253,11 +292,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               decoration: BoxDecoration(
                 color: isEmergency
                     ? Colors.white.withOpacity(0.3)
-                    : const Color(0x98007376),
-                borderRadius: BorderRadius.circular(10.0),
+                    : const Color(0xFF007376),
+                borderRadius: BorderRadius.circular(14.0),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(14.0),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SvgPicture.asset(
@@ -1122,13 +1161,41 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     );
   }
 
+  /// Bloque neutro que ocupa el lugar del banner o de las tarjetas Premium
+  /// mientras se resuelve la suscripción, para que la pantalla no salte.
+  Widget _buildSubscriptionPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 140.0,
+      decoration: BoxDecoration(
+        color: const Color(0x14007376),
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      alignment: Alignment.center,
+      child: SizedBox(
+        width: 22.0,
+        height: 22.0,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.0,
+          color: FlutterFlowTheme.of(context).primary,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Estado real de suscripcion (Recurrente) desde PaymentsRepository.
     // `hasActiveSubscription` es true para ACTIVE, PAST_DUE y CANCEL_SCHEDULED,
     // que es el criterio con el que el backend habilita los beneficios Premium.
-    final hasSubscription =
-        context.watch<PaymentsRepository>().hasActiveSubscription;
+    final payments = context.watch<PaymentsRepository>();
+    final hasSubscription = payments.hasActiveSubscription;
+    // Mientras no se sabe el estado no se muestra ninguna de las dos
+    // variantes: si no, un suscriptor ve un instante el upsell de Premium.
+    // Si la consulta falló se sigue como sin plan, igual que antes, en vez de
+    // dejar el indicador girando.
+    final subscriptionKnown = payments.subscriptionLoaded ||
+        (!payments.isLoading && payments.error != null);
 
     return GestureDetector(
       onTap: () {
@@ -1156,9 +1223,8 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                       showNotifications: true,
                       showSettings: true,
                       title: 'Dovia Home',
-                      showCart: true,
-                      // Con avisos y ajustes sumados no entra tambien el
-                      // logotipo; el titulo ya dice donde estamos.
+                      // Sin el logotipo el titulo entra en una sola linea
+                      // junto a los avisos y los ajustes.
                       showLogo: false,
                       showMap: false,
                       showCurrency: false,
@@ -1234,45 +1300,62 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                                   ),
                         ),
                         const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 8.0,
-                          runSpacing: 8.0,
-                          alignment: WrapAlignment.center,
-                          children: [
-                            _buildServiceCard('Plomería',
-                                'assets/images/IconoServicioPlomeria.svg',
-                                onTap: () => _openServiceDetail('Plomería')),
-                            _buildServiceCard('Eléctrico',
-                                'assets/images/IconoServicioElectrico.svg',
-                                onTap: () => _openServiceDetail('Eléctrico')),
-                            _buildServiceCard('Albañilería',
-                                'assets/images/IconoServicioAlbaileria.svg',
-                                onTap: () => _openServiceDetail('Albañilería')),
-                            _buildServiceCard('Pintura',
-                                'assets/images/IconServicioPintura.svg',
-                                onTap: () => _openServiceDetail('Pintura')),
-                            _buildServiceCard('Instalación',
-                                'assets/images/IconServicioInstalacion.svg',
-                                onTap: () => _openServiceDetail('Instalación')),
-                            _buildServiceCard('Servicio de\nemergencia',
-                                'assets/images/warning-triangle.svg',
-                                isEmergency: true, onTap: () {
-                              // Abierto a todos los clientes: el estatus de la
-                              // cuenta se resuelve más adelante, en el paso de
-                              // cobro (descuento Premium vs. pago regular +
-                              // upsell para Free).
-                              DHCLIENTUbicacionWidget.pendingNextRoute =
-                                  DHCLIENTEmergenciasWidget.routeName;
-                              context
-                                  .pushNamed(DHCLIENTUbicacionWidget.routeName);
-                            }),
-                          ],
-                        ),
+                        // Tres columnas iguales que ocupan todo el ancho: la
+                        // grilla queda alineada con el resto del contenido.
+                        LayoutBuilder(builder: (context, constraints) {
+                          const gap = 12.0;
+                          final cardWidth =
+                              (constraints.maxWidth - gap * 2) / 3;
+                          return Wrap(
+                            spacing: gap,
+                            runSpacing: gap,
+                            children: [
+                              _buildServiceCard('Plomería',
+                                  'assets/images/IconoServicioPlomeria.svg',
+                                  onTap: () => _openServiceDetail('Plomería'),
+                                  width: cardWidth),
+                              _buildServiceCard('Eléctrico',
+                                  'assets/images/IconoServicioElectrico.svg',
+                                  onTap: () => _openServiceDetail('Eléctrico'),
+                                  width: cardWidth),
+                              _buildServiceCard('Albañilería',
+                                  'assets/images/IconoServicioAlbaileria.svg',
+                                  onTap: () =>
+                                      _openServiceDetail('Albañilería'),
+                                  width: cardWidth),
+                              _buildServiceCard('Pintura',
+                                  'assets/images/IconServicioPintura.svg',
+                                  onTap: () => _openServiceDetail('Pintura'),
+                                  width: cardWidth),
+                              _buildServiceCard('Instalación',
+                                  'assets/images/IconServicioInstalacion.svg',
+                                  onTap: () =>
+                                      _openServiceDetail('Instalación'),
+                                  width: cardWidth),
+                              _buildServiceCard('Servicio de\nemergencia',
+                                  'assets/images/warning-triangle.svg',
+                                  isEmergency: true, onTap: () {
+                                // Abierto a todos los clientes: el estatus de la
+                                // cuenta se resuelve más adelante, en el paso de
+                                // cobro (descuento Premium vs. pago regular +
+                                // upsell para Free).
+                                DHCLIENTUbicacionWidget.pendingNextRoute =
+                                    DHCLIENTEmergenciasWidget.routeName;
+                                context.pushNamed(
+                                    DHCLIENTUbicacionWidget.routeName);
+                              }, width: cardWidth),
+                            ],
+                          );
+                        }),
                         const SizedBox(height: 30),
 
                         // Banner Suscripcion
+                        if (!subscriptionKnown) ...[
+                          _buildSubscriptionPlaceholder(),
+                          const SizedBox(height: 30),
+                        ],
                         Visibility(
-                          visible: !hasSubscription,
+                          visible: subscriptionKnown && !hasSubscription,
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(20),
@@ -1345,10 +1428,15 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             ),
                           ),
                         ),
-                        if (!hasSubscription) const SizedBox(height: 30),
+                        if (subscriptionKnown && !hasSubscription)
+                          const SizedBox(height: 30),
 
                         // Tarjetas Premium (usuario con suscripcion activa)
-                        if (hasSubscription) ...[
+                        if (subscriptionKnown && hasSubscription) ...[
+                          if (payments.subscriptionNeedsRenewal) ...[
+                            const SubscriptionRenewalNotice(),
+                            const SizedBox(height: 16),
+                          ],
                           _buildIncludedServicesCard(),
                           const SizedBox(height: 16),
                           _buildQuoteRequestCard(),

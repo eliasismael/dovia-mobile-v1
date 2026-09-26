@@ -328,9 +328,11 @@ class _DOVIACLIENTMisOfertasWidgetState
     final reason = await showCancelarOfertaModal(context);
     if (reason == null || !mounted) return;
 
-    final result = await context
-        .read<OffersRepository>()
-        .withdrawMyOffer(offerId: offer.offerId, reason: reason);
+    final result = await context.read<OffersRepository>().withdrawMyOffer(
+          offerId: offer.offerId,
+          reason: reason,
+          isInitialOffer: offer.isSentAwaitingOwnerResponse,
+        );
     if (!mounted) return;
 
     switch (result) {

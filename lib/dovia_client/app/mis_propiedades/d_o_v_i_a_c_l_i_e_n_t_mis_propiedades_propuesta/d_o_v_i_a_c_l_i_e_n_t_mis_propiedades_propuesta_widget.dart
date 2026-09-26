@@ -114,7 +114,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     if (res.succeeded) {
       messenger.showSnackBar(SnackBar(
         content: const Text('¡Oferta aceptada exitosamente!'),
-        backgroundColor: _successGreen,
+        backgroundColor: _primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ));
@@ -264,6 +264,8 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
       case 'ACTIVE':
       case 'IN_NEGOTIATION':
         return 'En negociación';
+      case 'COUNTER_OFFER':
+        return 'En contraoferta';
       case 'ACCEPTED':
         return 'Aceptada';
       case 'REJECTED':
@@ -288,6 +290,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
   /// Estados en los que la negociacion sigue viva con una contraoferta de por
   /// medio. Quien debe responder lo decide [_ownerOwesCounterResponse].
   static const Set<String> _counterStatuses = {
+    'COUNTER_OFFER',
     'COUNTER_OFFERED',
     'COUNTER_OFFER_SENT',
     'COUNTERED',
@@ -656,20 +659,24 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
             : 'Te ${daysLeft == 1 ? "queda" : "quedan"} $daysLeft ${daysLeft == 1 ? "día" : "días"} para responder';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: overdue ? const Color(0x1FE44444) : const Color(0xFFFFDBBC),
+        color: overdue ? const Color(0xFFFDECEC) : const Color(0xFFFFF4E8),
         borderRadius: BorderRadius.circular(99),
+        border: Border.all(
+            color: overdue ? const Color(0xFFF5C2C2) : const Color(0xFFFFDDB8)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.schedule_rounded,
-            size: 16, color: overdue ? _errorRed : const Color(0xFFF57E00)),
+            size: 14, color: overdue ? _errorRed : const Color(0xFFF57E00)),
         const SizedBox(width: 6),
         Text(label,
             style: GoogleFonts.inter(
                 fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: overdue ? _errorRed : const Color(0xFFF57E00))),
+                fontWeight: FontWeight.w500,
+                color: overdue
+                    ? const Color(0xFFA83232)
+                    : const Color(0xFF8A4B0B))),
       ]),
     );
   }
@@ -862,27 +869,35 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         Expanded(
             child: OutlinedButton(
           style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
             side: const BorderSide(color: _primary),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
           ),
           onPressed: _isActioning
               ? null
               : () => safeSetState(() => _isRejecting = true),
-          child: Text('Rechazar',
-              style: GoogleFonts.inter(
-                  fontSize: 15, fontWeight: FontWeight.w600, color: _primary)),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('Rechazar',
+                maxLines: 1,
+                style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _primary)),
+          ),
         )),
         const SizedBox(width: 10),
         // Contraoferta
         Expanded(
             child: OutlinedButton(
           style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
             side: const BorderSide(color: _primary),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
           ),
           onPressed: _isActioning
               ? null
@@ -931,9 +946,15 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                     }.withoutNulls,
                   );
                 },
-          child: Text('Contraoferta',
-              style: GoogleFonts.inter(
-                  fontSize: 15, fontWeight: FontWeight.w600, color: _primary)),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('Contraoferta',
+                maxLines: 1,
+                style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _primary)),
+          ),
         )),
         const SizedBox(width: 10),
         // Aceptar
@@ -941,9 +962,10 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
             child: FilledButton(
           style: FilledButton.styleFrom(
             backgroundColor: _primary,
+            disabledBackgroundColor: _primary,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
           ),
           onPressed: _isActioning ? null : _acceptOffer,
           child: _isActioning
@@ -952,11 +974,15 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                   height: 18,
                   child: CircularProgressIndicator(
                       strokeWidth: 2, color: Colors.white))
-              : Text('Aceptar',
-                  style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
+              : FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('Aceptar',
+                      maxLines: 1,
+                      style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white)),
+                ),
         )),
       ]),
     ]);

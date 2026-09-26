@@ -124,7 +124,9 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
     if (!mounted) return;
     safeSetState(() {
       DHCLIENTAgendaWidget.minAdvanceHours =
-          payments.hasActiveSubscription ? 24 : 36;
+          payments.hasActiveSubscription && !payments.subscriptionNeedsRenewal
+              ? 24
+              : 36;
     });
   }
 
@@ -688,7 +690,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                   ),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 24.0, 20.0, 100.0),
+                        20.0, 24.0, 20.0, 150.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -780,7 +782,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 40.0, 0.0, 0.0),
+                              0.0, 28.0, 0.0, 0.0),
                           child: FFButtonWidget(
                             // Crea la solicitud en el backend: sin esto la red
                             // de Home Associates nunca la ve.

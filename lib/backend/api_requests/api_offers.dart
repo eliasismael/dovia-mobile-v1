@@ -19,6 +19,7 @@ class DOVIAAPIOfferContextGroup {
   static GetOfferByIDCall getOfferByIDCall = GetOfferByIDCall();
   static AcceptOfferCall acceptOfferCall = AcceptOfferCall();
   static RejectOfferCall rejectOfferCall = RejectOfferCall();
+  static CancelOfferCall cancelOfferCall = CancelOfferCall();
   static SelectLegalAssociateCall selectLegalAssociateCall =
       SelectLegalAssociateCall();
   static SubmitBankAgentDataCall submitBankAgentDataCall =
@@ -232,6 +233,37 @@ class AcceptOfferCall {
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// POST /offers/{offerId}/cancel
+///
+/// El cliente retira su oferta inicial mientras el propietario todavía no
+/// respondió. Sin body; no le avisa al propietario.
+class CancelOfferCall {
+  Future<ApiCallResponse> call({
+    String? offerId = '',
+    String? authToken = '',
+  }) async {
+    final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Cancel Offer',
+      apiUrl: '$baseUrl/offers/$offerId/cancel',
+      callType: ApiCallType.POST,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      bodyType: BodyType.NONE,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

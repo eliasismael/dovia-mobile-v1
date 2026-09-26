@@ -1,3 +1,5 @@
+import '/shared_components/dovia_bottom_sheet/dovia_bottom_sheet.dart';
+import 'dart:async';
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -56,12 +58,21 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
   int? _minBathrooms;
   double? _minArea;
   double? _maxArea;
-  String _currency = 'USD';
   bool _showPriceOverlay = false;
 
   // ── Controllers ───────────────────────────────────────────
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
+
+  /// Texto buscable de cada propiedad (nombre, descripción, dirección, tipo y
+  /// precio), normalizado. Sale del JSON crudo porque el marcador no guarda
+  /// la descripción.
+  final Map<String, String> _searchTextById = {};
+
+  /// Foto principal de cada propiedad, para la tarjeta que abre el pin.
+  final Map<String, String> _imageById = {};
+  String _searchQuery = '';
+  Timer? _searchDebounce;
   final TextEditingController _minPriceController = TextEditingController();
   final FocusNode _minPriceFocus = FocusNode();
   final TextEditingController _maxPriceController = TextEditingController();
@@ -74,6 +85,7 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
       final result =
           await DOVIAAPIPropertyContextGroup.getPropertiesForMapCall.call();
       if (result.succeeded && mounted) {
+        _indexSearchText(result.jsonBody);
         setState(() {
           _allProperties = functions
               .parseMapMarkers(result.jsonBody)
@@ -86,6 +98,7 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _searchFocus.dispose();
     _minPriceController.dispose();
@@ -95,12 +108,79 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
     super.dispose();
   }
 
+  // ── Búsqueda por texto ────────────────────────────────────
+  // Misma lógica que el buscador del inicio: quedan sólo las propiedades que
+  // contienen todas las palabras escritas, sin importar tildes ni mayúsculas.
+  static String _normalize(String input) {
+    var s = input.toLowerCase();
+    const from = 'áàäâéèëêíìïîóòöôúùüûñ';
+    const to = 'aaaaeeeeiiiioooouuuun';
+    for (var i = 0; i < from.length; i++) {
+      s = s.replaceAll(from[i], to[i]);
+    }
+    return s;
+  }
+
+  void _indexSearchText(dynamic body) {
+    final data = body is Map ? body['data'] : null;
+    if (data is! List) return;
+    _searchTextById.clear();
+    _imageById.clear();
+    for (final raw in data) {
+      if (raw is! Map) continue;
+      String field(String path) {
+        final v = getJsonField(raw, path);
+        return v == null ? '' : v.toString();
+      }
+
+      final id = field(r'$.id');
+      if (id.isEmpty) continue;
+      final image = field(r'$.image');
+      if (image.isNotEmpty) _imageById[id] = image;
+      final price = field(r'$.price');
+      _searchTextById[id] = _normalize([
+        field(r'$.name'),
+        field(r'$.description.raw'),
+        field(r'$.location.address.fullAddress'),
+        field(r'$.propertyType'),
+        field(r'$.listingType'),
+        price,
+        price.replaceAll(RegExp(r'[^0-9]'), ''),
+      ].join(' '));
+    }
+  }
+
+  List<String> get _searchWords => _normalize(_searchQuery)
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty)
+      .map((w) => w.replaceAll(RegExp(r'^(q|\$)(?=\d)|(?<=\d)[.,](?=\d)'), ''))
+      .toList();
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      setState(() {
+        _searchQuery = value.trim();
+        _filteredProperties = _applyFilters(_allProperties);
+      });
+    });
+  }
+
   // ── Filter helpers ────────────────────────────────────────
   List<MapPropertyMarkerStruct> _applyFilters(
       List<MapPropertyMarkerStruct> all) {
+    final words = _searchWords;
+    final searched = words.isEmpty
+        ? all
+        : all.where((property) {
+            final text =
+                _searchTextById[property.id] ?? _normalize(property.name);
+            return words.every(text.contains);
+          }).toList();
     return functions
         .applyFiltersForMap(
-          all,
+          searched,
           _typeFilter,
           _listingFilter,
           _minPrice,
@@ -121,13 +201,9 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
 
   // ── Advanced filters sheet ────────────────────────────────
   Future<void> _openAdvancedFilters() async {
-    final result = await showModalBottomSheet<Map<String, dynamic>?>(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: false,
-      useSafeArea: true,
-      context: context,
-      builder: (ctx) => _AdvancedFilterSheet(
+    final result = await showDoviaBottomSheet<Map<String, dynamic>?>(
+      context,
+      child: _AdvancedFilterSheet(
         initialBedrooms: _minBedrooms,
         initialBathrooms: _minBathrooms,
         initialMinArea: _minArea,
@@ -208,25 +284,28 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
                         filteredProperties: _filteredProperties,
                         onIconSelected: (propertyId, name, price, listingType,
                             landArea, isFavorite) async {
-                          await showModalBottomSheet(
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            enableDrag: true,
-                            context: context,
-                            builder: (ctx) => Padding(
-                              padding: MediaQuery.viewInsetsOf(ctx),
-                              child: SizedBox(
-                                height: 360.0 +
-                                    MediaQuery.viewPaddingOf(ctx).bottom,
-                                child: HouseCardComponentWidget(
-                                  propertyId: propertyId,
-                                  name: name,
-                                  price: price,
-                                  listingType: listingType,
-                                  landArea: landArea,
-                                  isFavorite: isFavorite,
-                                ),
-                              ),
+                          MapPropertyMarkerStruct? marker;
+                          for (final p in _allProperties) {
+                            if (p.id == propertyId) {
+                              marker = p;
+                              break;
+                            }
+                          }
+                          await showDoviaBottomSheet(
+                            context,
+                            child: HouseCardComponentWidget(
+                              propertyId: propertyId,
+                              name: name,
+                              price: price,
+                              listingType: listingType,
+                              landArea: landArea,
+                              isFavorite: isFavorite,
+                              imageUrl: _imageById[propertyId],
+                              propertyType: marker?.propertyType,
+                              bedrooms: marker?.bedrooms,
+                              bathrooms: marker?.bathrooms,
+                              constructionArea:
+                                  marker?.constructionArea.round(),
                             ),
                           );
                         },
@@ -278,6 +357,8 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
                 controller: _searchController,
                 focusNode: _searchFocus,
                 autofocus: false,
+                onChanged: _onSearchChanged,
+                textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
@@ -382,14 +463,6 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
               hasChevron: true,
               onTap: () =>
                   setState(() => _showPriceOverlay = !_showPriceOverlay),
-            ),
-            const SizedBox(width: 8),
-            // Moneda
-            _buildPill(
-              label: _currency,
-              isActive: false,
-              onTap: () => setState(
-                  () => _currency = _currency == 'USD' ? 'GTQ' : 'USD'),
             ),
           ],
         ),
@@ -620,7 +693,7 @@ class _MapExplorerPageWidgetState extends State<MapExplorerPageWidget> {
 // ─────────────────────────────────────────────────────────────────────────────
 //  _AdvancedFilterSheet
 //  Full-height modal matching Figma node 1023-54897.
-//  Sections: Habitaciones, Baños, Parqueos (UI only), Área, Precio, Descripción.
+//  Sections: Habitaciones, Baños, Área, Precio.
 //  Returns Map with filter values via Navigator.pop, or null if cancelled.
 //  Returns {'clear': true} when the user taps "Cancelar".
 // ─────────────────────────────────────────────────────────────────────────────
@@ -652,17 +725,14 @@ class _AdvancedFilterSheet extends StatefulWidget {
 
 class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
   static const Color _aqua = Color(0xFF007376);
-  static const List<String> _numberOptions = ['1', '2', '3', '4+'];
 
   String? _bedrooms;
   String? _bathrooms;
-  String? _parkings; // UI only — not wired to filter logic yet
   String? _expandedSection; // tracks which selector is open
   late final TextEditingController _minAreaCtrl;
   late final TextEditingController _maxAreaCtrl;
   late final TextEditingController _minPriceCtrl;
   late final TextEditingController _maxPriceCtrl;
-  final TextEditingController _descriptionCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -689,7 +759,6 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
   void dispose() {
     _minAreaCtrl.dispose();
     _maxAreaCtrl.dispose();
-    _descriptionCtrl.dispose();
     // Note: _minPriceCtrl / _maxPriceCtrl are passed in and disposed by caller
     super.dispose();
   }
@@ -705,47 +774,62 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
     final theme = FlutterFlowTheme.of(context);
 
     return Container(
-      // ~90% of screen height
-      height: MediaQuery.of(context).size.height * 0.92,
-      // El contenido termina sobre los botones de Android.
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
-      decoration: BoxDecoration(
-        color: theme.primaryBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      // Toma el alto de su contenido, con un tope para que se vea arriba la
+      // pantalla oscurecida.
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 24,
+            offset: Offset(0, -4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // ── Header ────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Filtros',
-                      style: GoogleFonts.publicSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF00444B),
-                        letterSpacing: 0.32,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Es opcional',
-                      style: GoogleFonts.publicSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: _aqua,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Filtros opcionales',
+                  style: GoogleFonts.publicSans(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF00444B),
+                    letterSpacing: 0.32,
+                  ),
                 ),
+                const Spacer(),
+                // Vuelve todo a cero (también transacción, tipo y precio de
+                // la barra) y cierra la hoja.
+                TextButton(
+                  onPressed: () => Navigator.pop(context, {'clear': true}),
+                  style: TextButton.styleFrom(
+                    foregroundColor: _aqua,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    minimumSize: const Size(0, 32),
+                  ),
+                  child: Text(
+                    'Limpiar filtros',
+                    style: GoogleFonts.publicSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: _aqua,
+                      decoration: TextDecoration.underline,
+                      decorationColor: _aqua,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
@@ -762,19 +846,19 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           const Divider(height: 1),
 
           // ── Scrollable body ───────────────────────────────
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Habitaciones
                   _sectionLabel('Habitaciones', theme),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   _inlineDropdown(
                     key: const ValueKey('bedrooms'),
                     selected: _bedrooms,
@@ -790,11 +874,11 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                     }),
                     theme: theme,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Baños
                   _sectionLabel('Baños', theme),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   _inlineDropdown(
                     key: const ValueKey('bathrooms'),
                     selected: _bathrooms,
@@ -810,31 +894,11 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                     }),
                     theme: theme,
                   ),
-                  const SizedBox(height: 16),
-
-                  // Parqueos (UI only)
-                  _sectionLabel('Parqueos', theme),
-                  const SizedBox(height: 10),
-                  _inlineDropdown(
-                    key: const ValueKey('parkings'),
-                    selected: _parkings,
-                    placeholder: 'Selecciona el número de parqueos',
-                    isOpen: _expandedSection == 'parkings',
-                    onToggle: () => setState(() {
-                      _expandedSection =
-                          _expandedSection == 'parkings' ? null : 'parkings';
-                    }),
-                    onSelect: (v) => setState(() {
-                      _parkings = v;
-                      _expandedSection = null;
-                    }),
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Área de construcción
                   _sectionLabel('Área de construcción', theme),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
@@ -866,7 +930,7 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
 
                   // Precio
                   _sectionLabel('Precio', theme),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
@@ -901,13 +965,6 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                     ],
                   ),
                   const SizedBox(height: 20),
-
-                  // Descripción libre (AI)
-                  _sectionLabel(
-                      'Describe que otras características son importantes para ti',
-                      theme),
-                  const SizedBox(height: 10),
-                  _aiTextField(theme),
                 ],
               ),
             ),
@@ -917,19 +974,20 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
           const Divider(height: 1),
           Padding(
             padding: EdgeInsets.fromLTRB(
-                20, 16, 20, MediaQuery.paddingOf(context).bottom + 20),
+                20, 14, 20, MediaQuery.viewPaddingOf(context).bottom + 14),
             child: Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
                       foregroundColor: _aqua,
                       side: const BorderSide(color: _aqua),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    onPressed: () => Navigator.pop(context, {'clear': true}),
+                    onPressed: () => Navigator.pop(context),
                     child: Text('Cancelar',
                         style: GoogleFonts.publicSans(
                             fontSize: 14,
@@ -952,7 +1010,6 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                       Navigator.pop(context, {
                         'bedrooms': _parseOption(_bedrooms),
                         'bathrooms': _parseOption(_bathrooms),
-                        // parkings is UI-only for now — not returned
                         'minArea': _minAreaCtrl.text.isNotEmpty
                             ? double.tryParse(_minAreaCtrl.text)
                             : null,
@@ -1017,7 +1074,7 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFFFAFAFA),
+          color: const Color(0xFFF3F5F5),
           borderRadius: BorderRadius.circular(10),
           border: isOpen
               ? Border.all(color: _aqua, width: 1.2)
@@ -1030,10 +1087,11 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
             GestureDetector(
               onTap: onToggle,
               behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+              child: Container(
+                height: 44,
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Text(
@@ -1043,9 +1101,8 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                           fontWeight: FontWeight.w400,
                           color: hasValue
                               ? const Color(0xFF00444B)
-                              : const Color(0xFF888888).withValues(alpha: 0.5),
+                              : const Color(0xFF9A9A9A),
                           letterSpacing: 0.28,
-                          height: 49.849 / 14,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1077,7 +1134,7 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 13),
+                        horizontal: 15, vertical: 11),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? _aqua.withValues(alpha: 0.06)
@@ -1138,7 +1195,7 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
         prefixText: money ? '${currencySymbol()} ' : null,
         hintStyle: GoogleFonts.publicSans(
           fontSize: 14,
-          color: const Color(0xFF888888).withValues(alpha: 0.5),
+          color: const Color(0xFF9A9A9A),
           letterSpacing: 0.28,
         ),
         enabledBorder: OutlineInputBorder(
@@ -1150,43 +1207,9 @@ class _AdvancedFilterSheetState extends State<_AdvancedFilterSheet> {
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
         filled: true,
-        fillColor: const Color(0xFFFAFAFA),
+        fillColor: const Color(0xFFF3F5F5),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      ),
-      style: GoogleFonts.publicSans(
-        fontSize: 14,
-        color: const Color(0xFF00444B),
-      ),
-    );
-  }
-
-  Widget _aiTextField(FlutterFlowTheme theme) {
-    return TextField(
-      controller: _descriptionCtrl,
-      maxLines: 4,
-      keyboardType: TextInputType.multiline,
-      decoration: InputDecoration(
-        isDense: true,
-        hintText:
-            'Aquí puedes escribir en lenguaje natural lo que buscas y nuestra IA lo procesara',
-        hintStyle: GoogleFonts.publicSans(
-          fontSize: 14,
-          color: const Color(0xFF888888),
-          letterSpacing: 0.28,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: theme.alternate),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: _aqua, width: 1.5),
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-        filled: true,
-        fillColor: const Color(0xFFFAFAFA),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
       style: GoogleFonts.publicSans(
         fontSize: 14,

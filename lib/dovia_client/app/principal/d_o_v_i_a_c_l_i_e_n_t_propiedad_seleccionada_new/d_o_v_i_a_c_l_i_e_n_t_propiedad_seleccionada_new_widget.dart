@@ -34,10 +34,15 @@ class DOVIACLIENTPropiedadSeleccionadaNewWidget extends StatefulWidget {
     super.key,
     required this.propertyId,
     this.isReadOnly = false,
+    this.initialImageUrl,
   });
 
   final String? propertyId;
   final bool isReadOnly;
+
+  /// Foto que ya tenía quien abre la ficha (Ej: el pin del mapa): se muestra
+  /// de entrada mientras llega el resto, en vez de la imagen default.
+  final String? initialImageUrl;
 
   static String routeName = 'DOVIA_CLIENT_PropiedadSeleccionadaNew';
   static String routePath = '/propiedad';
@@ -86,6 +91,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     _model =
         createModel(context, () => DOVIACLIENTPropiedadSeleccionadaNewModel());
 
+    final initialImage = widget.initialImageUrl?.trim() ?? '';
+    if (initialImage.isNotEmpty) _carouselImages = [initialImage];
     _loadPropertyData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<VisitsRepository>().loadMyVisits();
@@ -241,8 +248,36 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
   /// ninguna se muestra la imagen que trae la app, para no dejar el hueco
   /// en blanco.
   List<Widget> _carouselItems() {
+    // Mientras carga la ficha se muestra un fondo neutro: la imagen default
+    // queda sólo para propiedades que de verdad no tienen fotos.
+    if (_carouselImages.isEmpty && _propertyData == null) {
+      return [_carouselLoadingItem()];
+    }
     final urls = _carouselImages.isEmpty ? <String>[''] : _carouselImages;
     return urls.map(_carouselItem).toList();
+  }
+
+  Widget _carouselLoadingItem() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.0),
+        child: Container(
+          width: double.infinity,
+          height: 220.0,
+          color: const Color(0xFFE9EEEE),
+          alignment: Alignment.center,
+          child: const SizedBox(
+            width: 22.0,
+            height: 22.0,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.0,
+              color: Color(0xFF007376),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   List<String> get _availabilityLabels {
@@ -393,6 +428,10 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                 : Image.network(
                     url,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) =>
+                        progress == null
+                            ? child
+                            : Container(color: const Color(0xFFE9EEEE)),
                     errorBuilder: (_, __, ___) => fallback(),
                   ),
           ),

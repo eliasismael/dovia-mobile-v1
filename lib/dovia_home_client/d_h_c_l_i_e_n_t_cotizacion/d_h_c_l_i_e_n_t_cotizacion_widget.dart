@@ -1,3 +1,4 @@
+import '/dovia_home_client/subscription_renewal_notice.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
@@ -11,7 +12,6 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -364,7 +364,10 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     if (addressId == null) return;
     // El formulario sólo se renderiza para Premium, pero el envío se vuelve a
     // verificar para que ninguna carrera de estado cree una cotización sin plan.
-    if (!context.read<PaymentsRepository>().hasActiveSubscription) return;
+    final payments = context.read<PaymentsRepository>();
+    if (!payments.hasActiveSubscription || payments.subscriptionNeedsRenewal) {
+      return;
+    }
 
     final selectedPhotos = _model.uploadedPhotos.length;
     safeSetState(() => _model.isSubmitting = true);
@@ -379,9 +382,11 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
 
       if (!response.succeeded) {
         if (mounted) {
+          // El motivo del backend (Ej: suscripción sin acceso vigente) le
+          // dice al cliente qué hacer; el genérico sólo si no llegó ninguno.
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
+            SnackBar(
+              content: Text(doviaHomeErrorMessage(response) ??
                   'No se pudo enviar la solicitud de cotización. Intenta de nuevo.'),
             ),
           );
@@ -498,6 +503,17 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                       // los planes, y puede volver con la flecha del header.
                       child: PremiumUpsellPopupWidget(dismissOnTap: false),
                     )
+                  else if (payments.subscriptionNeedsRenewal)
+                    const Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          20.0, 40.0, 20.0, 120.0),
+                      child: SubscriptionRenewalNotice(
+                        message: 'Las cotizaciones son un beneficio de tu '
+                            'plan y quedan en pausa hasta que lo renueves. '
+                            'Reactívalo para enviar tu requerimiento a la red '
+                            'de proveedores.',
+                      ),
+                    )
                   else
                     _requirementForm(),
                 ],
@@ -581,7 +597,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
   /// (opcional) y lugar del servicio. Sólo se renderiza para Premium.
   Widget _requirementForm() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 120.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 150.0),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -590,6 +606,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
           const SizedBox(height: 12.0),
           _descriptionField(),
           const SizedBox(height: 18.0),
+          const SizedBox(height: 6.0),
           _sectionLabel('Agregar fotos'),
           const SizedBox(height: 10.0),
           Text(
@@ -602,8 +619,11 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                 ),
           ),
           const SizedBox(height: 12.0),
-          _photoDropZone(),
-          if (_model.uploadedPhotos.isNotEmpty) _buildPhotoThumbnails(),
+          // Sin fotos, el recuadro grande; con fotos, la grilla con el +.
+          if (_model.uploadedPhotos.isEmpty)
+            _photoDropZone()
+          else
+            _buildPhotoThumbnails(),
           const SizedBox(height: 24.0),
           _locationSelector(),
           const SizedBox(height: 30.0),
@@ -681,9 +701,8 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
     );
   }
 
-  /// Zona de carga multimedia. Al tapear abre el selector nativo (Cámara/Galería).
-  /// El asset ya trae la caja completa (fondo + ícono), igual que en el resto
-  /// de la app (subir_archivo, reportar_problema, materiales, etc.).
+  /// Zona de carga multimedia, igual que en la solicitud de servicio. Al
+  /// tapear abre el selector nativo (Cámara/Galería).
   Widget _photoDropZone() {
     return InkWell(
       splashColor: Colors.transparent,
@@ -692,87 +711,148 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
       highlightColor: Colors.transparent,
       borderRadius: BorderRadius.circular(10.0),
       onTap: _model.isPhotoUploading ? null : _pickPhotos,
-      child: Stack(
+      child: Container(
+        width: double.infinity,
+        height: 104.0,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
         alignment: Alignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: SvgPicture.asset(
-              'assets/images/AddMediaImage.svg',
-              width: double.infinity,
-              height: 104.0,
-              fit: BoxFit.cover,
-            ),
-          ),
-          if (_model.isPhotoUploading)
-            const SizedBox(
-              width: 24.0,
-              height: 24.0,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.0,
-                color: Color(0xFF007376),
+        child: _model.isPhotoUploading
+            ? const SizedBox(
+                width: 24.0,
+                height: 24.0,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.0,
+                  color: Color(0xFF007376),
+                ),
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40.0,
+                    height: 40.0,
+                    decoration: const BoxDecoration(
+                      color: Color(0x2670ACAD),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.add_a_photo_outlined,
+                      size: 20.0,
+                      color: Color(0xFF007376),
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    'Toca para agregar fotos',
+                    style: GoogleFonts.publicSans(
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF007376),
+                    ),
+                  ),
+                ],
               ),
-            ),
-        ],
       ),
     );
   }
 
+  /// Grilla del ancho completo, igual que en el checklist del Lister HQ: con
+  /// más fotos hay más columnas (hasta 4) y cada miniatura se achica. La
+  /// última celda es el botón + para seguir agregando.
   Widget _buildPhotoThumbnails() {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-      child: Wrap(
-        spacing: 10.0,
-        runSpacing: 10.0,
-        children: List.generate(_model.uploadedPhotos.length, (index) {
-          final photo = _model.uploadedPhotos[index];
-          return Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: photo.bytes != null
-                    ? Image.memory(
-                        photo.bytes!,
-                        width: 90.0,
-                        height: 90.0,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: 90.0,
-                        height: 90.0,
-                        color: FlutterFlowTheme.of(context).alternate,
-                      ),
-              ),
-              Positioned(
-                top: 4.0,
-                right: 4.0,
-                child: InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () =>
-                      safeSetState(() => _model.uploadedPhotos.removeAt(index)),
-                  child: Container(
-                    width: 22.0,
-                    height: 22.0,
-                    decoration: const BoxDecoration(
-                      color: Color(0xCC000000),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 16.0,
+    final photos = _model.uploadedPhotos;
+    final columns = (photos.length + 1).clamp(1, 4);
+    const spacing = 8.0;
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final tileWidth =
+          (constraints.maxWidth - spacing * (columns - 1)) / columns;
+      final tileHeight = tileWidth.clamp(0.0, 160.0);
+
+      return Wrap(
+        spacing: spacing,
+        runSpacing: spacing,
+        children: [
+          for (var index = 0; index < photos.length; index++)
+            SizedBox(
+              width: tileWidth,
+              height: tileHeight,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: photos[index].bytes != null
+                          ? Image.memory(photos[index].bytes!,
+                              fit: BoxFit.cover)
+                          : Container(
+                              color: FlutterFlowTheme.of(context).alternate,
+                            ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    top: 4.0,
+                    right: 4.0,
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () => safeSetState(() => photos.removeAt(index)),
+                      child: Container(
+                        width: 22.0,
+                        height: 22.0,
+                        decoration: const BoxDecoration(
+                          color: Color(0xCC000000),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 16.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          );
-        }),
-      ),
-    );
+            ),
+          InkWell(
+            splashColor: Colors.transparent,
+            focusColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onTap: _model.isPhotoUploading ? null : _pickPhotos,
+            child: Container(
+              width: tileWidth,
+              height: tileHeight,
+              decoration: BoxDecoration(
+                color: const Color(0x2670ACAD),
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              alignment: Alignment.center,
+              child: _model.isPhotoUploading
+                  ? const SizedBox(
+                      width: 22.0,
+                      height: 22.0,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        color: Color(0xFF007376),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.add,
+                      size: 28.0,
+                      color: Color(0xFF007376),
+                    ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   // ---------------------------------------------------------------------------

@@ -26,6 +26,12 @@ List<MapPropertyMarkerStruct> parseMapMarkers(dynamic apiResponse) {
       propertyType: item['propertyType'] as String,
       isFavorite: item['isFavorite'] == true,
       landArea: landAreaRaw != null ? (landAreaRaw as num).toDouble() : null,
+      bedrooms: general is Map ? (general['bedrooms'] as num?)?.toInt() : null,
+      bathrooms:
+          general is Map ? (general['bathrooms'] as num?)?.toInt() : null,
+      constructionArea: general is Map
+          ? (general['constructionArea'] as num?)?.toDouble()
+          : null,
     );
   }).toList();
 }

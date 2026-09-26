@@ -17,6 +17,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.hideActions = false,
     this.showCurrency = true,
     this.showMap = true,
+    this.mapActive = false,
     this.showLogo = true,
     this.showCart = false,
     this.showNotifications = false,
@@ -28,6 +29,10 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   final bool hideActions;
   final bool showCurrency;
   final bool showMap;
+
+  /// La pantalla actual es el mapa: el ícono se pinta relleno en verde
+  /// oscuro para marcar dónde está el usuario.
+  final bool mapActive;
   final bool showLogo;
   final bool showCart;
 
@@ -204,8 +209,10 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                         width: 40.0,
                         height: 40.0,
                         decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
+                          color: widget.mapActive
+                              ? const Color(0xFF00444B)
+                              : FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
                           shape: BoxShape.circle,
                         ),
                         child: ClipRRect(
@@ -215,6 +222,10 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                             width: 8.0,
                             height: 8.0,
                             fit: BoxFit.none,
+                            colorFilter: widget.mapActive
+                                ? const ColorFilter.mode(
+                                    Colors.white, BlendMode.srcIn)
+                                : null,
                           ),
                         ),
                       ),

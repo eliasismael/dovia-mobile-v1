@@ -1,4 +1,3 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
@@ -19,6 +18,11 @@ class HouseCardComponentWidget extends StatefulWidget {
     required this.listingType,
     required this.landArea,
     required this.isFavorite,
+    this.imageUrl,
+    this.propertyType,
+    this.bedrooms,
+    this.bathrooms,
+    this.constructionArea,
   });
 
   final String? propertyId;
@@ -27,6 +31,11 @@ class HouseCardComponentWidget extends StatefulWidget {
   final String? listingType;
   final double? landArea;
   final bool? isFavorite;
+  final String? imageUrl;
+  final String? propertyType;
+  final int? bedrooms;
+  final int? bathrooms;
+  final int? constructionArea;
 
   @override
   State<HouseCardComponentWidget> createState() =>
@@ -60,24 +69,46 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       // Se abre desde abajo: el contenido termina sobre los botones de Android.
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).tertiary,
+      padding: EdgeInsets.fromLTRB(
+          20.0, 12.0, 20.0, MediaQuery.viewPaddingOf(context).bottom + 16.0),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 24.0,
+            offset: Offset(0.0, -4.0),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Container(
+            width: 40.0,
+            height: 4.0,
+            margin: const EdgeInsets.only(bottom: 12.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDFDFDF),
+              borderRadius: BorderRadius.circular(2.0),
+            ),
+          ),
           SizedBox(
-            width: MediaQuery.sizeOf(context).width * 1.0,
-            height: 250.0,
+            width: double.infinity,
             child: custom_widgets.DoviaClientHouseCard(
-              width: MediaQuery.sizeOf(context).width * 1.0,
-              height: 250.0,
-              imageUrl:
-                  'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
+              width: double.infinity,
+              height: 0.0,
+              // La foto real que ya trae el mapa; la default sólo si no hay.
+              imageUrl: widget.imageUrl ?? '',
+              propertyType: widget.propertyType,
+              bedrooms: widget.bedrooms,
+              bathrooms: widget.bathrooms,
+              constructionArea: widget.constructionArea,
+              landArea: widget.landArea,
               isFavorite: widget.isFavorite,
               propertyId: widget.propertyId,
               authToken: currentAuthenticationToken,
@@ -108,7 +139,7 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
                           isCreatingNewFolderPARAM: false,
                           houseId: widget.propertyId,
                           propertyName: widget.name,
-                          propertyImage: '',
+                          propertyImage: widget.imageUrl ?? '',
                           propertyIsFavorite: false,
                         ),
                       ),
@@ -134,7 +165,7 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
                           isCreatingNewFolderPARAM: false,
                           houseId: widget.propertyId,
                           propertyName: widget.name,
-                          propertyImage: '',
+                          propertyImage: widget.imageUrl ?? '',
                           propertyIsFavorite: true,
                         ),
                       ),
@@ -157,6 +188,10 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
                     queryParameters: {
                       'propertyId': serializeParam(
                         widget.propertyId,
+                        ParamType.String,
+                      ),
+                      'initialImageUrl': serializeParam(
+                        widget.imageUrl,
                         ParamType.String,
                       ),
                     }.withoutNulls,

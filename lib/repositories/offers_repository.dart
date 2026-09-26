@@ -385,22 +385,29 @@ class OffersRepository extends ChangeNotifier {
 
   /// Retira una oferta enviada por el cliente.
   ///
-  /// El backend no tiene un endpoint propio de cancelación: retirar es
-  /// rechazar la negociación desde el lado del cliente, igual que ya lo hace
-  /// la pantalla de detalle del comprador.
+  /// La oferta inicial, mientras el propietario no respondió, se cancela con
+  /// `POST /offers/{id}/cancel` (el backend no deja rechazarla porque el turno
+  /// es del dueño). Una vez que hubo contraoferta, retirar es rechazar la
+  /// negociación desde el lado del cliente.
   Future<Result<bool>> withdrawMyOffer({
     required String offerId,
     required String reason,
+    bool isInitialOffer = false,
   }) async {
     _isLoading = true;
     notifyListeners();
 
-    final response = await DOVIAAPIOfferContextGroup.rejectOfferCall.call(
-      offerId: offerId,
-      authToken: currentAuthenticationToken ?? '',
-      rejectedBy: 'CLIENT',
-      reason: reason,
-    );
+    final response = isInitialOffer
+        ? await DOVIAAPIOfferContextGroup.cancelOfferCall.call(
+            offerId: offerId,
+            authToken: currentAuthenticationToken ?? '',
+          )
+        : await DOVIAAPIOfferContextGroup.rejectOfferCall.call(
+            offerId: offerId,
+            authToken: currentAuthenticationToken ?? '',
+            rejectedBy: 'CLIENT',
+            reason: reason,
+          );
 
     _isLoading = false;
     notifyListeners();

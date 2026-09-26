@@ -1128,6 +1128,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                   ParamType.bool,
                 ) ??
                 false,
+            initialImageUrl: params.getParam(
+              'initialImageUrl',
+              ParamType.String,
+            ),
           ),
         ),
         FFRoute(

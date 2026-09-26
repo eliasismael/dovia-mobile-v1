@@ -53,10 +53,6 @@ class DoviaMapExplorerWidget extends StatefulWidget {
 }
 
 class _DoviaMapExplorerWidgetState extends State<DoviaMapExplorerWidget> {
-  // ── Dovia Design Tokens ──────────────────────────────────
-  static const Color aquaColor = Color(0xFF007376);
-  static const Color aquaDark = Color(0xFF005456);
-
   // ── Map Controller ───────────────────────────────────────
   final MapController _mapController = MapController();
 
@@ -240,9 +236,6 @@ class _DoviaMapExplorerWidgetState extends State<DoviaMapExplorerWidget> {
               ),
             ),
 
-            // ── Title badge ─────────────────────────────────
-            Positioned(top: 16, left: 16, child: _buildTitleBadge()),
-
             // ── Count badge ─────────────────────────────────
             Positioned(top: 16, right: 16, child: _buildCountBadge()),
           ],
@@ -254,55 +247,6 @@ class _DoviaMapExplorerWidgetState extends State<DoviaMapExplorerWidget> {
   // ══════════════════════════════════════════════════════════
   //  BADGE WIDGETS
   // ══════════════════════════════════════════════════════════
-
-  Widget _buildTitleBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: aquaColor.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: aquaDark.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: const Color(0xFF4DD0E1),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF4DD0E1).withValues(alpha: 0.6),
-                  blurRadius: 6,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'Dovia Explorer',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCountBadge() {
     return Container(

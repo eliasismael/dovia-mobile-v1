@@ -107,6 +107,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
     final result = await context.read<OffersRepository>().withdrawMyOffer(
           offerId: offerId,
           reason: reason,
+          isInitialOffer: _detail?.isInitialOffer ?? false,
         );
     if (!mounted) return;
     safeSetState(() => _isWithdrawing = false);

@@ -66,6 +66,8 @@ class _MapWidgetPageTestWidgetState extends State<MapWidgetPageTestWidget> {
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
                       title: 'Mapa',
+                      mapActive: true,
+                      showCurrency: false,
                     ),
                   ),
                   Expanded(

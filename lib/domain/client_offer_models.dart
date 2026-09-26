@@ -16,6 +16,7 @@ enum ClientOfferLane { realizadas, contraoferta, aceptada }
 enum ClientOfferFilter {
   enviada,
   rechazada,
+  contraofertaRecibida,
   contraofertaEnviada,
   contraofertaRechazada,
   procesoLegal,
@@ -66,6 +67,7 @@ extension ClientOfferLaneX on ClientOfferLane {
         return const [ClientOfferFilter.enviada, ClientOfferFilter.rechazada];
       case ClientOfferLane.contraoferta:
         return const [
+          ClientOfferFilter.contraofertaRecibida,
           ClientOfferFilter.contraofertaEnviada,
           ClientOfferFilter.contraofertaRechazada,
         ];
@@ -110,8 +112,10 @@ extension ClientOfferFilterX on ClientOfferFilter {
       case ClientOfferFilter.rechazada:
       case ClientOfferFilter.contraofertaRechazada:
         return 'Rechazada';
+      case ClientOfferFilter.contraofertaRecibida:
+        return 'Recibidas';
       case ClientOfferFilter.contraofertaEnviada:
-        return 'Enviado';
+        return 'Enviadas';
       case ClientOfferFilter.procesoLegal:
         return 'Proceso Legal';
       case ClientOfferFilter.finalizada:
@@ -127,8 +131,10 @@ extension ClientOfferFilterX on ClientOfferFilter {
         return 'Todavía no has enviado ofertas.';
       case ClientOfferFilter.rechazada:
         return 'Ninguna de tus ofertas fue rechazada.';
-      case ClientOfferFilter.contraofertaEnviada:
+      case ClientOfferFilter.contraofertaRecibida:
         return 'No tienes contraofertas esperando tu respuesta.';
+      case ClientOfferFilter.contraofertaEnviada:
+        return 'No tienes contraofertas esperando al propietario.';
       case ClientOfferFilter.contraofertaRechazada:
         return 'Ninguna negociación terminó en rechazo.';
       case ClientOfferFilter.procesoLegal:
@@ -500,8 +506,7 @@ class ClientOffersBoard {
   /// (una en contraoferta sí aparece en "realizadas" y en "contraoferta").
   List<ClientOffer> inLane(ClientOfferLane lane) {
     if (lane == ClientOfferLane.realizadas) {
-      return _newestFirst(
-          all.where((o) => o.lane != ClientOfferLane.aceptada));
+      return _newestFirst(all.where((o) => o.lane != ClientOfferLane.aceptada));
     }
     return _newestFirst(all.where((o) => o.lane == lane));
   }
@@ -514,12 +519,17 @@ class ClientOffersBoard {
         all.where((offer) => switch (filter) {
               ClientOfferFilter.enviada => offer.isSentAwaitingOwnerResponse,
               ClientOfferFilter.rechazada => offer.wasRejectedByOwner,
-              // Toda negociación viva, no sólo la que espera respuesta del
-              // cliente: si el cliente ya recontraofertó, la pelota está del
-              // otro lado pero el trato sigue en curso y tiene que verse. De
-              // quién es el turno lo dice el punto rojo de la tarjeta.
+              // Las negociaciones vivas se reparten por turno: "Recibidas"
+              // cuando la última contraoferta la hizo el propietario y
+              // "Enviadas" cuando la hizo el cliente y espera al dueño.
+              ClientOfferFilter.contraofertaRecibida =>
+                offer.lane == ClientOfferLane.contraoferta &&
+                    offer.isActive &&
+                    offer.awaitsClientResponse,
               ClientOfferFilter.contraofertaEnviada =>
-                offer.lane == ClientOfferLane.contraoferta && offer.isActive,
+                offer.lane == ClientOfferLane.contraoferta &&
+                    offer.isActive &&
+                    !offer.awaitsClientResponse,
               ClientOfferFilter.contraofertaRechazada =>
                 offer.lane == ClientOfferLane.contraoferta && offer.isTerminal,
               ClientOfferFilter.procesoLegal ||

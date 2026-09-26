@@ -288,7 +288,11 @@ class _ClientCounterOfferContentState extends State<ClientCounterOfferContent> {
               const Divider(color: _aqua, thickness: 1.0),
               const SizedBox(height: 12.0),
               _termsSection(
-                title: 'Propuesta del propietario',
+                // Al contraofertar, el formulario deja de ser la propuesta
+                // del propietario y pasa a ser la del cliente.
+                title: _isCounterEditing
+                    ? 'Tu contraoferta'
+                    : 'Propuesta del propietario',
                 terms: widget.detail.ownerTerms,
                 readOnly: !_isCounterEditing,
                 background: _surface,
@@ -654,15 +658,35 @@ class _ClientCounterOfferContentState extends State<ClientCounterOfferContent> {
   }
 
   Widget _resolutionActions() {
-    final actions = [
-      _outlineButton('Rechazar', _startReject, const ValueKey('reject-offer')),
-      _outlineButton(
-        _isCounterEditing ? 'Enviar contraoferta' : 'Contraoferta',
-        _isCounterEditing ? _sendCounterOffer : _startCounterOffer,
-        const ValueKey('counter-offer'),
-      ),
-      _primaryButton('Aceptar', _accept, const ValueKey('accept-offer')),
-    ];
+    // Editando la contraoferta sólo quedan enviarla o volver atrás: "Aceptar"
+    // desaparece para que no parezca que confirma lo que se está escribiendo.
+    final actions = _isCounterEditing
+        ? [
+            _outlineButton(
+              'Cancelar',
+              _cancelCounterOffer,
+              const ValueKey('cancel-counter-offer'),
+            ),
+            _primaryButton(
+              'Enviar contraoferta',
+              _sendCounterOffer,
+              const ValueKey('counter-offer'),
+            ),
+          ]
+        : [
+            _outlineButton(
+                'Rechazar', _startReject, const ValueKey('reject-offer')),
+            _outlineButton(
+              'Contraofertar',
+              _startCounterOffer,
+              const ValueKey('counter-offer'),
+            ),
+            _primaryButton(
+              'Aceptar propuesta',
+              _accept,
+              const ValueKey('accept-offer'),
+            ),
+          ];
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 620.0) {
@@ -834,6 +858,21 @@ class _ClientCounterOfferContentState extends State<ClientCounterOfferContent> {
       _isCounterEditing = true;
       _showRejectReason = false;
       _validationMessage = null;
+    });
+  }
+
+  /// Descarta lo escrito y vuelve a mostrar la propuesta del propietario.
+  void _cancelCounterOffer() {
+    setState(() {
+      _isCounterEditing = false;
+      _validationMessage = null;
+      _selectedCurrency = widget.detail.ownerTerms.currency;
+      for (final field in widget.detail.ownerTerms.fields) {
+        final controller = _controllers[field.key];
+        if (controller == null) continue;
+        controller.text =
+            _isMoney(field.key) ? formatAmountText(field.value) : field.value;
+      }
     });
   }
 

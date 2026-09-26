@@ -276,6 +276,16 @@ class Subscription {
   /// `GET /subscriptions/current`).
   bool get keepsBenefits => isActive || isPastDue || isCancelScheduled;
 
+  DateTime? get periodEnd =>
+      currentPeriodEnd == null ? null : DateTime.tryParse(currentPeriodEnd!);
+
+  /// El período pagado ya terminó. El backend sólo aplica los beneficios con
+  /// `currentPeriodEnd` en el futuro, aunque el estado siga siendo `ACTIVE`.
+  bool get periodExpired {
+    final end = periodEnd;
+    return end != null && !end.isAfter(DateTime.now());
+  }
+
   factory Subscription.fromJson(Map<String, dynamic> json) {
     final data = json['data'] as Map<String, dynamic>? ?? json;
     return Subscription(

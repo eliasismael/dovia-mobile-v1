@@ -1,3 +1,4 @@
+import '/dovia_home_client/subscription_renewal_notice.dart';
 import '/core/result.dart';
 import '/domain/payment_models.dart';
 import '/dovia_home_client/checkout_launcher.dart';
@@ -273,6 +274,8 @@ class _DHCLIENTValorVisitaPageWidgetState
       return;
     }
 
+    if (await _settleExistingOrder()) return;
+
     final serviceRequestId = DHCLIENTValorVisitaPageWidget.serviceRequestId;
     final amount = _amount;
     if (serviceRequestId == null || amount == null) {
@@ -334,8 +337,16 @@ class _DHCLIENTValorVisitaPageWidgetState
   }
 
   Future<void> _chargeSubscriberPrice() async {
+    if (_isPaid ||
+        _phase == _CheckoutPhase.creating ||
+        _phase == _CheckoutPhase.waiting) {
+      return;
+    }
+    if (await _settleExistingOrder()) return;
+
     final serviceRequestId = DHCLIENTValorVisitaPageWidget.serviceRequestId;
-    final amount = _amount;
+    // Con plan se cobra el precio de suscriptor si el backend lo distingue.
+    final amount = _subscriberAmount ?? _amount;
     if (serviceRequestId == null || amount == null) return;
 
     if (amount <= 0) {
@@ -393,6 +404,46 @@ class _DHCLIENTValorVisitaPageWidgetState
       _paymentOrderId = order.id;
     });
     _pollUntilResolved();
+  }
+
+  /// Si quedó una orden de un intento anterior (Ej: se agotó la espera del
+  /// sondeo y el cliente vuelve a tocar el botón), se consulta antes de crear
+  /// otra: sin esto un pago que Recurrente confirmó tarde se cobraría dos
+  /// veces. Devuelve `true` si la orden existente resolvió la acción.
+  Future<bool> _settleExistingOrder() async {
+    final orderId = _paymentOrderId;
+    if (orderId == null) return false;
+
+    final result = await context
+        .read<PaymentsRepository>()
+        .getPaymentStatus(paymentOrderId: orderId);
+    if (!mounted) return true;
+    final order = result.dataOrNull;
+    if (order == null) return false;
+
+    final method = _pendingMethod ?? 'direct';
+    if (order.isPaid) {
+      safeSetState(() {
+        _paidMethod = method;
+        _phase = _CheckoutPhase.idle;
+      });
+      return true;
+    }
+    if (order.status == PaymentStatus.pending ||
+        order.status == PaymentStatus.inProcess) {
+      if (order.hasActiveCheckout) {
+        await _openCheckout(order, method: method);
+      } else {
+        safeSetState(() => _phase = _CheckoutPhase.waiting);
+        _pollUntilResolved();
+      }
+      return true;
+    }
+    if (order.isResumable) {
+      await _resumeCheckout();
+      return true;
+    }
+    return false;
   }
 
   /// Reanuda una orden que terminó mal. No se vuelve a crear un checkout de
@@ -727,6 +778,55 @@ class _DHCLIENTValorVisitaPageWidgetState
         _phase == _CheckoutPhase.creating || _phase == _CheckoutPhase.waiting;
     final subscriberAmount = _subscriberAmount;
 
+    // Con suscripción activa no hay nada que venderle: un solo precio, el
+    // del plan, y un solo botón para pagarlo.
+    final payments = context.watch<PaymentsRepository>();
+    if (payments.subscriptionNeedsRenewal) {
+      // Con el plan vencido el backend cotiza la visita a precio regular: se
+      // cobra eso y se avisa por qué no aplica el precio del plan.
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SubscriptionRenewalNotice(
+            message: 'Tu plan venció, así que esta visita se cobra a precio '
+                'regular. Reactívalo para volver a pagar el precio de '
+                'suscriptor.',
+          ),
+          const SizedBox(height: 20.0),
+          Text(
+            'Precio del servicio',
+            textAlign: TextAlign.center,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(),
+                  color: const Color(0xFF00444B),
+                  fontSize: 17.0,
+                  letterSpacing: -0.34,
+                ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+            child: _buildPrice(srFormatAmount(_amount!, _currency), ' /visita'),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+            child: _buildSoftButton(
+              'Pagar',
+              paid: _paidMethod != null,
+              onTap: busy ? null : _payDirect,
+            ),
+          ),
+          _buildCheckoutStatus(),
+        ],
+      );
+    }
+    if (payments.hasActiveSubscription) {
+      return _buildSubscriberContent(
+        amount: subscriberAmount ?? _amount!,
+        busy: busy,
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -781,6 +881,50 @@ class _DHCLIENTValorVisitaPageWidgetState
             onTap: busy ? null : _goToSubscription,
           ),
         ),
+        _buildCheckoutStatus(),
+      ],
+    );
+  }
+
+  Widget _buildSubscriberContent({required num amount, required bool busy}) {
+    final included = amount <= 0;
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Precio con tu plan Dovia Home',
+          textAlign: TextAlign.center,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.publicSans(),
+                color: const Color(0xFF00444B),
+                fontSize: 17.0,
+                letterSpacing: -0.34,
+              ),
+        ),
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+          child: included
+              ? Text(
+                  'Incluido en tu plan',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.publicSans(
+                    fontSize: 26.0,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF007376),
+                  ),
+                )
+              : _buildPrice(srFormatAmount(amount, _currency), ' /visita'),
+        ),
+        if (!included)
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+            child: _buildSoftButton(
+              'Pagar',
+              paid: _paidMethod != null,
+              onTap: busy ? null : _chargeSubscriberPrice,
+            ),
+          ),
         _buildCheckoutStatus(),
       ],
     );

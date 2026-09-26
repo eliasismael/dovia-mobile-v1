@@ -90,6 +90,7 @@ class CounterOfferTerms {
             key: CounterOfferFieldKey.propertyUse,
             label: 'Uso de la propiedad',
             value: offerStr(data['propertyUse']) ?? '',
+            editable: false,
           ),
           CounterOfferField(
             key: CounterOfferFieldKey.considerations,
@@ -119,6 +120,9 @@ class CounterOfferTerms {
         value: text,
         kind: kind,
         half: half,
+        // Sólo se negocia lo que acepta el backend en la contraoferta; el
+        // resto se muestra pero queda fijo.
+        editable: _negotiableKeys.contains(key),
         suffix: suffix,
       ));
     }
@@ -233,6 +237,9 @@ class CounterOfferTerms {
 
   String get paymentMethodLabel => _paymentMethodLabel(paymentMethod);
 
+  /// Arma `counterOfferData` con exactamente los campos que admite el
+  /// esquema de `POST /offers/{id}/counter-offer` para cada método de pago:
+  /// el API Gateway rechaza cualquier campo de más con "Invalid request body".
   Map<String, dynamic> toCounterOfferPayload(
     Map<CounterOfferFieldKey, String> values, {
     required String selectedCurrency,
@@ -248,6 +255,7 @@ class CounterOfferTerms {
     };
 
     for (final field in fields) {
+      if (!_negotiableKeys.contains(field.key)) continue;
       final value = (values[field.key] ?? field.value).trim();
       switch (field.key) {
         case CounterOfferFieldKey.paymentMethod:
@@ -274,17 +282,43 @@ class CounterOfferTerms {
         case CounterOfferFieldKey.promiseTimeMonths:
           payload['promiseTimeMonths'] = _parseNumber(value);
         case CounterOfferFieldKey.contractStartDate:
-          payload['contractStartDate'] = value;
+          payload['contractStartDate'] = _isoDateTime(value);
         case CounterOfferFieldKey.contractEndDate:
-          payload['contractEndDate'] = value;
+          payload['contractEndDate'] = _isoDateTime(value);
         case CounterOfferFieldKey.propertyUse:
           payload['propertyUse'] = value;
         case CounterOfferFieldKey.considerations:
           payload['considerations'] = value;
       }
     }
+    payload.removeWhere((_, value) => value == null);
     return payload;
   }
+}
+
+/// Lo que el propietario y el cliente pueden mover en una contraoferta. Es
+/// el esquema del backend: método de pago, estado del crédito, tiempos
+/// estimados, pago final y uso de la propiedad quedan como en la oferta.
+const Set<CounterOfferFieldKey> _negotiableKeys = {
+  CounterOfferFieldKey.proposedAmount,
+  CounterOfferFieldKey.bankName,
+  CounterOfferFieldKey.downPaymentPercentage,
+  CounterOfferFieldKey.initialReserve,
+  CounterOfferFieldKey.promiseTimeMonths,
+  CounterOfferFieldKey.contractStartDate,
+  CounterOfferFieldKey.contractEndDate,
+  CounterOfferFieldKey.considerations,
+};
+
+/// El backend pide fecha y hora ISO 8601; las fechas llegan como texto.
+String _isoDateTime(String value) {
+  final parsed = DateTime.tryParse(value);
+  if (parsed == null) return value;
+  final utc = parsed.isUtc
+      ? parsed
+      : DateTime.utc(parsed.year, parsed.month, parsed.day, parsed.hour,
+          parsed.minute, parsed.second);
+  return utc.toIso8601String();
 }
 
 class ClientCounterOfferDetail {

@@ -500,19 +500,21 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // El nombre de la casa identifica el expediente de un vistazo;
+                // el ID y la dirección quedan como dato secundario.
                 Text(
-                  'ID inmueble: ${_shortId(process.propertyId)}',
+                  process.title,
                   style: GoogleFonts.publicSans(
                     color: _textDark,
                     fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6.0),
                 Text(
-                  'Dirección: ${_addressLabel(process)}',
+                  'ID ${_shortId(process.propertyId)} · ${_addressLabel(process)}',
                   style: GoogleFonts.publicSans(
                     color: _aqua,
                     fontSize: 14.0,

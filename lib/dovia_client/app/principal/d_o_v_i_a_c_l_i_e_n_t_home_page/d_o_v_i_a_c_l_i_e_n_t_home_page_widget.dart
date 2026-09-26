@@ -254,7 +254,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     if (!scrollToNew) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final controller = _carouselControllers[carouselKey];
-      if (controller == null || !controller.hasClients) return;
+      if (controller == null ||
+          !controller.hasClients ||
+          !controller.position.hasContentDimensions) {
+        return;
+      }
       final target = (loaded * _carouselItemExtent)
           .clamp(0.0, controller.position.maxScrollExtent);
       controller.animateTo(target,
@@ -267,7 +271,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   /// final, la de avanzar carga el bloque siguiente.
   void _moveCarousel(String carouselKey, int step, int total) {
     final controller = _carouselController(carouselKey);
-    if (!controller.hasClients) return;
+    if (!controller.hasClients || !controller.position.hasContentDimensions) {
+      return;
+    }
     final position = controller.position;
     if (step > 0 && position.pixels >= position.maxScrollExtent - 1) {
       _loadMoreCarousel(carouselKey, total, scrollToNew: true);
@@ -347,7 +353,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
         AnimatedBuilder(
           animation: controller,
           builder: (context, _) {
-            final hasClients = controller.hasClients;
+            final hasClients = controller.hasClients &&
+                controller.position.hasContentDimensions;
             final pixels = hasClients ? controller.position.pixels : 0.0;
             final max = hasClients ? controller.position.maxScrollExtent : 0.0;
             final hasPrevious = pixels > 1;

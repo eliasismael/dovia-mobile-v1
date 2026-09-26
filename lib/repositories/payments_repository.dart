@@ -36,6 +36,12 @@ class PaymentsRepository extends ChangeNotifier {
   bool get hasActiveSubscription =>
       _currentSubscription?.keepsBenefits ?? false;
 
+  /// Sigue suscripto pero el período venció: la UI mantiene la cara de
+  /// suscriptor y en los puntos clave pide reactivar el plan, porque el
+  /// backend no le aplica los beneficios hasta que se renueve.
+  bool get subscriptionNeedsRenewal =>
+      hasActiveSubscription && _currentSubscription!.periodExpired;
+
   /// Si ya se resolvió el estado de suscripción. Permite a la UI distinguir
   /// "todavía no sé" de "no tiene suscripción" y así no mostrarle upsells de
   /// Premium a un cliente que sí paga mientras carga.
