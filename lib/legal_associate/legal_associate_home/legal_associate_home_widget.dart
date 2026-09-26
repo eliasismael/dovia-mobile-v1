@@ -6,7 +6,6 @@ import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_widget.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_2/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_widget.dart';
-import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos_2/l_e_g_a_l_a_s_s_o_c_a_i_t_e_documentos2_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,20 +28,43 @@ class _LegalProcess {
     this.name = '',
     this.description = '',
     this.ownerName = '',
+    this.clientName = '',
   });
 
   final String name;
   final String description;
   final String ownerName;
+  final String clientName;
 
-  /// Coincide con el texto buscado: propietario, dirección o ID del trámite.
+  /// Coincide con el texto buscado: nombre de la propiedad, dirección,
+  /// propietario, cliente, tipo de operación o ID del trámite. Ignora
+  /// mayúsculas y acentos, y cada palabra puede estar en cualquier campo.
   bool matches(String q) {
     if (q.isEmpty) return true;
-    final t = q.toLowerCase();
-    return ownerName.toLowerCase().contains(t) ||
-        address.toLowerCase().contains(t) ||
-        name.toLowerCase().contains(t) ||
-        id.toLowerCase().contains(t);
+    final operation = switch (category) {
+      'SALE' => 'venta',
+      'RENT' => 'renta alquiler',
+      'PUBLICATION' => 'publicacion',
+      _ => '',
+    };
+    final haystack = _normalize(
+        '$name $address $ownerName $clientName $operation $propertyType $id');
+    return _normalize(q)
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .every(haystack.contains);
+  }
+
+  static String _normalize(String s) {
+    const from = 'áàäâéèëêíìïîóòöôúùüûñ';
+    const to = 'aaaaeeeeiiiioooouuuun';
+    final lower = s.toLowerCase();
+    final out = StringBuffer();
+    for (final ch in lower.split('')) {
+      final i = from.indexOf(ch);
+      out.write(i >= 0 ? to[i] : ch);
+    }
+    return out.toString();
   }
 
   final String id;
@@ -80,6 +102,10 @@ class _LegalProcess {
       description: property['description']?.toString() ?? '',
       ownerName: (json['ownerProfile'] is Map
               ? json['ownerProfile']['fullName']?.toString()
+              : null) ??
+          '',
+      clientName: (json['interestedProfile'] is Map
+              ? json['interestedProfile']['fullName']?.toString()
               : null) ??
           '',
     );
@@ -163,8 +189,6 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
   // Badge: completed/success – reusing theme success (#249689) with tinted bg
   static const Color _badgeSuccessBg = Color(0x1A249689);
   static const Color _badgeSuccessText = Color(0xFF249689);
-  // "Ver más" pill
-  static const Color _verMasBg = Color(0xFFCCE3E4);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -313,87 +337,90 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 100.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // ────────────────────────────────────────────────
-                          // CAROUSEL 1: Tus siguientes inmuebles asignados
-                          // ────────────────────────────────────────────────
-                          _buildSectionHeader(
-                            context,
-                            title: 'Tus siguientes inmuebles\nasignados',
-                            onVerMas: () {
-                              context.pushNamed(
-                                LEGALASSOCIATEProcesosWidget.routeName,
-                                queryParameters: {'filter': 'nuevos'},
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 14.0),
-                          _buildFutureCarousel<_LegalProcess>(
-                            future: _newAssignmentsFuture,
-                            height: 158.0,
-                            emptyMessage: 'No tienes nuevas asignaciones',
-                            cardBuilder: (process) =>
-                                _buildAssignedCard(context, process),
-                          ),
+                      child: _query.isNotEmpty
+                          ? _buildSearchResults(context)
+                          : Column(
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // ────────────────────────────────────────────────
+                                // CAROUSEL 1: Tus siguientes inmuebles asignados
+                                // ────────────────────────────────────────────────
+                                _buildSectionHeader(
+                                  context,
+                                  title: 'Tus siguientes inmuebles\nasignados',
+                                  onVerMas: () {
+                                    context.pushNamed(
+                                      LEGALASSOCIATEProcesosWidget.routeName,
+                                      queryParameters: {'filter': 'nuevos'},
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 14.0),
+                                _buildFutureCarousel<_LegalProcess>(
+                                  future: _newAssignmentsFuture,
+                                  height: 158.0,
+                                  emptyMessage: 'No tienes nuevas asignaciones',
+                                  cardBuilder: (process) =>
+                                      _buildAssignedCard(context, process),
+                                ),
 
-                          const SizedBox(height: 30.0),
+                                const SizedBox(height: 30.0),
 
-                          // ────────────────────────────────────────────────
-                          // CAROUSEL 2: Propiedades pendientes por revisar
-                          // ────────────────────────────────────────────────
-                          _buildSectionHeader(
-                            context,
-                            title: 'Propiedades pendientes\npor revisar',
-                            onVerMas: () {
-                              context.pushNamed(
-                                LEGALASSOCIATEProcesosWidget.routeName,
-                                queryParameters: {'filter': 'en_curso'},
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 14.0),
-                          _buildFutureCarousel<_LegalProcess>(
-                            future: _inProgressFuture,
-                            height: 136.0,
-                            emptyMessage: 'No tienes procesos en curso',
-                            cardBuilder: (process) => _buildPropertyCard(
-                              context,
-                              process,
-                              isCompleted: false,
+                                // ────────────────────────────────────────────────
+                                // CAROUSEL 2: Propiedades pendientes por revisar
+                                // ────────────────────────────────────────────────
+                                _buildSectionHeader(
+                                  context,
+                                  title: 'Propiedades pendientes\npor revisar',
+                                  onVerMas: () {
+                                    context.pushNamed(
+                                      LEGALASSOCIATEProcesosWidget.routeName,
+                                      queryParameters: {'filter': 'en_curso'},
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 14.0),
+                                _buildFutureCarousel<_LegalProcess>(
+                                  future: _inProgressFuture,
+                                  height: 136.0,
+                                  emptyMessage: 'No tienes procesos en curso',
+                                  cardBuilder: (process) => _buildPropertyCard(
+                                    context,
+                                    process,
+                                    isCompleted: false,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 30.0),
+
+                                // ────────────────────────────────────────────────
+                                // CAROUSEL 3: Propiedades Completadas
+                                // ────────────────────────────────────────────────
+                                _buildSectionHeader(
+                                  context,
+                                  title: 'Propiedades Completadas',
+                                  onVerMas: () {
+                                    context.pushNamed(
+                                      LEGALASSOCIATEProcesosWidget.routeName,
+                                      queryParameters: {'filter': 'aprobados'},
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 14.0),
+                                _buildFutureCarousel<_LegalProcess>(
+                                  future: _completedFuture,
+                                  height: 136.0,
+                                  emptyMessage:
+                                      'Aún no tienes procesos completados',
+                                  cardBuilder: (process) => _buildPropertyCard(
+                                    context,
+                                    process,
+                                    isCompleted: true,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-
-                          const SizedBox(height: 30.0),
-
-                          // ────────────────────────────────────────────────
-                          // CAROUSEL 3: Propiedades Completadas
-                          // ────────────────────────────────────────────────
-                          _buildSectionHeader(
-                            context,
-                            title: 'Propiedades Completadas',
-                            onVerMas: () {
-                              context.pushNamed(
-                                LEGALASSOCIATEProcesosWidget.routeName,
-                                queryParameters: {'filter': 'aprobados'},
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 14.0),
-                          _buildFutureCarousel<_LegalProcess>(
-                            future: _completedFuture,
-                            height: 136.0,
-                            emptyMessage: 'Aún no tienes procesos completados',
-                            cardBuilder: (process) => _buildPropertyCard(
-                              context,
-                              process,
-                              isCompleted: true,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ],
                 ),
@@ -418,6 +445,60 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
           ),
         ),
       ),
+    );
+  }
+
+  // ── Resultados de búsqueda ────────────────────────────────────────────────
+
+  /// Busca en los tres grupos a la vez y muestra una sola lista vertical.
+  Widget _buildSearchResults(BuildContext context) {
+    return FutureBuilder<List<List<_LegalProcess>>>(
+      future: Future.wait(
+          [_newAssignmentsFuture, _inProgressFuture, _completedFuture]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.all(40.0),
+            child: Center(child: CircularProgressIndicator(color: _aqua)),
+          );
+        }
+        final groups = snapshot.data!;
+        final results = <(_LegalProcess, int)>[
+          for (var g = 0; g < groups.length; g++)
+            for (final p in groups[g])
+              if (p.matches(_query)) (p, g),
+        ];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              results.isEmpty
+                  ? 'Sin resultados para "$_query"'
+                  : '${results.length} resultado${results.length == 1 ? '' : 's'}',
+              style: GoogleFonts.publicSans(
+                color: _textDark,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 14.0),
+            for (final (process, group) in results) ...[
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _openProcess(process),
+                child: SizedBox(
+                  height: group == 0 ? 158.0 : 136.0,
+                  child: group == 0
+                      ? _buildAssignedCard(context, process)
+                      : _buildPropertyCard(context, process,
+                          isCompleted: group == 2),
+                ),
+              ),
+              const SizedBox(height: 14.0),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -503,24 +584,16 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                 ),
           ),
         ),
-        GestureDetector(
+        // "Ver más" como texto sin fondo, igual que en el resto de la app.
+        InkWell(
           onTap: onVerMas,
-          child: Container(
-            height: 30.0,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
-            decoration: BoxDecoration(
-              color: _verMasBg,
-              borderRadius: BorderRadius.circular(100.0),
-            ),
-            child: Text(
-              'Ver más',
-              style: GoogleFonts.publicSans(
-                color: _aqua,
-                fontSize: 14.0,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
+          child: Text(
+            'Ver más',
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: FlutterFlowTheme.of(context).primary,
+                  fontSize: 14.0,
+                ),
           ),
         ),
       ],
@@ -692,22 +765,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
     required bool isCompleted,
   }) {
     return _cardFrame(
-      onTap: isCompleted
-          ? () {
-              // Open the read-only history / final PDFs for this deal
-              context.pushNamed(
-                LEGALASSOCAITEDocumentos2Widget.routeName,
-                queryParameters: {
-                  'selectedProperty': serializeParam(
-                    process.address.isNotEmpty
-                        ? process.address
-                        : _propertyTypeLabel(process.propertyType),
-                    ParamType.String,
-                  ),
-                }.withoutNulls,
-              );
-            }
-          : null,
+      onTap: isCompleted ? () => _openProcess(process) : null,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

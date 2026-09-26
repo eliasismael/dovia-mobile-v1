@@ -1,6 +1,9 @@
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar_widget.dart';
+import '/dovia_home_associate/associate_current_job.dart';
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -19,7 +22,18 @@ import 'd_h_a_s_s_o_c_i_a_t_e_tu_trabajo_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_tu_trabajo_model.dart';
 
 class DHASSOCIATETuTrabajoWidget extends StatefulWidget {
-  const DHASSOCIATETuTrabajoWidget({super.key});
+  const DHASSOCIATETuTrabajoWidget({
+    super.key,
+    this.routeId,
+    this.routeProposalId,
+  });
+
+  /// Id del trabajo que viene en la ruta (`?id=`). Manda sobre el campo
+  /// estático cuando no coinciden: ver [associateRouteParams].
+  final String? routeId;
+
+  /// Id de la propuesta que viene en la ruta (`?proposalId=`).
+  final String? routeProposalId;
 
   static String routeName = 'DH_ASSOCIATE_TuTrabajo';
   static String routePath = '/dHASSOCIATETuTrabajo';
@@ -55,6 +69,8 @@ class _DHASSOCIATETuTrabajoWidgetState
     _model.textController3 ??= TextEditingController();
     _model.textFieldFocusNode3 ??= FocusNode();
 
+    DHASSOCIATETuTrabajoWidget.requestData = resolveRouteRequest(
+        DHASSOCIATETuTrabajoWidget.requestData, widget.routeId);
     _loadDetail();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
@@ -178,6 +194,15 @@ class _DHASSOCIATETuTrabajoWidgetState
 
     safeSetState(() => _model.isStarting = true);
     try {
+      // Un trabajo a la vez: si ya hay otro en ejecución, se frena acá.
+      AssociateCurrentJob.invalidate();
+      final current = await AssociateCurrentJob.load();
+      if (!mounted) return;
+      if (current != null && asrId(current) != id) {
+        _showMessage(kJobInProgressNotice);
+        return;
+      }
+
       final position = await _captureCurrentPosition();
       if (position == null) return;
 
@@ -191,15 +216,34 @@ class _DHASSOCIATETuTrabajoWidgetState
       if (!mounted) return;
 
       if (!response.succeeded) {
-        _showMessage('No se pudo notificar tu llegada. Intenta de nuevo.');
+        // El backend explica por qué (Ej: fuera del radio del domicilio).
+        final reason = getJsonField(response.jsonBody, r'''$.message''');
+        final text = reason is List ? reason.join(', ') : reason?.toString();
+        // "Estado no válido": se relee el trabajo para decir en qué estado
+        // quedó realmente en lugar del mensaje genérico del backend.
+        if ((text ?? '').toLowerCase().contains('estado')) {
+          await _loadDetail();
+          final fresh = _request;
+          if (fresh != null) {
+            _showMessage(
+                'No se pudo notificar tu llegada. ${asrStartBlockedReason(fresh)}');
+            return;
+          }
+        }
+        _showMessage(text != null && text.isNotEmpty
+            ? 'No se pudo notificar tu llegada: $text'
+            : 'No se pudo notificar tu llegada (error ${response.statusCode}).');
         return;
       }
 
-      // El trabajo ya está en curso: la pantalla de cierre opera sobre la misma
-      // solicitud, así que se le pasa el detalle que ya tenemos en mano.
-      DHASSOCIATETrabajoFinalizadoWidget.requestData = data;
+      // El trabajo ya está en curso: se pasa a la pantalla de trabajo en
+      // ejecución (trabajos adicionales / finalizar), que relee el estado.
+      // Reemplaza a esta para que "volver" no regrese al aviso de llegada.
+      DHASSOCIATETrabajoARealizarWidget.requestData = data;
+      AssociateCurrentJob.invalidate();
       _showMessage('Le avisamos al cliente que ya llegaste.');
-      context.pushNamed(DHASSOCIATETrabajoFinalizadoWidget.routeName);
+      context.pushReplacementNamed(DHASSOCIATETrabajoARealizarWidget.routeName,
+          queryParameters: associateRouteParams(request: data));
     } finally {
       if (mounted) safeSetState(() => _model.isStarting = false);
     }
@@ -258,13 +302,20 @@ class _DHASSOCIATETuTrabajoWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            // Lo que sube al scrollear no pasa por detrás de la hora y la
+            // batería.
+            StatusBarClip(
+                child: SingleChildScrollView(
+              // Espacio de la barra de navegación del sistema (sin SafeArea).
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 42.0, 20.0, 0.0),
+                    // Header debajo de la barra de estado, como en el resto.
+                    padding: EdgeInsetsDirectional.fromSTEB(20.0,
+                        MediaQuery.paddingOf(context).top + 42.0, 20.0, 0.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -276,25 +327,27 @@ class _DHASSOCIATETuTrabajoWidgetState
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 35.0,
-                                height: 35.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => context.safePop(),
+                                child: Container(
+                                  width: 35.0,
+                                  height: 35.0,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
                                   child: SvgPicture.asset(
                                     'assets/images/IconoVolverAtras.svg',
-                                    width: 200.0,
-                                    height: 200.0,
                                     fit: BoxFit.none,
                                   ),
                                 ),
                               ),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(0.0),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => goAssociateHome(context),
                                 child: SvgPicture.asset(
                                   'assets/images/D-verde.svg',
                                   width: 28.0,
@@ -1440,7 +1493,7 @@ class _DHASSOCIATETuTrabajoWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

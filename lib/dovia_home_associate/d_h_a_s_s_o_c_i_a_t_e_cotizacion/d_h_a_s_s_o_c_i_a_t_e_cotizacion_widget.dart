@@ -1,3 +1,5 @@
+import 'package:url_launcher/url_launcher.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import 'dart:async';
 
 import '/dovia_home_associate/associate_service_request_fields.dart';
@@ -55,7 +57,18 @@ enum _QuoteState { active, submitted, approved }
 /// activas" para una versión nueva (el contrato versiona las propuestas), así
 /// que su lectura vive en [DHASSOCIATEPropuestaEnviadaWidget].
 class DHASSOCIATECotizacionWidget extends StatefulWidget {
-  const DHASSOCIATECotizacionWidget({super.key});
+  const DHASSOCIATECotizacionWidget({
+    super.key,
+    this.routeId,
+    this.routeProposalId,
+  });
+
+  /// Id del trabajo que viene en la ruta (`?id=`). Manda sobre el campo
+  /// estático cuando no coinciden: ver [associateRouteParams].
+  final String? routeId;
+
+  /// Id de la propuesta que viene en la ruta (`?proposalId=`).
+  final String? routeProposalId;
 
   static String routeName = 'DH_ASSOCIATE_Cotizacion';
   static String routePath = '/dHASSOCIATECotizacion';
@@ -92,12 +105,13 @@ class _DHASSOCIATECotizacionWidgetState
     _model.amountController ??= TextEditingController();
     _model.amountFocusNode ??= FocusNode();
 
-    _requestData = DHASSOCIATECotizacionWidget.requestData;
+    _requestData = resolveRouteRequest(
+        DHASSOCIATECotizacionWidget.requestData, widget.routeId);
     _model.proposal = DHASSOCIATECotizacionWidget.proposalData;
     DHASSOCIATECotizacionWidget.requestData = null;
     DHASSOCIATECotizacionWidget.proposalData = null;
 
-    _loadDetail();
+    _loadRouteProposalThenDetail();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -132,6 +146,26 @@ class _DHASSOCIATECotizacionWidgetState
           : _QuoteState.submitted;
     }
     return _model.submitted ? _QuoteState.submitted : _QuoteState.active;
+  }
+
+  /// La propuesta decide el estado (activa, enviada, aprobada), así que si
+  /// sólo vino su id en la ruta se pide antes que el requerimiento.
+  Future<void> _loadRouteProposalThenDetail() async {
+    final id = widget.routeProposalId ?? '';
+    final current = _model.proposal;
+    if (id.isNotEmpty && (current == null || proposalId(current) != id)) {
+      final response = await DOVIAAPIDoviaHomeContextGroup
+          .getCompanyQuoteProposalCall
+          .call(proposalId: id, authToken: currentAuthenticationToken ?? '');
+      if (!mounted) return;
+      final data = response.succeeded
+          ? getJsonField(response.jsonBody, r'''$.data''')
+          : null;
+      if (data is Map) {
+        safeSetState(() => _model.proposal = Map<String, dynamic>.from(data));
+      }
+    }
+    await _loadDetail();
   }
 
   /// Relee la solicitud. En Estado 3 el servicio ya salió del marketplace de
@@ -253,14 +287,17 @@ class _DHASSOCIATECotizacionWidgetState
 
     safeSetState(() => _model.isSubmitting = true);
     try {
-      final response = await DOVIAAPIDoviaHomeContextGroup
-          .submitCompanyQuoteProposalCall
-          .call(
-        serviceRequestId: id,
-        file: file,
-        totalAmount: amount,
-        authToken: currentAuthenticationToken ?? '',
-      );
+      final response =
+          await DOVIAAPIDoviaHomeContextGroup.submitCompanyQuoteProposalCall
+              .call(
+                serviceRequestId: id,
+                file: file,
+                totalAmount: amount,
+                authToken: currentAuthenticationToken ?? '',
+              )
+              // Sin tope, una subida trabada dejaba el spinner girando para
+              // siempre sin decir nada.
+              .timeout(const Duration(seconds: 60));
       if (!mounted) return;
 
       if (!response.succeeded) {
@@ -273,8 +310,11 @@ class _DHASSOCIATECotizacionWidgetState
       // bloqueados — no hay que volver al panel para verlo.
       safeSetState(() => _model.submitted = true);
       await _showSubmittedDialog();
-    } catch (_) {
-      _showMessage('No pudimos enviar la propuesta. Intenta de nuevo.');
+    } on TimeoutException {
+      _showMessage('El envío tardó demasiado y no obtuvimos respuesta. Revisa '
+          'tu conexión y vuelve a intentarlo.');
+    } catch (e) {
+      _showMessage('No pudimos enviar la propuesta: $e');
     } finally {
       if (mounted) safeSetState(() => _model.isSubmitting = false);
     }
@@ -289,6 +329,7 @@ class _DHASSOCIATECotizacionWidgetState
   String _submitError(ApiCallResponse response) {
     final message = getJsonField(response.jsonBody, r'''$.message''');
     if (message is String && message.trim().isNotEmpty) return message.trim();
+    if (message is List && message.isNotEmpty) return message.join(', ');
 
     switch (response.statusCode) {
       case 403:
@@ -297,7 +338,8 @@ class _DHASSOCIATECotizacionWidgetState
       case 409:
         return 'Esta cotización ya no acepta propuestas.';
       default:
-        return 'No pudimos enviar la propuesta. Intenta de nuevo.';
+        return 'No pudimos enviar la propuesta (error '
+            '${response.statusCode}). Intenta de nuevo.';
     }
   }
 
@@ -748,46 +790,67 @@ class _DHASSOCIATECotizacionWidgetState
     );
   }
 
+  /// Mientras envía sigue verde, con el spinner en blanco.
   Widget _sendButton() {
     final theme = FlutterFlowTheme.of(context);
-    return FFButtonWidget(
-      onPressed: _canSubmit ? _submit : null,
-      text: _model.isSubmitting ? 'Enviando…' : 'Enviar cotización',
-      options: FFButtonOptions(
-        width: double.infinity,
-        height: 42.0,
-        padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-        iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-        color: theme.primary,
-        textStyle: theme.titleSmall.override(
-          font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-          color: Colors.white,
-          fontSize: 16.0,
-          letterSpacing: 0.0,
+    final ready = _canSubmit || _model.isSubmitting;
+    return SizedBox(
+      width: double.infinity,
+      height: 42.0,
+      child: ElevatedButton(
+        onPressed: _canSubmit ? _submit : (_model.isSubmitting ? () {} : null),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: theme.primary,
+          disabledBackgroundColor: theme.primary.withValues(alpha: 0.35),
+          elevation: 0.0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
-        elevation: 0.0,
-        borderRadius: BorderRadius.circular(25.0),
-        disabledColor: theme.alternate,
-        disabledTextColor: theme.secondaryText,
+        child: _model.isSubmitting
+            ? const SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2.0, color: Colors.white),
+              )
+            : Text(
+                'Enviar cotización',
+                style: GoogleFonts.publicSans(
+                  color: ready ? Colors.white : Colors.white70,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
 
-  /// Fila de botones del estado. Activa: los dos, uno al lado del otro
-  /// (Info deshabilitado). Enviada: sólo Info, deshabilitado — Enviar
-  /// desaparece. Aprobada: sólo Info, habilitado.
+  /// Acciones del estado. Activa: Enviar. Enviada: un aviso de que el
+  /// contacto se habilita al aceptar (un botón gris sin explicación
+  /// confundía). Aprobada: Información del cliente.
   Widget _buildActions() {
     switch (_state) {
       case _QuoteState.active:
-        return Row(
-          children: [
-            Expanded(child: _infoButton(enabled: false)),
-            const SizedBox(width: 16.0),
-            Expanded(child: _sendButton()),
-          ],
-        );
+        return _sendButton();
       case _QuoteState.submitted:
-        return _infoButton(enabled: false);
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14.0),
+          decoration: BoxDecoration(
+            color: const Color(0x2670ACAD),
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Text(
+            'Cuando el cliente acepte tu presupuesto vas a poder ver sus '
+            'datos de contacto.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.publicSans(
+              color: const Color(0xFF00444B),
+              fontSize: 13.0,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        );
       case _QuoteState.approved:
         return _infoButton(enabled: true);
     }
@@ -957,6 +1020,49 @@ class _ClientInfoDialog extends StatelessWidget {
 
   static const String _kUnavailable = 'No disponible';
 
+  /// Teléfono listo para marcar: sólo dígitos y el `+` del código de país.
+  String get _dialable => (phone ?? '').replaceAll(RegExp(r'[^0-9+]'), '');
+
+  Future<void> _launch(BuildContext context, Uri uri,
+      {required String error}) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {}
+    messenger.showSnackBar(SnackBar(content: Text(error)));
+  }
+
+  Widget _contactButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool filled,
+    required VoidCallback onTap,
+  }) {
+    final primary = FlutterFlowTheme.of(context).primary;
+    return SizedBox(
+      height: 44.0,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 18.0, color: filled ? Colors.white : primary),
+        label: Text(
+          label,
+          style: GoogleFonts.publicSans(
+            color: filled ? Colors.white : primary,
+            fontSize: 14.0,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          backgroundColor: filled ? primary : Colors.transparent,
+          side: BorderSide(color: primary),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.0)),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -998,6 +1104,39 @@ class _ClientInfoDialog extends StatelessWidget {
           line('Número: ${phone ?? _kUnavailable}'),
           const SizedBox(height: 12.0),
           line('Correo: ${email ?? _kUnavailable}'),
+          // Contacto directo con el cliente, sin copiar el número a mano.
+          if (_dialable.isNotEmpty) ...[
+            const SizedBox(height: 18.0),
+            Row(
+              children: [
+                Expanded(
+                  child: _contactButton(
+                    context,
+                    icon: Icons.call_outlined,
+                    label: 'Llamar',
+                    filled: false,
+                    onTap: () => _launch(
+                        context, Uri(scheme: 'tel', path: _dialable),
+                        error: 'No se pudo abrir el teléfono'),
+                  ),
+                ),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: _contactButton(
+                    context,
+                    icon: Icons.chat_outlined,
+                    label: 'WhatsApp',
+                    filled: true,
+                    onTap: () => _launch(
+                        context,
+                        Uri.parse(
+                            'https://wa.me/${_dialable.replaceAll('+', '')}'),
+                        error: 'No se pudo abrir WhatsApp'),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 21.0),
           FFButtonWidget(
             onPressed: () => Navigator.of(context).pop(),

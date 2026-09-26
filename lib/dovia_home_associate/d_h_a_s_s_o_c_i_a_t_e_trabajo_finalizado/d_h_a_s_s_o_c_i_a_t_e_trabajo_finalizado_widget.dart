@@ -1,3 +1,5 @@
+import '/dovia_home_associate/associate_current_job.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import 'dart:async';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -7,7 +9,6 @@ import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_home_page/d_h_a_s_s_o_c_i_a_t_e_home_page_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -16,7 +17,6 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_model.dart';
@@ -34,7 +34,18 @@ export 'd_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_model.dart';
 /// solicitud FINISHED: lo decide el estado de [requestData], así que no puede
 /// quedar desincronizado.
 class DHASSOCIATETrabajoFinalizadoWidget extends StatefulWidget {
-  const DHASSOCIATETrabajoFinalizadoWidget({super.key});
+  const DHASSOCIATETrabajoFinalizadoWidget({
+    super.key,
+    this.routeId,
+    this.routeProposalId,
+  });
+
+  /// Id del trabajo que viene en la ruta (`?id=`). Manda sobre el campo
+  /// estático cuando no coinciden: ver [associateRouteParams].
+  final String? routeId;
+
+  /// Id de la propuesta que viene en la ruta (`?proposalId=`).
+  final String? routeProposalId;
 
   /// Solicitud que se está cerrando, o el trabajo terminado que se abrió desde
   /// el historial. Se fija antes de navegar; null cuando se entra a la pantalla
@@ -77,9 +88,32 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
     _model.textController2 ??= TextEditingController();
     _model.textFieldFocusNode2 ??= FocusNode();
 
+    DHASSOCIATETrabajoFinalizadoWidget.requestData = resolveRouteRequest(
+        DHASSOCIATETrabajoFinalizadoWidget.requestData, widget.routeId);
     _fillCompletionFields();
+    _loadRouteDetail();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  /// Abierta sólo con el id de la ruta (notificación, deep link, hot
+  /// restart): pide el trabajo para poder mostrarlo.
+  Future<void> _loadRouteDetail() async {
+    final data = _request;
+    if (!isRouteStub(data)) return;
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.getAssociateServiceRequestCall.call(
+      serviceRequestId: asrId(data!),
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted || !response.succeeded) return;
+    final detail = getJsonField(response.jsonBody, r'''$.data''');
+    if (detail is! Map) return;
+    safeSetState(() {
+      DHASSOCIATETrabajoFinalizadoWidget.requestData =
+          Map<String, dynamic>.from(detail);
+      _fillCompletionFields();
+    });
   }
 
   /// Vuelca lo que el asociado ya había reportado al cerrar el trabajo. No pisa
@@ -136,60 +170,131 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
     });
   }
 
-  /// Caja de carga de fotos del diseño. Con fotos elegidas muestra las
-  /// miniaturas; sin ellas, el placeholder original.
+  /// Carga de fotos igual que en Emergencias de Dovia Home: sin fotos, un
+  /// recuadro "Toca para agregar fotos"; con fotos, la grilla de miniaturas
+  /// (cada una con su ✕) y un cuadro "+" para sumar más. En solo lectura la
+  /// evidencia ya se cargó: se muestran las miniaturas sin acciones.
   Widget _mediaSlot(
     List<FFUploadedFile> media,
     void Function(List<FFUploadedFile>) assign,
   ) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
-      child: InkWell(
-        splashColor: Colors.transparent,
-        focusColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        // En solo lectura la evidencia ya se cargó: no hay nada que adjuntar.
-        onTap: _readOnly ? null : () => _pickMedia(media, assign),
-        child: Container(
-          width: MediaQuery.sizeOf(context).width * 1.0,
-          height: 104.0,
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: media.isEmpty
-                ? SvgPicture.asset(
-                    'assets/images/AddMediaImage.svg',
-                    width: 200.0,
-                    height: 200.0,
-                    fit: BoxFit.cover,
-                  )
-                : ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: media.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8.0),
-                    itemBuilder: (_, index) {
-                      final bytes = media[index].bytes;
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: bytes == null
-                            ? const SizedBox(width: 88.0)
-                            : Image.memory(
-                                bytes,
-                                width: 88.0,
-                                height: 88.0,
-                                fit: BoxFit.cover,
-                              ),
-                      );
-                    },
+    final primary = FlutterFlowTheme.of(context).primary;
+    void pick() => _pickMedia(media, assign);
+
+    if (media.isEmpty) {
+      if (_readOnly) return const SizedBox(height: 12.0);
+      return Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+        child: InkWell(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: pick,
+          child: Container(
+            width: double.infinity,
+            height: 104.0,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.0,
+                  height: 40.0,
+                  decoration: const BoxDecoration(
+                    color: Color(0x2670ACAD),
+                    shape: BoxShape.circle,
                   ),
+                  child: Icon(Icons.add_a_photo_outlined,
+                      size: 20.0, color: primary),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  'Toca para agregar fotos',
+                  style: GoogleFonts.publicSans(
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.w500,
+                    color: primary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+      );
+    }
+
+    final columns = (media.length + (_readOnly ? 0 : 1)).clamp(1, 4);
+    const spacing = 8.0;
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
+      child: LayoutBuilder(builder: (context, constraints) {
+        final tileWidth =
+            (constraints.maxWidth - spacing * (columns - 1)) / columns;
+        final tileHeight = tileWidth.clamp(0.0, 160.0);
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (var index = 0; index < media.length; index++)
+              SizedBox(
+                width: tileWidth,
+                height: tileHeight,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: media[index].bytes != null
+                            ? Image.memory(media[index].bytes!,
+                                fit: BoxFit.cover)
+                            : Container(
+                                color: FlutterFlowTheme.of(context).alternate),
+                      ),
+                    ),
+                    if (!_readOnly)
+                      Positioned(
+                        top: 4.0,
+                        right: 4.0,
+                        child: InkWell(
+                          onTap: () => safeSetState(
+                              () => assign([...media]..removeAt(index))),
+                          child: Container(
+                            width: 22.0,
+                            height: 22.0,
+                            decoration: const BoxDecoration(
+                              color: Color(0xCC000000),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close,
+                                color: Colors.white, size: 16.0),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            if (!_readOnly)
+              InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: pick,
+                child: Container(
+                  width: tileWidth,
+                  height: tileHeight,
+                  decoration: BoxDecoration(
+                    color: const Color(0x2670ACAD),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(Icons.add, size: 28.0, color: primary),
+                ),
+              ),
+          ],
+        );
+      }),
     );
   }
 
@@ -250,9 +355,30 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
       if (!mounted) return;
 
       if (!response.succeeded) {
-        _showMessage('No se pudo cerrar el trabajo. Intenta de nuevo.');
+        // El backend explica por qué; si es por el estado, se relee el
+        // trabajo para decir en cuál quedó.
+        final reason = getJsonField(response.jsonBody, r'''$.message''');
+        final text = reason is List ? reason.join(', ') : reason?.toString();
+        if ((text ?? '').toLowerCase().contains('estado')) {
+          final fresh = await DOVIAAPIDoviaHomeContextGroup
+              .getAssociateServiceRequestCall
+              .call(serviceRequestId: id, authToken: token);
+          if (!mounted) return;
+          final detail = fresh.succeeded
+              ? getJsonField(fresh.jsonBody, r'''$.data''')
+              : null;
+          if (detail is Map) {
+            _showMessage('No se pudo cerrar el trabajo. '
+                '${asrFinishBlockedReason(Map<String, dynamic>.from(detail))}');
+            return;
+          }
+        }
+        _showMessage(text != null && text.isNotEmpty
+            ? 'No se pudo cerrar el trabajo: $text'
+            : 'No se pudo cerrar el trabajo (error ${response.statusCode}).');
         return;
       }
+      AssociateCurrentJob.invalidate();
 
       await _showSuccessDialog(partial: partial);
       if (!mounted) return;
@@ -343,41 +469,6 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
       SnackBar(content: Text(message)),
     );
   }
-
-  /// Acceso a la solicitud de materiales extra.
-  ///
-  /// Se ofrece sólo con el trabajo en curso: el contrato exige
-  /// `IN_PROGRESS / WORKING` y una vez cerrado no hay a qué agregarle materiales.
-  Widget _requestMaterialsButton() => FFButtonWidget(
-        onPressed: _model.isSubmitting
-            ? null
-            : () {
-                final data = _request;
-                DHASSOCIATETrabajoAdicionalWidget.serviceRequestId =
-                    data == null ? null : asrId(data);
-                context.pushNamed(DHASSOCIATETrabajoAdicionalWidget.routeName);
-              },
-        text: 'Solicitar material adicional',
-        options: FFButtonOptions(
-          width: MediaQuery.sizeOf(context).width * 1.0,
-          height: 42.0,
-          padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-          iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                color: FlutterFlowTheme.of(context).primary,
-                letterSpacing: 0.0,
-                fontWeight: FontWeight.w600,
-              ),
-          elevation: 0.0,
-          borderSide: BorderSide(
-            color: FlutterFlowTheme.of(context).primary,
-            width: 1.0,
-          ),
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-      );
 
   @override
   void dispose() {
@@ -507,9 +598,6 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -697,52 +785,62 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                   ),
                                 ),
                               ),
-                              Container(
-                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                decoration: const BoxDecoration(),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Align(
-                                      alignment:
-                                          const AlignmentDirectional(-1.0, 0.0),
-                                      child: Text(
-                                        'En caso de dejar materiales, ¿dónde los dejaste?',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.publicSans(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              letterSpacing: 0.28,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                      ),
+                              // Mismo margen que el resto de las secciones.
+                              Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 21.0, 0.0, 0.0),
+                                  child: Container(
+                                    width:
+                                        MediaQuery.sizeOf(context).width * 1.0,
+                                    decoration: const BoxDecoration(),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Align(
+                                          alignment: const AlignmentDirectional(
+                                              -1.0, 0.0),
+                                          child: Text(
+                                            'En caso de dejar materiales, ¿dónde los dejaste?',
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.publicSans(
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontStyle,
+                                                  ),
+                                                  letterSpacing: 0.28,
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                          ),
+                                        ),
+                                        // Categoría LEFTOVER_MATERIALS del contrato:
+                                        // se confirma en su propia tanda, aparte de
+                                        // las fotos del trabajo.
+                                        _mediaSlot(
+                                          _model.leftoverMedia,
+                                          (files) =>
+                                              _model.leftoverMedia = files,
+                                        ),
+                                      ],
                                     ),
-                                    // Categoría LEFTOVER_MATERIALS del contrato:
-                                    // se confirma en su propia tanda, aparte de
-                                    // las fotos del trabajo.
-                                    _mediaSlot(
-                                      _model.leftoverMedia,
-                                      (files) => _model.leftoverMedia = files,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  )),
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 21.0, 0.0, 0.0),
@@ -774,9 +872,6 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -975,12 +1070,6 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      // Único acceso a la solicitud de
-                                      // materiales extra: el contrato sólo la
-                                      // permite con el trabajo en curso, que es
-                                      // exactamente donde está esta pantalla.
-                                      _requestMaterialsButton(),
-                                      const SizedBox(height: 12.0),
                                       FFButtonWidget(
                                         onPressed: _model.isSubmitting
                                             ? null

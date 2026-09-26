@@ -1,3 +1,4 @@
+import '/dovia_home_associate/associate_nav.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/api_manager.dart';
@@ -6,12 +7,10 @@ import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_model.dart';
@@ -31,7 +30,18 @@ export 'd_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_model.dart';
 /// Las imágenes **no** viajan en el body: se adjuntan después con
 /// presign → PUT → confirm, que necesitan el id del reporte ya creado.
 class DHASSOCIATEFueraDeAlcanceWidget extends StatefulWidget {
-  const DHASSOCIATEFueraDeAlcanceWidget({super.key});
+  const DHASSOCIATEFueraDeAlcanceWidget({
+    super.key,
+    this.routeId,
+    this.routeProposalId,
+  });
+
+  /// Id del trabajo que viene en la ruta (`?id=`). Manda sobre el campo
+  /// estático cuando no coinciden: ver [associateRouteParams].
+  final String? routeId;
+
+  /// Id de la propuesta que viene en la ruta (`?proposalId=`).
+  final String? routeProposalId;
 
   static String routeName = 'DH_ASSOCIATE_FueraDeAlcance';
   static String routePath = '/dHASSOCIATEFueraDeAlcance';
@@ -69,7 +79,8 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
-    _serviceRequestId = DHASSOCIATEFueraDeAlcanceWidget.serviceRequestId;
+    _serviceRequestId =
+        widget.routeId ?? DHASSOCIATEFueraDeAlcanceWidget.serviceRequestId;
     DHASSOCIATEFueraDeAlcanceWidget.serviceRequestId = null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
@@ -229,38 +240,116 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
         ),
       );
 
-  /// Contenido de la caja de carga: las miniaturas elegidas o el ícono del
-  /// diseño mientras no haya ninguna.
+  /// Carga de fotos igual que en Emergencias de Dovia Home: sin fotos, un
+  /// recuadro "Toca para agregar fotos"; con fotos, la grilla de miniaturas
+  /// (cada una con su ✕) y un cuadro "+" para sumar más.
   Widget _mediaPreview() {
+    final primary = FlutterFlowTheme.of(context).primary;
     final media = _model.uploadedMedia;
     if (media.isEmpty) {
-      // AddMediaImage.svg es un lienzo 350x104 con su propio fondo: no sirve
-      // como ícono de 24x24 acá, se ve como un manchón gris ilegible.
-      return Center(
-        child: SvgPicture.asset(
-          'assets/images/media-image-list.svg',
-          width: 24.0,
-          height: 24.0,
-          fit: BoxFit.contain,
+      return InkWell(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: _pickMedia,
+        child: Container(
+          width: double.infinity,
+          height: 104.0,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40.0,
+                height: 40.0,
+                decoration: const BoxDecoration(
+                  color: Color(0x2670ACAD),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.add_a_photo_outlined,
+                    size: 20.0, color: primary),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                'Toca para agregar fotos',
+                style: GoogleFonts.publicSans(
+                  fontSize: 13.0,
+                  fontWeight: FontWeight.w500,
+                  color: primary,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
-    return ListView.separated(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.all(8.0),
-      itemCount: media.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 8.0),
-      itemBuilder: (_, index) {
-        final bytes = media[index].bytes;
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: bytes == null
-              ? const SizedBox(width: 88.0)
-              : Image.memory(bytes,
-                  width: 88.0, height: 88.0, fit: BoxFit.cover),
-        );
-      },
-    );
+
+    final columns = (media.length + 1).clamp(1, 4);
+    const spacing = 8.0;
+    return LayoutBuilder(builder: (context, constraints) {
+      final tileWidth =
+          (constraints.maxWidth - spacing * (columns - 1)) / columns;
+      final tileHeight = tileWidth.clamp(0.0, 160.0);
+      return Wrap(
+        spacing: spacing,
+        runSpacing: spacing,
+        children: [
+          for (var index = 0; index < media.length; index++)
+            SizedBox(
+              width: tileWidth,
+              height: tileHeight,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: media[index].bytes != null
+                          ? Image.memory(media[index].bytes!, fit: BoxFit.cover)
+                          : Container(
+                              color: FlutterFlowTheme.of(context).alternate),
+                    ),
+                  ),
+                  Positioned(
+                    top: 4.0,
+                    right: 4.0,
+                    child: InkWell(
+                      onTap: () => safeSetState(() => media.removeAt(index)),
+                      child: Container(
+                        width: 22.0,
+                        height: 22.0,
+                        decoration: const BoxDecoration(
+                          color: Color(0xCC000000),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close,
+                            color: Colors.white, size: 16.0),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          InkWell(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onTap: _pickMedia,
+            child: Container(
+              width: tileWidth,
+              height: tileHeight,
+              decoration: BoxDecoration(
+                color: const Color(0x2670ACAD),
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              alignment: Alignment.center,
+              child: Icon(Icons.add, size: 28.0, color: primary),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   @override
@@ -372,47 +461,38 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
                           const SizedBox(height: 18.0),
                           _label('Sube las imágenes', fontSize: 16.0),
                           const SizedBox(height: 12.0),
-                          InkWell(
-                            borderRadius: BorderRadius.circular(10.0),
-                            onTap: _pickMedia,
-                            child: Container(
-                              width: double.infinity,
-                              height: 168.0,
-                              clipBehavior: Clip.antiAlias,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).alternate,
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: _mediaPreview(),
-                            ),
-                          ),
+                          _mediaPreview(),
                           const SizedBox(height: 18.0),
-                          FFButtonWidget(
-                            onPressed: _model.isSubmitting ? null : _submit,
-                            text: _model.isSubmitting ? 'Enviando…' : 'Enviar',
-                            options: FFButtonOptions(
-                              width: double.infinity,
-                              height: 42.0,
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 0.0, 16.0, 0.0),
-                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 0.0),
-                              color: FlutterFlowTheme.of(context).primary,
-                              textStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .override(
-                                    font: GoogleFonts.publicSans(
-                                        fontWeight: FontWeight.w600),
-                                    color: Colors.white,
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                              elevation: 0.0,
-                              borderRadius: BorderRadius.circular(25.0),
-                              disabledColor:
-                                  FlutterFlowTheme.of(context).alternate,
-                              disabledTextColor:
-                                  FlutterFlowTheme.of(context).secondaryText,
+                          // Mientras envía sigue verde, con el spinner en
+                          // blanco en lugar del texto.
+                          SizedBox(
+                            width: double.infinity,
+                            height: 42.0,
+                            child: ElevatedButton(
+                              onPressed: _model.isSubmitting ? () {} : _submit,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    FlutterFlowTheme.of(context).primary,
+                                elevation: 0.0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25.0)),
+                              ),
+                              child: _model.isSubmitting
+                                  ? const SizedBox(
+                                      width: 20.0,
+                                      height: 20.0,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2.0,
+                                          color: Colors.white),
+                                    )
+                                  : Text(
+                                      'Enviar',
+                                      style: GoogleFonts.publicSans(
+                                        color: Colors.white,
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],

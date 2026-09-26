@@ -212,31 +212,42 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DHASSOCIATEProximosTrabajosWidget.routeName,
           path: DHASSOCIATEProximosTrabajosWidget.routePath,
-          builder: (context, params) =>
-              const DHASSOCIATEProximosTrabajosWidget(),
+          builder: (context, params) => DHASSOCIATEProximosTrabajosWidget(
+            onlyFinished:
+                params.getParam('seccion', ParamType.String) == 'terminados',
+          ),
         ),
         FFRoute(
           name: DHASSOCIATETrabajoRealizadoWidget.routeName,
           path: DHASSOCIATETrabajoRealizadoWidget.routePath,
-          builder: (context, params) =>
-              const DHASSOCIATETrabajoRealizadoWidget(),
+          builder: (context, params) => DHASSOCIATETrabajoRealizadoWidget(
+            routeId: params.getParam('id', ParamType.String),
+            routeProposalId: params.getParam('proposalId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DHASSOCIATETuTrabajoWidget.routeName,
           path: DHASSOCIATETuTrabajoWidget.routePath,
-          builder: (context, params) => const DHASSOCIATETuTrabajoWidget(),
+          builder: (context, params) => DHASSOCIATETuTrabajoWidget(
+            routeId: params.getParam('id', ParamType.String),
+            routeProposalId: params.getParam('proposalId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DHASSOCIATETrabajoARealizarWidget.routeName,
           path: DHASSOCIATETrabajoARealizarWidget.routePath,
-          builder: (context, params) =>
-              const DHASSOCIATETrabajoARealizarWidget(),
+          builder: (context, params) => DHASSOCIATETrabajoARealizarWidget(
+            routeId: params.getParam('id', ParamType.String),
+            routeProposalId: params.getParam('proposalId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DHASSOCIATETrabajoFinalizadoWidget.routeName,
           path: DHASSOCIATETrabajoFinalizadoWidget.routePath,
-          builder: (context, params) =>
-              const DHASSOCIATETrabajoFinalizadoWidget(),
+          builder: (context, params) => DHASSOCIATETrabajoFinalizadoWidget(
+            routeId: params.getParam('id', ParamType.String),
+            routeProposalId: params.getParam('proposalId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DHASSOCIATETrabajoAdicionalWidget.routeName,
@@ -247,7 +258,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DHASSOCIATEFueraDeAlcanceWidget.routeName,
           path: DHASSOCIATEFueraDeAlcanceWidget.routePath,
-          builder: (context, params) => const DHASSOCIATEFueraDeAlcanceWidget(),
+          builder: (context, params) => DHASSOCIATEFueraDeAlcanceWidget(
+            routeId: params.getParam('id', ParamType.String),
+            routeProposalId: params.getParam('proposalId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DHASSOCIATEEmpresaHomePageWidget.routeName,
@@ -263,13 +277,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: DHASSOCIATECotizacionWidget.routeName,
           path: DHASSOCIATECotizacionWidget.routePath,
-          builder: (context, params) => const DHASSOCIATECotizacionWidget(),
+          builder: (context, params) => DHASSOCIATECotizacionWidget(
+            routeId: params.getParam('id', ParamType.String),
+            routeProposalId: params.getParam('proposalId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DHASSOCIATEPropuestaEnviadaWidget.routeName,
           path: DHASSOCIATEPropuestaEnviadaWidget.routePath,
-          builder: (context, params) =>
-              const DHASSOCIATEPropuestaEnviadaWidget(),
+          builder: (context, params) => DHASSOCIATEPropuestaEnviadaWidget(
+            routeId: params.getParam('id', ParamType.String),
+            routeProposalId: params.getParam('proposalId', ParamType.String),
+          ),
         ),
         FFRoute(
           name: DHCLIENTBienvenidaWidget.routeName,

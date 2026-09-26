@@ -1,3 +1,5 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_job_filters.dart';
 import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
@@ -36,7 +38,12 @@ export 'd_h_a_s_s_o_c_i_a_t_e_proximos_trabajos_model.dart';
 /// **dos secciones a la vez**, como pide el diseño: cambiar un desplegable
 /// actualiza aceptados y terminados en la misma pasada.
 class DHASSOCIATEProximosTrabajosWidget extends StatefulWidget {
-  const DHASSOCIATEProximosTrabajosWidget({super.key});
+  const DHASSOCIATEProximosTrabajosWidget(
+      {super.key, this.onlyFinished = false});
+
+  /// `?seccion=terminados`: la misma búsqueda y filtros, pero sólo sobre el
+  /// historial de trabajos terminados (el "Ver más" de ese carrusel).
+  final bool onlyFinished;
 
   static String routeName = 'DH_ASSOCIATE_ProximosTrabajos';
   static String routePath = '/dHASSOCIATEProximosTrabajos';
@@ -202,7 +209,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
   ) {
     final category = _selectedCategory(agenda.categories.approved);
     return jobs
-        .where((data) => asrMatchesQuery(data, _model.searchQuery))
+        .where((data) => associateRequestMatchesQuery(
+            data, _model.searchQuery, agenda.categories.approved))
         .where((data) =>
             category == null || associateRequestMatchesCategory(data, category))
         .where((data) =>
@@ -253,7 +261,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
   void _openScheduledJob(Map<String, dynamic> data) {
     DHASSOCIATETuTrabajoWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETuTrabajoWidget.routeName)
+        .pushNamed(DHASSOCIATETuTrabajoWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadAgenda));
   }
 
@@ -262,7 +271,8 @@ class _DHASSOCIATEProximosTrabajosWidgetState
   void _openFinishedJob(Map<String, dynamic> data) {
     DHASSOCIATETrabajoRealizadoWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETrabajoRealizadoWidget.routeName)
+        .pushNamed(DHASSOCIATETrabajoRealizadoWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadAgenda));
   }
 
@@ -306,7 +316,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-                  hintText: 'Búsqueda con IA',
+                  hintText: 'Buscar por servicio, zona o fecha',
                   hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: GoogleFonts.inter(),
                         color: FlutterFlowTheme.of(context).secondaryText,
@@ -509,16 +519,18 @@ class _DHASSOCIATEProximosTrabajosWidgetState
           ),
           const SizedBox(height: 8.0),
         ],
-        _buildSection(
-          title: 'Trabajos aceptados',
-          jobs: accepted,
-          emptyMessage: filtering
-              ? 'No hay trabajos aceptados con estos filtros.'
-              : 'Todavía no aceptaste ningún trabajo. Postulate a los que '
-                  'están disponibles.',
-          onViewDetail: _openScheduledJob,
-        ),
-        const SizedBox(height: 32.0),
+        if (!widget.onlyFinished) ...[
+          _buildSection(
+            title: 'Trabajos aceptados',
+            jobs: accepted,
+            emptyMessage: filtering
+                ? 'No hay trabajos aceptados con estos filtros.'
+                : 'Todavía no aceptaste ningún trabajo. Postulate a los que '
+                    'están disponibles.',
+            onViewDetail: _openScheduledJob,
+          ),
+          const SizedBox(height: 32.0),
+        ],
         _buildSection(
           title: 'Trabajos terminados',
           jobs: finished,
@@ -548,15 +560,23 @@ class _DHASSOCIATEProximosTrabajosWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            // Lo que sube al scrollear no pasa por detrás de la hora y la
+            // batería.
+            StatusBarClip(
+                child: SingleChildScrollView(
+              // Espacio de la barra de navegación del sistema (sin SafeArea).
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   wrapWithModel(
                     model: _model.dHASSOCIATEHeaderModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: const DHASSOCIATEHeaderWidget(
-                      tittleText: 'Próximos trabajos',
+                    child: DHASSOCIATEHeaderWidget(
+                      tittleText: widget.onlyFinished
+                          ? 'Trabajos terminados'
+                          : 'Próximos trabajos',
                     ),
                   ),
                   Padding(
@@ -588,7 +608,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 1.0),
               child: Column(

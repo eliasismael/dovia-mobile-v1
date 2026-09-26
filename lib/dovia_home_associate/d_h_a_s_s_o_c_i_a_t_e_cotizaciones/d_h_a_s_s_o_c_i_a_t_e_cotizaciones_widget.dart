@@ -1,3 +1,5 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/dovia_home_associate/associate_job_filters.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
@@ -188,7 +190,8 @@ class _DHASSOCIATECotizacionesWidgetState
   void _openOpportunity(Map<String, dynamic> data) {
     DHASSOCIATECotizacionWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATECotizacionWidget.routeName)
+        .pushNamed(DHASSOCIATECotizacionWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -199,7 +202,9 @@ class _DHASSOCIATECotizacionesWidgetState
     DHASSOCIATECotizacionWidget.requestData = submission.request;
     DHASSOCIATECotizacionWidget.proposalData = submission.proposal;
     context
-        .pushNamed(DHASSOCIATECotizacionWidget.routeName)
+        .pushNamed(DHASSOCIATECotizacionWidget.routeName,
+            queryParameters: associateRouteParams(
+                request: submission.request, proposal: submission.proposal))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -209,7 +214,9 @@ class _DHASSOCIATECotizacionesWidgetState
     DHASSOCIATEPropuestaEnviadaWidget.proposalData = submission.proposal;
     DHASSOCIATEPropuestaEnviadaWidget.requestData = submission.request;
     context
-        .pushNamed(DHASSOCIATEPropuestaEnviadaWidget.routeName)
+        .pushNamed(DHASSOCIATEPropuestaEnviadaWidget.routeName,
+            queryParameters: associateRouteParams(
+                request: submission.request, proposal: submission.proposal))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -219,7 +226,8 @@ class _DHASSOCIATECotizacionesWidgetState
   void _openWonProject(Map<String, dynamic> data) {
     DHASSOCIATETrabajoARealizarWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName)
+        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -335,12 +343,14 @@ class _DHASSOCIATECotizacionesWidgetState
     required String title,
     required String iconPath,
     required VoidCallback onViewWork,
+    String? subtitle,
   }) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 10.0),
         child: DHASSOCIATECotizacionEnviadaCardWidget(
           title: title,
           iconPath: iconPath,
+          subtitle: subtitle,
           onViewWork: onViewWork,
         ),
       );
@@ -363,11 +373,8 @@ class _DHASSOCIATECotizacionesWidgetState
       children: [
         for (final data in requests)
           _buildCard(
-            title: asrServiceName(data),
-            iconPath: associateCategoryIcon(
-              asrServiceCode(data),
-              asrServiceName(data),
-            ),
+            title: associateRequestTitle(data, _trades),
+            iconPath: associateRequestIcon(data, _trades),
             onViewWork: () => onViewWork(data),
           ),
       ],
@@ -383,6 +390,7 @@ class _DHASSOCIATECotizacionesWidgetState
     required List<CompanyQuoteSubmission> submissions,
     required String emptyMessage,
     required void Function(CompanyQuoteSubmission) onViewWork,
+    String? subtitle,
   }) {
     if (board.proposalsFailed) {
       return _buildMessage(
@@ -394,20 +402,25 @@ class _DHASSOCIATECotizacionesWidgetState
       children: [
         for (final submission in submissions)
           _buildCard(
-            title: submission.title,
+            title: associateSubmittedTitle(submission.request == null
+                ? submission.title
+                : associateRequestTitle(submission.request!, _trades)),
+            subtitle: subtitle,
             iconPath: submission.request == null
                 ? associateCategoryIcon(null, submission.title)
-                : associateCategoryIcon(
-                    asrServiceCode(submission.request!),
-                    asrServiceName(submission.request!),
-                  ),
+                : associateRequestIcon(submission.request!, _trades),
             onViewWork: () => onViewWork(submission),
           ),
       ],
     );
   }
 
+  /// Oficios aprobados de la empresa, para titular e iconizar cada
+  /// cotización con su oficio en vez del genérico "Servicio por cotizar".
+  List<AssociateServiceCategory> _trades = const [];
+
   Widget _buildResults(CompanyQuoteBoard board) {
+    _trades = board.categories.approved;
     final category = _selectedCategory(board.categories.approved);
 
     return Column(
@@ -438,6 +451,7 @@ class _DHASSOCIATECotizacionesWidgetState
             submissions: _filterSubmissions(board.submitted, category),
             emptyMessage: 'No hay presupuestos enviados con estos filtros.',
             onViewWork: _openSubmittedQuote,
+            subtitle: 'Aguardando respuesta del cliente',
           ),
           const SizedBox(height: 24.0),
         ],
@@ -459,6 +473,7 @@ class _DHASSOCIATECotizacionesWidgetState
             submissions: _filterSubmissions(board.rejected, category),
             emptyMessage: 'No hay cotizaciones rechazadas con estos filtros.',
             onViewWork: _openRejectedQuote,
+            subtitle: 'El cliente rechazó el presupuesto',
           ),
         ],
       ],
@@ -482,7 +497,13 @@ class _DHASSOCIATECotizacionesWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            // Lo que sube al scrollear no pasa por detrás de la hora y la
+            // batería.
+            StatusBarClip(
+                child: SingleChildScrollView(
+              // Espacio de la barra de navegación del sistema (sin SafeArea).
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -525,7 +546,7 @@ class _DHASSOCIATECotizacionesWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 1.0),
               child: Column(

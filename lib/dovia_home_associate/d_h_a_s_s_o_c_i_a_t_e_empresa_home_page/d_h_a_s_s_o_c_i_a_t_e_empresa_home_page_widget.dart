@@ -1,3 +1,5 @@
+import '/dovia_home_associate/associate_header_actions.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
@@ -8,7 +10,6 @@ import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_card/d_h_a_s_s_o_c_i_a_t_e_trabajo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
@@ -117,7 +118,8 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   ) {
     final category = _selectedCategory(categories);
     return requests
-        .where((data) => asrMatchesQuery(data, _model.searchQuery))
+        .where((data) =>
+            associateRequestMatchesQuery(data, _model.searchQuery, categories))
         .where((data) =>
             category == null || associateRequestMatchesCategory(data, category))
         .toList();
@@ -139,7 +141,10 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
       }
       final query = _model.searchQuery.trim();
       if (query.isEmpty) return true;
-      if (request != null && asrMatchesQuery(request, query)) return true;
+      if (request != null &&
+          associateRequestMatchesQuery(request, query, categories)) {
+        return true;
+      }
       return submission.title.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
@@ -153,7 +158,8 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   void _openOpportunity(Map<String, dynamic> data) {
     DHASSOCIATECotizacionWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATECotizacionWidget.routeName)
+        .pushNamed(DHASSOCIATECotizacionWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -164,7 +170,9 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
     DHASSOCIATECotizacionWidget.requestData = submission.request;
     DHASSOCIATECotizacionWidget.proposalData = submission.proposal;
     context
-        .pushNamed(DHASSOCIATECotizacionWidget.routeName)
+        .pushNamed(DHASSOCIATECotizacionWidget.routeName,
+            queryParameters: associateRouteParams(
+                request: submission.request, proposal: submission.proposal))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -174,7 +182,8 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   void _openWonProject(Map<String, dynamic> data) {
     DHASSOCIATETrabajoARealizarWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName)
+        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -188,32 +197,38 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   // Bloques de UI.
   // ---------------------------------------------------------------------------
 
-  /// Cabecera del panel: el diseño de escritorio esconde carrito y
-  /// diagnósticos, así que en mobile queda sólo el logo y el título.
+  /// Cabecera del panel: logo, título y los accesos a Servicios y Próximos
+  /// trabajos.
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+      // Título centrado en la pantalla, no entre los íconos: la D y los
+      // accesos quedan encima, a cada lado.
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          SvgPicture.asset(
-            'assets/images/D-verde.svg',
-            width: 28.0,
-            height: 36.0,
-            fit: BoxFit.contain,
+          Text(
+            'Home',
+            textAlign: TextAlign.center,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  fontSize: 18.0,
+                  letterSpacing: 0.0,
+                  lineHeight: 1.2,
+                ),
           ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Text(
-              'Dovia Home Associate',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    fontSize: 22.0,
-                    letterSpacing: 0.0,
-                    lineHeight: 1.2,
-                  ),
-            ),
+          Row(
+            children: [
+              SvgPicture.asset(
+                'assets/images/D-verde.svg',
+                width: 28.0,
+                height: 36.0,
+                fit: BoxFit.contain,
+              ),
+              const Spacer(),
+              const AssociateHeaderActions(),
+            ],
           ),
         ],
       ),
@@ -258,7 +273,7 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    hintText: 'Búsqueda con IA',
+                    hintText: 'Buscar por servicio, zona o fecha',
                     hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.inter(),
                           color: FlutterFlowTheme.of(context).secondaryText,
@@ -294,7 +309,7 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
     );
   }
 
-  /// Encabezado de sección con su acción a la derecha (la píldora del diseño).
+  /// Encabezado de sección con su acción a la derecha.
   Widget _buildSectionHeader(
     String title, {
     required String actionText,
@@ -316,23 +331,17 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
                 ),
           ),
         ),
-        FFButtonWidget(
-          onPressed: onAction,
-          text: actionText,
-          options: FFButtonOptions(
-            height: 30.0,
-            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 20.0, 6.0),
-            iconPadding:
-                const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-            color: const Color(0xFFCCE3E4),
-            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.normal),
+        // Acción como texto sin fondo, igual que el "Ver más" del resto de
+        // la app.
+        InkWell(
+          onTap: onAction,
+          child: Text(
+            actionText,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                   color: FlutterFlowTheme.of(context).primary,
                   fontSize: 14.0,
-                  letterSpacing: 0.0,
                 ),
-            elevation: 0.0,
-            borderRadius: BorderRadius.circular(24.0),
           ),
         ),
       ],
@@ -364,10 +373,12 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
     }
 
     return SizedBox(
-      height: 100.0,
+      height: 116.0,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
+        // Aire para que no se corte la sombra de las tarjetas.
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
+        clipBehavior: Clip.none,
         itemCount: categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 11.0),
         itemBuilder: (context, index) {
@@ -383,8 +394,15 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
             child: Container(
               width: 100.0,
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F7F7),
-                borderRadius: BorderRadius.circular(8.0),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 10.0,
+                    offset: Offset(0.0, 3.0),
+                  ),
+                ],
                 border: Border.all(
                   color: isSelected
                       ? FlutterFlowTheme.of(context).primary
@@ -399,8 +417,9 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
                     width: 40.0,
                     height: 40.0,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF70ACAD),
-                      borderRadius: BorderRadius.circular(10.0),
+                      // Igual que los servicios del Dovia Home cliente.
+                      color: const Color(0xFF007376),
+                      borderRadius: BorderRadius.circular(14.0),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -442,8 +461,8 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F3EF),
-        borderRadius: BorderRadius.circular(10.0),
+        color: const Color(0x2670ACAD),
+        borderRadius: BorderRadius.circular(12.0),
       ),
       child: Text(
         message,
@@ -478,7 +497,7 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
             (data) => Padding(
               padding: const EdgeInsets.only(bottom: 10.0),
               child: DHASSOCIATETrabajoCardWidget(
-                title: asrServiceName(data),
+                title: associateRequestTitle(data, _trades),
                 // La dirección va enmascarada: la empresa todavía no ganó el
                 // proyecto y la exacta se revela al aceptarlo.
                 addressLabel: asrZoneLabel(data),
@@ -497,6 +516,10 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   /// pantalla de la cotización, en Estado 2 (sólo lectura + banner de
   /// espera): antes no había nada que ver ahí, pero ahora sí hay un
   /// presupuesto propio para releer.
+  /// Oficios aprobados de la empresa, para titular e iconizar cada
+  /// cotización con su oficio en vez del genérico "Servicio por cotizar".
+  List<AssociateServiceCategory> _trades = const [];
+
   Widget _buildSubmittedLane(
       CompanyQuoteBoard board, List<CompanyQuoteSubmission> submissions) {
     if (board.proposalsFailed) {
@@ -516,8 +539,13 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
             (submission) => Padding(
               padding: const EdgeInsets.only(bottom: 10.0),
               child: DHASSOCIATECotizacionEnviadaCardWidget(
-                title: submission.title,
-                iconPath: associateCategoryIcon(null, submission.title),
+                title: associateSubmittedTitle(submission.request == null
+                    ? submission.title
+                    : associateRequestTitle(submission.request!, _trades)),
+                subtitle: 'Aguardando respuesta del cliente',
+                iconPath: submission.request == null
+                    ? associateCategoryIcon(null, submission.title)
+                    : associateRequestIcon(submission.request!, _trades),
                 onViewWork: () => _openSubmission(submission),
               ),
             ),
@@ -549,6 +577,7 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
                 future: _boardFuture,
                 builder: (context, snapshot) {
                   final board = snapshot.data;
+                  _trades = board?.categories.approved ?? const [];
                   final categories = board?.categories.approved ??
                       const <AssociateServiceCategory>[];
 

@@ -1,3 +1,5 @@
+import '/dovia_home_associate/associate_current_job.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_role.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -37,6 +39,10 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => DHASSOCIATENavbarModel());
+    _currentJob = AssociateCurrentJob.cached;
+    AssociateCurrentJob.load().then((job) {
+      if (mounted) safeSetState(() => _currentJob = job);
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -48,6 +54,9 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
     super.dispose();
   }
 
+  /// Trabajo en curso (ya avisó su llegada): habilita el ítem "En curso".
+  Map<String, dynamic>? _currentJob;
+
   /// Ítem de la barra: un ícono que navega. Se extrajo del `build` porque con
   /// el ítem de empresa la barra pasó a tener un número variable de ellos.
   Widget _navItem({
@@ -55,6 +64,7 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
     required String label,
     required List<String> routeNames,
     required VoidCallback onTap,
+    Color? tint,
   }) =>
       NavbarItemIndicator(
         label: label,
@@ -71,7 +81,9 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
               asset,
               width: 24.0,
               height: 24.0,
-              fit: BoxFit.none,
+              fit: tint == null ? BoxFit.none : BoxFit.contain,
+              colorFilter:
+                  tint == null ? null : ColorFilter.mode(tint, BlendMode.srcIn),
             ),
           ),
         ),
@@ -80,64 +92,91 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
   @override
   Widget build(BuildContext context) {
     final isCompany = isHomeAssociateCompany();
+    // Fuera de un SafeArea la barra de navegación de Android la tapaba; dentro
+    // de uno este valor es 0 y no cambia nada.
+    final systemBar = MediaQuery.paddingOf(context).bottom;
 
-    return Container(
-      width: MediaQuery.sizeOf(context).width * 1.0,
-      height: 62.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 8.0,
-            color: Color(0x33000000),
-            offset: Offset(
-              0.0,
-              2.0,
-            ),
-          )
-        ],
-        borderRadius: BorderRadius.circular(30.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            _navItem(
-              asset: 'assets/images/DH_icono-navbar-home.svg',
-              label: 'Inicio',
-              routeNames: [
-                DHASSOCIATEEmpresaHomePageWidget.routeName,
-                DHASSOCIATEHomePageWidget.routeName
-              ],
-              onTap: () => context.pushNamed(isCompany
-                  ? DHASSOCIATEEmpresaHomePageWidget.routeName
-                  : DHASSOCIATEHomePageWidget.routeName),
-            ),
-            if (isCompany)
-              _navItem(
-                asset: 'assets/images/page-edit.svg',
-                label: 'Cotizaciones',
-                routeNames: [DHASSOCIATECotizacionesWidget.routeName],
-                onTap: () =>
-                    context.pushNamed(DHASSOCIATECotizacionesWidget.routeName),
+    return Padding(
+      padding: EdgeInsets.only(bottom: systemBar),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        height: 62.0,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          boxShadow: const [
+            BoxShadow(
+              blurRadius: 8.0,
+              color: Color(0x33000000),
+              offset: Offset(
+                0.0,
+                2.0,
               ),
-            _navItem(
-              asset: 'assets/images/DH_icono-navbar-notificaciones.svg',
-              label: 'Notificaciones',
-              routeNames: [DHASSOCIATENotificacionesWidget.routeName],
-              onTap: () =>
-                  context.pushNamed(DHASSOCIATENotificacionesWidget.routeName),
-            ),
-            _navItem(
-              asset: 'assets/images/DH_icono-navbar-ajustes.svg',
-              label: 'Ajustes',
-              routeNames: [DHASSOCIATEAjustesWidget.routeName],
-              onTap: () =>
-                  context.pushNamed(DHASSOCIATEAjustesWidget.routeName),
-            ),
+            )
           ],
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _navItem(
+                asset: 'assets/images/DH_icono-navbar-home.svg',
+                label: 'Inicio',
+                routeNames: [
+                  DHASSOCIATEEmpresaHomePageWidget.routeName,
+                  DHASSOCIATEHomePageWidget.routeName
+                ],
+                // Vuelve al panel limpiando la pila, igual que la D del header.
+                onTap: () => goAssociateHome(context),
+              ),
+              // Acceso directo al trabajo que se está ejecutando: sólo
+              // aparece si hay uno en curso.
+              if (_currentJob != null)
+                _navItem(
+                  asset: 'assets/images/tools-white.svg',
+                  tint: const Color(0xFF00444B),
+                  label: 'En curso',
+                  routeNames: [
+                    DHASSOCIATETrabajoARealizarWidget.routeName,
+                    DHASSOCIATETrabajoFinalizadoWidget.routeName,
+                    DHASSOCIATEFueraDeAlcanceWidget.routeName,
+                  ],
+                  onTap: () {
+                    final job = _currentJob!;
+                    DHASSOCIATETrabajoARealizarWidget.requestData = job;
+                    context.pushNamed(
+                        DHASSOCIATETrabajoARealizarWidget.routeName,
+                        queryParameters: associateRouteParams(request: job));
+                  },
+                ),
+              if (isCompany)
+                _navItem(
+                  asset: 'assets/images/page-edit.svg',
+                  // El SVG viene en gris: se tiñe del verde de los demás.
+                  tint: const Color(0xFF00444B),
+                  label: 'Cotizaciones',
+                  routeNames: [DHASSOCIATECotizacionesWidget.routeName],
+                  onTap: () => context
+                      .pushNamed(DHASSOCIATECotizacionesWidget.routeName),
+                ),
+              _navItem(
+                asset: 'assets/images/DH_icono-navbar-notificaciones.svg',
+                label: 'Notificaciones',
+                routeNames: [DHASSOCIATENotificacionesWidget.routeName],
+                onTap: () => context
+                    .pushNamed(DHASSOCIATENotificacionesWidget.routeName),
+              ),
+              _navItem(
+                asset: 'assets/images/DH_icono-navbar-ajustes.svg',
+                label: 'Ajustes',
+                routeNames: [DHASSOCIATEAjustesWidget.routeName],
+                onTap: () =>
+                    context.pushNamed(DHASSOCIATEAjustesWidget.routeName),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
@@ -30,7 +32,18 @@ export 'd_h_a_s_s_o_c_i_a_t_e_trabajo_realizado_model.dart';
 ///     asociado y las fotos de evidencia que subió.
 ///   - **Feedback del cliente**: las estrellas y el comentario que dejó.
 class DHASSOCIATETrabajoRealizadoWidget extends StatefulWidget {
-  const DHASSOCIATETrabajoRealizadoWidget({super.key});
+  const DHASSOCIATETrabajoRealizadoWidget({
+    super.key,
+    this.routeId,
+    this.routeProposalId,
+  });
+
+  /// Id del trabajo que viene en la ruta (`?id=`). Manda sobre el campo
+  /// estático cuando no coinciden: ver [associateRouteParams].
+  final String? routeId;
+
+  /// Id de la propuesta que viene en la ruta (`?proposalId=`).
+  final String? routeProposalId;
 
   /// Trabajo terminado a mostrar. Se fija antes de navegar.
   static Map<String, dynamic>? requestData;
@@ -62,7 +75,8 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
 
     // Lo que inyectó la tarjeta se pinta sin esperar al backend; el detalle
     // sólo completa lo que el resumen del listado no trae.
-    _model.requestData = DHASSOCIATETrabajoRealizadoWidget.requestData;
+    _model.requestData = resolveRouteRequest(
+        DHASSOCIATETrabajoRealizadoWidget.requestData, widget.routeId);
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadDetail());
   }
@@ -315,7 +329,7 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel('Imagenes que se mandaron'),
+        _fieldLabel('Imágenes que se mandaron'),
         const SizedBox(height: 12.0),
         Container(
           width: double.infinity,
@@ -372,7 +386,7 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel('Calificacion que se te asigno'),
+        _fieldLabel('Calificación que se te asignó'),
         const SizedBox(height: 20.0),
         Align(
           alignment: const AlignmentDirectional(0.0, 0.0),
@@ -418,7 +432,7 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel('Comentario que se te asigno', fontWeight: FontWeight.w500),
+        _fieldLabel('Comentario que se te asignó', fontWeight: FontWeight.w500),
         const SizedBox(height: 12.0),
         _readOnlyBox(
           child: _boxText(
@@ -469,7 +483,13 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            // Lo que sube al scrollear no pasa por detrás de la hora y la
+            // batería.
+            StatusBarClip(
+                child: SingleChildScrollView(
+              // Espacio de la barra de navegación del sistema (sin SafeArea).
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -486,7 +506,7 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _sectionTitle('Información que se envio al cliente'),
+                        _sectionTitle('Información que se envió al cliente'),
                         const SizedBox(height: 21.0),
                         _buildReport(),
                         const SizedBox(height: 21.0),
@@ -504,7 +524,7 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 1.0),
               child: Column(

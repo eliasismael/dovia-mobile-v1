@@ -22,10 +22,11 @@ export 'd_h_a_s_s_o_c_i_a_t_e_servicios_model.dart';
 const Color _kFieldSurface = Color(0xFFFAFAFA);
 
 /// Superficie de las tarjetas de categoría (#F7F7F7).
-const Color _kCardSurface = Color(0xFFF7F7F7);
+const Color _kCardSurface = Colors.white;
 
-/// Aqua/60 del diseño: el cuadrado que envuelve al ícono de cada categoría.
-const Color _kIconSurface = Color(0xFF70ACAD);
+/// Cuadrado que envuelve al ícono de cada categoría: el mismo verde que en
+/// los servicios del Dovia Home cliente.
+const Color _kIconSurface = Color(0xFF007376);
 
 /// Límites del certificado, tal como los valida
 /// `POST /users/me/specialty-requests`. Se chequean acá para que el asociado se
@@ -488,7 +489,14 @@ class _DHASSOCIATEServiciosWidgetState
       height: 100.0,
       decoration: BoxDecoration(
         color: _kCardSurface,
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 10.0,
+            offset: Offset(0.0, 3.0),
+          ),
+        ],
         border: Border.all(
           color: isSelected
               ? FlutterFlowTheme.of(context).primary
@@ -503,10 +511,8 @@ class _DHASSOCIATEServiciosWidgetState
             width: 40.0,
             height: 40.0,
             decoration: BoxDecoration(
-              color: isSelected
-                  ? FlutterFlowTheme.of(context).primary
-                  : _kIconSurface,
-              borderRadius: BorderRadius.circular(10.0),
+              color: isSelected ? const Color(0xFF00444B) : _kIconSurface,
+              borderRadius: BorderRadius.circular(14.0),
             ),
             child: Padding(
               padding: const EdgeInsets.all(12.0),

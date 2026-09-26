@@ -141,3 +141,65 @@ bool associateRequestMatchesCategory(
   if (code != null && _key(code) == _key(category.code)) return true;
   return _key(asrServiceName(request)) == _key(category.label);
 }
+
+/// Búsqueda de la barra de los listados del asociado: [asrMatchesQuery] más
+/// los oficios del catálogo que habilitan el trabajo, para que escribir
+/// "albañilería" o "eléctrico" encuentre un servicio que se llama
+/// "Instalación".
+bool associateRequestMatchesQuery(
+  Map<String, dynamic> request,
+  String query,
+  List<AssociateServiceCategory> categories,
+) =>
+    asrMatchesQuery(request, query, extraText: [
+      for (final c in categories)
+        if (associateRequestMatchesCategory(request, c)) c.label,
+    ]);
+
+/// Oficio de una solicitud según el catálogo del asociado (Ej: "Albañilería").
+///
+/// Las cotizaciones llegan todas con el servicio genérico "Servicio por
+/// cotizar", así que el oficio sale de las especialidades que habilitan el
+/// trabajo o, si no las declara, de la categoría que eligió el cliente.
+String? associateRequestTrade(
+  Map<String, dynamic> request,
+  List<AssociateServiceCategory> categories,
+) {
+  if (asrRequiredSpecialtyIds(request).isNotEmpty) {
+    for (final c in categories) {
+      if (associateRequestMatchesCategory(request, c)) return c.label;
+    }
+  }
+  return asrCategoryName(request);
+}
+
+/// Título de la tarjeta: el oficio cuando el servicio es el genérico de
+/// cotización; si no, el nombre del servicio.
+String associateRequestTitle(
+  Map<String, dynamic> request,
+  List<AssociateServiceCategory> categories,
+) {
+  final isQuote = asrRequestType(request) == 'QUOTE' ||
+      (asrServiceCode(request) ?? '').contains('QUOTE');
+  final trade = associateRequestTrade(request, categories);
+  return isQuote && trade != null ? trade : asrServiceName(request);
+}
+
+/// Ícono del oficio de la solicitud, con el del servicio como respaldo.
+String associateRequestIcon(
+  Map<String, dynamic> request,
+  List<AssociateServiceCategory> categories,
+) {
+  final trade = associateRequestTrade(request, categories);
+  if (trade != null) {
+    final icon = associateCategoryIcon(null, trade);
+    if (icon != _fallbackIcon) return icon;
+  }
+  return associateCategoryIcon(
+      asrServiceCode(request), asrServiceName(request));
+}
+
+/// Título de una cotización ya enviada: el genérico "Servicio por cotizar"
+/// pasa a "Servicio cotizado", porque la empresa ya presupuestó.
+String associateSubmittedTitle(String title) =>
+    title.toLowerCase().contains('por cotizar') ? 'Servicio cotizado' : title;

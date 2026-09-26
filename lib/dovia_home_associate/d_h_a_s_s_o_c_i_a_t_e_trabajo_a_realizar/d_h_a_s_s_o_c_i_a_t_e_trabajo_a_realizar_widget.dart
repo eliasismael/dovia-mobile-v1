@@ -1,8 +1,10 @@
+import '/dovia_home_associate/associate_current_job.dart';
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance/d_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_widget.dart';
-import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional/d_h_a_s_s_o_c_i_a_t_e_trabajo_adicional_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado/d_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -21,7 +23,18 @@ import 'd_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar_model.dart';
 
 class DHASSOCIATETrabajoARealizarWidget extends StatefulWidget {
-  const DHASSOCIATETrabajoARealizarWidget({super.key});
+  const DHASSOCIATETrabajoARealizarWidget({
+    super.key,
+    this.routeId,
+    this.routeProposalId,
+  });
+
+  /// Id del trabajo que viene en la ruta (`?id=`). Manda sobre el campo
+  /// estático cuando no coinciden: ver [associateRouteParams].
+  final String? routeId;
+
+  /// Id de la propuesta que viene en la ruta (`?proposalId=`).
+  final String? routeProposalId;
 
   static String routeName = 'DH_ASSOCIATE_TrabajoARealizar';
   static String routePath = '/dHASSOCIATETrabajoARealizar';
@@ -47,6 +60,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
     super.initState();
     _model = createModel(context, () => DHASSOCIATETrabajoARealizarModel());
 
+    DHASSOCIATETrabajoARealizarWidget.requestData = resolveRouteRequest(
+        DHASSOCIATETrabajoARealizarWidget.requestData, widget.routeId);
     _loadDetail();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
@@ -238,6 +253,15 @@ class _DHASSOCIATETrabajoARealizarWidgetState
 
     safeSetState(() => _model.isStarting = true);
     try {
+      // Un trabajo a la vez: si ya hay otro en ejecución, se frena acá.
+      AssociateCurrentJob.invalidate();
+      final current = await AssociateCurrentJob.load();
+      if (!mounted) return;
+      if (current != null && asrId(current) != id) {
+        _showMessage(kJobInProgressNotice);
+        return;
+      }
+
       final position = await _captureCurrentPosition();
       if (position == null) return;
 
@@ -251,11 +275,28 @@ class _DHASSOCIATETrabajoARealizarWidgetState
       if (!mounted) return;
 
       if (!response.succeeded) {
-        _showMessage('No se pudo notificar tu llegada. Intenta de nuevo.');
+        // El backend explica por qué (Ej: fuera del radio del domicilio).
+        final reason = getJsonField(response.jsonBody, r'''$.message''');
+        final text = reason is List ? reason.join(', ') : reason?.toString();
+        // "Estado no válido": se relee el trabajo para decir en qué estado
+        // quedó realmente en lugar del mensaje genérico del backend.
+        if ((text ?? '').toLowerCase().contains('estado')) {
+          await _loadDetail();
+          final fresh = _request;
+          if (fresh != null) {
+            _showMessage(
+                'No se pudo notificar tu llegada. ${asrStartBlockedReason(fresh)}');
+            return;
+          }
+        }
+        _showMessage(text != null && text.isNotEmpty
+            ? 'No se pudo notificar tu llegada: $text'
+            : 'No se pudo notificar tu llegada (error ${response.statusCode}).');
         return;
       }
 
       safeSetState(() => _model.checkedIn = true);
+      AssociateCurrentJob.invalidate();
       _showMessage('Le avisamos al cliente que ya llegaste.');
       await _loadDetail();
     } finally {
@@ -408,21 +449,13 @@ class _DHASSOCIATETrabajoARealizarWidgetState
     );
   }
 
-  /// Materiales extra: abre el formulario de pedido. El backend sólo lo acepta
-  /// con el servicio en curso, que es justo cuando se muestra este botón.
-  void _openExtraMaterials() {
-    DHASSOCIATETrabajoAdicionalWidget.serviceRequestId = _requestId;
-    context
-        .pushNamed(DHASSOCIATETrabajoAdicionalWidget.routeName)
-        .then((_) => _loadDetail());
-  }
-
   /// Trabajo fuera de alcance: abre el reporte de tareas que no estaban en el
   /// pedido original y aparecieron durante la ejecución.
   void _openOutOfScope() {
     DHASSOCIATEFueraDeAlcanceWidget.serviceRequestId = _requestId;
     context
-        .pushNamed(DHASSOCIATEFueraDeAlcanceWidget.routeName)
+        .pushNamed(DHASSOCIATEFueraDeAlcanceWidget.routeName,
+            queryParameters: associateRouteParams(id: _requestId))
         .then((_) => _loadDetail());
   }
 
@@ -433,7 +466,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
     if (data == null) return;
     DHASSOCIATETrabajoFinalizadoWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETrabajoFinalizadoWidget.routeName)
+        .pushNamed(DHASSOCIATETrabajoFinalizadoWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => _loadDetail());
   }
 
@@ -653,7 +687,13 @@ class _DHASSOCIATETrabajoARealizarWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            // Lo que sube al scrollear no pasa por detrás de la hora y la
+            // batería.
+            StatusBarClip(
+                child: SingleChildScrollView(
+              // Espacio de la barra de navegación del sistema (sin SafeArea).
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -914,7 +954,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                           // el asociado es aceptarla. Tomado y sin
                           // check-in todavía, se desoculta la dirección/mapa
                           // y el aviso de llegada. Ya en sitio, las acciones
-                          // de ejecución (materiales, trabajos adicionales,
+                          // de ejecución (trabajos adicionales,
                           // finalizar).
                           if (_canApply) _buildPreAcceptanceSection(),
                           if (_canApply) _buildApplyButton(),
@@ -923,65 +963,11 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 21.0, 0.0, 0.0),
-                              child: Container(
+                              child: SizedBox(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    FFButtonWidget(
-                                      onPressed: _openExtraMaterials,
-                                      text: 'Necesito materiales adicionales',
-                                      options: FFButtonOptions(
-                                        width:
-                                            MediaQuery.sizeOf(context).width *
-                                                1.0,
-                                        height: 42.0,
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                        iconPadding: const EdgeInsetsDirectional
-                                            .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        textStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .override(
-                                              font: GoogleFonts.publicSans(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .fontStyle,
-                                              ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontStyle,
-                                            ),
-                                        elevation: 0.0,
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
-                                          width: 1.5,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(25.0),
-                                      ),
-                                    ),
                                     FFButtonWidget(
                                       onPressed: _openOutOfScope,
                                       text: 'Se necesitan trabajos adicionales',
@@ -1090,9 +1076,12 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                       ),
                     ),
                   ),
+                  // Aire para que lo último (Ej: "Aceptar trabajo") no quede
+                  // debajo de la navbar y el ícono flotante.
+                  const SizedBox(height: 160.0),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(

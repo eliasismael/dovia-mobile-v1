@@ -178,7 +178,7 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
             const Icon(Icons.notifications_none, size: 48, color: muted),
             const SizedBox(height: 12),
             Text(
-              repo.error ?? 'No tenés notificaciones',
+              repo.error ?? 'No tienes notificaciones',
               textAlign: TextAlign.center,
               style: const TextStyle(
                   fontFamily: 'Public Sans', fontSize: 14, color: muted),

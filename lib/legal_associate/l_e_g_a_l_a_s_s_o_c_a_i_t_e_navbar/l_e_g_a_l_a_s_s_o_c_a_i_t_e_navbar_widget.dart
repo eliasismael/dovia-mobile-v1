@@ -66,8 +66,31 @@ class _LEGALASSOCAITENavbarWidgetState
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             NavbarItemIndicator(
+              label: 'Inicio',
+              routeNames: [LegalAssociateHomeWidget.routeName],
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  context.goNamed(LegalAssociateHomeWidget.routeName);
+                },
+                child: SvgPicture.asset(
+                  'assets/images/DH_icono-navbar-home.svg',
+                  width: 24.0,
+                  height: 24.0,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            NavbarItemIndicator(
               label: 'Procesos',
-              routeNames: [LEGALASSOCIATEProcesosWidget.routeName],
+              // El detalle de un trámite también cuenta como Procesos.
+              routeNames: [
+                LEGALASSOCIATEProcesosWidget.routeName,
+                LEGALASSOCIATEProcesos2Widget.routeName,
+              ],
               child: InkWell(
                 splashColor: Colors.transparent,
                 focusColor: Colors.transparent,

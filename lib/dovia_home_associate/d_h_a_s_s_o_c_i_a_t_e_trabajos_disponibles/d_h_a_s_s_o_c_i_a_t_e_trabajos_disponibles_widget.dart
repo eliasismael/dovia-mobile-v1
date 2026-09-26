@@ -1,3 +1,5 @@
+import '/shared_components/status_bar_clip/status_bar_clip.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_job_filters.dart';
 import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
@@ -199,7 +201,8 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
   List<Map<String, dynamic>> _applyFilters(_Board board) {
     final category = _selectedCategory(board.categories.approved);
     return board.jobs
-        .where((data) => asrMatchesQuery(data, _model.searchQuery))
+        .where((data) => associateRequestMatchesQuery(
+            data, _model.searchQuery, board.categories.approved))
         .where((data) =>
             category == null || associateRequestMatchesCategory(data, category))
         .where((data) =>
@@ -213,7 +216,8 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
   void _openOpportunity(Map<String, dynamic> data) {
     DHASSOCIATETrabajoARealizarWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName)
+        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadBoard));
   }
 
@@ -257,7 +261,7 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-                  hintText: 'Búsqueda con IA',
+                  hintText: 'Buscar por servicio, zona o fecha',
                   hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                         font: GoogleFonts.inter(),
                         color: FlutterFlowTheme.of(context).secondaryText,
@@ -421,7 +425,13 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
               updateCallback: () => safeSetState(() {}),
               child: const CornerGradientBackgroundWidget(),
             ),
-            SingleChildScrollView(
+            // Lo que sube al scrollear no pasa por detrás de la hora y la
+            // batería.
+            StatusBarClip(
+                child: SingleChildScrollView(
+              // Espacio de la barra de navegación del sistema (sin SafeArea).
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -466,7 +476,7 @@ class _DHASSOCIATETrabajosDisponiblesWidgetState
                   ),
                 ],
               ),
-            ),
+            )),
             Align(
               alignment: const AlignmentDirectional(0.0, 1.0),
               child: Column(

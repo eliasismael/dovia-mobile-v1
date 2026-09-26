@@ -1,3 +1,6 @@
+import '/backend/api_requests/api_dovia_home.dart';
+import '/auth/custom_auth/auth_util.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
@@ -36,7 +39,18 @@ export 'd_h_a_s_s_o_c_i_a_t_e_propuesta_enviada_model.dart';
 /// reenvío desde acá: la versión nueva se manda desde la oportunidad, que es
 /// donde están el requerimiento y las fotos del cliente.
 class DHASSOCIATEPropuestaEnviadaWidget extends StatefulWidget {
-  const DHASSOCIATEPropuestaEnviadaWidget({super.key});
+  const DHASSOCIATEPropuestaEnviadaWidget({
+    super.key,
+    this.routeId,
+    this.routeProposalId,
+  });
+
+  /// Id del trabajo que viene en la ruta (`?id=`). Manda sobre el campo
+  /// estático cuando no coinciden: ver [associateRouteParams].
+  final String? routeId;
+
+  /// Id de la propuesta que viene en la ruta (`?proposalId=`).
+  final String? routeProposalId;
 
   static String routeName = 'DH_ASSOCIATE_PropuestaEnviada';
   static String routePath = '/dHASSOCIATEPropuestaEnviada';
@@ -66,9 +80,11 @@ class _DHASSOCIATEPropuestaEnviadaWidgetState
     _model = createModel(context, () => DHASSOCIATEPropuestaEnviadaModel());
 
     _model.proposal = DHASSOCIATEPropuestaEnviadaWidget.proposalData;
-    _model.request = DHASSOCIATEPropuestaEnviadaWidget.requestData;
+    _model.request = resolveRouteRequest(
+        DHASSOCIATEPropuestaEnviadaWidget.requestData, widget.routeId);
     DHASSOCIATEPropuestaEnviadaWidget.proposalData = null;
     DHASSOCIATEPropuestaEnviadaWidget.requestData = null;
+    _loadFromRoute();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -78,6 +94,40 @@ class _DHASSOCIATEPropuestaEnviadaWidgetState
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Abierta desde la ruta sin datos inyectados: pide la propuesta y el
+  /// requerimiento que le faltan.
+  Future<void> _loadFromRoute() async {
+    final token = currentAuthenticationToken ?? '';
+    final propId = widget.routeProposalId ?? '';
+    final current = _model.proposal;
+    if (propId.isNotEmpty &&
+        (current == null || proposalId(current) != propId)) {
+      final response = await DOVIAAPIDoviaHomeContextGroup
+          .getCompanyQuoteProposalCall
+          .call(proposalId: propId, authToken: token);
+      final data = response.succeeded
+          ? getJsonField(response.jsonBody, r'''$.data''')
+          : null;
+      if (!mounted) return;
+      if (data is Map) {
+        safeSetState(() => _model.proposal = Map<String, dynamic>.from(data));
+      }
+    }
+    final request = _model.request;
+    if (isRouteStub(request)) {
+      final response = await DOVIAAPIDoviaHomeContextGroup
+          .getCompanyQuoteServiceRequestCall
+          .call(serviceRequestId: asrId(request!), authToken: token);
+      final data = response.succeeded
+          ? getJsonField(response.jsonBody, r'''$.data''')
+          : null;
+      if (!mounted) return;
+      if (data is Map) {
+        safeSetState(() => _model.request = Map<String, dynamic>.from(data));
+      }
+    }
   }
 
   bool get _isRejected =>

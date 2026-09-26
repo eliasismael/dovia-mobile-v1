@@ -1,3 +1,6 @@
+import '/dovia_home_associate/associate_current_job.dart';
+import '/dovia_home_associate/associate_header_actions.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
@@ -5,7 +8,6 @@ import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_card/d_h_a_s_s_o_c_i_a_t_e_trabajo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
@@ -130,7 +132,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
         .map((e) => Map<String, dynamic>.from(e))
         // Perfil Independiente: nunca cotizaciones ni fuera de alcance.
         .where(asrIsWorkableByIndependent)
-        .where((data) => asrMatchesQuery(data, _model.searchQuery))
+        .where((data) =>
+            associateRequestMatchesQuery(data, _model.searchQuery, categories))
         .where((data) =>
             category == null || associateRequestMatchesCategory(data, category))
         .toList();
@@ -138,7 +141,148 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
 
   /// Agenda activa: lo que este asociado ya aceptó y todavía tiene por delante.
   /// Los trabajos finalizados salen de "Próximos trabajos".
-  bool _isUpcoming(Map<String, dynamic> data) => asrStatus(data) != 'FINISHED';
+  /// El que ya está en ejecución (`IN_PROGRESS`) tampoco: va en "En curso".
+  bool _isUpcoming(Map<String, dynamic> data) {
+    final status = asrStatus(data);
+    return status != 'FINISHED' && status != 'IN_PROGRESS';
+  }
+
+  /// Trabajo en ejecución: el asociado ya avisó su llegada.
+  bool _isInProgress(Map<String, dynamic> data) =>
+      asrStatus(data) == 'IN_PROGRESS';
+
+  /// Abre el trabajo en curso en su pantalla de ejecución (trabajos
+  /// adicionales / finalizar), igual que el ítem "En curso" de la navbar.
+  void _openInProgress(Map<String, dynamic> data) {
+    DHASSOCIATETrabajoARealizarWidget.requestData = data;
+    context
+        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
+        .then((_) => safeSetState(_loadFeeds));
+  }
+
+  /// Resumen de solo lectura de un trabajo ya cerrado.
+  void _openFinished(Map<String, dynamic> data) {
+    DHASSOCIATETrabajoRealizadoWidget.requestData = data;
+    context.pushNamed(DHASSOCIATETrabajoRealizadoWidget.routeName,
+        queryParameters: associateRouteParams(request: data));
+  }
+
+  /// Carrusel "Trabajos terminados": los últimos cerrados, cada tarjeta abre
+  /// su resumen ("Trabajo realizado"). Sin ninguno, la sección se ve igual con
+  /// un texto chico que lo dice.
+  Widget _buildFinishedCarousel(List<AssociateServiceCategory> categories) {
+    return FutureBuilder<ApiCallResponse>(
+      future: _myJobsFuture,
+      builder: (context, snapshot) {
+        final response = snapshot.data;
+        if (response == null || !response.succeeded) {
+          return const SizedBox.shrink();
+        }
+        final jobs = _applyFilters(
+                DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall
+                        .requestsList(response.jsonBody) ??
+                    const [],
+                categories)
+            .where(asrIsFinished)
+            .toList()
+          ..sort((a, b) => (asrFilterDate(b) ?? DateTime(0))
+              .compareTo(asrFilterDate(a) ?? DateTime(0)));
+
+        final cardWidth = MediaQuery.sizeOf(context).width * 0.8;
+        return Padding(
+          padding: const EdgeInsets.only(top: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader(
+                'Trabajos terminados',
+                actionText: 'Ver más',
+                onAction: () => context.pushNamed(
+                    DHASSOCIATEProximosTrabajosWidget.routeName,
+                    queryParameters: {
+                      'seccion': 'terminados'
+                    }).then((_) => safeSetState(_loadFeeds)),
+              ),
+              const SizedBox(height: 14.0),
+              if (jobs.isEmpty)
+                Text(
+                  'Todavía no tienes trabajos finalizados.',
+                  style: GoogleFonts.publicSans(
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                    fontSize: 12.0,
+                  ),
+                )
+              else
+                SizedBox(
+                  height: 190.0,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
+                    padding: const EdgeInsets.symmetric(vertical: 6.0),
+                    itemCount: jobs.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12.0),
+                    itemBuilder: (context, index) => SizedBox(
+                      width: cardWidth,
+                      child: DHASSOCIATETrabajoCardWidget(
+                        title: asrServiceName(jobs[index]),
+                        addressLabel: asrZoneLabel(jobs[index]),
+                        dateLabel: asrFormattedDate(jobs[index]),
+                        timeLabel: asrTimeLabel(jobs[index]),
+                        payoutLabel: asrPayoutLabel(jobs[index]),
+                        onViewDetail: () => _openFinished(jobs[index]),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Sección "En curso": sólo existe si hay un trabajo en ejecución.
+  Widget _buildInProgressSection() {
+    return FutureBuilder<ApiCallResponse>(
+      future: _myJobsFuture,
+      builder: (context, snapshot) {
+        final response = snapshot.data;
+        if (response == null || !response.succeeded) {
+          return const SizedBox.shrink();
+        }
+        final jobs = (DOVIAAPIDoviaHomeContextGroup
+                    .listAssociateServiceRequestsCall
+                    .requestsList(response.jsonBody) ??
+                const [])
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .where(_isInProgress)
+            .toList();
+        if (jobs.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'En curso',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                      color: FlutterFlowTheme.of(context).primaryText,
+                      fontSize: 17.0,
+                      letterSpacing: 0.0,
+                      lineHeight: 1.3,
+                    ),
+              ),
+              const SizedBox(height: 14.0),
+              for (final data in jobs) _jobCard(data, _openInProgress),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   // ---------------------------------------------------------------------------
   // Navegación.
@@ -149,7 +293,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
   void _openOpportunity(Map<String, dynamic> data) {
     DHASSOCIATETrabajoARealizarWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName)
+        .pushNamed(DHASSOCIATETrabajoARealizarWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadFeeds));
   }
 
@@ -158,7 +303,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
   void _openScheduledJob(Map<String, dynamic> data) {
     DHASSOCIATETuTrabajoWidget.requestData = data;
     context
-        .pushNamed(DHASSOCIATETuTrabajoWidget.routeName)
+        .pushNamed(DHASSOCIATETuTrabajoWidget.routeName,
+            queryParameters: associateRouteParams(request: data))
         .then((_) => safeSetState(_loadFeeds));
   }
 
@@ -170,37 +316,43 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
   /// y diagnósticos, así que en mobile queda sólo el logo y el título.
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+      // Título centrado en la pantalla, no entre los íconos: la D y los
+      // accesos quedan encima, a cada lado.
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          SvgPicture.asset(
-            'assets/images/D-verde.svg',
-            width: 28.0,
-            height: 36.0,
-            fit: BoxFit.contain,
+          Text(
+            'Home',
+            textAlign: TextAlign.center,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  fontSize: 18.0,
+                  letterSpacing: 0.0,
+                  lineHeight: 1.2,
+                ),
           ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Text(
-              'Dovia Home Associate',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    fontSize: 22.0,
-                    letterSpacing: 0.0,
-                    lineHeight: 1.2,
-                  ),
-            ),
+          Row(
+            children: [
+              SvgPicture.asset(
+                'assets/images/D-verde.svg',
+                width: 28.0,
+                height: 36.0,
+                fit: BoxFit.contain,
+              ),
+              const Spacer(),
+              const AssociateHeaderActions(),
+            ],
           ),
         ],
       ),
     );
   }
 
-  /// Barra "Búsqueda con IA": el asociado escribe lo que sabe hacer o lo que
-  /// busca ("Fuga de agua", "Instalación TV") y los dos feeds se filtran.
+  /// Barra de búsqueda: el asociado escribe un servicio u oficio
+  /// ("albañilería", "eléctrico"), una zona ("zona 10") o una fecha
+  /// ("12/07", "julio") y los dos feeds se filtran.
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(20.0, 18.0, 20.0, 0.0),
@@ -239,7 +391,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    hintText: 'Búsqueda con IA',
+                    hintText: 'Buscar por servicio, zona o fecha',
                     hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
                           font: GoogleFonts.inter(),
                           color: FlutterFlowTheme.of(context).secondaryText,
@@ -297,23 +449,17 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                 ),
           ),
         ),
-        FFButtonWidget(
-          onPressed: onAction,
-          text: actionText,
-          options: FFButtonOptions(
-            height: 30.0,
-            padding: const EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 20.0, 6.0),
-            iconPadding:
-                const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-            color: const Color(0xFFCCE3E4),
-            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.normal),
+        // Acción como texto sin fondo, igual que el "Ver más" del resto de
+        // la app.
+        InkWell(
+          onTap: onAction,
+          child: Text(
+            actionText,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                   color: FlutterFlowTheme.of(context).primary,
                   fontSize: 14.0,
-                  letterSpacing: 0.0,
                 ),
-            elevation: 0.0,
-            borderRadius: BorderRadius.circular(24.0),
           ),
         ),
       ],
@@ -338,10 +484,12 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
     }
 
     return SizedBox(
-      height: 100.0,
+      height: 116.0,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
+        // Aire para que no se corte la sombra de las tarjetas.
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
+        clipBehavior: Clip.none,
         itemCount: categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 11.0),
         itemBuilder: (context, index) {
@@ -357,8 +505,15 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
             child: Container(
               width: 100.0,
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F7F7),
-                borderRadius: BorderRadius.circular(8.0),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 10.0,
+                    offset: Offset(0.0, 3.0),
+                  ),
+                ],
                 border: Border.all(
                   color: isSelected
                       ? FlutterFlowTheme.of(context).primary
@@ -373,8 +528,9 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                     width: 40.0,
                     height: 40.0,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF70ACAD),
-                      borderRadius: BorderRadius.circular(10.0),
+                      // Igual que los servicios del Dovia Home cliente.
+                      color: const Color(0xFF007376),
+                      borderRadius: BorderRadius.circular(14.0),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -416,8 +572,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F3EF),
-        borderRadius: BorderRadius.circular(10.0),
+        color: const Color(0x2670ACAD),
+        borderRadius: BorderRadius.circular(12.0),
       ),
       child: Text(
         message,
@@ -439,6 +595,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
     required bool Function(Map<String, dynamic>) extraFilter,
     required void Function(Map<String, dynamic>) onViewDetail,
     required String emptyMessage,
+    bool dimWhileBusy = false,
   }) {
     return FutureBuilder<ApiCallResponse>(
       future: future,
@@ -459,25 +616,155 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
         final jobs = _applyFilters(raw, categories).where(extraFilter).toList();
         if (jobs.isEmpty) return _buildEmptyState(emptyMessage);
 
+        // Con un trabajo en ejecución no se arranca otro: las tarjetas se ven
+        // tenues y al tocarlas se avisa.
+        final busy = dimWhileBusy &&
+            raw
+                .whereType<Map>()
+                .any((e) => _isInProgress(Map<String, dynamic>.from(e)));
+
         return Column(
-          children: jobs
-              .take(DHASSOCIATEHomePageWidget.previewCount)
-              .map(
-                (data) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: DHASSOCIATETrabajoCardWidget(
-                    title: asrServiceName(data),
-                    addressLabel: asrZoneLabel(data),
-                    dateLabel: asrFormattedDate(data),
-                    timeLabel: asrTimeLabel(data),
-                    payoutLabel: asrPayoutLabel(data),
-                    priorityLabel: asrPriorityLabel(data),
-                    isUrgent: asrIsEmergency(data),
-                    onViewDetail: () => onViewDetail(data),
+          children: [
+            for (final data
+                in jobs.take(DHASSOCIATEHomePageWidget.previewCount))
+              _jobCard(data, onViewDetail, dimmed: busy),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _jobCard(Map<String, dynamic> data,
+          void Function(Map<String, dynamic>) onViewDetail,
+          {bool dimmed = false}) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 14.0),
+        child: dimmed
+            ? GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                      const SnackBar(content: Text(kJobInProgressNotice))),
+                child: AbsorbPointer(
+                  child: Opacity(
+                    opacity: 0.45,
+                    child: _cardFor(data, onViewDetail),
                   ),
                 ),
               )
-              .toList(),
+            : _cardFor(data, onViewDetail),
+      );
+
+  Widget _cardFor(Map<String, dynamic> data,
+          void Function(Map<String, dynamic>) onViewDetail) =>
+      DHASSOCIATETrabajoCardWidget(
+        title: asrServiceName(data),
+        addressLabel: asrZoneLabel(data),
+        dateLabel: asrFormattedDate(data),
+        timeLabel: asrTimeLabel(data),
+        payoutLabel: asrPayoutLabel(data),
+        priorityLabel: asrPriorityLabel(data),
+        isUrgent: asrIsEmergency(data),
+        onViewDetail: () => onViewDetail(data),
+      );
+
+  // Los dos feeds juntos, armados una sola vez por carga: si se recreara en
+  // cada tecla, el FutureBuilder volvería a mostrar el spinner.
+  Future<List<ApiCallResponse>>? _searchFeedsFuture;
+  Object? _searchFeedsKey;
+  Future<List<ApiCallResponse>> _searchFeeds() {
+    final key = Object.hash(_availableJobsFuture, _myJobsFuture);
+    if (_searchFeedsFuture == null || _searchFeedsKey != key) {
+      _searchFeedsKey = key;
+      _searchFeedsFuture = Future.wait([_availableJobsFuture, _myJobsFuture]);
+    }
+    return _searchFeedsFuture!;
+  }
+
+  /// Con texto en la búsqueda el panel muestra sólo lo que coincide: cada
+  /// tarjeta bajo la sección a la que pertenece (Trabajos disponibles o
+  /// Próximos trabajos), y una sección sólo si tiene resultados.
+  Widget _buildSearchResults(List<AssociateServiceCategory> categories) {
+    return FutureBuilder<List<ApiCallResponse>>(
+      future: _searchFeeds(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final available = _applyFilters(
+                DOVIAAPIDoviaHomeContextGroup
+                        .listAvailableAssociateServiceRequestsCall
+                        .requestsList(snapshot.data![0].jsonBody) ??
+                    const [],
+                categories)
+            .where(asrIsTakeable)
+            .toList();
+        final mine = _applyFilters(
+                DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall
+                        .requestsList(snapshot.data![1].jsonBody) ??
+                    const [],
+                categories)
+            .where(_isUpcoming)
+            .toList();
+        final inProgress = _applyFilters(
+                DOVIAAPIDoviaHomeContextGroup.listAssociateServiceRequestsCall
+                        .requestsList(snapshot.data![1].jsonBody) ??
+                    const [],
+                categories)
+            .where(_isInProgress)
+            .toList();
+
+        if (available.isEmpty && mine.isEmpty && inProgress.isEmpty) {
+          return _buildEmptyState(
+              'No encontramos trabajos para "${_model.searchQuery.trim()}".');
+        }
+
+        Widget section(String title, List<Map<String, dynamic>> jobs,
+                void Function(Map<String, dynamic>) open,
+                {bool dimmed = false}) =>
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font:
+                            GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                        color: FlutterFlowTheme.of(context).primaryText,
+                        fontSize: 17.0,
+                        letterSpacing: 0.0,
+                        lineHeight: 1.3,
+                      ),
+                ),
+                const SizedBox(height: 14.0),
+                for (final data in jobs) _jobCard(data, open, dimmed: dimmed),
+              ],
+            );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (inProgress.isNotEmpty) ...[
+              section('En curso', inProgress, _openInProgress),
+              const SizedBox(height: 18.0),
+            ],
+            if (available.isNotEmpty)
+              section('Trabajos disponibles:', available, _openOpportunity),
+            if (available.isNotEmpty && mine.isNotEmpty)
+              const SizedBox(height: 18.0),
+            if (mine.isNotEmpty)
+              section('Próximos trabajos', mine, _openScheduledJob,
+                  dimmed: (DOVIAAPIDoviaHomeContextGroup
+                              .listAssociateServiceRequestsCall
+                              .requestsList(snapshot.data![1].jsonBody) ??
+                          const [])
+                      .whereType<Map>()
+                      .any((e) => _isInProgress(Map<String, dynamic>.from(e)))),
+          ],
         );
       },
     );
@@ -523,81 +810,91 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               20.0, 28.0, 20.0, 120.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSectionHeader(
-                                'Servicios',
-                                actionText: 'Agregar',
-                                onAction: () => context
-                                    .pushNamed(
-                                        DHASSOCIATEServiciosWidget.routeName)
-                                    .then((_) => safeSetState(_loadCategories)),
-                              ),
-                              const SizedBox(height: 14.0),
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting)
-                                const SizedBox(
-                                  height: 100.0,
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
-                                )
-                              else if (snapshot.data?.failed ?? false)
-                                _buildEmptyState(snapshot.data!.errorMessage)
-                              else
-                                _buildCategoriesCarousel(categories),
-                              const SizedBox(height: 32.0),
-                              _buildSectionHeader(
-                                'Trabajos disponibles:',
-                                actionText: 'Ver más',
-                                onAction: () => context
-                                    .pushNamed(
-                                        DHASSOCIATETrabajosDisponiblesWidget
-                                            .routeName)
-                                    .then((_) => safeSetState(_loadFeeds)),
-                              ),
-                              const SizedBox(height: 14.0),
-                              _buildJobsSection(
-                                future: _availableJobsFuture,
-                                extractList: DOVIAAPIDoviaHomeContextGroup
-                                    .listAvailableAssociateServiceRequestsCall
-                                    .requestsList,
-                                categories: categories,
-                                // La bolsa es sólo lo que nadie tomó todavía.
-                                // El endpoint acepta `status` como filtro
-                                // opcional y admite TAKEN entre sus valores,
-                                // así que sin este descarte una solicitud ya
-                                // asignada podría quedar visible.
-                                extraFilter: asrIsTakeable,
-                                onViewDetail: _openOpportunity,
-                                emptyMessage:
-                                    'Por ahora no hay trabajos disponibles en '
-                                    'tu zona con estos filtros.',
-                              ),
-                              const SizedBox(height: 32.0),
-                              _buildSectionHeader(
-                                'Próximos trabajos',
-                                actionText: 'Ver más',
-                                onAction: () => context
-                                    .pushNamed(DHASSOCIATEProximosTrabajosWidget
-                                        .routeName)
-                                    .then((_) => safeSetState(_loadFeeds)),
-                              ),
-                              const SizedBox(height: 14.0),
-                              _buildJobsSection(
-                                future: _myJobsFuture,
-                                extractList: DOVIAAPIDoviaHomeContextGroup
-                                    .listAssociateServiceRequestsCall
-                                    .requestsList,
-                                categories: categories,
-                                extraFilter: _isUpcoming,
-                                onViewDetail: _openScheduledJob,
-                                emptyMessage:
-                                    'Todavía no aceptaste ningún trabajo. '
-                                    'Postulate a los que están disponibles.',
-                              ),
-                            ],
-                          ),
+                          child: _model.searchQuery.trim().isNotEmpty
+                              ? _buildSearchResults(categories)
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildSectionHeader(
+                                      'Servicios',
+                                      actionText: 'Agregar',
+                                      onAction: () => context
+                                          .pushNamed(DHASSOCIATEServiciosWidget
+                                              .routeName)
+                                          .then((_) =>
+                                              safeSetState(_loadCategories)),
+                                    ),
+                                    const SizedBox(height: 14.0),
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting)
+                                      const SizedBox(
+                                        height: 100.0,
+                                        child: Center(
+                                            child: CircularProgressIndicator()),
+                                      )
+                                    else if (snapshot.data?.failed ?? false)
+                                      _buildEmptyState(
+                                          snapshot.data!.errorMessage)
+                                    else
+                                      _buildCategoriesCarousel(categories),
+                                    _buildInProgressSection(),
+                                    const SizedBox(height: 32.0),
+                                    _buildSectionHeader(
+                                      'Trabajos disponibles:',
+                                      actionText: 'Ver más',
+                                      onAction: () => context
+                                          .pushNamed(
+                                              DHASSOCIATETrabajosDisponiblesWidget
+                                                  .routeName)
+                                          .then(
+                                              (_) => safeSetState(_loadFeeds)),
+                                    ),
+                                    const SizedBox(height: 14.0),
+                                    _buildJobsSection(
+                                      future: _availableJobsFuture,
+                                      extractList: DOVIAAPIDoviaHomeContextGroup
+                                          .listAvailableAssociateServiceRequestsCall
+                                          .requestsList,
+                                      categories: categories,
+                                      // La bolsa es sólo lo que nadie tomó todavía.
+                                      // El endpoint acepta `status` como filtro
+                                      // opcional y admite TAKEN entre sus valores,
+                                      // así que sin este descarte una solicitud ya
+                                      // asignada podría quedar visible.
+                                      extraFilter: asrIsTakeable,
+                                      onViewDetail: _openOpportunity,
+                                      emptyMessage:
+                                          'Por ahora no hay trabajos disponibles en '
+                                          'tu zona con estos filtros.',
+                                    ),
+                                    const SizedBox(height: 32.0),
+                                    _buildSectionHeader(
+                                      'Próximos trabajos',
+                                      actionText: 'Ver más',
+                                      onAction: () => context
+                                          .pushNamed(
+                                              DHASSOCIATEProximosTrabajosWidget
+                                                  .routeName)
+                                          .then(
+                                              (_) => safeSetState(_loadFeeds)),
+                                    ),
+                                    const SizedBox(height: 14.0),
+                                    _buildJobsSection(
+                                      future: _myJobsFuture,
+                                      extractList: DOVIAAPIDoviaHomeContextGroup
+                                          .listAssociateServiceRequestsCall
+                                          .requestsList,
+                                      categories: categories,
+                                      extraFilter: _isUpcoming,
+                                      onViewDetail: _openScheduledJob,
+                                      dimWhileBusy: true,
+                                      emptyMessage:
+                                          'Todavía no aceptaste ningún trabajo. '
+                                          'Postulate a los que están disponibles.',
+                                    ),
+                                    _buildFinishedCarousel(categories),
+                                  ],
+                                ),
                         ),
                       ],
                     ),

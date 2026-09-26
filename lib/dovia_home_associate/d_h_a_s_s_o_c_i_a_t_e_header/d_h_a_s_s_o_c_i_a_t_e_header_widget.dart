@@ -1,3 +1,5 @@
+import '/dovia_home_associate/associate_header_actions.dart';
+import '/dovia_home_associate/associate_nav.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +47,13 @@ class _DHASSOCIATEHeaderWidgetState extends State<DHASSOCIATEHeaderWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Algunas pantallas envuelven el cuerpo en SafeArea y otras no. Dentro
+    // de un SafeArea `padding.top` es 0; fuera, es el alto de la barra de
+    // estado. Sumarlo deja el header siempre a la misma distancia de ella.
+    final statusBar = MediaQuery.paddingOf(context).top;
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
+      padding:
+          EdgeInsetsDirectional.fromSTEB(20.0, statusBar + 42.0, 20.0, 0.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,34 +65,28 @@ class _DHASSOCIATEHeaderWidgetState extends State<DHASSOCIATEHeaderWidget> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  width: 35.0,
-                  height: 35.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).alternate,
-                    shape: BoxShape.circle,
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      context.safePop();
-                    },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: SvgPicture.asset(
-                        'assets/images/IconoVolverAtras.svg',
-                        width: 200.0,
-                        height: 200.0,
-                        fit: BoxFit.none,
-                      ),
+                // Volver: toda el área del círculo responde al toque.
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => context.safePop(),
+                  child: Container(
+                    width: 35.0,
+                    height: 35.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: SvgPicture.asset(
+                      'assets/images/IconoVolverAtras.svg',
+                      fit: BoxFit.none,
                     ),
                   ),
                 ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(0.0),
+                // La D lleva al panel del asociado (limpia la pila).
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => goAssociateHome(context),
                   child: SvgPicture.asset(
                     'assets/images/D-verde.svg',
                     width: 28.0,
@@ -100,90 +101,57 @@ class _DHASSOCIATEHeaderWidgetState extends State<DHASSOCIATEHeaderWidget> {
           // de los dos grupos de íconos en una pantalla angosta. Sin esto la
           // fila desborda y el título queda cortado tras las rayas amarillas.
           Flexible(
-            child: RichText(
-              textScaler: MediaQuery.of(context).textScaler,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: valueOrDefault<String>(
-                      widget.tittleText,
-                      '[tittle]',
-                    ),
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.publicSans(
+            // Aire a los lados para que un título largo baje de línea antes
+            // de tocar los íconos.
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14.0),
+              child: RichText(
+                textScaler: MediaQuery.of(context).textScaler,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: valueOrDefault<String>(
+                        widget.tittleText,
+                        '[tittle]',
+                      ),
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .fontStyle,
+                            ),
+                            fontSize: 18.0,
+                            letterSpacing: 0.0,
                             fontWeight: FontWeight.w600,
                             fontStyle: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .fontStyle,
+                            lineHeight: 1.4,
                           ),
-                          fontSize: 18.0,
-                          letterSpacing: 0.0,
+                    )
+                  ],
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.inter(
                           fontWeight: FontWeight.w600,
                           fontStyle:
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                          lineHeight: 1.4,
                         ),
-                  )
-                ],
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.inter(
+                        fontSize: 18.0,
+                        letterSpacing: 0.0,
                         fontWeight: FontWeight.w600,
                         fontStyle:
                             FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                        lineHeight: 1.4,
                       ),
-                      fontSize: 18.0,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.w600,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                      lineHeight: 1.4,
-                    ),
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                width: 40.0,
-                height: 40.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  shape: BoxShape.circle,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(0.0),
-                  child: SvgPicture.asset(
-                    'assets/images/IconoServiciosAsignados.svg',
-                    width: 8.0,
-                    height: 8.0,
-                    fit: BoxFit.none,
-                  ),
-                ),
-              ),
-              Container(
-                width: 40.0,
-                height: 40.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  shape: BoxShape.circle,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: SvgPicture.asset(
-                    'assets/images/IconoDiagnosticos.svg',
-                    width: 8.0,
-                    height: 8.0,
-                    fit: BoxFit.none,
-                  ),
-                ),
-              ),
-            ].divide(const SizedBox(width: 8.0)),
-          ),
+          const AssociateHeaderActions(),
         ],
       ),
     );

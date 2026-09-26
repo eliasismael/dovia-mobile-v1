@@ -602,17 +602,39 @@ String asrPayoutLabel(Map<String, dynamic> data) {
 /// "Instalación TV"). Cruza el título del trabajo, la descripción del cliente,
 /// la categoría del catálogo y la zona; ignora tildes y mayúsculas para que
 /// "instalacion" también encuentre "Instalación".
-bool asrMatchesQuery(Map<String, dynamic> data, String query) {
+///
+/// También busca por:
+///   - oficio ([extraText]: Ej. "Albañilería", "Eléctrico", los oficios del
+///     catálogo que habilitan el trabajo);
+///   - fecha, escrita como `12/07/2026`, `12/07`, `12-07`, `12 de julio` o sólo
+///     el mes (`julio`);
+///   - "urgente" / "emergencia" / "estándar".
+bool asrMatchesQuery(Map<String, dynamic> data, String query,
+    {List<String> extraText = const []}) {
   final terms = _normalize(query).split(RegExp(r'\s+'))
-    ..removeWhere((t) => t.isEmpty);
+    ..removeWhere((t) => t.isEmpty || t == 'de' || t == 'del');
   if (terms.isEmpty) return true;
+
+  final date = asrFilterDate(data);
+  final dateText = date == null
+      ? ''
+      : [
+          '${_two(date.day)}/${_two(date.month)}/${date.year}',
+          '${date.day}/${date.month}/${date.year}',
+          '${_two(date.day)}-${_two(date.month)}-${date.year}',
+          '${date.day} ${_monthsEs[date.month - 1]} ${date.year}',
+        ].join(' ');
 
   final haystack = _normalize([
     asrServiceName(data),
     asrServiceCode(data) ?? '',
+    asrCategoryName(data) ?? '',
     asrString(data['description']) ?? '',
     asrZone(data),
     asrPriorityLabel(data),
+    if (asrIsEmergency(data)) 'emergencia urgente',
+    dateText,
+    ...extraText,
   ].join(' '));
 
   return terms.every(haystack.contains);
@@ -632,4 +654,46 @@ String _normalize(String value) {
   var out = value.toLowerCase();
   _accents.forEach((from, to) => out = out.replaceAll(from, to));
   return out;
+}
+
+/// Explica por qué el backend rechazó el aviso de llegada (`/start`) cuando
+/// responde "estado no válido": sólo se puede iniciar un trabajo `TAKEN` que
+/// el asociado tomó y todavía no arrancó.
+String asrStartBlockedReason(Map<String, dynamic> data) {
+  final status = asrStatus(data);
+  final sub = (asrString(data['subStatus']) ?? '').toUpperCase();
+  final detail = sub.isEmpty ? status : '$status / $sub';
+  switch (status) {
+    case 'PENDING':
+      return 'El trabajo todavía no está tomado por vos ($detail). '
+          'Primero tenés que aceptarlo.';
+    case 'IN_PROGRESS':
+      return 'Ya avisaste tu llegada: el trabajo está en curso ($detail). '
+          'Seguí con "Finalizar trabajos/visitas".';
+    case 'FINISHED':
+      return 'El trabajo ya está finalizado ($detail).';
+    default:
+      return 'El trabajo está en un estado que no permite avisar la llegada '
+          '($detail).';
+  }
+}
+
+/// Explica por qué el backend rechazó el cierre (`/finish`) cuando responde
+/// "estado no válido": sólo se cierra un trabajo `IN_PROGRESS`, o sea después
+/// de avisar la llegada.
+String asrFinishBlockedReason(Map<String, dynamic> data) {
+  final status = asrStatus(data);
+  final sub = (asrString(data['subStatus']) ?? '').toUpperCase();
+  final detail = sub.isEmpty ? status : '$status / $sub';
+  switch (status) {
+    case 'PENDING':
+      return 'El trabajo todavía no está tomado por vos ($detail).';
+    case 'TAKEN':
+      return 'Todavía no avisaste tu llegada ($detail). Primero tocá '
+          '"Enviar mi ubicación y notificar" en el trabajo.';
+    case 'FINISHED':
+      return 'El trabajo ya estaba finalizado ($detail).';
+    default:
+      return 'El trabajo está en un estado que no permite cerrarlo ($detail).';
+  }
 }

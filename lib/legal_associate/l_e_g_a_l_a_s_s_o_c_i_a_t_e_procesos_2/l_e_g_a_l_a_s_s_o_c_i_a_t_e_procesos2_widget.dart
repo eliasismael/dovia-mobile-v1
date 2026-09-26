@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -1373,6 +1374,26 @@ class _LEGALASSOCIATEProcesos2WidgetState
     );
   }
 
+  Widget _fileThumb(LegalHqDocument d) {
+    if (!d.hasFile) {
+      return Center(child: _text('—', color: _textDark));
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          d.isPdf
+              ? Icons.picture_as_pdf_outlined
+              : Icons.insert_drive_file_outlined,
+          color: Colors.white,
+          size: 34,
+        ),
+        const SizedBox(height: 4),
+        _text(d.isPdf ? 'PDF' : 'Archivo', color: Colors.white, size: 12),
+      ],
+    );
+  }
+
   Widget _stripIcon(IconData icon, String tooltip, VoidCallback onTap) =>
       Padding(
         padding: const EdgeInsets.only(left: 6),
@@ -1457,14 +1478,27 @@ class _LEGALASSOCIATEProcesos2WidgetState
               color: d.hasFile ? _primary : const Color(0xFFE9E8E2),
               borderRadius: BorderRadius.circular(8),
             ),
+            clipBehavior: Clip.antiAlias,
             child: Stack(
+              fit: StackFit.expand,
               children: [
-                Center(
-                  child: _busyDocId == d.id
-                      ? _spinner()
-                      : _text(d.hasFile ? (d.isPdf ? 'PDF' : 'Imagen') : '—',
-                          color: d.hasFile ? Colors.white : _textDark),
-                ),
+                // Las imágenes se ven en miniatura; los PDF (y lo que no
+                // cargue como imagen) muestran un ícono de archivo.
+                if (d.hasFile && !d.isPdf)
+                  CachedNetworkImage(
+                    imageUrl: d.url,
+                    fit: BoxFit.cover,
+                    fadeInDuration: Duration.zero,
+                    placeholder: (_, __) => Center(child: _spinner()),
+                    errorWidget: (_, __, ___) => _fileThumb(d),
+                  )
+                else
+                  _fileThumb(d),
+                if (_busyDocId == d.id)
+                  Container(
+                    color: const Color(0x66000000),
+                    child: Center(child: _spinner()),
+                  ),
               ],
             ),
           ),

@@ -92,8 +92,9 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                         FlutterFlowTheme.of(context).alternate,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => context.safePop(),
                                     child: SvgPicture.asset(
                                       'assets/images/IconoVolverAtras.svg',
                                       width: 200.0,
@@ -102,8 +103,10 @@ class _LEGALASSOCAITEDocumentos2WidgetState
                                     ),
                                   ),
                                 ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(0.0),
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => context.goNamed(
+                                      LegalAssociateHomeWidget.routeName),
                                   child: SvgPicture.asset(
                                     'assets/images/D-verde.svg',
                                     width: 28.0,

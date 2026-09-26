@@ -47,6 +47,14 @@ class _LegalAssociateHeaderWidgetState
 
   @override
   Widget build(BuildContext context) {
+    // El ícono de documentos queda marcado cuando la bandeja está abierta.
+    String? route;
+    try {
+      route = GoRouterState.of(context).name;
+    } catch (_) {}
+    final onDocuments = route == LEGALASSOCIATEDocumentosWidget.routeName;
+    // En el inicio no hay a dónde volver.
+    final onHome = route == LegalAssociateHomeWidget.routeName;
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
       child: Row(
@@ -60,34 +68,38 @@ class _LegalAssociateHeaderWidgetState
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  width: 35.0,
-                  height: 35.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).alternate,
-                    shape: BoxShape.circle,
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      context.safePop();
-                    },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: SvgPicture.asset(
-                        'assets/images/IconoVolverAtras.svg',
-                        width: 200.0,
-                        height: 200.0,
-                        fit: BoxFit.none,
+                if (!onHome)
+                  Container(
+                    width: 35.0,
+                    height: 35.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      shape: BoxShape.circle,
+                    ),
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () async {
+                        context.safePop();
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: SvgPicture.asset(
+                          'assets/images/IconoVolverAtras.svg',
+                          width: 200.0,
+                          height: 200.0,
+                          fit: BoxFit.none,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(0.0),
+                // La D lleva al inicio del Legal Associate (limpia el stack).
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () =>
+                      context.goNamed(LegalAssociateHomeWidget.routeName),
                   child: SvgPicture.asset(
                     'assets/images/D-verde.svg',
                     width: 28.0,
@@ -143,7 +155,9 @@ class _LegalAssociateHeaderWidgetState
                 width: 40.0,
                 height: 40.0,
                 decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  color: onDocuments
+                      ? const Color(0xFF00444B)
+                      : FlutterFlowTheme.of(context).secondaryBackground,
                   shape: BoxShape.circle,
                 ),
                 child: InkWell(
@@ -152,6 +166,7 @@ class _LegalAssociateHeaderWidgetState
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () async {
+                    if (onDocuments) return;
                     context.pushNamed(LEGALASSOCIATEDocumentosWidget.routeName);
                   },
                   child: ClipRRect(
@@ -161,6 +176,10 @@ class _LegalAssociateHeaderWidgetState
                       width: 8.0,
                       height: 8.0,
                       fit: BoxFit.none,
+                      colorFilter: onDocuments
+                          ? const ColorFilter.mode(
+                              Colors.white, BlendMode.srcIn)
+                          : null,
                     ),
                   ),
                 ),
