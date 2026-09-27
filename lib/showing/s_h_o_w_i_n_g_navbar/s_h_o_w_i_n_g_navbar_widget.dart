@@ -64,6 +64,25 @@ class _SHOWINGNavbarWidgetState extends State<SHOWINGNavbarWidget> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             NavbarItemIndicator(
+              label: 'Inicio',
+              routeNames: [SHOWINGHomeWidget.routeName],
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  context.goNamed(SHOWINGHomeWidget.routeName);
+                },
+                child: SvgPicture.asset(
+                  'assets/images/DH_icono-navbar-home.svg',
+                  width: 24.0,
+                  height: 24.0,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            NavbarItemIndicator(
               label: 'Agenda',
               routeNames: [SHOWINGAgendaWidget.routeName],
               child: InkWell(
@@ -122,28 +141,6 @@ class _SHOWINGNavbarWidgetState extends State<SHOWINGNavbarWidget> {
                   borderRadius: BorderRadius.circular(8.0),
                   child: SvgPicture.asset(
                     'assets/images/edit.svg',
-                    width: 24.0,
-                    height: 24.0,
-                    fit: BoxFit.none,
-                  ),
-                ),
-              ),
-            ),
-            NavbarItemIndicator(
-              label: 'Notificaciones',
-              routeNames: [SHOWINGNotificationsWidget.routeName],
-              child: InkWell(
-                splashColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () async {
-                  context.pushNamed(SHOWINGNotificationsWidget.routeName);
-                },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: SvgPicture.asset(
-                    'assets/images/DH_icono-navbar-notificaciones.svg',
                     width: 24.0,
                     height: 24.0,
                     fit: BoxFit.none,

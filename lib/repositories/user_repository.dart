@@ -120,7 +120,10 @@ class UserRepository extends ChangeNotifier {
     String documentType,
     FFUploadedFile file,
   ) async {
-    final userId = _profile?.uid ?? currentUserUid;
+    // La sesión manda: el perfil en memoria puede ser de la cuenta anterior
+    // si se cerró sesión y se entró (o registró) con otra.
+    final userId =
+        currentUserUid.isNotEmpty ? currentUserUid : (_profile?.uid ?? '');
     if (userId.isEmpty) {
       return const Failure('No se pudo identificar al usuario');
     }
@@ -186,7 +189,10 @@ class UserRepository extends ChangeNotifier {
     String? address,
     String? workArea,
   }) async {
-    final userId = _profile?.uid ?? currentUserUid;
+    // La sesión manda: el perfil en memoria puede ser de la cuenta anterior
+    // si se cerró sesión y se entró (o registró) con otra.
+    final userId =
+        currentUserUid.isNotEmpty ? currentUserUid : (_profile?.uid ?? '');
     if (userId.isEmpty) {
       return const Failure('No se pudo identificar al usuario');
     }
@@ -233,7 +239,10 @@ class UserRepository extends ChangeNotifier {
     String? coordinates,
     String? description,
   }) async {
-    final userId = _profile?.uid ?? currentUserUid;
+    // La sesión manda: el perfil en memoria puede ser de la cuenta anterior
+    // si se cerró sesión y se entró (o registró) con otra.
+    final userId =
+        currentUserUid.isNotEmpty ? currentUserUid : (_profile?.uid ?? '');
     if (userId.isEmpty) {
       return const Failure('No se pudo identificar al usuario');
     }
@@ -255,7 +264,11 @@ class UserRepository extends ChangeNotifier {
     _isLoading = false;
 
     if (!response.succeeded) {
-      _error = 'Error al actualizar preferencias';
+      final message =
+          getJsonField(response.jsonBody, r'$.message')?.toString();
+      _error = (message != null && message.isNotEmpty)
+          ? message
+          : 'Error al actualizar preferencias';
       notifyListeners();
       return Failure(_error!, statusCode: response.statusCode);
     }

@@ -60,6 +60,12 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
   dynamic _offerData;
   bool _isLoadingOffer = true;
 
+  /// El backend manda `mortgage`; las pantallas usan `hipoteca`.
+  bool get _isMortgage {
+    final m = (widget.paymentMethod ?? '').toLowerCase();
+    return m.contains('mortgage') || m.contains('hipoteca');
+  }
+
   double get _computedStep {
     // return 3.5;
     if (_offerData != null) {
@@ -78,7 +84,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
       if (pStatus == 'completed') return 4.0;
       if (pStatus == 'agreement_structuring' ||
           (pStatus != 'contract_signing' && oStatus == 'accepted')) {
-        return widget.paymentMethod == 'hipoteca' ? 3.0 : 2.0;
+        return _isMortgage ? 3.0 : 2.0;
       }
       if (pStatus == 'contract_signing') {
         final contractSigned =
@@ -90,7 +96,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
       }
       if (pStatus == 'completed') return 4.0;
     }
-    if (widget.negociationStep == 2.0 && widget.paymentMethod == 'hipoteca') {
+    if (widget.negociationStep == 2.0 && _isMortgage) {
       return 3.0;
     }
     return widget.negociationStep;
@@ -767,8 +773,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                 ],
                                               ),
                                             );
-                                          } else if (widget.paymentMethod ==
-                                              'hipoteca') {
+                                          } else if (_isMortgage) {
                                             return Column(
                                               mainAxisSize: MainAxisSize.max,
                                               children: [
@@ -1922,7 +1927,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                 } else if (_computedStep == 3.0) {
                                   return Builder(
                                     builder: (context) {
-                                      if (widget.paymentMethod == 'hipoteca') {
+                                      if (_isMortgage) {
                                         return Column(
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment:
@@ -2083,7 +2088,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                     ),
                                                     const SizedBox(height: 4.0),
                                                     Text(
-                                                      'Aquí Dovia desplegar avances sobre procesos y documento para firmar',
+                                                      'Lo firmas tú, como propietario. Descarga el convenio de reconocimiento de honorarios entre DOVIA y tú, fírmalo y súbelo aquí. Con el convenio firmado DOVIA avanza con el trámite.',
                                                       style: FlutterFlowTheme
                                                               .of(context)
                                                           .bodySmall
@@ -2136,7 +2141,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                               .fromSTEB(10.0,
                                                               0.0, 0.0, 0.0),
                                                       child: Text(
-                                                        'Documento a firmar',
+                                                        'Convenio de honorarios DOVIA',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -2197,6 +2202,34 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                                                         .transparent,
                                                                 onTap:
                                                                     () async {
+                                                                  // El convenio lo carga DOVIA en la oferta
+                                                                  // (doviaAgreementDocumentUrl). Sin él no hay
+                                                                  // nada que descargar: se avisa en vez de
+                                                                  // mostrar un "se descargó" falso.
+                                                                  final agreementUrl = getJsonField(
+                                                                          _offerData,
+                                                                          r'''$.doviaAgreementDocumentUrl''')
+                                                                      ?.toString();
+                                                                  if (agreementUrl ==
+                                                                          null ||
+                                                                      agreementUrl
+                                                                          .isEmpty ||
+                                                                      agreementUrl ==
+                                                                          'null') {
+                                                                    ScaffoldMessenger.of(
+                                                                            context)
+                                                                        .showSnackBar(
+                                                                            const SnackBar(
+                                                                      content: Text(
+                                                                          'El convenio todavía no está disponible. DOVIA lo cargará pronto.'),
+                                                                    ));
+                                                                    return;
+                                                                  }
+                                                                  await launchURL(
+                                                                      agreementUrl);
+                                                                  if (!context
+                                                                      .mounted)
+                                                                    return;
                                                                   await showDialog(
                                                                     context:
                                                                         context,
@@ -3906,7 +3939,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                   );
                                 }
 
-                                if (widget.paymentMethod == 'hipoteca') {
+                                if (_isMortgage) {
                                   return const SizedBox.shrink();
                                 }
 

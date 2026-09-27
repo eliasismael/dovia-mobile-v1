@@ -16,10 +16,14 @@ class SHOWINGHeaderWidget extends StatefulWidget {
     super.key,
     required this.title,
     this.actionWidget,
+    this.showRouteButton = false,
   });
 
   final String? title;
   final Widget? actionWidget;
+
+  /// Botón para iniciar la ruta a la visita de hoy: sólo en el home.
+  final bool showRouteButton;
 
   @override
   State<SHOWINGHeaderWidget> createState() => _SHOWINGHeaderWidgetState();
@@ -277,6 +281,34 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                       ),
                     ),
                   ),
+                  if (widget.showRouteButton)
+                    Container(
+                      width: 40.0,
+                      height: 40.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                        shape: BoxShape.circle,
+                      ),
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          await _openTodayVisitMap();
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: SvgPicture.asset(
+                            'assets/images/Vector23.svg',
+                            width: 8.0,
+                            height: 8.0,
+                            fit: BoxFit.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                  // Notificaciones: pasó de la barra de abajo al header.
                   Container(
                     width: 40.0,
                     height: 40.0,
@@ -290,15 +322,14 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onTap: () async {
-                        await _openTodayVisitMap();
+                        context.pushNamed(SHOWINGNotificationsWidget.routeName);
                       },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
+                      child: Center(
                         child: SvgPicture.asset(
-                          'assets/images/Vector23.svg',
-                          width: 8.0,
-                          height: 8.0,
-                          fit: BoxFit.none,
+                          'assets/images/DH_icono-navbar-notificaciones.svg',
+                          width: 20.0,
+                          height: 20.0,
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ),

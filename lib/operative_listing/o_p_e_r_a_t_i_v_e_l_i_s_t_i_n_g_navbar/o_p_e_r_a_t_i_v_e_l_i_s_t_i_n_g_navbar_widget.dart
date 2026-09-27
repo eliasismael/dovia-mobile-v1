@@ -66,6 +66,25 @@ class _OPERATIVELISTINGNavbarWidgetState
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             NavbarItemIndicator(
+              label: 'Inicio',
+              routeNames: [OPERATIVELISTINGHomeWidget.routeName],
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  context.goNamed(OPERATIVELISTINGHomeWidget.routeName);
+                },
+                child: SvgPicture.asset(
+                  'assets/images/DH_icono-navbar-home.svg',
+                  width: 24.0,
+                  height: 24.0,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            NavbarItemIndicator(
               label: 'Agenda',
               routeNames: [OPERATIVELISTINGAgendaWidget.routeName],
               child: InkWell(

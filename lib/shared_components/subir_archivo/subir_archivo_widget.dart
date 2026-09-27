@@ -132,15 +132,19 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Tarjeta centrada del alto de su contenido: se abre como popup en el
+    // medio de la pantalla, no como una hoja que la ocupa entera.
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
+      margin: const EdgeInsets.symmetric(horizontal: 20.0),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(20.0),
       ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 40.0, 20.0, 40.0),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 28.0, 20.0, 24.0),
         child: Column(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Sube el documento firmado',

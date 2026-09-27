@@ -828,42 +828,14 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                         ),
                                   ),
                                 ),
-                                FFButtonWidget(
-                                  onPressed: () {
-                                    print('Button pressed ...');
-                                  },
-                                  text: 'Ver todo',
-                                  options: FFButtonOptions(
-                                    height: 30.0,
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            16.0, 0.0, 16.0, 0.0),
-                                    iconPadding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 0.0, 0.0, 0.0),
-                                    color: FlutterFlowTheme.of(context).accent1,
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          font: GoogleFonts.publicSans(
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          fontSize: 14.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(24.0),
+                                // Link de texto, con el estilo de los
+                                // "Ver más" del resto de la app.
+                                Text(
+                                  'Ver todo',
+                                  style: GoogleFonts.publicSans(
+                                    color: const Color(0xFF007376),
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],

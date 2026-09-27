@@ -77,6 +77,28 @@ class _SHOWINGRegistroDeVisita2WidgetState
     super.dispose();
   }
 
+  /// Mensaje del backend (errors[0].message o message) para el snackbar, en
+  /// vez de un error genérico.
+  String _apiError(ApiCallResponse res, String what) {
+    final body = res.jsonBody;
+    String? detail;
+    if (body is Map) {
+      final errors = body['errors'];
+      if (errors is List && errors.isNotEmpty && errors.first is Map) {
+        detail = (errors.first as Map)['message']?.toString();
+      }
+      detail ??= body['message']?.toString();
+    }
+    return (detail != null && detail.isNotEmpty)
+        ? '$what: $detail'
+        : '$what (HTTP ${res.statusCode}).';
+  }
+
+  void _showError(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   Future<void> _onCancelVisit() async {
     final message = await showDialog<String>(
       context: context,
@@ -154,11 +176,8 @@ class _SHOWINGRegistroDeVisita2WidgetState
       );
 
       if (!presignRes.succeeded) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error al preparar subida de fotos.')),
-          );
-        }
+        _showError(_apiError(
+            presignRes, 'No se pudo preparar la subida de fotos'));
         return;
       }
 
@@ -175,11 +194,16 @@ class _SHOWINGRegistroDeVisita2WidgetState
           final pBytes = photos[pIndex].bytes;
 
           if (pBytes != null && uploadUrl != null) {
-            await http.put(
+            final put = await http.put(
               Uri.parse(uploadUrl.toString()),
               headers: {'Content-Type': 'image/jpeg'},
               body: pBytes,
             );
+            if (put.statusCode >= 300) {
+              _showError('No se pudo subir la foto ${pIndex + 1} '
+                  '(HTTP ${put.statusCode}).');
+              return;
+            }
           }
         }
 
@@ -200,12 +224,8 @@ class _SHOWINGRegistroDeVisita2WidgetState
         );
 
         if (!confirmRes.succeeded) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Error al confirmar fotos subidas.')),
-            );
-          }
+          _showError(_apiError(
+              confirmRes, 'No se pudieron confirmar las fotos subidas'));
           return;
         }
       }
@@ -246,7 +266,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
     } else {
       final msg = res.statusCode == 409
           ? 'El reporte de esta visita ya fue enviado.'
-          : 'No se pudo registrar la visita. Inténtalo de nuevo.';
+          : _apiError(res, 'No se pudo registrar la visita');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg)),
       );
@@ -527,6 +547,51 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                   ),
                                 ),
                               ),
+                              // "No se realizó": debajo de la card de la casa,
+                              // con el botón rojo de cancelar de la app.
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 16.0, 20.0, 4.0),
+                                child: Column(
+                                  children: [
+                                    const Text(
+                                      'Toca aquí si la visita no se realizó',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: 'Public Sans',
+                                        fontSize: 13,
+                                        color: Color(0xFF6A6A6A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    GestureDetector(
+                                      onTap: () => _onCancelVisit(),
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.red
+                                                  .withValues(alpha: 0.5)),
+                                          borderRadius:
+                                              BorderRadius.circular(99),
+                                        ),
+                                        child: const Center(
+                                          child: Text(
+                                            'No se realizó',
+                                            style: TextStyle(
+                                              fontFamily: 'Public Sans',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               // Sin alto fijo: un solo scroll, el de la pantalla.
                               SizedBox(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
@@ -537,7 +602,6 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                   clientName: ownerName,
                                   dateText: dateText,
                                   timeText: timeText,
-                                  onCancelVisit: () => _onCancelVisit(),
                                   onSave: (data) => _submitReport(
                                       data as Map<String, dynamic>),
                                   onFinalizarRegistro: () async {},

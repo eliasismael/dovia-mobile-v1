@@ -1,3 +1,5 @@
+import 'dart:async';
+import '/backend/api_requests/api_manager.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -101,17 +103,51 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     }
   }
 
+  /// Motivo que devuelve el backend (errors[0].message o message).
+  String? _backendMessage(ApiCallResponse res) {
+    final body = res.jsonBody;
+    if (body is! Map) return null;
+    final errors = body['errors'];
+    if (errors is List && errors.isNotEmpty && errors.first is Map) {
+      final m = (errors.first as Map)['message']?.toString();
+      if (m != null && m.isNotEmpty) return m;
+    }
+    final m = body['message']?.toString();
+    return (m != null && m.isNotEmpty) ? m : null;
+  }
+
+  /// Hipoteca y demás: cada paso avisa qué pasó. Antes un id faltante o un
+  /// error después de aceptar terminaban sin ningún aviso.
   Future<void> _acceptOffer() async {
-    if (widget.offerId == null) return;
-    safeSetState(() => _isActioning = true);
     final messenger = ScaffoldMessenger.of(context);
-    final res = await DOVIAAPIOfferContextGroup.acceptOfferCall.call(
-      offerId: widget.offerId,
-      authToken: currentAuthenticationToken,
-    );
-    if (!mounted) return;
-    safeSetState(() => _isActioning = false);
-    if (res.succeeded) {
+    void fail(String text) => messenger.showSnackBar(SnackBar(
+          content: Text(text),
+          backgroundColor: _errorRed,
+          behavior: SnackBarBehavior.floating,
+        ));
+
+    final offerId = widget.offerId;
+    if (offerId == null || offerId.isEmpty) {
+      fail('No se encontró la oferta a aceptar.');
+      return;
+    }
+    safeSetState(() => _isActioning = true);
+    try {
+      final res = await DOVIAAPIOfferContextGroup.acceptOfferCall
+          .call(
+            offerId: offerId,
+            authToken: currentAuthenticationToken,
+          )
+          .timeout(const Duration(seconds: 60));
+      if (!mounted) return;
+      if (!res.succeeded) {
+        safeSetState(() => _isActioning = false);
+        final m = _backendMessage(res);
+        fail(m != null
+            ? 'No se pudo aceptar: $m'
+            : 'Error al aceptar (${res.statusCode}).');
+        return;
+      }
       messenger.showSnackBar(SnackBar(
         content: const Text('¡Oferta aceptada exitosamente!'),
         backgroundColor: _primary,
@@ -119,26 +155,36 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ));
       await _loadOffer();
-      if (mounted) {
-        context.pushNamed(
-          DOVIACLIENTMisPropiedadesAcuerdoWidget.routeName,
-          queryParameters: {
-            'offerId': serializeParam(widget.offerId, ParamType.String),
-            'paymentMethod': serializeParam(
-                getJsonField(_offerData, r'''$.paymentMethod''') ??
-                    getJsonField(_offerData, r'''$.offerData.paymentMethod'''),
-                ParamType.String),
-            'proposedAmount':
-                serializeParam(_resolveAmount()?.toString(), ParamType.String),
-          }.withoutNulls,
-        );
-      }
-    } else {
-      messenger.showSnackBar(SnackBar(
-        content: Text('Error al aceptar (${res.statusCode}).'),
-        backgroundColor: _errorRed,
-        behavior: SnackBarBehavior.floating,
-      ));
+      if (!mounted) return;
+      safeSetState(() => _isActioning = false);
+      final paymentMethod =
+          (getJsonField(_offerData, r'''$.activeOfferData.paymentMethod''') ??
+                  getJsonField(_offerData, r'''$.paymentMethod''') ??
+                  getJsonField(_offerData, r'''$.offerData.paymentMethod'''))
+              ?.toString();
+      // Hipoteca: el trámite lo lleva el abogado del banco, así que va directo
+      // al paso 3 (el mismo que ve el cliente).
+      final pm = (paymentMethod ?? '').toLowerCase();
+      final isMortgage = pm.contains('mortgage') || pm.contains('hipoteca');
+      context.pushNamed(
+        DOVIACLIENTMisPropiedadesAcuerdoWidget.routeName,
+        queryParameters: {
+          'offerId': serializeParam(offerId, ParamType.String),
+          'paymentMethod': serializeParam(
+              isMortgage ? 'hipoteca' : paymentMethod, ParamType.String),
+          if (isMortgage)
+            'negociationStep': serializeParam(3.0, ParamType.double),
+          'proposedAmount':
+              serializeParam(_resolveAmount()?.toString(), ParamType.String),
+        }.withoutNulls,
+      );
+    } catch (e) {
+      debugPrint('[OfferDetail] accept failed: $e');
+      if (!mounted) return;
+      safeSetState(() => _isActioning = false);
+      fail(e is TimeoutException
+          ? 'La aceptación tardó demasiado. Revisa tu conexión e inténtalo de nuevo.'
+          : 'No se pudo completar la aceptación: $e');
     }
   }
 

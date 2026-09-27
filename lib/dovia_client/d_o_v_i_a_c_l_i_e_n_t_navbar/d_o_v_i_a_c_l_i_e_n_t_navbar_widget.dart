@@ -13,7 +13,12 @@ class DOVIACLIENTNavbarWidget extends StatefulWidget {
   const DOVIACLIENTNavbarWidget({
     super.key,
     this.activeTab,
+    this.tutorialKeys,
   });
+
+  /// Llaves opcionales por ítem ('propiedades', 'visitas', 'doviaHome',
+  /// 'ofertas', 'favoritos') para que el tutorial pueda señalarlos.
+  final Map<String, GlobalKey>? tutorialKeys;
 
   /// Pass the route name of the current page so the matching icon is highlighted.
   /// E.g. DOVIACLIENTMisVisitasWidget.routeName
@@ -87,10 +92,12 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
     required String routeName,
     required Future<void> Function() onTap,
     double iconSize = 24.0,
+    Key? itemKey,
   }) {
     final active = _isActive(routeName);
     return Expanded(
       child: InkWell(
+        key: itemKey,
         splashColor: Colors.transparent,
         focusColor: Colors.transparent,
         hoverColor: Colors.transparent,
@@ -153,6 +160,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
   /// Botón central: destaca por tamaño, color y por sobresalir de la barra.
   Widget _centerButton() {
     return InkWell(
+      key: widget.tutorialKeys?['doviaHome'],
       splashColor: Colors.transparent,
       focusColor: Colors.transparent,
       hoverColor: Colors.transparent,
@@ -240,6 +248,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     _navItem(
                       asset: 'assets/images/IconoCasaLLave.svg',
                       label: 'Propiedades',
+                      itemKey: widget.tutorialKeys?['propiedades'],
                       routeName: DOVIACLIENTMisPropiedadesWidget.routeName,
                       onTap: () => _openRestricted(
                           DOVIACLIENTMisPropiedadesWidget.routeName),
@@ -247,6 +256,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     _navItem(
                       asset: 'assets/images/IconoCalendario.svg',
                       label: 'Visitas',
+                      itemKey: widget.tutorialKeys?['visitas'],
                       routeName: DOVIACLIENTMisVisitasWidget.routeName,
                       onTap: () async {
                         context
@@ -258,6 +268,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     _navItem(
                       asset: 'assets/images/IconoMisOfertas.svg',
                       label: 'Ofertas',
+                      itemKey: widget.tutorialKeys?['ofertas'],
                       routeName: DOVIACLIENTMisOfertasWidget.routeName,
                       onTap: () => _openRestricted(
                           DOVIACLIENTMisOfertasWidget.routeName),
@@ -265,6 +276,7 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                     _navItem(
                       asset: 'assets/images/IconoCorazon.svg',
                       label: 'Favoritos',
+                      itemKey: widget.tutorialKeys?['favoritos'],
                       iconSize: 20.0,
                       routeName: DOVIACLIENTMisFavoritosWidget.routeName,
                       onTap: () async {

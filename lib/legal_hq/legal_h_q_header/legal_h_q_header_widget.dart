@@ -138,8 +138,9 @@ class _LegalHQHeaderWidgetState extends State<LegalHQHeaderWidget> {
                     ),
                   ),
                 ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(0.0),
+              // La D lleva al home.
+              GestureDetector(
+                onTap: () => context.goNamed(LEGALHQHomeWidget.routeName),
                 child: SvgPicture.asset(
                   'assets/images/D-verde.svg',
                   width: 28.0,

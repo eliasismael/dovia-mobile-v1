@@ -765,7 +765,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
     required bool isCompleted,
   }) {
     return _cardFrame(
-      onTap: isCompleted ? () => _openProcess(process) : null,
+      onTap: () => _openProcess(process),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

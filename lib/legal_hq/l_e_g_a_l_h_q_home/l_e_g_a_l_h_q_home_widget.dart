@@ -45,7 +45,6 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
 
   static const Color _aqua = Color(0xFF007376);
   static const Color _textDark = Color(0xFF00444B);
-  static const Color _verMasBg = Color(0xFFCCE3E4);
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
 
@@ -447,23 +446,15 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                 ),
           ),
         ),
+        // Link de texto, con el estilo de los "Ver más" del resto de la app.
         GestureDetector(
           onTap: onVerMas,
-          child: Container(
-            height: 30.0,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
-            decoration: BoxDecoration(
-              color: _verMasBg,
-              borderRadius: BorderRadius.circular(100.0),
-            ),
-            child: Text(
-              'Ver más',
-              style: GoogleFonts.publicSans(
-                color: _aqua,
-                fontSize: 14.0,
-                fontWeight: FontWeight.normal,
-              ),
+          child: Text(
+            'Ver más',
+            style: GoogleFonts.publicSans(
+              color: _aqua,
+              fontSize: 14.0,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

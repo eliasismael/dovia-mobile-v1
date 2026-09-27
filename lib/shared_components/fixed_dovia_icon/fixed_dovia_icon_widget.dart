@@ -35,6 +35,10 @@ class FixedDoviaIconWidget extends StatefulWidget {
   /// Espacio que se deja arriba para no taparle el header a la pantalla.
   static const double headerSpace = 90.0;
 
+  /// Dónde se dibujó por última vez (coordenadas de pantalla). Lo usa el
+  /// tutorial para señalarlo.
+  static Rect? lastRect;
+
   static const String _sideKey = 'dovia_icon_right';
   static const String _topKey = 'dovia_icon_top';
 
@@ -200,6 +204,8 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
       top = anchor.dy;
     }
 
+    FixedDoviaIconWidget.lastRect = Rect.fromLTWH(
+        left, top, FixedDoviaIconWidget.size, FixedDoviaIconWidget.size);
     return AnimatedPositioned(
       duration: dragging ? Duration.zero : const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,

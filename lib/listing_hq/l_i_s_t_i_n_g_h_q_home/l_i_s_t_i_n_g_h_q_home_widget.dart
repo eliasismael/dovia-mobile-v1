@@ -381,28 +381,26 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                   ),
             ),
           ),
-          FFButtonWidget(
-            onPressed: onToggle ??
+          // Link de texto, con el estilo de los "Ver más" del resto de la app.
+          const SizedBox(width: 12.0),
+          InkWell(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onTap: onToggle ??
                 () {
                   if (routeToPush.isNotEmpty) {
                     context.pushNamed(routeToPush);
                   }
                 },
-            text: onToggle != null
-                ? (isExpanded ? 'Ver menos' : 'Ver todo')
-                : 'Ver todo',
-            options: FFButtonOptions(
-              height: 30.0,
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-              color: FlutterFlowTheme.of(context).accent1,
-              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                    font: GoogleFonts.publicSans(),
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    fontSize: 14.0,
-                  ),
-              elevation: 0.0,
-              borderRadius: BorderRadius.circular(24.0),
+            child: Text(
+              onToggle != null
+                  ? (isExpanded ? 'Ver menos' : 'Ver todo')
+                  : 'Ver todo',
+              style: GoogleFonts.publicSans(
+                color: const Color(0xFF007376),
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -718,6 +716,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                         updateCallback: () => safeSetState(() {}),
                         child: const LISTINGHQHeaderWidget(
                           titleText: 'Home',
+                          showBack: false,
                         ),
                       ),
                       Padding(

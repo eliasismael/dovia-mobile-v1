@@ -1,5 +1,7 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
+import '/backend/api_requests/api_properties.dart';
+import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
@@ -23,7 +25,12 @@ class _DocCardData {
   final Color statusTextColor;
   final List<String> documentNames;
 
+  /// Documentos del checklist con su estado (missing, submitted, approved,
+  /// rejected): es lo principal de la tarjeta.
+  final List<({String label, String status})> documents;
+
   _DocCardData({
+    this.documents = const [],
     required this.visitId,
     required this.propertyName,
     required this.address,
@@ -175,57 +182,63 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
     final raw = getJsonField(res.jsonBody, r'$.data');
     final docs = raw is List ? raw : <dynamic>[];
 
+    // Nombre, dirección y foto no vienen en este listado: se completan con
+    // la propiedad (propertyId), una consulta por propiedad distinta.
+    final propertyIds = <String>{
+      for (final item in docs)
+        if (item is Map && (item['propertyId']?.toString() ?? '').isNotEmpty)
+          item['propertyId'].toString(),
+    };
+    final properties = <String, Map<String, dynamic>>{};
+    await Future.wait(propertyIds.map((id) async {
+      final r = await DOVIAAPIPropertyContextGroup.getPropertyByIDCall
+          .call(propertyId: id);
+      final data = r.succeeded ? getJsonField(r.jsonBody, r'$.data') : null;
+      if (data is Map) properties[id] = Map<String, dynamic>.from(data);
+    }));
+
     return docs.map((item) {
       final id = _resolveVisitId(item);
       String propertyName = '';
       String address = '';
       String imageUrl = '';
-      List<String> documentNames = [];
+      final documentNames = <String>[];
+      final documents = <({String label, String status})>[];
 
       if (item is Map) {
-        // Extract property info
-        final prop = item['property'] ??
-            (item['visit'] is Map ? item['visit']['property'] : null);
-        if (prop is Map) {
-          propertyName =
-              prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+        propertyName = item['propertyName']?.toString() ?? '';
+        final prop = properties[item['propertyId']?.toString() ?? ''] ??
+            (item['property'] is Map
+                ? Map<String, dynamic>.from(item['property'])
+                : null);
+        if (prop != null) {
+          if (propertyName.isEmpty) {
+            propertyName =
+                prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+          }
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
               locAddr?['street']?.toString() ??
+              prop['fullAddress']?.toString() ??
               '';
-          imageUrl = prop['image']?.toString() ?? '';
+          imageUrl =
+              firstPropertyPhotoUrl(prop) ?? prop['image']?.toString() ?? '';
         }
 
-        // Extract document names from checklist items
-        final checklist = item['documentChecklist'] ??
-            item['checklist'] ??
-            (item['visit'] is Map ? item['visit']['documentChecklist'] : null);
-        if (checklist is List) {
-          for (final doc in checklist) {
-            if (doc is Map) {
-              final docName =
-                  doc['name']?.toString() ?? doc['type']?.toString() ?? '';
-              if (docName.isNotEmpty) {
-                documentNames.add(docName);
-              }
-            }
-          }
-        }
-
-        // Fallback: extract document names from documents list
-        if (documentNames.isEmpty) {
-          final documents = item['documents'];
-          if (documents is List) {
-            for (final doc in documents) {
-              if (doc is Map) {
-                final docName = doc['fileName']?.toString() ??
-                    doc['name']?.toString() ??
-                    '';
-                if (docName.isNotEmpty) {
-                  documentNames.add(docName);
-                }
-              }
-            }
+        final list = item['documents'] ?? item['documentChecklist'];
+        if (list is List) {
+          for (final doc in list) {
+            if (doc is! Map) continue;
+            final label = doc['label']?.toString() ??
+                doc['name']?.toString() ??
+                doc['type']?.toString() ??
+                '';
+            if (label.isEmpty) continue;
+            documentNames.add(label);
+            documents.add((
+              label: label,
+              status: (doc['status']?.toString() ?? 'missing').toLowerCase(),
+            ));
           }
         }
       }
@@ -241,6 +254,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
         statusBgColor: statusInfo.bg,
         statusTextColor: statusInfo.fg,
         documentNames: documentNames,
+        documents: documents,
       );
     }).toList();
   }
@@ -713,14 +727,76 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
     );
   }
 
-  /// Builds a single document card from API data.
+  static ({String text, Color bg, Color fg}) _docStatus(String status) =>
+      switch (status) {
+        'approved' => (
+            text: 'Aprobado',
+            bg: const Color(0x3370ACAD),
+            fg: const Color(0xFF007376)
+          ),
+        'submitted' => (
+            text: 'Por revisar',
+            bg: const Color(0xFFFFEAD6),
+            fg: const Color(0xFFE08A00)
+          ),
+        'rejected' => (
+            text: 'Rechazado',
+            bg: const Color(0xFFFFE4E4),
+            fg: const Color(0xFFDC2626)
+          ),
+        _ => (
+            text: 'Falta cargar',
+            bg: const Color(0xFFF0F0F0),
+            fg: const Color(0xFF6A6A6A)
+          ),
+      };
+
+  Widget _chip(String text, Color bg, Color fg) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Text(
+          text,
+          style: GoogleFonts.publicSans(
+              color: fg, fontSize: 11, fontWeight: FontWeight.w600),
+        ),
+      );
+
+  /// Tarjeta de una visita: la propiedad arriba, chica, como contexto; los
+  /// documentos del checklist abajo, cada uno con su estado.
   Widget _buildDocumentCard(_DocCardData card) {
-    final docsText = card.documentNames.isNotEmpty
-        ? card.documentNames.join(', ')
-        : 'Sin documentos';
+    const textDark = Color(0xFF00444B);
+    const grey = Color(0xFF6A6A6A);
+    final pendingReview =
+        card.documents.where((d) => d.status == 'submitted').length;
+
+    Widget thumb() => ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: card.imageUrl.isNotEmpty
+              ? Image.network(
+                  card.imageUrl,
+                  width: 52,
+                  height: 52,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Image.asset(
+                    'assets/images/casa_card_sobreMiVisita.png',
+                    width: 52,
+                    height: 52,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Image.asset(
+                  'assets/images/casa_card_sobreMiVisita.png',
+                  width: 52,
+                  height: 52,
+                  fit: BoxFit.cover,
+                ),
+        );
 
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
       child: InkWell(
         splashColor: Colors.transparent,
         focusColor: Colors.transparent,
@@ -741,202 +817,124 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
           });
         },
         child: Container(
-          width: MediaQuery.sizeOf(context).width * 1.0,
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                  color: Color(0x14000000),
+                  blurRadius: 12,
+                  offset: Offset(0, 4)),
+            ],
           ),
-          child: Padding(
-            padding:
-                const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  width: 100.0,
-                  height: 100.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: card.imageUrl.isNotEmpty
-                        ? Image.network(
-                            card.imageUrl,
-                            width: 200.0,
-                            height: 200.0,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Image.asset(
-                              'assets/images/casa_card_sobreMiVisita.png',
-                              width: 200.0,
-                              height: 200.0,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Image.asset(
-                            'assets/images/casa_card_sobreMiVisita.png',
-                            width: 200.0,
-                            height: 200.0,
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                ),
-                Expanded(
-                  child: SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Propiedad: contexto.
+              Row(
+                children: [
+                  thumb(),
+                  const SizedBox(width: 12),
+                  Expanded(
                     child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Align(
-                          alignment: const AlignmentDirectional(-1.0, 0.0),
-                          child: RichText(
-                            textScaler: MediaQuery.of(context).textScaler,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: '${card.propertyName}\n',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w500,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 16.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w500,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
-                                TextSpan(
-                                  text: docsText,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 12.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
-                              ],
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.publicSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                    lineHeight: 1.5,
-                                  ),
-                            ),
-                          ),
+                        Text(
+                          card.propertyName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.publicSans(
+                              color: textDark,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600),
                         ),
-                        Align(
-                          alignment: const AlignmentDirectional(0.0, 1.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Estatus',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 12.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: card.statusBgColor,
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 2.0, 16.0, 2.0),
-                                  child: Text(
-                                    card.statusText,
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: card.statusTextColor,
-                                          fontSize: 12.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                        if (card.address.isNotEmpty)
+                          Text(
+                            card.address,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.publicSans(
+                                color: grey, fontSize: 12),
                           ),
-                        ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  _chip(card.statusText, card.statusBgColor,
+                      card.statusTextColor),
+                ],
+              ),
+              const Divider(height: 24, color: Color(0xFFEDEDED)),
+              // Documentos: lo principal.
+              Row(
+                children: [
+                  Text(
+                    'Documentos',
+                    style: GoogleFonts.publicSans(
+                        color: textDark,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  if (pendingReview > 0)
+                    Text(
+                      pendingReview == 1
+                          ? '1 por revisar'
+                          : '$pendingReview por revisar',
+                      style: GoogleFonts.publicSans(
+                          color: const Color(0xFFE08A00),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (card.documents.isEmpty)
+                Text(
+                  'Todavía no hay documentos en el checklist.',
+                  style: GoogleFonts.publicSans(color: grey, fontSize: 13),
+                )
+              else
+                for (final doc in card.documents)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.description_outlined,
+                            size: 18, color: Color(0xFF007376)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            doc.label,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.publicSans(
+                                color: textDark,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        () {
+                          final st = _docStatus(doc.status);
+                          return _chip(st.text, st.bg, st.fg);
+                        }(),
+                      ],
+                    ),
+                  ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Ver documentos →',
+                  style: GoogleFonts.publicSans(
+                      color: const Color(0xFF007376),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600),
                 ),
-              ].divide(const SizedBox(width: 10.0)),
-            ),
+              ),
+            ],
           ),
         ),
       ),

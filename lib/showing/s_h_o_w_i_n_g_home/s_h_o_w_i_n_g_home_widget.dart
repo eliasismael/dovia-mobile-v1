@@ -490,6 +490,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: SHOWINGHeaderWidget(
+                        showRouteButton: true,
                         title: 'Home',
                       ),
                     ),
@@ -633,21 +634,18 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                   fontWeight: FontWeight.w600,
                 ),
           ),
-          FFButtonWidget(
-            onPressed: onVerTodo,
-            text: 'Ver todo',
-            options: FFButtonOptions(
-              height: 30.0,
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-              color: FlutterFlowTheme.of(context).accent1,
-              textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.normal),
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    fontSize: 14.0,
-                  ),
-              elevation: 0.0,
-              borderRadius: BorderRadius.circular(24.0),
+          // Link de texto, con el estilo de los "Ver más" del resto de la app.
+          InkWell(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onTap: onVerTodo,
+            child: Text(
+              'Ver todo',
+              style: GoogleFonts.publicSans(
+                color: const Color(0xFF007376),
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

@@ -1,3 +1,5 @@
+import '/shared_components/app_tutorial/app_tutorial.dart';
+import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/domain/property_owner.dart';
 import 'dart:async';
@@ -126,15 +128,15 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   Future<void> _loadListingHint() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    setState(
-        () => _showListingHint = !(prefs.getBool(_listingHintKey) ?? false));
+    setState(() => _showListingHint =
+        !(prefs.getBool('${_listingHintKey}_$currentUserUid') ?? false));
   }
 
   Future<void> _dismissListingHint() async {
     if (!_showListingHint) return;
     setState(() => _showListingHint = false);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_listingHintKey, true);
+    await prefs.setBool('${_listingHintKey}_$currentUserUid', true);
   }
 
   /// Botón Comprar/Rentar. Seleccionado: verde oscuro con texto e ícono
@@ -241,19 +243,40 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   int _carouselRetries = 0;
   bool _carouselRetryScheduled = false;
 
-  bool _carouselReady(ApiCallResponse response) {
-    if (response.succeeded) return true;
-    if (_carouselRetries >= 6) return true;
+  /// Una sola consulta compartida por los tres carruseles. Antes se volvía a
+  /// pedir en cada reconstrucción de la pantalla (y volvía el spinner, o un
+  /// "no hay propiedades" momentáneo); ahora se pide una vez y se reusa.
+  Future<ApiCallResponse>? _propertiesFuture;
+
+  /// Última respuesta buena: una vez que hubo propiedades, se siguen
+  /// mostrando aunque un reintento falle o esté en curso.
+  ApiCallResponse? _lastProperties;
+
+  Future<ApiCallResponse> _properties() =>
+      _propertiesFuture ??= DOVIAAPIPropertyContextGroup.listPropertiesCall
+          .call(limit: '40', authToken: currentAuthenticationToken);
+
+  /// Respuesta a mostrar, o null mientras no haya ninguna buena (spinner).
+  ApiCallResponse? _carouselResponse(AsyncSnapshot<ApiCallResponse> snap) {
+    final response = snap.data;
+    if (response != null && response.succeeded) {
+      _lastProperties = response;
+      return response;
+    }
+    if (_lastProperties != null) return _lastProperties;
+    if (response == null) return null;
+    if (_carouselRetries >= 6) return response;
     if (!_carouselRetryScheduled) {
       _carouselRetryScheduled = true;
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
         _carouselRetryScheduled = false;
         _carouselRetries++;
+        _propertiesFuture = null;
         safeSetState(() {});
       });
     }
-    return false;
+    return null;
   }
 
   Widget _carouselEmpty(String text) => Padding(
@@ -950,6 +973,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
       safeSetState(() {});
       await _refreshFavoritePropertyIds();
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
   }
 
   @override
@@ -958,6 +982,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
       controller.dispose();
     }
     _searchDebounce?.cancel();
+    _pageScroll.dispose();
     _model.dispose();
 
     super.dispose();
@@ -990,11 +1015,117 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   }
 
   /// Boton redondo de la cabecera. El mapa del hero usa el mismo aspecto.
+  // ── Tutorial de bienvenida ────────────────────────────────────────────────
+  final _pageScroll = ScrollController();
+  final _tutorialHomeKey = GlobalKey();
+  final _tutorialMapKey = GlobalKey();
+  final _tutorialMessagesKey = GlobalKey();
+  final _tutorialNotificationsKey = GlobalKey();
+  final _tutorialSettingsKey = GlobalKey();
+  final _navbarKeys = {
+    for (final k in [
+      'propiedades',
+      'visitas',
+      'doviaHome',
+      'ofertas',
+      'favoritos'
+    ])
+      k: GlobalKey(),
+  };
+
+  /// La primera vez que un cliente entra (recién registrado o primer inicio
+  /// de sesión en este teléfono) se le muestra el tutorial.
+  Future<void> _maybeShowTutorial() async {
+    if (FFAppState().UserRole != 'CLIENT') return;
+    final userId = currentUserUid;
+    if (userId.isEmpty) return;
+    if (await AppTutorial.isDone('client_home', userId)) return;
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    if (_pageScroll.hasClients) _pageScroll.jumpTo(0);
+    await AppTutorial.show(context, [
+      const TutorialStep(
+        title: '¡Bienvenido a DOVIA!',
+        text: 'La plataforma donde puedes comprar, vender y rentar '
+            'propiedades, y contratar servicios para tu hogar.',
+      ),
+      TutorialStep(
+        title: 'Inicio',
+        text: 'Busca propiedades describiendo con tus palabras lo que '
+            'quieres, elige entre comprar y rentar y descubre lo nuevo, '
+            'proyectos nuevos y recomendaciones.',
+        target: () => rectOfKey(_tutorialHomeKey),
+      ),
+      TutorialStep(
+        title: 'Mapa',
+        text: 'Explora las propiedades en el mapa y filtra por zona para '
+            'encontrar las que están donde quieres vivir.',
+        target: () => rectOfKey(_tutorialMapKey),
+      ),
+      TutorialStep(
+        title: 'Propiedades',
+        text: 'Publica tus propiedades, revisa sus métricas y acepta '
+            'visitas u ofertas.',
+        target: () => rectOfKey(_navbarKeys['propiedades']!),
+      ),
+      TutorialStep(
+        title: 'Visitas',
+        text: 'Consulta el estado de las visitas que solicitaste.',
+        target: () => rectOfKey(_navbarKeys['visitas']!),
+      ),
+      TutorialStep(
+        title: 'Ofertas',
+        text: 'Revisa las ofertas que enviaste, su estado y las '
+            'contraofertas que recibiste.',
+        target: () => rectOfKey(_navbarKeys['ofertas']!),
+      ),
+      TutorialStep(
+        title: 'Favoritos',
+        text: 'Guarda las propiedades que te gustan y organízalas en '
+            'carpetas.',
+        target: () => rectOfKey(_navbarKeys['favoritos']!),
+      ),
+      TutorialStep(
+        title: 'DOVIA Home',
+        text: 'Suscríbete a DOVIA Home para contratar servicios para tu '
+            'hogar.',
+        target: () => rectOfKey(_navbarKeys['doviaHome']!),
+      ),
+      TutorialStep(
+        title: 'Ajustes',
+        text: 'Edita tu perfil y tus datos, administra tu suscripción y '
+            'la seguridad de tu cuenta.',
+        target: () => rectOfKey(_tutorialSettingsKey),
+      ),
+      TutorialStep(
+        title: 'Notificaciones',
+        text: 'Aquí te avisamos de novedades sobre tus visitas, ofertas y '
+            'trámites.',
+        target: () => rectOfKey(_tutorialNotificationsKey),
+      ),
+      TutorialStep(
+        title: 'Soporte',
+        text: 'Escríbenos si necesitas ayuda: el equipo de DOVIA te '
+            'responde por aquí.',
+        target: () => rectOfKey(_tutorialMessagesKey),
+      ),
+      TutorialStep(
+        title: 'Soporte siempre a mano',
+        text: 'También puedes abrir soporte desde este ícono. Arrástralo '
+            'con el dedo para ubicarlo donde prefieras en la pantalla.',
+        target: () => FixedDoviaIconWidget.lastRect,
+      ),
+    ]);
+    await AppTutorial.markDone('client_home', userId);
+  }
+
   Widget _headerAction({
     required String asset,
     required Future<void> Function() onTap,
+    Key? key,
   }) {
     return InkWell(
+      key: key,
       splashColor: Colors.transparent,
       focusColor: Colors.transparent,
       hoverColor: Colors.transparent,
@@ -1054,6 +1185,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                 child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
+                controller: _pageScroll,
                 child: Column(
                   children: [
                     // Para quien todavía no tiene cuenta, la invitación a
@@ -1118,6 +1250,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                             children: [
                               if (FFAppState().UserRole != 'VISITOR') ...[
                                 _headerAction(
+                                  key: _tutorialMessagesKey,
                                   asset:
                                       'assets/images/IconoDoviaHomeClienteMensajes.svg',
                                   onTap: () async {
@@ -1145,6 +1278,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                   },
                                 ),
                                 _headerAction(
+                                  key: _tutorialNotificationsKey,
                                   asset:
                                       'assets/images/DH_icono-navbar-notificaciones.svg',
                                   onTap: () async {
@@ -1156,6 +1290,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                               ],
                               // Ajustes dejó la barra de abajo y vive acá.
                               _headerAction(
+                                key: _tutorialSettingsKey,
                                 asset:
                                     'assets/images/DH_icono-navbar-ajustes.svg',
                                 onTap: () async {
@@ -1173,6 +1308,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                     // Hero del diseño: la foto con el titular arriba y, al pie
                     // y superpuestos, la búsqueda, la moneda y el mapa.
                     Padding(
+                      key: _tutorialHomeKey,
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 8.0, 20.0, 0.0),
                       child: ClipRRect(
@@ -1368,6 +1504,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                       ),
                                       const SizedBox(width: 8.0),
                                       _headerAction(
+                                        key: _tutorialMapKey,
                                         asset:
                                             'assets/images/IconoDoviaHomeClienteMapa.svg',
                                         onTap: () async {
@@ -1416,7 +1553,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                         padding:
                                             const EdgeInsets.only(top: 6.0),
                                         child: Text(
-                                          'Elegí si querés comprar o rentar para ver propiedades',
+                                          'Elige si quieres comprar o rentar para ver propiedades',
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.inter(
                                             fontSize: 12.0,
@@ -1476,16 +1613,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 8.0, 20.0, 0.0),
                             child: FutureBuilder<ApiCallResponse>(
-                              future: DOVIAAPIPropertyContextGroup
-                                  .listPropertiesCall
-                                  .call(
-                                limit: '40',
-                                authToken: currentAuthenticationToken,
-                              ),
+                              future: _properties(),
                               builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData ||
-                                    !_carouselReady(snapshot.data!)) {
+                                // Spinner sólo hasta la primera respuesta
+                                // buena.
+                                if (_carouselResponse(snapshot) == null) {
                                   return Center(
                                     child: SizedBox(
                                       width: 50.0,
@@ -1500,7 +1632,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                   );
                                 }
                                 final rowListPropertiesResponse =
-                                    snapshot.data!;
+                                    _carouselResponse(snapshot)!;
 
                                 return Builder(
                                   builder: (context) {
@@ -1656,16 +1788,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 20.0, 20.0, 0.0),
                             child: FutureBuilder<ApiCallResponse>(
-                              future: DOVIAAPIPropertyContextGroup
-                                  .listPropertiesCall
-                                  .call(
-                                limit: '40',
-                                authToken: currentAuthenticationToken,
-                              ),
+                              future: _properties(),
                               builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData ||
-                                    !_carouselReady(snapshot.data!)) {
+                                // Spinner sólo hasta la primera respuesta
+                                // buena.
+                                if (_carouselResponse(snapshot) == null) {
                                   return Center(
                                     child: SizedBox(
                                       width: 50.0,
@@ -1680,7 +1807,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                   );
                                 }
                                 final rowListPropertiesResponse =
-                                    snapshot.data!;
+                                    _carouselResponse(snapshot)!;
 
                                 return Builder(
                                   builder: (context) {
@@ -2094,16 +2221,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 20.0, 20.0, 0.0),
                             child: FutureBuilder<ApiCallResponse>(
-                              future: DOVIAAPIPropertyContextGroup
-                                  .listPropertiesCall
-                                  .call(
-                                limit: '40',
-                                authToken: currentAuthenticationToken,
-                              ),
+                              future: _properties(),
                               builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData ||
-                                    !_carouselReady(snapshot.data!)) {
+                                // Spinner sólo hasta la primera respuesta
+                                // buena.
+                                if (_carouselResponse(snapshot) == null) {
                                   return Center(
                                     child: SizedBox(
                                       width: 50.0,
@@ -2118,7 +2240,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                   );
                                 }
                                 final rowListPropertiesResponse =
-                                    snapshot.data!;
+                                    _carouselResponse(snapshot)!;
 
                                 return Builder(
                                   builder: (context) {
@@ -2502,11 +2624,23 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    // Ícono flotante de soporte, como en el resto de las
+                    // pantallas del cliente.
+                    if (FFAppState().UserRole != 'VISITOR')
+                      const Align(
+                        alignment: AlignmentDirectional(1.0, 0.0),
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 15.0, 12.0),
+                          child: FixedDoviaIconWidget(),
+                        ),
+                      ),
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIACLIENTNavbarWidget(
                         activeTab: DOVIACLIENTHomePageWidget.routeName,
+                        tutorialKeys: _navbarKeys,
                       ),
                     ),
                   ],

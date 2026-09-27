@@ -416,8 +416,23 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
     );
   }
 
-  /// Datos de la propiedad y documentos del propietario, arriba del checklist.
-  List<Widget> _buildReviewHeader() {
+  /// Orden de la pantalla: documentos del propietario, checklist y, al final,
+  /// los datos de la propiedad como referencia.
+  List<Widget> _buildOwnerDocs() {
+    final p = _property;
+    final legal = p?['legalInfo'] is Map ? p!['legalInfo'] as Map : null;
+    return [
+      _buildSectionTitle('Documentos que subió el propietario'),
+      _card([
+        _ownerDocTile(
+            'DPI propietario inmueble', _str(legal?['ownerIdDocument'])),
+        _ownerDocTile('Certificación de la propiedad',
+            _str(legal?['propertyCertification'])),
+      ]),
+    ];
+  }
+
+  List<Widget> _buildPropertyData() {
     final p = _property;
     final legal = p?['legalInfo'] is Map ? p!['legalInfo'] as Map : null;
     final ownership = p?['ownership'] is Map ? p!['ownership'] as Map : null;
@@ -472,13 +487,6 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
         _infoRow('Email', _str(_owner?['email'])),
         _infoRow('Descripción', _str(description?['raw'])),
         _registryBox(legal),
-      ]),
-      _buildSectionTitle('Documentos que subió el propietario'),
-      _card([
-        _ownerDocTile(
-            'DPI propietario inmueble', _str(legal?['ownerIdDocument'])),
-        _ownerDocTile('Certificación de la propiedad',
-            _str(legal?['propertyCertification'])),
       ]),
     ];
   }
@@ -791,7 +799,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    ..._buildReviewHeader(),
+                                    ..._buildOwnerDocs(),
                                     _buildSectionTitle(
                                         'Checklist de documentos'),
                                     if (docs.isEmpty)
@@ -1093,6 +1101,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                         }).toList(),
                                       ),
                                     ],
+                                    ..._buildPropertyData(),
                                   ],
                                 );
                               },

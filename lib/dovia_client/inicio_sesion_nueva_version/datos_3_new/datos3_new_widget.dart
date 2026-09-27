@@ -975,8 +975,11 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
       safeSetState(() {});
       context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
     } else {
-      _model.preferencesError =
-          'No pudimos guardar tus preferencias. Inténtalo de nuevo.';
+      final detail = result is Failure ? (result as Failure).message : '';
+      _model.preferencesError = detail.isNotEmpty &&
+              detail != 'Error al actualizar preferencias'
+          ? 'No pudimos guardar tus preferencias: $detail'
+          : 'No pudimos guardar tus preferencias. Inténtalo de nuevo.';
       safeSetState(() {});
     }
   }

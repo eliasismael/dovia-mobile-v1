@@ -64,10 +64,28 @@ class _LEGALHQNavbarWidgetState extends State<LEGALHQNavbarWidget> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             NavbarItemIndicator(
+              label: 'Inicio',
+              routeNames: [LEGALHQHomeWidget.routeName],
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  context.goNamed(LEGALHQHomeWidget.routeName);
+                },
+                child: SvgPicture.asset(
+                  'assets/images/DH_icono-navbar-home.svg',
+                  width: 24.0,
+                  height: 24.0,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            NavbarItemIndicator(
               label: 'Procesos',
               routeNames: [
                 LEGALHQProcesosWidget.routeName,
-                LEGALHQHomeWidget.routeName,
               ],
               child: InkWell(
                 splashColor: Colors.transparent,

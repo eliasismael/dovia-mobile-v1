@@ -169,6 +169,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
   @override
   void dispose() {
     appRouteObserver.unsubscribe(this);
+    _searchController.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -441,12 +442,117 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
     );
   }
 
+  // ── Búsqueda y filtros (como en Documentos) ───────────────────────────────
+  final _searchController = TextEditingController();
+  String _query = '';
+  String _section = 'all';
+
+  static const _sectionFilters = [
+    ('all', 'Todas'),
+    ('docs', 'Documentación'),
+    ('assign', 'Asignar Operative'),
+    ('publish', 'Por publicar'),
+    ('legal', 'Proceso legal'),
+  ];
+
+  bool _showSection(String key) => _section == 'all' || _section == key;
+
+  static String _fold(String v) {
+    const from = 'áéíóúüñÁÉÍÓÚÜÑ';
+    const to = 'aeiouunAEIOUUN';
+    final b = StringBuffer();
+    for (final c in v.split('')) {
+      final i = from.indexOf(c);
+      b.write(i >= 0 ? to[i] : c);
+    }
+    return b.toString().toLowerCase();
+  }
+
+  /// Coincide con la dirección, la etiqueta o el estado de la tarjeta.
+  bool _matches(_HqCardData e) {
+    final q = _fold(_query.trim());
+    if (q.isEmpty) return true;
+    final haystack = _fold('${e.address} ${e.tagText} ${e.statusText}');
+    return q.split(RegExp(r'\s+')).every(haystack.contains);
+  }
+
+  Widget _buildFilters() {
+    const primary = Color(0xFF007376);
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _searchController,
+            onChanged: (v) => setState(() => _query = v),
+            decoration: InputDecoration(
+              hintText: 'Buscar por dirección o estado...',
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF8A8A8A)),
+              suffixIcon: _query.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _query = '');
+                      },
+                    ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final (key, label) in _sectionFilters)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(label),
+                      selected: _section == key,
+                      showCheckmark: false,
+                      onSelected: (_) => setState(() => _section = key),
+                      selectedColor: Colors.white,
+                      backgroundColor: const Color(0xFFEFF3F4),
+                      side: BorderSide.none,
+                      labelStyle: GoogleFonts.publicSans(
+                        color: _section == key
+                            ? const Color(0xFF00444B)
+                            : const Color(0xFF8A8A8A),
+                        fontWeight:
+                            _section == key ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      elevation: _section == key ? 1 : 0,
+                      pressElevation: 0,
+                      shadowColor: primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHorizontalList(List<Widget> cards) {
     if (cards.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
         child: Text(
-          'No hay propiedades en esta sección',
+          _query.trim().isEmpty
+              ? 'No hay propiedades en esta sección'
+              : 'Ninguna propiedad coincide con la búsqueda',
           style: FlutterFlowTheme.of(context).bodyMedium,
         ),
       );
@@ -511,140 +617,160 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
+                            _buildFilters(),
                             // Sección 1: Checklist documental pendiente.
-                            _buildSectionHeader(
-                              'Propiedades a revisar su documentación',
-                            ),
-                            FutureBuilder<List<_HqCardData>>(
-                              future: _docsFuture,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) return _buildLoader();
-                                return _buildHorizontalList(
-                                  snapshot.data!
-                                      .map((e) => _buildCarouselCard(
-                                            address: e.address,
-                                            tagText: e.tagText,
-                                            statusText: e.statusText,
-                                            statusBgColor: e.statusBgColor,
-                                            statusTextColor: e.statusTextColor,
-                                            buttonText: 'Revisar ahora',
-                                            onPressed: () => Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    LISTINGHQPropiedadArchivosPendientesWidget(
-                                                  title: e.address,
-                                                  visitId: e.id,
+                            if (_showSection('docs')) ...[
+                              _buildSectionHeader(
+                                'Propiedades a revisar su documentación',
+                              ),
+                              FutureBuilder<List<_HqCardData>>(
+                                future: _docsFuture,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) return _buildLoader();
+                                  return _buildHorizontalList(
+                                    snapshot.data!
+                                        .where(_matches)
+                                        .map((e) => _buildCarouselCard(
+                                              address: e.address,
+                                              tagText: e.tagText,
+                                              statusText: e.statusText,
+                                              statusBgColor: e.statusBgColor,
+                                              statusTextColor:
+                                                  e.statusTextColor,
+                                              buttonText: 'Revisar ahora',
+                                              onPressed: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      LISTINGHQPropiedadArchivosPendientesWidget(
+                                                    title: e.address,
+                                                    visitId: e.id,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ))
-                                      .toList(),
-                                );
-                              },
-                            ),
+                                            ))
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ],
 
                             // Sección 2: Asignar Operative Listing
-                            _buildSectionHeader(
-                              'Propiedades que necesitan asignar un Operative Listing',
-                            ),
-                            FutureBuilder<List<_HqCardData>>(
-                              future: _assignFuture,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) return _buildLoader();
-                                return _buildHorizontalList(
-                                  snapshot.data!
-                                      .map((e) => _buildCarouselCard(
-                                            address: e.address,
-                                            tagText: e.tagText,
-                                            statusText: e.statusText,
-                                            statusBgColor: e.statusBgColor,
-                                            statusTextColor: e.statusTextColor,
-                                            buttonText: e.substatus ==
-                                                    'RESCHEDULE_REQUIRED'
-                                                ? 'Asignar de nuevo'
-                                                : 'Asignar Operative Listing',
-                                            onPressed: () => context.pushNamed(
-                                              LISTINGHQPropiedadAsignadaWidget
-                                                  .routeName,
-                                              queryParameters: {
-                                                'visitId': serializeParam(
-                                                    e.id, ParamType.String),
-                                              }.withoutNulls,
-                                            ),
-                                            onEyePressed: () =>
-                                                context.pushNamed(
-                                              'LISTING_HQ_Propiedad',
-                                              queryParameters: {
-                                                'visitId': serializeParam(
-                                                    e.id, ParamType.String),
-                                              }.withoutNulls,
-                                            ),
-                                          ))
-                                      .toList(),
-                                );
-                              },
-                            ),
+                            if (_showSection('assign')) ...[
+                              _buildSectionHeader(
+                                'Propiedades que necesitan asignar un Operative Listing',
+                              ),
+                              FutureBuilder<List<_HqCardData>>(
+                                future: _assignFuture,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) return _buildLoader();
+                                  return _buildHorizontalList(
+                                    snapshot.data!
+                                        .where(_matches)
+                                        .map((e) => _buildCarouselCard(
+                                              address: e.address,
+                                              tagText: e.tagText,
+                                              statusText: e.statusText,
+                                              statusBgColor: e.statusBgColor,
+                                              statusTextColor:
+                                                  e.statusTextColor,
+                                              buttonText: e.substatus ==
+                                                      'RESCHEDULE_REQUIRED'
+                                                  ? 'Asignar de nuevo'
+                                                  : 'Asignar Operative Listing',
+                                              onPressed: () =>
+                                                  context.pushNamed(
+                                                LISTINGHQPropiedadAsignadaWidget
+                                                    .routeName,
+                                                queryParameters: {
+                                                  'visitId': serializeParam(
+                                                      e.id, ParamType.String),
+                                                }.withoutNulls,
+                                              ),
+                                              onEyePressed: () =>
+                                                  context.pushNamed(
+                                                'LISTING_HQ_Propiedad',
+                                                queryParameters: {
+                                                  'visitId': serializeParam(
+                                                      e.id, ParamType.String),
+                                                }.withoutNulls,
+                                              ),
+                                            ))
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ],
 
                             // Sección 3: Fotos cargadas, pendientes de revisión.
-                            _buildSectionHeader(
-                              'Propiedades pendientes por publicar',
-                            ),
-                            FutureBuilder<List<_HqCardData>>(
-                              future: _publishFuture,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) return _buildLoader();
-                                return _buildHorizontalList(
-                                  snapshot.data!
-                                      .map((e) => _buildCarouselCard(
-                                            address: e.address,
-                                            tagText: e.tagText,
-                                            statusText: e.statusText,
-                                            statusBgColor: e.statusBgColor,
-                                            statusTextColor: e.statusTextColor,
-                                            buttonText: 'Revisar checklist',
-                                            onPressed: () => context.pushNamed(
-                                              'LISTING_HQ_Propiedad',
-                                              queryParameters: {
-                                                'visitId': serializeParam(
-                                                    e.id, ParamType.String),
-                                              }.withoutNulls,
-                                            ),
-                                          ))
-                                      .toList(),
-                                );
-                              },
-                            ),
+                            if (_showSection('publish')) ...[
+                              _buildSectionHeader(
+                                'Propiedades pendientes por publicar',
+                              ),
+                              FutureBuilder<List<_HqCardData>>(
+                                future: _publishFuture,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) return _buildLoader();
+                                  return _buildHorizontalList(
+                                    snapshot.data!
+                                        .where(_matches)
+                                        .map((e) => _buildCarouselCard(
+                                              address: e.address,
+                                              tagText: e.tagText,
+                                              statusText: e.statusText,
+                                              statusBgColor: e.statusBgColor,
+                                              statusTextColor:
+                                                  e.statusTextColor,
+                                              buttonText: 'Revisar checklist',
+                                              onPressed: () =>
+                                                  context.pushNamed(
+                                                'LISTING_HQ_Propiedad',
+                                                queryParameters: {
+                                                  'visitId': serializeParam(
+                                                      e.id, ParamType.String),
+                                                }.withoutNulls,
+                                              ),
+                                            ))
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ],
 
                             // Sección 4: En proceso legal
-                            _buildSectionHeader(
-                              'Propiedades en proceso legal',
-                            ),
-                            FutureBuilder<List<_HqCardData>>(
-                              future: _legalFuture,
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) return _buildLoader();
-                                return _buildHorizontalList(
-                                  snapshot.data!
-                                      .map((e) => _buildCarouselCard(
-                                            address: e.address,
-                                            tagText: e.tagText,
-                                            statusText: e.statusText,
-                                            statusBgColor: e.statusBgColor,
-                                            statusTextColor: e.statusTextColor,
-                                            buttonText: 'Revisar fotos',
-                                            onPressed: () => context.pushNamed(
-                                              'LISTING_HQ_Propiedad',
-                                              queryParameters: {
-                                                'visitId': serializeParam(
-                                                    e.id, ParamType.String),
-                                              }.withoutNulls,
-                                            ),
-                                          ))
-                                      .toList(),
-                                );
-                              },
-                            ),
+                            if (_showSection('legal')) ...[
+                              _buildSectionHeader(
+                                'Propiedades en proceso legal',
+                              ),
+                              FutureBuilder<List<_HqCardData>>(
+                                future: _legalFuture,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) return _buildLoader();
+                                  return _buildHorizontalList(
+                                    snapshot.data!
+                                        .where(_matches)
+                                        .map((e) => _buildCarouselCard(
+                                              address: e.address,
+                                              tagText: e.tagText,
+                                              statusText: e.statusText,
+                                              statusBgColor: e.statusBgColor,
+                                              statusTextColor:
+                                                  e.statusTextColor,
+                                              buttonText: 'Revisar fotos',
+                                              onPressed: () =>
+                                                  context.pushNamed(
+                                                'LISTING_HQ_Propiedad',
+                                                queryParameters: {
+                                                  'visitId': serializeParam(
+                                                      e.id, ParamType.String),
+                                                }.withoutNulls,
+                                              ),
+                                            ))
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ],
                           ],
                         ),
                       ),
