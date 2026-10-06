@@ -5,7 +5,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
-import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,6 +28,15 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  static final _emailPattern =
+      RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
+  /// Correo con formato válido (recortado). Habilita "Continuar" mientras se
+  /// escribe; el aviso de "correo inválido" se muestra recién al salir del
+  /// campo, para no marcar error a mitad de escritura.
+  bool get _emailLooksValid => _emailPattern
+      .hasMatch(_model.correoElectronicoTextController?.text.trim() ?? '');
+
   @override
   void initState() {
     super.initState();
@@ -39,10 +47,9 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
     _model.correoElectronicoFocusNode!.addListener(
       () async {
         if (!(_model.correoElectronicoFocusNode?.hasFocus ?? false)) {
-          if (!((String mail) {
-            return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                .hasMatch(mail);
-          }(_model.correoElectronicoTextController.text.trim()))) {
+          // Campo vacío: no se marca error, el botón ya queda deshabilitado.
+          if (_model.correoElectronicoTextController.text.trim().isNotEmpty &&
+              !_emailLooksValid) {
             _model.mailInvalid = true;
             safeSetState(() {});
             return;
@@ -188,20 +195,16 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                           .correoElectronicoTextController,
                                       focusNode:
                                           _model.correoElectronicoFocusNode,
-                                      onChanged: (_) => EasyDebounce.debounce(
-                                        '_model.correoElectronicoTextController',
-                                        const Duration(milliseconds: 2000),
-                                        () async {
-                                          if (_model.mailInvalid ||
-                                              _model.mailAlredyRegistered ||
-                                              _model.signUpError != null) {
-                                            _model.mailInvalid = false;
-                                            _model.mailAlredyRegistered = false;
-                                            _model.signUpError = null;
-                                            safeSetState(() {});
-                                          }
-                                        },
-                                      ),
+                                      // Se redibuja en cada tecla: el botón
+                                      // se habilita apenas el correo es válido.
+                                      // Antes solo se actualizaba al cerrar el
+                                      // teclado (o 2 s después, si había un
+                                      // error que limpiar).
+                                      onChanged: (_) => safeSetState(() {
+                                        _model.mailInvalid = false;
+                                        _model.mailAlredyRegistered = false;
+                                        _model.signUpError = null;
+                                      }),
                                       autofocus: false,
                                       enabled: true,
                                       obscureText: false,
@@ -427,9 +430,7 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                     0.0, 30.0, 0.0, 0.0),
                                 child: FFButtonWidget(
                                   onPressed: ((_model.mailInvalid == true) ||
-                                          (_model.correoElectronicoTextController
-                                                  .text ==
-                                              ''))
+                                          !_emailLooksValid)
                                       ? null
                                       : () async {
                                           var shouldSetState = false;

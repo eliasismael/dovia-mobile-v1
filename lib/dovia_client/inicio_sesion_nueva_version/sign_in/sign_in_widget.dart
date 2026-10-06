@@ -74,992 +74,1105 @@ class _SignInWidgetState extends State<SignInWidget> {
               child: Padding(
                 padding:
                     const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 64.0, 0.0, 0.0),
-                        child: Container(
-                          decoration: const BoxDecoration(),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(0.0),
-                            child: SvgPicture.asset(
-                              'assets/images/D-verde.svg',
-                              width: 52.0,
-                              height: 68.0,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Entorno de la API (sólo fuera de producción), para no
-                      // confundir una build de dev con una de staging.
-                      if (kApiEnvLabel.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0, vertical: 3.0),
-                            decoration: BoxDecoration(
-                              color: kApiEnvLabel == 'DEV'
-                                  ? const Color(0xFFFFEAD6)
-                                  : const Color(0xFFE0E7FF),
-                              borderRadius: BorderRadius.circular(100.0),
-                            ),
-                            child: Text(
-                              kApiEnvLabel,
-                              style: GoogleFonts.publicSans(
-                                color: kApiEnvLabel == 'DEV'
-                                    ? const Color(0xFFB45309)
-                                    : const Color(0xFF4F46E5),
-                                fontSize: 11.0,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 24.0, 0.0, 0.0),
-                          child: Text(
-                            'Ingresa a tu cuenta',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  color: const Color(0xFF00444B),
-                                  fontSize: 26.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                          ),
-                        ),
-                      ),
-                      // Deja que el gestor de contraseñas complete y guarde
-                      // los datos de acceso.
-                      AutofillGroup(
-                        child: Form(
-                        key: _model.formKey,
-                        autovalidateMode: AutovalidateMode.disabled,
+                child: // El contenido ocupa al menos el alto de la pantalla (con el bloque
+                    // de registro abajo) y solo scrollea si no entra: antes, con
+                    // márgenes fijos, sobraban unos píxeles y había scroll de más.
+                    LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight),
+                      child: IntrinsicHeight(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 20.0, 0.0, 0.0),
-                                child: Text(
-                                  'Correo',
-                                  textAlign: TextAlign.start,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 16.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 12.0, 0.0, 0.0),
-                                child: SizedBox(
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  child: TextFormField(
-                                    controller:
-                                        _model.correoInputTextController,
-                                    focusNode: _model.correoInputFocusNode,
-                                    autofocus: false,
-                                    enabled: true,
-                                    obscureText: false,
-                                    keyboardType: TextInputType.emailAddress,
-                                    autocorrect: false,
-                                    textInputAction: TextInputAction.next,
-                                    autofillHints: const [
-                                      AutofillHints.email,
-                                      AutofillHints.username,
-                                    ],
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      labelStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontStyle,
-                                            ),
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                      hintText: 'ex: jon.smith@email.com',
-                                      hintStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontStyle,
-                                            ),
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0x00000000),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0x00000000),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      filled: true,
-                                      fillColor: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                    ),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                    cursorColor: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    enableInteractiveSelection: true,
-                                    validator: _model
-                                        .correoInputTextControllerValidator
-                                        .asValidator(context),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 14.0, 0.0, 0.0),
-                                child: Text(
-                                  'Contraseña',
-                                  textAlign: TextAlign.start,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 16.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 12.0, 0.0, 0.0),
-                                child: SizedBox(
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  child: TextFormField(
-                                    controller:
-                                        _model.passwordInputTextController,
-                                    focusNode: _model.passwordInputFocusNode,
-                                    autofocus: false,
-                                    enabled: true,
-                                    autofillHints: const [
-                                      AutofillHints.password,
-                                    ],
-                                    obscureText:
-                                        !_model.passwordInputVisibility,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      labelStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontStyle,
-                                            ),
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                      hintText: '************',
-                                      hintStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .fontStyle,
-                                            ),
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0x00000000),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0x00000000),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      filled: true,
-                                      fillColor: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                      suffixIcon: InkWell(
-                                        onTap: () async {
-                                          safeSetState(() => _model
-                                                  .passwordInputVisibility =
-                                              !_model.passwordInputVisibility);
-                                        },
-                                        focusNode:
-                                            FocusNode(skipTraversal: true),
-                                        child: Icon(
-                                          _model.passwordInputVisibility
-                                              ? Icons.visibility_outlined
-                                              : Icons.visibility_off_outlined,
-                                          size: 22,
-                                        ),
-                                      ),
-                                    ),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                    cursorColor: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    enableInteractiveSelection: true,
-                                    validator: _model
-                                        .passwordInputTextControllerValidator
-                                        .asValidator(context),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ),
-                      Align(
-                        alignment: const AlignmentDirectional(0.0, 0.0),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 8.0, 0.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              InkWell(
-                                splashColor: Colors.transparent,
-                                focusColor: Colors.transparent,
-                                hoverColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                onTap: () async {
-                                  context.pushNamed(
-                                      RecoverPasswordStep1Widget.routeName);
-                                },
-                                child: Text(
-                                  '¿Olvidaste tu contraseña?',
-                                  textAlign: TextAlign.center,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Builder(
-                          builder: (context) {
-                            if (_model.invalidMailOrPassword) {
-                              return Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 20.0, 0.0, 0.0),
-                                child: Text(
-                                  _model.signInError ?? '',
-                                  textAlign: TextAlign.center,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        color:
-                                            FlutterFlowTheme.of(context).error,
-                                        fontSize: 14.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        lineHeight: 1.3,
-                                      ),
-                                ),
-                              );
-                            } else {
-                              return Container(
-                                width: 0.0,
-                                height: 0.0,
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 40.0, 0.0, 0.0),
+                              child: Container(
                                 decoration: const BoxDecoration(),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 20.0, 0.0, 0.0),
-                        child: FFButtonWidget(
-                          onPressed: () async {
-                            _model.invalidMailOrPassword = false;
-                            safeSetState(() {});
-                            _model.resultForm = true;
-                            if (_model.formKey.currentState == null ||
-                                !_model.formKey.currentState!.validate()) {
-                              _model.resultForm = false;
-                            }
-                            if (_model.resultForm!) {
-                              _model.apiResultbr7 =
-                                  await DOVIAAPIAuthContextGroup.signInNEWCall
-                                      .call(
-                                email: _model.correoInputTextController.text
-                                    .trim(),
-                                password:
-                                    _model.passwordInputTextController.text,
-                              );
-
-                              if ((_model.apiResultbr7?.succeeded ?? true)) {
-                                // El inicio de sesión se apila sobre esta
-                                // pantalla, que sigue viva: sin esto, al
-                                // cerrar sesión volvía con el correo y la
-                                // contraseña del usuario anterior escritos.
-                                TextInput.finishAutofillContext();
-                                final signedInEmail = _model
-                                    .correoInputTextController.text
-                                    .trim();
-                                _model.correoInputTextController?.clear();
-                                _model.passwordInputTextController?.clear();
-                                final idToken = DOVIAAPIAuthContextGroup
-                                    .signInNEWCall
-                                    .idToken(
-                                  (_model.apiResultbr7?.jsonBody ?? ''),
-                                );
-                                FFAppState().UserEmail = signedInEmail;
-                                if (!context.mounted) return;
-                                GoRouter.of(context).prepareAuthEvent();
-                                // Sin el uid, `currentUserUid` quedaba vacío:
-                                // fallaba la subida de documentos del registro
-                                // de asociado y todo lo que se guarda por
-                                // usuario se mezclaba entre cuentas.
-                                await authManager.signIn(
-                                  authenticationToken: idToken,
-                                  refreshToken: DOVIAAPIAuthContextGroup
-                                      .signInNEWCall
-                                      .refreshToken(
-                                    (_model.apiResultbr7?.jsonBody ?? ''),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(0.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/D-verde.svg',
+                                    width: 52.0,
+                                    height: 68.0,
+                                    fit: BoxFit.contain,
                                   ),
-                                  tokenExpiration: tokenExpirationFrom(
-                                    DOVIAAPIAuthContextGroup.signInNEWCall
-                                        .expiresIn(
-                                            _model.apiResultbr7?.jsonBody),
+                                ),
+                              ),
+                            ),
+                            // Entorno de la API (sólo fuera de producción), para no
+                            // confundir una build de dev con una de staging.
+                            if (kApiEnvLabel.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0, vertical: 3.0),
+                                  decoration: BoxDecoration(
+                                    color: kApiEnvLabel == 'DEV'
+                                        ? const Color(0xFFFFEAD6)
+                                        : const Color(0xFFE0E7FF),
+                                    borderRadius: BorderRadius.circular(100.0),
                                   ),
-                                  authUid: DOVIAAPIAuthContextGroup
-                                      .signInNEWCall
-                                      .userId(_model.apiResultbr7?.jsonBody),
-                                );
-
-                                _model.apiResultProfile =
-                                    await DOVIAAPIUserContextGroup
-                                        .getAuthenticatedUserProfileCall
-                                        .call(
-                                  authToken: idToken,
-                                );
-
-                                // Respaldo por si el sign-in no trae el id.
-                                final profileUid = DOVIAAPIUserContextGroup
-                                    .getAuthenticatedUserProfileCall
-                                    .userId(_model.apiResultProfile?.jsonBody);
-                                if ((authManager.uid ?? '').isEmpty &&
-                                    profileUid != null &&
-                                    profileUid.isNotEmpty) {
-                                  authManager.updateAuthUserData(
-                                    authenticationToken:
-                                        authManager.authenticationToken,
-                                    refreshToken: authManager.refreshToken,
-                                    tokenExpiration:
-                                        authManager.tokenExpiration,
-                                    authUid: profileUid,
+                                  child: Text(
+                                    kApiEnvLabel,
+                                    style: GoogleFonts.publicSans(
+                                      color: kApiEnvLabel == 'DEV'
+                                          ? const Color(0xFFB45309)
+                                          : const Color(0xFF4F46E5),
+                                      fontSize: 11.0,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 24.0, 0.0, 0.0),
+                              child: Text(
+                                'Ingresa a tu cuenta',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      color: const Color(0xFF00444B),
+                                      fontSize: 26.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              ),
+                            ),
+                            // Deja que el gestor de contraseñas complete y guarde
+                            // los datos de acceso.
+                            AutofillGroup(
+                              child: Form(
+                                key: _model.formKey,
+                                autovalidateMode: AutovalidateMode.disabled,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Align(
+                                      alignment:
+                                          const AlignmentDirectional(-1.0, 0.0),
+                                      child: Padding(
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 20.0, 0.0, 0.0),
+                                        child: Text(
+                                          'Correo',
+                                          textAlign: TextAlign.start,
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.publicSans(
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                                fontSize: 16.0,
+                                                letterSpacing: 0.0,
+                                                fontWeight:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontWeight,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                    Align(
+                                      alignment:
+                                          const AlignmentDirectional(-1.0, 0.0),
+                                      child: Padding(
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                        child: SizedBox(
+                                          width:
+                                              MediaQuery.sizeOf(context).width *
+                                                  1.0,
+                                          child: TextFormField(
+                                            controller: _model
+                                                .correoInputTextController,
+                                            focusNode:
+                                                _model.correoInputFocusNode,
+                                            autofocus: false,
+                                            enabled: true,
+                                            obscureText: false,
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                            autocorrect: false,
+                                            textInputAction:
+                                                TextInputAction.next,
+                                            autofillHints: const [
+                                              AutofillHints.email,
+                                              AutofillHints.username,
+                                            ],
+                                            decoration: InputDecoration(
+                                              isDense: true,
+                                              labelStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontStyle,
+                                                      ),
+                                              hintText:
+                                                  'ex: jon.smith@email.com',
+                                              hintStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontStyle,
+                                                      ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                  color: Color(0x00000000),
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                  color: Color(0x00000000),
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              errorBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .error,
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .error,
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              filled: true,
+                                              fillColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                            ),
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.inter(
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontStyle,
+                                                  ),
+                                                  letterSpacing: 0.0,
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                            cursorColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .primaryText,
+                                            enableInteractiveSelection: true,
+                                            validator: _model
+                                                .correoInputTextControllerValidator
+                                                .asValidator(context),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Align(
+                                      alignment:
+                                          const AlignmentDirectional(-1.0, 0.0),
+                                      child: Padding(
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 14.0, 0.0, 0.0),
+                                        child: Text(
+                                          'Contraseña',
+                                          textAlign: TextAlign.start,
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                font: GoogleFonts.publicSans(
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                                fontSize: 16.0,
+                                                letterSpacing: 0.0,
+                                                fontWeight:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontWeight,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                    Align(
+                                      alignment:
+                                          const AlignmentDirectional(-1.0, 0.0),
+                                      child: Padding(
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                        child: SizedBox(
+                                          width:
+                                              MediaQuery.sizeOf(context).width *
+                                                  1.0,
+                                          child: TextFormField(
+                                            controller: _model
+                                                .passwordInputTextController,
+                                            focusNode:
+                                                _model.passwordInputFocusNode,
+                                            autofocus: false,
+                                            enabled: true,
+                                            autofillHints: const [
+                                              AutofillHints.password,
+                                            ],
+                                            obscureText:
+                                                !_model.passwordInputVisibility,
+                                            decoration: InputDecoration(
+                                              isDense: true,
+                                              labelStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontStyle,
+                                                      ),
+                                              hintText: '************',
+                                              hintStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .labelMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelMedium
+                                                                .fontStyle,
+                                                      ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                  color: Color(0x00000000),
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                  color: Color(0x00000000),
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              errorBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .error,
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .error,
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              filled: true,
+                                              fillColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                              suffixIcon: InkWell(
+                                                onTap: () async {
+                                                  safeSetState(() => _model
+                                                          .passwordInputVisibility =
+                                                      !_model
+                                                          .passwordInputVisibility);
+                                                },
+                                                focusNode: FocusNode(
+                                                    skipTraversal: true),
+                                                child: Icon(
+                                                  _model.passwordInputVisibility
+                                                      ? Icons
+                                                          .visibility_outlined
+                                                      : Icons
+                                                          .visibility_off_outlined,
+                                                  size: 22,
+                                                ),
+                                              ),
+                                            ),
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                                  font: GoogleFonts.inter(
+                                                    fontWeight:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontWeight,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .bodyMedium
+                                                            .fontStyle,
+                                                  ),
+                                                  letterSpacing: 0.0,
+                                                  fontWeight:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontWeight,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodyMedium
+                                                          .fontStyle,
+                                                ),
+                                            cursorColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .primaryText,
+                                            enableInteractiveSelection: true,
+                                            validator: _model
+                                                .passwordInputTextControllerValidator
+                                                .asValidator(context),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 8.0, 0.0, 0.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        context.pushNamed(
+                                            RecoverPasswordStep1Widget
+                                                .routeName);
+                                      },
+                                      child: Text(
+                                        '¿Olvidaste tu contraseña?',
+                                        textAlign: TextAlign.center,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              font: GoogleFonts.inter(
+                                                fontWeight:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontWeight,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                              ),
+                                              letterSpacing: 0.0,
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .fontStyle,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Builder(
+                              builder: (context) {
+                                if (_model.invalidMailOrPassword) {
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 20.0, 0.0, 0.0),
+                                    child: Text(
+                                      _model.signInError ?? '',
+                                      textAlign: TextAlign.center,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts.publicSans(
+                                              fontWeight: FontWeight.normal,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .error,
+                                            fontSize: 14.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.normal,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                            lineHeight: 1.3,
+                                          ),
+                                    ),
+                                  );
+                                } else {
+                                  return Container(
+                                    width: 0.0,
+                                    height: 0.0,
+                                    decoration: const BoxDecoration(),
                                   );
                                 }
-
-                                final userRole = DOVIAAPIUserContextGroup
-                                    .getAuthenticatedUserProfileCall
-                                    .userRole(
-                                  (_model.apiResultProfile?.jsonBody ?? ''),
-                                );
-                                // La aprobación del asociado es `verified`:
-                                // select-role lo deja en false y HQ Admin lo
-                                // pasa a true. `active` es otra cosa (cuenta
-                                // deshabilitada): con active=false el backend
-                                // ni siquiera deja iniciar sesión.
-                                final isApproved = DOVIAAPIAuthContextGroup
-                                            .signInNEWCall
-                                            .verified(
-                                                _model.apiResultbr7?.jsonBody) ==
-                                        true ||
-                                    DOVIAAPIUserContextGroup
-                                            .getAuthenticatedUserProfileCall
-                                            .isVerified(_model
-                                                .apiResultProfile?.jsonBody) ==
-                                        true;
-
-                                final associateRoles = [
-                                  'SHOWING_AGENT',
-                                  'OPERATIVE_LISTER',
-                                  'LISTER_HQ',
-                                  'HOME_ASSOCIATE',
-                                  // Asociado tipo Empresa: mismo contexto Dovia
-                                  // Home, pero su panel es el pipeline de
-                                  // cotizaciones y no la bolsa de trabajos.
-                                  'HOME_ASSOCIATE_COMPANY',
-                                  'LEGAL_ASSOCIATE',
-                                  'LEGAL_OFFICER',
-                                  'HQ_ADMIN',
-                                ];
-
-                                if (!context.mounted) return;
-
-                                // Registro a medias: se retoma el paso que
-                                // falta en vez de entrar al home.
-                                final signInBody =
-                                    _model.apiResultbr7?.jsonBody ?? '';
-                                final roleSelected = DOVIAAPIAuthContextGroup
-                                    .signInNEWCall
-                                    .isRoleSelected(signInBody);
-                                if (roleSelected == false) {
-                                  await RegistrationProgress.set(
-                                      RegistrationProgress.idAndTerms);
-                                  RegistrationProgress.resumedAfterRestart =
-                                      true;
-                                  if (!context.mounted) return;
-                                  context.goNamed(Datos2Widget.routeName);
-                                  return;
-                                }
-                                if (associateRoles.contains(userRole)) {
-                                  final profileDone = DOVIAAPIAuthContextGroup
-                                      .signInNEWCall
-                                      .isAssociateProfileComplete(signInBody);
-                                  final verified = DOVIAAPIAuthContextGroup
-                                      .signInNEWCall
-                                      .verified(signInBody);
-                                  final submitted = await RegistrationProgress
-                                      .associateSubmitted(currentUserUid);
-                                  if (!context.mounted) return;
-                                  if (RegistrationProgress.step ==
-                                          RegistrationProgress.associateForm ||
-                                      (profileDone == false &&
-                                          verified != true &&
-                                          !submitted)) {
-                                    FFAppState().UserRole = userRole ?? '';
-                                    await RegistrationProgress.set(
-                                        RegistrationProgress.associateForm);
-                                    if (!context.mounted) return;
-                                    context
-                                        .goNamed(FormAssociateWidget.routeName);
-                                    return;
-                                  }
-                                }
-                                await RegistrationProgress.clear();
-                                if (!context.mounted) return;
-
-                                if (associateRoles.contains(userRole)) {
-                                  if (!isApproved) {
-                                    // Pendiente de aprobación: la sesión queda
-                                    // abierta y se muestra "solicitud en
-                                    // revisión". Antes se cerraba la sesión y
-                                    // la app volvía al login cada vez.
-                                    FFAppState().UserRole =
-                                        userRole ?? FFAppState().UserRole;
-                                    await RegistrationProgress.set(
-                                        RegistrationProgress.pendingReview);
-                                    if (!context.mounted) return;
-                                    context.goNamed(
-                                        SolicitudEnRevisionWidget.routeName);
-                                  } else {
-                                    // Approved — route to role-specific home
-                                    FFAppState().UserRole =
-                                        userRole ?? 'HOME_ASSOCIATE';
-                                    if (userRole == 'SHOWING_AGENT') {
-                                      context.pushNamedAuth(
-                                          SHOWINGHomeWidget.routeName,
-                                          context.mounted);
-                                    } else if (userRole == 'OPERATIVE_LISTER') {
-                                      context.pushNamedAuth(
-                                          OPERATIVELISTINGHomeWidget.routeName,
-                                          context.mounted);
-                                    } else if (userRole == 'LISTER_HQ') {
-                                      context.pushNamedAuth(
-                                          LISTINGHQHomeWidget.routeName,
-                                          context.mounted);
-                                    } else if (userRole == 'LEGAL_OFFICER') {
-                                      // Legal HQ audita y supervisa: su panel es
-                                      // el tablero de expedientes, no la bolsa
-                                      // de trabajo del asociado.
-                                      context.pushNamedAuth(
-                                          LEGALHQHomeWidget.routeName,
-                                          context.mounted);
-                                    } else if (userRole == 'LEGAL_ASSOCIATE') {
-                                      context.pushNamedAuth(
-                                          LegalAssociateHomeWidget.routeName,
-                                          context.mounted);
-                                    } else if (userRole ==
-                                        'HOME_ASSOCIATE_COMPANY') {
-                                      // La empresa no tiene bolsa de trabajos:
-                                      // su panel es el pipeline de cotizaciones.
-                                      context.pushNamedAuth(
-                                          DHASSOCIATEEmpresaHomePageWidget
-                                              .routeName,
-                                          context.mounted);
-                                    } else {
-                                      // HOME_ASSOCIATE / HQ_ADMIN
-                                      context.pushNamedAuth(
-                                          DHASSOCIATEHomePageWidget.routeName,
-                                          context.mounted);
-                                    }
-                                  }
-                                } else {
-                                  FFAppState().UserRole = 'CLIENT';
-                                  context.pushNamedAuth(
-                                      DOVIACLIENTHomePageWidget.routeName,
-                                      context.mounted);
-                                }
-                              } else {
-                                // Error en texto rojo bajo el form, sin dialog con el JSON.
-                                final status =
-                                    _model.apiResultbr7?.statusCode ?? 0;
-                                // 403 USER_DISABLED: cuenta deshabilitada o
-                                // suspendida. Antes caía en el mensaje de
-                                // "intenta en unos minutos", que no se arregla
-                                // esperando.
-                                _model.signInError = status == 403
-                                    ? 'Tu cuenta está deshabilitada o suspendida.\nSi crees que es un error, contacta a soporte.'
-                                    : (status == 400 ||
-                                            status == 401 ||
-                                            status == 404)
-                                        ? 'Correo o contraseña incorrectos.\nPor favor, verifica tus datos e Inténtalo nuevamente.'
-                                        : 'No pudimos iniciar sesión. Intenta de nuevo en unos minutos.';
-                                _model.invalidMailOrPassword = true;
-                                safeSetState(() {});
-                              }
-                            }
-
-                            safeSetState(() {});
-                          },
-                          text: 'Inicia sesión',
-                          options: FFButtonOptions(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            height: 42.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                20.0, 10.0, 20.0, 10.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: const Color(0xFF007376),
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
-                                  ),
-                                  color: Colors.white,
-                                  fontSize: 15.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 16.0, 0.0, 0.0),
-                        child: Text(
-                          'O inicia con',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.inter(
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 14.0, 0.0, 0.0),
-                        child: Container(
-                          width: MediaQuery.sizeOf(context).width * 1.0,
-                          height: 46.6,
-                          decoration: const BoxDecoration(),
-                          child: Align(
-                            alignment: const AlignmentDirectional(0.0, -1.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 0.0, 6.0, 0.0),
-                                    child: Container(
-                                      height: 42.0,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF4F4F4),
-                                        borderRadius:
-                                            BorderRadius.circular(13.0),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(0.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/AppleLogo.svg',
-                                          width: 19.0,
-                                          height: 19.0,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            6.0, 0.0, 6.0, 0.0),
-                                    child: Container(
-                                      height: 42.0,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF4F4F4),
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/GoogleLogo.svg',
-                                          width: 19.0,
-                                          height: 19.0,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            6.0, 0.0, 0.0, 0.0),
-                                    child: Container(
-                                      height: 42.0,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF4F4F4),
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(0.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/FacebookLogo.svg',
-                                          width: 19.0,
-                                          height: 19.0,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            0.0, 20.0, 0.0, 32.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '¿Todavía no tienes cuenta?',
-                              style: GoogleFonts.publicSans(
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            const SizedBox(height: 4.0),
-                            _footerLink(
-                              'Regístrate como usuario',
-                              () {
-                                PendingAssociateRole.clear();
-                                context
-                                    .pushNamed(CreateAccountWidget.routeName);
                               },
                             ),
-                            _footerDivider(),
-                            _footerLink('Ingresa como visita', () {
-                              FFAppState().UserRole = Roles.VISITOR.name;
-                              context
-                                  .goNamed(DOVIACLIENTHomePageWidget.routeName);
-                            }),
-                            _footerDivider(),
-                            _footerLink(
-                              'Regístrate como asociado',
-                              () => context
-                                  .pushNamed(ElegirRolAsociadoWidget.routeName),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 20.0, 0.0, 0.0),
+                              child: FFButtonWidget(
+                                onPressed: () async {
+                                  _model.invalidMailOrPassword = false;
+                                  safeSetState(() {});
+                                  _model.resultForm = true;
+                                  if (_model.formKey.currentState == null ||
+                                      !_model.formKey.currentState!
+                                          .validate()) {
+                                    _model.resultForm = false;
+                                  }
+                                  if (_model.resultForm!) {
+                                    _model.apiResultbr7 =
+                                        await DOVIAAPIAuthContextGroup
+                                            .signInNEWCall
+                                            .call(
+                                      email: _model
+                                          .correoInputTextController.text
+                                          .trim(),
+                                      password: _model
+                                          .passwordInputTextController.text,
+                                    );
+
+                                    if ((_model.apiResultbr7?.succeeded ??
+                                        true)) {
+                                      // El inicio de sesión se apila sobre esta
+                                      // pantalla, que sigue viva: sin esto, al
+                                      // cerrar sesión volvía con el correo y la
+                                      // contraseña del usuario anterior escritos.
+                                      TextInput.finishAutofillContext();
+                                      final signedInEmail = _model
+                                          .correoInputTextController.text
+                                          .trim();
+                                      _model.correoInputTextController?.clear();
+                                      _model.passwordInputTextController
+                                          ?.clear();
+                                      final idToken = DOVIAAPIAuthContextGroup
+                                          .signInNEWCall
+                                          .idToken(
+                                        (_model.apiResultbr7?.jsonBody ?? ''),
+                                      );
+                                      FFAppState().UserEmail = signedInEmail;
+                                      if (!context.mounted) return;
+                                      GoRouter.of(context).prepareAuthEvent();
+                                      // Sin el uid, `currentUserUid` quedaba vacío:
+                                      // fallaba la subida de documentos del registro
+                                      // de asociado y todo lo que se guarda por
+                                      // usuario se mezclaba entre cuentas.
+                                      await authManager.signIn(
+                                        authenticationToken: idToken,
+                                        refreshToken: DOVIAAPIAuthContextGroup
+                                            .signInNEWCall
+                                            .refreshToken(
+                                          (_model.apiResultbr7?.jsonBody ?? ''),
+                                        ),
+                                        tokenExpiration: tokenExpirationFrom(
+                                          DOVIAAPIAuthContextGroup.signInNEWCall
+                                              .expiresIn(_model
+                                                  .apiResultbr7?.jsonBody),
+                                        ),
+                                        authUid: DOVIAAPIAuthContextGroup
+                                            .signInNEWCall
+                                            .userId(
+                                                _model.apiResultbr7?.jsonBody),
+                                      );
+
+                                      _model.apiResultProfile =
+                                          await DOVIAAPIUserContextGroup
+                                              .getAuthenticatedUserProfileCall
+                                              .call(
+                                        authToken: idToken,
+                                      );
+
+                                      // Respaldo por si el sign-in no trae el id.
+                                      final profileUid =
+                                          DOVIAAPIUserContextGroup
+                                              .getAuthenticatedUserProfileCall
+                                              .userId(_model
+                                                  .apiResultProfile?.jsonBody);
+                                      if ((authManager.uid ?? '').isEmpty &&
+                                          profileUid != null &&
+                                          profileUid.isNotEmpty) {
+                                        authManager.updateAuthUserData(
+                                          authenticationToken:
+                                              authManager.authenticationToken,
+                                          refreshToken:
+                                              authManager.refreshToken,
+                                          tokenExpiration:
+                                              authManager.tokenExpiration,
+                                          authUid: profileUid,
+                                        );
+                                      }
+
+                                      final userRole = DOVIAAPIUserContextGroup
+                                          .getAuthenticatedUserProfileCall
+                                          .userRole(
+                                        (_model.apiResultProfile?.jsonBody ??
+                                            ''),
+                                      );
+                                      // La aprobación del asociado es `verified`:
+                                      // select-role lo deja en false y HQ Admin lo
+                                      // pasa a true. `active` es otra cosa (cuenta
+                                      // deshabilitada): con active=false el backend
+                                      // ni siquiera deja iniciar sesión.
+                                      final isApproved = DOVIAAPIAuthContextGroup
+                                                  .signInNEWCall
+                                                  .verified(_model.apiResultbr7
+                                                      ?.jsonBody) ==
+                                              true ||
+                                          DOVIAAPIUserContextGroup
+                                                  .getAuthenticatedUserProfileCall
+                                                  .isVerified(_model
+                                                      .apiResultProfile
+                                                      ?.jsonBody) ==
+                                              true;
+
+                                      final associateRoles = [
+                                        'SHOWING_AGENT',
+                                        'OPERATIVE_LISTER',
+                                        'LISTER_HQ',
+                                        'HOME_ASSOCIATE',
+                                        // Asociado tipo Empresa: mismo contexto Dovia
+                                        // Home, pero su panel es el pipeline de
+                                        // cotizaciones y no la bolsa de trabajos.
+                                        'HOME_ASSOCIATE_COMPANY',
+                                        'LEGAL_ASSOCIATE',
+                                        'LEGAL_OFFICER',
+                                        'HQ_ADMIN',
+                                      ];
+
+                                      if (!context.mounted) return;
+
+                                      // Registro a medias: se retoma el paso que
+                                      // falta en vez de entrar al home.
+                                      final signInBody =
+                                          _model.apiResultbr7?.jsonBody ?? '';
+                                      final roleSelected =
+                                          DOVIAAPIAuthContextGroup.signInNEWCall
+                                              .isRoleSelected(signInBody);
+                                      if (roleSelected == false) {
+                                        await RegistrationProgress.set(
+                                            RegistrationProgress.idAndTerms);
+                                        RegistrationProgress
+                                            .resumedAfterRestart = true;
+                                        if (!context.mounted) return;
+                                        context.goNamed(Datos2Widget.routeName);
+                                        return;
+                                      }
+                                      if (associateRoles.contains(userRole)) {
+                                        final profileDone =
+                                            DOVIAAPIAuthContextGroup
+                                                .signInNEWCall
+                                                .isAssociateProfileComplete(
+                                                    signInBody);
+                                        final verified =
+                                            DOVIAAPIAuthContextGroup
+                                                .signInNEWCall
+                                                .verified(signInBody);
+                                        // Ya envió el formulario si lo dice el
+                                        // perfil del backend (vale en
+                                        // cualquier teléfono) o la marca local.
+                                        final submitted = RegistrationProgress
+                                                .associateFormSentInProfile(
+                                                    _model.apiResultProfile
+                                                        ?.jsonBody) ||
+                                            await RegistrationProgress
+                                                .associateSubmitted(
+                                                    currentUserUid);
+                                        if (!context.mounted) return;
+                                        if (RegistrationProgress.step ==
+                                                RegistrationProgress
+                                                    .associateForm ||
+                                            (profileDone == false &&
+                                                verified != true &&
+                                                !submitted)) {
+                                          FFAppState().UserRole =
+                                              userRole ?? '';
+                                          await RegistrationProgress.set(
+                                              RegistrationProgress
+                                                  .associateForm);
+                                          if (!context.mounted) return;
+                                          context.goNamed(
+                                              FormAssociateWidget.routeName);
+                                          return;
+                                        }
+                                      }
+                                      await RegistrationProgress.clear();
+                                      if (!context.mounted) return;
+
+                                      if (associateRoles.contains(userRole)) {
+                                        if (!isApproved) {
+                                          // Pendiente de aprobación: la sesión queda
+                                          // abierta y se muestra "solicitud en
+                                          // revisión". Antes se cerraba la sesión y
+                                          // la app volvía al login cada vez.
+                                          FFAppState().UserRole =
+                                              userRole ?? FFAppState().UserRole;
+                                          await RegistrationProgress.set(
+                                              RegistrationProgress
+                                                  .pendingReview);
+                                          if (!context.mounted) return;
+                                          context.goNamed(
+                                              SolicitudEnRevisionWidget
+                                                  .routeName);
+                                        } else {
+                                          // Approved — route to role-specific home
+                                          FFAppState().UserRole =
+                                              userRole ?? 'HOME_ASSOCIATE';
+                                          if (userRole == 'SHOWING_AGENT') {
+                                            context.pushNamedAuth(
+                                                SHOWINGHomeWidget.routeName,
+                                                context.mounted);
+                                          } else if (userRole ==
+                                              'OPERATIVE_LISTER') {
+                                            context.pushNamedAuth(
+                                                OPERATIVELISTINGHomeWidget
+                                                    .routeName,
+                                                context.mounted);
+                                          } else if (userRole == 'LISTER_HQ') {
+                                            context.pushNamedAuth(
+                                                LISTINGHQHomeWidget.routeName,
+                                                context.mounted);
+                                          } else if (userRole ==
+                                              'LEGAL_OFFICER') {
+                                            // Legal HQ audita y supervisa: su panel es
+                                            // el tablero de expedientes, no la bolsa
+                                            // de trabajo del asociado.
+                                            context.pushNamedAuth(
+                                                LEGALHQHomeWidget.routeName,
+                                                context.mounted);
+                                          } else if (userRole ==
+                                              'LEGAL_ASSOCIATE') {
+                                            context.pushNamedAuth(
+                                                LegalAssociateHomeWidget
+                                                    .routeName,
+                                                context.mounted);
+                                          } else if (userRole ==
+                                              'HOME_ASSOCIATE_COMPANY') {
+                                            // La empresa no tiene bolsa de trabajos:
+                                            // su panel es el pipeline de cotizaciones.
+                                            context.pushNamedAuth(
+                                                DHASSOCIATEEmpresaHomePageWidget
+                                                    .routeName,
+                                                context.mounted);
+                                          } else {
+                                            // HOME_ASSOCIATE / HQ_ADMIN
+                                            context.pushNamedAuth(
+                                                DHASSOCIATEHomePageWidget
+                                                    .routeName,
+                                                context.mounted);
+                                          }
+                                        }
+                                      } else {
+                                        FFAppState().UserRole = 'CLIENT';
+                                        context.pushNamedAuth(
+                                            DOVIACLIENTHomePageWidget.routeName,
+                                            context.mounted);
+                                      }
+                                    } else {
+                                      // Error en texto rojo bajo el form, sin dialog con el JSON.
+                                      final status =
+                                          _model.apiResultbr7?.statusCode ?? 0;
+                                      // 403 USER_DISABLED: cuenta deshabilitada o
+                                      // suspendida. Antes caía en el mensaje de
+                                      // "intenta en unos minutos", que no se arregla
+                                      // esperando.
+                                      _model.signInError = status == 403
+                                          ? 'Tu cuenta está deshabilitada o suspendida.\nSi crees que es un error, contacta a soporte.'
+                                          : (status == 400 ||
+                                                  status == 401 ||
+                                                  status == 404)
+                                              ? 'Correo o contraseña incorrectos.\nPor favor, verifica tus datos e Inténtalo nuevamente.'
+                                              : 'No pudimos iniciar sesión. Intenta de nuevo en unos minutos.';
+                                      _model.invalidMailOrPassword = true;
+                                      safeSetState(() {});
+                                    }
+                                  }
+
+                                  safeSetState(() {});
+                                },
+                                text: 'Inicia sesión',
+                                options: FFButtonOptions(
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  height: 42.0,
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      20.0, 10.0, 20.0, 10.0),
+                                  iconPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 0.0, 0.0, 0.0),
+                                  color: const Color(0xFF007376),
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .override(
+                                        font: GoogleFonts.publicSans(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontStyle,
+                                        ),
+                                        color: Colors.white,
+                                        fontSize: 15.0,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontStyle,
+                                      ),
+                                  elevation: 0.0,
+                                  borderRadius: BorderRadius.circular(25.0),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 16.0, 0.0, 0.0),
+                              child: Text(
+                                'O inicia con',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .fontStyle,
+                                    ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 14.0, 0.0, 0.0),
+                              child: Container(
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                height: 46.6,
+                                decoration: const BoxDecoration(),
+                                child: Align(
+                                  alignment:
+                                      const AlignmentDirectional(0.0, -1.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 6.0, 0.0),
+                                          child: Container(
+                                            height: 42.0,
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF4F4F4),
+                                              borderRadius:
+                                                  BorderRadius.circular(13.0),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(0.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/AppleLogo.svg',
+                                                width: 19.0,
+                                                height: 19.0,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(6.0, 0.0, 6.0, 0.0),
+                                          child: Container(
+                                            height: 42.0,
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF4F4F4),
+                                              borderRadius:
+                                                  BorderRadius.circular(16.0),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(5.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/GoogleLogo.svg',
+                                                width: 19.0,
+                                                height: 19.0,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(6.0, 0.0, 0.0, 0.0),
+                                          child: Container(
+                                            height: 42.0,
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF4F4F4),
+                                              borderRadius:
+                                                  BorderRadius.circular(16.0),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(0.0),
+                                              child: SvgPicture.asset(
+                                                'assets/images/FacebookLogo.svg',
+                                                width: 19.0,
+                                                height: 19.0,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Empuja el bloque de registro al fondo cuando sobra
+                            // alto; en pantallas chicas mide cero.
+                            const Spacer(),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 20.0, 0.0, 16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '¿Todavía no tienes cuenta?',
+                                    style: GoogleFonts.publicSans(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4.0),
+                                  _footerLink(
+                                    'Regístrate como usuario',
+                                    () {
+                                      PendingAssociateRole.clear();
+                                      context.pushNamed(
+                                          CreateAccountWidget.routeName);
+                                    },
+                                  ),
+                                  _footerDivider(),
+                                  _footerLink('Ingresa como visita', () {
+                                    FFAppState().UserRole = Roles.VISITOR.name;
+                                    context.goNamed(
+                                        DOVIACLIENTHomePageWidget.routeName);
+                                  }),
+                                  _footerDivider(),
+                                  _footerLink(
+                                    'Regístrate como asociado',
+                                    () => context.pushNamed(
+                                        ElegirRolAsociadoWidget.routeName),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

@@ -118,6 +118,32 @@ void main() {
       expect(homeForRole('SHOWING_AGENT'), isA<SHOWINGHomeWidget>());
     });
 
+    test('el perfil del backend dice si el formulario ya se envió', () {
+      // Vale en cualquier teléfono, sin la marca local. Con esto el login ya
+      // no lo vuelve a mandar al formulario.
+      Map<String, dynamic> profile(Map<String, dynamic> data) => {'data': data};
+      final complete = {
+        'criminalRecordUrl': 'users/u/criminal.pdf',
+        'policeRecordUrl': 'users/u/police.pdf',
+        'utilityBillUrl': 'users/u/bill.pdf',
+        'address': 'Calle 123',
+      };
+      expect(RegistrationProgress.associateFormSentInProfile(profile(complete)),
+          isTrue);
+      for (final key in complete.keys) {
+        final missing = Map<String, dynamic>.from(complete)..remove(key);
+        expect(
+            RegistrationProgress.associateFormSentInProfile(profile(missing)),
+            isFalse,
+            reason: 'falta $key');
+      }
+      expect(
+          RegistrationProgress.associateFormSentInProfile(
+              profile({...complete, 'address': '  '})),
+          isFalse);
+      expect(RegistrationProgress.associateFormSentInProfile(null), isFalse);
+    });
+
     test('el paso pendiente sobrevive a reabrir la app', () async {
       await RegistrationProgress.set(RegistrationProgress.pendingReview);
       // Simula el arranque: se vuelve a leer de SharedPreferences.

@@ -57,6 +57,26 @@ class RegistrationProgress {
           .getBool('$_submittedKey$userId') ??
       false;
 
+  /// El formulario de asociado ya se envió, según el perfil del backend
+  /// (`GET /users/me`): están los documentos y la dirección que sube el
+  /// formulario.
+  ///
+  /// `isAssociateProfileComplete` del sign-in no sirve para esto: además
+  /// exige la zona de trabajo y una cita **confirmada**, así que recién
+  /// enviado sigue en false. Y la marca local de [associateSubmitted] no está
+  /// en otro teléfono (ni si el uid cambió): sin esto, al volver a iniciar
+  /// sesión se lo mandaba otra vez al formulario.
+  static bool associateFormSentInProfile(dynamic profileBody) {
+    if (profileBody is! Map) return false;
+    final data = profileBody['data'];
+    if (data is! Map) return false;
+    bool has(String key) => (data[key]?.toString().trim() ?? '').isNotEmpty;
+    return has('criminalRecordUrl') &&
+        has('policeRecordUrl') &&
+        has('utilityBillUrl') &&
+        has('address');
+  }
+
   /// Registro a medias con el correo ya verificado
   /// (`PASSWORD_RECOVERY_REQUIRED`). El backend no deja reverificar un correo
   /// confirmado, así que se usa el código de recuperación: la pantalla del
