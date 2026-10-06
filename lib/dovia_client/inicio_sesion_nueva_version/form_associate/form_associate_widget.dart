@@ -7,7 +7,6 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -295,11 +294,6 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                                       SolicitudEnRevisionWidget.routeName);
                                 }
                               },
-                              onMapPointSelected:
-                                  (latitude, longitude) async {},
-                              mapWidget: () => DrawMapComponentWidget(
-                                onPointSelected: (latitude, longitude) async {},
-                              ),
                             ),
                           ),
                         ),

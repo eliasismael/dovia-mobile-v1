@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import '/flutter_flow/upload_data.dart';
+import '/flutter_flow/flutter_flow_drop_down.dart';
+import '/flutter_flow/form_field_controller.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/auth/pending_associate_role.dart';
 import '/backend/api_requests/api_manager.dart';
@@ -22,11 +24,9 @@ class DoviaAssociateFormWidget extends StatefulWidget {
 
   final Widget? profileImage;
   final String roleBadgeText;
-  final Widget Function()? mapWidget;
 
   // Callbacks to the parent page (optional — for routing/API calls)
   final VoidCallback? onEnviar;
-  final void Function(double latitude, double longitude)? onMapPointSelected;
 
   const DoviaAssociateFormWidget({
     super.key,
@@ -34,9 +34,7 @@ class DoviaAssociateFormWidget extends StatefulWidget {
     this.height,
     this.profileImage,
     this.roleBadgeText = 'Dovia Showing Associate',
-    this.mapWidget,
     this.onEnviar,
-    this.onMapPointSelected,
   });
 
   @override
@@ -100,24 +98,68 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
       }.entries)
         if (url(e.value) != null) e.key: url(e.value)!,
     };
-    setState(() => _remoteDocs = docs);
+    setState(() {
+      _remoteDocs = docs;
+      _profileZoneId = DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall
+          .workZoneId(res.jsonBody);
+      _applyProfileZone();
+    });
   }
+
+  // ── Zona de trabajo ──────────────────────────────────────────────────────────
+  /// Zonas activas de `GET /users/work-zones`; null mientras se cargan.
+  List<UserWorkZone>? _zones;
+  bool _zonesFailed = false;
+  String? _workZoneId;
+
+  /// La zona que ya tenía guardada (si volvió al formulario).
+  String? _profileZoneId;
+  final _zoneController = FormFieldController<String>(null);
+
+  Future<void> _loadZones() async {
+    setState(() {
+      _zones = null;
+      _zonesFailed = false;
+    });
+    final res = await DOVIAAPIUserContextGroup.getUserWorkZonesCall.call();
+    if (!mounted) return;
+    setState(() {
+      if (res.succeeded) {
+        _zones = UserWorkZone.listFrom(res.jsonBody);
+        _applyProfileZone();
+      } else {
+        _zones = const [];
+        _zonesFailed = true;
+      }
+    });
+  }
+
+  /// Preselecciona la zona guardada, solo si sigue en el catálogo activo.
+  void _applyProfileZone() {
+    final id = _profileZoneId;
+    if (_workZoneId != null || id == null) return;
+    if (_zones?.any((z) => z.id == id) ?? false) {
+      _workZoneId = id;
+      _zoneController.value = id;
+    }
+  }
+
+  /// Se pide elegir una zona cuando hay catálogo. Si no se pudo cargar o
+  /// viene vacío no se bloquea el envío: el backend la toma como opcional.
+  bool get _zoneRequired => _zones == null || _zones!.isNotEmpty;
 
   // ── Profile photo (internal state) ───────────────────────────────────────────
   Uint8List? _profileImageBytes;
 
-  // ── Map coordinates ──────────────────────────────────────────────────────────
-  double? _mapLatitude;
-  double? _mapLongitude;
-
   // ── Form completeness ────────────────────────────────────────────────────────
-  /// Lo único obligatorio según el backend es la cita de primer contacto
-  /// (`scheduledAt`). Datos personales vienen del registro; dirección, foto y
+  /// Lo obligatorio es la cita de primer contacto (`scheduledAt`) y la zona de
+  /// trabajo. Datos personales vienen del registro; dirección, foto y
   /// documentos son opcionales.
   bool get _isFormComplete => _missingFields.isEmpty;
 
   /// Qué falta para poder enviar, en el orden del formulario.
   List<String> get _missingFields => [
+        if (_zoneRequired && _workZoneId == null) 'zona de trabajo',
         if (_fechaEntrevista == null) 'fecha de la entrevista',
         if (_horaEntrevista == null) 'hora de la entrevista',
       ];
@@ -266,13 +308,17 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
 
       if (error == null) {
         final address = _direccionController.text.trim();
-        if (address.isNotEmpty) {
+        final zoneId = _workZoneId;
+        if (address.isNotEmpty || zoneId != null) {
           final res = await DOVIAAPIUserContextGroup.updateUserProfileCall.call(
             userId: userId,
             authToken: token,
-            address: address,
+            address: address.isNotEmpty ? address : null,
+            workZoneId: zoneId,
           );
-          if (!res.succeeded) error = failMsg(res, 'guardar tu dirección');
+          if (!res.succeeded) {
+            error = failMsg(res, 'guardar tu dirección y zona de trabajo');
+          }
         }
       }
 
@@ -310,6 +356,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _loadZones();
       _loadRemoteDocs();
       final idDoc = RegistrationIdDocument.uploaded;
       if (idDoc != null) setState(() => _fileFotografiaId = idDoc);
@@ -362,6 +409,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     _telefonoController.dispose();
     _correoController.dispose();
     _direccionController.dispose();
+    _zoneController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -396,7 +444,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
                 const SizedBox(height: 30),
                 _buildFormFields(),
                 const SizedBox(height: 14),
-                _buildMapSection(),
+                _buildZoneSection(),
                 const SizedBox(height: 30),
                 // Date / time BEFORE documents (as in Figma)
                 _buildDateTimeSection(),
@@ -742,56 +790,63 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     );
   }
 
-  // ── Map ──────────────────────────────────────────────────────────────────────
-  Widget _buildMapSection() {
+  // ── Zona de trabajo ──────────────────────────────────────────────────────────
+  Widget _buildZoneSection() {
+    final zones = _zones;
+    // Sin zonas configuradas en el backend no hay nada que elegir.
+    if (zones != null && zones.isEmpty && !_zonesFailed) {
+      return const SizedBox.shrink();
+    }
+    const infoStyle = TextStyle(
+        fontFamily: 'Public Sans', fontSize: 13, color: Color(0xFF6A6A6A));
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Marca el rango de trabajo que te es accesible o tienes actualmente disponible:',
-          style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: textColor,
-              letterSpacing: 0.28),
-        ),
+        _requiredLabel('Zona de trabajo', required: _zoneRequired),
         const SizedBox(height: 12),
-        AspectRatio(
-          aspectRatio: 1.0,
-          child: Container(
+        if (zones == null)
+          const Text('Cargando zonas…', style: infoStyle)
+        else if (_zonesFailed)
+          Row(
+            children: [
+              const Expanded(
+                child: Text('No pudimos cargar las zonas.', style: infoStyle),
+              ),
+              TextButton(
+                onPressed: _loadZones,
+                child: const Text('Reintentar',
+                    style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontWeight: FontWeight.w600,
+                        color: aquaColor)),
+              ),
+            ],
+          )
+        else
+          FlutterFlowDropDown<String>(
+            controller: _zoneController,
+            options: [for (final z in zones) z.id],
+            optionLabels: [for (final z in zones) z.name],
+            onChanged: (val) => setState(() => _workZoneId = val),
             width: double.infinity,
-            decoration: BoxDecoration(
-                color: inputBg, borderRadius: BorderRadius.circular(10)),
-            clipBehavior: Clip.antiAlias,
-            child: widget.mapWidget?.call() ??
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.map_outlined,
-                          size: 48, color: Colors.grey[400]),
-                      const SizedBox(height: 12),
-                      Text('Mapa',
-                          style: TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 16,
-                              color: Colors.grey[500])),
-                    ],
-                  ),
-                ),
-          ),
-        ),
-        if (_mapLatitude != null && _mapLongitude != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              'Punto: ${_mapLatitude!.toStringAsFixed(5)}, ${_mapLongitude!.toStringAsFixed(5)}',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 11,
-                  color: textColor.withAlpha(178)),
-            ),
+            height: 42,
+            textStyle: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                color: textColor,
+                letterSpacing: 0.28),
+            hintText: 'Selecciona la zona donde trabajarás',
+            icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                color: placeholderColor, size: 24),
+            fillColor: inputBg,
+            elevation: 2,
+            borderColor: Colors.transparent,
+            borderWidth: 0,
+            borderRadius: 10,
+            margin: const EdgeInsetsDirectional.fromSTEB(15, 0, 12, 0),
+            hidesUnderline: true,
+            isSearchable: false,
+            isMultiSelect: false,
           ),
       ],
     );

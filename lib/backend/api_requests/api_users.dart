@@ -19,6 +19,7 @@ class DOVIAAPIUserContextGroup {
   static UploadProfilePictureCall uploadProfilePictureCall =
       UploadProfilePictureCall();
   static UpdateUserProfileCall updateUserProfileCall = UpdateUserProfileCall();
+  static GetUserWorkZonesCall getUserWorkZonesCall = GetUserWorkZonesCall();
   static AdminVerifyUserCall adminVerifyUserCall = AdminVerifyUserCall();
   static GetPerformanceSummaryCall getPerformanceSummaryCall =
       GetPerformanceSummaryCall();
@@ -77,6 +78,56 @@ class GetAuthenticatedUserProfileCall {
         response,
         r'''$.data.fullName.lastname''',
       ));
+
+  /// Zona de trabajo elegida (`workZone: { id, name }`), o null.
+  String? workZoneId(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.data.workZone.id''',
+      ));
+}
+
+/// Zona de trabajo del catálogo (`GET /users/work-zones`).
+class UserWorkZone {
+  const UserWorkZone({required this.id, required this.name});
+
+  final String id;
+  final String name;
+
+  /// Las zonas válidas de la respuesta; ignora las que vienen sin id o
+  /// nombre.
+  static List<UserWorkZone> listFrom(dynamic body) {
+    final data = body is Map ? body['data'] : null;
+    if (data is! List) return const [];
+    return [
+      for (final z in data)
+        if (z is Map &&
+            (z['id']?.toString() ?? '').isNotEmpty &&
+            (z['name']?.toString() ?? '').isNotEmpty)
+          UserWorkZone(id: z['id'].toString(), name: z['name'].toString()),
+    ];
+  }
+}
+
+/// `GET /users/work-zones`: zonas de trabajo activas `{ id, name }[]`.
+/// Pública, sin token.
+class GetUserWorkZonesCall {
+  Future<ApiCallResponse> call() async {
+    final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get User Work Zones',
+      apiUrl: '$baseUrl/users/work-zones',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
 }
 
 class ListUsersByRoleCall {
@@ -254,6 +305,8 @@ class UpdateUserProfileCall {
     String? phoneNumber,
     String? address,
     String? workArea,
+    // Id de `GET /users/work-zones`; el backend resuelve el nombre.
+    String? workZoneId,
   }) async {
     final baseUrl = DOVIAAPIUserContextGroup.getBaseUrl();
 
@@ -268,6 +321,7 @@ class UpdateUserProfileCall {
         'phone': {'countryCode': phoneCountryCode, 'number': phoneNumber},
       if (address != null) 'address': address,
       if (workArea != null) 'workArea': jsonDecode(workArea),
+      if (workZoneId != null) 'workZoneId': workZoneId,
     });
     return ApiManager.instance.makeApiCall(
       callName: 'Update User Profile',

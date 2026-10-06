@@ -188,6 +188,7 @@ class UserRepository extends ChangeNotifier {
     String? phoneNumber,
     String? address,
     String? workArea,
+    String? workZoneId,
   }) async {
     // La sesión manda: el perfil en memoria puede ser de la cuenta anterior
     // si se cerró sesión y se entró (o registró) con otra.
@@ -212,6 +213,7 @@ class UserRepository extends ChangeNotifier {
       phoneNumber: phoneNumber,
       address: address,
       workArea: workArea,
+      workZoneId: workZoneId,
     );
     debugPrint('[Perfil] PATCH /users/$userId -> '
         '${response.statusCode}: ${response.bodyText}');
@@ -264,8 +266,7 @@ class UserRepository extends ChangeNotifier {
     _isLoading = false;
 
     if (!response.succeeded) {
-      final message =
-          getJsonField(response.jsonBody, r'$.message')?.toString();
+      final message = getJsonField(response.jsonBody, r'$.message')?.toString();
       _error = (message != null && message.isNotEmpty)
           ? message
           : 'Error al actualizar preferencias';

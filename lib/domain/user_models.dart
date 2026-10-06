@@ -26,6 +26,10 @@ class UserProfile {
   final String? policeRecordUrl;
   final String? utilityBillUrl;
 
+  // Zona de trabajo elegida (`workZone: { id, name }`), o null.
+  final String? workZoneId;
+  final String? workZoneName;
+
   const UserProfile({
     required this.uid,
     this.email,
@@ -45,6 +49,8 @@ class UserProfile {
     this.criminalRecordUrl,
     this.policeRecordUrl,
     this.utilityBillUrl,
+    this.workZoneId,
+    this.workZoneName,
   });
 
   String get displayName {
@@ -87,6 +93,8 @@ class UserProfile {
     // roles array
     final roles = data['roles'] as List?;
 
+    final workZone = data['workZone'] is Map ? data['workZone'] as Map : null;
+
     // preferences object
     final prefs = data['preferences'] as Map<String, dynamic>?;
 
@@ -128,6 +136,8 @@ class UserProfile {
       criminalRecordUrl: _nonEmpty(data['criminalRecordUrl']),
       policeRecordUrl: _nonEmpty(data['policeRecordUrl']),
       utilityBillUrl: _nonEmpty(data['utilityBillUrl']),
+      workZoneId: _nonEmpty(workZone?['id']),
+      workZoneName: _nonEmpty(workZone?['name']),
     );
   }
 

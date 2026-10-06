@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import '/repositories/user_repository.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/shared_components/draw_map_component/draw_map_component_widget.dart';
+import '/backend/api_requests/api_users.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
 import '/core/result.dart';
 
@@ -89,6 +89,24 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   final _phoneCodeController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   String? _editGender;
+
+  // Zona de trabajo (`GET /users/work-zones`): se carga al editar.
+  List<UserWorkZone>? _zones;
+  bool _zonesFailed = false;
+  String? _editZoneId;
+
+  Future<void> _loadZones() async {
+    setState(() {
+      _zones = null;
+      _zonesFailed = false;
+    });
+    final res = await DOVIAAPIUserContextGroup.getUserWorkZonesCall.call();
+    if (!mounted) return;
+    setState(() {
+      _zonesFailed = !res.succeeded;
+      _zones = res.succeeded ? UserWorkZone.listFrom(res.jsonBody) : const [];
+    });
+  }
 
   // Avatar upload state
   Uint8List? _tempAvatarBytes;
@@ -363,7 +381,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           const SizedBox(height: 14),
           _readonlyField('Teléfono', phone.isEmpty ? '—' : phone),
           const SizedBox(height: 14),
-          _buildPerimetroField(profile),
+          _readonlyField(
+              'Zona de trabajo', profile?.workZoneName ?? 'Sin elegir'),
         ],
       ],
     );
@@ -379,7 +398,9 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     _editGender = const {'MALE', 'FEMALE', 'OTHER'}.contains(profile?.gender)
         ? profile!.gender
         : null;
+    _editZoneId = profile?.workZoneId;
     setState(() => _editingDatos = true);
+    if (_zones == null || _zonesFailed) _loadZones();
   }
 
   List<Widget> _buildDatosEditForm() {
@@ -428,6 +449,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           ),
         ],
       ),
+      const SizedBox(height: 14),
+      ..._buildZoneEditField(),
       const SizedBox(height: 20),
       Row(
         children: [
@@ -469,6 +492,58 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           ),
         ],
       ),
+    ];
+  }
+
+  List<Widget> _buildZoneEditField() {
+    final zones = _zones;
+    // Sin zonas configuradas en el backend no hay nada que elegir.
+    if (zones != null && zones.isEmpty && !_zonesFailed) return const [];
+    const infoStyle = TextStyle(
+        fontFamily: 'Public Sans', fontSize: 13, color: inputPlaceholder);
+    return [
+      _fieldLabel('Zona de trabajo'),
+      const SizedBox(height: 8),
+      if (zones == null)
+        const Text('Cargando zonas…', style: infoStyle)
+      else if (_zonesFailed)
+        Row(
+          children: [
+            const Expanded(
+              child: Text('No pudimos cargar las zonas.', style: infoStyle),
+            ),
+            TextButton(
+              onPressed: _loadZones,
+              child: const Text('Reintentar',
+                  style: TextStyle(
+                      fontFamily: 'Public Sans',
+                      fontWeight: FontWeight.w600,
+                      color: aqua)),
+            ),
+          ],
+        )
+      else
+        Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          decoration: BoxDecoration(
+            color: backgroundGray,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              // Una zona guardada que ya no está activa queda sin elegir.
+              value: zones.any((z) => z.id == _editZoneId) ? _editZoneId : null,
+              isExpanded: true,
+              hint: const Text('Selecciona tu zona'),
+              items: [
+                for (final z in zones)
+                  DropdownMenuItem(value: z.id, child: Text(z.name)),
+              ],
+              onChanged: (v) => setState(() => _editZoneId = v),
+            ),
+          ),
+        ),
     ];
   }
 
@@ -538,6 +613,12 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           lastname: lastname,
           gender: _editGender,
           nationality: nationality.isEmpty ? null : nationality,
+          // Solo si la cambió: omitirla conserva la guardada.
+          workZoneId: _editZoneId != null &&
+                  _editZoneId !=
+                      context.read<UserRepository>().profile?.workZoneId
+              ? _editZoneId
+              : null,
           phoneCountryCode: number.isEmpty ? null : code,
           phoneNumber: number.isEmpty ? null : number,
         );
@@ -569,62 +650,6 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
       default:
         return '—';
     }
-  }
-
-  Widget _buildPerimetroField(profile) {
-    final hasLocation = profile?.latitude != null && profile?.longitude != null;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Tu perímetro',
-          style: TextStyle(
-            fontFamily: 'Public Sans',
-            fontSize: 16,
-            fontWeight: FontWeight.normal,
-            color: textPrimary,
-            letterSpacing: 0.32,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: SizedBox(
-            width: double.infinity,
-            height: 155,
-            child: hasLocation
-                ? DrawMapComponentWidget(
-                    height: 155,
-                    initialLatitude: profile.latitude!,
-                    initialLongitude: profile.longitude!,
-                    singlePointMode: true,
-                    interactive: false,
-                  )
-                : Container(
-                    color: backgroundGray,
-                    child: const Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.location_off_outlined,
-                              size: 36, color: inputPlaceholder),
-                          SizedBox(height: 6),
-                          Text(
-                            'Ubicación no disponible',
-                            style: TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 13,
-                              color: inputPlaceholder,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-          ),
-        ),
-      ],
-    );
   }
 
   // ─── Ganancias Card (read-only metrics) ───────────────────────────────────────
@@ -1127,8 +1152,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           // Antes se mostraba el éxito aunque el backend hubiera fallado.
           if (!deleted) {
             ScaffoldMessenger.of(this.context).showSnackBar(const SnackBar(
-                content:
-                    Text('No pudimos eliminar tu cuenta. Inténtalo de nuevo.')));
+                content: Text(
+                    'No pudimos eliminar tu cuenta. Inténtalo de nuevo.')));
             return;
           }
           // `context` acá es el del diálogo del motivo, que ya se cerró: el
