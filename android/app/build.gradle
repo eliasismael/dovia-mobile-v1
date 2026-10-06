@@ -61,6 +61,23 @@ android {
         versionName flutterVersionName
     }
 
+    // Un flavor por entorno: se instalan juntas en el mismo celular y se
+    // distinguen por el nombre. La URL de la API la define el build
+    // (--dart-define=API_BASE_URL, ver tools/build_apks.ps1).
+    flavorDimensions "env"
+    productFlavors {
+        dev {
+            dimension "env"
+            applicationIdSuffix ".dev"
+            resValue "string", "app_name", "DOVIA Dev"
+        }
+        staging {
+            dimension "env"
+            applicationIdSuffix ".stg"
+            resValue "string", "app_name", "DOVIA Staging"
+        }
+    }
+
    signingConfigs {
        release {
            keyAlias keystoreProperties['keyAlias']

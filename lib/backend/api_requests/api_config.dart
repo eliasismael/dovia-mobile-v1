@@ -11,3 +11,12 @@ const String _envApiBaseUrl = String.fromEnvironment('API_BASE_URL');
 
 const String kApiBaseUrl =
     _envApiBaseUrl == '' ? _defaultApiBaseUrl : _envApiBaseUrl;
+
+/// Entorno al que apunta este build, deducido de la URL de la API para que no
+/// pueda quedar desfasado: 'DEV', 'STAGING' o '' (producción u otro).
+String get kApiEnvLabel {
+  final url = kApiBaseUrl.toLowerCase();
+  if (url.endsWith('/dev')) return 'DEV';
+  if (url.endsWith('/staging')) return 'STAGING';
+  return '';
+}

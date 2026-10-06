@@ -106,7 +106,8 @@
       "Bash(grep -v \"^.*:///\")",
       "PowerShell(git stash pop)",
       "PowerShell(git checkout -- .claude/settings.local.json)",
-      "PowerShell(flutter test test/dh_client_planes_test.dart 2>&1)"
+      "PowerShell(flutter test test/dh_client_planes_test.dart 2>&1)",
+      "PowerShell(flutter test 2>&1)"
     ]
   }
 }
