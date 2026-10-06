@@ -135,6 +135,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         ),
       );
       if (response.succeeded) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Documento cargado correctamente.')),
         );
@@ -143,6 +144,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         debugPrint(
             '[HQ Subir documento] ${response.statusCode}: ${response.bodyText}');
         // POST /legal-processes/{id}/documents es solo para LEGAL_ASSOCIATE.
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(response.statusCode == 403
@@ -177,11 +179,13 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         ),
       );
       if (response.succeeded) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Documento reemplazado exitosamente.')),
         );
         _fetchProcessData();
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error al reemplazar el documento.')),
         );

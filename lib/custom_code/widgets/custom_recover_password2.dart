@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 // Importa este componente para que el modal de éxito funcione, o cámbialo por el tuyo.
 import '/dovia_client/recover_password/password_successfully_changed/password_successfully_changed_widget.dart';
 import '/backend/api_requests/api_calls.dart';
+import '/core/api_error.dart';
+import '/index.dart' show SignInWidget;
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -156,7 +158,8 @@ class _CustomRecoverPassword2State extends State<CustomRecoverPassword2> {
     await Future.delayed(const Duration(seconds: 3));
     if (mounted) {
       Navigator.of(context, rootNavigator: true).pop();
-      context.pushNamed('SignIn'); // Nombre exacto de la ruta del Login
+      // go y no push: con push, "atrás" desde el login volvía a esta pantalla.
+      context.goNamed(SignInWidget.routeName);
     }
   }
 
@@ -179,24 +182,66 @@ class _CustomRecoverPassword2State extends State<CustomRecoverPassword2> {
       confirmNewPassword: confirm,
     );
 
+    if (!mounted) return;
     if (result.succeeded) {
       await _showSuccessModal();
-    } else {
-      safeSetState(() {
-        showPinError = true;
-      });
-      await _showInvalidOtpModal();
-      safeSetState(() {
-        showPinError = false;
-        pinCodeController?.clear();
-      });
+      return;
     }
+
+    // Solo un código incorrecto o vencido se muestra como "código inválido" y
+    // borra el PIN. Sin conexión, o si el backend rechaza la contraseña, el
+    // código sigue sirviendo: se explica el motivo y se deja lo escrito.
+    if (!_isCodeError(result)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(apiErrorMessage(
+            result, 'No pudimos cambiar tu contraseña. Inténtalo de nuevo.')),
+      ));
+      return;
+    }
+    safeSetState(() => showPinError = true);
+    await _showInvalidOtpModal();
+    safeSetState(() {
+      showPinError = false;
+      pinCodeController?.clear();
+    });
   }
+
+  bool _isCodeError(ApiCallResponse result) {
+    if (result.statusCode == -1 || result.statusCode >= 500) return false;
+    final message = apiBodyMessage(result.jsonBody);
+    // Sin mensaje, un 4xx se sigue tratando como código inválido (lo más
+    // común en este paso).
+    if (message == null) return true;
+    return RegExp(r'code|c[oó]digo|mismatch|expired|venci', caseSensitive: false)
+        .hasMatch(message);
+  }
+
+  /// Momento a partir del cual se puede volver a pedir el código.
+  DateTime? _resendAvailableAt;
 
   Future<void> _onResendCode() async {
     if (widget.email == null || widget.email!.isEmpty) return;
-    await DOVIAAPIAuthContextGroup.forgotPasswordNEWCall
+    final now = DateTime.now();
+    if (_resendAvailableAt != null && now.isBefore(_resendAvailableAt!)) {
+      final seconds = _resendAvailableAt!.difference(now).inSeconds + 1;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Espera $seconds s para pedir otro código.'),
+      ));
+      return;
+    }
+    _resendAvailableAt = now.add(const Duration(seconds: 30));
+    final res = await DOVIAAPIAuthContextGroup.forgotPasswordNEWCall
         .call(email: widget.email!);
+    if (!mounted) return;
+    // Antes se confirmaba el reenvío aunque la llamada hubiera fallado.
+    if (!res.succeeded) {
+      _resendAvailableAt = null;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(apiErrorMessage(
+            res, 'No pudimos reenviar el código. Inténtalo de nuevo.')),
+      ));
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Se reenvió el código a ${widget.email}',

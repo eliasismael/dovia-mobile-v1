@@ -208,6 +208,7 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                 debugPrint(
                                     '[HQ Publicar] POST /visits/${widget.visitId}/publish → ${res.statusCode}: ${res.bodyText}');
                                 if (!res.succeeded) {
+                                  if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(

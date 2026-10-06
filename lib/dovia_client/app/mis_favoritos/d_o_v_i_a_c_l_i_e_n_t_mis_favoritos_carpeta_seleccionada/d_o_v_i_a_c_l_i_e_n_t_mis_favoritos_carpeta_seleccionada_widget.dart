@@ -1,4 +1,5 @@
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
+import '/shared_components/error_state/error_state_widget.dart';
 import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -185,6 +186,12 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                           }
                           final listViewGetFavoritesInFolderResponse =
                               snapshot.data!;
+                          // Sin conexión o con el servidor caído se avisa y se deja
+                          // reintentar, en vez de mostrar la lista vacía.
+                          if (isRetryableLoadError(listViewGetFavoritesInFolderResponse)) {
+                            return ErrorStateWidget.fromResponse(listViewGetFavoritesInFolderResponse,
+                                onRetry: () => safeSetState(() {}));
+                          }
 
                           return Builder(
                             builder: (context) {

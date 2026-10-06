@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 
 // CUSTOM RECOVER PASSWORD 1
 import '/backend/api_requests/api_calls.dart';
+import '/core/api_error.dart';
+import '/index.dart' show RecoverPasswordStep2Widget;
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +44,7 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
   }
 
   void _onEmailChanged() {
-    final val = correoTextController!.text;
+    final val = correoTextController!.text.trim();
     final isValid =
         val.isNotEmpty && RegExp(kTextValidatorEmailRegex).hasMatch(val);
     if (isValid != isEmailValid) {
@@ -388,6 +390,7 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                                   .primaryText,
                                           enableInteractiveSelection: true,
                                           validator: (val) {
+                                            val = val?.trim();
                                             if (val == null || val.isEmpty) {
                                               return 'Ingresa un correo electrónico';
                                             }
@@ -415,18 +418,34 @@ class _CustomRecoverPassword1State extends State<CustomRecoverPassword1> {
                                                       .validate()) {
                                                 return;
                                               }
-                                              await DOVIAAPIAuthContextGroup
-                                                  .forgotPasswordNEWCall
-                                                  .call(
-                                                email:
-                                                    correoTextController!.text,
-                                              );
+                                              final email =
+                                                  correoTextController!.text
+                                                      .trim();
+                                              final res =
+                                                  await DOVIAAPIAuthContextGroup
+                                                      .forgotPasswordNEWCall
+                                                      .call(email: email);
+                                              if (!context.mounted) return;
+                                              // Antes se pasaba al paso 2
+                                              // aunque el correo no hubiera
+                                              // salido, y el usuario esperaba
+                                              // un código que nunca llegaba.
+                                              if (!res.succeeded) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                  content: Text(apiErrorMessage(
+                                                      res,
+                                                      'No pudimos enviarte el código. Inténtalo de nuevo.')),
+                                                ));
+                                                return;
+                                              }
 
                                               context.pushNamed(
-                                                'RecoverPasswordStep2', // CAMBIA ESTO SI EL NOMBRE DE TU PÁGINA CAMBIA
+                                                RecoverPasswordStep2Widget
+                                                    .routeName,
                                                 queryParameters: {
                                                   'email': serializeParam(
-                                                    correoTextController!.text,
+                                                    email,
                                                     ParamType.String,
                                                   ),
                                                 },

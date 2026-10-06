@@ -1046,7 +1046,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
         builder: (dialogContext) {
           Future.delayed(const Duration(milliseconds: 1500), () {
             // Check if still mounted to avoid popping something else
+            if (!dialogContext.mounted) return;
             if (mounted && Navigator.of(dialogContext).canPop()) {
+              if (!dialogContext.mounted) return;
               Navigator.of(dialogContext).pop();
             }
           });

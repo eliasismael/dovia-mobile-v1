@@ -52,6 +52,24 @@ class _DOVIACLIENTOfertaCompraWidgetState
   final _cashPaymentTimeController = FormFieldController<String>(null);
   late final Future<ApiCallResponse> _propertyRequest;
 
+  /// En una oferta "ambos", la renta ya se creó en un intento anterior.
+  bool _rentOfferSent = false;
+
+  /// Cierra esta pantalla y, si se llegó desde la de selección, también esa.
+  /// El router se toma antes del primer pop: después este `context` ya no
+  /// está montado y el segundo pop no se podía hacer con él.
+  void _closeOfferScreen() {
+    final router = GoRouter.of(context);
+    for (var i = 0; i < (widget.fromSelectionScreen ? 2 : 1); i++) {
+      if (router.canPop()) {
+        router.pop();
+      } else {
+        router.go('/');
+        break;
+      }
+    }
+  }
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -4997,7 +5015,10 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 // Handle BOTH (ambos) offer type: submit rent + purchase
                                                 if (widget.offerType ==
                                                     'ambos') {
-                                                  // 1. Submit RENT offer
+                                                  // 1. Submit RENT offer. Si ya salió en un intento
+                                                  // anterior (falló solo la compra), no se reenvía:
+                                                  // reintentar creaba otra oferta de renta.
+                                                  if (!_rentOfferSent) {
                                                   final rentResult =
                                                       await DOVIAAPIOfferContextGroup
                                                           .createOfferRENTIndividualCall
@@ -5056,6 +5077,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   );
                                                   if (!mounted) return;
                                                   if (!rentResult.succeeded) {
+                                                    if (!context.mounted) return;
                                                     ScaffoldMessenger.of(
                                                             context)
                                                         .showSnackBar(
@@ -5064,6 +5086,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                               'Error al enviar la oferta de renta. Inténtalo de nuevo.')),
                                                     );
                                                     return;
+                                                  }
+                                                  _rentOfferSent = true;
                                                   }
 
                                                   // 2. Submit PURCHASE offer
@@ -5217,17 +5241,21 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   if (!mounted) return;
                                                   if (!purchaseResult
                                                       .succeeded) {
+                                                    if (!context.mounted) return;
                                                     ScaffoldMessenger.of(
                                                             context)
                                                         .showSnackBar(
                                                       const SnackBar(
+                                                          duration: Duration(
+                                                              seconds: 6),
                                                           content: Text(
-                                                              'Error al enviar la oferta de compra. Inténtalo de nuevo.')),
+                                                              'Tu oferta de renta ya se envió, pero la de compra no. Toca Aceptar para reintentar solo la compra (la renta no se vuelve a enviar).')),
                                                     );
                                                     return;
                                                   }
 
                                                   // 3. Show success modal
+                                                  if (!context.mounted) return;
                                                   showGeneralDialog(
                                                     context: context,
                                                     barrierDismissible: true,
@@ -5274,10 +5302,12 @@ class _DOVIACLIENTOfertaCompraWidgetState
 
                                                   // 4. Pop past Ofertar screen to property profile if needed
                                                   if (mounted) {
+                                                    if (!context.mounted) return;
                                                     context
                                                         .safePop(); // pop OfertaCompra
                                                     if (widget
                                                         .fromSelectionScreen) {
+                                                      if (!context.mounted) return;
                                                       context
                                                           .safePop(); // pop Ofertar selection screen
                                                     }
@@ -5351,6 +5381,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   if (!mounted) return;
 
                                                   if (!(rentResult.succeeded)) {
+                                                    if (!context.mounted) return;
                                                     ScaffoldMessenger.of(
                                                             context)
                                                         .showSnackBar(
@@ -5363,6 +5394,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   }
 
                                                   // Show success modal
+                                                  if (!context.mounted) return;
                                                   showGeneralDialog(
                                                     context: context,
                                                     barrierDismissible: true,
@@ -5408,11 +5440,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                           milliseconds: 2100));
 
                                                   if (mounted) {
-                                                    context.safePop();
-                                                    if (widget
-                                                        .fromSelectionScreen) {
-                                                      context.safePop();
-                                                    }
+                                                    _closeOfferScreen();
                                                   }
                                                   return;
                                                 }
@@ -5627,6 +5655,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                   }
                                                 }
 
+                                                if (!context.mounted) return;
                                                 showGeneralDialog(
                                                   context: context,
                                                   barrierDismissible: true,
@@ -5676,6 +5705,7 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                 // Navigate back to the property profile or transition to Rent
                                                 if (mounted) {
                                                   if (widget.isAmbosFlow) {
+                                                    if (!context.mounted) return;
                                                     context
                                                         .pushReplacementNamed(
                                                       DOVIACLIENTOfertaCompraWidget
@@ -5704,11 +5734,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                       }.withoutNulls,
                                                     );
                                                   } else {
-                                                    context.safePop();
-                                                    if (widget
-                                                        .fromSelectionScreen) {
-                                                      context.safePop();
-                                                    }
+                                                    if (!mounted) return;
+                                                    _closeOfferScreen();
                                                   }
                                                 }
 

@@ -1,4 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
+import '/auth/sign_out.dart';
 import '/backend/api_requests/api_users.dart';
 import '/dovia_client/app/ajustes/unsuscribe_modal_1/unsuscribe_modal1_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
@@ -8,7 +9,6 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import '/index.dart';
 import 'package:flutter/material.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_ajustes_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_ajustes_model.dart';
@@ -44,15 +44,8 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
     super.dispose();
   }
 
-  /// Sign-out: clear session and navigate to the landing/login screen.
-  Future<void> _signOut() async {
-    GoRouter.of(context).prepareAuthEvent();
-    await authManager.signOut();
-    GoRouter.of(context).clearRedirectLocation();
-    if (context.mounted) {
-      context.goNamedAuth(SignInWidget.routeName, context.mounted);
-    }
-  }
+  /// Cierra la sesión (también en el backend) y vuelve al login.
+  Future<void> _signOut() => signOutAndGoToLogin(context);
 
   @override
   Widget build(BuildContext context) {
@@ -122,14 +115,14 @@ class _DOVIACLIENTAjustesWidgetState extends State<DOVIACLIENTAjustesWidget> {
                                     ).then((value) => safeSetState(() {}));
                                   },
                                   onDeleteAccount: (reason) async {
-                                    await DOVIAAPIUserContextGroup
+                                    final res = await DOVIAAPIUserContextGroup
                                         .deactivateMyAccountCall
                                         .call(
                                       authToken:
                                           authManager.authenticationToken,
                                       reason: reason,
                                     );
-                                    await _signOut();
+                                    return res.succeeded;
                                   },
                                   onSignOut: () async {
                                     await _signOut();

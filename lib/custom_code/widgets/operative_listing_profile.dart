@@ -19,7 +19,9 @@ class OperativeListingProfile extends StatefulWidget {
   final double? height;
 
   /// Called after the user confirms the delete-account flow (confirm + reason).
-  final Future Function(String? reason)? onDeleteAccount;
+  /// Devuelve si el backend dio de baja la cuenta. Solo entonces se muestra
+  /// el éxito y se cierra la sesión.
+  final Future<bool> Function(String? reason)? onDeleteAccount;
 
   /// Called when the user taps "Cerrar sesión".
   final Future Function()? onSignOut;
@@ -68,6 +70,7 @@ enum _DocType {
 
 class _OperativeListingProfileState extends State<OperativeListingProfile> {
   bool _datosPersonalesExpanded = true;
+  bool _deletingAccount = false;
   bool _gananciasExpanded = false;
   bool _documentacionExpanded = false;
 
@@ -1113,13 +1116,26 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
         controller: _deleteReasonController,
         onConfirm: () async {
           Navigator.pop(context);
-          if (widget.onDeleteAccount != null) {
-            final reason = _deleteReasonController.text.trim();
-            await widget.onDeleteAccount!.call(reason.isEmpty ? null : reason);
+          if (_deletingAccount) return;
+          _deletingAccount = true;
+          final reason = _deleteReasonController.text.trim();
+          final deleted = await widget.onDeleteAccount
+                  ?.call(reason.isEmpty ? null : reason) ??
+              false;
+          _deletingAccount = false;
+          if (!mounted) return;
+          // Antes se mostraba el éxito aunque el backend hubiera fallado.
+          if (!deleted) {
+            ScaffoldMessenger.of(this.context).showSnackBar(const SnackBar(
+                content:
+                    Text('No pudimos eliminar tu cuenta. Inténtalo de nuevo.')));
+            return;
           }
+          // `context` acá es el del diálogo del motivo, que ya se cerró: el
+          // éxito se muestra sobre la pantalla.
           if (mounted) {
             showDialog(
-              context: context,
+              context: this.context,
               barrierDismissible: false,
               builder: (context) => const _DeleteSuccessDialog(),
             );

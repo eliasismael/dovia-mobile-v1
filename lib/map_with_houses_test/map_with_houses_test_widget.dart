@@ -41,6 +41,7 @@ class _MapWithHousesTestWidgetState extends State<MapWithHousesTestWidget> {
             .toList()
             .cast<MapPropertyMarkerStruct>();
         safeSetState(() {});
+        if (!mounted) return;
         await showDialog(
           context: context,
           builder: (alertDialogContext) {
@@ -57,6 +58,7 @@ class _MapWithHousesTestWidgetState extends State<MapWithHousesTestWidget> {
           },
         );
       } else {
+        if (!mounted) return;
         await showDialog(
           context: context,
           builder: (alertDialogContext) {

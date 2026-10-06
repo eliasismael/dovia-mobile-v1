@@ -168,6 +168,7 @@ class _TerminosYCondicionesScrolleableWidgetState
                             ? null
                             : () async {
                                 await widget.onAccept?.call();
+                                if (!context.mounted) return;
                                 Navigator.pop(context);
                               },
                         text: 'Aceptar',

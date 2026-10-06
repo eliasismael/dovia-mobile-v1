@@ -1430,6 +1430,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
 
                                                   if (hasPending) {
                                                     // Show pending visit modal directly — skip the scheduling form
+                                                    if (!context.mounted) return;
                                                     await showDialog(
                                                       context: context,
                                                       barrierColor: Colors.black
@@ -1462,6 +1463,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                     );
                                                   } else {
                                                     // No pending visit — open the scheduling form
+                                                    if (!context.mounted) return;
                                                     await showDialog(
                                                       context: context,
                                                       builder: (dialogContext) {

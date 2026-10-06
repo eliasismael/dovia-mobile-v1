@@ -407,6 +407,7 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                             text: 'Cancelar',
                             onTap: () async {
                               await widget.onClearFilters?.call();
+                              if (!context.mounted) return;
                               Navigator.pop(context);
                             },
                           ),
@@ -425,6 +426,7 @@ class _FiltroMapaModalWidgetState extends State<FiltroMapaModalWidget> {
                           text: 'Aplicar filtro',
                           onTap: () async {
                             await widget.onApplySomeFilter?.call();
+                            if (!context.mounted) return;
                             Navigator.pop(context);
                           },
                         ),

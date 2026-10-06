@@ -1,4 +1,5 @@
 // Automatic FlutterFlow imports
+import '/core/api_error.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 // Imports other custom widgets
 // Imports custom functions
@@ -208,17 +209,33 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
     if (_sending) return;
     setState(() => _sending = true);
     final token = currentAuthenticationToken ?? '';
-    final userId = currentUserUid;
+    var userId = currentUserUid;
     String? error;
 
     String failMsg(ApiCallResponse res, String what) {
-      final m = getJsonField(res.jsonBody, r'$.message')?.toString();
-      return (m != null && m.isNotEmpty) ? '$what: $m' : 'No se pudo $what.';
+      if (res.statusCode == -1) return apiErrorMessage(res, '');
+      final m = apiBodyMessage(res.jsonBody);
+      return m != null ? 'No se pudo $what: $m' : 'No se pudo $what.';
     }
 
     try {
+      // Los documentos van a /users/{id}/...: sin id el pedido sale a
+      // /users//... y falla. Se busca en el perfil antes de intentar.
+      if (userId.isEmpty) {
+        final profile = await DOVIAAPIUserContextGroup
+            .getAuthenticatedUserProfileCall
+            .call(authToken: token);
+        userId = DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall
+                .userId(profile.jsonBody) ??
+            '';
+        if (userId.isEmpty) {
+          error = 'No pudimos identificar tu cuenta. Cierra sesión y vuelve '
+              'a entrar.';
+        }
+      }
+
       final photo = _profileImageBytes;
-      if (photo != null) {
+      if (photo != null && error == null) {
         final res =
             await DOVIAAPIUserContextGroup.uploadProfilePictureCall.call(
           authToken: token,

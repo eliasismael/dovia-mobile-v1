@@ -50,6 +50,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
             _model.allProperties.toList().cast<MapPropertyMarkerStruct>();
         safeSetState(() {});
       } else {
+        if (!mounted) return;
         await showDialog(
           context: context,
           builder: (alertDialogContext) {
@@ -141,6 +142,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                         );
                       },
                     );
+                    if (!context.mounted) return;
                     await showDialog(
                       context: context,
                       builder: (alertDialogContext) {
@@ -158,6 +160,7 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                         );
                       },
                     );
+                    if (!context.mounted) return;
                     await showDialog(
                       context: context,
                       builder: (alertDialogContext) {

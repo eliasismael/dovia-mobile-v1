@@ -2218,6 +2218,7 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                                       if (!_validate()) return;
                                       setState(() => _isSaving = true);
                                       await widget.onSave(_hasSale, _hasRent);
+                                      if (!context.mounted) return;
                                       if (mounted) Navigator.pop(context);
                                     },
                               child: _isSaving

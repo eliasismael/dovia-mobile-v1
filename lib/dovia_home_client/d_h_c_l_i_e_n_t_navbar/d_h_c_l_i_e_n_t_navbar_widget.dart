@@ -259,10 +259,9 @@ class _DHCLIENTNavbarWidgetState extends State<DHCLIENTNavbarWidget> {
                         asset: 'assets/images/IconoCalendario.svg',
                         label: 'Visitas',
                         routeName: DOVIACLIENTMisVisitasWidget.routeName,
-                        onTap: () async {
-                          context
-                              .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
-                        },
+                        // El invitado ve el aviso de registro en vez de entrar.
+                      onTap: () => _openRestricted(
+                          DOVIACLIENTMisVisitasWidget.routeName),
                       ),
                       // Hueco para el botón central, que va por encima.
                       const SizedBox(width: 72.0),
@@ -278,10 +277,9 @@ class _DHCLIENTNavbarWidgetState extends State<DHCLIENTNavbarWidget> {
                         label: 'Favoritos',
                         iconSize: 20.0,
                         routeName: DOVIACLIENTMisFavoritosWidget.routeName,
-                        onTap: () async {
-                          context.pushNamed(
-                              DOVIACLIENTMisFavoritosWidget.routeName);
-                        },
+                        // El invitado ve el aviso de registro en vez de entrar.
+                      onTap: () => _openRestricted(
+                          DOVIACLIENTMisFavoritosWidget.routeName),
                       ),
                     ],
                   ),

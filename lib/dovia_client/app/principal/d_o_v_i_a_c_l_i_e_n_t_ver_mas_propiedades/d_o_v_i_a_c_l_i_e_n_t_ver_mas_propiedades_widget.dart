@@ -1,4 +1,5 @@
 import '/domain/property_owner.dart';
+import '/shared_components/error_state/error_state_widget.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -155,6 +156,12 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                 }
                                 final listViewListPropertiesResponse =
                                     snapshot.data!;
+                                // Sin conexión o con el servidor caído se avisa y se deja
+                                // reintentar, en vez de mostrar la lista vacía.
+                                if (isRetryableLoadError(listViewListPropertiesResponse)) {
+                                  return ErrorStateWidget.fromResponse(listViewListPropertiesResponse,
+                                      onRetry: () => safeSetState(() {}));
+                                }
 
                                 return Builder(
                                   builder: (context) {
@@ -295,6 +302,7 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                                     if ((_model.apiResult9li
                                                             ?.succeeded ??
                                                         true)) {
+                                                      if (!context.mounted) return;
                                                       await showModalBottomSheet(
                                                         isScrollControlled:
                                                             true,
@@ -341,6 +349,7 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                                       ).then((value) =>
                                                           safeSetState(() {}));
                                                     } else {
+                                                      if (!context.mounted) return;
                                                       await showDialog(
                                                         context: context,
                                                         builder:

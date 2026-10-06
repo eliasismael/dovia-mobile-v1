@@ -19,7 +19,9 @@ class AjustesScreen extends StatefulWidget {
   final double? width;
   final double? height;
   final Future Function()? onCancelSubscription;
-  final Future Function(String? reason)? onDeleteAccount;
+  /// Devuelve si el backend dio de baja la cuenta. Solo entonces se cierra la
+  /// sesión con [onSignOut].
+  final Future<bool> Function(String? reason)? onDeleteAccount;
   final Future Function()? onSignOut;
 
   const AjustesScreen({
@@ -46,6 +48,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
   bool _obscureNew = true;
   bool _obscureRepeat = true;
   bool _cancellingSubscription = false;
+  bool _deletingAccount = false;
 
   final _cancelReasonCtrl = TextEditingController();
   final _deleteReasonCtrl = TextEditingController();
@@ -681,6 +684,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
             duration: Duration(seconds: 2)));
       }
 
+      if (!mounted) return;
       final result = await context.read<UserRepository>().uploadAvatar(ffFile);
 
       if (mounted) {
@@ -756,8 +760,24 @@ class _AjustesScreenState extends State<AjustesScreen> {
           title: '¿Por qué abandonas DOVIA?',
           controller: _deleteReasonCtrl,
           onConfirm: () async {
+            if (_deletingAccount) return;
+            setState(() => _deletingAccount = true);
             final reason = _deleteReasonCtrl.text.trim();
-            await widget.onDeleteAccount?.call(reason.isEmpty ? null : reason);
+            final deleted = await widget.onDeleteAccount
+                    ?.call(reason.isEmpty ? null : reason) ??
+                false;
+            if (!mounted) return;
+            setState(() => _deletingAccount = false);
+            // Antes se cerraba la sesión aunque el backend hubiera fallado, y
+            // el usuario creía haber borrado una cuenta que seguía activa.
+            if (!deleted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text(
+                      'No pudimos eliminar tu cuenta. Inténtalo de nuevo.'),
+                  backgroundColor: _softRed));
+              return;
+            }
+            await widget.onSignOut?.call();
           },
         );
       },

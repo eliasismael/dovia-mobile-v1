@@ -1,4 +1,5 @@
 import '/core/dovia_zones.dart';
+import '/core/api_error.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -135,28 +136,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     }
   }
 
-  String _apiErrorMessage(dynamic response, String fallback) {
-    if (response is Map) {
-      final message = response['message']?.toString().trim();
-      if (message != null && message.isNotEmpty) {
-        return message;
-      }
-
-      final errors = response['errors'];
-      if (errors is List) {
-        for (final error in errors) {
-          if (error is Map) {
-            final message = error['message']?.toString().trim();
-            if (message != null && message.isNotEmpty) {
-              return message;
-            }
-          }
-        }
-      }
-    }
-
-    return fallback;
-  }
+  String _apiErrorMessage(dynamic response, String fallback) =>
+      apiBodyMessage(response) ?? fallback;
 
   /// Revisa el formulario antes de llamar al backend y devuelve un problema
   /// por linea.
@@ -4530,6 +4511,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                                     return;
                                   }
 
+                                  if (!context.mounted) return;
                                   context.pushNamed(
                                     DOVIACLIENTMisPropiedadesAgendarVisitaWidget
                                         .routeName,

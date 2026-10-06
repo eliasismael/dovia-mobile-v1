@@ -86,8 +86,8 @@ class _DOVIACLIENTOfertaCardWidgetState
                             topLeft: Radius.circular(10.0),
                             topRight: Radius.circular(10.0),
                           ),
-                          child: Image.network(
-                            'https://picsum.photos/seed/874/600',
+                          child: Image.asset(
+                            'assets/images/casa_card_sobreMiVisita.png',
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: MediaQuery.sizeOf(context).height * 1.0,
                             fit: BoxFit.cover,

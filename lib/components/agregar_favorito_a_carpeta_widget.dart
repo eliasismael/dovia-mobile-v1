@@ -1,4 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
+import '/shared_components/error_state/error_state_widget.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -99,6 +100,12 @@ class _AgregarFavoritoACarpetaWidgetState
                     );
                   }
                   final listViewGetAllFavoriteFoldersResponse = snapshot.data!;
+                  // Sin conexión o con el servidor caído se avisa y se deja
+                  // reintentar, en vez de mostrar la lista vacía.
+                  if (isRetryableLoadError(listViewGetAllFavoriteFoldersResponse)) {
+                    return ErrorStateWidget.fromResponse(listViewGetAllFavoriteFoldersResponse,
+                        onRetry: () => safeSetState(() {}));
+                  }
 
                   return Builder(
                     builder: (context) {
@@ -161,6 +168,7 @@ class _AgregarFavoritoACarpetaWidgetState
 
                                   if ((_model.apiResultv19?.succeeded ??
                                       true)) {
+                                    if (!context.mounted) return;
                                     await showDialog(
                                       context: context,
                                       builder: (dialogContext) {
@@ -188,6 +196,7 @@ class _AgregarFavoritoACarpetaWidgetState
                                       },
                                     );
                                   } else {
+                                    if (!context.mounted) return;
                                     await showDialog(
                                       context: context,
                                       builder: (alertDialogContext) {

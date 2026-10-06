@@ -1,16 +1,13 @@
 import '/auth/custom_auth/auth_util.dart';
-import '/backend/api_requests/api_auth.dart';
+import '/auth/sign_out.dart';
 import '/backend/api_requests/api_users.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/index.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
-import '/repositories/user_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_ajustes_model.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_ajustes_model.dart';
 
@@ -90,29 +87,15 @@ class _LEGALASSOCIATEAjustesWidgetState
                               height: MediaQuery.sizeOf(context).height * 1.0,
                               onTermsAndConditions: () async {},
                               onSupport: () async {},
-                              onLogout: () async {
-                                final router = GoRouter.of(context);
-                                context.read<UserRepository>().clear();
-                                await DOVIAAPIAuthContextGroup.logoutAllCall
-                                    .call(
-                                        idToken:
-                                            authManager.authenticationToken);
-                                router.prepareAuthEvent();
-                                await authManager.signOut();
-                                router.clearRedirectLocation();
-                                if (mounted) {
-                                  // ignore: use_build_context_synchronously
-                                  context.goNamedAuth(
-                                      SignInWidget.routeName, mounted);
-                                }
-                              },
+                              onLogout: () => signOutAndGoToLogin(context),
                               onDeleteAccount: (reason) async {
-                                await DOVIAAPIUserContextGroup
+                                final res = await DOVIAAPIUserContextGroup
                                     .deactivateMyAccountCall
                                     .call(
                                   authToken: authManager.authenticationToken,
                                   reason: reason,
                                 );
+                                return res.succeeded;
                               },
                               onSaveInfo: () async {},
                             ),

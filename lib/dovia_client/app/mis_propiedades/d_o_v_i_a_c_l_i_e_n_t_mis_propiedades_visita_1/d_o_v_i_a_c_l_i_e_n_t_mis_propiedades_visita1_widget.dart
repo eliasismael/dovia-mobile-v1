@@ -770,7 +770,14 @@ class _ListerCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(50.0),
             child: photoUrl.isNotEmpty
                 ? Image.network(photoUrl,
-                    width: 72, height: 72, fit: BoxFit.cover)
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                        'assets/images/nahid_photo.png',
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.cover))
                 : Image.asset('assets/images/nahid_photo.png',
                     width: 72, height: 72, fit: BoxFit.cover),
           ),

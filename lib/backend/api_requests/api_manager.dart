@@ -260,6 +260,31 @@ class ApiManager {
   // If your API calls need authentication, populate this field once
   // the user has authenticated. Alter this as needed.
   static String? _accessToken;
+
+  /// Se llama cuando un pedido autenticado vuelve con 401. Debe renovar la
+  /// sesión y devolver el token nuevo, o null si no se pudo. Lo registra
+  /// `main.dart`, para que esta capa no dependa de la de auth.
+  static Future<String?> Function()? onUnauthorized;
+
+  /// Se llama antes de cada pedido autenticado. Si el token ya venció lo
+  /// renueva y devuelve el nuevo; si no hace falta, null. Es necesario en web:
+  /// API Gateway responde los 401 sin cabeceras CORS y el navegador los
+  /// entrega como error de red, así que [onUnauthorized] nunca se dispara.
+  static Future<String?> Function()? freshTokenIfExpired;
+
+  /// Llamadas de autenticación: un 401 en ellas no se resuelve renovando.
+  static const _authCallNames = {
+    'Sign In NEW',
+    'Refresh Token NEW',
+    'Logout All Sessions',
+    // Un 401 acá puede ser la contraseña actual equivocada.
+    'Change Password',
+  };
+
+  // Holgado a propósito: algunas operaciones (aceptar una oferta) tardan en
+  // el backend, y cortarlas antes haría reintentar algo que ya se hizo.
+  static const _requestTimeout = Duration(seconds: 60);
+  static const _multipartTimeout = Duration(seconds: 120);
   // You may want to call this if, for example, you make a change to the
   // database and no longer want the cached result of a call that may
   // have changed.
@@ -538,11 +563,11 @@ class ApiManager {
       return _apiCache[callOptions]!;
     }
 
-    ApiCallResponse result;
-    try {
+    Future<ApiCallResponse> send(Map<String, dynamic> headers) {
+      final Future<ApiCallResponse> request;
       switch (callType) {
         case ApiCallType.GET:
-          result = await urlRequest(
+          request = urlRequest(
             callType,
             apiUrl,
             headers,
@@ -554,8 +579,8 @@ class ApiManager {
           );
           break;
         case ApiCallType.DELETE:
-          result = alwaysAllowBody
-              ? await requestWithBody(
+          request = alwaysAllowBody
+              ? requestWithBody(
                   callType,
                   apiUrl,
                   headers,
@@ -569,7 +594,7 @@ class ApiManager {
                   isStreamingApi,
                   client: client,
                 )
-              : await urlRequest(
+              : urlRequest(
                   callType,
                   apiUrl,
                   headers,
@@ -583,7 +608,7 @@ class ApiManager {
         case ApiCallType.POST:
         case ApiCallType.PUT:
         case ApiCallType.PATCH:
-          result = await requestWithBody(
+          request = requestWithBody(
             callType,
             apiUrl,
             headers,
@@ -598,6 +623,44 @@ class ApiManager {
             client: client,
           );
           break;
+      }
+      // Sin límite, con mala señal el pedido podía quedar colgado y la
+      // pantalla con el spinner para siempre. Las subidas de archivos tienen
+      // más margen. El TimeoutException cae en el catch de abajo (código -1).
+      if (isStreamingApi) return request;
+      return request.timeout(bodyType == BodyType.MULTIPART
+          ? _multipartTimeout
+          : _requestTimeout);
+    }
+
+    ApiCallResponse result;
+    try {
+      final authKey = headers.keys.firstWhereOrNull(
+          (k) => k.toLowerCase() == HttpHeaders.authorizationHeader);
+      final isAuthCall = _authCallNames.contains(callName);
+      if (authKey != null && !isAuthCall && freshTokenIfExpired != null) {
+        final fresh = await freshTokenIfExpired!();
+        if (fresh != null && fresh.isNotEmpty) {
+          headers = Map<String, dynamic>.from(headers)
+            ..[authKey] = 'Bearer $fresh';
+        }
+      }
+
+      result = await send(headers);
+
+      // El idToken de Cognito dura una hora: con la app abierta más tiempo
+      // todas las llamadas empezaban a dar 401 sin que nada lo resolviera. Se
+      // renueva la sesión y se reintenta una sola vez con el token nuevo.
+      if (result.statusCode == 401 &&
+          authKey != null &&
+          onUnauthorized != null &&
+          !isAuthCall) {
+        final newToken = await onUnauthorized!();
+        if (newToken != null && newToken.isNotEmpty) {
+          final retryHeaders = Map<String, dynamic>.from(headers)
+            ..[authKey] = 'Bearer $newToken';
+          result = await send(retryHeaders);
+        }
       }
 
       // If caching is on, cache the result (if present).

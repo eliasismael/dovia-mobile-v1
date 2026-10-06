@@ -355,6 +355,7 @@ class _RecoverPassword1WidgetState extends State<RecoverPassword1Widget> {
                                               _model.correoTextController.text,
                                         );
 
+                                        if (!context.mounted) return;
                                         context.pushNamed(
                                           RecoverPassword2Widget.routeName,
                                           extra: <String, dynamic>{

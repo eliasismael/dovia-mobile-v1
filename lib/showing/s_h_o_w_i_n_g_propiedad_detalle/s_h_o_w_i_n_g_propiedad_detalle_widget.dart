@@ -495,8 +495,8 @@ class _SHOWINGPropiedadDetalleWidgetState
                                               child: ClipRRect(
                                                 borderRadius:
                                                     BorderRadius.circular(12.0),
-                                                child: Image.network(
-                                                  'https://picsum.photos/seed/146/600',
+                                                child: Image.asset(
+                                                  'assets/images/casa_card_sobreMiVisita.png',
                                                   width: 212.0,
                                                   height: 160.0,
                                                   fit: BoxFit.cover,
@@ -517,8 +517,8 @@ class _SHOWINGPropiedadDetalleWidgetState
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(12.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/119/600',
+                                              child: Image.asset(
+                                                'assets/images/casa_card_sobreMiVisita.png',
                                                 width: 212.0,
                                                 height: 160.0,
                                                 fit: BoxFit.cover,

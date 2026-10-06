@@ -288,6 +288,9 @@ class SignInNEWCall {
         response,
         r'''$.data.userId''',
       ));
+  int? expiresIn(dynamic response) =>
+      castToType<int>(getJsonField(response, r'''$.data.expiresIn''')) ??
+      castToType<int>(getJsonField(response, r'''$.data.tokens.expiresIn'''));
 }
 
 class ForgotPasswordNEWCall {
@@ -396,6 +399,9 @@ class RefreshTokenNEWCall {
   String? idToken(dynamic response) =>
       castToType<String>(getJsonField(response, r'''$.data.idToken''')) ??
       castToType<String>(getJsonField(response, r'''$.data.tokens.idToken'''));
+  int? expiresIn(dynamic response) =>
+      castToType<int>(getJsonField(response, r'''$.data.expiresIn''')) ??
+      castToType<int>(getJsonField(response, r'''$.data.tokens.expiresIn'''));
 }
 
 class SelectRoleCall {
@@ -444,6 +450,10 @@ class SelectRoleCall {
   String? idToken(dynamic response) =>
       castToType<String>(getJsonField(response, r'''$.data.idToken''')) ??
       castToType<String>(getJsonField(response, r'''$.data.tokens.idToken'''));
+
+  int? expiresIn(dynamic response) =>
+      castToType<int>(getJsonField(response, r'''$.data.expiresIn''')) ??
+      castToType<int>(getJsonField(response, r'''$.data.tokens.expiresIn'''));
 }
 
 class LogoutAllCall {

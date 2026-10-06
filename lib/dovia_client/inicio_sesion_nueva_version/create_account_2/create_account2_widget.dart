@@ -269,6 +269,7 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                     if (!mounted) return;
                                     if ((_model.apiResultvj1?.succeeded ??
                                         true)) {
+                                      if (!context.mounted) return;
                                       context.pushNamed(
                                           DatosCustomWidget.routeName);
                                     } else {

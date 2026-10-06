@@ -1127,6 +1127,7 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                         telefonoInputTextController.text,
                                 );
 
+                                if (!context.mounted) return;
                                 GoRouter.of(context).prepareAuthEvent();
                                 await authManager.signIn(
                                   authenticationToken: DOVIAAPIAuthContextGroup
@@ -1147,6 +1148,7 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                 if (!context.mounted) return;
                                 context.goNamed('Datos_2');
                               } else {
+                                if (!context.mounted) return;
                                 await showDialog(
                                   context: context,
                                   builder: (alertDialogContext) {

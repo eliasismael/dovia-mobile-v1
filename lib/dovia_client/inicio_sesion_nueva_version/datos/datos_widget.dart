@@ -3368,6 +3368,7 @@ class _DatosWidgetState extends State<DatosWidget> {
                               );
 
                               if ((_model.response?.succeeded ?? true)) {
+                                if (!context.mounted) return;
                                 GoRouter.of(context).prepareAuthEvent();
                                 await authManager.signIn(
                                   authenticationToken: DOVIAAPIAuthContextGroup
@@ -3388,9 +3389,11 @@ class _DatosWidgetState extends State<DatosWidget> {
                                   ),
                                 );
 
+                                if (!context.mounted) return;
                                 context.pushNamedAuth(
                                     Datos2Widget.routeName, context.mounted);
                               } else {
+                                if (!context.mounted) return;
                                 await showDialog(
                                   context: context,
                                   builder: (alertDialogContext) {

@@ -22,6 +22,9 @@ class SignInModel extends FlutterFlowModel<SignInWidget> {
   String? Function(BuildContext, String?)? correoInputTextControllerValidator;
   String? _correoInputTextControllerValidator(
       BuildContext context, String? val) {
+    // El autocompletado del teclado suele dejar un espacio al final: se
+    // valida (y se envía) el correo recortado.
+    val = val?.trim();
     if (val == null || val.isEmpty) {
       return 'Introduce un correo';
     }

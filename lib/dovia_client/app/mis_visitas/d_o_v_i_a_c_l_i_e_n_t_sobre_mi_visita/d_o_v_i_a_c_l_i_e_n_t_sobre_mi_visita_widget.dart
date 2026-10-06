@@ -457,6 +457,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                           mode:
                                               LaunchMode.externalApplication)) {
                                         if (mounted) {
+                                          if (!context.mounted) return;
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(

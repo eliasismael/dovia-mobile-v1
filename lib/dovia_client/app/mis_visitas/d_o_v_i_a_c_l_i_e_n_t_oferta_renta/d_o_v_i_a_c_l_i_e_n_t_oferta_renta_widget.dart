@@ -1,4 +1,5 @@
 import '/backend/api_requests/api_calls.dart';
+import '/shared_components/error_state/error_state_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -114,6 +115,12 @@ class _DOVIACLIENTOfertaRentaWidgetState
           );
         }
         final dOVIACLIENTOfertaRentaGetPropertyByIDResponse = snapshot.data!;
+        // Sin conexión o con el servidor caído se avisa y se deja
+        // reintentar, en vez de mostrar la lista vacía.
+        if (isRetryableLoadError(dOVIACLIENTOfertaRentaGetPropertyByIDResponse)) {
+          return ErrorStateWidget.fromResponse(dOVIACLIENTOfertaRentaGetPropertyByIDResponse,
+              onRetry: () => safeSetState(() {}));
+        }
 
         return GestureDetector(
           onTap: () {
@@ -3706,6 +3713,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                                           ?.succeeded ??
                                                       false) ==
                                                   false) {
+                                                if (!context.mounted) return;
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
                                                   const SnackBar(
@@ -3718,6 +3726,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
                                               }
 
                                               // Show success modal
+                                              if (!context.mounted) return;
                                               showGeneralDialog(
                                                 context: context,
                                                 barrierDismissible: true,
@@ -3760,6 +3769,7 @@ class _DOVIACLIENTOfertaRentaWidgetState
 
                                               // Navigate back to the property profile
                                               if (mounted) {
+                                                if (!context.mounted) return;
                                                 context.safePop();
                                               }
                                             },

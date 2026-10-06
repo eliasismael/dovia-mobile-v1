@@ -1,6 +1,7 @@
 import '/auth/registration_progress.dart';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -91,6 +92,8 @@ Widget homeForRole(String role) {
       return const Datos2Widget();
     case RegistrationProgress.associateForm:
       return const FormAssociateWidget();
+    case RegistrationProgress.pendingReview:
+      return const SolicitudEnRevisionWidget();
   }
   switch (role) {
     case 'SHOWING_AGENT':
@@ -113,9 +116,33 @@ Widget homeForRole(String role) {
   }
 }
 
+/// Nombre de la ruta del home de cada rol, para navegar a él (mismo mapeo que
+/// [homeForRole]).
+String homeRouteNameForRole(String role) {
+  switch (role) {
+    case 'SHOWING_AGENT':
+      return SHOWINGHomeWidget.routeName;
+    case 'OPERATIVE_LISTER':
+      return OPERATIVELISTINGHomeWidget.routeName;
+    case 'LISTER_HQ':
+      return LISTINGHQHomeWidget.routeName;
+    case 'LEGAL_OFFICER':
+      return LEGALHQHomeWidget.routeName;
+    case 'LEGAL_ASSOCIATE':
+      return LegalAssociateHomeWidget.routeName;
+    case 'HOME_ASSOCIATE_COMPANY':
+      return DHASSOCIATEEmpresaHomePageWidget.routeName;
+    case 'HOME_ASSOCIATE':
+    case 'HQ_ADMIN':
+      return DHASSOCIATEHomePageWidget.routeName;
+    default:
+      return DOVIACLIENTHomePageWidget.routeName;
+  }
+}
+
 GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       initialLocation: '/',
-      debugLogDiagnostics: true,
+      debugLogDiagnostics: kDebugMode,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
       observers: [appRouteObserver],
@@ -189,37 +216,44 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATEBienvenidaWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEBienvenidaWidget.routePath,
           builder: (context, params) => const DHASSOCIATEBienvenidaWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEServiciosWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEServiciosWidget.routePath,
           builder: (context, params) => const DHASSOCIATEServiciosWidget(),
         ),
         FFRoute(
           name: DHASSOCIATENotificacionesWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATENotificacionesWidget.routePath,
           builder: (context, params) => const DHASSOCIATENotificacionesWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEAjustesWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEAjustesWidget.routePath,
           builder: (context, params) => const DHASSOCIATEAjustesWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEHomePageWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEHomePageWidget.routePath,
           builder: (context, params) => const DHASSOCIATEHomePageWidget(),
         ),
         FFRoute(
           name: DHASSOCIATETrabajosDisponiblesWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATETrabajosDisponiblesWidget.routePath,
           builder: (context, params) =>
               const DHASSOCIATETrabajosDisponiblesWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEProximosTrabajosWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEProximosTrabajosWidget.routePath,
           builder: (context, params) => DHASSOCIATEProximosTrabajosWidget(
             onlyFinished:
@@ -228,6 +262,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATETrabajoRealizadoWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATETrabajoRealizadoWidget.routePath,
           builder: (context, params) => DHASSOCIATETrabajoRealizadoWidget(
             routeId: params.getParam('id', ParamType.String),
@@ -236,6 +271,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATETuTrabajoWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATETuTrabajoWidget.routePath,
           builder: (context, params) => DHASSOCIATETuTrabajoWidget(
             routeId: params.getParam('id', ParamType.String),
@@ -244,6 +280,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATETrabajoARealizarWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATETrabajoARealizarWidget.routePath,
           builder: (context, params) => DHASSOCIATETrabajoARealizarWidget(
             routeId: params.getParam('id', ParamType.String),
@@ -252,6 +289,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATETrabajoFinalizadoWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATETrabajoFinalizadoWidget.routePath,
           builder: (context, params) => DHASSOCIATETrabajoFinalizadoWidget(
             routeId: params.getParam('id', ParamType.String),
@@ -260,12 +298,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATETrabajoAdicionalWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATETrabajoAdicionalWidget.routePath,
           builder: (context, params) =>
               const DHASSOCIATETrabajoAdicionalWidget(),
         ),
         FFRoute(
           name: DHASSOCIATEFueraDeAlcanceWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEFueraDeAlcanceWidget.routePath,
           builder: (context, params) => DHASSOCIATEFueraDeAlcanceWidget(
             routeId: params.getParam('id', ParamType.String),
@@ -274,17 +314,20 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATEEmpresaHomePageWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEEmpresaHomePageWidget.routePath,
           builder: (context, params) =>
               const DHASSOCIATEEmpresaHomePageWidget(),
         ),
         FFRoute(
           name: DHASSOCIATECotizacionesWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATECotizacionesWidget.routePath,
           builder: (context, params) => const DHASSOCIATECotizacionesWidget(),
         ),
         FFRoute(
           name: DHASSOCIATECotizacionWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATECotizacionWidget.routePath,
           builder: (context, params) => DHASSOCIATECotizacionWidget(
             routeId: params.getParam('id', ParamType.String),
@@ -293,6 +336,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DHASSOCIATEPropuestaEnviadaWidget.routeName,
+          requireAuth: true,
           path: DHASSOCIATEPropuestaEnviadaWidget.routePath,
           builder: (context, params) => DHASSOCIATEPropuestaEnviadaWidget(
             routeId: params.getParam('id', ParamType.String),
@@ -404,31 +448,37 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisFavoritosWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisFavoritosWidget.routePath,
           builder: (context, params) => const DOVIACLIENTMisFavoritosWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesWidget.routePath,
           builder: (context, params) => const DOVIACLIENTMisPropiedadesWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisVisitasWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisVisitasWidget.routePath,
           builder: (context, params) => const DOVIACLIENTMisVisitasWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTNotificacionesWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTNotificacionesWidget.routePath,
           builder: (context, params) => const DOVIACLIENTNotificacionesWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTAjustesWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTAjustesWidget.routePath,
           builder: (context, params) => const DOVIACLIENTAjustesWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTSobreMiVisitaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTSobreMiVisitaWidget.routePath,
           builder: (context, params) => DOVIACLIENTSobreMiVisitaWidget(
             propertyId: params.getParam(
@@ -447,6 +497,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTVisitaAceptadaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTVisitaAceptadaWidget.routePath,
           builder: (context, params) => DOVIACLIENTVisitaAceptadaWidget(
             propertyId: params.getParam(
@@ -463,6 +514,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTOfertarWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTOfertarWidget.routePath,
           builder: (context, params) => DOVIACLIENTOfertarWidget(
             propertyId: params.getParam(
@@ -473,6 +525,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTOfertaRentaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTOfertaRentaWidget.routePath,
           builder: (context, params) => DOVIACLIENTOfertaRentaWidget(
             propertyId: params.getParam(
@@ -483,11 +536,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTRentaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTRentaWidget.routePath,
           builder: (context, params) => const DOVIACLIENTRentaWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTOfertaCompraWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTOfertaCompraWidget.routePath,
           builder: (context, params) => DOVIACLIENTOfertaCompraWidget(
             propertyId: params.getParam(
@@ -513,6 +568,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisVisitasTuPropuestaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisVisitasTuPropuestaWidget.routePath,
           builder: (context, params) => DOVIACLIENTMisVisitasTuPropuestaWidget(
             propuestaState: params.getParam('propuestaState', ParamType.String),
@@ -523,11 +579,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DCFormaPagoSuscripcion2Widget.routeName,
+          requireAuth: true,
           path: DCFormaPagoSuscripcion2Widget.routePath,
           builder: (context, params) => const DCFormaPagoSuscripcion2Widget(),
         ),
         FFRoute(
           name: DCFormaPagoSuscripcion1Widget.routeName,
+          requireAuth: true,
           path: DCFormaPagoSuscripcion1Widget.routePath,
           builder: (context, params) => const DCFormaPagoSuscripcion1Widget(),
         ),
@@ -554,12 +612,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisFavoritosCarpetasWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisFavoritosCarpetasWidget.routePath,
           builder: (context, params) =>
               const DOVIACLIENTMisFavoritosCarpetasWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidget(
@@ -580,24 +640,28 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesAccionesARealizarWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesAccionesARealizarWidget.routePath,
           builder: (context, params) =>
               const DOVIACLIENTMisPropiedadesAccionesARealizarWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesVenderWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesVenderWidget.routePath,
           builder: (context, params) =>
               const DOVIACLIENTMisPropiedadesVenderWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesRentarWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesRentarWidget.routePath,
           builder: (context, params) =>
               const DOVIACLIENTMisPropiedadesRentarWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesAgendarVisitaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesAgendarVisitaWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisPropiedadesAgendarVisitaWidget(
@@ -609,6 +673,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesVisita1Widget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesVisita1Widget.routePath,
           builder: (context, params) => DOVIACLIENTMisPropiedadesVisita1Widget(
             visitId: params.getParam(
@@ -619,6 +684,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget(
@@ -634,11 +700,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisOfertasWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisOfertasWidget.routePath,
           builder: (context, params) => const DOVIACLIENTMisOfertasWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTMisOfertasListaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisOfertasListaWidget.routePath,
           builder: (context, params) => DOVIACLIENTMisOfertasListaWidget(
             lane: params.getParam(
@@ -649,6 +717,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisOfertasDetalleWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisOfertasDetalleWidget.routePath,
           builder: (context, params) => DOVIACLIENTMisOfertasDetalleWidget(
             offerId: params.getParam(
@@ -659,6 +728,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisOfertasContraofertaDetalleWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisOfertasContraofertaDetalleWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisOfertasContraofertaDetalleWidget(
@@ -670,12 +740,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTPropuestasRecientesWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTPropuestasRecientesWidget.routePath,
           builder: (context, params) =>
               const DOVIACLIENTPropuestasRecientesWidget(),
         ),
         FFRoute(
           name: DOVIACLIENTPropuestasListaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTPropuestasListaWidget.routePath,
           builder: (context, params) => DOVIACLIENTPropuestasListaWidget(
             lane: params.getParam(
@@ -686,6 +758,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesPropuestaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesPropuestaWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisPropiedadesPropuestaWidget(
@@ -701,6 +774,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTPropuestaDeVisitaWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTPropuestaDeVisitaWidget.routePath,
           builder: (context, params) => DOVIACLIENTPropuestaDeVisitaWidget(
             propertyId: params.getParam(
@@ -717,6 +791,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesContraofertarWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesContraofertarWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisPropiedadesContraofertarWidget(
@@ -736,6 +811,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesAcuerdoWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesAcuerdoWidget.routePath,
           builder: (context, params) => DOVIACLIENTMisPropiedadesAcuerdoWidget(
             negociationStep: params.getParam(
@@ -758,11 +834,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: OPERATIVELISTINGHomeWidget.routeName,
+          requireAuth: true,
           path: OPERATIVELISTINGHomeWidget.routePath,
           builder: (context, params) => const OPERATIVELISTINGHomeWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGPrimeraVisitaWidget.routeName,
+          requireAuth: true,
           path: OPERATIVELISTINGPrimeraVisitaWidget.routePath,
           builder: (context, params) => OPERATIVELISTINGPrimeraVisitaWidget(
             visitId: params.getParam('visitId', ParamType.String) ?? '',
@@ -775,16 +853,19 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: OPERATIVELISTINGProfileWidget.routeName,
+          requireAuth: true,
           path: OPERATIVELISTINGProfileWidget.routePath,
           builder: (context, params) => const OPERATIVELISTINGProfileWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGChecklistWidget.routeName,
+          requireAuth: true,
           path: OPERATIVELISTINGChecklistWidget.routePath,
           builder: (context, params) => const OPERATIVELISTINGChecklistWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGChecklistFormWidget.routeName,
+          requireAuth: true,
           path: OPERATIVELISTINGChecklistFormWidget.routePath,
           builder: (context, params) => OPERATIVELISTINGChecklistFormWidget(
             visitId: params.getParam('visitId', ParamType.String) ?? '',
@@ -792,34 +873,40 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: OPERATIVELISTINGAgendaWidget.routeName,
+          requireAuth: true,
           path: OPERATIVELISTINGAgendaWidget.routePath,
           builder: (context, params) => const OPERATIVELISTINGAgendaWidget(),
         ),
         FFRoute(
           name: OPERATIVELISTINGNotificationsWidget.routeName,
+          requireAuth: true,
           path: OPERATIVELISTINGNotificationsWidget.routePath,
           builder: (context, params) =>
               const OPERATIVELISTINGNotificationsWidget(),
         ),
         FFRoute(
           name: LISTINGHQHomeWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQHomeWidget.routePath,
           builder: (context, params) => const LISTINGHQHomeWidget(),
         ),
         FFRoute(
           name: LISTINGHQBusquedaPropiedadWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQBusquedaPropiedadWidget.routePath,
           builder: (context, params) =>
               const LISTINGHQBusquedaPropiedadWidget(),
         ),
         FFRoute(
           name: LISTINGHQDocumentosPendientesWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQDocumentosPendientesWidget.routePath,
           builder: (context, params) =>
               const LISTINGHQDocumentosPendientesWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadArchivosPendientesWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQPropiedadArchivosPendientesWidget.routePath,
           builder: (context, params) =>
               LISTINGHQPropiedadArchivosPendientesWidget(
@@ -831,21 +918,25 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LISTINGHQNotificationsWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQNotificationsWidget.routePath,
           builder: (context, params) => const LISTINGHQNotificationsWidget(),
         ),
         FFRoute(
           name: LISTINGHQProfileWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQProfileWidget.routePath,
           builder: (context, params) => const LISTINGHQProfileWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadesWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQPropiedadesWidget.routePath,
           builder: (context, params) => const LISTINGHQPropiedadesWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadAsignadaWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQPropiedadAsignadaWidget.routePath,
           builder: (context, params) => LISTINGHQPropiedadAsignadaWidget(
             visitId: params.getParam(
@@ -856,11 +947,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LISTINGHQDocumentosWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQDocumentosWidget.routePath,
           builder: (context, params) => const LISTINGHQDocumentosWidget(),
         ),
         FFRoute(
           name: LISTINGHQPropiedadWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQPropiedadWidget.routePath,
           builder: (context, params) => LISTINGHQPropiedadWidget(
             visitId: params.getParam(
@@ -871,6 +964,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LISTINGHQPropiedadRechazadaWidget.routeName,
+          requireAuth: true,
           path: LISTINGHQPropiedadRechazadaWidget.routePath,
           builder: (context, params) => LISTINGHQPropiedadRechazadaWidget(
             processId: params.getParam(
@@ -882,6 +976,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LISTINGHQDocumentos2Widget.routeName,
+          requireAuth: true,
           path: LISTINGHQDocumentos2Widget.routePath,
           builder: (context, params) => LISTINGHQDocumentos2Widget(
             propiedad: params.getParam(
@@ -892,6 +987,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LISTINGHQDocumentos3Widget.routeName,
+          requireAuth: true,
           path: LISTINGHQDocumentos3Widget.routePath,
           builder: (context, params) => LISTINGHQDocumentos3Widget(
             propiedad: params.getParam(
@@ -906,32 +1002,38 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: SHOWINGHomeWidget.routeName,
+          requireAuth: true,
           path: SHOWINGHomeWidget.routePath,
           builder: (context, params) => const SHOWINGHomeWidget(),
         ),
         FFRoute(
           name: SHOWINGVisitaDelDiaWidget.routeName,
+          requireAuth: true,
           path: SHOWINGVisitaDelDiaWidget.routePath,
           builder: (context, params) => const SHOWINGVisitaDelDiaWidget(),
         ),
         FFRoute(
           name: SHOWINGNotificationsWidget.routeName,
+          requireAuth: true,
           path: SHOWINGNotificationsWidget.routePath,
           builder: (context, params) => const SHOWINGNotificationsWidget(),
         ),
         FFRoute(
           name: SHOWINGProfileWidget.routeName,
+          requireAuth: true,
           path: SHOWINGProfileWidget.routePath,
           builder: (context, params) => const SHOWINGProfileWidget(),
         ),
         FFRoute(
           name: SHOWINGPropiedadesAMostrarWidget.routeName,
+          requireAuth: true,
           path: SHOWINGPropiedadesAMostrarWidget.routePath,
           builder: (context, params) =>
               const SHOWINGPropiedadesAMostrarWidget(),
         ),
         FFRoute(
           name: SHOWINGPropiedadAMostrarWidget.routeName,
+          requireAuth: true,
           path: SHOWINGPropiedadAMostrarWidget.routePath,
           builder: (context, params) => SHOWINGPropiedadAMostrarWidget(
             visitId: params.getParam(
@@ -942,6 +1044,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: SHOWINGPropiedadDetalleWidget.routeName,
+          requireAuth: true,
           path: SHOWINGPropiedadDetalleWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTPropiedadSeleccionadaNewWidget(
@@ -954,16 +1057,19 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: SHOWINGAgendaWidget.routeName,
+          requireAuth: true,
           path: SHOWINGAgendaWidget.routePath,
           builder: (context, params) => const SHOWINGAgendaWidget(),
         ),
         FFRoute(
           name: SHOWINGRegistroDeVisitaWidget.routeName,
+          requireAuth: true,
           path: SHOWINGRegistroDeVisitaWidget.routePath,
           builder: (context, params) => const SHOWINGRegistroDeVisitaWidget(),
         ),
         FFRoute(
           name: SHOWINGRegistroDeVisita2Widget.routeName,
+          requireAuth: true,
           path: SHOWINGRegistroDeVisita2Widget.routePath,
           builder: (context, params) => SHOWINGRegistroDeVisita2Widget(
             visitId: params.getParam('visitId', ParamType.String),
@@ -985,22 +1091,31 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const ElegirRolAsociadoWidget(),
         ),
         FFRoute(
+          name: SolicitudEnRevisionWidget.routeName,
+          requireAuth: true,
+          path: SolicitudEnRevisionWidget.routePath,
+          builder: (context, params) => const SolicitudEnRevisionWidget(),
+        ),
+        FFRoute(
           name: FormAssociateWidget.routeName,
           path: FormAssociateWidget.routePath,
           builder: (context, params) => const FormAssociateWidget(),
         ),
         FFRoute(
           name: LegalAssociateHomeWidget.routeName,
+          requireAuth: true,
           path: LegalAssociateHomeWidget.routePath,
           builder: (context, params) => const LegalAssociateHomeWidget(),
         ),
         FFRoute(
           name: LEGALASSOCIATEDocumentosWidget.routeName,
+          requireAuth: true,
           path: LEGALASSOCIATEDocumentosWidget.routePath,
           builder: (context, params) => const LEGALASSOCIATEDocumentosWidget(),
         ),
         FFRoute(
           name: LEGALASSOCAITEDocumentos2Widget.routeName,
+          requireAuth: true,
           path: LEGALASSOCAITEDocumentos2Widget.routePath,
           builder: (context, params) => LEGALASSOCAITEDocumentos2Widget(
             selectedProperty: params.getParam(
@@ -1011,6 +1126,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LEGALASSOCIATEProcesosWidget.routeName,
+          requireAuth: true,
           path: LEGALASSOCIATEProcesosWidget.routePath,
           builder: (context, params) => LEGALASSOCIATEProcesosWidget(
             filter: params.getParam('filter', ParamType.String),
@@ -1018,6 +1134,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LEGALASSOCIATEProcesos2Widget.routeName,
+          requireAuth: true,
           path: LEGALASSOCIATEProcesos2Widget.routePath,
           builder: (context, params) => LEGALASSOCIATEProcesos2Widget(
             processId: params.getParam('processId', ParamType.String),
@@ -1026,22 +1143,26 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LEGALASSOCIATENotificationsWidget.routeName,
+          requireAuth: true,
           path: LEGALASSOCIATENotificationsWidget.routePath,
           builder: (context, params) =>
               const LEGALASSOCIATENotificationsWidget(),
         ),
         FFRoute(
           name: LEGALASSOCIATEAjustesWidget.routeName,
+          requireAuth: true,
           path: LEGALASSOCIATEAjustesWidget.routePath,
           builder: (context, params) => const LEGALASSOCIATEAjustesWidget(),
         ),
         FFRoute(
           name: LEGALHQHomeWidget.routeName,
+          requireAuth: true,
           path: LEGALHQHomeWidget.routePath,
           builder: (context, params) => const LEGALHQHomeWidget(),
         ),
         FFRoute(
           name: LEGALHQProcesosCasosConHipotecaWidget.routeName,
+          requireAuth: true,
           path: LEGALHQProcesosCasosConHipotecaWidget.routePath,
           builder: (context, params) => LEGALHQProcesosCasosConHipotecaWidget(
             processId: params.getParam(
@@ -1052,16 +1173,19 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LEGALHQAjustesWidget.routeName,
+          requireAuth: true,
           path: LEGALHQAjustesWidget.routePath,
           builder: (context, params) => const LEGALHQAjustesWidget(),
         ),
         FFRoute(
           name: LEGALHQNotificacionesWidget.routeName,
+          requireAuth: true,
           path: LEGALHQNotificacionesWidget.routePath,
           builder: (context, params) => const LEGALHQNotificacionesWidget(),
         ),
         FFRoute(
           name: LEGALHQProcesosWidget.routeName,
+          requireAuth: true,
           path: LEGALHQProcesosWidget.routePath,
           builder: (context, params) => LEGALHQProcesosWidget(
             filter: params.getParam('filter', ParamType.String),
@@ -1069,6 +1193,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LEGALHQRevisionDocumentosPropiedadesWidget.routeName,
+          requireAuth: true,
           path: LEGALHQRevisionDocumentosPropiedadesWidget.routePath,
           builder: (context, params) =>
               LEGALHQRevisionDocumentosPropiedadesWidget(
@@ -1080,6 +1205,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LEGALHQDocumentoWidget.routeName,
+          requireAuth: true,
           path: LEGALHQDocumentoWidget.routePath,
           builder: (context, params) => LEGALHQDocumentoWidget(
             nombreDocumento: params.getParam(
@@ -1114,6 +1240,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: LEGALHQPostVentaWidget.routeName,
+          requireAuth: true,
           path: LEGALHQPostVentaWidget.routePath,
           builder: (context, params) => LEGALHQPostVentaWidget(
             processId: params.getParam(
@@ -1124,6 +1251,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         ),
         FFRoute(
           name: DOVIACLIENTMisPropiedadesVenderRentarWidget.routeName,
+          requireAuth: true,
           path: DOVIACLIENTMisPropiedadesVenderRentarWidget.routePath,
           builder: (context, params) =>
               DOVIACLIENTMisPropiedadesVenderRentarWidget(
@@ -1373,9 +1501,11 @@ class FFRoute {
             return redirectLocation;
           }
 
+          // Sin sesión se va al login y, al entrar, se vuelve a esta ruta.
+          // (Antes apuntaba a '/queEsDovia', una ruta que ya no existe.)
           if (requireAuth && !appStateNotifier.loggedIn) {
             appStateNotifier.setRedirectLocationIfUnset(state.uri.toString());
-            return '/queEsDovia';
+            return SignInWidget.routePath;
           }
           return null;
         },

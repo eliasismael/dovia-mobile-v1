@@ -285,6 +285,7 @@ class _DHASSOCIATECreateAccountWidgetState
                             },
                           );
 
+                          if (!context.mounted) return;
                           context.pushNamed(CreateAccountWidget.routeName);
                         },
                         text: 'Continuar',

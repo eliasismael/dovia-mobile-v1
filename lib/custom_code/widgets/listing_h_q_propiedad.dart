@@ -1400,6 +1400,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               try {
                 await _handleAction(widget.onGuardar);
               } catch (e) {
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -1439,6 +1440,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               try {
                 await _handleAction(widget.onPublicar, isPublish: true);
               } catch (e) {
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(

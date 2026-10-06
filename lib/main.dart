@@ -9,6 +9,9 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'auth/custom_auth/auth_util.dart';
 import 'auth/custom_auth/custom_auth_user_provider.dart';
 import 'auth/custom_auth/session_restore.dart';
+import 'auth/custom_auth/token_refresher.dart';
+import 'backend/api_requests/api_manager.dart';
+import 'index.dart' show SignInWidget;
 
 import 'flutter_flow/flutter_flow_util.dart';
 import 'repositories/index.dart';
@@ -19,6 +22,8 @@ void main() async {
   usePathUrlStrategy();
 
   await authManager.initialize();
+  ApiManager.onUnauthorized = refreshSession;
+  ApiManager.freshTokenIfExpired = freshTokenIfExpired;
   await restoreSession();
 
   final appState = FFAppState(); // Initialize FFAppState
@@ -59,7 +64,9 @@ class MyAppScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
   ThemeMode _themeMode = ThemeMode.system;
 
   late AppStateNotifier _appStateNotifier;
@@ -79,6 +86,7 @@ class _MyAppState extends State<MyApp> {
           .toList();
   late Stream<DoviaAuthUser> userStream;
   String? _notificationsUserId;
+  bool _wasLoggedIn = false;
 
   @override
   void initState() {
@@ -86,17 +94,35 @@ class _MyAppState extends State<MyApp> {
 
     _appStateNotifier = AppStateNotifier.instance;
     _router = createRouter(_appStateNotifier);
+    WidgetsBinding.instance.addObserver(this);
+    onSessionExpired = _onSessionExpired;
     userStream = doviaAuthUserStream()
       ..listen((user) {
         _appStateNotifier.update(user);
-        // Cerrar sesión no pasa por un solo lugar: cada vertical tiene su
-        // propia pantalla de ajustes con su propio botón. Este stream sí es
-        // común a todos, así que el estado de pagos se limpia acá. Dejarlo con
-        // la suscripción del usuario anterior le daría beneficios Premium a
-        // quien inicie sesión después en el mismo dispositivo.
-        if (!user.loggedIn && mounted) {
+        // Cerrar sesión no pasa por un solo lugar (cada rol tiene su pantalla
+        // de ajustes, y la sesión también puede vencer), pero este stream sí
+        // es común a todos: el estado del usuario se limpia acá. Los
+        // repositorios viven en toda la app y guardan en caché perfil,
+        // favoritos, propiedades y visitas; sin esto quien iniciara sesión
+        // después en el mismo teléfono veía los datos de la cuenta anterior
+        // (y heredaba la suscripción Premium).
+        final previousUid = _notificationsUserId;
+        final switchedAccount = user.loggedIn &&
+            (previousUid ?? '').isNotEmpty &&
+            previousUid != user.uid;
+        if (mounted && (!user.loggedIn || switchedAccount)) {
+          context.read<UserRepository>().clear();
+          context.read<FavoritesRepository>().clear();
+          context.read<PropertiesRepository>().clear();
+          context.read<VisitsRepository>().clear();
           context.read<PaymentsRepository>().clear();
         }
+        // Solo en un logout real: al abrir la app sin sesión puede haber un
+        // registro a medias que necesita esos datos.
+        if (!user.loggedIn && _wasLoggedIn) {
+          FFAppState().clearUserScopedState();
+        }
+        _wasLoggedIn = user.loggedIn;
         // Tambien cubre un cambio directo de cuenta sin un evento de logout.
         if (mounted && (!user.loggedIn || _notificationsUserId != user.uid)) {
           context.read<NotificationsRepository>().clear();
@@ -110,6 +136,32 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    onSessionExpired = null;
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Al volver del fondo el token puede haber vencido: se renueva antes de
+    // que la pantalla empiece a pedir datos.
+    if (state == AppLifecycleState.resumed) refreshSessionIfStale();
+  }
+
+  /// El backend rechazó el refreshToken: la sesión ya se cerró. Se lleva al
+  /// login y se explica por qué, en lugar de dejar la pantalla fallando.
+  void _onSessionExpired() {
+    if (!mounted) return;
+    _router.goNamed(SignInWidget.routeName);
+    _scaffoldMessengerKey.currentState
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(
+        content: Text('Tu sesión expiró. Volvé a iniciar sesión.'),
+      ));
+  }
+
   void setThemeMode(ThemeMode mode) => safeSetState(() {
         _themeMode = mode;
       });
@@ -118,6 +170,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       title: 'DOVIA',
       scrollBehavior: MyAppScrollBehavior(),
       localizationsDelegates: const [

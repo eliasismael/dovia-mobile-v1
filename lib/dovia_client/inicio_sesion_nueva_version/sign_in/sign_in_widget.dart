@@ -1,6 +1,8 @@
+import '/backend/api_requests/api_config.dart';
 import '/auth/registration_progress.dart';
 import '/auth/pending_associate_role.dart';
 import '/auth/custom_auth/auth_util.dart';
+import '/auth/custom_auth/token_refresher.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/backend/schema/enums/enums.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -9,6 +11,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'sign_in_model.dart';
@@ -92,6 +95,33 @@ class _SignInWidgetState extends State<SignInWidget> {
                           ),
                         ),
                       ),
+                      // Entorno de la API (sólo fuera de producción), para no
+                      // confundir una build de dev con una de staging.
+                      if (kApiEnvLabel.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 3.0),
+                            decoration: BoxDecoration(
+                              color: kApiEnvLabel == 'DEV'
+                                  ? const Color(0xFFFFEAD6)
+                                  : const Color(0xFFE0E7FF),
+                              borderRadius: BorderRadius.circular(100.0),
+                            ),
+                            child: Text(
+                              kApiEnvLabel,
+                              style: GoogleFonts.publicSans(
+                                color: kApiEnvLabel == 'DEV'
+                                    ? const Color(0xFFB45309)
+                                    : const Color(0xFF4F46E5),
+                                fontSize: 11.0,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
                       Flexible(
                         child: Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
@@ -118,7 +148,10 @@ class _SignInWidgetState extends State<SignInWidget> {
                           ),
                         ),
                       ),
-                      Form(
+                      // Deja que el gestor de contraseñas complete y guarde
+                      // los datos de acceso.
+                      AutofillGroup(
+                        child: Form(
                         key: _model.formKey,
                         autovalidateMode: AutovalidateMode.disabled,
                         child: Column(
@@ -171,6 +204,13 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     autofocus: false,
                                     enabled: true,
                                     obscureText: false,
+                                    keyboardType: TextInputType.emailAddress,
+                                    autocorrect: false,
+                                    textInputAction: TextInputAction.next,
+                                    autofillHints: const [
+                                      AutofillHints.email,
+                                      AutofillHints.username,
+                                    ],
                                     decoration: InputDecoration(
                                       isDense: true,
                                       labelStyle: FlutterFlowTheme.of(context)
@@ -337,6 +377,9 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     focusNode: _model.passwordInputFocusNode,
                                     autofocus: false,
                                     enabled: true,
+                                    autofillHints: const [
+                                      AutofillHints.password,
+                                    ],
                                     obscureText:
                                         !_model.passwordInputVisibility,
                                     decoration: InputDecoration(
@@ -477,6 +520,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                           ],
                         ),
                       ),
+                      ),
                       Align(
                         alignment: const AlignmentDirectional(0.0, 0.0),
                         child: Padding(
@@ -584,7 +628,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                               _model.apiResultbr7 =
                                   await DOVIAAPIAuthContextGroup.signInNEWCall
                                       .call(
-                                email: _model.correoInputTextController.text,
+                                email: _model.correoInputTextController.text
+                                    .trim(),
                                 password:
                                     _model.passwordInputTextController.text,
                               );
@@ -594,6 +639,10 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 // pantalla, que sigue viva: sin esto, al
                                 // cerrar sesión volvía con el correo y la
                                 // contraseña del usuario anterior escritos.
+                                TextInput.finishAutofillContext();
+                                final signedInEmail = _model
+                                    .correoInputTextController.text
+                                    .trim();
                                 _model.correoInputTextController?.clear();
                                 _model.passwordInputTextController?.clear();
                                 final idToken = DOVIAAPIAuthContextGroup
@@ -601,7 +650,13 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     .idToken(
                                   (_model.apiResultbr7?.jsonBody ?? ''),
                                 );
+                                FFAppState().UserEmail = signedInEmail;
+                                if (!context.mounted) return;
                                 GoRouter.of(context).prepareAuthEvent();
+                                // Sin el uid, `currentUserUid` quedaba vacío:
+                                // fallaba la subida de documentos del registro
+                                // de asociado y todo lo que se guarda por
+                                // usuario se mezclaba entre cuentas.
                                 await authManager.signIn(
                                   authenticationToken: idToken,
                                   refreshToken: DOVIAAPIAuthContextGroup
@@ -609,6 +664,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                                       .refreshToken(
                                     (_model.apiResultbr7?.jsonBody ?? ''),
                                   ),
+                                  tokenExpiration: tokenExpirationFrom(
+                                    DOVIAAPIAuthContextGroup.signInNEWCall
+                                        .expiresIn(
+                                            _model.apiResultbr7?.jsonBody),
+                                  ),
+                                  authUid: DOVIAAPIAuthContextGroup
+                                      .signInNEWCall
+                                      .userId(_model.apiResultbr7?.jsonBody),
                                 );
 
                                 _model.apiResultProfile =
@@ -617,6 +680,23 @@ class _SignInWidgetState extends State<SignInWidget> {
                                         .call(
                                   authToken: idToken,
                                 );
+
+                                // Respaldo por si el sign-in no trae el id.
+                                final profileUid = DOVIAAPIUserContextGroup
+                                    .getAuthenticatedUserProfileCall
+                                    .userId(_model.apiResultProfile?.jsonBody);
+                                if ((authManager.uid ?? '').isEmpty &&
+                                    profileUid != null &&
+                                    profileUid.isNotEmpty) {
+                                  authManager.updateAuthUserData(
+                                    authenticationToken:
+                                        authManager.authenticationToken,
+                                    refreshToken: authManager.refreshToken,
+                                    tokenExpiration:
+                                        authManager.tokenExpiration,
+                                    authUid: profileUid,
+                                  );
+                                }
 
                                 final userRole = DOVIAAPIUserContextGroup
                                     .getAuthenticatedUserProfileCall
@@ -690,106 +770,17 @@ class _SignInWidgetState extends State<SignInWidget> {
 
                                 if (associateRoles.contains(userRole)) {
                                   if (isActive != true) {
-                                    // Account pending approval — show modal then go to welcome
-                                    await showDialog(
-                                      context: context,
-                                      barrierColor: Colors.black54,
-                                      builder: (dialogContext) {
-                                        return Dialog(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(16.0),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(24.0),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          0.0),
-                                                  child: SvgPicture.asset(
-                                                    'assets/images/D-verde.svg',
-                                                    width: 48.0,
-                                                    height: 62.0,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16.0),
-                                                Text(
-                                                  'Tu cuenta se creó con éxito.',
-                                                  textAlign: TextAlign.center,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .publicSans(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                        fontSize: 18.0,
-                                                        color: const Color(
-                                                            0xFF00444B),
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                                const SizedBox(height: 12.0),
-                                                Text(
-                                                  'El equipo de DOVIA se comunicará contigo a la brevedad para continuar con el proceso de incorporación.',
-                                                  textAlign: TextAlign.center,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .publicSans(
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        lineHeight: 1.4,
-                                                      ),
-                                                ),
-                                                const SizedBox(height: 24.0),
-                                                FFButtonWidget(
-                                                  onPressed: () =>
-                                                      Navigator.pop(
-                                                          dialogContext),
-                                                  text: 'Entendido',
-                                                  options: FFButtonOptions(
-                                                    width: double.infinity,
-                                                    height: 42.0,
-                                                    color:
-                                                        const Color(0xFF007376),
-                                                    textStyle: FlutterFlowTheme
-                                                            .of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .publicSans(),
-                                                          color: Colors.white,
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                    elevation: 0.0,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            25.0),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                    await authManager.signOut();
-                                    context.pushNamedAuth(
-                                        BienvenidaWidget.routeName,
-                                        context.mounted);
+                                    // Pendiente de aprobación: la sesión queda
+                                    // abierta y se muestra "solicitud en
+                                    // revisión". Antes se cerraba la sesión y
+                                    // la app volvía al login cada vez.
+                                    FFAppState().UserRole =
+                                        userRole ?? FFAppState().UserRole;
+                                    await RegistrationProgress.set(
+                                        RegistrationProgress.pendingReview);
+                                    if (!context.mounted) return;
+                                    context.goNamed(
+                                        SolicitudEnRevisionWidget.routeName);
                                   } else {
                                     // Approved — route to role-specific home
                                     FFAppState().UserRole =

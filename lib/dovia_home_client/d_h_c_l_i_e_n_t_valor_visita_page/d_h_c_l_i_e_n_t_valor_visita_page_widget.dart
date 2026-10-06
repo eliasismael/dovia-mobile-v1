@@ -289,6 +289,7 @@ class _DHCLIENTValorVisitaPageWidgetState
       _failureMessage = null;
     });
 
+    if (!mounted) return;
     final result =
         await context.read<PaymentsRepository>().createCustomCheckout(
               paymentType: PaymentType.normalService,
@@ -362,6 +363,7 @@ class _DHCLIENTValorVisitaPageWidgetState
       _failureMessage = null;
     });
 
+    if (!mounted) return;
     final result =
         await context.read<PaymentsRepository>().createCustomCheckout(
               paymentType: PaymentType.normalService,

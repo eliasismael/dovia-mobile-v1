@@ -11,7 +11,6 @@ const _kAuthTokenKey = '_auth_authentication_token_';
 const _kRefreshTokenKey = '_auth_refresh_token_';
 const _kTokenExpirationKey = '_auth_token_expiration_';
 const _kUidKey = '_auth_uid_';
-const _kUserDataKey = '_auth_user_data_';
 
 class CustomAuthManager {
   // Auth session attributes
@@ -28,9 +27,7 @@ class CustomAuthManager {
     uid = null;
 
     // Update the current user.
-    doviaAuthUserSubject.add(
-      DoviaAuthUser(loggedIn: false),
-    );
+    _setCurrentUser(DoviaAuthUser(loggedIn: false));
     persistAuthData();
   }
 
@@ -58,11 +55,13 @@ class CustomAuthManager {
       'User must be logged in to update auth user data.',
     );
 
+    // Renovar tokens no cambia de usuario: sin uid nuevo se conserva el que
+    // había, en vez de dejar `currentUserUid` vacío.
     _updateCurrentUser(
       authenticationToken: authenticationToken,
       refreshToken: refreshToken,
       tokenExpiration: tokenExpiration,
-      authUid: authUid,
+      authUid: authUid ?? uid,
     );
   }
 
@@ -82,7 +81,7 @@ class CustomAuthManager {
       loggedIn: true,
       uid: authUid,
     );
-    doviaAuthUserSubject.add(updatedUser);
+    _setCurrentUser(updatedUser);
     persistAuthData();
     return updatedUser;
   }
@@ -109,11 +108,22 @@ class CustomAuthManager {
     final authTokenExists = authenticationToken != null;
     final tokenExpired =
         tokenExpiration != null && tokenExpiration!.isBefore(DateTime.now());
+    // Con un refreshToken la sesión sigue: `restoreSession()` pide un idToken
+    // nuevo al arrancar, y si el backend lo rechaza recién ahí se cierra.
+    final canRefresh = refreshToken != null && refreshToken!.isNotEmpty;
     final updatedUser = DoviaAuthUser(
-      loggedIn: authTokenExists && !tokenExpired,
+      loggedIn: authTokenExists && (!tokenExpired || canRefresh),
       uid: uid,
     );
-    doviaAuthUserSubject.add(updatedUser);
+    _setCurrentUser(updatedUser);
+  }
+
+  /// `currentUser` (y con él `loggedIn`) se actualiza acá mismo y no solo
+  /// cuando alguien escucha el stream: al arrancar todavía nadie lo escucha, y
+  /// `restoreSession()` veía `loggedIn == false` y no renovaba la sesión.
+  void _setCurrentUser(DoviaAuthUser user) {
+    currentUser = user;
+    doviaAuthUserSubject.add(user);
   }
 
   void persistAuthData() {

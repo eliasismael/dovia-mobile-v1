@@ -79,6 +79,19 @@ class FFAppState extends ChangeNotifier {
     });
   }
 
+  /// Borra los datos personales del usuario que cerró sesión, para que no
+  /// aparezcan precargados a quien entre después en el mismo teléfono.
+  ///
+  /// Las listas indexadas por id (visitas, ofertas, solicitudes) se conservan:
+  /// esos ids no se repiten entre cuentas y el mismo usuario los necesita al
+  /// volver a entrar.
+  void clearUserScopedState() {
+    _UserEmail = '';
+    prefs.remove('ff_UserEmail');
+    _UserData = UserDataFromRegisterFormStruct();
+    prefs.remove('ff_UserData');
+  }
+
   void update(VoidCallback callback) {
     callback();
     notifyListeners();

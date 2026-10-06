@@ -42,7 +42,7 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
           if (!((String mail) {
             return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
                 .hasMatch(mail);
-          }(_model.correoElectronicoTextController.text))) {
+          }(_model.correoElectronicoTextController.text.trim()))) {
             _model.mailInvalid = true;
             safeSetState(() {});
             return;
@@ -205,6 +205,11 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                       autofocus: false,
                                       enabled: true,
                                       obscureText: false,
+                                      keyboardType: TextInputType.emailAddress,
+                                      autocorrect: false,
+                                      autofillHints: const [
+                                        AutofillHints.email
+                                      ],
                                       decoration: InputDecoration(
                                         isDense: true,
                                         labelStyle: FlutterFlowTheme.of(context)
@@ -430,7 +435,8 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                           var shouldSetState = false;
                                           FFAppState().UserEmail = _model
                                               .correoElectronicoTextController
-                                              .text;
+                                              .text
+                                              .trim();
                                           FFAppState().update(() {});
                                           _model.response =
                                               await DOVIAAPIAuthContextGroup
@@ -442,6 +448,7 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                           shouldSetState = true;
                                           if ((_model.response?.succeeded ??
                                               true)) {
+                                            if (!context.mounted) return;
                                             context.pushNamed(
                                                 CreateAccount2Widget.routeName);
 
@@ -480,11 +487,13 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                                   email;
                                               _model.signUpError = null;
                                               safeSetState(() {});
+                                              if (!context.mounted) return;
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(const SnackBar(
                                                 content: Text(
                                                     'Tu registro quedó a medias. Te enviamos un código para continuar.'),
                                               ));
+                                              if (!context.mounted) return;
                                               context.pushNamed(
                                                   CreateAccount2Widget
                                                       .routeName);
@@ -515,6 +524,7 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                               if (resend.succeeded) {
                                                 _model.signUpError = null;
                                                 safeSetState(() {});
+                                                if (!context.mounted) return;
                                                 context.pushNamed(
                                                     CreateAccount2Widget
                                                         .routeName);

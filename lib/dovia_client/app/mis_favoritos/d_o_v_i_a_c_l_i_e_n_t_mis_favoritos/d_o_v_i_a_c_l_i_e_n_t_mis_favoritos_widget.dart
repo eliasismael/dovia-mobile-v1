@@ -1,4 +1,5 @@
 import '/shared_components/dovia_bottom_sheet/dovia_bottom_sheet.dart';
+import '/shared_components/error_state/error_state_widget.dart';
 import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
@@ -198,6 +199,12 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                   }
                                   final gridViewGetAllFavoriteFoldersResponse =
                                       snapshot.data!;
+                                  // Sin conexión o con el servidor caído se avisa y se deja
+                                  // reintentar, en vez de mostrar la lista vacía.
+                                  if (isRetryableLoadError(gridViewGetAllFavoriteFoldersResponse)) {
+                                    return ErrorStateWidget.fromResponse(gridViewGetAllFavoriteFoldersResponse,
+                                        onRetry: () => safeSetState(() {}));
+                                  }
                                   final eachFolder =
                                       DOVIAAPIFavoriteContextGroup
                                               .getAllFavoriteFoldersCall
@@ -394,6 +401,12 @@ class _DOVIACLIENTMisFavoritosWidgetState
                               }
                               final listViewGetDefaultFavoritesResponse =
                                   snapshot.data!;
+                              // Sin conexión o con el servidor caído se avisa y se deja
+                              // reintentar, en vez de mostrar la lista vacía.
+                              if (isRetryableLoadError(listViewGetDefaultFavoritesResponse)) {
+                                return ErrorStateWidget.fromResponse(listViewGetDefaultFavoritesResponse,
+                                    onRetry: () => safeSetState(() {}));
+                              }
 
                               return Builder(
                                 builder: (context) {

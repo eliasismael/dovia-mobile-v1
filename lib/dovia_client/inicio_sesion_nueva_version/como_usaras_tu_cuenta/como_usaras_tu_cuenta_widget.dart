@@ -163,8 +163,10 @@ class _ComoUsarasTuCuentaWidgetState extends State<ComoUsarasTuCuentaWidget> {
                                 '[ComoUsaras] WARNING: No token available even after refresh.');
                           }
 
+                          if (!context.mounted) return;
                           context.pushNamed(Datos3NewWidget.routeName);
                         } else {
+                          if (!context.mounted) return;
                           await showDialog(
                             context: context,
                             builder: (alertDialogContext) {

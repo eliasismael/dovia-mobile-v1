@@ -258,10 +258,9 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                       label: 'Visitas',
                       itemKey: widget.tutorialKeys?['visitas'],
                       routeName: DOVIACLIENTMisVisitasWidget.routeName,
-                      onTap: () async {
-                        context
-                            .pushNamed(DOVIACLIENTMisVisitasWidget.routeName);
-                      },
+                      // El invitado ve el aviso de registro en vez de entrar.
+                      onTap: () => _openRestricted(
+                          DOVIACLIENTMisVisitasWidget.routeName),
                     ),
                     // Hueco para el botón central, que va por encima.
                     const SizedBox(width: 72.0),
@@ -279,10 +278,9 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                       itemKey: widget.tutorialKeys?['favoritos'],
                       iconSize: 20.0,
                       routeName: DOVIACLIENTMisFavoritosWidget.routeName,
-                      onTap: () async {
-                        context
-                            .pushNamed(DOVIACLIENTMisFavoritosWidget.routeName);
-                      },
+                      // El invitado ve el aviso de registro en vez de entrar.
+                      onTap: () => _openRestricted(
+                          DOVIACLIENTMisFavoritosWidget.routeName),
                     ),
                   ],
                 ),

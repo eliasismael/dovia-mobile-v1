@@ -158,6 +158,8 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
     return Icons.house;
   }
 
+  bool _heartBusy = false;
+
   Future<void> _handleHeartTap() async {
     // Un invitado no puede guardar nada: la acción sólo abre el modal de
     // registro, así que el corazón no debe encenderse.
@@ -165,19 +167,31 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
       await widget.onAddToFavorites?.call();
       return;
     }
-
-    if (!_isFavorite) {
-      setState(() {
-        _isFavorite = true;
-      });
-      if (widget.onAddToFavorites != null) {
-        await widget.onAddToFavorites!();
+    // Un segundo toque mientras se guarda mandaba el alta dos veces.
+    if (_heartBusy) return;
+    _heartBusy = true;
+    try {
+      if (!_isFavorite) {
+        setState(() {
+          _isFavorite = true;
+        });
+        if (widget.onAddToFavorites != null) {
+          await widget.onAddToFavorites!();
+        }
+      } else {
+        // If already favorite, we trigger onRemoveFromFavorites to show the folder modal without adding again
+        if (widget.onRemoveFromFavorites != null) {
+          await widget.onRemoveFromFavorites!();
+        }
       }
-    } else {
-      // If already favorite, we trigger onRemoveFromFavorites to show the folder modal without adding again
-      if (widget.onRemoveFromFavorites != null) {
-        await widget.onRemoveFromFavorites!();
-      }
+    } finally {
+      _heartBusy = false;
+    }
+    // El corazón se prende antes de guardar; si el alta falló (o en el modal
+    // se quitó de todas las carpetas) quedaba mintiendo. Se confirma con el
+    // backend.
+    if (mounted && FFAppState().UserRole == 'CLIENT') {
+      await _syncFavoriteStatusFromApi();
     }
   }
 

@@ -102,7 +102,11 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                             roleBadgeText:
                                 _roleBadgeText(FFAppState().UserRole),
                             onEnviar: () async {
-                              await RegistrationProgress.clear();
+                              // La sesión queda abierta: hasta que DOVIA lo
+                              // apruebe, al abrir la app ve "solicitud en
+                              // revisión" en vez del login.
+                              await RegistrationProgress.set(
+                                  RegistrationProgress.pendingReview);
                               await RegistrationProgress.markAssociateSubmitted(
                                   currentUserUid);
                               if (!context.mounted) return;
@@ -190,10 +194,9 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                                   );
                                 },
                               );
-                              await authManager.signOut();
                               if (context.mounted) {
-                                context.goNamedAuth(
-                                    SignInWidget.routeName, context.mounted);
+                                context.goNamed(
+                                    SolicitudEnRevisionWidget.routeName);
                               }
                             },
                             onMapPointSelected: (latitude, longitude) async {},

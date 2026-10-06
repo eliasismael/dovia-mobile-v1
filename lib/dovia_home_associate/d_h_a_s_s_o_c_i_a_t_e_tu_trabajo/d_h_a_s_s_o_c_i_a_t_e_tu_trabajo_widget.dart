@@ -730,56 +730,54 @@ class _DHASSOCIATETuTrabajoWidgetState
                                       padding:
                                           const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 12.0, 0.0, 0.0),
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/806/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/177/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/201/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                              child: Image.network(
-                                                'https://picsum.photos/seed/353/600',
-                                                width: 92.0,
-                                                height: 92.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ].divide(const SizedBox(width: 15.0)),
-                                        ),
-                                      ),
+                                      // Las fotos que adjuntó el cliente. Antes
+                                      // había cuatro fotos de relleno al azar.
+                                      child: Builder(builder: (context) {
+                                        final images =
+                                            asrRequestImages(_request ?? {});
+                                        if (images.isEmpty) {
+                                          return Text(
+                                            'El cliente no adjuntó imágenes.',
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodySmall
+                                                .override(
+                                                  font: GoogleFonts.inter(),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .secondaryText,
+                                                  letterSpacing: 0.0,
+                                                ),
+                                          );
+                                        }
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              for (final url in images)
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
+                                                  child: Image.network(
+                                                    url,
+                                                    width: 92.0,
+                                                    height: 92.0,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (_, __, ___) =>
+                                                        Container(
+                                                      width: 92.0,
+                                                      height: 92.0,
+                                                      color: const Color(
+                                                          0xFFEFEFEF),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ].divide(
+                                                const SizedBox(width: 15.0)),
+                                          ),
+                                        );
+                                      }),
                                     ),
                                   ),
                                 ],

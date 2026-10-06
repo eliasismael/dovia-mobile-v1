@@ -440,6 +440,14 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                                     width: 200.0,
                                                     height: 200.0,
                                                     fit: BoxFit.cover,
+                                                    errorBuilder:
+                                                        (_, __, ___) =>
+                                                            Image.asset(
+                                                      'assets/images/casa_card_sobreMiVisita.png',
+                                                      width: 200.0,
+                                                      height: 200.0,
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : Image.asset(
                                                     'assets/images/casa_card_sobreMiVisita.png',

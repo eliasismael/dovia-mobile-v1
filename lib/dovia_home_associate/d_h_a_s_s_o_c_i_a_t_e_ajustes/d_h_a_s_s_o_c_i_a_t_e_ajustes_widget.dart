@@ -1,18 +1,15 @@
 import '/auth/custom_auth/auth_util.dart';
-import '/backend/api_requests/api_auth.dart';
+import '/auth/sign_out.dart';
 import '/backend/api_requests/api_users.dart';
 import '/dovia_home_associate/associate_role.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/repositories/user_repository.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import '/index.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_ajustes_model.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_ajustes_model.dart';
@@ -70,23 +67,9 @@ class _DHASSOCIATEAjustesWidgetState extends State<DHASSOCIATEAjustesWidget> {
     super.dispose();
   }
 
-  /// Cierra la sesión en el backend y vuelve al inicio de la app.
-  ///
-  /// El perfil cacheado se limpia **antes** de navegar: es el mismo
-  /// [UserRepository] para toda la app y dejarlo con los datos del asociado
-  /// anterior se los mostraría a quien inicie sesión después.
-  Future<void> _signOut() async {
-    final router = GoRouter.of(context);
-    context.read<UserRepository>().clear();
-    await DOVIAAPIAuthContextGroup.logoutAllCall
-        .call(idToken: authManager.authenticationToken);
-    router.prepareAuthEvent();
-    await authManager.signOut();
-    router.clearRedirectLocation();
-    if (!mounted) return;
-    // ignore: use_build_context_synchronously
-    context.goNamedAuth(SignInWidget.routeName, mounted);
-  }
+  /// Cierra la sesión en el backend y vuelve al login. El estado del usuario
+  /// se limpia en `main.dart`.
+  Future<void> _signOut() => signOutAndGoToLogin(context);
 
   @override
   Widget build(BuildContext context) {
@@ -137,11 +120,13 @@ class _DHASSOCIATEAjustesWidgetState extends State<DHASSOCIATEAjustesWidget> {
                         onSupport: () async {},
                         onLogout: _signOut,
                         onDeleteAccount: (reason) async {
-                          await DOVIAAPIUserContextGroup.deactivateMyAccountCall
+                          final res = await DOVIAAPIUserContextGroup
+                              .deactivateMyAccountCall
                               .call(
                             authToken: authManager.authenticationToken,
                             reason: reason,
                           );
+                          return res.succeeded;
                         },
                         onSaveInfo: () async {},
                       ),

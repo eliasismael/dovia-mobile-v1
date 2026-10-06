@@ -8,9 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// - [idAndTerms]: falta la identificación y aceptar los términos.
 /// - [associateForm]: asociado que falta completar el formulario (dirección,
 ///   documentos y entrevista).
+/// - [pendingReview]: asociado que ya envió todo y espera que DOVIA lo
+///   apruebe. Al abrir la app ve la pantalla de "solicitud en revisión" (con
+///   la sesión abierta) hasta que el backend lo marque activo.
 class RegistrationProgress {
   static const idAndTerms = 'id_terms';
   static const associateForm = 'associate_form';
+  static const pendingReview = 'pending_review';
 
   static const _stepKey = 'registration_step';
   static const _submittedKey = 'associate_form_submitted_';

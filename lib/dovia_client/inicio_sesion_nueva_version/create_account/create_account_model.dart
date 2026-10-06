@@ -26,12 +26,13 @@ class CreateAccountModel extends FlutterFlowModel<CreateAccountWidget> {
       correoElectronicoTextControllerValidator;
   String? _correoElectronicoTextControllerValidator(
       BuildContext context, String? val) {
+    val = val?.trim();
     if (val == null || val.isEmpty) {
       return 'Introduce un correo electrónico';
     }
 
     if (val.length < 4) {
-      return 'Requires at least 4 characters.';
+      return 'Debe tener al menos 4 caracteres.';
     }
 
     if (!RegExp(kTextValidatorEmailRegex).hasMatch(val)) {

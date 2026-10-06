@@ -821,6 +821,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
 
               if ((addFavoriteResponse?.succeeded ?? false) ||
                   isAlreadyFavorite) {
+                if (!context.mounted) return;
                 await showModalBottomSheet(
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
@@ -852,6 +853,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                   },
                 ).then((value) => safeSetState(() {}));
               } else {
+                if (!context.mounted) return;
                 await showDialog(
                   context: context,
                   builder: (alertDialogContext) {
@@ -2000,6 +2002,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                   ?.succeeded ??
                                                               false) ||
                                                           isAlreadyFavorite) {
+                                                        if (!context.mounted) return;
                                                         await showModalBottomSheet(
                                                           isScrollControlled:
                                                               true,
@@ -2050,6 +2053,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                             safeSetState(
                                                                 () {}));
                                                       } else {
+                                                        if (!context.mounted) return;
                                                         await showDialog(
                                                           context: context,
                                                           builder:
@@ -2433,6 +2437,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                   ?.succeeded ??
                                                               false) ||
                                                           isAlreadyFavorite) {
+                                                        if (!context.mounted) return;
                                                         await showModalBottomSheet(
                                                           isScrollControlled:
                                                               true,
@@ -2483,6 +2488,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                             safeSetState(
                                                                 () {}));
                                                       } else {
+                                                        if (!context.mounted) return;
                                                         await showDialog(
                                                           context: context,
                                                           builder:

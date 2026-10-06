@@ -1,4 +1,5 @@
 import '/dovia_client/app/mis_propiedades/deal_in_progress_badge.dart';
+import '/shared_components/error_state/error_state_widget.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -315,6 +316,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                 }
                                 final listViewGetMyPropertiesResponse =
                                     snapshot.data!;
+                                // Sin conexión o con el servidor caído se avisa y se deja
+                                // reintentar, en vez de mostrar la lista vacía.
+                                if (isRetryableLoadError(listViewGetMyPropertiesResponse)) {
+                                  return ErrorStateWidget.fromResponse(listViewGetMyPropertiesResponse,
+                                      onRetry: () => safeSetState(() {}));
+                                }
 
                                 return Builder(
                                   builder: (context) {
@@ -462,6 +469,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                                   .apiResultj56
                                                                   ?.succeeded ??
                                                               true)) {
+                                                            if (!context.mounted) return;
                                                             await showModalBottomSheet(
                                                               isScrollControlled:
                                                                   true,
@@ -512,6 +520,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                                 safeSetState(
                                                                     () {}));
                                                           } else {
+                                                            if (!context.mounted) return;
                                                             await showDialog(
                                                               context: context,
                                                               builder:

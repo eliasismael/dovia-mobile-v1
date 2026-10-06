@@ -745,6 +745,7 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                         .invalidate();
                                                                     if (!removeResult
                                                                         .succeeded) {
+                                                                      if (!context.mounted) return;
                                                                       await showDialog(
                                                                         context:
                                                                             context,
@@ -832,6 +833,7 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                           true;
                                                                       // Sin aviso: el ícono de la carpeta ya muestra que quedó guardada.
                                                                     } else {
+                                                                      if (!context.mounted) return;
                                                                       await showDialog(
                                                                         context:
                                                                             context,
@@ -989,6 +991,7 @@ class _TusFavoritosCarpetasModalWidgetState
                                         );
                                       }
 
+                                      if (!context.mounted) return;
                                       await showDialog(
                                         context: context,
                                         builder: (dialogContext) {
@@ -1020,6 +1023,7 @@ class _TusFavoritosCarpetasModalWidgetState
                                       if (widget.isCreatingNewFolderPARAM ==
                                               true ||
                                           addedToFolder) {
+                                        if (!context.mounted) return;
                                         Navigator.pop(context);
                                       } else {
                                         _model.isCreatingNewFolder = false;

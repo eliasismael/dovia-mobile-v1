@@ -6,6 +6,8 @@ import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favorit
 import '/backend/api_requests/api_calls.dart';
 import '/auth/custom_auth/auth_util.dart';
 import 'package:flutter/material.dart';
+import '/core/api_error.dart';
+import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
 import 'house_card_component_model.dart';
 export 'house_card_component_model.dart';
 
@@ -116,12 +118,38 @@ class _HouseCardComponentWidgetState extends State<HouseCardComponentWidget> {
               type: widget.listingType,
               price: widget.price?.toString(),
               onAddToFavorites: () async {
-                await DOVIAAPIFavoriteContextGroup.addPropertyToFavoritesCall
+                // Un invitado no puede guardar favoritos: se le ofrece
+                // registrarse, como en el resto de las tarjetas (acá se abría
+                // el modal de carpetas y el alta fallaba en silencio).
+                if (FFAppState().UserRole == 'VISITOR') {
+                  await showDialog(
+                    context: context,
+                    builder: (dialogContext) => const Dialog(
+                      elevation: 0,
+                      insetPadding: EdgeInsets.zero,
+                      backgroundColor: Colors.transparent,
+                      child: VisitorRestrictionPopupWidget(),
+                    ),
+                  );
+                  return;
+                }
+                final res = await DOVIAAPIFavoriteContextGroup
+                    .addPropertyToFavoritesCall
                     .call(
                   authToken: currentAuthenticationToken,
                   propertyId: widget.propertyId,
                   folderId: '',
                 );
+                if (!context.mounted) return;
+                final alreadyFavorite = res.statusCode == 409 ||
+                    res.bodyText.toLowerCase().contains('already');
+                if (!res.succeeded && !alreadyFavorite) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(apiErrorMessage(
+                        res, 'No pudimos guardar la propiedad en favoritos.')),
+                  ));
+                  return;
+                }
                 await showModalBottomSheet(
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
