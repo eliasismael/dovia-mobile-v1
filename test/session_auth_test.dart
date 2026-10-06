@@ -183,7 +183,11 @@ void main() {
     test('si el backend rechaza el refresh, cierra sesión y avisa', () async {
       await _storedSession();
       var expired = 0;
-      onSessionExpired = () => expired++;
+      String? message;
+      onSessionExpired = (m) {
+        expired++;
+        message = m;
+      };
       final res = await http.runWithClient(
         _getMyProfile,
         () => MockClient((req) async {
@@ -197,6 +201,30 @@ void main() {
       expect(loggedIn, isFalse);
       expect(authManager.authenticationToken, isNull);
       expect(expired, 1);
+      expect(message, sessionExpiredMessage);
+    });
+
+    test('cuenta deshabilitada: cierra sesión con ese motivo', () async {
+      // Desde dcb0e24e el backend rechaza el refresh de usuarios inactivos o
+      // suspendidos con 403 USER_DISABLED.
+      await _storedSession();
+      String? message;
+      onSessionExpired = (m) => message = m;
+      await http.runWithClient(
+        _getMyProfile,
+        () => MockClient((req) async {
+          if (req.url.path.endsWith('/auth/refresh-token')) {
+            return _json(403, {
+              'errors': [
+                {'code': 'USER_DISABLED'}
+              ]
+            });
+          }
+          return _json(401, {});
+        }),
+      );
+      expect(loggedIn, isFalse);
+      expect(message, accountDisabledMessage);
     });
 
     test('sin conexión durante el refresh no reintenta ni cierra sesión',

@@ -3,9 +3,15 @@ import 'package:flutter/foundation.dart';
 import '/backend/api_requests/api_auth.dart';
 import 'auth_util.dart';
 
-/// Se llama cuando el backend rechaza el refreshToken y la sesión se cierra.
-/// Lo registra `main.dart` para llevar al login y avisarle al usuario.
-VoidCallback? onSessionExpired;
+/// Se llama cuando el backend rechaza el refreshToken y la sesión se cierra,
+/// con el motivo para mostrarle al usuario. Lo registra `main.dart` para
+/// llevar al login.
+void Function(String message)? onSessionExpired;
+
+const sessionExpiredMessage = 'Tu sesión expiró. Volvé a iniciar sesión.';
+const accountDisabledMessage =
+    'Tu cuenta está deshabilitada o suspendida. Si crees que es un error, '
+    'contacta a soporte.';
 
 Future<String?>? _inFlight;
 DateTime? _lastRefresh;
@@ -78,7 +84,11 @@ Future<String?> _refresh() async {
     }
 
     if (response.statusCode >= 400 && response.statusCode < 500) {
-      await _expire();
+      // 403 USER_DISABLED: el backend ahora también rechaza el refresh de una
+      // cuenta deshabilitada o suspendida. No es una sesión vencida.
+      await _expire(response.statusCode == 403
+          ? accountDisabledMessage
+          : sessionExpiredMessage);
     }
   } catch (e) {
     if (kDebugMode) print('No se pudo renovar la sesión: $e');
@@ -86,7 +96,7 @@ Future<String?> _refresh() async {
   return null;
 }
 
-Future<void> _expire() async {
+Future<void> _expire([String message = sessionExpiredMessage]) async {
   await authManager.signOut();
-  onSessionExpired?.call();
+  onSessionExpired?.call(message);
 }

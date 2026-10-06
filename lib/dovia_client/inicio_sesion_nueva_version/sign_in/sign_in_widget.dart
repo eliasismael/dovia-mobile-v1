@@ -703,11 +703,21 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     .userRole(
                                   (_model.apiResultProfile?.jsonBody ?? ''),
                                 );
-                                final isActive = DOVIAAPIUserContextGroup
-                                    .getAuthenticatedUserProfileCall
-                                    .isUserActive(
-                                  (_model.apiResultProfile?.jsonBody ?? ''),
-                                );
+                                // La aprobación del asociado es `verified`:
+                                // select-role lo deja en false y HQ Admin lo
+                                // pasa a true. `active` es otra cosa (cuenta
+                                // deshabilitada): con active=false el backend
+                                // ni siquiera deja iniciar sesión.
+                                final isApproved = DOVIAAPIAuthContextGroup
+                                            .signInNEWCall
+                                            .verified(
+                                                _model.apiResultbr7?.jsonBody) ==
+                                        true ||
+                                    DOVIAAPIUserContextGroup
+                                            .getAuthenticatedUserProfileCall
+                                            .isVerified(_model
+                                                .apiResultProfile?.jsonBody) ==
+                                        true;
 
                                 final associateRoles = [
                                   'SHOWING_AGENT',
@@ -769,7 +779,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 if (!context.mounted) return;
 
                                 if (associateRoles.contains(userRole)) {
-                                  if (isActive != true) {
+                                  if (!isApproved) {
                                     // Pendiente de aprobación: la sesión queda
                                     // abierta y se muestra "solicitud en
                                     // revisión". Antes se cerraba la sesión y
@@ -833,11 +843,17 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 // Error en texto rojo bajo el form, sin dialog con el JSON.
                                 final status =
                                     _model.apiResultbr7?.statusCode ?? 0;
-                                _model.signInError = (status == 400 ||
-                                        status == 401 ||
-                                        status == 404)
-                                    ? 'Correo o contraseña incorrectos.\nPor favor, verifica tus datos e Inténtalo nuevamente.'
-                                    : 'No pudimos iniciar sesión. Intenta de nuevo en unos minutos.';
+                                // 403 USER_DISABLED: cuenta deshabilitada o
+                                // suspendida. Antes caía en el mensaje de
+                                // "intenta en unos minutos", que no se arregla
+                                // esperando.
+                                _model.signInError = status == 403
+                                    ? 'Tu cuenta está deshabilitada o suspendida.\nSi crees que es un error, contacta a soporte.'
+                                    : (status == 400 ||
+                                            status == 401 ||
+                                            status == 404)
+                                        ? 'Correo o contraseña incorrectos.\nPor favor, verifica tus datos e Inténtalo nuevamente.'
+                                        : 'No pudimos iniciar sesión. Intenta de nuevo en unos minutos.';
                                 _model.invalidMailOrPassword = true;
                                 safeSetState(() {});
                               }

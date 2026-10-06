@@ -141,9 +141,12 @@ void main() {
       await RegistrationProgress.set(RegistrationProgress.pendingReview);
       await pumpReview(
           tester,
+          // Así llega un asociado pendiente: la cuenta está activa (si no, ni
+          // podría iniciar sesión) pero todavía no fue verificado por HQ.
           (_) async => _json(200, {
                 'data': {
-                  'active': false,
+                  'active': true,
+                  'verified': false,
                   'roles': ['HOME_ASSOCIATE']
                 }
               }));
@@ -162,7 +165,7 @@ void main() {
           tester,
           (_) async => _json(200, {
                 'data': {
-                  'active': true,
+                  'verified': true,
                   'roles': ['SHOWING_AGENT']
                 }
               }));
@@ -201,7 +204,7 @@ void main() {
       },
           () => MockClient((_) async => _json(200, {
                 'data': {
-                  'active': approved,
+                  'verified': approved,
                   'roles': ['HOME_ASSOCIATE']
                 }
               })));
@@ -222,7 +225,7 @@ void main() {
         await _settle(tester);
       },
           () => MockClient((_) async => _json(200, {
-                'data': {'active': false}
+                'data': {'verified': false}
               })));
 
       expect(find.text('RUTA ${SignInWidget.routeName}'), findsOneWidget);

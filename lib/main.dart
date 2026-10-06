@@ -152,14 +152,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   /// El backend rechazó el refreshToken: la sesión ya se cerró. Se lleva al
   /// login y se explica por qué, en lugar de dejar la pantalla fallando.
-  void _onSessionExpired() {
+  void _onSessionExpired(String message) {
     if (!mounted) return;
     _router.goNamed(SignInWidget.routeName);
     _scaffoldMessengerKey.currentState
       ?..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(
-        content: Text('Tu sesión expiró. Volvé a iniciar sesión.'),
-      ));
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   void setThemeMode(ThemeMode mode) => safeSetState(() {

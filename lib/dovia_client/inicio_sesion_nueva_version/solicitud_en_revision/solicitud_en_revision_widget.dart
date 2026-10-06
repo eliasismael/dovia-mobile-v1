@@ -51,7 +51,9 @@ class _SolicitudEnRevisionWidgetState extends State<SolicitudEnRevisionWidget>
     if (state == AppLifecycleState.resumed) _checkStatus();
   }
 
-  /// Consulta si DOVIA ya aprobó la cuenta (`active` en el perfil).
+  /// Consulta si DOVIA ya aprobó la cuenta: `verified` en el perfil (lo pone
+  /// en true HQ Admin con `POST /admin/users/{id}/verify`). No es `active`,
+  /// que indica cuenta deshabilitada.
   Future<void> _checkStatus() async {
     if (!mounted) return;
     setState(() {
@@ -62,7 +64,7 @@ class _SolicitudEnRevisionWidgetState extends State<SolicitudEnRevisionWidget>
     final response = await call.call(authToken: currentAuthenticationToken);
     if (!mounted) return;
 
-    if (response.succeeded && call.isUserActive(response.jsonBody) == true) {
+    if (response.succeeded && call.isVerified(response.jsonBody) == true) {
       final role = call.userRole(response.jsonBody);
       if (role != null && role.isNotEmpty) FFAppState().UserRole = role;
       await RegistrationProgress.clear();
