@@ -97,8 +97,12 @@ class AppAuthGoogleOAuthClient implements GoogleOAuthClient {
           CognitoGoogleConfig.redirectUrl,
           serviceConfiguration: discoveryUrl == null ? _service(config) : null,
           discoveryUrl: discoveryUrl,
-          scopes: CognitoGoogleConfig.scopes,
+          scopes: config.scopes,
           additionalParameters: const {'identity_provider': 'Google'},
+          // Cognito se lo pasa a Google: siempre muestra el selector de
+          // cuentas. Si no, Google entra solo con la cuenta abierta en el
+          // navegador y no se puede usar otra (ni registrarse con otra).
+          promptValues: const ['select_account'],
           // iOS: sesión efímera, sin cookies compartidas con Safari. Así se
           // puede elegir otra cuenta de Google después de cerrar sesión.
           externalUserAgent:
@@ -130,7 +134,7 @@ class AppAuthGoogleOAuthClient implements GoogleOAuthClient {
         refreshToken: refreshToken,
         serviceConfiguration: discoveryUrl == null ? _service(config) : null,
         discoveryUrl: discoveryUrl,
-        scopes: CognitoGoogleConfig.scopes,
+        scopes: config.scopes,
       ));
       final idToken = res.idToken;
       if (idToken == null || idToken.isEmpty) {

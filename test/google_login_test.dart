@@ -143,6 +143,8 @@ void main() {
           'https://us-east-2amy5dp2mj.auth.us-east-2.amazoncognito.com/oauth2/token');
       // Producción todavía no tiene valores: no se ofrece Google.
       expect(CognitoGoogleConfig.forEnvironment(''), isNull);
+      expect(dev.scopes, ['openid', 'email', 'profile']);
+      expect(stg.scopes, ['openid', 'email']);
       expect(CognitoGoogleConfig.redirectUrl,
           'com.mycompany.dovia://oauth/callback');
     });

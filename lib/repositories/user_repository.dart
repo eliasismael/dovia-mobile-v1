@@ -64,6 +64,8 @@ class UserRepository extends ChangeNotifier {
     _isLoading = false;
 
     if (!response.succeeded) {
+      debugPrint('[Perfil] GET /users/me -> '
+          '${response.statusCode}: ${response.bodyText}');
       _error = 'No se pudo cargar el perfil';
       notifyListeners();
       return Failure(_error!, statusCode: response.statusCode);

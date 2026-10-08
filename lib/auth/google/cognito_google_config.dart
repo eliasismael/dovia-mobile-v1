@@ -16,6 +16,7 @@ class CognitoGoogleConfig {
     required this.domain,
     required this.clientId,
     this.userPoolId = '',
+    this.scopes = fullScopes,
   });
 
   /// Origen del dominio de Cognito (sin barra final).
@@ -25,12 +26,19 @@ class CognitoGoogleConfig {
   final String clientId;
   final String userPoolId;
 
+  /// Scopes que se piden a Cognito. Login y registro piden los mismos.
+  final List<String> scopes;
+
   static const redirectUrl = 'com.mycompany.dovia://oauth/callback';
   static const logoutRedirectUrl = 'com.mycompany.dovia://auth/login';
-  /// La guía pide también `profile`, pero los clientes móviles de dev y
-  /// staging no lo tienen habilitado (Cognito responde `invalid_scope`). Con
-  /// `openid` el ID token ya trae los atributos legibles (nombre, correo).
-  static const scopes = ['openid', 'email'];
+
+  /// Los de la guía del backend.
+  static const fullScopes = ['openid', 'email', 'profile'];
+
+  /// El cliente móvil de staging todavía no tiene habilitado `profile`
+  /// (Cognito responde `invalid_scope`). Cuando lo habiliten, usar
+  /// [fullScopes] también ahí.
+  static const scopesWithoutProfile = ['openid', 'email'];
 
   String get authorizationEndpoint => '$domain/oauth2/authorize';
   String get tokenEndpoint => '$domain/oauth2/token';
@@ -55,6 +63,7 @@ class CognitoGoogleConfig {
     domain: 'https://us-east-2amy5dp2mj.auth.us-east-2.amazoncognito.com',
     clientId: '4t90gdei6t163sv0vuq70qfeqb',
     userPoolId: String.fromEnvironment('COGNITO_USER_POOL_ID'),
+    scopes: scopesWithoutProfile,
   );
 
   static const _envDomain = String.fromEnvironment('COGNITO_DOMAIN');

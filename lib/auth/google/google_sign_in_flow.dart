@@ -69,6 +69,12 @@ Future<void> continueWithGoogle(
 
   final claims = tokens.claims;
   final claimId = claims['custom:id']?.toString() ?? '';
+  if (kDebugMode) {
+    print('[Google] login (${intent.name}): custom:id=${claimId.isNotEmpty} '
+        'custom:profile_complete=${claims['custom:profile_complete']} '
+        'custom:verified=${claims['custom:verified']} '
+        'cognito:groups=${claims['cognito:groups']}');
+  }
   router.prepareAuthEvent();
   await authManager.signIn(
     authenticationToken: tokens.idToken,

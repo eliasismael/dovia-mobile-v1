@@ -95,6 +95,10 @@ class _Datos2WidgetState extends State<Datos2Widget> {
 
     // 409: el rol ya estaba elegido (retomó el registro después de cerrar la
     // app en este paso); se sigue con la identificación.
+    if (!res.succeeded) {
+      debugPrint('[Registro] select-role $role -> '
+          '${res.statusCode}: ${res.bodyText}');
+    }
     if (!res.succeeded && res.statusCode != 409) {
       safeSetState(() {
         _enviando = false;
