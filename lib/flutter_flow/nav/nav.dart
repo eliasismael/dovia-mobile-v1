@@ -94,6 +94,8 @@ Widget homeForRole(String role) {
       return const FormAssociateWidget();
     case RegistrationProgress.pendingReview:
       return const SolicitudEnRevisionWidget();
+    case RegistrationProgress.googleData:
+      return const GoogleDatosWidget();
   }
   switch (role) {
     case 'SHOWING_AGENT':
@@ -1095,6 +1097,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           path: SolicitudEnRevisionWidget.routePath,
           builder: (context, params) => const SolicitudEnRevisionWidget(),
+        ),
+        FFRoute(
+          name: GoogleDatosWidget.routeName,
+          requireAuth: true,
+          path: GoogleDatosWidget.routePath,
+          builder: (context, params) => const GoogleDatosWidget(),
         ),
         FFRoute(
           name: FormAssociateWidget.routeName,

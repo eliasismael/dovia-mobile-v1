@@ -1,3 +1,4 @@
+import '/auth/custom_auth/token_refresher.dart';
 import '/auth/registration_progress.dart';
 import '/backend/api_requests/api_users.dart';
 import '/auth/pending_associate_role.dart';
@@ -107,24 +108,20 @@ class _Datos2WidgetState extends State<Datos2Widget> {
     String? newRefreshToken =
         DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(res.jsonBody);
 
-    if (newToken == null || newToken.isEmpty) {
-      final refreshRes = await DOVIAAPIAuthContextGroup.refreshTokenNEWCall
-          .call(refreshToken: currentAuthRefreshToken);
-      if (refreshRes.succeeded) {
-        newToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall
-            .idToken(refreshRes.jsonBody);
-        newRefreshToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall
-            .refreshTokenResponse(refreshRes.jsonBody);
-      }
-    }
-
     if (newToken != null && newToken.isNotEmpty) {
       authManager.updateAuthUserData(
         authenticationToken: newToken,
-        refreshToken: newRefreshToken,
+        refreshToken: newRefreshToken ?? currentAuthRefreshToken,
         tokenExpiration: currentAuthTokenExpiration,
         authUid: currentUserUid,
       );
+    } else {
+      // Sin tokens en la respuesta (siempre con Google): se renuevan según la
+      // sesión, con la API o directo en Cognito, para que traigan el rol.
+      newToken = await refreshSession();
+    }
+
+    if (newToken != null && newToken.isNotEmpty) {
       FFAppState().UserRole = role;
       FFAppState().update(() {});
     }

@@ -7,6 +7,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/index.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '/auth/google/google_sign_in_flow.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,27 @@ class CreateAccountWidget extends StatefulWidget {
 }
 
 class _CreateAccountWidgetState extends State<CreateAccountWidget> {
+  bool _googleBusy = false;
+
+  /// "Continuar con Google": Cognito en el navegador del sistema.
+  Widget _googleButton(Widget child) => Tooltip(
+        message: 'Continuar con Google',
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.0),
+          onTap: _googleBusy
+              ? null
+              : () async {
+                  setState(() => _googleBusy = true);
+                  try {
+                    await continueWithGoogle(context,
+                        intent: GoogleAuthIntent.signUp);
+                  } finally {
+                    if (mounted) setState(() => _googleBusy = false);
+                  }
+                },
+          child: child,
+        ),
+      );
   late CreateAccountModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -650,23 +672,26 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                     padding:
                                         const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 15.0, 0.0, 0.0),
-                                    child: Container(
-                                      width: MediaQuery.sizeOf(context).width *
-                                          1.0,
-                                      height: 42.0,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF4F4F4),
-                                        borderRadius:
-                                            BorderRadius.circular(100.0),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/GoogleLogo.svg',
-                                          width: 13.0,
-                                          height: 13.0,
-                                          fit: BoxFit.none,
+                                    child: _googleButton(
+                                      Container(
+                                        width:
+                                            MediaQuery.sizeOf(context).width *
+                                                1.0,
+                                        height: 42.0,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF4F4F4),
+                                          borderRadius:
+                                              BorderRadius.circular(100.0),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                          child: SvgPicture.asset(
+                                            'assets/images/GoogleLogo.svg',
+                                            width: 13.0,
+                                            height: 13.0,
+                                            fit: BoxFit.none,
+                                          ),
                                         ),
                                       ),
                                     ),

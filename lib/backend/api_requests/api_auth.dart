@@ -24,6 +24,64 @@ class DOVIAAPIAuthContextGroup {
   static SelectRoleCall selectRoleCall = SelectRoleCall();
   static LogoutAllCall logoutAllCall = LogoutAllCall();
   static ChangePasswordCall changePasswordCall = ChangePasswordCall();
+  static FederatedCompleteRegistrationCall federatedCompleteRegistrationCall =
+      FederatedCompleteRegistrationCall();
+}
+
+/// `POST /auth/federated/complete-registration`: alta en Dovia de quien entró
+/// con Google. Va con el ID token de Cognito; la identidad (correo, `sub`) la
+/// toma el backend de los claims, nunca del body. 201 también si la identidad
+/// ya existía; no devuelve tokens (hay que renovarlos en Cognito después).
+///
+/// Errores: 409 `ACCOUNT_METHOD_CONFLICT` (el correo ya tiene cuenta con
+/// contraseña) y 409 `FEDERATED_IDENTITY_CONFLICT` (identidad inconsistente).
+class FederatedCompleteRegistrationCall {
+  Future<ApiCallResponse> call({
+    required String idToken,
+    required String name,
+    required String lastname,
+    required String day,
+    required String month,
+    required String year,
+    required String gender,
+    required String phoneCountryCode,
+    required String phoneNumber,
+    String? nationality,
+  }) async {
+    final baseUrl = DOVIAAPIAuthContextGroup.getBaseUrl();
+    // Solo estos campos: el backend rechaza cualquier otro (también dentro de
+    // `phone`) y prohíbe email, password, sub o roles.
+    final body = jsonEncode({
+      'name': name,
+      'lastname': lastname,
+      'birthDate': '$day/$month/$year',
+      'gender': gender,
+      'phone': {'countryCode': phoneCountryCode, 'number': phoneNumber},
+      'nationality':
+          (nationality == null || nationality.isEmpty) ? null : nationality,
+    });
+    return ApiManager.instance.makeApiCall(
+      callName: 'Federated Complete Registration',
+      apiUrl: '$baseUrl/auth/federated/complete-registration',
+      callType: ApiCallType.POST,
+      headers: {'Authorization': 'Bearer $idToken'},
+      params: {},
+      body: body,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  /// La respuesta trae ese código de error (`ACCOUNT_METHOD_CONFLICT`,
+  /// ...). Se busca en el cuerpo entero porque el envelope de errores no
+  /// está documentado en detalle.
+  bool hasErrorCode(ApiCallResponse response, String code) =>
+      response.bodyText.contains(code);
 }
 
 class SignUpStepNEWCall {

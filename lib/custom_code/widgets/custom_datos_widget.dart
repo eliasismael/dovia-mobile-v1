@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 import '/auth/custom_auth/auth_util.dart';
+import '/auth/google/google_oauth_client.dart';
+import '/auth/google/google_sign_in_flow.dart';
+import '/auth/sign_out.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -102,10 +105,15 @@ class CustomDatosWidget extends StatefulWidget {
     super.key,
     this.width,
     this.height,
+    this.googleAccount = false,
   });
 
   final double? width;
   final double? height;
+
+  /// Alta de quien entró con Google: sin contraseña (no tiene) y con el
+  /// alta federada en vez de `complete-registration`.
+  final bool googleAccount;
 
   @override
   State<CustomDatosWidget> createState() => _CustomDatosWidgetState();
@@ -202,8 +210,7 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
         hasTelefono &&
         hasNacionalidad &&
         hasPhoneCountry &&
-        hasPassword &&
-        hasConfirmPassword &&
+        (widget.googleAccount || (hasPassword && hasConfirmPassword)) &&
         noErrors;
   }
 
@@ -243,6 +250,15 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
     sexoInpotValueController = FormFieldController<String>(null);
     phoneCountryDropdownController = FormFieldController<String>(null);
     nacionalidadDropdownController = FormFieldController<String>(null);
+
+    if (widget.googleAccount) {
+      // Lo que ya da Google: se puede corregir para que coincida con la
+      // identificación.
+      final claims = jwtClaims(currentAuthenticationToken);
+      nombreInputTextController.text = claims['given_name']?.toString() ?? '';
+      apellidosInputTextController.text =
+          claims['family_name']?.toString() ?? '';
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
@@ -923,113 +939,121 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                                         ],
                                       ),
                                     ),
-                                    // Contraseña
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 12.0, 0.0, 0.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          _buildLabel('Contraseña'),
-                                          Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
-                                            child: TextFormField(
-                                              controller:
-                                                  passwordInputTextController,
-                                              focusNode: passwordInputFocusNode,
-                                              onChanged: (val) {
-                                                password = val;
-                                                validatePassword(val);
-                                                if (confirmPasswordInputTextController
-                                                    .text.isNotEmpty) {
-                                                  validateConfirmPassword(
-                                                      confirmPasswordInputTextController
-                                                          .text);
-                                                }
-                                                setState(() {});
-                                              },
-                                              obscureText:
-                                                  !passwordInputVisibility,
-                                              decoration: _inputDecoration(
-                                                hintText: '*********',
-                                                hasError: passwordError != null,
-                                                suffixIcon: InkWell(
-                                                  onTap: () => setState(() =>
-                                                      passwordInputVisibility =
-                                                          !passwordInputVisibility),
-                                                  focusNode: FocusNode(
-                                                      skipTraversal: true),
-                                                  child: Icon(
-                                                      passwordInputVisibility
-                                                          ? Icons
-                                                              .visibility_outlined
-                                                          : Icons
-                                                              .visibility_off_outlined,
-                                                      size: 22),
+                                    // Contraseña (con Google no hay)
+                                    if (!widget.googleAccount) ...[
+                                      Padding(
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel('Contraseña'),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 12.0, 0.0, 0.0),
+                                              child: TextFormField(
+                                                controller:
+                                                    passwordInputTextController,
+                                                focusNode:
+                                                    passwordInputFocusNode,
+                                                onChanged: (val) {
+                                                  password = val;
+                                                  validatePassword(val);
+                                                  if (confirmPasswordInputTextController
+                                                      .text.isNotEmpty) {
+                                                    validateConfirmPassword(
+                                                        confirmPasswordInputTextController
+                                                            .text);
+                                                  }
+                                                  setState(() {});
+                                                },
+                                                obscureText:
+                                                    !passwordInputVisibility,
+                                                decoration: _inputDecoration(
+                                                  hintText: '*********',
+                                                  hasError:
+                                                      passwordError != null,
+                                                  suffixIcon: InkWell(
+                                                    onTap: () => setState(() =>
+                                                        passwordInputVisibility =
+                                                            !passwordInputVisibility),
+                                                    focusNode: FocusNode(
+                                                        skipTraversal: true),
+                                                    child: Icon(
+                                                        passwordInputVisibility
+                                                            ? Icons
+                                                                .visibility_outlined
+                                                            : Icons
+                                                                .visibility_off_outlined,
+                                                        size: 22),
+                                                  ),
                                                 ),
+                                                style: _bodyStyle,
                                               ),
-                                              style: _bodyStyle,
                                             ),
-                                          ),
-                                          _buildErrorText(passwordError),
-                                        ],
+                                            _buildErrorText(passwordError),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    // Confirmar Contraseña
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 12.0, 0.0, 0.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          _buildLabel('Confirma la contraseña'),
-                                          Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0.0, 12.0, 0.0, 0.0),
-                                            child: TextFormField(
-                                              controller:
-                                                  confirmPasswordInputTextController,
-                                              focusNode:
-                                                  confirmPasswordInputFocusNode,
-                                              onChanged: (val) {
-                                                confirmPassword = val;
-                                                validateConfirmPassword(val);
-                                                setState(() {});
-                                              },
-                                              obscureText:
-                                                  !confirmPasswordInputVisibility,
-                                              decoration: _inputDecoration(
-                                                hintText: '*********',
-                                                hasError:
-                                                    confirmPasswordError !=
-                                                        null,
-                                                suffixIcon: InkWell(
-                                                  onTap: () => setState(() =>
-                                                      confirmPasswordInputVisibility =
-                                                          !confirmPasswordInputVisibility),
-                                                  focusNode: FocusNode(
-                                                      skipTraversal: true),
-                                                  child: Icon(
-                                                      confirmPasswordInputVisibility
-                                                          ? Icons
-                                                              .visibility_outlined
-                                                          : Icons
-                                                              .visibility_off_outlined,
-                                                      size: 22),
+                                      // Confirmar Contraseña
+                                      Padding(
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(0.0, 12.0, 0.0, 0.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                                'Confirma la contraseña'),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 12.0, 0.0, 0.0),
+                                              child: TextFormField(
+                                                controller:
+                                                    confirmPasswordInputTextController,
+                                                focusNode:
+                                                    confirmPasswordInputFocusNode,
+                                                onChanged: (val) {
+                                                  confirmPassword = val;
+                                                  validateConfirmPassword(val);
+                                                  setState(() {});
+                                                },
+                                                obscureText:
+                                                    !confirmPasswordInputVisibility,
+                                                decoration: _inputDecoration(
+                                                  hintText: '*********',
+                                                  hasError:
+                                                      confirmPasswordError !=
+                                                          null,
+                                                  suffixIcon: InkWell(
+                                                    onTap: () => setState(() =>
+                                                        confirmPasswordInputVisibility =
+                                                            !confirmPasswordInputVisibility),
+                                                    focusNode: FocusNode(
+                                                        skipTraversal: true),
+                                                    child: Icon(
+                                                        confirmPasswordInputVisibility
+                                                            ? Icons
+                                                                .visibility_outlined
+                                                            : Icons
+                                                                .visibility_off_outlined,
+                                                        size: 22),
+                                                  ),
                                                 ),
+                                                style: _bodyStyle,
                                               ),
-                                              style: _bodyStyle,
                                             ),
-                                          ),
-                                          _buildErrorText(confirmPasswordError),
-                                        ],
+                                            _buildErrorText(
+                                                confirmPasswordError),
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -1047,6 +1071,10 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
                       onPressed: !isFormValid
                           ? null
                           : () async {
+                              if (widget.googleAccount) {
+                                await _submitGoogle();
+                                return;
+                              }
                               final email = FFAppState().UserEmail;
                               final resumeCode =
                                   RegistrationProgress.resumeCode;
@@ -1193,6 +1221,79 @@ class _CustomDatosWidgetState extends State<CustomDatosWidget> {
         ),
       ),
     );
+  }
+
+  bool _sendingGoogle = false;
+
+  String get _genderCode => sexoInpotValue == 'Masculino'
+      ? 'MALE'
+      : sexoInpotValue == 'Femenino'
+          ? 'FEMALE'
+          : sexoInpotValue ?? '';
+
+  /// Alta federada (`/auth/federated/complete-registration`) y, si sale bien,
+  /// el mismo paso siguiente que el registro con correo: identificación,
+  /// términos y rol.
+  Future<void> _submitGoogle() async {
+    if (_sendingGoogle) return;
+    setState(() => _sendingGoogle = true);
+    final error = await completeGoogleRegistration(
+      name: nombreInputTextController.text.trim(),
+      lastname: apellidosInputTextController.text.trim(),
+      day: diaInputTextController.text.trim().padLeft(2, '0'),
+      month: mesInputTextController.text.trim().padLeft(2, '0'),
+      year: yearInputTextController.text.trim(),
+      gender: _genderCode,
+      phoneCountryCode: areaCodeInputTextController.text.trim(),
+      phoneNumber: telefonoInputTextController.text.trim(),
+      nationality: selectedNacionalidad,
+    );
+    if (!mounted) return;
+    setState(() => _sendingGoogle = false);
+
+    if (error != null) {
+      // Conflictos o sesión cerrada: no se arregla reintentando acá.
+      final mustLeave = error == accountMethodConflictMessage ||
+          error == federatedIdentityConflictMessage ||
+          !loggedIn;
+      if (!mustLeave) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error)));
+        return;
+      }
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          content: Text(error),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Ir al inicio de sesión'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      await signOutAndGoToLogin(context, revokeSessions: false);
+      return;
+    }
+
+    FFAppState().updateUserDataStruct(
+      (u) => u
+        ..name = nombreInputTextController.text.trim()
+        ..lastname = apellidosInputTextController.text.trim()
+        ..birthdayDay = int.tryParse(diaInputTextController.text.trim())
+        ..birthdayMonth = int.tryParse(mesInputTextController.text.trim())
+        ..birthdayYear = int.tryParse(yearInputTextController.text.trim())
+        ..gender = _genderCode
+        ..nationality = selectedNacionalidad ?? ''
+        ..phoneCode = areaCodeInputTextController.text.trim()
+        ..phoneNumber = telefonoInputTextController.text.trim(),
+    );
+    // go: el alta ya se hizo; volver a este formulario no tiene sentido.
+    await RegistrationProgress.set(RegistrationProgress.idAndTerms);
+    if (!mounted) return;
+    context.goNamed('Datos_2');
   }
 
   Widget _buildFieldSection({

@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '/auth/custom_auth/auth_util.dart';
+import '/auth/google/cognito_google_config.dart';
+import '/auth/google/google_oauth_client.dart';
 import '/auth/registration_progress.dart';
 import '/backend/api_requests/api_auth.dart';
 import '/flutter_flow/nav/nav.dart';
@@ -25,8 +29,16 @@ Future<void> signOutAndGoToLogin(
   // Un paso de registro pendiente (p. ej. la revisión del asociado) es de esta
   // cuenta: no debe aplicarse a quien inicie sesión después.
   await RegistrationProgress.clear();
+  final wasGoogle = authManager.isGoogleSession;
   router.prepareAuthEvent();
   await authManager.signOut();
   router.clearRedirectLocation();
   router.goNamed(SignInWidget.routeName);
+  // Con Google además se cierra la sesión de Cognito en el navegador, para
+  // que la próxima vez se pueda elegir otra cuenta. La sesión local ya está
+  // cerrada aunque esto no vuelva.
+  final config = CognitoGoogleConfig.current;
+  if (wasGoogle && config != null) {
+    unawaited(googleOAuthClient.logout(config));
+  }
 }

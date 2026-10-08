@@ -55,6 +55,9 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.mycompany.dovia"
+        // Vuelta del login con Google (Cognito): com.mycompany.dovia://oauth/callback
+        // y la salida com.mycompany.dovia://auth/login. Lo usa flutter_appauth.
+        manifestPlaceholders += [appAuthRedirectScheme: "com.mycompany.dovia"]
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()

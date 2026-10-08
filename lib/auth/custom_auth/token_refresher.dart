@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '/auth/google/cognito_google_config.dart';
+import '/auth/google/google_oauth_client.dart';
 import '/backend/api_requests/api_auth.dart';
 import 'auth_util.dart';
 
@@ -18,9 +20,8 @@ DateTime? _lastRefresh;
 
 /// Vencimiento del idToken a partir del `expiresIn` (segundos) que devuelven
 /// el sign-in y el refresh. Sin dato, null.
-DateTime? tokenExpirationFrom(int? expiresIn) => expiresIn == null
-    ? null
-    : DateTime.now().add(Duration(seconds: expiresIn));
+DateTime? tokenExpirationFrom(int? expiresIn) =>
+    expiresIn == null ? null : DateTime.now().add(Duration(seconds: expiresIn));
 
 /// Renueva el idToken con el refreshToken guardado y devuelve el nuevo.
 ///
@@ -66,6 +67,8 @@ Future<String?> _refresh() async {
     return null;
   }
 
+  if (authManager.isGoogleSession) return _refreshGoogle(refreshToken);
+
   try {
     final call = DOVIAAPIAuthContextGroup.refreshTokenNEWCall;
     final response = await call.call(refreshToken: refreshToken);
@@ -92,6 +95,41 @@ Future<String?> _refresh() async {
     }
   } catch (e) {
     if (kDebugMode) print('No se pudo renovar la sesión: $e');
+  }
+  return null;
+}
+
+/// Las sesiones de Google se renuevan directo en Cognito con el cliente
+/// móvil (no con `/auth/refresh-token`, que es para correo y contraseña).
+Future<String?> _refreshGoogle(String refreshToken) async {
+  final config = CognitoGoogleConfig.current;
+  if (config == null) {
+    await _expire();
+    return null;
+  }
+  try {
+    final tokens = await googleOAuthClient.refresh(config, refreshToken);
+    _lastRefresh = DateTime.now();
+    final claimId = tokens.claims['custom:id']?.toString();
+    if (kDebugMode) {
+      final c = tokens.claims;
+      print('[Google] refresh OK: custom:id=${claimId != null} '
+          'custom:profile_complete=${c['custom:profile_complete']} '
+          'custom:verified=${c['custom:verified']} '
+          'cognito:groups=${c['cognito:groups']}');
+    }
+    authManager.updateAuthUserData(
+      authenticationToken: tokens.idToken,
+      refreshToken: tokens.refreshToken ?? refreshToken,
+      tokenExpiration: tokens.expiresAt,
+      // Tras el alta federada el claim `custom:id` recién aparece acá.
+      authUid: (claimId != null && claimId.isNotEmpty) ? claimId : null,
+    );
+    return tokens.idToken;
+  } on GoogleRefreshRejected {
+    await _expire();
+  } catch (e) {
+    if (kDebugMode) print('No se pudo renovar la sesión de Google: $e');
   }
   return null;
 }

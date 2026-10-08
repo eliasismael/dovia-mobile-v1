@@ -230,6 +230,8 @@ export '/dovia_client/inicio_sesion_nueva_version/form_associate/form_associate_
     show FormAssociateWidget;
 export '/dovia_client/inicio_sesion_nueva_version/solicitud_en_revision/solicitud_en_revision_widget.dart'
     show SolicitudEnRevisionWidget;
+export '/dovia_client/inicio_sesion_nueva_version/google_datos/google_datos_widget.dart'
+    show GoogleDatosWidget;
 export '/legal_associate/legal_associate_home/legal_associate_home_widget.dart'
     show LegalAssociateHomeWidget;
 export '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos/l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos_widget.dart'

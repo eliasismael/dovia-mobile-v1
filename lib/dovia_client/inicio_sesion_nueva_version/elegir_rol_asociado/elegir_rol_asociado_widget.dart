@@ -1,3 +1,4 @@
+import '/auth/custom_auth/token_refresher.dart';
 import '/auth/pending_associate_role.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -59,17 +60,22 @@ class _ElegirRolAsociadoWidgetState extends State<ElegirRolAsociadoWidget> {
       authToken: currentAuthenticationToken,
     );
     if (!result.succeeded) return;
+    // La API recibe el ID token (antes se guardaba el access token).
     final newToken =
-        DOVIAAPIAuthContextGroup.selectRoleCall.accessToken(result.jsonBody);
+        DOVIAAPIAuthContextGroup.selectRoleCall.idToken(result.jsonBody);
     final newRefreshToken =
         DOVIAAPIAuthContextGroup.selectRoleCall.refreshToken(result.jsonBody);
     if (newToken != null && newToken.isNotEmpty) {
       authManager.updateAuthUserData(
         authenticationToken: newToken,
-        refreshToken: newRefreshToken,
+        refreshToken: newRefreshToken ?? currentAuthRefreshToken,
         tokenExpiration: currentAuthTokenExpiration,
         authUid: currentUserUid,
       );
+    } else {
+      // Sin tokens en la respuesta (siempre con Google): se renuevan según la
+      // sesión para que traigan el rol.
+      await refreshSession();
     }
     FFAppState().UserRole = role;
     if (mounted) context.pushNamed(FormAssociateWidget.routeName);
