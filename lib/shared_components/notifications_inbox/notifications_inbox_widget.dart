@@ -4,8 +4,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '/app_state.dart';
 import '/core/result.dart';
 import '/domain/notification_models.dart';
+import '/flutter_flow/nav/nav.dart';
+import '/notifications/notification_router.dart';
 import '/repositories/notifications_repository.dart';
 
 /// Inbox de notificaciones compartido por todos los perfiles.
@@ -74,6 +77,22 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
         backgroundColor: deleteRed,
       ));
     }
+  }
+
+  /// Marca la notificación como leída y, si hay una pantalla segura para
+  /// ella, la abre. Si no, se queda en la bandeja.
+  void _open(AppNotification n) {
+    if (n.isUnread) context.read<NotificationsRepository>().markAsRead(n.id);
+    final destination = notificationDetailFor(
+      role: FFAppState().UserRole,
+      type: n.type,
+      actionPath: n.actionPath,
+    );
+    if (destination == null) return;
+    context.pushNamed(
+      destination.routeName,
+      queryParameters: destination.queryParameters,
+    );
   }
 
   Future<void> _delete(AppNotification n) async {
@@ -268,9 +287,7 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
       ),
       onDismissed: (_) => _delete(n),
       child: GestureDetector(
-        onTap: n.isUnread
-            ? () => context.read<NotificationsRepository>().markAsRead(n.id)
-            : null,
+        onTap: () => _open(n),
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
           decoration: BoxDecoration(

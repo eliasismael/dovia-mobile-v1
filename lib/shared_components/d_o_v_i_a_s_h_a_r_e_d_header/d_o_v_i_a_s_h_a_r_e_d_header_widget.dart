@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_s_h_a_r_e_d_header_model.dart';
+import '/shared_components/notification_badge.dart';
 export 'd_o_v_i_a_s_h_a_r_e_d_header_model.dart';
 
 class DOVIASHAREDHeaderWidget extends StatefulWidget {
@@ -324,12 +325,13 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                             shape: BoxShape.circle,
                           ),
                           alignment: const AlignmentDirectional(0.0, 0.0),
-                          child: SvgPicture.asset(
+                          child: NotificationBadge(
+                              child: SvgPicture.asset(
                             'assets/images/DH_icono-navbar-notificaciones.svg',
                             width: 22.0,
                             height: 22.0,
                             fit: BoxFit.contain,
-                          ),
+                          )),
                         ),
                       ),
                     if (widget.showSettings)

@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import 's_h_o_w_i_n_g_header_model.dart';
+import '/shared_components/notification_badge.dart';
 export 's_h_o_w_i_n_g_header_model.dart';
 
 class SHOWINGHeaderWidget extends StatefulWidget {
@@ -325,12 +326,13 @@ class _SHOWINGHeaderWidgetState extends State<SHOWINGHeaderWidget> {
                         context.pushNamed(SHOWINGNotificationsWidget.routeName);
                       },
                       child: Center(
-                        child: SvgPicture.asset(
+                        child: NotificationBadge(
+                            child: SvgPicture.asset(
                           'assets/images/DH_icono-navbar-notificaciones.svg',
                           width: 20.0,
                           height: 20.0,
                           fit: BoxFit.contain,
-                        ),
+                        )),
                       ),
                     ),
                   ),

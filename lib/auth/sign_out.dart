@@ -9,6 +9,7 @@ import '/auth/registration_progress.dart';
 import '/backend/api_requests/api_auth.dart';
 import '/flutter_flow/nav/nav.dart';
 import '/index.dart' show SignInWidget;
+import '/notifications/push_notifications_service.dart';
 
 /// Cierra la sesión y lleva al login. Es el cierre de sesión de todos los
 /// roles: antes cada pantalla de ajustes tenía el suyo y no hacían lo mismo
@@ -22,6 +23,8 @@ Future<void> signOutAndGoToLogin(
   bool revokeSessions = true,
 }) async {
   final router = GoRouter.of(context);
+  // Antes que nada: la baja del dispositivo necesita el JWT todavía vigente.
+  await pushNotificationsService?.beforeSignOut();
   final token = authManager.authenticationToken;
   if (revokeSessions && token != null && token.isNotEmpty) {
     await DOVIAAPIAuthContextGroup.logoutAllCall.call(idToken: token);

@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/shared_components/notification_badge.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_home_page_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_home_page_model.dart';
 
@@ -1148,11 +1149,14 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
           ],
         ),
         alignment: const AlignmentDirectional(0.0, 0.0),
-        child: SvgPicture.asset(
+        child: withNotificationBadge(
           asset,
-          width: 22.0,
-          height: 22.0,
-          fit: BoxFit.contain,
+          SvgPicture.asset(
+            asset,
+            width: 22.0,
+            height: 22.0,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );

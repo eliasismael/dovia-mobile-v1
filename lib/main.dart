@@ -12,6 +12,9 @@ import 'auth/custom_auth/session_restore.dart';
 import 'auth/custom_auth/token_refresher.dart';
 import 'backend/api_requests/api_manager.dart';
 import 'index.dart' show SignInWidget;
+import 'notifications/notification_router.dart';
+import 'notifications/push_messaging.dart';
+import 'notifications/push_notifications_service.dart';
 
 import 'flutter_flow/flutter_flow_util.dart';
 import 'repositories/index.dart';
@@ -87,6 +90,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late Stream<DoviaAuthUser> userStream;
   String? _notificationsUserId;
   bool _wasLoggedIn = false;
+  late final PushNotificationsService _push;
 
   @override
   void initState() {
@@ -96,8 +100,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _router = createRouter(_appStateNotifier);
     WidgetsBinding.instance.addObserver(this);
     onSessionExpired = _onSessionExpired;
+    _push = PushNotificationsService(
+      messaging: pushMessaging,
+      repository: context.read<NotificationsRepository>(),
+      onOpen: _openPush,
+      onForeground: _showForegroundPush,
+    );
+    pushNotificationsService = _push;
+    _push.start();
     userStream = doviaAuthUserStream()
       ..listen((user) {
+        // Empezó una sesión (login, arranque con sesión o cambio de cuenta):
+        // se registra el dispositivo para push y se trae el contador.
+        final sessionStarted = user.loggedIn &&
+            (!_wasLoggedIn || user.uid != _notificationsUserId);
         _appStateNotifier.update(user);
         // Cerrar sesión no pasa por un solo lugar (cada rol tiene su pantalla
         // de ajustes, y la sesión también puede vencer), pero este stream sí
@@ -128,6 +144,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           context.read<NotificationsRepository>().clear();
         }
         _notificationsUserId = user.loggedIn ? user.uid : null;
+        if (mounted && sessionStarted) {
+          _push.syncForCurrentSession();
+          context.read<NotificationsRepository>().refreshUnreadCount();
+        }
       });
 
     Future.delayed(
@@ -140,6 +160,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     onSessionExpired = null;
+    _push.dispose();
+    pushNotificationsService = null;
     super.dispose();
   }
 
@@ -147,7 +169,42 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Al volver del fondo el token puede haber vencido: se renueva antes de
     // que la pantalla empiece a pedir datos.
-    if (state == AppLifecycleState.resumed) refreshSessionIfStale();
+    if (state == AppLifecycleState.resumed) {
+      refreshSessionIfStale();
+      // Pudo haber llegado algo mientras la app estaba en segundo plano.
+      if (loggedIn) context.read<NotificationsRepository>().refreshUnreadCount();
+    }
+  }
+
+  /// El usuario tocó un push: al detalle si se puede, si no a su bandeja.
+  void _openPush(PushMessage message) {
+    if (!mounted) return;
+    final destination = destinationForPush(
+      role: FFAppState().UserRole,
+      message: message,
+    );
+    _router.pushNamed(
+      destination.routeName,
+      queryParameters: destination.queryParameters,
+    );
+  }
+
+  /// Un push con la app abierta no lo muestra el sistema: se avisa acá.
+  void _showForegroundPush(PushMessage message) {
+    final text = [message.title, message.body]
+        .whereType<String>()
+        .where((t) => t.trim().isNotEmpty)
+        .join('\n');
+    if (text.isEmpty) return;
+    _scaffoldMessengerKey.currentState
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(text),
+        action: SnackBarAction(
+          label: 'Ver',
+          onPressed: () => _openPush(message),
+        ),
+      ));
   }
 
   /// El backend rechazó el refreshToken: la sesión ya se cerró. Se lleva al

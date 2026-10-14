@@ -5,6 +5,7 @@ import '/shared_components/navbar_item_indicator/navbar_item_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_model.dart';
+import '/shared_components/notification_badge.dart';
 export 'l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_model.dart';
 
 class LEGALASSOCAITENavbarWidget extends StatefulWidget {
@@ -124,12 +125,13 @@ class _LEGALASSOCAITENavbarWidgetState
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: SvgPicture.asset(
+                  child: NotificationBadge(
+                      child: SvgPicture.asset(
                     'assets/images/DH_icono-navbar-notificaciones.svg',
                     width: 24.0,
                     height: 24.0,
                     fit: BoxFit.none,
-                  ),
+                  )),
                 ),
               ),
             ),

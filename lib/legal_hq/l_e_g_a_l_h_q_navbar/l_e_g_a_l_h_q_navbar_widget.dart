@@ -5,6 +5,7 @@ import '/shared_components/navbar_item_indicator/navbar_item_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'l_e_g_a_l_h_q_navbar_model.dart';
+import '/shared_components/notification_badge.dart';
 export 'l_e_g_a_l_h_q_navbar_model.dart';
 
 class LEGALHQNavbarWidget extends StatefulWidget {
@@ -119,12 +120,13 @@ class _LEGALHQNavbarWidgetState extends State<LEGALHQNavbarWidget> {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: SvgPicture.asset(
+                  child: NotificationBadge(
+                      child: SvgPicture.asset(
                     'assets/images/DH_icono-navbar-notificaciones.svg',
                     width: 24.0,
                     height: 24.0,
                     fit: BoxFit.none,
-                  ),
+                  )),
                 ),
               ),
             ),

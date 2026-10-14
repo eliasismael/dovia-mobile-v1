@@ -8,6 +8,7 @@ import '/shared_components/navbar_item_indicator/navbar_item_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_navbar_model.dart';
+import '/shared_components/notification_badge.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_navbar_model.dart';
 
 /// Barra de navegación del Dovia Home Associate.
@@ -77,14 +78,17 @@ class _DHASSOCIATENavbarWidgetState extends State<DHASSOCIATENavbarWidget> {
           onTap: onTap,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: SvgPicture.asset(
-              asset,
-              width: 24.0,
-              height: 24.0,
-              fit: tint == null ? BoxFit.none : BoxFit.contain,
-              colorFilter:
-                  tint == null ? null : ColorFilter.mode(tint, BlendMode.srcIn),
-            ),
+            child: withNotificationBadge(
+                asset,
+                SvgPicture.asset(
+                  asset,
+                  width: 24.0,
+                  height: 24.0,
+                  fit: tint == null ? BoxFit.none : BoxFit.contain,
+                  colorFilter: tint == null
+                      ? null
+                      : ColorFilter.mode(tint, BlendMode.srcIn),
+                )),
           ),
         ),
       );
