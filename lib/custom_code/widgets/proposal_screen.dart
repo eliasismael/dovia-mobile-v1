@@ -1630,8 +1630,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
 
     setState(() => _isUploadingPaymentProof = true);
 
-    final res =
-        await DOVIAAPILegalProcessContextGroup.uploadPaymentProofCall.call(
+    final res = await uploadLegalPaymentProof(
       processId: processId,
       authToken: currentAuthenticationToken,
       file: uploaded,

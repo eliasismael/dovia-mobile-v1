@@ -18,8 +18,8 @@ class SubirArchivoWidget extends StatefulWidget {
   });
 
   /// ID del proceso legal. Si se provee junto con authToken, el botón "Subir"
-  /// llama POST /legal-processes/{processId}/payment-proof en lugar de solo
-  /// mostrar el popup de éxito.
+  /// sube el comprobante ([uploadLegalPaymentProof]: estándar o hipotecario
+  /// según el proceso) en lugar de solo mostrar el popup de éxito.
   final String? processId;
   final String? authToken;
 
@@ -71,8 +71,7 @@ class _SubirArchivoWidgetState extends State<SubirArchivoWidget> {
         authToken.isNotEmpty) {
       safeSetState(() => _model.isUploading = true);
 
-      final res =
-          await DOVIAAPILegalProcessContextGroup.uploadPaymentProofCall.call(
+      final res = await uploadLegalPaymentProof(
         processId: processId,
         authToken: authToken,
         file: file,

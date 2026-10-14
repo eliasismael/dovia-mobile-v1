@@ -38,6 +38,8 @@ class DOVIAAPILegalProcessContextGroup {
       DeleteLegalProcessDocumentCall();
   static UploadPaymentProofCall uploadPaymentProofCall =
       UploadPaymentProofCall();
+  static UploadMortgagePaymentDocumentCall uploadMortgagePaymentDocumentCall =
+      UploadMortgagePaymentDocumentCall();
   static AdvanceToDraftingCall advanceToDraftingCall = AdvanceToDraftingCall();
   static UploadUnsignedContractCall uploadUnsignedContractCall =
       UploadUnsignedContractCall();
@@ -559,6 +561,64 @@ class UploadPaymentProofCall {
       alwaysAllowBody: false,
     );
   }
+}
+
+/// POST /legal-processes/{processId}/mortgage/payment-document
+/// Roles: CLIENT comprador — comprobante de pago del flujo SALE_MORTGAGE.
+/// Mismo contrato que [UploadPaymentProofCall]: multipart con un `file`, sólo
+/// con el proceso en APPROVED. Sin él, Legal HQ no puede cerrar el proceso.
+class UploadMortgagePaymentDocumentCall {
+  Future<ApiCallResponse> call({
+    String? processId = '',
+    String? authToken = '',
+    FFUploadedFile? file,
+  }) async {
+    final baseUrl = DOVIAAPILegalProcessContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Upload Mortgage Payment Document',
+      apiUrl: '$baseUrl/legal-processes/$processId/mortgage/payment-document',
+      callType: ApiCallType.POST,
+      headers: {
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      },
+      params: {
+        'file': file,
+      },
+      bodyType: BodyType.MULTIPART,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// Sube el comprobante de pago del proceso legal por el endpoint que
+/// corresponde a su categoría: `SALE_MORTGAGE` tiene uno propio y el estándar
+/// lo rechaza con 400. La categoría se consulta al backend para no depender de
+/// lo que sepa cada pantalla; si esa consulta falla se usa el estándar, que es
+/// el comportamiento de antes.
+Future<ApiCallResponse> uploadLegalPaymentProof({
+  required String processId,
+  required String? authToken,
+  required FFUploadedFile file,
+}) async {
+  final process = await DOVIAAPILegalProcessContextGroup.getLegalProcessByIDCall
+      .call(processId: processId, authToken: authToken);
+  final category = (getJsonField(process.jsonBody, r'''$.data.category''') ??
+          getJsonField(process.jsonBody, r'''$.category'''))
+      ?.toString();
+
+  if (category == 'SALE_MORTGAGE') {
+    return DOVIAAPILegalProcessContextGroup.uploadMortgagePaymentDocumentCall
+        .call(processId: processId, authToken: authToken, file: file);
+  }
+  return DOVIAAPILegalProcessContextGroup.uploadPaymentProofCall
+      .call(processId: processId, authToken: authToken, file: file);
 }
 
 /// POST /legal-processes/{processId}/advance-to-drafting
