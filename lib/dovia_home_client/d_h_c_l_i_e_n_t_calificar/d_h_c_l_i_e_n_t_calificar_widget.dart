@@ -132,7 +132,20 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
         );
       }
 
-      if (response != null && !response.succeeded) {
+      // Sin ningún id no se envió nada: no hay que mostrar el modal de éxito.
+      if (response == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'No se pudo identificar el servicio a calificar. Intenta de nuevo.'),
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!response.succeeded) {
         if (mounted) {
           final message = associateFeedbackErrorMessage(
             response,

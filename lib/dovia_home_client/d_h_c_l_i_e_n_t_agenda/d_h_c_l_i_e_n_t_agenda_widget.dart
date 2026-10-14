@@ -103,10 +103,30 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
   bool _isLoadingScope = true;
   String? _selectedCategoryId;
 
+  /// Solicitud ya creada en el backend. Si algo falla después del POST, el
+  /// reintento la reutiliza en vez de crear otra.
+  String? _createdRequestId;
+
+  /// Copia de [DHCLIENTAgendaWidget.nextRouteAfterSubmit] tomada al entrar.
+  String? _nextRouteAfterSubmit;
+
+  /// Dirección, fecha y categoría con que se creó [_createdRequestId].
+  String? _createdRequestKey;
+
+  /// Fotos (por índice) ya confirmadas en [_createdRequestId], para que un
+  /// reintento suba solo las que faltan.
+  final Set<int> _uploadedPhotoIndexes = {};
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => DHCLIENTAgendaModel());
+
+    // Se toma una sola vez al entrar: si el cliente vuelve del cobro y reenvía,
+    // tiene que volver a pasar por el pago. Se limpia la estática para que no
+    // se filtre al flujo de cotización, que no la setea.
+    _nextRouteAfterSubmit = DHCLIENTAgendaWidget.nextRouteAfterSubmit;
+    DHCLIENTAgendaWidget.nextRouteAfterSubmit = null;
 
     _loadAddresses();
     _loadScope();
@@ -357,65 +377,201 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Sube las fotos del levantamiento con el flujo presign → PUT → confirm. Es
-  /// best-effort: la solicitud ya existe, así que un fallo de fotos no la anula.
-  Future<void> _uploadPhotos(String serviceRequestId, String token) async {
+  /// Índices (en [DHCLIENTInstalacionWidget.photos]) de las fotos que todavía
+  /// no quedaron confirmadas en el backend. Las que no tienen bytes no se
+  /// pueden subir y no cuentan.
+  List<int> get _pendingPhotoIndexes {
     final photos = DHCLIENTInstalacionWidget.photos;
-    if (photos.isEmpty) return;
-
-    final uploads = <Map<String, dynamic>>[
+    return [
       for (var i = 0; i < photos.length; i++)
-        {
-          'clientUploadId': 'upload_$i',
-          'contentType': 'image/jpeg',
-          'fileName': photos[i].name ?? 'foto_$i.jpg',
-        },
+        if (photos[i].bytes != null && !_uploadedPhotoIndexes.contains(i)) i,
     ];
+  }
 
-    final presignRes = await DOVIAAPIDoviaHomeContextGroup
-        .presignServiceRequestImagesCall
-        .call(
-      serviceRequestId: serviceRequestId,
-      uploads: uploads,
-      authToken: token,
-    );
-    if (!presignRes.succeeded) return;
+  /// Sube las fotos pendientes con el flujo presign → PUT → confirm y devuelve
+  /// cuántas quedaron sin subir. Nunca lanza: la solicitud ya existe, así que
+  /// un fallo de fotos no la anula, pero el llamador tiene que enterarse.
+  Future<int> _uploadPendingPhotos(String serviceRequestId) async {
+    final photos = DHCLIENTInstalacionWidget.photos;
+    final pending = _pendingPhotoIndexes;
+    if (pending.isEmpty) return 0;
 
-    final items = DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall
-        .items(presignRes.jsonBody);
-    if (items == null || items.isEmpty) return;
+    try {
+      final token = currentAuthenticationToken ?? '';
+      final uploads = <Map<String, dynamic>>[
+        for (final i in pending)
+          {
+            'clientUploadId': 'upload_$i',
+            'contentType': 'image/jpeg',
+            'fileName': photos[i].name ?? 'foto_$i.jpg',
+          },
+      ];
 
-    final storageKeys = <String>[];
-    for (final item in items) {
-      if (item is! Map) continue;
-      final clientUploadId = item['clientUploadId']?.toString() ?? '';
-      final uploadUrl = item['uploadUrl']?.toString();
-      final storageKey = item['storageKey']?.toString();
-      final index =
-          int.tryParse(clientUploadId.replaceAll('upload_', '')) ?? -1;
-      if (uploadUrl == null || index < 0 || index >= photos.length) continue;
-
-      final bytes = photos[index].bytes;
-      if (bytes == null) continue;
-
-      final putRes = await http.put(
-        Uri.parse(uploadUrl),
-        headers: {'Content-Type': 'image/jpeg'},
-        body: bytes,
+      final presignRes = await DOVIAAPIDoviaHomeContextGroup
+          .presignServiceRequestImagesCall
+          .call(
+        serviceRequestId: serviceRequestId,
+        uploads: uploads,
+        authToken: token,
       );
-      if (putRes.statusCode >= 200 &&
-          putRes.statusCode < 300 &&
-          storageKey != null) {
-        storageKeys.add(storageKey);
+      if (!presignRes.succeeded) return pending.length;
+
+      final items = DOVIAAPIDoviaHomeContextGroup
+          .presignServiceRequestImagesCall
+          .items(presignRes.jsonBody);
+      if (items == null || items.isEmpty) return pending.length;
+
+      final storageKeys = <String>[];
+      final putIndexes = <int>[];
+      for (final item in items) {
+        if (item is! Map) continue;
+        final clientUploadId = item['clientUploadId']?.toString() ?? '';
+        final uploadUrl = item['uploadUrl']?.toString();
+        final storageKey = item['storageKey']?.toString();
+        final index =
+            int.tryParse(clientUploadId.replaceAll('upload_', '')) ?? -1;
+        if (uploadUrl == null ||
+            storageKey == null ||
+            !pending.contains(index)) {
+          continue;
+        }
+
+        try {
+          final putRes = await http.put(
+            Uri.parse(uploadUrl),
+            headers: {'Content-Type': 'image/jpeg'},
+            body: photos[index].bytes,
+          );
+          if (putRes.statusCode >= 200 && putRes.statusCode < 300) {
+            storageKeys.add(storageKey);
+            putIndexes.add(index);
+          }
+        } catch (e) {
+          debugPrint('[Agenda] PUT de la foto $index falló: $e');
+        }
       }
+
+      if (storageKeys.isNotEmpty) {
+        final confirmRes = await DOVIAAPIDoviaHomeContextGroup
+            .confirmServiceRequestImagesCall
+            .call(
+          serviceRequestId: serviceRequestId,
+          storageKeys: storageKeys,
+          authToken: token,
+        );
+        // Sin confirm el backend no las asocia: siguen pendientes y el
+        // reintento las vuelve a presignar.
+        if (confirmRes.succeeded) _uploadedPhotoIndexes.addAll(putIndexes);
+      }
+    } catch (e) {
+      debugPrint('[Agenda] No se pudieron subir las fotos: $e');
+    }
+    return _pendingPhotoIndexes.length;
+  }
+
+  /// Sube las fotos y, si alguna falla, deja reintentar solo esas o seguir sin
+  /// ellas. El aviso no se puede cerrar sin elegir: la solicitud ya existe con
+  /// la fecha y la dirección de ahora, así que no hay que volver al formulario.
+  Future<void> _uploadPhotosWithRetry(String serviceRequestId) async {
+    while (true) {
+      final failed = await _uploadPendingPhotos(serviceRequestId);
+      if (failed == 0 || !mounted) return;
+
+      final total = _uploadedPhotoIndexes.length + failed;
+      final retry = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: const Text('Faltan fotos'),
+            content: Text(failed == 1
+                ? 'Tu solicitud ya se creó, pero 1 de $total fotos no se pudo subir.'
+                : 'Tu solicitud ya se creó, pero $failed de $total fotos no se pudieron subir.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Continuar sin ellas'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (retry != true) return;
+    }
+  }
+
+  /// Devuelve la solicitud a usar: la ya creada si el cliente no cambió
+  /// dirección, fecha ni categoría (así un reintento no la duplica), o una
+  /// nueva. `null` si no se pudo crear (el aviso ya se mostró).
+  Future<String?> _ensureServiceRequest(
+      String addressId, DateTime scheduledAt) async {
+    final scope = _scope;
+    final categoryId = _selectedCategoryId;
+    if (scope == null || categoryId == null) {
+      _showSnack(
+          'No se pudo identificar el servicio en el catálogo. Intenta de nuevo.');
+      return null;
     }
 
-    if (storageKeys.isEmpty) return;
-    await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestImagesCall.call(
-      serviceRequestId: serviceRequestId,
-      storageKeys: storageKeys,
-      authToken: token,
+    final key = '$addressId|${scheduledAt.toIso8601String()}|$categoryId';
+    if (_createdRequestId != null && _createdRequestKey == key) {
+      return _createdRequestId;
+    }
+
+    // El endpoint rechaza strings vacíos: si se llegó hasta aquí sin
+    // levantamiento (Ej: entrando directo a la ruta) se manda el servicio.
+    final description = DHCLIENTInstalacionWidget.description.trim().isNotEmpty
+        ? DHCLIENTInstalacionWidget.description.trim()
+        : 'Solicitud de ${DHCLIENTInstalacionWidget.serviceTitle}';
+
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.createServiceRequestCall.call(
+      serviceId: scope.serviceId,
+      categoryId: categoryId,
+      description: description,
+      scheduledAt: scheduledAt.toUtc().toIso8601String(),
+      addressId: addressId,
+      authToken: currentAuthenticationToken ?? '',
     );
+    if (!response.succeeded) {
+      // La categoría dejó de pertenecer al servicio (el catálogo cambió
+      // mientras el cliente completaba el formulario): se recarga la lista y
+      // se le pide que elija de nuevo, porque reenviar lo mismo vuelve a
+      // fallar.
+      if (doviaHomeErrorCode(response) ==
+          kDoviaHomeServiceCategoryNotFoundCode) {
+        safeSetState(() {
+          _selectedCategoryId = null;
+          _isLoadingScope = true;
+        });
+        await _loadScope();
+        _showSnack(
+            'El tipo de trabajo que elegiste ya no está disponible. Elige otro.');
+        return null;
+      }
+      _showSnack(doviaHomeErrorMessage(response) ??
+          'No se pudo enviar la solicitud. Intenta de nuevo.');
+      return null;
+    }
+
+    final id = DOVIAAPIDoviaHomeContextGroup.createServiceRequestCall
+        .id(response.jsonBody);
+    if (id == null || id.isEmpty) {
+      debugPrint('[Agenda] POST service-requests sin id: ${response.bodyText}');
+      _showSnack('No se pudo confirmar la solicitud. Intenta de nuevo.');
+      return null;
+    }
+
+    // Es otra solicitud: las fotos subidas a la anterior no cuentan.
+    _createdRequestId = id;
+    _createdRequestKey = key;
+    _uploadedPhotoIndexes.clear();
+    return id;
   }
 
   /// Crea la solicitud en el backend (`POST /dovia-home/service-requests`) para
@@ -439,66 +595,18 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
 
     safeSetState(() => _model.isSubmitting = true);
     try {
-      final token = currentAuthenticationToken ?? '';
+      final serviceRequestId =
+          await _ensureServiceRequest(addressId, scheduledAt);
+      if (serviceRequestId == null) return;
 
-      final scope = _scope;
-      final categoryId = _selectedCategoryId;
-      if (scope == null || categoryId == null) {
-        _showSnack(
-            'No se pudo identificar el servicio en el catálogo. Intenta de nuevo.');
-        return;
-      }
-
-      // El endpoint rechaza strings vacíos: si se llegó hasta aquí sin
-      // levantamiento (Ej: entrando directo a la ruta) se manda el servicio.
-      final description =
-          DHCLIENTInstalacionWidget.description.trim().isNotEmpty
-              ? DHCLIENTInstalacionWidget.description.trim()
-              : 'Solicitud de ${DHCLIENTInstalacionWidget.serviceTitle}';
-
-      final response =
-          await DOVIAAPIDoviaHomeContextGroup.createServiceRequestCall.call(
-        serviceId: scope.serviceId,
-        categoryId: categoryId,
-        description: description,
-        scheduledAt: scheduledAt.toUtc().toIso8601String(),
-        addressId: addressId,
-        authToken: token,
-      );
-      if (!response.succeeded) {
-        // La categoría dejó de pertenecer al servicio (el catálogo cambió
-        // mientras el cliente completaba el formulario): se recarga la lista y
-        // se le pide que elija de nuevo, porque reenviar lo mismo vuelve a
-        // fallar.
-        if (doviaHomeErrorCode(response) ==
-            kDoviaHomeServiceCategoryNotFoundCode) {
-          safeSetState(() {
-            _selectedCategoryId = null;
-            _isLoadingScope = true;
-          });
-          await _loadScope();
-          _showSnack(
-              'El tipo de trabajo que elegiste ya no está disponible. Elige otro.');
-          return;
-        }
-        _showSnack(doviaHomeErrorMessage(response) ??
-            'No se pudo enviar la solicitud. Intenta de nuevo.');
-        return;
-      }
-
-      final serviceRequestId = DOVIAAPIDoviaHomeContextGroup
-          .createServiceRequestCall
-          .id(response.jsonBody);
-      if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
-        await _uploadPhotos(serviceRequestId, token);
-      }
+      await _uploadPhotosWithRetry(serviceRequestId);
+      if (!mounted) return;
 
       // El wizard estándar deriva al cobro: la solicitud existe pero todavía
       // no está pagada, así que ni se anuncia en el Dashboard ni se muestra el
       // modal de éxito. Eso pasa recién cuando ValorVisita confirma el pago.
-      final nextRoute = DHCLIENTAgendaWidget.nextRouteAfterSubmit;
+      final nextRoute = _nextRouteAfterSubmit;
       if (nextRoute != null) {
-        DHCLIENTAgendaWidget.nextRouteAfterSubmit = null;
         DHCLIENTValorVisitaPageWidget.serviceRequestId = serviceRequestId;
         if (!mounted) return;
         context.pushNamed(nextRoute);
