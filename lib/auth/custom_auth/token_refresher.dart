@@ -16,6 +16,7 @@ const accountDisabledMessage =
     'contacta a soporte.';
 
 Future<String?>? _inFlight;
+int? _inFlightGeneration;
 DateTime? _lastRefresh;
 
 /// Vencimiento del idToken a partir del `expiresIn` (segundos) que devuelven
@@ -29,9 +30,25 @@ DateTime? tokenExpirationFrom(int? expiresIn) =>
 /// dan 401 a la vez no disparan varios refresh. Si el backend rechaza el
 /// refreshToken (4xx) la sesión se cierra; un error de red no la cierra, para
 /// no desloguear a quien se quedó sin conexión.
-Future<String?> refreshSession() => _inFlight ??= _refresh().whenComplete(
-      () => _inFlight = null,
-    );
+///
+/// La renovación queda atada a la sesión que la pidió: si mientras tanto se
+/// cerró sesión o entró otra cuenta, la respuesta se descarta.
+Future<String?> refreshSession() {
+  final generation = authManager.sessionGeneration;
+  final pending = _inFlight;
+  if (pending != null && _inFlightGeneration == generation) return pending;
+
+  late final Future<String?> refresh;
+  refresh = _refresh(generation).whenComplete(() {
+    if (identical(_inFlight, refresh)) _inFlight = null;
+  });
+  _inFlight = refresh;
+  _inFlightGeneration = generation;
+  return refresh;
+}
+
+/// La sesión que pidió la renovación ya no es la actual.
+bool _stale(int generation) => authManager.sessionGeneration != generation;
 
 /// Si el token ya venció (o vence en menos de 30 s), lo renueva y devuelve el
 /// nuevo; si no, null. Lo usa el ApiManager antes de cada pedido autenticado.
@@ -58,7 +75,7 @@ Future<void> refreshSessionIfStale() async {
   if (stale) await refreshSession();
 }
 
-Future<String?> _refresh() async {
+Future<String?> _refresh(int generation) async {
   if (!loggedIn) return null;
 
   final refreshToken = authManager.refreshToken;
@@ -67,11 +84,14 @@ Future<String?> _refresh() async {
     return null;
   }
 
-  if (authManager.isGoogleSession) return _refreshGoogle(refreshToken);
+  if (authManager.isGoogleSession) {
+    return _refreshGoogle(refreshToken, generation);
+  }
 
   try {
     final call = DOVIAAPIAuthContextGroup.refreshTokenNEWCall;
     final response = await call.call(refreshToken: refreshToken);
+    if (_stale(generation)) return null;
     final idToken = call.idToken(response.jsonBody);
 
     if (response.succeeded && idToken != null && idToken.isNotEmpty) {
@@ -101,7 +121,7 @@ Future<String?> _refresh() async {
 
 /// Las sesiones de Google se renuevan directo en Cognito con el cliente
 /// móvil (no con `/auth/refresh-token`, que es para correo y contraseña).
-Future<String?> _refreshGoogle(String refreshToken) async {
+Future<String?> _refreshGoogle(String refreshToken, int generation) async {
   final config = CognitoGoogleConfig.current;
   if (config == null) {
     await _expire();
@@ -109,6 +129,7 @@ Future<String?> _refreshGoogle(String refreshToken) async {
   }
   try {
     final tokens = await googleOAuthClient.refresh(config, refreshToken);
+    if (_stale(generation)) return null;
     _lastRefresh = DateTime.now();
     final claimId = tokens.claims['custom:id']?.toString();
     if (kDebugMode) {
@@ -127,7 +148,7 @@ Future<String?> _refreshGoogle(String refreshToken) async {
     );
     return tokens.idToken;
   } on GoogleRefreshRejected {
-    await _expire();
+    if (!_stale(generation)) await _expire();
   } catch (e) {
     if (kDebugMode) print('No se pudo renovar la sesión de Google: $e');
   }

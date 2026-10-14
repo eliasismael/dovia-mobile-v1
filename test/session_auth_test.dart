@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -27,13 +28,15 @@ http.Response _refreshOk(String idToken, {int expiresIn = 3600}) =>
       },
     });
 
-/// Deja una sesión guardada como si el usuario hubiera iniciado sesión antes.
+/// Deja una sesión guardada como la dejaba una versión anterior de la app
+/// (tokens en las preferencias); `initialize()` la migra.
 Future<void> _storedSession({
   String token = 'token-viejo',
   String? refresh = 'refresh-1',
   String? uid = 'user-1',
   DateTime? expiration,
 }) async {
+  FlutterSecureStorage.setMockInitialValues({});
   SharedPreferences.setMockInitialValues({
     '_auth_authentication_token_': token,
     if (refresh != null) '_auth_refresh_token_': refresh,
@@ -376,6 +379,144 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('_auth_uid_'), 'nuevo');
       expect(prefs.getInt('_auth_token_expiration_'), isNotNull);
+    });
+  });
+
+  group('tokens en almacenamiento seguro', () {
+    const secure = FlutterSecureStorage();
+
+    test('migra los tokens de las preferencias y siguen al reabrir',
+        () async {
+      await _storedSession();
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('_auth_authentication_token_'), isNull);
+      expect(prefs.getString('_auth_refresh_token_'), isNull);
+      expect(await secure.read(key: '_auth_authentication_token_'),
+          'token-viejo');
+      expect(await secure.read(key: '_auth_refresh_token_'), 'refresh-1');
+
+      await authManager.initialize();
+      expect(loggedIn, isTrue);
+      expect(authManager.authenticationToken, 'token-viejo');
+      expect(authManager.refreshToken, 'refresh-1');
+    });
+
+    test('renovar guarda los tokens nuevos cifrados, no en preferencias',
+        () async {
+      await _storedSession();
+      authManager.updateAuthUserData(
+          authenticationToken: 'otro', refreshToken: 'r2');
+      await Future<void>.delayed(Duration.zero);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('_auth_authentication_token_'), isNull);
+      expect(prefs.getString('_auth_refresh_token_'), isNull);
+      expect(await secure.read(key: '_auth_authentication_token_'), 'otro');
+      expect(await secure.read(key: '_auth_refresh_token_'), 'r2');
+    });
+
+    test('cerrar sesión borra los tokens cifrados', () async {
+      await _storedSession();
+      await authManager.signOut();
+      await Future<void>.delayed(Duration.zero);
+      expect(await secure.read(key: '_auth_authentication_token_'), isNull);
+      expect(await secure.read(key: '_auth_refresh_token_'), isNull);
+      await authManager.initialize();
+      expect(loggedIn, isFalse);
+    });
+
+    test('tokens sueltos de una instalación anterior no abren sesión',
+        () async {
+      // En iOS el Keychain sobrevive a la desinstalación; las preferencias no.
+      FlutterSecureStorage.setMockInitialValues({
+        '_auth_authentication_token_': 'de-antes',
+        '_auth_refresh_token_': 'de-antes',
+      });
+      SharedPreferences.setMockInitialValues({});
+      await authManager.initialize();
+      expect(loggedIn, isFalse);
+      expect(authManager.authenticationToken, isNull);
+      await Future<void>.delayed(Duration.zero);
+      expect(await secure.read(key: '_auth_refresh_token_'), isNull);
+    });
+  });
+
+  group('respuestas de una sesión anterior', () {
+    test('un refresh que llega tarde no pisa la cuenta nueva', () async {
+      await _storedSession();
+      final response = Completer<http.Response>();
+      final refresh = http.runWithClient(
+        refreshSession,
+        () => MockClient((req) => response.future),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      await authManager.signOut();
+      await authManager.signIn(
+        authenticationToken: 'token-cuenta-b',
+        refreshToken: 'refresh-b',
+        authUid: 'user-b',
+      );
+      response.complete(_refreshOk('token-cuenta-a'));
+
+      expect(await refresh, isNull);
+      expect(authManager.authenticationToken, 'token-cuenta-b');
+      expect(authManager.refreshToken, 'refresh-b');
+      expect(currentUserUid, 'user-b');
+    });
+
+    test('un refresh rechazado que llega tarde no cierra la cuenta nueva',
+        () async {
+      await _storedSession();
+      var expired = 0;
+      onSessionExpired = (_) => expired++;
+      final response = Completer<http.Response>();
+      final refresh = http.runWithClient(
+        refreshSession,
+        () => MockClient((req) => response.future),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      await authManager.signIn(
+        authenticationToken: 'token-cuenta-b',
+        refreshToken: 'refresh-b',
+        authUid: 'user-b',
+      );
+      response.complete(_json(401, {'message': 'Refresh Token has expired'}));
+
+      await refresh;
+      expect(loggedIn, isTrue);
+      expect(authManager.authenticationToken, 'token-cuenta-b');
+      expect(expired, 0);
+    });
+
+    test('la cuenta nueva no se cuelga del refresh de la anterior', () async {
+      await _storedSession();
+      final old = Completer<http.Response>();
+      final refreshBodies = <String>[];
+      await http.runWithClient(
+        () async {
+          final first = refreshSession();
+          await Future<void>.delayed(Duration.zero);
+          await authManager.signIn(
+            authenticationToken: 'token-cuenta-b',
+            refreshToken: 'refresh-b',
+            authUid: 'user-b',
+          );
+          final second = await refreshSession();
+          expect(second, 'token-nuevo');
+          old.complete(_refreshOk('token-cuenta-a'));
+          expect(await first, isNull);
+        },
+        () => MockClient((req) {
+          refreshBodies.add(req.body);
+          return refreshBodies.length == 1
+              ? old.future
+              : Future.value(_refreshOk('token-nuevo'));
+        }),
+      );
+      expect(jsonDecode(refreshBodies.last)['refreshToken'], 'refresh-b');
+      expect(authManager.authenticationToken, 'token-nuevo');
+      expect(currentUserUid, 'user-b');
     });
   });
 

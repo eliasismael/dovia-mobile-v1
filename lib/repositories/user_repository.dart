@@ -25,6 +25,8 @@ import '/flutter_flow/uploaded_file.dart';
 ///   },
 /// );
 /// ```
+const _sessionChangedMessage = 'La sesión cambió mientras se cargaba';
+
 class UserRepository extends ChangeNotifier {
   UserProfile? _profile;
   bool _isLoading = false;
@@ -56,10 +58,17 @@ class UserRepository extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIUserContextGroup
         .getAuthenticatedUserProfileCall
         .call(authToken: token);
+
+    // Se cerró sesión o entró otra cuenta mientras tanto: el perfil es de la
+    // sesión anterior y no se guarda.
+    if (authManager.sessionGeneration != generation) {
+      return const Failure(_sessionChangedMessage);
+    }
 
     _isLoading = false;
 
@@ -158,9 +167,14 @@ class UserRepository extends ChangeNotifier {
     _isLoadingSummary = true;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIUserContextGroup.getPerformanceSummaryCall
         .call(authToken: token);
+
+    if (authManager.sessionGeneration != generation) {
+      return const Failure(_sessionChangedMessage);
+    }
 
     _isLoadingSummary = false;
 
@@ -308,6 +322,8 @@ class UserRepository extends ChangeNotifier {
   /// Clears the cached profile (call on logout).
   void clear() {
     _profile = null;
+    _isLoading = false;
+    _isLoadingSummary = false;
     _error = null;
     _totalEarned = null;
     _averageStars = null;
