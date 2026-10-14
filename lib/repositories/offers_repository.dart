@@ -4,6 +4,8 @@ import '/backend/api_requests/api_offers.dart';
 import '/backend/api_requests/api_associate_feedback.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/backend/api_requests/api_properties.dart';
+import '/backend/api_requests/api_manager.dart';
+import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/core/result.dart';
 import '/domain/client_counter_offer_detail.dart';
 import '/domain/client_offer_detail.dart';
@@ -22,47 +24,57 @@ class OffersRepository extends ChangeNotifier {
   /// las propiedades del dueño en una segunda llamada y se cruzan por id: sin
   /// eso las tarjetas quedarían sin nombre ni foto. Si esa llamada falla, las
   /// propuestas se devuelven igual, sólo que sin los datos de la propiedad.
-  Future<Result<OwnerProposalsBoard>> loadProposalsOnMyProperties({
-    int page = 1,
-    int limit = 50,
-  }) async {
+  Future<Result<OwnerProposalsBoard>> loadProposalsOnMyProperties() async {
     final token = currentAuthenticationToken ?? '';
-    final response =
-        await DOVIAAPIOfferContextGroup.listOffersOnMyPropertiesCall.call(
-      authToken: token,
-      page: page.toString(),
-      limit: limit.toString(),
+    final offers = await _loadAllPages(
+      'propuestas recibidas',
+      (page, limit) => DOVIAAPIOfferContextGroup.listOffersOnMyPropertiesCall
+          .call(authToken: token, page: '$page', limit: '$limit'),
     );
 
-    if (!response.succeeded) {
-      return Failure(
-        response.jsonBody?['message']?.toString() ??
-            'Error al cargar las propuestas recibidas',
-        statusCode: response.statusCode,
-      );
+    if (offers.failed) {
+      return Failure('Error al cargar las propuestas recibidas',
+          statusCode: offers.errorStatus);
     }
 
     return Success(OwnerProposalsBoard.fromOffers(
-      _extractItems(response.jsonBody),
+      offers.items,
       propertiesById: await _loadMyPropertiesById(token),
     ));
+  }
+
+  /// Trae todas las páginas de un listado de ofertas o propiedades.
+  ///
+  /// Las pantallas arman los carriles, filtros y búsquedas del lado del
+  /// cliente, así que con una sola página una oferta vieja desaparecía de la
+  /// vista y de los filtros sin aviso. Mismo criterio que los listados de
+  /// Dovia Home (ver [loadAllDoviaHomePages]).
+  Future<DoviaHomePagedList> _loadAllPages(
+    String label,
+    Future<ApiCallResponse> Function(int page, int limit) fetchPage,
+  ) async {
+    final result = await loadAllDoviaHomePages(
+      fetchPage: fetchPage,
+      extractList: _extractItems,
+    );
+    if (result.truncated) {
+      debugPrint('[Ofertas] $label: listado incompleto '
+          '(${result.items.length} elementos)');
+    }
+    return result;
   }
 
   /// Propiedades del dueño indexadas por id, para completar las ofertas.
   Future<Map<String, Map<String, dynamic>>> _loadMyPropertiesById(
       String token) async {
-    final response =
-        await DOVIAAPIPropertyContextGroup.getMyPropertiesCall.call(
-      authToken: token,
-      page: '1',
-      limit: '100',
+    final properties = await _loadAllPages(
+      'propiedades del dueño',
+      (page, limit) => DOVIAAPIPropertyContextGroup.getMyPropertiesCall
+          .call(authToken: token, page: '$page', limit: '$limit'),
     );
-    if (!response.succeeded) return const {};
 
     final result = <String, Map<String, dynamic>>{};
-    for (final raw in _extractItems(response.jsonBody)) {
-      if (raw is! Map) continue;
-      final property = Map<String, dynamic>.from(raw);
+    for (final property in properties.items) {
       final id = property['id']?.toString() ?? property['_id']?.toString();
       if (id != null && id.isNotEmpty) result[id] = property;
     }
@@ -77,30 +89,23 @@ class OffersRepository extends ChangeNotifier {
   /// cada inmueble distinto con `GET /properties/{id}`, que es el único
   /// endpoint que además trae la foto principal. Si una propiedad no se puede
   /// resolver, la oferta se muestra igual con el placeholder de la tarjeta.
-  Future<Result<ClientOffersBoard>> loadMyOffers({
-    int page = 1,
-    int limit = 50,
-  }) async {
+  Future<Result<ClientOffersBoard>> loadMyOffers() async {
     final token = currentAuthenticationToken ?? '';
-    final response = await DOVIAAPIOfferContextGroup.listMyOffersCall.call(
-      authToken: token,
-      page: page.toString(),
-      limit: limit.toString(),
+    final result = await _loadAllPages(
+      'mis ofertas',
+      (page, limit) => DOVIAAPIOfferContextGroup.listMyOffersCall
+          .call(authToken: token, page: '$page', limit: '$limit'),
     );
 
-    if (!response.succeeded) {
-      debugPrint('[MisOfertas] my-offers ${response.statusCode}: '
-          '${response.bodyText}');
-      return Failure(
-        response.jsonBody?['message']?.toString() ??
-            'Error al cargar tus ofertas',
-        statusCode: response.statusCode,
-      );
+    if (result.failed) {
+      debugPrint('[MisOfertas] my-offers ${result.errorStatus}');
+      return Failure('Error al cargar tus ofertas',
+          statusCode: result.errorStatus);
     }
 
-    final offers = _extractItems(response.jsonBody);
+    final offers = result.items;
     final propertyIds = offers
-        .map((o) => o is Map ? o['propertyId']?.toString() ?? '' : '')
+        .map((o) => o['propertyId']?.toString() ?? '')
         .where((id) => id.isNotEmpty)
         .toSet();
 
@@ -128,22 +133,23 @@ class OffersRepository extends ChangeNotifier {
   Future<Map<String, Map<String, dynamic>>> _loadRatingStatusByOffer(
     String token,
   ) async {
-    final responses = await Future.wait(
+    final lists = await Future.wait(
       const ['rated', 'pending-rating'].map(
-        (filter) => DOVIAAPIOfferContextGroup.listAcceptedOffersCall.call(
-          authToken: token,
-          filter: filter,
-          page: '1',
-          limit: '100',
+        (filter) => _loadAllPages(
+          'ofertas aceptadas ($filter)',
+          (page, limit) => DOVIAAPIOfferContextGroup.listAcceptedOffersCall
+              .call(
+                  authToken: token,
+                  filter: filter,
+                  page: '$page',
+                  limit: '$limit'),
         ),
       ),
     );
 
     final result = <String, Map<String, dynamic>>{};
-    for (final response in responses) {
-      if (!response.succeeded) continue;
-      for (final raw in _extractItems(response.jsonBody)) {
-        if (raw is! Map) continue;
+    for (final list in lists) {
+      for (final raw in list.items) {
         final id = raw['offerId']?.toString() ?? raw['id']?.toString() ?? '';
         final status = raw['ratingStatus'];
         if (id.isEmpty || status is! Map) continue;
