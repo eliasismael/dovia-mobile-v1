@@ -543,7 +543,7 @@ class _DHCLIENTValorVisitaPageWidgetState
         scheduledAt: scheduledAt,
       ),
     );
-    DHCLIENTInstalacionWidget.resetDraft();
+    DHCLIENTInstalacionWidget.discardSavedDraft();
     DHCLIENTValorVisitaPageWidget.serviceRequestId = null;
 
     await showDialog(

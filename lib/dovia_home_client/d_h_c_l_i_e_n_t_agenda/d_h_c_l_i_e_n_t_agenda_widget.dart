@@ -626,7 +626,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
           scheduledAt: scheduledAt,
         ),
       );
-      DHCLIENTInstalacionWidget.resetDraft();
+      DHCLIENTInstalacionWidget.discardSavedDraft();
 
       if (!mounted) return;
       await showDialog(

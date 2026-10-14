@@ -2,6 +2,7 @@ import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/category_picker.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/service_catalog.dart';
+import '/dovia_home_client/service_request_draft.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -10,6 +11,8 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -46,10 +49,20 @@ class DHCLIENTInstalacionWidget extends StatefulWidget {
 
   /// Limpia el levantamiento anterior. Se llama al iniciar una solicitud nueva
   /// y al terminar de enviarla, para que no se filtre entre solicitudes.
+  ///
+  /// No toca el borrador en disco ([ServiceRequestDraftStore]): ese sobrevive
+  /// a que el sistema cierre la app y se descarta recién con
+  /// [discardSavedDraft], cuando la solicitud se completa.
   static void resetDraft() {
     selectedCategoryId = null;
     description = '';
     photos = [];
+  }
+
+  /// La solicitud se completó: ya no hay nada que recuperar.
+  static void discardSavedDraft() {
+    resetDraft();
+    ServiceRequestDraftStore.clear();
   }
 
   @override
@@ -70,13 +83,20 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
-    _loadScope();
+    // Primero el borrador (es local y rápido) y después el catálogo, que ya
+    // valida que la categoría recuperada siga existiendo.
+    _restoreDraft().whenComplete(_loadScope);
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   @override
   void dispose() {
+    // Lo último que se tipeó todavía no se guardó.
+    if (_saveTimer?.isActive ?? false) {
+      _saveTimer!.cancel();
+      _saveDraft();
+    }
     _model.dispose();
 
     super.dispose();
@@ -108,6 +128,65 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
         _selectedCategoryId = null;
       }
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Borrador en disco.
+  // ---------------------------------------------------------------------------
+
+  Timer? _saveTimer;
+
+  Future<void> _restoreDraft() async {
+    final draft = await ServiceRequestDraftStore.load(
+        DHCLIENTInstalacionWidget.serviceTitle);
+    if (!mounted || draft == null) return;
+    if (draft.description.isEmpty && draft.photos.isEmpty) return;
+
+    safeSetState(() {
+      _selectedCategoryId = draft.categoryId;
+      _model.textController!.text = draft.description;
+      _model.uploadedPhotos
+        ..clear()
+        ..addAll(draft.photos);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Recuperamos lo que habías cargado.'),
+        action: SnackBarAction(label: 'Descartar', onPressed: _discardDraft),
+      ),
+    );
+  }
+
+  void _discardDraft() {
+    _saveTimer?.cancel();
+    safeSetState(() {
+      _model.textController!.clear();
+      _model.uploadedPhotos.clear();
+    });
+    ServiceRequestDraftStore.clear();
+  }
+
+  /// Guarda lo cargado. Sin descripción ni fotos no hay nada que valga la pena
+  /// recuperar (la categoría sola se vuelve a elegir en un toque), así que no
+  /// se guarda nada y un borrador de otro servicio queda intacto.
+  void _saveDraft({bool photosChanged = false}) {
+    final description = _model.textController?.text.trim() ?? '';
+    final photos = _model.uploadedPhotos;
+    if (description.isEmpty && photos.isEmpty) {
+      if (photosChanged) ServiceRequestDraftStore.clear();
+      return;
+    }
+    ServiceRequestDraftStore.save(
+      serviceTitle: DHCLIENTInstalacionWidget.serviceTitle,
+      categoryId: _selectedCategoryId,
+      description: description,
+      photos: photosChanged ? List.of(photos) : null,
+    );
+  }
+
+  void _onDescriptionChanged() {
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 600), _saveDraft);
   }
 
   /// Categoría elegida, o null mientras el cliente no haya elegido ninguna.
@@ -144,6 +223,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
     );
     if (category == null || !mounted) return;
     safeSetState(() => _selectedCategoryId = category.id);
+    _saveDraft();
   }
 
   /// Avanzar sólo exige haber elegido una categoría del catálogo: es el único
@@ -175,6 +255,7 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
               ))
           .toList();
       safeSetState(() => _model.uploadedPhotos.addAll(files));
+      _saveDraft(photosChanged: true);
     } finally {
       safeSetState(() => _model.isPhotoUploading = false);
     }
@@ -357,7 +438,10 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                         focusColor: Colors.transparent,
                         hoverColor: Colors.transparent,
                         highlightColor: Colors.transparent,
-                        onTap: () => safeSetState(() => photos.removeAt(index)),
+                        onTap: () {
+                          safeSetState(() => photos.removeAt(index));
+                          _saveDraft(photosChanged: true);
+                        },
                         child: Container(
                           width: 22.0,
                           height: 22.0,
@@ -491,7 +575,10 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                             child: TextFormField(
                               controller: _model.textController,
                               focusNode: _model.textFieldFocusNode,
-                              onChanged: (_) => safeSetState(() {}),
+                              onChanged: (_) {
+                                safeSetState(() {});
+                                _onDescriptionChanged();
+                              },
                               autofocus: false,
                               enabled: true,
                               obscureText: false,
