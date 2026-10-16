@@ -11,6 +11,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
+import '/auth/google/google_button_label.dart';
 import '/auth/google/google_sign_in_flow.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -954,88 +955,17 @@ class _SignInWidgetState extends State<SignInWidget> {
                                 Padding(
                                   padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 16.0, 0.0, 0.0),
-                                  child: Text(
-                                    'O inicia con',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 14.0, 0.0, 0.0),
-                                  child: Container(
-                                    width:
-                                        MediaQuery.sizeOf(context).width * 1.0,
-                                    height: 46.6,
-                                    decoration: const BoxDecoration(),
-                                    child: Align(
-                                      alignment:
-                                          const AlignmentDirectional(0.0, -1.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          // Sólo Google: Apple y Facebook no están habilitados.
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                      0.0, 0.0, 0.0, 0.0),
-                                              child: _googleButton(
-                                                Container(
-                                                  height: 42.0,
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        const Color(0xFFF4F4F4),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16.0),
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5.0),
-                                                    child: SvgPicture.asset(
-                                                      'assets/images/GoogleLogo.svg',
-                                                      width: 19.0,
-                                                      height: 19.0,
-                                                      fit: BoxFit.contain,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                  child: _googleButton(
+                                    Container(
+                                      height: 42.0,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF4F4F4),
+                                        borderRadius:
+                                            BorderRadius.circular(16.0),
                                       ),
+                                      child: const GoogleButtonLabel(),
                                     ),
                                   ),
                                 ),
@@ -1056,6 +986,12 @@ class _SignInWidgetState extends State<SignInWidget> {
                                     ),
                                   ),
                                   const SizedBox(height: 4.0),
+                                  _footerLink('Ingresa como visita', () {
+                                    FFAppState().UserRole = Roles.VISITOR.name;
+                                    context.goNamed(
+                                        DOVIACLIENTHomePageWidget.routeName);
+                                  }),
+                                  _footerDivider(),
                                   _footerLink(
                                     'Regístrate como usuario',
                                     () {
@@ -1064,12 +1000,6 @@ class _SignInWidgetState extends State<SignInWidget> {
                                           CreateAccountWidget.routeName);
                                     },
                                   ),
-                                  _footerDivider(),
-                                  _footerLink('Ingresa como visita', () {
-                                    FFAppState().UserRole = Roles.VISITOR.name;
-                                    context.goNamed(
-                                        DOVIACLIENTHomePageWidget.routeName);
-                                  }),
                                   _footerDivider(),
                                   _footerLink(
                                     'Regístrate como asociado',
@@ -1098,7 +1028,7 @@ class _SignInWidgetState extends State<SignInWidget> {
         highlightColor: Colors.transparent,
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0),
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
           child: Text(
             text,
             style: GoogleFonts.publicSans(
@@ -1111,15 +1041,19 @@ class _SignInWidgetState extends State<SignInWidget> {
       );
 
   Widget _footerDivider() => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 4.0),
+        padding: EdgeInsets.symmetric(horizontal: 40.0),
         child: Row(
           children: [
-            Expanded(child: Divider(thickness: 1.0, color: Color(0xFFD9D9D9))),
+            Expanded(
+                child: Divider(
+                    height: 12.0, thickness: 1.0, color: Color(0xFFD9D9D9))),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.0),
               child: Text('o', style: TextStyle(color: Color(0xFF8A8A8A))),
             ),
-            Expanded(child: Divider(thickness: 1.0, color: Color(0xFFD9D9D9))),
+            Expanded(
+                child: Divider(
+                    height: 12.0, thickness: 1.0, color: Color(0xFFD9D9D9))),
           ],
         ),
       );

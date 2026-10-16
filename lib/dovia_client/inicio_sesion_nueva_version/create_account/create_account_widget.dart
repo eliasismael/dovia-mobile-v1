@@ -7,6 +7,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/index.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '/auth/google/google_button_label.dart';
 import '/auth/google/google_sign_in_flow.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -659,21 +660,14 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                             MediaQuery.sizeOf(context).width *
                                                 1.0,
                                         height: 42.0,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFF4F4F4),
                                           borderRadius:
                                               BorderRadius.circular(100.0),
                                         ),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          child: SvgPicture.asset(
-                                            'assets/images/GoogleLogo.svg',
-                                            width: 13.0,
-                                            height: 13.0,
-                                            fit: BoxFit.none,
-                                          ),
-                                        ),
+                                        child: const GoogleButtonLabel(),
                                       ),
                                     ),
                                   ),
