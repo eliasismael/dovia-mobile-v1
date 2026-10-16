@@ -1,5 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/shared_components/centered_panel.dart';
 import '/shared_components/dovia_suupport_messages/dovia_suupport_messages_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,40 +8,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dovia_support_model.dart';
 export 'dovia_support_model.dart';
 
-/// Abre el panel de soporte centrado (90 % del ancho y 75 % del alto) sobre
-/// un fondo oscuro, con un fundido al abrir y al cerrar. Tocar el fondo lo
-/// cierra.
-Future<void> showDoviaSupport(BuildContext context) => showGeneralDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Cerrar',
-      barrierColor: const Color(0x99000000),
-      transitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (context, _, __) {
-        final size = MediaQuery.sizeOf(context);
-        return Center(
-          child: SizedBox(
-            width: size.width * 0.9,
-            height: size.height * 0.75,
-            child: const Material(
-              type: MaterialType.transparency,
-              child: DoviaSupportWidget(),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (context, animation, _, child) {
-        final curved =
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-        return FadeTransition(
-          opacity: curved,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.96, end: 1.0).animate(curved),
-            child: child,
-          ),
-        );
-      },
-    );
+/// Abre el panel de soporte centrado sobre un fondo oscuro.
+Future<void> showDoviaSupport(BuildContext context) =>
+    showCenteredPanel<void>(context, const DoviaSupportWidget());
 
 class DoviaSupportWidget extends StatefulWidget {
   const DoviaSupportWidget({super.key});
@@ -75,18 +45,8 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
 
   /// Abre el chat con soporte (desde "Mensajes" o "Hacer una pregunta").
   Future<void> _openChat() async {
-    await showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: false,
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: MediaQuery.viewInsetsOf(context),
-          child: const DoviaSuupportMessagesWidget(),
-        );
-      },
-    ).then((value) => safeSetState(() {}));
+    await showDoviaSupportChat(context);
+    safeSetState(() {});
   }
 
   @override

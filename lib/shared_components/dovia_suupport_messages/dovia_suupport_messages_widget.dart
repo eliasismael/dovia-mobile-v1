@@ -1,10 +1,22 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/shared_components/centered_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dovia_suupport_messages_model.dart';
 export 'dovia_suupport_messages_model.dart';
+
+/// Abre el chat con soporte centrado sobre un fondo oscuro.
+Future<void> showDoviaSupportChat(BuildContext context) =>
+    showCenteredPanel<void>(
+      context,
+      // Tocar fuera del campo cierra el teclado.
+      GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: const DoviaSuupportMessagesWidget(),
+      ),
+    );
 
 class DoviaSuupportMessagesWidget extends StatefulWidget {
   const DoviaSuupportMessagesWidget({super.key});
@@ -93,23 +105,10 @@ class _DoviaSuupportMessagesWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // Se abre a pantalla completa y el bottom sheet le saca los márgenes del
-    // sistema: se toman de la ventana (barra de estado y botones de Android).
-    final view = MediaQueryData.fromView(View.of(context));
-    final safeTop = view.viewPadding.top;
-    // Con el teclado abierto la hoja se achica a lo que queda libre y el
-    // margen de los botones de Android ya no hace falta.
-    // `MediaQuery.viewInsetsOf` hace que se reconstruya cuando el teclado
-    // se abre o se cierra (leer solo la ventana no avisa de los cambios).
-    final keyboard = MediaQuery.viewInsetsOf(context).bottom > 0
-        ? MediaQuery.viewInsetsOf(context).bottom
-        : view.viewInsets.bottom;
-    final safeBottom = keyboard > 0 ? 0.0 : view.viewPadding.bottom;
+    // El panel centrado (showDoviaSupportChat) le da el alto, ya
+    // descontado el teclado.
     return LayoutBuilder(builder: (context, constraints) {
-      // Ocupa exactamente lo que le deja la hoja (ya descontado el teclado).
-      final sheetHeight = constraints.maxHeight.isFinite
-          ? constraints.maxHeight
-          : view.size.height - keyboard;
+      final sheetHeight = constraints.maxHeight;
       return Column(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -124,8 +123,8 @@ class _DoviaSuupportMessagesWidgetState
                   borderRadius: BorderRadius.circular(18.0),
                 ),
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                      20.0, safeTop + 24.0, 20.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      20.0, 24.0, 20.0, 0.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -205,7 +204,9 @@ class _DoviaSuupportMessagesWidgetState
                             0.0, 27.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
-                          height: 100.0,
+                          // Alto mínimo y no fijo: en el panel centrado el
+                          // texto puede ocupar más líneas.
+                          constraints: const BoxConstraints(minHeight: 100.0),
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
@@ -225,7 +226,7 @@ class _DoviaSuupportMessagesWidgetState
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 14.0, 14.0, 14.0, 14.0),
                             child: Column(
-                              mainAxisSize: MainAxisSize.max,
+                              mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -262,8 +263,8 @@ class _DoviaSuupportMessagesWidgetState
                       Expanded(
                         child: ListView(
                           controller: _messagesScroll,
-                          padding: EdgeInsets.only(
-                              top: 6.0, bottom: 110.0 + safeBottom),
+                          padding:
+                              const EdgeInsets.only(top: 6.0, bottom: 110.0),
                           children: _messages.map(_messageBubble).toList(),
                         ),
                       ),
@@ -272,8 +273,8 @@ class _DoviaSuupportMessagesWidgetState
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                    20.0, 120.0, 20.0, 20.0 + safeBottom),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                    20.0, 120.0, 20.0, 20.0),
                 child: Container(
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).tertiary,
