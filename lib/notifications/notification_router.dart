@@ -180,9 +180,13 @@ Map<String, String> _queryOf(String? actionPath) {
   }
 }
 
-/// Último segmento del código del catálogo (`VISIT_CONFIRMED_CLIENT` ->
-/// `CLIENT`), que dice a quién iba dirigida.
+/// A quién iba dirigida según el código del catálogo: el último `CLIENT` u
+/// `OWNER` (`VISIT_CONFIRMED_CLIENT` -> `CLIENT`). Los recordatorios llevan
+/// el plazo al final (`CLIENT_VISIT_REMINDER_OWNER_24H` -> `OWNER`). Si no
+/// hay ninguno, el último segmento.
 String? _audienceOf(String? type) {
   if (type == null || !type.contains('_')) return null;
-  return type.substring(type.lastIndexOf('_') + 1);
+  final parts = type.split('_');
+  return parts.lastWhere((p) => p == 'CLIENT' || p == 'OWNER',
+      orElse: () => parts.last);
 }
