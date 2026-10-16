@@ -373,18 +373,28 @@ class NotificationsRepository extends ChangeNotifier {
     return const Success(null);
   }
 
-  /// Pide una notificacion de prueba (`POST /notifications/test`) y devuelve el
-  /// `eventId` aceptado.
+  /// Pide una notificacion de prueba (`POST /notifications/test`) con titulo,
+  /// texto y ruta a eleccion, y devuelve el `eventId` aceptado.
   ///
   /// El `202` confirma que el inbox y el outbox quedaron persistidos, no que
   /// FCM haya entregado el push. Requiere usuario activo y verificado: una
-  /// cuenta inactiva o sin verificar devuelve `403`.
-  Future<Result<String>> sendTestNotification() async {
+  /// cuenta inactiva o sin verificar devuelve `403`; una ruta que no sea
+  /// interna (`/...`), `400`.
+  Future<Result<String>> sendTestNotification({
+    required String title,
+    required String body,
+    required String actionPath,
+  }) async {
     if (_token.isEmpty) return const Failure('No autenticado');
 
     final response = await DOVIAAPINotificationContextGroup
         .sendTestNotificationCall
-        .call(authToken: _token);
+        .call(
+      title: title,
+      body: body,
+      actionPath: actionPath,
+      authToken: _token,
+    );
 
     if (!response.succeeded) {
       return Failure(
@@ -393,8 +403,8 @@ class NotificationsRepository extends ChangeNotifier {
       );
     }
 
-    final body = response.jsonBody;
-    final eventId = body is Map ? (body['data']?['eventId'] as String?) : null;
+    final json = response.jsonBody;
+    final eventId = json is Map ? (json['data']?['eventId'] as String?) : null;
     return Success(eventId ?? '');
   }
 

@@ -106,15 +106,26 @@ class GetUnreadNotificationCountCall {
 
 /// `POST /notifications/test` -> `202 { eventId }`.
 ///
-/// Notificacion de prueba de contenido fijo (categoria `SYSTEM`). Requiere
-/// usuario activo y verificado. El 202 confirma persistencia durable del inbox
-/// y del outbox, no la entrega FCM.
+/// Notificacion de prueba para el usuario del JWT (tipo `NOTIFICATION_TEST`,
+/// categoria `SYSTEM`) con titulo, texto y ruta a eleccion. Queda en la bandeja
+/// y se encola el push. `actionPath` tiene que ser una ruta interna que
+/// empiece con una sola `/`. Requiere usuario activo y verificado. El 202
+/// confirma persistencia durable del inbox y del outbox, no la entrega FCM.
 class SendTestNotificationCall {
   Future<ApiCallResponse> call({
+    required String title,
+    required String body,
+    required String actionPath,
     String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPINotificationContextGroup.getBaseUrl();
 
+    final ffApiRequestBody = '''
+{
+  "title": "${escapeStringForJson(title)}",
+  "body": "${escapeStringForJson(body)}",
+  "actionPath": "${escapeStringForJson(actionPath)}"
+}''';
     return ApiManager.instance.makeApiCall(
       callName: 'Send Test Notification',
       apiUrl: '$baseUrl/notifications/test',
@@ -123,6 +134,7 @@ class SendTestNotificationCall {
         'Authorization': 'Bearer $authToken',
       },
       params: {},
+      body: ffApiRequestBody,
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

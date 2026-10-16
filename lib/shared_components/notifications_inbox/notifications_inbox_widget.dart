@@ -8,7 +8,9 @@ import '/app_state.dart';
 import '/core/result.dart';
 import '/domain/notification_models.dart';
 import '/flutter_flow/nav/nav.dart';
+import '/notifications/notification_navigation.dart';
 import '/notifications/notification_router.dart';
+import '/notifications/notification_test_sheet.dart';
 import '/repositories/notifications_repository.dart';
 
 /// Inbox de notificaciones compartido por todos los perfiles.
@@ -83,16 +85,15 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
   /// ella, la abre. Si no, se queda en la bandeja.
   void _open(AppNotification n) {
     if (n.isUnread) context.read<NotificationsRepository>().markAsRead(n.id);
-    final destination = notificationDetailFor(
+    final router = GoRouter.of(context);
+    final destination = resolveNotificationTap(
       role: FFAppState().UserRole,
       type: n.type,
       actionPath: n.actionPath,
+      isAppRoute: (path) => isAppRoute(router, path),
     );
     if (destination == null) return;
-    context.pushNamed(
-      destination.routeName,
-      queryParameters: destination.queryParameters,
-    );
+    openNotificationDestination(router, destination);
   }
 
   Future<void> _delete(AppNotification n) async {
@@ -175,6 +176,16 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
     );
   }
 
+  /// Sólo en dev y staging: mandarse una notificación de prueba.
+  Widget _buildTestButton() => TextButton(
+        onPressed: () => showNotificationTestSheet(context),
+        child: const Text(
+          'Probar una notificación',
+          style:
+              TextStyle(fontFamily: 'Public Sans', fontSize: 14, color: aqua),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final repo = context.watch<NotificationsRepository>();
@@ -207,6 +218,7 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
                 onPressed: () => repo.loadInbox(),
                 child: const Text('Reintentar', style: TextStyle(color: aqua)),
               ),
+            if (notificationTestEnabled) _buildTestButton(),
           ],
         ),
       );
@@ -215,6 +227,8 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (notificationTestEnabled)
+          Align(alignment: Alignment.centerLeft, child: _buildTestButton()),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton.icon(

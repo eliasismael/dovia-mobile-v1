@@ -12,6 +12,7 @@ import 'auth/custom_auth/session_restore.dart';
 import 'auth/custom_auth/token_refresher.dart';
 import 'backend/api_requests/api_manager.dart';
 import 'index.dart' show SignInWidget;
+import 'notifications/notification_navigation.dart';
 import 'notifications/notification_router.dart';
 import 'notifications/push_messaging.dart';
 import 'notifications/push_notifications_service.dart';
@@ -182,11 +183,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final destination = destinationForPush(
       role: FFAppState().UserRole,
       message: message,
+      isAppRoute: (path) => isAppRoute(_router, path),
     );
-    _router.pushNamed(
-      destination.routeName,
-      queryParameters: destination.queryParameters,
-    );
+    openNotificationDestination(_router, destination);
   }
 
   /// Un push con la app abierta no lo muestra el sistema: se avisa acá.
