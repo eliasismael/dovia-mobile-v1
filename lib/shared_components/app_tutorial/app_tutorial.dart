@@ -42,17 +42,31 @@ class AppTutorial {
       (await SharedPreferences.getInstance())
           .setBool('$_doneKeyPrefix${id}_$userId', true);
 
-  static Future<void> show(BuildContext context, List<TutorialStep> steps) {
-    return showGeneralDialog(
-      context: context,
-      useRootNavigator: true,
-      barrierDismissible: false,
-      barrierColor: Colors.transparent,
-      transitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (_, __, ___) => _TutorialOverlay(steps: steps),
-      transitionBuilder: (_, animation, __, child) =>
-          FadeTransition(opacity: animation, child: child),
-    );
+  static bool _showing = false;
+
+  /// Muestra el tutorial y devuelve `true` cuando el usuario lo termina u
+  /// omite. Si ya hay uno en pantalla no abre otro y devuelve `false`: al
+  /// iniciar sesión la home se puede construir dos veces, y cada instancia
+  /// lanzaba el suyo (dos carteles superpuestos).
+  static Future<bool> show(
+      BuildContext context, List<TutorialStep> steps) async {
+    if (_showing) return false;
+    _showing = true;
+    try {
+      await showGeneralDialog(
+        context: context,
+        useRootNavigator: true,
+        barrierDismissible: false,
+        barrierColor: Colors.transparent,
+        transitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (_, __, ___) => _TutorialOverlay(steps: steps),
+        transitionBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+      return true;
+    } finally {
+      _showing = false;
+    }
   }
 }
 

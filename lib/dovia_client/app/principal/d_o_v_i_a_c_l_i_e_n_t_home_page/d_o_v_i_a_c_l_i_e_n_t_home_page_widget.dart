@@ -1046,7 +1046,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     await Future.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
     if (_pageScroll.hasClients) _pageScroll.jumpTo(0);
-    await AppTutorial.show(context, [
+    final shown = await AppTutorial.show(context, [
       const TutorialStep(
         title: '¡Bienvenido a DOVIA!',
         text: 'La plataforma donde puedes comprar, vender y rentar '
@@ -1119,6 +1119,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
         target: () => FixedDoviaIconWidget.lastRect,
       ),
     ]);
+    // Otra instancia de la home ya lo está mostrando: lo marca ella al terminar.
+    if (!shown) return;
     await AppTutorial.markDone('client_home', userId);
   }
 
