@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '/backend/api_requests/api_config.dart';
@@ -52,6 +54,10 @@ class _NotificationTestSheetState extends State<_NotificationTestSheet> {
   bool _sending = false;
   String? _error;
 
+  /// En Android la app se cierra sola; iOS no permite cerrarla desde código.
+  bool get _canCloseApp =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
   @override
   void dispose() {
     _title.dispose();
@@ -60,7 +66,11 @@ class _NotificationTestSheetState extends State<_NotificationTestSheet> {
     super.dispose();
   }
 
-  Future<void> _send() async {
+  /// Con [closeApp] la app se cierra apenas el backend acepta el envío: el
+  /// push pasa por la cola y el worker, que tardan unos segundos, así que
+  /// llega con la app cerrada y aparece en la barra del sistema. Tocarlo abre
+  /// la app desde cero (el camino de `getInitialMessage`).
+  Future<void> _send({required bool closeApp}) async {
     final title = _title.text.trim();
     final body = _body.text.trim();
     final path = _path.text.trim();
@@ -86,13 +96,18 @@ class _NotificationTestSheetState extends State<_NotificationTestSheet> {
     if (!mounted) return;
     switch (result) {
       case Success():
+        if (closeApp && _canCloseApp) {
+          await SystemNavigator.pop();
+          return;
+        }
         await repo.loadInbox();
         if (!mounted) return;
         final messenger = ScaffoldMessenger.of(context);
         Navigator.of(context).pop();
-        messenger.showSnackBar(const SnackBar(
-          content: Text(
-              'Enviada. Ya está en la bandeja; tocala para ver a dónde lleva.'),
+        messenger.showSnackBar(SnackBar(
+          content: Text(closeApp
+              ? 'Enviada. Salí de la app ya para que llegue como push.'
+              : 'Enviada. Ya está en la bandeja; tocala para ver a dónde lleva.'),
         ));
       case Failure(:final message):
         setState(() {
@@ -152,8 +167,15 @@ class _NotificationTestSheetState extends State<_NotificationTestSheet> {
             ],
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: _sending ? null : _send,
-              child: Text(_sending ? 'Enviando...' : 'Enviar'),
+              onPressed: _sending ? null : () => _send(closeApp: false),
+              child: Text(_sending ? 'Enviando...' : 'Enviar (app abierta)'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: _sending ? null : () => _send(closeApp: true),
+              child: Text(_canCloseApp
+                  ? 'Enviar como push (cierra la app)'
+                  : 'Enviar como push (salí de la app)'),
             ),
           ],
         ),
