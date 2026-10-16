@@ -120,8 +120,14 @@ class _NotificationTestSheetState extends State<_NotificationTestSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
+      // Teclado o, si no está abierto, la barra de navegación del sistema.
       padding: EdgeInsets.fromLTRB(
-          16, 16, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
+          16,
+          16,
+          16,
+          16 +
+              MediaQuery.viewInsetsOf(context).bottom +
+              MediaQuery.paddingOf(context).bottom),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
