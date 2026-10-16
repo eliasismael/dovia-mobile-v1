@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show appFlavor;
 
 import 'push_messaging.dart';
 
@@ -9,16 +10,25 @@ import 'push_messaging.dart';
 /// `GoogleService-Info.plist`; se pasan desde Dart para no depender del plugin
 /// de Gradle, que exige que cada flavor tenga su paquete registrado.
 ///
-/// Hoy sólo está registrado `com.mycompany.dovia`: el push funciona en el
-/// flavor `devfcm`. Cuando se registren `.dev` y `.stg` hay que sumar sus
-/// `appId` acá.
+/// En Android cada flavor es un paquete distinto y tiene su propia app en
+/// Firebase. Registrados: `com.mycompany.dovia` (flavor `devfcm` o build sin
+/// flavor) y `com.mycompany.dovia.stg` (`staging`). Falta `.dev`: en ese
+/// flavor no hay push hasta que se registre y se sume su `appId` acá.
+const _androidAppIds = <String?, String>{
+  null: '1:240336837682:android:780f6a517ffbc7112df02b',
+  'devfcm': '1:240336837682:android:780f6a517ffbc7112df02b',
+  'staging': '1:240336837682:android:83b592ef903911b52df02b',
+};
+
 FirebaseOptions? _firebaseOptions() {
   if (kIsWeb) return null;
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
-      return const FirebaseOptions(
+      final appId = _androidAppIds[appFlavor];
+      if (appId == null) return null;
+      return FirebaseOptions(
         apiKey: 'AIzaSyAMAV1vt44gcRVyUPJNhCPMKIkUp61ZTaw',
-        appId: '1:240336837682:android:780f6a517ffbc7112df02b',
+        appId: appId,
         messagingSenderId: '240336837682',
         projectId: 'dovia-notifications',
         storageBucket: 'dovia-notifications.firebasestorage.app',

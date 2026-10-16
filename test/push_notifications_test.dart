@@ -102,6 +102,11 @@ class _Backend {
             }
           });
         }
+        if (req.method == 'PATCH' && path.endsWith('/read')) {
+          return _json(200, {
+            'data': {'readAt': '2026-10-16T12:00:00.000Z'}
+          });
+        }
         if (path.endsWith('/notifications/unread-count')) {
           return _json(200, {
             'data': {'count': unreadCount}
@@ -318,6 +323,23 @@ void main() {
       });
 
       expect(opened.single.actionPath, '/offers/o1');
+    });
+
+    test('tocar un push con notificationId la marca como leída', () async {
+      await withBackend(() async {
+        await service.start();
+        push.opened.add(const PushMessage(data: {
+          'actionPath': '/offers/o1',
+          'type': 'OFFER_ACCEPTED_CLIENT',
+          'notificationId': 'n-7',
+        }));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      });
+
+      final patches = backend.requests.where((r) => r.method == 'PATCH');
+      expect(patches.single.url.path, endsWith('/notifications/n-7/read'));
+      // El contador se pide después de marcarla, para que ya la descuente.
+      expect(backend.requests.last.url.path, endsWith('/unread-count'));
     });
 
     test('el push que abrió la app desde cerrada también se atiende', () async {

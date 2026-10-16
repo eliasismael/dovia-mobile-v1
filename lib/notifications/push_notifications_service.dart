@@ -164,7 +164,15 @@ class PushNotificationsService {
 
   void _onMessageOpened(PushMessage message) {
     if (!loggedIn) return;
-    unawaited(repository.refreshUnreadCount());
+    unawaited(_markOpened(message));
     onOpen?.call(message);
+  }
+
+  /// Tocar el push equivale a abrirla en la bandeja: se marca como leída si
+  /// el push trae su `notificationId`, y después se actualiza el contador.
+  Future<void> _markOpened(PushMessage message) async {
+    final id = message.data['notificationId'];
+    if (id != null && id.isNotEmpty) await repository.markAsRead(id);
+    await repository.refreshUnreadCount();
   }
 }
