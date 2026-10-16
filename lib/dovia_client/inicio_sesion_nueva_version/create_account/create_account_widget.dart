@@ -648,30 +648,11 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  Container(
-                                    width:
-                                        MediaQuery.sizeOf(context).width * 1.0,
-                                    height: 42.0,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF4F4F4),
-                                      borderRadius:
-                                          BorderRadius.circular(100.0),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius:
-                                          BorderRadius.circular(100.0),
-                                      child: SvgPicture.asset(
-                                        'assets/images/AppleLogo.svg',
-                                        width: 16.0,
-                                        height: 16.0,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  ),
+                                  // Sólo Google: Apple y Facebook no están habilitados.
                                   Padding(
                                     padding:
                                         const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 15.0, 0.0, 0.0),
+                                            0.0, 0.0, 0.0, 0.0),
                                     child: _googleButton(
                                       Container(
                                         width:
@@ -692,30 +673,6 @@ class _CreateAccountWidgetState extends State<CreateAccountWidget> {
                                             height: 13.0,
                                             fit: BoxFit.none,
                                           ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 15.0, 0.0, 0.0),
-                                    child: Container(
-                                      width: 1000.0,
-                                      height: 42.0,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF4F4F4),
-                                        borderRadius:
-                                            BorderRadius.circular(100.0),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/FacebookLogo.svg',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.none,
                                         ),
                                       ),
                                     ),

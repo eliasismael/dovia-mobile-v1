@@ -1001,42 +1001,13 @@ class _SignInWidgetState extends State<SignInWidget> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
+                                          // Sólo Google: Apple y Facebook no están habilitados.
                                           Expanded(
                                             child: Padding(
                                               padding:
                                                   const EdgeInsetsDirectional
                                                       .fromSTEB(
-                                                      0.0, 0.0, 6.0, 0.0),
-                                              child: Container(
-                                                height: 42.0,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFFF4F4F4),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          13.0),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          0.0),
-                                                  child: SvgPicture.asset(
-                                                    'assets/images/AppleLogo.svg',
-                                                    width: 19.0,
-                                                    height: 19.0,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                      6.0, 0.0, 6.0, 0.0),
+                                                      0.0, 0.0, 0.0, 0.0),
                                               child: _googleButton(
                                                 Container(
                                                   height: 42.0,
@@ -1058,36 +1029,6 @@ class _SignInWidgetState extends State<SignInWidget> {
                                                       height: 19.0,
                                                       fit: BoxFit.contain,
                                                     ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                      6.0, 0.0, 0.0, 0.0),
-                                              child: Container(
-                                                height: 42.0,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFFF4F4F4),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          16.0),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          0.0),
-                                                  child: SvgPicture.asset(
-                                                    'assets/images/FacebookLogo.svg',
-                                                    width: 19.0,
-                                                    height: 19.0,
-                                                    fit: BoxFit.contain,
                                                   ),
                                                 ),
                                               ),
