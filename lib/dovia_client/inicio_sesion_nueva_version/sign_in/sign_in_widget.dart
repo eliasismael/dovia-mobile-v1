@@ -107,12 +107,12 @@ class _SignInWidgetState extends State<SignInWidget> {
                           BoxConstraints(minHeight: constraints.maxHeight),
                       // Sin IntrinsicHeight: con las fuentes reales medía
                       // unos píxeles menos que el contenido y el pie
-                      // desbordaba. El alto mínimo y spaceBetween dejan el
-                      // bloque de registro abajo cuando sobra lugar.
+                      // desbordaba. El bloque de registro va pegado al botón
+                      // de Google, no al fondo de la pantalla.
                       child: SizedBox(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Column(
                               mainAxisSize: MainAxisSize.min,
@@ -973,7 +973,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 20.0, 0.0, 16.0),
+                                  0.0, 32.0, 0.0, 16.0),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
