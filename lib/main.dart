@@ -14,6 +14,7 @@ import 'backend/api_requests/api_manager.dart';
 import 'index.dart' show SignInWidget;
 import 'notifications/notification_navigation.dart';
 import 'notifications/notification_router.dart';
+import 'notifications/firebase_push_messaging.dart';
 import 'notifications/push_messaging.dart';
 import 'notifications/push_notifications_service.dart';
 
@@ -29,6 +30,8 @@ void main() async {
   ApiManager.onUnauthorized = refreshSession;
   ApiManager.freshTokenIfExpired = freshTokenIfExpired;
   await restoreSession();
+  // Firebase para push (Android/iOS); sin configuración queda sin push.
+  pushMessaging = await initPushMessaging();
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
