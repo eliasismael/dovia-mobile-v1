@@ -141,6 +141,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         // registro a medias que necesita esos datos.
         if (!user.loggedIn && _wasLoggedIn) {
           FFAppState().clearUserScopedState();
+          // También si la sesión venció y no se pudo dar de baja el
+          // dispositivo: que no le sigan llegando push de esa cuenta.
+          _push.afterSignOut();
         }
         _wasLoggedIn = user.loggedIn;
         // Tambien cubre un cambio directo de cuenta sin un evento de logout.

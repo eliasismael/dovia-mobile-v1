@@ -113,6 +113,20 @@ class PushNotificationsService {
     }
   }
 
+  /// Ya sin sesión, por cualquier camino (cerrar sesión o sesión vencida):
+  /// descarta el token de FCM de este dispositivo. Si la baja no se pudo
+  /// hacer (sin JWT vigente o sin conexión), el backend igual deja de
+  /// mandarle: FCM rechaza el token viejo y el worker desactiva el
+  /// dispositivo. Al volver a entrar se registra un token nuevo.
+  Future<void> afterSignOut() async {
+    _registered = false;
+    try {
+      await messaging.deleteToken();
+    } catch (e) {
+      debugPrint('[Push] No se pudo descartar el token: $e');
+    }
+  }
+
   Future<PushSyncOutcome> _register(String token, int generation) async {
     var result = await repository.syncDevice(pushToken: token);
 

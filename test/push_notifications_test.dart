@@ -255,6 +255,25 @@ void main() {
           backend.devicePuts.single.url.path);
     });
 
+    test(
+        'sin sesión (Ej: vencida) descarta el token y al volver registra '
+        'uno nuevo', () async {
+      await withBackend(service.syncForCurrentSession);
+      await authManager.signOut();
+      await service.afterSignOut();
+
+      expect(push.deletedTokens, 1);
+      expect(service.isRegistered, isFalse);
+
+      push.tokens = ['token-nuevo'];
+      await authManager.signIn(authenticationToken: 'jwt-a', authUid: 'user-a');
+      await withBackend(service.syncForCurrentSession);
+      expect(
+        backend.devicePuts.map((r) => (jsonDecode(r.body) as Map)['pushToken']),
+        ['token-1', 'token-nuevo'],
+      );
+    });
+
     test('si la sesión cambia mientras registra, el resultado no aplica',
         () async {
       final gate = Completer<void>();
