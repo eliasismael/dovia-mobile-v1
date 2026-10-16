@@ -7,6 +7,41 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dovia_support_model.dart';
 export 'dovia_support_model.dart';
 
+/// Abre el panel de soporte centrado (90 % del ancho y 75 % del alto) sobre
+/// un fondo oscuro, con un fundido al abrir y al cerrar. Tocar el fondo lo
+/// cierra.
+Future<void> showDoviaSupport(BuildContext context) => showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Cerrar',
+      barrierColor: const Color(0x99000000),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, _, __) {
+        final size = MediaQuery.sizeOf(context);
+        return Center(
+          child: SizedBox(
+            width: size.width * 0.9,
+            height: size.height * 0.75,
+            child: const Material(
+              type: MaterialType.transparency,
+              child: DoviaSupportWidget(),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, _, child) {
+        final curved =
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.96, end: 1.0).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
+
 class DoviaSupportWidget extends StatefulWidget {
   const DoviaSupportWidget({super.key});
 
@@ -56,20 +91,10 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // La hoja ocupa el alto que le da quien la abre. El panel pedía el alto de
-    // la pantalla entera, así que en las pantallas que lo limitan al 70 %
-    // —Ajustes, el perfil de lister— desbordaba justo ese 30 % restante.
-    // La hoja se abre a pantalla completa y el bottom sheet le saca los
-    // márgenes del sistema, así que se toman de la ventana: la barra de
-    // estado arriba y los botones de Android abajo.
-    final view = MediaQueryData.fromView(View.of(context));
-    final safeTop = view.viewPadding.top;
-    final safeBottom = view.viewPadding.bottom;
     return Stack(
       alignment: const AlignmentDirectional(0.0, 1.0),
       children: [
         Container(
-          // Se abre desde abajo: el contenido termina sobre los botones de Android.
           decoration: BoxDecoration(
             color: FlutterFlowTheme.of(context).tertiary,
             borderRadius: BorderRadius.circular(18.0),
@@ -92,10 +117,10 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
             child: Padding(
               // El 120 de abajo reserva la franja donde flota la barra de
               // Inicio / Mensajes, apoyada al fondo del Stack.
-              padding: EdgeInsetsDirectional.fromSTEB(
-                  20.0, safeTop + 24.0, 20.0, 120.0 + safeBottom),
-              // Con la hoja recortada el contenido no siempre entra, así
-              // que rueda en vez de desbordar.
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 120.0),
+              // Si el contenido no entra en el panel, rueda en vez de
+              // desbordar.
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -327,8 +352,8 @@ class _DoviaSupportWidgetState extends State<DoviaSupportWidget> {
           ),
         ),
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(
-              20.0, 120.0, 20.0, 20.0 + safeBottom),
+          padding:
+              const EdgeInsetsDirectional.fromSTEB(20.0, 120.0, 20.0, 20.0),
           child: Container(
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).tertiary,

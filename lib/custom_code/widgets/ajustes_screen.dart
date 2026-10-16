@@ -19,6 +19,7 @@ class AjustesScreen extends StatefulWidget {
   final double? width;
   final double? height;
   final Future Function()? onCancelSubscription;
+
   /// Devuelve si el backend dio de baja la cuenta. Solo entonces se cierra la
   /// sesión con [onSignOut].
   final Future<bool> Function(String? reason)? onDeleteAccount;
@@ -643,24 +644,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   // ── SUPPORT CHAT ──────────────────────────────────────────────────
   void _openSupportChat() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.7,
-          ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: const DoviaSupportWidget(),
-        ),
-      ),
-    );
+    showDoviaSupport(context);
   }
 
   // ── IMAGE PICKER ──────────────────────────────────────────────────

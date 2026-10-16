@@ -417,16 +417,7 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
     }
 
     if (!mounted) return;
-    await showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: false,
-      context: context,
-      builder: (context) => Padding(
-        padding: MediaQuery.viewInsetsOf(context),
-        child: const DoviaSupportWidget(),
-      ),
-    );
+    await showDoviaSupport(context);
   }
 
   void _showMessage(String message) {

@@ -1100,24 +1100,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   }
 
   void _openSupportChat() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.7,
-          ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: const DoviaSupportWidget(),
-        ),
-      ),
-    );
+    showDoviaSupport(context);
   }
 
   // ─── Delete account flow (2 pop-ups) ──────────────────────────────────────────

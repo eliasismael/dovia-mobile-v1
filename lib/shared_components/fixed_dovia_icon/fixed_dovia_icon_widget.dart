@@ -136,18 +136,7 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
       : FixedDoviaIconWidget.sideMargin;
 
   void _openSupport() async {
-    await showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: false,
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: MediaQuery.viewInsetsOf(context),
-          child: const DoviaSupportWidget(),
-        );
-      },
-    ).then((value) => safeSetState(() {}));
+    await showDoviaSupport(context).then((value) => safeSetState(() {}));
   }
 
   Widget _buildBubble({required bool lifted}) {

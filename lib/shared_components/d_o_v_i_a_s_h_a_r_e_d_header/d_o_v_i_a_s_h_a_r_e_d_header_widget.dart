@@ -274,18 +274,8 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                           widget.onChatTap!();
                           return;
                         }
-                        await showModalBottomSheet(
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          enableDrag: false,
-                          context: context,
-                          builder: (context) {
-                            return Padding(
-                              padding: MediaQuery.viewInsetsOf(context),
-                              child: const DoviaSupportWidget(),
-                            );
-                          },
-                        ).then((value) => safeSetState(() {}));
+                        await showDoviaSupport(context)
+                            .then((value) => safeSetState(() {}));
                       },
                       child: Container(
                         width: 40.0,
