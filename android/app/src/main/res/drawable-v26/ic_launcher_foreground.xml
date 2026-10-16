@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D de DOVIA (assets/images/D-verde.svg) dentro de la zona segura del ícono adaptable. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.6364"
+        android:scaleY="0.6364"
+        android:translateX="32.36"
+        android:translateY="26">
+        <path android:fillColor="#007376" android:pathData="M20.6197,56.448L0,72.9647V15.0332L20.6197,31.5522V56.448Z"/>
+        <path android:fillColor="#007376" android:pathData="M57.1218,11.0473C49.8705,3.68244 38.9551,0 24.3757,0H0V15.0331L46.0772,24.4551V63.5426L0,72.9646V87.9978H24.3757C38.9551,87.9978 49.8705,84.3375 57.124,77.0147C64.3754,69.6941 68.0022,58.7087 68.0022,44.0631C68.0022,29.4175 64.3754,18.4122 57.124,11.0473H57.1218Z"/>
+        <path android:pathData="M0,15.0332L46.0772,24.4552L46.0794,63.5449L0,50.6929V15.0332Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="0.372315"
+                    android:startY="14.6568"
+                    android:endX="47.9179"
+                    android:endY="61.6839"
+                    android:startColor="#00007376"
+                    android:endColor="#B3007376"/>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

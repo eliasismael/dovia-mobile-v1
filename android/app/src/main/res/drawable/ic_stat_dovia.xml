@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícono de las notificaciones en la barra de estado: Android sólo usa la
+     silueta (canal alfa), el color lo pone default_notification_color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="88"
+    android:viewportHeight="88">
+    <group android:translateX="10">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M20.6197,56.448L0,72.9647V15.0332L20.6197,31.5522V56.448Z"/>
+        <path android:fillColor="#FFFFFFFF" android:pathData="M57.1218,11.0473C49.8705,3.68244 38.9551,0 24.3757,0H0V15.0331L46.0772,24.4551V63.5426L0,72.9646V87.9978H24.3757C38.9551,87.9978 49.8705,84.3375 57.124,77.0147C64.3754,69.6941 68.0022,58.7087 68.0022,44.0631C68.0022,29.4175 64.3754,18.4122 57.124,11.0473H57.1218Z"/>
+    </group>
+</vector>

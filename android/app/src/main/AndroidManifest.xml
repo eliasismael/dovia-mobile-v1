@@ -23,6 +23,15 @@
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true">
 
+        <!-- Ícono y color de los push que muestra el sistema (app cerrada o en
+             segundo plano). Sin esto usa el ícono de la app en blanco. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_dovia"/>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/dovia_green"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
