@@ -140,6 +140,9 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                 // La misma consulta que los carruseles del
                                 // home: acá se ven todas de una, hacia abajo.
                                 limit: '40',
+                                // Sin los proyectos nuevos: no tienen ficha
+                                // en la app.
+                                isMock: 'false',
                                 authToken: currentAuthenticationToken,
                               ),
                               builder: (context, snapshot) {

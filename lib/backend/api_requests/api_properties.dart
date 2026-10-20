@@ -136,6 +136,9 @@ class CreatePropertyBasicCall {
 }
 
 class ListPropertiesCall {
+  /// [isMock]: `'true'` sólo los proyectos del sitio externo de desarrollos,
+  /// `'false'` sólo inventario real (incluye registros viejos sin el campo).
+  /// Sin pasarlo vienen los dos.
   Future<ApiCallResponse> call({
     String? page = '',
     String? limit = '',
@@ -143,6 +146,7 @@ class ListPropertiesCall {
     String? minPrice = '',
     String? maxPrice = '',
     String? location = '',
+    String? isMock,
     String? authToken = '',
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
@@ -162,6 +166,7 @@ class ListPropertiesCall {
         'maxPrice': maxPrice,
         'location': location,
         'status': "PUBLISHED",
+        if (isMock != null) 'isMock': isMock,
       },
       returnBody: true,
       encodeBodyUtf8: false,

@@ -16,6 +16,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/dovia_suupport_messages/dovia_suupport_messages_widget.dart';
 import '/shared_components/visitor_restriction_popup/visitor_restriction_popup_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/dovia_client/app/principal/new_projects.dart';
 import '/domain/offer_json.dart';
 import '/index.dart';
 import '/dovia_client/app/mis_favoritos/tus_favoritos_carpetas_modal/tus_favoritos_carpetas_modal_widget.dart';
@@ -68,6 +69,98 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   /// Foto principal que manda el backend para la propiedad. El listado de
   /// propiedades hoy no incluye ninguna, y ahi la tarjeta se queda con su
   /// imagen por defecto.
+  Future<ApiCallResponse>? _newProjectsFuture;
+
+  /// Proyectos Nuevos: `GET /properties?isMock=true`. Pedido aparte del resto
+  /// de Inicio, así un fallo acá no afecta a los demás carruseles.
+  Future<ApiCallResponse> _newProjects() =>
+      _newProjectsFuture ??= DOVIAAPIPropertyContextGroup.listPropertiesCall
+          .call(
+        page: '1',
+        limit: '$kNewProjectsLimit',
+        isMock: 'true',
+        authToken: currentAuthenticationToken,
+      );
+
+  Widget _buildNewProjects() {
+    return FutureBuilder<ApiCallResponse>(
+      future: _newProjects(),
+      builder: (context, snapshot) {
+        final response = snapshot.data;
+        if (response == null) {
+          return Center(
+            child: SizedBox(
+              width: 50.0,
+              height: 50.0,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  FlutterFlowTheme.of(context).primary,
+                ),
+              ),
+            ),
+          );
+        }
+        if (!response.succeeded) {
+          return Row(
+            children: [
+              const Expanded(
+                child: Text('No pudimos cargar los proyectos nuevos.'),
+              ),
+              TextButton(
+                onPressed: () =>
+                    safeSetState(() => _newProjectsFuture = null),
+                child: const Text('Reintentar'),
+              ),
+            ],
+          );
+        }
+        final projects = NewProject.listFrom(response.jsonBody);
+        if (projects.isEmpty) {
+          return const Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text('Aún no hay proyectos nuevos.'),
+          );
+        }
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              for (final project in projects)
+                InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  // Sin ficha en la app: abre su página en el sitio de
+                  // desarrollos, como la web.
+                  onTap: () => _handleRestrictedAction(
+                      () async => launchURL(project.url)),
+                  child: custom_widgets.DoviaClientHouseCard(
+                    width: 210.0,
+                    height: 0.0,
+                    imageUrl: project.imageUrl ?? '',
+                    name: project.name,
+                    type: project.listingType,
+                    priceLabel: project.priceLabel,
+                    propertyType: project.propertyType,
+                    landArea: project.landArea,
+                    constructionArea: project.constructionArea,
+                    bedrooms: project.bedrooms,
+                    bathrooms: project.bathrooms,
+                    dashEmptySpecs: true,
+                    // Sin corazón: no se pueden guardar en favoritos.
+                    showFavorite: false,
+                  ),
+                ),
+            ].divide(const SizedBox(width: 16.0)),
+          ),
+        );
+      },
+    );
+  }
+
   String _houseImageUrl(dynamic house) {
     if (house is! Map) {
       return '';
@@ -255,7 +348,11 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
 
   Future<ApiCallResponse> _properties() =>
       _propertiesFuture ??= DOVIAAPIPropertyContextGroup.listPropertiesCall
-          .call(limit: '40', authToken: currentAuthenticationToken);
+          .call(
+              limit: '40',
+              // Sin los proyectos nuevos: no tienen ficha en la app (404).
+              isMock: 'false',
+              authToken: currentAuthenticationToken);
 
   /// Respuesta a mostrar, o null mientras no haya ninguna buena (spinner).
   ApiCallResponse? _carouselResponse(AsyncSnapshot<ApiCallResponse> snap) {
@@ -565,6 +662,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
       final res = await DOVIAAPIPropertyContextGroup.listPropertiesCall.call(
         page: '$page',
         limit: '$pageSize',
+        isMock: 'false',
         authToken: currentAuthenticationToken,
       );
       if (!res.succeeded) {
@@ -1692,8 +1790,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 ),
                                 _verMasLink(onTap: () async {
                                   _handleRestrictedAction(() async {
-                                    await launchURL(
-                                        'https://doviaapp.com/proyectos-nuevos');
+                                    await launchURL(kNewProjectsLandingUrl);
                                   });
                                 }),
                               ],
@@ -1702,41 +1799,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 20.0, 20.0, 20.0, 0.0),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: List.generate(3, (index) {
-                                  return Builder(
-                                    builder: (context) => InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        _handleRestrictedAction(() async {
-                                          await launchURL(
-                                              'https://dovia.app/desarrollos');
-                                        });
-                                      },
-                                      child:
-                                          custom_widgets.DoviaClientHouseCard(
-                                        width: 210.0,
-                                        height: 0.0,
-                                        imageUrl:
-                                            'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',
-                                        name: 'Desarrollo Especial',
-                                        type: 'Preventa',
-                                        price: 'Q 1,000,000',
-                                        propertyType: 'Edificio',
-                                      ),
-                                    ),
-                                  );
-                                }).divide(const SizedBox(width: 16.0)),
-                              ),
-                            ),
+                            child: _buildNewProjects(),
                           ),
                         ],
                       ),

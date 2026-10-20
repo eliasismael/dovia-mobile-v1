@@ -191,6 +191,8 @@ class PropertiesRepository extends ChangeNotifier {
       minPrice: minPrice,
       maxPrice: maxPrice,
       location: location,
+      // Inventario real: los proyectos nuevos (`isMock`) no tienen ficha.
+      isMock: 'false',
       authToken: token,
     );
 

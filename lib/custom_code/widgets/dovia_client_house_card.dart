@@ -35,6 +35,15 @@ class DoviaClientHouseCard extends StatefulWidget {
   /// medidas acomodadas en varias líneas si no entran en una.
   final bool compact;
 
+  /// Precio ya armado, que se muestra tal cual en vez de [price] (Ej: los
+  /// proyectos nuevos van en USD y "Desde ...", y [price] siempre sale en Q).
+  final String? priceLabel;
+
+  /// Los datos que no vienen (o vienen en 0) se muestran como "—" en vez de
+  /// "0". Para los proyectos nuevos, cuyo sitio manda 0 en lo que el
+  /// desarrollo todavía no definió.
+  final bool dashEmptySpecs;
+
   const DoviaClientHouseCard({
     super.key,
     this.width,
@@ -58,6 +67,8 @@ class DoviaClientHouseCard extends StatefulWidget {
     this.hasDiscount,
     this.originalPrice,
     this.propertyType,
+    this.priceLabel,
+    this.dashEmptySpecs = false,
   });
 
   @override
@@ -319,12 +330,21 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(
-                      _formatPrice(widget.price),
-                      style: GoogleFonts.raleway(
-                        fontSize: widget.compact ? 14 : 16,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF007376),
+                    // Un precio largo ("Precio por confirmar") se achica en
+                    // vez de desbordar la tarjeta.
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          widget.priceLabel ?? _formatPrice(widget.price),
+                          maxLines: 1,
+                          style: GoogleFonts.raleway(
+                            fontSize: widget.compact ? 14 : 16,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF007376),
+                          ),
+                        ),
                       ),
                     ),
                     if (widget.hasDiscount == true &&
@@ -372,13 +392,13 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                     alignment: Alignment.centerLeft,
                     child: Row(
                       children: [
-                        _buildSpecItem("${widget.constructionArea ?? 0} M2"),
+                        _buildSpecItem(_spec(widget.constructionArea, " M2")),
                         const SizedBox(width: 8),
-                        _buildSpecItem("${widget.landArea?.toInt() ?? 0} M2"),
+                        _buildSpecItem(_spec(widget.landArea?.toInt(), " M2")),
                         const SizedBox(width: 8),
-                        _buildSpecItem("${widget.bedrooms ?? 0} Hab."),
+                        _buildSpecItem(_spec(widget.bedrooms, " Hab.")),
                         const SizedBox(width: 8),
-                        _buildSpecItem("${widget.bathrooms ?? 0} Baños"),
+                        _buildSpecItem(_spec(widget.bathrooms, " Baños")),
                       ],
                     ),
                   )
@@ -386,10 +406,10 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildSpecItem("${widget.constructionArea ?? 0} M2"),
-                      _buildSpecItem("${widget.landArea?.toInt() ?? 0} M2"),
-                      _buildSpecItem("${widget.bedrooms ?? 0} Hab."),
-                      _buildSpecItem("${widget.bathrooms ?? 0} Baños"),
+                      _buildSpecItem(_spec(widget.constructionArea, " M2")),
+                      _buildSpecItem(_spec(widget.landArea?.toInt(), " M2")),
+                      _buildSpecItem(_spec(widget.bedrooms, " Hab.")),
+                      _buildSpecItem(_spec(widget.bathrooms, " Baños")),
                     ],
                   ),
               ],
@@ -432,6 +452,12 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
     }
 
     return 'Q ${value.startsWith('-') ? '-' : ''}$grouped';
+  }
+
+  /// Un dato de la ficha con su unidad; "—" si falta y [dashEmptySpecs].
+  String _spec(int? value, String unit) {
+    if (widget.dashEmptySpecs && (value == null || value <= 0)) return '—';
+    return '${value ?? 0}$unit';
   }
 
   Widget _buildSpecItem(String text) {
