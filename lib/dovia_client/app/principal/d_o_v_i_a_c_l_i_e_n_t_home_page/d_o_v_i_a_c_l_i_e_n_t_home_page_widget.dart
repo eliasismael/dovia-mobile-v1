@@ -1689,7 +1689,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                 _verMasLink(onTap: () async {
                                   _handleRestrictedAction(() async {
                                     await launchURL(
-                                        'https://dovia.app/desarrollos');
+                                        'https://doviaapp.com/proyectos-nuevos');
                                   });
                                 }),
                               ],
