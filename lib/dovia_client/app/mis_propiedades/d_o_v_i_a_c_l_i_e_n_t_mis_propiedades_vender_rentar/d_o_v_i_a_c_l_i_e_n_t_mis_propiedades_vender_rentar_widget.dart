@@ -1,3 +1,4 @@
+import '/backend/api_requests/presigned_upload.dart';
 import '/core/dovia_zones.dart';
 import '/core/api_error.dart';
 import '/core/result.dart';
@@ -80,6 +81,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
   OwnershipKind _ownership = OwnershipKind.self;
   bool _companyElectronicBook = false;
   bool _submitting = false;
+
+  /// Datos con los que se creó [DOVIACLIENTMisPropiedadesVenderRentarModel
+  /// .createdPropertyId]: el body enviado y los documentos subidos. Si al
+  /// volver de agendar la visita el formulario ya no coincide, la propiedad
+  /// se vuelve a crear; si no, los cambios se perdían sin aviso.
+  String? _createdSignature;
   bool _uploadingAccountId = false;
   String? _accountIdError;
 
@@ -298,6 +305,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
   /// Los documentos son obligatorios: si alguno no queda asociado, el
   /// borrador recién creado se descarta y el próximo "Aceptar" crea la
   /// propiedad de nuevo, con lo que haya en el formulario en ese momento.
+  ///
+  /// Si ya se había creado (se volvió desde agendar la visita) y el
+  /// formulario cambió, se descarta ese borrador y se crea otro con los datos
+  /// actuales.
   Future<void> _submit() async {
     if (_submitting) return;
     final input = _publicationInput();
@@ -312,8 +323,28 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     });
 
     try {
-      // Ya creada con sus documentos (se volvió desde agendar la visita): se
-      // sigue con esa, sin crear otra.
+      final signature = _submissionSignature(input);
+      final created = _model.createdPropertyId;
+      if (created != null && signature != _createdSignature) {
+        final discarded = await _discardDraft(
+          created,
+          note: 'El propietario cambió los datos antes de agendar la visita.',
+        );
+        if (!discarded) {
+          await _showPublicationError(
+            'No pudimos guardar los cambios porque la publicación anterior ya '
+            'no se puede reemplazar. Revísala en Mis propiedades.',
+          );
+          return;
+        }
+        safeSetState(() {
+          _model.createdPropertyId = null;
+          _createdSignature = null;
+        });
+      }
+
+      // Ya creada con estos mismos datos y sus documentos (se volvió desde
+      // agendar la visita sin cambiar nada): se sigue con esa.
       var propertyId = _model.createdPropertyId;
       if (propertyId == null) {
         final call = DOVIAAPIPropertyContextGroup.createPropertyBasicCall;
@@ -347,7 +378,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
           return;
         }
         propertyId = newId;
-        safeSetState(() => _model.createdPropertyId = newId);
+        safeSetState(() {
+          _model.createdPropertyId = newId;
+          _createdSignature = signature;
+        });
       }
 
       if (!mounted) return;
@@ -416,7 +450,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
           };
           try {
             // El body es el archivo tal cual; a S3 no va el token del API.
-            final response = await http.put(Uri.parse(url),
+            final response = await putPresigned(Uri.parse(url),
                 headers: headers, body: _files[doc.field]!.bytes);
             if (response.statusCode >= 200 && response.statusCode < 300) {
               uploaded[uploadId] = doc;
@@ -461,13 +495,30 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
   /// Borra el borrador que quedó sin sus documentos, para que no aparezca en
   /// "Mis propiedades". Si el borrado falla, el borrador queda en DRAFT (sin
   /// publicarse) y el próximo intento igual crea una propiedad nueva.
-  Future<void> _discardDraft(String propertyId) async {
-    await context.read<PropertiesRepository>().changePropertyStatus(
-          propertyId,
-          'DELETED',
-          note: 'No se pudieron subir los documentos de titularidad.',
-        );
+  /// Da de baja un borrador (status DELETED). Devuelve si el backend lo
+  /// aceptó.
+  Future<bool> _discardDraft(
+    String propertyId, {
+    String note = 'No se pudieron subir los documentos de titularidad.',
+  }) async {
+    final result = await context
+        .read<PropertiesRepository>()
+        .changePropertyStatus(propertyId, 'DELETED', note: note);
+    return result is Success;
   }
+
+  /// Huella de lo que se envía al crear la propiedad: el body y, de cada
+  /// documento, nombre y tamaño.
+  String _submissionSignature(PublicationInput input) => jsonEncode({
+        'body': buildCreatePropertyBody(input),
+        'files': {
+          for (final entry in _files.entries)
+            entry.key: [
+              entry.value.originalFilename,
+              entry.value.bytes?.length ?? 0,
+            ],
+        },
+      });
 
   /// Elige un documento de titularidad (PDF o imagen de hasta 10 MB).
   Future<void> _pickDocument(String key) async {
@@ -1320,8 +1371,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
           'ownershipType',
           'La propiedad está a nombre de',
           {for (final kind in OwnershipKind.values) kind.apiValue: kind.label},
-          // Mientras se envía, o ya creada con sus documentos, no cambia.
-          disabled: _submitting || _model.createdPropertyId != null,
+          // Mientras se envía no cambia. Ya creada sí: cambiarla hace que
+          // "Aceptar" vuelva a crear la propiedad.
+          disabled: _submitting,
           onChanged: (value) => safeSetState(() {
             _ownership = OwnershipKind.fromApi(value) ?? OwnershipKind.self;
             // Los errores de la variante anterior ya no aplican.
