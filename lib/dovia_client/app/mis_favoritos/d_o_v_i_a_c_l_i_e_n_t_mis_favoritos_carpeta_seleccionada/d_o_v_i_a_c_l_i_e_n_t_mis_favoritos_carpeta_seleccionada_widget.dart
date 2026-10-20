@@ -1,3 +1,4 @@
+import '/domain/property_location.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/error_state/error_state_widget.dart';
 import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
@@ -191,8 +192,10 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                               snapshot.data!;
                           // Sin conexión o con el servidor caído se avisa y se deja
                           // reintentar, en vez de mostrar la lista vacía.
-                          if (isRetryableLoadError(listViewGetFavoritesInFolderResponse)) {
-                            return ErrorStateWidget.fromResponse(listViewGetFavoritesInFolderResponse,
+                          if (isRetryableLoadError(
+                              listViewGetFavoritesInFolderResponse)) {
+                            return ErrorStateWidget.fromResponse(
+                                listViewGetFavoritesInFolderResponse,
                                 onRetry: () => safeSetState(() {}));
                           }
 
@@ -282,6 +285,11 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                         bathrooms: castToType<int>(getJsonField(
                                             eachFavoriteInFolderItem,
                                             r'''$.features.general.bathrooms''')),
+                                        location: propertyLocationLabel(
+                                            eachFavoriteInFolderItem),
+                                        parkingSpots: castToType<int>(getJsonField(
+                                            eachFavoriteInFolderItem,
+                                            r'''$.features.general.parkingSpots''')),
                                         propertyId: _propertyIdOf(
                                             eachFavoriteInFolderItem),
                                         authToken: currentAuthenticationToken,

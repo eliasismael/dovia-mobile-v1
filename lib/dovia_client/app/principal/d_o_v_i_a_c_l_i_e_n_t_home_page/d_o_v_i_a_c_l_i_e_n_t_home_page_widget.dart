@@ -1,3 +1,4 @@
+import '/domain/property_location.dart';
 import '/shared_components/app_tutorial/app_tutorial.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -73,9 +74,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
 
   /// Proyectos Nuevos: `GET /properties?isMock=true`. Pedido aparte del resto
   /// de Inicio, así un fallo acá no afecta a los demás carruseles.
-  Future<ApiCallResponse> _newProjects() =>
-      _newProjectsFuture ??= DOVIAAPIPropertyContextGroup.listPropertiesCall
-          .call(
+  Future<ApiCallResponse> _newProjects() => _newProjectsFuture ??=
+          DOVIAAPIPropertyContextGroup.listPropertiesCall.call(
         page: '1',
         limit: '$kNewProjectsLimit',
         isMock: 'true',
@@ -107,8 +107,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                 child: Text('No pudimos cargar los proyectos nuevos.'),
               ),
               TextButton(
-                onPressed: () =>
-                    safeSetState(() => _newProjectsFuture = null),
+                onPressed: () => safeSetState(() => _newProjectsFuture = null),
                 child: const Text('Reintentar'),
               ),
             ],
@@ -121,40 +120,49 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
             child: Text('Aún no hay proyectos nuevos.'),
           );
         }
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              for (final project in projects)
-                InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  // Sin ficha en la app: abre su página en el sitio de
-                  // desarrollos, como la web.
-                  onTap: () => _handleRestrictedAction(
-                      () async => launchURL(project.url)),
-                  child: custom_widgets.DoviaClientHouseCard(
-                    width: 210.0,
-                    height: 0.0,
-                    imageUrl: project.imageUrl ?? '',
-                    name: project.name,
-                    type: project.listingType,
-                    priceLabel: project.priceLabel,
-                    propertyType: project.propertyType,
-                    landArea: project.landArea,
-                    constructionArea: project.constructionArea,
-                    bedrooms: project.bedrooms,
-                    bathrooms: project.bathrooms,
-                    dashEmptySpecs: true,
-                    // Sin corazón: no se pueden guardar en favoritos.
-                    showFavorite: false,
+        // Con uno o dos proyectos quedaba centrado; va alineado como los
+        // demás carruseles.
+        return Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                for (final project in projects)
+                  InkWell(
+                    splashColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    // Sin ficha en la app: abre su página en el sitio de
+                    // desarrollos, como la web.
+                    onTap: () => _handleRestrictedAction(
+                        () async => launchURL(project.url)),
+                    child: custom_widgets.DoviaClientHouseCard(
+                      width: 210.0,
+                      height: 0.0,
+                      imageUrl: project.imageUrl ?? '',
+                      name: project.name,
+                      type: project.listingType,
+                      priceLabel: project.priceLabel,
+                      priceCaption: project.hasPrice ? 'Precio desde' : null,
+                      propertyType: project.propertyType,
+                      location: project.location,
+                      landArea: project.landArea,
+                      constructionArea: project.constructionArea,
+                      bedrooms: project.bedrooms,
+                      bathrooms: project.bathrooms,
+                      parkingSpots: project.parkingSpots,
+                      dashEmptySpecs: true,
+                      // Flecha al sitio en vez de corazón: no se pueden guardar
+                      // en favoritos.
+                      isNewProject: true,
+                    ),
                   ),
-                ),
-            ].divide(const SizedBox(width: 16.0)),
+              ].divide(const SizedBox(width: 16.0)),
+            ),
           ),
         );
       },
@@ -346,13 +354,12 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
   /// mostrando aunque un reintento falle o esté en curso.
   ApiCallResponse? _lastProperties;
 
-  Future<ApiCallResponse> _properties() =>
-      _propertiesFuture ??= DOVIAAPIPropertyContextGroup.listPropertiesCall
-          .call(
-              limit: '40',
-              // Sin los proyectos nuevos: no tienen ficha en la app (404).
-              isMock: 'false',
-              authToken: currentAuthenticationToken);
+  Future<ApiCallResponse> _properties() => _propertiesFuture ??=
+      DOVIAAPIPropertyContextGroup.listPropertiesCall.call(
+          limit: '40',
+          // Sin los proyectos nuevos: no tienen ficha en la app (404).
+          isMock: 'false',
+          authToken: currentAuthenticationToken);
 
   /// Respuesta a mostrar, o null mientras no haya ninguna buena (spinner).
   ApiCallResponse? _carouselResponse(AsyncSnapshot<ApiCallResponse> snap) {
@@ -891,6 +898,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
               getJsonField(eachHouseItem, r'''$.features.general.bedrooms''')),
           bathrooms: castToType<int>(
               getJsonField(eachHouseItem, r'''$.features.general.bathrooms''')),
+          location: propertyLocationLabel(eachHouseItem),
+          parkingSpots: castToType<int>(getJsonField(
+              eachHouseItem, r'''$.features.general.parkingSpots''')),
           hasDiscount: getJsonField(eachHouseItem, r'''$.hasDiscount''') ==
                   true ||
               getJsonField(eachHouseItem, r'''$.hasDiscount''').toString() ==
@@ -1998,6 +2008,13 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       getJsonField(
                                                           eachHouseItem,
                                                           r'''$.features.general.bathrooms''')),
+                                                  location:
+                                                      propertyLocationLabel(
+                                                          eachHouseItem),
+                                                  parkingSpots: castToType<int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.parkingSpots''')),
                                                   propertyType: getJsonField(
                                                           eachHouseItem,
                                                           r'''$.propertyType''')
@@ -2056,7 +2073,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                   ?.succeeded ??
                                                               false) ||
                                                           isAlreadyFavorite) {
-                                                        if (!context.mounted) return;
+                                                        if (!context.mounted)
+                                                          return;
                                                         await showModalBottomSheet(
                                                           isScrollControlled:
                                                               true,
@@ -2107,7 +2125,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                             safeSetState(
                                                                 () {}));
                                                       } else {
-                                                        if (!context.mounted) return;
+                                                        if (!context.mounted)
+                                                          return;
                                                         await showDialog(
                                                           context: context,
                                                           builder:
@@ -2433,6 +2452,13 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                       getJsonField(
                                                           eachHouseItem,
                                                           r'''$.features.general.bathrooms''')),
+                                                  location:
+                                                      propertyLocationLabel(
+                                                          eachHouseItem),
+                                                  parkingSpots: castToType<int>(
+                                                      getJsonField(
+                                                          eachHouseItem,
+                                                          r'''$.features.general.parkingSpots''')),
                                                   propertyType: getJsonField(
                                                           eachHouseItem,
                                                           r'''$.propertyType''')
@@ -2491,7 +2517,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                                   ?.succeeded ??
                                                               false) ||
                                                           isAlreadyFavorite) {
-                                                        if (!context.mounted) return;
+                                                        if (!context.mounted)
+                                                          return;
                                                         await showModalBottomSheet(
                                                           isScrollControlled:
                                                               true,
@@ -2542,7 +2569,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                                             safeSetState(
                                                                 () {}));
                                                       } else {
-                                                        if (!context.mounted) return;
+                                                        if (!context.mounted)
+                                                          return;
                                                         await showDialog(
                                                           context: context,
                                                           builder:

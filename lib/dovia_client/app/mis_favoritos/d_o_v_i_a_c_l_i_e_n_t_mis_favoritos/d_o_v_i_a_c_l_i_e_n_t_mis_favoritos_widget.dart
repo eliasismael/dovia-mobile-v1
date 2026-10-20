@@ -1,3 +1,4 @@
+import '/domain/property_location.dart';
 import '/shared_components/dovia_bottom_sheet/dovia_bottom_sheet.dart';
 import '/shared_components/error_state/error_state_widget.dart';
 import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
@@ -529,6 +530,12 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                                   getJsonField(
                                                       favoriteHouseItem,
                                                       r'''$.features.general.bathrooms''')),
+                                              location: propertyLocationLabel(
+                                                  favoriteHouseItem),
+                                              parkingSpots: castToType<int>(
+                                                  getJsonField(
+                                                      favoriteHouseItem,
+                                                      r'''$.features.general.parkingSpots''')),
                                               propertyId: _propertyIdOf(
                                                   favoriteHouseItem),
                                               authToken:

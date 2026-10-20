@@ -1,3 +1,4 @@
+import '/domain/property_location.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
 /// Listado del sitio externo de desarrollos ("Ver más" de Proyectos Nuevos).
@@ -25,6 +26,8 @@ class NewProject {
     this.constructionArea,
     this.bedrooms,
     this.bathrooms,
+    this.parkingSpots,
+    this.location,
   });
 
   final String id;
@@ -41,6 +44,8 @@ class NewProject {
   final int? constructionArea;
   final int? bedrooms;
   final int? bathrooms;
+  final int? parkingSpots;
+  final String? location;
 
   /// Sólo los que vienen del sitio externo: `isMock` y un `externalId` no
   /// vacío. Cualquier otro elemento del listado se descarta.
@@ -72,6 +77,8 @@ class NewProject {
       constructionArea: number(r'$.features.general.constructionArea')?.toInt(),
       bedrooms: number(r'$.features.general.bedrooms')?.toInt(),
       bathrooms: number(r'$.features.general.bathrooms')?.toInt(),
+      parkingSpots: number(r'$.features.general.parkingSpots')?.toInt(),
+      location: propertyLocationLabel(json),
     );
   }
 
@@ -97,15 +104,18 @@ class NewProject {
     return '$kNewProjectsLandingUrl/${Uri.encodeComponent(slug)}';
   }
 
-  /// "Desde US$ 350.000", o "Precio por confirmar" si todavía no tiene.
+  bool get hasPrice => priceUsd > 0;
+
+  /// "USD 165,000" (va debajo de "Precio desde", como en la web), o "Precio
+  /// por confirmar" si todavía no tiene.
   String get priceLabel {
-    if (priceUsd <= 0) return 'Precio por confirmar';
+    if (!hasPrice) return 'Precio por confirmar';
     final whole = priceUsd.round().toString();
     final grouped = StringBuffer();
     for (var i = 0; i < whole.length; i++) {
-      if (i > 0 && (whole.length - i) % 3 == 0) grouped.write('.');
+      if (i > 0 && (whole.length - i) % 3 == 0) grouped.write(',');
       grouped.write(whole[i]);
     }
-    return 'Desde US\$ $grouped';
+    return 'USD $grouped';
   }
 }

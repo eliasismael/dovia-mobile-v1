@@ -1,3 +1,4 @@
+import '/domain/property_location.dart';
 import '/domain/property_owner.dart';
 import '/shared_components/error_state/error_state_widget.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
@@ -165,8 +166,10 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                     snapshot.data!;
                                 // Sin conexión o con el servidor caído se avisa y se deja
                                 // reintentar, en vez de mostrar la lista vacía.
-                                if (isRetryableLoadError(listViewListPropertiesResponse)) {
-                                  return ErrorStateWidget.fromResponse(listViewListPropertiesResponse,
+                                if (isRetryableLoadError(
+                                    listViewListPropertiesResponse)) {
+                                  return ErrorStateWidget.fromResponse(
+                                      listViewListPropertiesResponse,
                                       onRetry: () => safeSetState(() {}));
                                 }
 
@@ -291,6 +294,11 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                                 bathrooms: castToType<int>(
                                                     getJsonField(eachHouseItem,
                                                         r'''$.features.general.bathrooms''')),
+                                                location: propertyLocationLabel(
+                                                    eachHouseItem),
+                                                parkingSpots: castToType<int>(
+                                                    getJsonField(eachHouseItem,
+                                                        r'''$.features.general.parkingSpots''')),
                                                 onAddToFavorites: () async {
                                                   if (FFAppState().UserRole !=
                                                       'VISITOR') {
@@ -309,7 +317,8 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                                     if ((_model.apiResult9li
                                                             ?.succeeded ??
                                                         true)) {
-                                                      if (!context.mounted) return;
+                                                      if (!context.mounted)
+                                                        return;
                                                       await showModalBottomSheet(
                                                         isScrollControlled:
                                                             true,
@@ -356,7 +365,8 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                                                       ).then((value) =>
                                                           safeSetState(() {}));
                                                     } else {
-                                                      if (!context.mounted) return;
+                                                      if (!context.mounted)
+                                                        return;
                                                       await showDialog(
                                                         context: context,
                                                         builder:
@@ -506,7 +516,8 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                     const Align(
                       alignment: AlignmentDirectional(1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 12.0),
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 12.0),
                         child: FixedDoviaIconWidget(),
                       ),
                     ),

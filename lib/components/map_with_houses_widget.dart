@@ -585,17 +585,14 @@ class _MapWithHousesWidgetState extends State<MapWithHousesWidget> {
                     builder: (context) {
                       return Padding(
                         padding: MediaQuery.viewInsetsOf(context),
-                        child: SizedBox(
-                          height:
-                              400.0 + MediaQuery.viewPaddingOf(context).bottom,
-                          child: HouseCardComponentWidget(
-                            propertyId: propertyId,
-                            name: name,
-                            price: price,
-                            listingType: listingType,
-                            landArea: landArea,
-                            isFavorite: isFavorite,
-                          ),
+                        // Sin alto fijo: la tarjeta crece con la foto.
+                        child: HouseCardComponentWidget(
+                          propertyId: propertyId,
+                          name: name,
+                          price: price,
+                          listingType: listingType,
+                          landArea: landArea,
+                          isFavorite: isFavorite,
                         ),
                       );
                     },

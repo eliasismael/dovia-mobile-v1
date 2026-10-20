@@ -1,3 +1,4 @@
+import '/domain/property_location.dart';
 import '/dovia_client/app/mis_propiedades/deal_in_progress_badge.dart';
 import '/shared_components/error_state/error_state_widget.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
@@ -320,8 +321,10 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                     snapshot.data!;
                                 // Sin conexión o con el servidor caído se avisa y se deja
                                 // reintentar, en vez de mostrar la lista vacía.
-                                if (isRetryableLoadError(listViewGetMyPropertiesResponse)) {
-                                  return ErrorStateWidget.fromResponse(listViewGetMyPropertiesResponse,
+                                if (isRetryableLoadError(
+                                    listViewGetMyPropertiesResponse)) {
+                                  return ErrorStateWidget.fromResponse(
+                                      listViewGetMyPropertiesResponse,
                                       onRetry: () => safeSetState(() {}));
                                 }
 
@@ -378,7 +381,6 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                               width: MediaQuery.sizeOf(context)
                                                       .width *
                                                   1.0,
-                                              height: 250.0,
                                               child: GestureDetector(
                                                 onTap: () {
                                                   context
@@ -412,7 +414,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                                   context)
                                                               .width *
                                                           1.0,
-                                                      height: 250.0,
+                                                      height: 0.0,
                                                       imageUrl: getJsonField(
                                                                   eachOwnPropertyItem,
                                                                   r'''$.photos[0].url''')
@@ -446,6 +448,14 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                           getJsonField(
                                                               eachOwnPropertyItem,
                                                               r'''$.features.general.bathrooms''')),
+                                                      location:
+                                                          propertyLocationLabel(
+                                                              eachOwnPropertyItem),
+                                                      parkingSpots: castToType<
+                                                              int>(
+                                                          getJsonField(
+                                                              eachOwnPropertyItem,
+                                                              r'''$.features.general.parkingSpots''')),
                                                       isFavorite: getJsonField(
                                                         eachOwnPropertyItem,
                                                         r'''$.isFavorite''',
@@ -471,7 +481,9 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                                   .apiResultj56
                                                                   ?.succeeded ??
                                                               true)) {
-                                                            if (!context.mounted) return;
+                                                            if (!context
+                                                                .mounted)
+                                                              return;
                                                             await showModalBottomSheet(
                                                               isScrollControlled:
                                                                   true,
@@ -522,7 +534,9 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                                                 safeSetState(
                                                                     () {}));
                                                           } else {
-                                                            if (!context.mounted) return;
+                                                            if (!context
+                                                                .mounted)
+                                                              return;
                                                             await showDialog(
                                                               context: context,
                                                               builder:

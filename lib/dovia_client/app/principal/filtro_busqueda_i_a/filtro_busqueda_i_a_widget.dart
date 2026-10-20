@@ -56,15 +56,15 @@ class _FiltroBusquedaIAWidgetState extends State<FiltroBusquedaIAWidget> {
       ),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 0.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
+        // Las tarjetas son más altas que la hoja: se recorre con scroll.
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
             SizedBox(
               width: MediaQuery.sizeOf(context).width * 1.0,
-              height: 160.0,
               child: custom_widgets.DoviaClientHouseCard(
                 width: MediaQuery.sizeOf(context).width * 1.0,
-                height: 160.0,
+                height: 0.0,
                 imageUrl:
                     'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
                 onAddToFavorites: () async {},
@@ -73,10 +73,9 @@ class _FiltroBusquedaIAWidgetState extends State<FiltroBusquedaIAWidget> {
             ),
             SizedBox(
               width: MediaQuery.sizeOf(context).width * 1.0,
-              height: 160.0,
               child: custom_widgets.DoviaClientHouseCard(
                 width: MediaQuery.sizeOf(context).width * 1.0,
-                height: 160.0,
+                height: 0.0,
                 imageUrl:
                     'https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/dovia-td03cg/assets/kbm95ashhb4z/casa_card_sobreMiVisita.png',
                 onAddToFavorites: () async {},

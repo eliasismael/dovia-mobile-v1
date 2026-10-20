@@ -1422,9 +1422,7 @@ class _RatingDialogState extends State<_RatingDialog> {
 
             // ── Botón Enviar ─────────────────────────────────────────────
             FFButtonWidget(
-              onPressed: _rating == 0 || _sending
-                  ? null
-                  : _submit,
+              onPressed: _rating == 0 || _sending ? null : _submit,
               text: _sending ? 'Enviando...' : 'Enviar',
               options: FFButtonOptions(
                 width: double.infinity,
@@ -1513,10 +1511,9 @@ class _Step4Content extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           width: MediaQuery.sizeOf(context).width,
-          height: 250.0,
           child: custom_widgets.DoviaClientHouseCard(
             width: MediaQuery.sizeOf(context).width,
-            height: 250.0,
+            height: 0.0,
             imageUrl: imageUrl.isNotEmpty
                 ? imageUrl
                 : 'https://images.unsplash.com/photo-1600596542815-27b88e57e62f?q=80&w=800&auto=format&fit=crop',

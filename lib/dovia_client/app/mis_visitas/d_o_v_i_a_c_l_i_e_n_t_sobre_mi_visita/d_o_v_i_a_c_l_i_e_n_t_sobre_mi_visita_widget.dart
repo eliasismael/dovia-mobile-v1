@@ -1,3 +1,4 @@
+import '/domain/property_location.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proveedor_card/d_h_c_l_i_e_n_t_proveedor_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -507,10 +508,9 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                   const EdgeInsets.symmetric(vertical: 16.0),
                               child: SizedBox(
                                 width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: 240.0,
                                 child: custom_widgets.DoviaClientHouseCard(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
-                                  height: 240.0,
+                                  height: 0.0,
                                   propertyId: widget.propertyId,
                                   authToken: currentAuthenticationToken,
                                   name: _propertyName.isNotEmpty
@@ -539,6 +539,11 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                                   bathrooms: castToType<int>(getJsonField(
                                       _propertyData,
                                       r'$.features.general.bathrooms')),
+                                  location:
+                                      propertyLocationLabel(_propertyData),
+                                  parkingSpots: castToType<int>(getJsonField(
+                                      _propertyData,
+                                      r'$.features.general.parkingSpots')),
                                   propertyType: getJsonField(
                                           _propertyData, r'$.propertyType')
                                       ?.toString(),
