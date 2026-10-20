@@ -7,9 +7,9 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
+import '/shared_components/header_navigation.dart';
+import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'd_o_v_i_a_c_l_i_e_n_t_como_funciona_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_como_funciona_model.dart';
@@ -69,78 +69,10 @@ class _DOVIACLIENTComoFuncionaWidgetState
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 42.0, 20.0, 0.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context.safePop();
-                            },
-                            child: Container(
-                              width: 35.0,
-                              height: 35.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).alternate,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/IconoVolverAtras.svg',
-                                  width: 200.0,
-                                  height: 200.0,
-                                  fit: BoxFit.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            'Mis propiedades',
-                            textAlign: TextAlign.center,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  fontSize: 18.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  lineHeight: 1.4,
-                                ),
-                          ),
-                          Container(
-                            width: 40.0,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              shape: BoxShape.circle,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: SvgPicture.asset(
-                                'assets/images/IconoDoviaHomeClienteMensajes.svg',
-                                width: 8.0,
-                                height: 8.0,
-                                fit: BoxFit.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    DOVIASHAREDHeaderWidget(
+                      title: 'Mis propiedades',
+                      showLogo: openedFromHome(context),
+                      hideActions: true,
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(

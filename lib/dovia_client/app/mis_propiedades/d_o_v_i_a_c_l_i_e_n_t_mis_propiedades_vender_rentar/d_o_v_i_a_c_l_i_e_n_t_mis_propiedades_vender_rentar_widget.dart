@@ -20,6 +20,8 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/index.dart';
+import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -513,6 +515,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
+                        showLogo: openedFromHome(context),
+                        showSupport: false,
                         title: widget.title!,
                         showCurrency: false,
                         showMap: false,
@@ -4540,6 +4544,14 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    const Align(
+                      alignment: AlignmentDirectional(1.0, 0.0),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 12.0),
+                        child: FixedDoviaIconWidget(),
+                      ),
+                    ),
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),

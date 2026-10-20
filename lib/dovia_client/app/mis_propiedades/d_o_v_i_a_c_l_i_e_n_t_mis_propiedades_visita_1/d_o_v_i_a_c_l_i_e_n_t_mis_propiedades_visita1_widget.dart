@@ -14,6 +14,7 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -384,6 +385,8 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                         model: _model.dOVIASHAREDHeaderModel,
                         updateCallback: () => safeSetState(() {}),
                         child: DOVIASHAREDHeaderWidget(
+                          showLogo: openedFromHome(context),
+                          showSupport: false,
                           title: headerTitle,
                           showMap: false,
                           showCurrency: false,

@@ -11,6 +11,7 @@ import '/backend/api_requests/api_offers.dart';
 import '/domain/owner_proposal_models.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_widget.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_widget.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propuesta_model.dart';
@@ -443,11 +444,13 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
-                          title: _screenTitle(),
-                          hideActions: true,
-                          showMap: false,
-                          showCurrency: false,
-                          showLogo: false)),
+                        showLogo: openedFromHome(context),
+                        showSupport: false,
+                        title: _screenTitle(),
+                        hideActions: true,
+                        showMap: false,
+                        showCurrency: false,
+                      )),
                   Expanded(child: _buildBody()),
                 ],
               ),

@@ -11,6 +11,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -949,6 +950,11 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   }
 
   Widget _buildHeader() {
+    final showLogo = openedFromHome(context);
+    // Flecha (+ D) a la izquierda y chat + teléfono a la derecha: los dos
+    // costados reservan el mismo ancho para que el título quede centrado en
+    // la pantalla.
+    const sideWidth = 40.0 + 8.0 + 40.0;
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
           20.0, MediaQuery.viewPaddingOf(context).top + 34.0, 20.0, 8.0),
@@ -956,51 +962,86 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          InkWell(
-            splashColor: Colors.transparent,
-            focusColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onTap: () async {
-              context.safePop();
-            },
-            child: Container(
-              width: 35.0,
-              height: 35.0,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).alternate,
-                shape: BoxShape.circle,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: SvgPicture.asset(
-                  'assets/images/IconoVolverAtras.svg',
-                  width: 200.0,
-                  height: 200.0,
-                  fit: BoxFit.none,
+          SizedBox(
+            width: sideWidth,
+            child: Row(
+              children: [
+                InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () async {
+                    context.safePop();
+                  },
+                  child: Container(
+                    width: 35.0,
+                    height: 35.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      shape: BoxShape.circle,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: SvgPicture.asset(
+                        'assets/images/IconoVolverAtras.svg',
+                        width: 200.0,
+                        height: 200.0,
+                        fit: BoxFit.none,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                if (showLogo) ...[
+                  const SizedBox(width: 8.0),
+                  InkWell(
+                    splashColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () async {
+                      context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
+                    },
+                    child: SvgPicture.asset(
+                      'assets/images/D-verde.svg',
+                      width: 28.0,
+                      height: 36.0,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 _headerTitle,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                      fontSize: 20.0,
+                      fontSize: 18.0,
                       letterSpacing: 0.0,
                       fontWeight: FontWeight.w600,
+                      lineHeight: 1.4,
                     ),
               ),
             ),
           ),
-          _headerIconButton(Icons.chat_bubble_outline, _openChat),
-          const SizedBox(width: 8.0),
-          _headerIconButton(Icons.phone_outlined, _callAssociate),
+          SizedBox(
+            width: sideWidth,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _headerIconButton(Icons.chat_bubble_outline, _openChat),
+                const SizedBox(width: 8.0),
+                _headerIconButton(Icons.phone_outlined, _callAssociate),
+              ],
+            ),
+          ),
         ],
       ),
     );

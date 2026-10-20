@@ -11,6 +11,7 @@ import '/repositories/visits_repository.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
 import 'dart:ui';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -376,6 +377,8 @@ class _DOVIACLIENTPropiedadSeleccionadaWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
+                        showLogo: openedFromHome(context),
+                        showSupport: false,
                         title: _propertyName.isNotEmpty
                             ? _propertyName
                             : 'Propiedad',

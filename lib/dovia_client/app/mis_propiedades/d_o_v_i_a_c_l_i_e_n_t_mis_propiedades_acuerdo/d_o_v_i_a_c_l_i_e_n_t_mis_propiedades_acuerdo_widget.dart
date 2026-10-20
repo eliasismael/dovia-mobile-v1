@@ -12,6 +12,8 @@ import '/shared_components/subir_archivo/subir_archivo_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_offers.dart';
+import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -270,10 +272,11 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
+                      child: DOVIASHAREDHeaderWidget(
+                        showLogo: openedFromHome(context),
+                        showSupport: false,
                         showMap: false,
                         showCurrency: false,
-                        showLogo: false,
                         hideActions: true,
                         title: 'Acuerdo',
                       ),
@@ -4047,6 +4050,14 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    const Align(
+                      alignment: AlignmentDirectional(1.0, 0.0),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 12.0),
+                        child: FixedDoviaIconWidget(),
+                      ),
+                    ),
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),

@@ -10,6 +10,7 @@ import '/backend/api_requests/api_metrics.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_offers.dart';
 import '/backend/api_requests/api_properties.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -1322,6 +1323,8 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: DOVIASHAREDHeaderWidget(
+                          showLogo: openedFromHome(context),
+                          showSupport: false,
                           showMap: false,
                           showCurrency: false,
                           title: propName.isNotEmpty

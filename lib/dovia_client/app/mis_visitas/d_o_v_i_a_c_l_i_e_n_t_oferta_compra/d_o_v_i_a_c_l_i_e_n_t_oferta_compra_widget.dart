@@ -15,6 +15,7 @@ import '/domain/offer_json.dart'
     show offerApiErrorMessage, offerAsMap, offerStr, propertyPathValue;
 import '/domain/offer_credit_status.dart';
 import '/domain/offer_form_validation.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -443,6 +444,8 @@ class _DOVIACLIENTOfertaCompraWidgetState
                           model: _model.dOVIASHAREDHeaderModel,
                           updateCallback: () => safeSetState(() {}),
                           child: DOVIASHAREDHeaderWidget(
+                            showLogo: openedFromHome(context),
+                            showSupport: false,
                             title: widget.offerType == 'renta'
                                 ? 'Oferta de renta'
                                 : widget.offerType == 'ambos'

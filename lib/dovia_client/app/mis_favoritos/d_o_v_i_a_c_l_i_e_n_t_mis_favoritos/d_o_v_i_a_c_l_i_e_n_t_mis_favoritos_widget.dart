@@ -121,6 +121,8 @@ class _DOVIACLIENTMisFavoritosWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
+                        showLogo: true,
+                        showSupport: false,
                         title: 'Mis Favoritos',
                         showCurrency: false,
                       ),
@@ -201,8 +203,10 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                       snapshot.data!;
                                   // Sin conexión o con el servidor caído se avisa y se deja
                                   // reintentar, en vez de mostrar la lista vacía.
-                                  if (isRetryableLoadError(gridViewGetAllFavoriteFoldersResponse)) {
-                                    return ErrorStateWidget.fromResponse(gridViewGetAllFavoriteFoldersResponse,
+                                  if (isRetryableLoadError(
+                                      gridViewGetAllFavoriteFoldersResponse)) {
+                                    return ErrorStateWidget.fromResponse(
+                                        gridViewGetAllFavoriteFoldersResponse,
                                         onRetry: () => safeSetState(() {}));
                                   }
                                   final eachFolder =
@@ -403,8 +407,10 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                   snapshot.data!;
                               // Sin conexión o con el servidor caído se avisa y se deja
                               // reintentar, en vez de mostrar la lista vacía.
-                              if (isRetryableLoadError(listViewGetDefaultFavoritesResponse)) {
-                                return ErrorStateWidget.fromResponse(listViewGetDefaultFavoritesResponse,
+                              if (isRetryableLoadError(
+                                  listViewGetDefaultFavoritesResponse)) {
+                                return ErrorStateWidget.fromResponse(
+                                    listViewGetDefaultFavoritesResponse,
                                     onRetry: () => safeSetState(() {}));
                               }
 

@@ -10,6 +10,8 @@ import '/dovia_home_client/service_request_fields.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
+import '/shared_components/header_navigation.dart';
+import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -370,48 +372,12 @@ class _DHCLIENTProximasVisitasListaWidgetState
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 34.0, 20.0, 12.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            splashColor: Colors.transparent,
-            focusColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onTap: () async {
-              context.safePop();
-            },
-            child: Container(
-              width: 40.0,
-              height: 40.0,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).alternate,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.chevron_left,
-                color: FlutterFlowTheme.of(context).primary,
-                size: 24.0,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text(
-                'Próximas Visitas',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                      fontSize: 22.0,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-          ),
-        ],
+      padding: const EdgeInsetsDirectional.only(bottom: 12.0),
+      child: DOVIASHAREDHeaderWidget(
+        title: 'Próximas Visitas',
+        topPadding: 34.0,
+        showLogo: openedFromHome(context),
+        hideActions: true,
       ),
     );
   }

@@ -13,6 +13,7 @@ import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
 import 'dart:async';
 
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -524,6 +525,8 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: DOVIASHAREDHeaderWidget(
+                      showLogo: openedFromHome(context),
+                      showSupport: false,
                       topPadding: 58.0,
                       title: DHCLIENTInstalacionWidget.serviceTitle,
                       showCurrency: false,

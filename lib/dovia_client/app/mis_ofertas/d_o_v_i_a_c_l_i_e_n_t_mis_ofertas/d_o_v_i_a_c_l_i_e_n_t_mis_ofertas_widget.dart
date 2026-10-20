@@ -107,10 +107,11 @@ class _DOVIACLIENTMisOfertasWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
+                        showLogo: true,
+                        showSupport: false,
                         title: 'Mis Ofertas',
                         showMap: false,
                         showCurrency: false,
-                        showLogo: false,
                       ),
                     ),
                     Padding(

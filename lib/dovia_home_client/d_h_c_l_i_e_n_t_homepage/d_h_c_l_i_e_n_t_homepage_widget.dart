@@ -1230,6 +1230,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
+                      showSupport: false,
                       topPadding: 58.0,
                       showNotifications: true,
                       showSettings: true,

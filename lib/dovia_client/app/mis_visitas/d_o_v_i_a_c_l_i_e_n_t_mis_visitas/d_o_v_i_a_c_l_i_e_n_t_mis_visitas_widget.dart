@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
+import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/backend/api_requests/api_properties.dart';
@@ -190,6 +191,8 @@ class _DOVIACLIENTMisVisitasWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
+                        showLogo: true,
+                        showSupport: false,
                         title: 'Mis visitas',
                         showMap: false,
                         showCurrency: false,
@@ -341,6 +344,14 @@ class _DOVIACLIENTMisVisitasWidgetState
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    const Align(
+                      alignment: AlignmentDirectional(1.0, 0.0),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 12.0),
+                        child: FixedDoviaIconWidget(),
+                      ),
+                    ),
                     wrapWithModel(
                       model: _model.dOVIACLIENTNavbarModel,
                       updateCallback: () => safeSetState(() {}),
@@ -1032,8 +1043,9 @@ class _VerMasScreenState extends State<_VerMasScreen> {
             Column(
               children: [
                 DOVIASHAREDHeaderWidget(
+                  showLogo: true,
+                  showSupport: false,
                   title: title,
-                  showLogo: false,
                   showMap: false,
                   showCurrency: false,
                   hideActions: true,

@@ -8,6 +8,7 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/primary_button/primary_button_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_oferta_renta_model.dart';
@@ -117,8 +118,10 @@ class _DOVIACLIENTOfertaRentaWidgetState
         final dOVIACLIENTOfertaRentaGetPropertyByIDResponse = snapshot.data!;
         // Sin conexión o con el servidor caído se avisa y se deja
         // reintentar, en vez de mostrar la lista vacía.
-        if (isRetryableLoadError(dOVIACLIENTOfertaRentaGetPropertyByIDResponse)) {
-          return ErrorStateWidget.fromResponse(dOVIACLIENTOfertaRentaGetPropertyByIDResponse,
+        if (isRetryableLoadError(
+            dOVIACLIENTOfertaRentaGetPropertyByIDResponse)) {
+          return ErrorStateWidget.fromResponse(
+              dOVIACLIENTOfertaRentaGetPropertyByIDResponse,
               onRetry: () => safeSetState(() {}));
         }
 
@@ -146,7 +149,9 @@ class _DOVIACLIENTOfertaRentaWidgetState
                         wrapWithModel(
                           model: _model.dOVIASHAREDHeaderModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: const DOVIASHAREDHeaderWidget(
+                          child: DOVIASHAREDHeaderWidget(
+                            showLogo: openedFromHome(context),
+                            showSupport: false,
                             title: 'Oferta de renta',
                             hideActions: true,
                           ),

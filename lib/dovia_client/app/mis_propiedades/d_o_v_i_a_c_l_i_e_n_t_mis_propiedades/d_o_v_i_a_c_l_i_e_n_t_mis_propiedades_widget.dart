@@ -198,6 +198,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const DOVIASHAREDHeaderWidget(
+                        showLogo: true,
+                        showSupport: false,
                         title: 'Mis Propiedades',
                         showMap: false,
                         showCurrency: false,

@@ -13,6 +13,7 @@ import '/core/dovia_zones.dart';
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import 'dart:async';
 import 'dart:convert';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -599,7 +600,9 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                   wrapWithModel(
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: const DOVIASHAREDHeaderWidget(
+                    child: DOVIASHAREDHeaderWidget(
+                      showLogo: openedFromHome(context),
+                      showSupport: false,
                       topPadding: 58.0,
                       title: 'Dovia Home',
                       showMap: false,

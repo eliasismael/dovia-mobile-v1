@@ -14,6 +14,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -700,7 +701,9 @@ class _DHCLIENTCostoEmergenciaWidgetState
                   wrapWithModel(
                     model: _model.dOVIASHAREDHeaderModel,
                     updateCallback: () => safeSetState(() {}),
-                    child: const DOVIASHAREDHeaderWidget(
+                    child: DOVIASHAREDHeaderWidget(
+                      showLogo: openedFromHome(context),
+                      showSupport: false,
                       topPadding: 58.0,
                       title: 'Costo fijo mínimo\ndel trabajo',
                       hideActions: true,

@@ -20,6 +20,9 @@ import 'dart:ui';
 import '/index.dart';
 import '/auth/custom_auth/auth_util.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import '/shared_components/header_navigation.dart';
+import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -825,168 +828,12 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                           ),
                         )
                       else
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 42.0, 20.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                decoration: const BoxDecoration(),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        context.safePop();
-                                      },
-                                      child: Container(
-                                        width: 35.0,
-                                        height: 35.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .alternate,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: SvgPicture.asset(
-                                            'assets/images/IconoVolverAtras.svg',
-                                            width: 200.0,
-                                            height: 200.0,
-                                            fit: BoxFit.none,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        context.pushNamed(
-                                            DOVIACLIENTHomePageWidget
-                                                .routeName);
-                                      },
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(0.0),
-                                        child: SvgPicture.asset(
-                                          'assets/images/D-verde.svg',
-                                          width: 28.0,
-                                          height: 36.0,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ].divide(const SizedBox(width: 8.0)),
-                                ),
-                              ),
-                              // El nombre puede ser largo: sin Expanded el titulo se sale de
-                              // la pantalla en lugar de repartirse en dos lineas.
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 28.0),
-                                  child: RichText(
-                                    textScaler:
-                                        MediaQuery.of(context).textScaler,
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: _propertyName.isNotEmpty
-                                              ? _propertyName
-                                              : 'Propiedad',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font: GoogleFonts.publicSans(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                fontSize: 18.0,
-                                                letterSpacing: 0.0,
-                                                fontWeight: FontWeight.w600,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                                lineHeight: 1.4,
-                                              ),
-                                        )
-                                      ],
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight: FontWeight.w600,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            fontSize: 18.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.4,
-                                          ),
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                  ),
-                                ),
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Container(
-                                        width: 40.0,
-                                        height: 40.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: SvgPicture.asset(
-                                            'assets/images/IconoDoviaHomeClienteMensajes.svg',
-                                            width: 8.0,
-                                            height: 8.0,
-                                            fit: BoxFit.none,
-                                          ),
-                                        ),
-                                      ),
-                                    ].divide(const SizedBox(width: 8.0)),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        DOVIASHAREDHeaderWidget(
+                          title: _propertyName.isNotEmpty
+                              ? _propertyName
+                              : 'Propiedad',
+                          showLogo: openedFromHome(context),
+                          hideActions: true,
                         ),
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
@@ -1691,12 +1538,21 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                         updateCallback: () => safeSetState(() {}),
                         child: const OPERATIVELISTINGNavbarWidget(),
                       )
-                    else
+                    else ...[
+                      const Align(
+                        alignment: AlignmentDirectional(1.0, 0.0),
+                        child: Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 12.0),
+                          child: FixedDoviaIconWidget(),
+                        ),
+                      ),
                       wrapWithModel(
                         model: _model.dOVIACLIENTNavbarModel,
                         updateCallback: () => safeSetState(() {}),
                         child: const DOVIACLIENTNavbarWidget(),
                       ),
+                    ],
                   ],
                 ),
               ),

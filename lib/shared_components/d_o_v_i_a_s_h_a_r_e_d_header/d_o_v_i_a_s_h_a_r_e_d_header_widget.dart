@@ -23,6 +23,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showCart = false,
     this.showNotifications = false,
     this.showSettings = false,
+    this.showSupport = true,
     this.onChatTap,
     this.topPadding = 42.0,
   }) : title = title ?? '[title]';
@@ -42,6 +43,11 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   /// abajo, asi que los muestran aca.
   final bool showNotifications;
   final bool showSettings;
+
+  /// Ícono de soporte de DOVIA. Las pantallas que ya tienen la burbuja
+  /// flotante lo apagan para no repetirlo y dejarle lugar al título. Con
+  /// [onChatTap] el ícono se muestra igual, porque abre otra conversación.
+  final bool showSupport;
 
   /// Destino alternativo del ícono de chat. Sin este callback el ícono abre el
   /// soporte de DOVIA; las pantallas donde el interlocutor es otro (Ej: el
@@ -81,18 +87,49 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
     super.dispose();
   }
 
+  static const double _backSize = 35.0;
+  static const double _logoWidth = 28.0;
+  static const double _iconSize = 40.0;
+  static const double _gap = 8.0;
+  static const double _currencyWidth = 90.0;
+
+  bool get _showChat => widget.onChatTap != null || widget.showSupport;
+
+  double get _leadingWidth =>
+      _backSize + (widget.showLogo ? _gap + _logoWidth : 0.0);
+
+  double get _actionsWidth {
+    if (widget.hideActions) return 0.0;
+    final icons = [
+      widget.showMap,
+      widget.showCart,
+      _showChat,
+      widget.showNotifications,
+      widget.showSettings,
+    ].where((shown) => shown).length;
+    final iconsWidth =
+        icons == 0 ? 0.0 : icons * _iconSize + (icons - 1) * _gap;
+    return widget.showCurrency
+        ? (iconsWidth > _currencyWidth ? iconsWidth : _currencyWidth)
+        : iconsWidth;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Los dos costados reservan el mismo ancho (el del más ancho), así el
+    // título queda centrado en la pantalla y no en el hueco que le dejan la
+    // flecha y los íconos.
+    final sideWidth =
+        _leadingWidth > _actionsWidth ? _leadingWidth : _actionsWidth;
     return Padding(
       padding:
           EdgeInsetsDirectional.fromSTEB(20.0, widget.topPadding, 20.0, 0.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            decoration: const BoxDecoration(),
+          SizedBox(
+            width: sideWidth,
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -152,9 +189,9 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
           ),
           Expanded(
             child: Padding(
-              // Aire de sobra a los costados: un título largo baja de línea
-              // antes de acercarse a la flecha o a los íconos.
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              // Aire a los costados: un título largo baja de línea antes de
+              // acercarse a la flecha o a los íconos.
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: RichText(
                 textScaler: MediaQuery.of(context).textScaler,
                 text: TextSpan(
@@ -198,175 +235,184 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
               ),
             ),
           ),
-          if (widget.hideActions)
-            // Mismo ancho que la flecha (y el logo) de la izquierda, para
-            // que el título quede centrado en la pantalla.
-            SizedBox(width: widget.showLogo ? 71.0 : 35.0)
-          else
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    if (widget.showMap)
-                      Container(
-                        width: 40.0,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          color: widget.mapActive
-                              ? const Color(0xFF00444B)
-                              : FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                          shape: BoxShape.circle,
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(0.0),
-                          child: SvgPicture.asset(
-                            'assets/images/IconoDoviaHomeClienteMapa.svg',
-                            width: 8.0,
-                            height: 8.0,
-                            fit: BoxFit.none,
-                            colorFilter: widget.mapActive
-                                ? const ColorFilter.mode(
-                                    Colors.white, BlendMode.srcIn)
-                                : null,
-                          ),
-                        ),
-                      ),
-                    if (widget.showCart)
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          // TODO: Navigate to cart
-                        },
-                        child: Container(
-                          width: 40.0,
-                          height: 40.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: SvgPicture.asset(
-                              'assets/images/shopping-bag.svg',
-                              fit: BoxFit.contain,
+          SizedBox(
+            width: sideWidth,
+            child: widget.hideActions
+                ? null
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.showMap)
+                            Container(
+                              width: 40.0,
+                              height: 40.0,
+                              decoration: BoxDecoration(
+                                color: widget.mapActive
+                                    ? const Color(0xFF00444B)
+                                    : FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                shape: BoxShape.circle,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(0.0),
+                                child: SvgPicture.asset(
+                                  'assets/images/IconoDoviaHomeClienteMapa.svg',
+                                  width: 8.0,
+                                  height: 8.0,
+                                  fit: BoxFit.none,
+                                  colorFilter: widget.mapActive
+                                      ? const ColorFilter.mode(
+                                          Colors.white, BlendMode.srcIn)
+                                      : null,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                          if (widget.showCart)
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                // TODO: Navigate to cart
+                              },
+                              child: Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/shopping-bag.svg',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          // Chat: abre el soporte de DOVIA (mismo panel que el ícono
+                          // flotante), salvo que la pantalla defina otro destino.
+                          if (_showChat)
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                if (widget.onChatTap != null) {
+                                  widget.onChatTap!();
+                                  return;
+                                }
+                                await showDoviaSupport(context)
+                                    .then((value) => safeSetState(() {}));
+                              },
+                              child: Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/IconoDoviaHomeClienteMensajes.svg',
+                                    width: 8.0,
+                                    height: 8.0,
+                                    fit: BoxFit.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (widget.showNotifications)
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                context.pushNamed(
+                                    DOVIACLIENTNotificacionesWidget.routeName);
+                              },
+                              child: Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                child: NotificationBadge(
+                                    child: SvgPicture.asset(
+                                  'assets/images/DH_icono-navbar-notificaciones.svg',
+                                  width: 22.0,
+                                  height: 22.0,
+                                  fit: BoxFit.contain,
+                                )),
+                              ),
+                            ),
+                          if (widget.showSettings)
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                context.pushNamed(
+                                    DOVIACLIENTAjustesWidget.routeName);
+                              },
+                              child: Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                child: SvgPicture.asset(
+                                  'assets/images/DH_icono-navbar-ajustes.svg',
+                                  width: 22.0,
+                                  height: 22.0,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                        ].divide(const SizedBox(width: 8.0)),
                       ),
-                    // Chat: abre el soporte de DOVIA (mismo panel que el ícono
-                    // flotante), salvo que la pantalla defina otro destino.
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        if (widget.onChatTap != null) {
-                          widget.onChatTap!();
-                          return;
-                        }
-                        await showDoviaSupport(context)
-                            .then((value) => safeSetState(() {}));
-                      },
-                      child: Container(
-                        width: 40.0,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          shape: BoxShape.circle,
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: SvgPicture.asset(
-                            'assets/images/IconoDoviaHomeClienteMensajes.svg',
-                            width: 8.0,
-                            height: 8.0,
-                            fit: BoxFit.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (widget.showNotifications)
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          context.pushNamed(
-                              DOVIACLIENTNotificacionesWidget.routeName);
-                        },
-                        child: Container(
-                          width: 40.0,
-                          height: 40.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: const AlignmentDirectional(0.0, 0.0),
-                          child: NotificationBadge(
-                              child: SvgPicture.asset(
-                            'assets/images/DH_icono-navbar-notificaciones.svg',
-                            width: 22.0,
-                            height: 22.0,
-                            fit: BoxFit.contain,
-                          )),
-                        ),
-                      ),
-                    if (widget.showSettings)
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          context.pushNamed(DOVIACLIENTAjustesWidget.routeName);
-                        },
-                        child: Container(
-                          width: 40.0,
-                          height: 40.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: const AlignmentDirectional(0.0, 0.0),
-                          child: SvgPicture.asset(
-                            'assets/images/DH_icono-navbar-ajustes.svg',
-                            width: 22.0,
-                            height: 22.0,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                  ].divide(const SizedBox(width: 8.0)),
-                ),
-                if (widget.showCurrency)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        0.0, 8.0, 0.0, 0.0),
-                    child: FlutterFlowDropDown<String>(
-                      controller: _model.dropDownValueController ??=
-                          FormFieldController<String>(null),
-                      options: const ['USD', 'GTQ'],
-                      onChanged: (val) =>
-                          safeSetState(() => _model.dropDownValue = val),
-                      width: 90.0,
-                      height: 30.0,
-                      textStyle:
-                          FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.publicSans(
+                      if (widget.showCurrency)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 8.0, 0.0, 0.0),
+                          child: FlutterFlowDropDown<String>(
+                            controller: _model.dropDownValueController ??=
+                                FormFieldController<String>(null),
+                            options: const ['USD', 'GTQ'],
+                            onChanged: (val) =>
+                                safeSetState(() => _model.dropDownValue = val),
+                            width: 90.0,
+                            height: 30.0,
+                            textStyle: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  font: GoogleFonts.publicSans(
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  letterSpacing: 0.0,
                                   fontWeight: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .fontWeight,
@@ -374,36 +420,29 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                                       .bodyMedium
                                       .fontStyle,
                                 ),
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                      hintText: 'USD',
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: FlutterFlowTheme.of(context).primary,
-                        size: 24.0,
-                      ),
-                      fillColor:
-                          FlutterFlowTheme.of(context).secondaryBackground,
-                      elevation: 2.0,
-                      borderColor: Colors.transparent,
-                      borderWidth: 0.0,
-                      borderRadius: 67.0,
-                      margin: const EdgeInsetsDirectional.fromSTEB(
-                          12.0, 0.0, 12.0, 0.0),
-                      hidesUnderline: true,
-                      isOverButton: false,
-                      isSearchable: false,
-                      isMultiSelect: false,
-                    ),
+                            hintText: 'USD',
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: FlutterFlowTheme.of(context).primary,
+                              size: 24.0,
+                            ),
+                            fillColor: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            elevation: 2.0,
+                            borderColor: Colors.transparent,
+                            borderWidth: 0.0,
+                            borderRadius: 67.0,
+                            margin: const EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            hidesUnderline: true,
+                            isOverButton: false,
+                            isSearchable: false,
+                            isMultiSelect: false,
+                          ),
+                        ),
+                    ],
                   ),
-              ],
-            ),
+          ),
         ],
       ),
     );

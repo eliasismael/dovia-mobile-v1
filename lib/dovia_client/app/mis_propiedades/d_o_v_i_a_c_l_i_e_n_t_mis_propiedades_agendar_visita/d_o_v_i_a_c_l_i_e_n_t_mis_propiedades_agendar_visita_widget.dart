@@ -8,6 +8,8 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_header_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
+import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_agendar_visita_model.dart';
@@ -231,7 +233,9 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
+                      child: DOVIASHAREDHeaderWidget(
+                        showLogo: openedFromHome(context),
+                        showSupport: false,
                         title: 'Agenda tu visita',
                         showMap: false,
                         showCurrency: false,
@@ -548,10 +552,23 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
               ),
               Align(
                 alignment: const AlignmentDirectional(0.0, 1.0),
-                child: wrapWithModel(
-                  model: _model.dOVIACLIENTNavbarModel,
-                  updateCallback: () => safeSetState(() {}),
-                  child: const DOVIACLIENTNavbarWidget(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Align(
+                      alignment: AlignmentDirectional(1.0, 0.0),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            0.0, 0.0, 15.0, 12.0),
+                        child: FixedDoviaIconWidget(),
+                      ),
+                    ),
+                    wrapWithModel(
+                      model: _model.dOVIACLIENTNavbarModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: const DOVIACLIENTNavbarWidget(),
+                    ),
+                  ],
                 ),
               ),
             ],

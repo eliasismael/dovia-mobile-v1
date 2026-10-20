@@ -12,6 +12,7 @@ import '/shared_components/d_o_v_i_a_s_h_a_r_e_d_header/d_o_v_i_a_s_h_a_r_e_d_he
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/index.dart';
+import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -406,7 +407,9 @@ class _DCFormaPagoSuscripcion2WidgetState
                     wrapWithModel(
                       model: _model.dOVIASHAREDHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const DOVIASHAREDHeaderWidget(
+                      child: DOVIASHAREDHeaderWidget(
+                        showLogo: openedFromHome(context),
+                        showSupport: false,
                         title: 'Dovia Home',
                       ),
                     ),
