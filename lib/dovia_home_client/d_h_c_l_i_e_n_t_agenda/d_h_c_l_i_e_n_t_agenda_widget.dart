@@ -821,7 +821,10 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                           padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 6.0, 0.0, 0.0),
                           child: Text(
-                            'Agenda disponible con ${DHCLIENTAgendaWidget.minAdvanceHours} hs de anticipación para DOVIA BASIC.',
+                            // 24 h es la regla de suscriptor (ver
+                            // `_resolveMinAdvanceHours`); el plan se nombra
+                            // según la que aplica.
+                            'Agenda disponible con ${DHCLIENTAgendaWidget.minAdvanceHours} hs de anticipación para ${DHCLIENTAgendaWidget.minAdvanceHours <= 24 ? 'DOVIA Home Premium' : 'DOVIA BASIC'}.',
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(

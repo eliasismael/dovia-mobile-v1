@@ -246,6 +246,12 @@ String srPriceCurrency(Map<String, dynamic> data) {
       'GTQ';
 }
 
+/// Plan con el que el backend le puso precio a la solicitud (`price.plan`:
+/// `FREE` o `SUBSCRIBED`), en mayúsculas. El precio se fija al crearla y no se
+/// recalcula si el cliente se suscribe después.
+String? srPricePlan(Map<String, dynamic> data) =>
+    srString(_asMap(data['price'])?['plan'])?.toUpperCase();
+
 /// Monto con descuento que se le cobraría a un suscriptor. `null` cuando el
 /// payload no lo trae: no se pinta un monto inventado (mismo criterio que el
 /// catálogo de planes, que sólo muestra precios que el backend confirma).

@@ -14,6 +14,12 @@
       "port": 8080
     },
     {
+      "name": "Flutter Web Server Staging",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "C:\\flutter\\bin\\flutter.bat", "run", "-d", "web-server", "--web-port", "8081", "--web-hostname", "localhost", "--dart-define=API_BASE_URL=https://52aqw5tygf.execute-api.us-east-2.amazonaws.com/staging"],
+      "port": 8081
+    },
+    {
       "name": "Flutter (Default Device)",
       "runtimeExecutable": "C:/flutter/bin/flutter",
       "runtimeArgs": ["run"],

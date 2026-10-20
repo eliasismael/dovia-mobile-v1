@@ -268,7 +268,10 @@ class _DHCLIENTCasaAWidgetState extends State<DHCLIENTCasaAWidget> {
   bool get _hasSavings {
     if (_data == null) return true;
     if (_savingsAmount != null) return true;
-    if (_pricePlan == 'SUBSCRIBED') return true;
+    // El precio de suscriptor no implica ahorro: las emergencias siempre se
+    // cotizan con él y se cobran. Sin cifra de ahorro, "ahorraste el precio
+    // de este servicio" sólo es cierto si no se cobró nada.
+    if (_pricePlan == 'SUBSCRIBED') return (srPriceAmount(_data!) ?? 0) <= 0;
     final used = _data?['usedIncludedService'] ?? _data?['includedServiceUsed'];
     final discount = _data?['discountApplied'] ?? _data?['hasDiscount'];
     return used == true || discount == true;

@@ -107,6 +107,11 @@ class _DHCLIENTValorVisitaPageWidgetState
   String get _currency => _requestData == null
       ? PaymentCurrency.gtq
       : srPriceCurrency(_requestData!);
+  /// La solicitud se cotizó sin plan (`price.plan` = `FREE`). El backend fija
+  /// el precio al crearla y no lo recalcula si el cliente se suscribe después,
+  /// así que comprar el plan desde esta pantalla no le baja esta visita.
+  bool get _pricedWithoutPlan =>
+      _requestData != null && srPricePlan(_requestData!) == 'FREE';
   String get _serviceName => _requestData == null
       ? 'Servicio Dovia Home'
       : srServiceName(_requestData!);
@@ -258,8 +263,11 @@ class _DHCLIENTValorVisitaPageWidgetState
 
     // Vuelta de comprar el plan: el cliente ya pidió el servicio con
     // descuento, así que se cobra sin hacerle tapear otra vez. Si el backend
-    // ya lo dejó cubierto (1er servicio incluido), no cobra nada.
-    if (autoCharge && payments.hasActiveSubscription) {
+    // ya lo dejó cubierto (1er servicio incluido), no cobra nada. Si la
+    // solicitud quedó cotizada sin plan, el monto no bajó: abrirle el cobro
+    // solo sería cobrarle el precio regular como si fuera el del plan, así
+    // que se le muestra el precio y decide él.
+    if (autoCharge && payments.hasActiveSubscription && !_pricedWithoutPlan) {
       await _chargeSubscriberPrice();
     }
   }
@@ -598,6 +606,25 @@ class _DHCLIENTValorVisitaPageWidgetState
     );
   }
 
+  /// Aviso informativo: sólo fondo suave y texto.
+  Widget _buildNotice(String message) {
+    return Container(
+      padding: const EdgeInsets.all(14.0),
+      decoration: BoxDecoration(
+        color: const Color(0x1A007376),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Text(
+        message,
+        style: GoogleFonts.publicSans(
+          fontSize: 14.0,
+          height: 1.4,
+          color: const Color(0xFF00444B),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSoftButton(
     String text, {
     required VoidCallback? onTap,
@@ -823,6 +850,43 @@ class _DHCLIENTValorVisitaPageWidgetState
         ],
       );
     }
+    if (payments.hasActiveSubscription && _pricedWithoutPlan) {
+      // Se suscribió después de pedir la visita: el backend la sigue cobrando
+      // a precio regular. Se dice tal cual en vez de rotularla "con tu plan".
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildNotice(
+              'Pediste esta visita antes de suscribirte, así que se cobra a '
+              'precio regular. Tu plan aplica desde tu próxima solicitud.'),
+          const SizedBox(height: 20.0),
+          Text(
+            'Precio del servicio',
+            textAlign: TextAlign.center,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(),
+                  color: const Color(0xFF00444B),
+                  fontSize: 17.0,
+                  letterSpacing: -0.34,
+                ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+            child: _buildPrice(srFormatAmount(_amount!, _currency), ' /visita'),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+            child: _buildSoftButton(
+              'Pagar',
+              paid: _paidMethod != null,
+              onTap: busy ? null : _payDirect,
+            ),
+          ),
+          _buildCheckoutStatus(),
+        ],
+      );
+    }
     if (payments.hasActiveSubscription) {
       return _buildSubscriberContent(
         amount: subscriberAmount ?? _amount!,
@@ -858,8 +922,13 @@ class _DHCLIENTValorVisitaPageWidgetState
         ),
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+          // Sin el monto de suscriptor (el backend no lo expone) el "se te
+          // cobrará:" quedaba colgando, y esta visita ya tiene su precio fijo:
+          // el plan aplica a las siguientes.
           child: Text(
-            'Si te suscribes a Dovia Home,\nse te cobrara:',
+            subscriberAmount != null
+                ? 'Si te suscribes a Dovia Home,\nse te cobrara:'
+                : 'Suscríbete a Dovia Home Premium\npara tus próximas solicitudes',
             textAlign: TextAlign.center,
             style: FlutterFlowTheme.of(context).bodyMedium.override(
                   font: GoogleFonts.publicSans(),

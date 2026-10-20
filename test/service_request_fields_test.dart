@@ -56,6 +56,38 @@ void main() {
     });
   });
 
+  group('srPricePlan', () {
+    test('lee price.plan en mayúsculas', () {
+      expect(
+        srPricePlan({
+          'price': {
+            'plan': 'free',
+            'price': {'gtq': 5},
+          },
+        }),
+        'FREE',
+      );
+      expect(
+        srPricePlan({
+          'price': {'plan': 'SUBSCRIBED'},
+        }),
+        'SUBSCRIBED',
+      );
+    });
+
+    test('null sin precio o sin plan', () {
+      expect(srPricePlan(const {}), isNull);
+      expect(
+        srPricePlan({
+          'price': {
+            'price': {'gtq': 5},
+          },
+        }),
+        isNull,
+      );
+    });
+  });
+
   group('srSubscriberPriceAmount', () {
     test('lee el monto con descuento cuando el backend lo expone', () {
       final data = {
