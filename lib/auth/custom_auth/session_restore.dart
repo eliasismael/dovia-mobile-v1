@@ -38,9 +38,13 @@ Future<void> restoreSession() async {
 /// Se completa con el perfil para no obligar a cerrar sesión.
 Future<void> _backfillUid() async {
   if (!loggedIn || (authManager.uid ?? '').isNotEmpty) return;
+  final generation = authManager.sessionGeneration;
   final call = DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall;
   final response =
       await call.call(authToken: authManager.authenticationToken);
+  // Si mientras tanto entró otra cuenta, el perfil es de la anterior: su id
+  // no se puede guardar junto a los tokens de la nueva.
+  if (authManager.sessionGeneration != generation) return;
   final id = call.userId(response.jsonBody);
   if (!response.succeeded || id == null || id.isEmpty) return;
   authManager.updateAuthUserData(

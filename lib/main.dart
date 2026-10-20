@@ -48,6 +48,7 @@ void main() async {
   await authManager.initialize();
   ApiManager.onUnauthorized = refreshSession;
   ApiManager.freshTokenIfExpired = freshTokenIfExpired;
+  ApiManager.sessionGeneration = () => authManager.sessionGeneration;
   await restoreSession();
   // Firebase para push (Android/iOS); sin configuración queda sin push.
   pushMessaging = await initPushMessaging();

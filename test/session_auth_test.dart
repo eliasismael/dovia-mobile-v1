@@ -19,8 +19,7 @@ http.Response _json(int status, Object body) => http.Response(
       headers: {'content-type': 'application/json'},
     );
 
-http.Response _refreshOk(String idToken, {int expiresIn = 3600}) =>
-    _json(200, {
+http.Response _refreshOk(String idToken, {int expiresIn = 3600}) => _json(200, {
       'data': {
         'idToken': idToken,
         'refreshToken': 'refresh-2',
@@ -47,9 +46,9 @@ Future<void> _storedSession({
   await authManager.initialize();
 }
 
-Future<ApiCallResponse> _getMyProfile() => DOVIAAPIUserContextGroup
-    .getAuthenticatedUserProfileCall
-    .call(authToken: authManager.authenticationToken);
+Future<ApiCallResponse> _getMyProfile() =>
+    DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall
+        .call(authToken: authManager.authenticationToken);
 
 void main() {
   setUp(() {
@@ -93,8 +92,7 @@ void main() {
       // Antes de arreglar `currentUser`, `loggedIn` daba false al arrancar y
       // esto no llamaba nunca al backend.
       expect(refreshCalls, hasLength(1));
-      expect(jsonDecode(refreshCalls.single.body)['refreshToken'],
-          'refresh-1');
+      expect(jsonDecode(refreshCalls.single.body)['refreshToken'], 'refresh-1');
       expect(authManager.authenticationToken, 'token-nuevo');
       expect(authManager.refreshToken, 'refresh-2');
       expect(authManager.tokenExpiration, isNotNull);
@@ -124,6 +122,35 @@ void main() {
       expect(currentUserUid, 'user-desde-perfil');
     });
 
+    test('el uid del perfil de A no se guarda si mientras tanto entró B',
+        () async {
+      await _storedSession(
+          uid: null, expiration: DateTime.now().add(const Duration(hours: 1)));
+      final profile = Completer<http.Response>();
+      await http.runWithClient(
+        () async {
+          await restoreSession();
+          await Future<void>.delayed(Duration.zero);
+          await authManager.signOut();
+          await authManager.signIn(
+            authenticationToken: 'token-b',
+            refreshToken: 'refresh-b',
+            authUid: 'user-b',
+          );
+          profile.complete(_json(200, {
+            'data': {'id': 'user-a'}
+          }));
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        },
+        () => MockClient((req) async {
+          if (req.url.path.endsWith('/users/me')) return profile.future;
+          return _json(404, {});
+        }),
+      );
+      expect(currentUserUid, 'user-b');
+      expect(authManager.authenticationToken, 'token-b');
+    });
+
     test('con el token vigente abre sin esperar a la red y renueva después',
         () async {
       await _storedSession(
@@ -132,8 +159,8 @@ void main() {
       await http.runWithClient(
         () async {
           // El refresh queda colgado: restoreSession igual termina.
-          await restoreSession()
-              .timeout(const Duration(seconds: 1), onTimeout: () {
+          await restoreSession().timeout(const Duration(seconds: 1),
+              onTimeout: () {
             fail('restoreSession esperó a la red con el token vigente');
           });
           expect(authManager.authenticationToken, 'token-viejo');
@@ -417,14 +444,13 @@ void main() {
   group('tokens en almacenamiento seguro', () {
     const secure = FlutterSecureStorage();
 
-    test('migra los tokens de las preferencias y siguen al reabrir',
-        () async {
+    test('migra los tokens de las preferencias y siguen al reabrir', () async {
       await _storedSession();
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('_auth_authentication_token_'), isNull);
       expect(prefs.getString('_auth_refresh_token_'), isNull);
-      expect(await secure.read(key: '_auth_authentication_token_'),
-          'token-viejo');
+      expect(
+          await secure.read(key: '_auth_authentication_token_'), 'token-viejo');
       expect(await secure.read(key: '_auth_refresh_token_'), 'refresh-1');
 
       await authManager.initialize();
@@ -553,8 +579,7 @@ void main() {
   });
 
   group('timeout', () {
-    testWidgets('un pedido colgado termina con statusCode -1',
-        (tester) async {
+    testWidgets('un pedido colgado termina con statusCode -1', (tester) async {
       // El límite real es de 60 s: testWidgets corre con el reloj simulado.
       ApiCallResponse? res;
       http.runWithClient(

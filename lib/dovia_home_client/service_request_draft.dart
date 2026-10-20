@@ -50,17 +50,20 @@ class ServiceRequestDraftStore {
     return result;
   }
 
+  /// Carpeta del usuario conectado. Se toma al llamar a [save], [load] o
+  /// [clear], no cuando la operación corre en la cola: si entretanto cambió
+  /// la cuenta, el borrador de A terminaba guardado bajo B.
   static String get _userSegment {
     final uid = currentUserUid;
     return uid.isEmpty ? 'anon' : uid.replaceAll(RegExp(r'[^\w-]'), '_');
   }
 
-  static String get _prefsKey => 'dh_service_request_draft_$_userSegment';
+  static String _prefsKey(String user) => 'dh_service_request_draft_$user';
 
-  static Future<Directory?> _photosDir() async {
+  static Future<Directory?> _photosDir(String user) async {
     if (kIsWeb) return null;
     final base = await getApplicationSupportDirectory();
-    return Directory('${base.path}/service_request_draft/$_userSegment');
+    return Directory('${base.path}/service_request_draft/$user');
   }
 
   /// Guarda el borrador. [photos] en null conserva las fotos ya guardadas
@@ -70,76 +73,83 @@ class ServiceRequestDraftStore {
     required String? categoryId,
     required String description,
     List<FFUploadedFile>? photos,
-  }) =>
-      _enqueue(() async {
-        try {
-          final prefs = await SharedPreferences.getInstance();
-          final previous = _decode(prefs.getString(_prefsKey));
-          final sameService = previous?['serviceTitle'] == serviceTitle;
+  }) {
+    final user = _userSegment;
+    return _enqueue(() async {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final previous = _decode(prefs.getString(_prefsKey(user)));
+        final sameService = previous?['serviceTitle'] == serviceTitle;
 
-          List<dynamic> photoEntries;
-          if (photos != null) {
-            photoEntries = await _writePhotos(photos);
-          } else if (sameService) {
-            photoEntries = previous?['photos'] as List? ?? const [];
-          } else {
-            photoEntries = await _writePhotos(const []);
-          }
-
-          await prefs.setString(
-            _prefsKey,
-            jsonEncode({
-              'serviceTitle': serviceTitle,
-              'categoryId': categoryId,
-              'description': description,
-              'photos': photoEntries,
-              'savedAt': DateTime.now().millisecondsSinceEpoch,
-            }),
-          );
-        } catch (e) {
-          debugPrint('[Borrador] No se pudo guardar: $e');
+        List<dynamic> photoEntries;
+        if (photos != null) {
+          photoEntries = await _writePhotos(user, photos);
+        } else if (sameService) {
+          photoEntries = previous?['photos'] as List? ?? const [];
+        } else {
+          photoEntries = await _writePhotos(user, const []);
         }
-      });
+
+        await prefs.setString(
+          _prefsKey(user),
+          jsonEncode({
+            'serviceTitle': serviceTitle,
+            'categoryId': categoryId,
+            'description': description,
+            'photos': photoEntries,
+            'savedAt': DateTime.now().millisecondsSinceEpoch,
+          }),
+        );
+      } catch (e) {
+        debugPrint('[Borrador] No se pudo guardar: $e');
+      }
+    });
+  }
 
   /// El borrador del servicio [serviceTitle], o null si no hay, es de otro
   /// servicio o ya venció.
-  static Future<ServiceRequestDraft?> load(String serviceTitle) =>
-      _enqueue(() async {
-        try {
-          final prefs = await SharedPreferences.getInstance();
-          final json = _decode(prefs.getString(_prefsKey));
-          if (json == null || json['serviceTitle'] != serviceTitle) {
-            return null;
-          }
-          final savedAt = DateTime.fromMillisecondsSinceEpoch(
-              (json['savedAt'] as num?)?.toInt() ?? 0);
-          if (DateTime.now().difference(savedAt) > maxAge) return null;
-
-          return ServiceRequestDraft(
-            serviceTitle: serviceTitle,
-            categoryId: json['categoryId'] as String?,
-            description: json['description'] as String? ?? '',
-            photos: await _readPhotos(json['photos'] as List? ?? const []),
-          );
-        } catch (e) {
-          debugPrint('[Borrador] No se pudo leer: $e');
+  static Future<ServiceRequestDraft?> load(String serviceTitle) {
+    final user = _userSegment;
+    return _enqueue(() async {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final json = _decode(prefs.getString(_prefsKey(user)));
+        if (json == null || json['serviceTitle'] != serviceTitle) {
           return null;
         }
-      });
+        final savedAt = DateTime.fromMillisecondsSinceEpoch(
+            (json['savedAt'] as num?)?.toInt() ?? 0);
+        if (DateTime.now().difference(savedAt) > maxAge) return null;
+
+        return ServiceRequestDraft(
+          serviceTitle: serviceTitle,
+          categoryId: json['categoryId'] as String?,
+          description: json['description'] as String? ?? '',
+          photos: await _readPhotos(user, json['photos'] as List? ?? const []),
+        );
+      } catch (e) {
+        debugPrint('[Borrador] No se pudo leer: $e');
+        return null;
+      }
+    });
+  }
 
   /// Descarta el borrador (al enviar la solicitud o si el cliente lo pide).
-  static Future<void> clear() => _enqueue(() async {
-        try {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.remove(_prefsKey);
-          final dir = await _photosDir();
-          if (dir != null && await dir.exists()) {
-            await dir.delete(recursive: true);
-          }
-        } catch (e) {
-          debugPrint('[Borrador] No se pudo borrar: $e');
+  static Future<void> clear() {
+    final user = _userSegment;
+    return _enqueue(() async {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_prefsKey(user));
+        final dir = await _photosDir(user);
+        if (dir != null && await dir.exists()) {
+          await dir.delete(recursive: true);
         }
-      });
+      } catch (e) {
+        debugPrint('[Borrador] No se pudo borrar: $e');
+      }
+    });
+  }
 
   static Map<String, dynamic>? _decode(String? raw) {
     if (raw == null) return null;
@@ -153,8 +163,8 @@ class ServiceRequestDraftStore {
 
   /// Reemplaza las fotos guardadas por [photos] y devuelve cómo encontrarlas.
   static Future<List<Map<String, dynamic>>> _writePhotos(
-      List<FFUploadedFile> photos) async {
-    final dir = await _photosDir();
+      String user, List<FFUploadedFile> photos) async {
+    final dir = await _photosDir(user);
     if (dir == null) return const [];
     if (await dir.exists()) await dir.delete(recursive: true);
     if (photos.isEmpty) return const [];
@@ -177,8 +187,9 @@ class ServiceRequestDraftStore {
     return entries;
   }
 
-  static Future<List<FFUploadedFile>> _readPhotos(List<dynamic> entries) async {
-    final dir = await _photosDir();
+  static Future<List<FFUploadedFile>> _readPhotos(
+      String user, List<dynamic> entries) async {
+    final dir = await _photosDir(user);
     if (dir == null) return const [];
 
     final photos = <FFUploadedFile>[];

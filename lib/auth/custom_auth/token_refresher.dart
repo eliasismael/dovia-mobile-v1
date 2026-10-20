@@ -15,6 +15,10 @@ const accountDisabledMessage =
     'Tu cuenta está deshabilitada o suspendida. Si crees que es un error, '
     'contacta a soporte.';
 
+/// Respuestas de `/auth/refresh-token` que significan que el refreshToken ya
+/// no sirve (vencido, revocado o cuenta deshabilitada).
+const _kRejectedRefreshStatuses = {400, 401, 403};
+
 Future<String?>? _inFlight;
 int? _inFlightGeneration;
 DateTime? _lastRefresh;
@@ -106,7 +110,9 @@ Future<String?> _refresh(int generation) async {
       return idToken;
     }
 
-    if (response.statusCode >= 400 && response.statusCode < 500) {
+    // Sólo un rechazo del refreshToken cierra la sesión. Un 429 (demasiados
+    // pedidos), 408 u otro 4xx pasajero se reintenta más adelante.
+    if (_kRejectedRefreshStatuses.contains(response.statusCode)) {
       // 403 USER_DISABLED: el backend ahora también rechaza el refresh de una
       // cuenta deshabilitada o suspendida. No es una sesión vencida.
       await _expire(response.statusCode == 403

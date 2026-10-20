@@ -272,6 +272,11 @@ class ApiManager {
   /// entrega como error de red, así que [onUnauthorized] nunca se dispara.
   static Future<String?> Function()? freshTokenIfExpired;
 
+  /// Sesión vigente (cambia al cerrar sesión o entrar otra cuenta). Un pedido
+  /// que empezó en una sesión no se renueva ni se reintenta con el token de
+  /// la siguiente: si no, una acción de la cuenta A se ejecutaba como B.
+  static int Function()? sessionGeneration;
+
   /// Llamadas de autenticación: un 401 en ellas no se resuelve renovando.
   static const _authCallNames = {
     'Sign In NEW',
@@ -638,9 +643,13 @@ class ApiManager {
       final authKey = headers.keys.firstWhereOrNull(
           (k) => k.toLowerCase() == HttpHeaders.authorizationHeader);
       final isAuthCall = _authCallNames.contains(callName);
+      final generation = sessionGeneration?.call();
+      bool sessionChanged() =>
+          generation != null && sessionGeneration!.call() != generation;
+
       if (authKey != null && !isAuthCall && freshTokenIfExpired != null) {
         final fresh = await freshTokenIfExpired!();
-        if (fresh != null && fresh.isNotEmpty) {
+        if (fresh != null && fresh.isNotEmpty && !sessionChanged()) {
           headers = Map<String, dynamic>.from(headers)
             ..[authKey] = 'Bearer $fresh';
         }
@@ -654,9 +663,10 @@ class ApiManager {
       if (result.statusCode == 401 &&
           authKey != null &&
           onUnauthorized != null &&
-          !isAuthCall) {
+          !isAuthCall &&
+          !sessionChanged()) {
         final newToken = await onUnauthorized!();
-        if (newToken != null && newToken.isNotEmpty) {
+        if (newToken != null && newToken.isNotEmpty && !sessionChanged()) {
           final retryHeaders = Map<String, dynamic>.from(headers)
             ..[authKey] = 'Bearer $newToken';
           result = await send(retryHeaders);

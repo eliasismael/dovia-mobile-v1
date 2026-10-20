@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '/app_state.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
-import '/backend/api_requests/api_auth.dart';
 import '/core/result.dart';
 import '/domain/visit_models.dart';
 
@@ -79,8 +78,6 @@ class VisitsRepository extends ChangeNotifier {
       return const Failure('Solo usuarios CLIENT pueden solicitar visitas.');
     }
     final token = currentAuthenticationToken ?? '';
-    debugPrint(
-        '[VisitsRepo] Using token: ${token.isNotEmpty ? "PRESENT (starts with ${token.substring(0, 10)})" : "EMPTY"}');
     final response =
         await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
       propertyId: propertyId,
@@ -93,49 +90,10 @@ class VisitsRepository extends ChangeNotifier {
       hourThree: hourThree,
     );
 
+    // El 401 por token vencido lo renueva y reintenta el ApiManager, atado a
+    // la sesión que hizo el pedido. Acá había un refresh propio que podía
+    // guardar el token de una cuenta con el id de otra.
     if (!response.succeeded) {
-      if (response.statusCode == 400 ||
-          response.statusCode == 401 ||
-          response.statusCode == 403) {
-        // Try healing the session silently with a token refresh.
-        final refreshRes =
-            await DOVIAAPIAuthContextGroup.refreshTokenNEWCall.call(
-          refreshToken: currentAuthRefreshToken,
-        );
-        if (refreshRes.succeeded) {
-          final newToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall
-              .idToken(refreshRes.jsonBody);
-          final newRefreshToken = DOVIAAPIAuthContextGroup.refreshTokenNEWCall
-              .refreshTokenResponse(refreshRes.jsonBody);
-          if (newToken != null && newToken.isNotEmpty) {
-            authManager.updateAuthUserData(
-              authenticationToken: newToken,
-              refreshToken: newRefreshToken,
-              tokenExpiration: currentAuthTokenExpiration,
-              authUid: currentUserUid,
-            );
-
-            // Retry the request with the fresh token
-            final retryResponse =
-                await DOVIAAPIVisitContextGroup.createVisitRequestCall.call(
-              propertyId: propertyId,
-              authToken: newToken,
-              dateOne: dateOne,
-              hourOne: hourOne,
-              dateTwo: dateTwo,
-              hourTwo: hourTwo,
-              dateThree: dateThree,
-              hourThree: hourThree,
-            );
-
-            if (retryResponse.succeeded) {
-              _myVisits = [];
-              notifyListeners();
-              return const Success(null);
-            }
-          }
-        }
-      }
       return Failure(
         'No se pudo solicitar la visita',
         statusCode: response.statusCode,
