@@ -69,22 +69,16 @@ android {
     // (--dart-define=API_BASE_URL, ver tools/build_apks.ps1).
     flavorDimensions "env"
     productFlavors {
+        // Sin sufijo: en Firebase (dovia-notifications) está registrado
+        // com.mycompany.dovia, así dev recibe push igual que staging.
         dev {
             dimension "env"
-            applicationIdSuffix ".dev"
             resValue "string", "app_name", "DOVIA Dev"
         }
         staging {
             dimension "env"
             applicationIdSuffix ".stg"
             resValue "string", "app_name", "DOVIA Staging"
-        }
-        // Temporal: igual que dev pero sin sufijo, porque en Firebase
-        // (dovia-notifications) sólo está registrado com.mycompany.dovia.
-        // Sirve para probar push hasta que se registren .dev y .stg.
-        devfcm {
-            dimension "env"
-            resValue "string", "app_name", "DOVIA Dev Push"
         }
     }
 

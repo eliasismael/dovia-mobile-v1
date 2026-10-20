@@ -1,5 +1,6 @@
 # Genera las APK de prueba de DOVIA, una por entorno, cada una con su URL de
-# API y su flavor (se instalan juntas: com.mycompany.dovia.dev / .stg).
+# API y su flavor (se instalan juntas: com.mycompany.dovia / .stg; las dos
+# con push).
 #
 # Uso (desde cualquier carpeta):
 #   powershell -ExecutionPolicy Bypass -File tools\build_apks.ps1            # dev y staging

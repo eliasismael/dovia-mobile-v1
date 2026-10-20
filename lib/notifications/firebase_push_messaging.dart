@@ -11,12 +11,11 @@ import 'push_messaging.dart';
 /// de Gradle, que exige que cada flavor tenga su paquete registrado.
 ///
 /// En Android cada flavor es un paquete distinto y tiene su propia app en
-/// Firebase. Registrados: `com.mycompany.dovia` (flavor `devfcm` o build sin
-/// flavor) y `com.mycompany.dovia.stg` (`staging`). Falta `.dev`: en ese
-/// flavor no hay push hasta que se registre y se sume su `appId` acá.
+/// Firebase. Registrados: `com.mycompany.dovia` (flavor `dev`, que va sin
+/// sufijo, o build sin flavor) y `com.mycompany.dovia.stg` (`staging`).
 const _androidAppIds = <String?, String>{
   null: '1:240336837682:android:780f6a517ffbc7112df02b',
-  'devfcm': '1:240336837682:android:780f6a517ffbc7112df02b',
+  'dev': '1:240336837682:android:780f6a517ffbc7112df02b',
   'staging': '1:240336837682:android:83b592ef903911b52df02b',
 };
 
