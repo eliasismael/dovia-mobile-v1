@@ -17,9 +17,9 @@
 /// la tanda entera.
 library;
 
+import '/backend/api_requests/presigned_upload.dart';
 import 'dart:typed_data';
 
-import 'package:http/http.dart' as http;
 
 import 'api_manager.dart';
 
@@ -166,7 +166,7 @@ Future<DoviaHomeUploadResult> uploadDoviaHomeImages({
     }
 
     try {
-      final putRes = await http.put(
+      final putRes = await putPresigned(
         Uri.parse(uploadUrl),
         headers: headers,
         body: upload.bytes,

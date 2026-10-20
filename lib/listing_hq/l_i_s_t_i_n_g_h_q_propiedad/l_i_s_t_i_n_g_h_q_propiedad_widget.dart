@@ -1,3 +1,4 @@
+import '/backend/api_requests/presigned_upload.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
@@ -9,7 +10,6 @@ import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/backend/api_requests/api_manager.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_model.dart';
-import 'package:http/http.dart' as http;
 import 'package:mime_type/mime_type.dart';
 import 'package:image_picker/image_picker.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
@@ -394,7 +394,7 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                       putHeaders.putIfAbsent(
                                           'Content-Type', () => mimeTypes[i]);
 
-                                      final s3PutRes = await http.put(
+                                      final s3PutRes = await putPresigned(
                                         Uri.parse(uploadUrl),
                                         headers: putHeaders,
                                         body: bytes,

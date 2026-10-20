@@ -1,3 +1,4 @@
+import '/backend/api_requests/presigned_upload.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/category_picker.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_exito_programar_agenda/d_h_c_l_i_e_n_t_exito_programar_agenda_widget.dart';
@@ -15,7 +16,6 @@ import 'package:flutter/cupertino.dart';
 import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -438,7 +438,7 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
         }
 
         try {
-          final putRes = await http.put(
+          final putRes = await putPresigned(
             Uri.parse(uploadUrl),
             headers: {'Content-Type': 'image/jpeg'},
             body: photos[index].bytes,

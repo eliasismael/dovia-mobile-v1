@@ -1,3 +1,5 @@
+import '/backend/api_requests/presigned_upload.dart';
+import 'package:http/http.dart' as http;
 import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
@@ -14,7 +16,6 @@ import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.da
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
 export 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
 
@@ -195,11 +196,20 @@ class _SHOWINGRegistroDeVisita2WidgetState
           final pBytes = photos[pIndex].bytes;
 
           if (pBytes != null && uploadUrl != null) {
-            final put = await http.put(
-              Uri.parse(uploadUrl.toString()),
-              headers: {'Content-Type': 'image/jpeg'},
-              body: pBytes,
-            );
+            final http.Response put;
+            try {
+              put = await putPresigned(
+                Uri.parse(uploadUrl.toString()),
+                headers: {'Content-Type': 'image/jpeg'},
+                body: pBytes,
+              );
+            } catch (_) {
+              // Sin conexión o se venció el tiempo máximo: mismo aviso que un
+              // rechazo de S3, en vez de cortar el envío sin decir nada.
+              _showError('No se pudo subir la foto ${pIndex + 1}. Revisa tu '
+                  'conexión e intenta de nuevo.');
+              return;
+            }
             if (put.statusCode >= 300) {
               _showError('No se pudo subir la foto ${pIndex + 1} '
                   '(HTTP ${put.statusCode}).');

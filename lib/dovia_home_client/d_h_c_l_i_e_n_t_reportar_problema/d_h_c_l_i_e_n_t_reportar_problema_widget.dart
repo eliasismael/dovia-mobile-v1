@@ -1,3 +1,4 @@
+import '/backend/api_requests/presigned_upload.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -15,7 +16,6 @@ import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'd_h_c_l_i_e_n_t_reportar_problema_model.dart';
 export 'd_h_c_l_i_e_n_t_reportar_problema_model.dart';
 
@@ -140,10 +140,26 @@ class _DHCLIENTReportarProblemaWidgetState
 
   /// Adjunta la evidencia al reporte con el flujo presign → PUT → confirm. Es
   /// best-effort: el reporte ya está creado, así que un fallo de subida no debe
-  /// invalidar el reclamo.
-  Future<void> _uploadEvidence(String serviceRequestId, String reportId) async {
+  /// invalidar el reclamo. Ningún error sale de acá: si no, el cliente no veía
+  /// la confirmación y volvía a enviar un reporte que ya existía.
+  ///
+  /// Devuelve cuántos archivos no quedaron adjuntos, para avisarle al cliente.
+  Future<int> _uploadEvidence(String serviceRequestId, String reportId) async {
+    final total = _model.uploadedMedia.length;
+    try {
+      return total - await _tryUploadEvidence(serviceRequestId, reportId);
+    } catch (e) {
+      debugPrint('[Reporte] No se pudo subir la evidencia: $e');
+      return total;
+    }
+  }
+
+  /// Sube la evidencia y devuelve cuántos archivos quedaron adjuntos. Cada
+  /// archivo se sube por separado: si uno falla, los demás se confirman igual.
+  Future<int> _tryUploadEvidence(
+      String serviceRequestId, String reportId) async {
     final media = _model.uploadedMedia;
-    if (media.isEmpty) return;
+    if (media.isEmpty) return 0;
 
     final token = currentAuthenticationToken ?? '';
     final mimeTypes = <String>[];
@@ -167,12 +183,12 @@ class _DHCLIENTReportarProblemaWidgetState
       uploads: uploads,
       authToken: token,
     );
-    if (!presignRes.succeeded) return;
+    if (!presignRes.succeeded) return 0;
 
     final items = DOVIAAPIAssociateFeedbackContextGroup
         .presignDoviaHomeReportImagesCall
         .items(presignRes.jsonBody);
-    if (items == null || items.isEmpty) return;
+    if (items == null || items.isEmpty) return 0;
 
     final storageKeys = <String>[];
     for (final item in items) {
@@ -187,26 +203,32 @@ class _DHCLIENTReportarProblemaWidgetState
       final bytes = media[index].bytes;
       if (bytes == null) continue;
 
-      final putRes = await http.put(
-        Uri.parse(uploadUrl),
-        headers: {'Content-Type': mimeTypes[index]},
-        body: bytes,
-      );
-      if (putRes.statusCode >= 200 &&
-          putRes.statusCode < 300 &&
-          storageKey != null) {
-        storageKeys.add(storageKey);
+      try {
+        final putRes = await putPresigned(
+          Uri.parse(uploadUrl),
+          headers: {'Content-Type': mimeTypes[index]},
+          body: bytes,
+        );
+        if (putRes.statusCode >= 200 &&
+            putRes.statusCode < 300 &&
+            storageKey != null) {
+          storageKeys.add(storageKey);
+        }
+      } catch (e) {
+        debugPrint('[Reporte] Falló la subida del archivo $index: $e');
       }
     }
 
-    if (storageKeys.isEmpty) return;
-    await DOVIAAPIAssociateFeedbackContextGroup.confirmDoviaHomeReportImagesCall
+    if (storageKeys.isEmpty) return 0;
+    final confirmRes = await DOVIAAPIAssociateFeedbackContextGroup
+        .confirmDoviaHomeReportImagesCall
         .call(
       serviceRequestId: serviceRequestId,
       reportId: reportId,
       storageKeys: storageKeys,
       authToken: token,
     );
+    return confirmRes.succeeded ? storageKeys.length : 0;
   }
 
   Future<void> _submit() async {
@@ -221,6 +243,7 @@ class _DHCLIENTReportarProblemaWidgetState
       final visitId = DHCLIENTReportarProblemaWidget.visitId;
 
       ApiCallResponse? response;
+      var missingEvidence = 0;
       if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
         response = await DOVIAAPIAssociateFeedbackContextGroup
             .createDoviaHomeAssociateReportCall
@@ -236,7 +259,7 @@ class _DHCLIENTReportarProblemaWidgetState
               .createDoviaHomeAssociateReportCall
               .id(response.jsonBody);
           if (reportId != null && reportId.isNotEmpty) {
-            await _uploadEvidence(serviceRequestId, reportId);
+            missingEvidence = await _uploadEvidence(serviceRequestId, reportId);
           }
         }
       } else if (offerId != null && offerId.isNotEmpty) {
@@ -259,7 +282,22 @@ class _DHCLIENTReportarProblemaWidgetState
         );
       }
 
-      if (response != null && !response.succeeded) {
+      // Sin ningún id (Ej: se abrió la ruta directo o se recargó la página y
+      // se perdieron los campos estáticos) no se envió nada: no hay éxito que
+      // mostrar.
+      if (response == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'No se pudo identificar el servicio a reportar. Intenta de nuevo.'),
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!response.succeeded) {
         if (mounted) {
           final message = associateFeedbackErrorMessage(
             response,
@@ -273,6 +311,15 @@ class _DHCLIENTReportarProblemaWidgetState
       }
 
       if (!mounted) return;
+      if (missingEvidence > 0) {
+        // El reporte se envió igual; lo que falta son adjuntos.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(missingEvidence == 1
+              ? 'Tu reporte se envió, pero 1 archivo no se pudo adjuntar.'
+              : 'Tu reporte se envió, pero $missingEvidence archivos no se '
+                  'pudieron adjuntar.'),
+        ));
+      }
       await showModalBottomSheet(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,

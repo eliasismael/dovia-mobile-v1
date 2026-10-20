@@ -1,3 +1,4 @@
+import '/backend/api_requests/presigned_upload.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/core/result.dart';
 import '/domain/payment_models.dart';
@@ -17,7 +18,6 @@ import '/index.dart';
 import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -297,7 +297,14 @@ class _DHCLIENTCostoEmergenciaWidgetState
     }
 
     DHCLIENTCostoEmergenciaWidget.serviceRequestId = id;
-    await _uploadPhotos(id, token);
+    final missing = await _uploadPhotos(id, token);
+    if (missing > 0) {
+      // La emergencia quedó registrada igual; sólo faltan fotos.
+      _showError(missing == 1
+          ? 'Registramos tu emergencia, pero 1 foto no se pudo adjuntar.'
+          : 'Registramos tu emergencia, pero $missing fotos no se pudieron '
+              'adjuntar.');
+    }
     return id;
   }
 
@@ -329,9 +336,25 @@ class _DHCLIENTCostoEmergenciaWidgetState
 
   /// Sube las fotos de la emergencia a S3 (presign → PUT → confirm). Es
   /// best-effort: la solicitud ya existe, un fallo de fotos no la invalida.
-  Future<void> _uploadPhotos(String serviceRequestId, String token) async {
+  /// Por eso ningún error ni corte de red sale de acá: antes una excepción en
+  /// la subida cortaba la carga del precio y la pantalla quedaba cargando.
+  ///
+  /// Devuelve cuántas fotos no quedaron adjuntas, para avisarle al cliente.
+  Future<int> _uploadPhotos(String serviceRequestId, String token) async {
+    final total = DHCLIENTCostoEmergenciaWidget.photos.length;
+    try {
+      return total - await _tryUploadPhotos(serviceRequestId, token);
+    } catch (e) {
+      debugPrint('[Emergencia] No se pudieron subir las fotos: $e');
+      return total;
+    }
+  }
+
+  /// Sube las fotos y devuelve cuántas quedaron adjuntas. Cada foto se sube
+  /// por separado: si una falla, las demás se confirman igual.
+  Future<int> _tryUploadPhotos(String serviceRequestId, String token) async {
     final photos = DHCLIENTCostoEmergenciaWidget.photos;
-    if (photos.isEmpty) return;
+    if (photos.isEmpty) return 0;
 
     final uploads = <Map<String, dynamic>>[];
     for (var i = 0; i < photos.length; i++) {
@@ -349,11 +372,11 @@ class _DHCLIENTCostoEmergenciaWidgetState
       uploads: uploads,
       authToken: token,
     );
-    if (!presignRes.succeeded) return;
+    if (!presignRes.succeeded) return 0;
 
     final items = DOVIAAPIDoviaHomeContextGroup.presignServiceRequestImagesCall
         .items(presignRes.jsonBody);
-    if (items == null || items.isEmpty) return;
+    if (items == null || items.isEmpty) return 0;
 
     final storageKeys = <String>[];
     for (final item in items) {
@@ -368,24 +391,31 @@ class _DHCLIENTCostoEmergenciaWidgetState
       final bytes = photos[index].bytes;
       if (bytes == null) continue;
 
-      final putRes = await http.put(
-        Uri.parse(uploadUrl),
-        headers: {'Content-Type': 'image/jpeg'},
-        body: bytes,
-      );
-      if (putRes.statusCode >= 200 &&
-          putRes.statusCode < 300 &&
-          storageKey != null) {
-        storageKeys.add(storageKey);
+      try {
+        final putRes = await putPresigned(
+          Uri.parse(uploadUrl),
+          headers: {'Content-Type': 'image/jpeg'},
+          body: bytes,
+        );
+        if (putRes.statusCode >= 200 &&
+            putRes.statusCode < 300 &&
+            storageKey != null) {
+          storageKeys.add(storageKey);
+        }
+      } catch (e) {
+        debugPrint('[Emergencia] Falló la subida de la foto $index: $e');
       }
     }
 
-    if (storageKeys.isEmpty) return;
-    await DOVIAAPIDoviaHomeContextGroup.confirmServiceRequestImagesCall.call(
+    if (storageKeys.isEmpty) return 0;
+    final confirmRes = await DOVIAAPIDoviaHomeContextGroup
+        .confirmServiceRequestImagesCall
+        .call(
       serviceRequestId: serviceRequestId,
       storageKeys: storageKeys,
       authToken: token,
     );
+    return confirmRes.succeeded ? storageKeys.length : 0;
   }
 
   /// Abre el cobro de la emergencia por Recurrente
