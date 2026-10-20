@@ -77,6 +77,19 @@ class PushNotificationsService {
     _subscriptions.clear();
   }
 
+  Future<PushSyncOutcome>? _retrying;
+
+  /// Reintenta el registro si todavía no quedó hecho en esta sesión (Ej: el
+  /// primer intento falló por falta de conexión, o el permiso se dio después
+  /// desde Ajustes). Pensado para cuando la app vuelve del fondo; si ya está
+  /// registrado no hace nada, y varias llamadas seguidas comparten el intento.
+  Future<PushSyncOutcome> retryIfNotRegistered() {
+    if (!loggedIn) return Future.value(PushSyncOutcome.notLoggedIn);
+    if (_registered) return Future.value(PushSyncOutcome.registered);
+    return _retrying ??=
+        syncForCurrentSession().whenComplete(() => _retrying = null);
+  }
+
   /// Registra este dispositivo para la sesión actual.
   Future<PushSyncOutcome> syncForCurrentSession() async {
     if (!loggedIn) return PushSyncOutcome.notLoggedIn;

@@ -206,6 +206,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       refreshSessionIfStale();
       // Pudo haber llegado algo mientras la app estaba en segundo plano.
       if (loggedIn) context.read<NotificationsRepository>().refreshUnreadCount();
+      // Si el registro del dispositivo falló (sin conexión) o el permiso se
+      // dio desde Ajustes, se reintenta acá: si no, los push no llegaban
+      // hasta el próximo inicio de sesión.
+      _push.retryIfNotRegistered();
     }
   }
 

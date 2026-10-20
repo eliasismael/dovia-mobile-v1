@@ -185,6 +185,41 @@ void main() {
       expect(backend.devicePuts.last.headers['Authorization'], 'Bearer jwt-b');
     });
 
+    test('si el registro falló sin conexión, al volver a la app se reintenta',
+        () async {
+      final first = await http.runWithClient(
+        service.syncForCurrentSession,
+        () => MockClient((_) async => throw http.ClientException('sin red')),
+      );
+      expect(first, PushSyncOutcome.failed);
+      expect(service.isRegistered, isFalse);
+
+      final retry = await withBackend(service.retryIfNotRegistered);
+
+      expect(retry, PushSyncOutcome.registered);
+      expect(backend.devicePuts, hasLength(1));
+      expect(service.isRegistered, isTrue);
+    });
+
+    test('ya registrado, volver a la app no repite el registro', () async {
+      await withBackend(service.syncForCurrentSession);
+      await withBackend(service.retryIfNotRegistered);
+
+      expect(backend.devicePuts, hasLength(1));
+    });
+
+    test('si el permiso se da después desde Ajustes, se registra al volver',
+        () async {
+      push.permission = PushPermission.denied;
+      await withBackend(service.syncForCurrentSession);
+      push.permission = PushPermission.granted;
+
+      final outcome = await withBackend(service.retryIfNotRegistered);
+
+      expect(outcome, PushSyncOutcome.registered);
+      expect(backend.devicePuts, hasLength(1));
+    });
+
     test('sin permiso no registra nada', () async {
       push.permission = PushPermission.denied;
       final outcome = await withBackend(service.syncForCurrentSession);
