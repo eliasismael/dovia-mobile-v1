@@ -567,7 +567,10 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                             // ─────────────────────────────────────────────
                             if (step == 3) ...[
                               const SizedBox(height: 20.0),
-                              _Step3Content(listerName: listerName),
+                              _Step3Content(
+                                listerName: listerName,
+                                visitId: widget.visitId ?? '',
+                              ),
                             ],
 
                             // ─────────────────────────────────────────────
@@ -1107,8 +1110,9 @@ class _ContractRow extends StatelessWidget {
 }
 
 class _Step3Content extends StatelessWidget {
-  const _Step3Content({required this.listerName});
+  const _Step3Content({required this.listerName, required this.visitId});
   final String listerName;
+  final String visitId;
 
   static const Color _teal = Color(0xFF006B6B);
 
@@ -1179,7 +1183,8 @@ class _Step3Content extends StatelessWidget {
         FFButtonWidget(
           onPressed: () => showDialog(
             context: context,
-            builder: (_) => _RatingDialog(listerName: listerName),
+            builder: (_) =>
+                _RatingDialog(listerName: listerName, visitId: visitId),
           ),
           text: 'Calificar',
           options: FFButtonOptions(
@@ -1200,9 +1205,13 @@ class _Step3Content extends StatelessWidget {
   }
 }
 
+/// Calificación del Operative Lister por la visita de producción
+/// (`POST /associate-feedback/visits/{visitId}/ratings`, `OPERATIVE_LISTER`).
+/// El backend sólo guarda las estrellas: el comentario no tiene dónde ir.
 class _RatingDialog extends StatefulWidget {
-  const _RatingDialog({required this.listerName});
+  const _RatingDialog({required this.listerName, required this.visitId});
   final String listerName;
+  final String visitId;
 
   @override
   State<_RatingDialog> createState() => _RatingDialogState();
@@ -1219,6 +1228,42 @@ class _RatingDialogState extends State<_RatingDialog> {
   void dispose() {
     _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (widget.visitId.isEmpty) {
+      messenger.showSnackBar(const SnackBar(
+          content: Text('No se pudo identificar la visita a calificar.')));
+      return;
+    }
+    setState(() => _sending = true);
+    final response = await DOVIAAPIAssociateFeedbackContextGroup
+        .createVisitAssociateRatingCall
+        .call(
+      visitId: widget.visitId,
+      targetRole: 'OPERATIVE_LISTER',
+      stars: _rating.toDouble(),
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted) return;
+    setState(() => _sending = false);
+
+    if (!response.succeeded) {
+      messenger.showSnackBar(SnackBar(
+        content: Text(associateFeedbackErrorMessage(
+          response,
+          // La calificación es única por visita y rol: el 409 es el duplicado.
+          fallback: response.statusCode == 409
+              ? 'Ya calificaste esta visita.'
+              : 'No se pudo enviar la calificación. Intenta de nuevo.',
+        )),
+      ));
+      return;
+    }
+    Navigator.pop(context);
+    messenger.showSnackBar(
+        const SnackBar(content: Text('¡Gracias por tu calificación!')));
   }
 
   @override
@@ -1379,12 +1424,7 @@ class _RatingDialogState extends State<_RatingDialog> {
             FFButtonWidget(
               onPressed: _rating == 0 || _sending
                   ? null
-                  : () async {
-                      setState(() => _sending = true);
-                      // TODO: llamar API de rating cuando esté disponible
-                      await Future.delayed(const Duration(milliseconds: 600));
-                      if (context.mounted) Navigator.pop(context);
-                    },
+                  : _submit,
               text: _sending ? 'Enviando...' : 'Enviar',
               options: FFButtonOptions(
                 width: double.infinity,

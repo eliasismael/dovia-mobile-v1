@@ -222,16 +222,20 @@ class CreateOfferAssociateReportCall {
 /// POST /associate-feedback/dovia-home/services/{serviceRequestId}/ratings
 /// El servicio debe pertenecer al cliente autenticado y estar FINISHED / null.
 /// Sólo se permite una calificación por cliente + servicio (409 si se repite).
+/// Es el único endpoint de ratings que guarda un `comment` (opcional).
 class CreateDoviaHomeAssociateRatingCall {
   Future<ApiCallResponse> call({
     String? serviceRequestId = '',
     String? authToken = '',
     double? stars,
+    String? comment,
   }) async {
     final baseUrl = DOVIAAPIAssociateFeedbackContextGroup.getBaseUrl();
 
+    final trimmedComment = comment?.trim() ?? '';
     final ffApiRequestBody = jsonEncode({
       'stars': stars,
+      if (trimmedComment.isNotEmpty) 'comment': trimmedComment,
     });
 
     return ApiManager.instance.makeApiCall(

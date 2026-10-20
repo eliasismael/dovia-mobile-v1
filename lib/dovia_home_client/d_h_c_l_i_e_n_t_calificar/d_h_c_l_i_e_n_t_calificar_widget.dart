@@ -89,10 +89,8 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
 
   /// Envía la calificación.
   ///
-  /// NOTA: el comentario opcional se captura (lo exige el AC) pero **no viaja**:
-  /// los tres endpoints de ratings sólo aceptan `stars` (y `targetRole` donde
-  /// aplica), no hay campo para el texto. Queda pendiente que el backend acepte
-  /// `comment` para poder adjuntarlo; hasta entonces se descarta.
+  /// El comentario opcional sólo viaja en la calificación de Dovia Home: los
+  /// ratings de visitas y ofertas aceptan únicamente `stars` y `targetRole`.
   Future<void> _submit() async {
     final stars = _model.ratingBarValue ?? 0.0;
     if (stars < 1.0) return;
@@ -111,6 +109,7 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
             .call(
           serviceRequestId: serviceRequestId,
           stars: stars,
+          comment: _model.comentarioTextController?.text,
           authToken: token,
         );
       } else if (offerId != null && offerId.isNotEmpty) {

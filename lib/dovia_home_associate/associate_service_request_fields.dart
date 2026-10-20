@@ -444,10 +444,8 @@ double? asrClientRatingStars(Map<String, dynamic> data) {
 
 /// Comentario en texto libre que el cliente dejó con su calificación.
 ///
-/// Hoy suele venir vacío: la pantalla de calificar del cliente captura el
-/// comentario pero los endpoints de ratings sólo aceptan `stars`, así que no
-/// hay dónde persistirlo. Se lee igual para que la pantalla lo muestre en
-/// cuanto el contrato lo soporte.
+/// El detalle del asociado lo trae en `rating.comment`; es null si el cliente
+/// calificó sin comentar.
 String? asrClientRatingComment(Map<String, dynamic> data) {
   final node = _clientRatingNode(data);
   return _firstString([
