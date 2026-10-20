@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import 'dart:async';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -772,7 +773,8 @@ class _ListerCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(50.0),
             child: photoUrl.isNotEmpty
-                ? Image.network(photoUrl,
+                ? Image.network(
+                    photoUrl,
                     width: 72,
                     height: 72,
                     fit: BoxFit.cover,
@@ -780,7 +782,9 @@ class _ListerCard extends StatelessWidget {
                         'assets/images/nahid_photo.png',
                         width: 72,
                         height: 72,
-                        fit: BoxFit.cover))
+                        fit: BoxFit.cover),
+                    cacheWidth: networkImageCacheWidth(width: 72, height: 72),
+                  )
                 : Image.asset('assets/images/nahid_photo.png',
                     width: 72, height: 72, fit: BoxFit.cover),
           ),
@@ -902,6 +906,7 @@ class _HQCard extends StatelessWidget {
                       height: 72,
                       fit: BoxFit.cover,
                     ),
+                    cacheWidth: networkImageCacheWidth(width: 72, height: 72),
                   )
                 : Image.asset(
                     'assets/images/nahid_photo.png',

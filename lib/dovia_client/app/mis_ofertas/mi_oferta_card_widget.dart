@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/domain/client_offer_models.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -177,6 +178,7 @@ class MiOfertaCardWidget extends StatelessWidget {
                 offer.propertyImageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => _placeholderImage(),
+                cacheWidth: networkImageCacheWidth(),
               )
             : _placeholderImage(),
       ),

@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/domain/legal_closure_models.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -142,6 +143,7 @@ class LegalProfessionalCardWidget extends StatelessWidget {
                 professional.avatarUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => _avatarPlaceholder(),
+                cacheWidth: networkImageCacheWidth(width: 72, height: 72),
               )
             : _avatarPlaceholder(),
       ),

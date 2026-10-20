@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -522,6 +523,8 @@ class _SHOWINGRegistroDeVisitaWidgetState
                           height: 130.0,
                           fit: BoxFit.cover,
                         ),
+                        cacheWidth:
+                            networkImageCacheWidth(width: 80.0, height: 130.0),
                       )
                     : Image.asset(
                         'assets/images/casa_card_sobreMiVisita.png',

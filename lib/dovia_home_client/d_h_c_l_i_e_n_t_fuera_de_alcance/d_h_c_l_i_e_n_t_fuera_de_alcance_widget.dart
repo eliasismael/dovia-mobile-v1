@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -647,6 +648,10 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                                                         .secondaryText,
                                                   ),
                                                 ),
+                                                cacheWidth:
+                                                    networkImageCacheWidth(
+                                                        width: 90.0,
+                                                        height: 90.0),
                                               ),
                                             ))
                                         .toList(),

@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
@@ -537,6 +538,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
       height: 139.0,
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) => fallback,
+      cacheWidth: networkImageCacheWidth(width: double.infinity, height: 139.0),
     );
   }
 

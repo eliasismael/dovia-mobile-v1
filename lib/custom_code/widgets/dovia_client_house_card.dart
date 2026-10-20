@@ -1,4 +1,5 @@
 // Automatic FlutterFlow imports
+import '/core/network_image_size.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -214,6 +215,7 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
         url,
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => fallback(),
+        cacheWidth: networkImageCacheWidth(width: widget.width ?? 320),
       );
     }
     return Image.asset(

@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_client/checkout_launcher.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_material_aprobado/d_h_c_l_i_e_n_t_material_aprobado_widget.dart';
@@ -697,6 +698,8 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                       height: 100.0,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _photoPlaceholder(),
+                      cacheWidth:
+                          networkImageCacheWidth(width: 100.0, height: 100.0),
                     ),
                   ),
                 ),

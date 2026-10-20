@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
@@ -176,8 +177,8 @@ class _SHOWINGRegistroDeVisita2WidgetState
       );
 
       if (!presignRes.succeeded) {
-        _showError(_apiError(
-            presignRes, 'No se pudo preparar la subida de fotos'));
+        _showError(
+            _apiError(presignRes, 'No se pudo preparar la subida de fotos'));
         return;
       }
 
@@ -448,6 +449,10 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                                       height: 200.0,
                                                       fit: BoxFit.cover,
                                                     ),
+                                                    cacheWidth:
+                                                        networkImageCacheWidth(
+                                                            width: 200.0,
+                                                            height: 200.0),
                                                   )
                                                 : Image.asset(
                                                     'assets/images/casa_card_sobreMiVisita.png',

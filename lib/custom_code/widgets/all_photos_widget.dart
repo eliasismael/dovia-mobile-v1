@@ -1,6 +1,7 @@
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
+import '/core/network_image_size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '/shared_components/carousel_arrow/carousel_arrow_button.dart';
@@ -504,6 +505,7 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
                       Icons.broken_image,
                       size: 40,
                       color: Colors.grey),
+                  cacheWidth: networkImageCacheWidth(width: 260, height: 200),
                 )
               : Image.asset(
                   imagePath,

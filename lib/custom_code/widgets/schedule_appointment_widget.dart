@@ -392,95 +392,92 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
 
         // Pending visit modal
         if (_showPendingModal)
-          ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          // Fondo oscuro sin desenfoque: el blur es de lo más pesado para
+          // la GPU de un celular viejo.
+          Container(
+            color: Colors.black.withValues(alpha: 0.5),
+            child: Center(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.35),
-                child: Center(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 32),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 28),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 48,
+                      color: primaryColor,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          size: 48,
-                          color: primaryColor,
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Ya tienes una visita pendiente o aprobada para este inmueble.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: darkTextColor,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Visualiza y gestiona tu visita en "Mis visitas".',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: mediumGrey,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          widget.onNavigateToVisits?.call();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Ya tienes una visita pendiente o aprobada para este inmueble.',
-                          textAlign: TextAlign.center,
+                        child: const Text(
+                          'Ver mis visitas',
                           style: TextStyle(
                             fontFamily: 'Public Sans',
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: darkTextColor,
-                            height: 1.5,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Visualiza y gestiona tu visita en "Mis visitas".',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Public Sans',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: mediumGrey,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              widget.onNavigateToVisits?.call();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: const Text(
-                              'Ver mis visitas',
-                              style: TextStyle(
-                                fontFamily: 'Public Sans',
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text(
-                            'Volver al perfil del inmueble',
-                            style: TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: mediumGrey,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'Volver al perfil del inmueble',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: mediumGrey,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

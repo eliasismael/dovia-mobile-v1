@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/core/external_links.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -321,6 +322,8 @@ class _DHCLIENTProveedorCardWidgetState
                   height: 100.0,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => _defaultAvatar(),
+                  cacheWidth:
+                      networkImageCacheWidth(width: 100.0, height: 100.0),
                 )
               : _defaultAvatar(),
         ),

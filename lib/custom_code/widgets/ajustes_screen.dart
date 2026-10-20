@@ -1,6 +1,7 @@
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
+import '/core/network_image_size.dart';
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -151,6 +152,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
                                         Icons.person,
                                         size: 40,
                                         color: _textSecondary),
+                                    cacheWidth: networkImageCacheWidth(
+                                        width: 84, height: 84),
                                   )
                                 : Container(
                                     width: 84,

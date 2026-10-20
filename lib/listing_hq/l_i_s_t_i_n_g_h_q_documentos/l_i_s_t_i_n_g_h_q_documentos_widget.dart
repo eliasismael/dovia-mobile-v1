@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
@@ -786,6 +787,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                     height: 52,
                     fit: BoxFit.cover,
                   ),
+                  cacheWidth: networkImageCacheWidth(width: 52, height: 52),
                 )
               : Image.asset(
                   'assets/images/casa_card_sobreMiVisita.png',

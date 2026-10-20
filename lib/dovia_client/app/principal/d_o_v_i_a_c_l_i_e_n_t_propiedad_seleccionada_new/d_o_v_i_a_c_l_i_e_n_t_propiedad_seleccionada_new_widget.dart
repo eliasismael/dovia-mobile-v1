@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/shared_components/carousel_arrow/carousel_arrow_button.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/dovia_client/app/principal/todas_las_fotos/todas_las_fotos_widget.dart';
@@ -436,6 +437,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                             ? child
                             : Container(color: const Color(0xFFE9EEEE)),
                     errorBuilder: (_, __, ___) => fallback(),
+                    cacheWidth: networkImageCacheWidth(),
                   ),
           ),
         ),
@@ -518,10 +520,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         barrierColor: Colors.black.withOpacity(0.7),
         transitionDuration: const Duration(milliseconds: 300),
         pageBuilder: (context, anim1, anim2) {
-          return BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: Recorrido360Modal(url: url),
-          );
+          // Sin desenfoque: el fondo ya oscurece al 70 % y el blur encima del
+          // visor 360 traba los celulares viejos.
+          return Recorrido360Modal(url: url);
         },
         transitionBuilder: (context, anim1, anim2, child) {
           return FadeTransition(
@@ -1277,7 +1278,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
 
                                                   if (hasPending) {
                                                     // Show pending visit modal directly — skip the scheduling form
-                                                    if (!context.mounted) return;
+                                                    if (!context.mounted)
+                                                      return;
                                                     await showDialog(
                                                       context: context,
                                                       barrierColor: Colors.black
@@ -1310,7 +1312,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                                                     );
                                                   } else {
                                                     // No pending visit — open the scheduling form
-                                                    if (!context.mounted) return;
+                                                    if (!context.mounted)
+                                                      return;
                                                     await showDialog(
                                                       context: context,
                                                       builder: (dialogContext) {
@@ -1542,8 +1545,8 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                       const Align(
                         alignment: AlignmentDirectional(1.0, 0.0),
                         child: Padding(
-                          padding:
-                              EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 12.0),
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 15.0, 12.0),
                           child: FixedDoviaIconWidget(),
                         ),
                       ),
@@ -1581,98 +1584,96 @@ class _PendingVisitDialog extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE8F5F5),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.event_available_rounded,
-                      color: Color(0xFF007376),
-                      size: 34,
-                    ),
+          // Sin desenfoque: la tarjeta es blanca opaca y no se veía.
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8F5F5),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Ya tienes una visita en proceso',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF00444B),
-                    ),
+                  child: const Icon(
+                    Icons.event_available_rounded,
+                    color: Color(0xFF007376),
+                    size: 34,
                   ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Ya solicitaste o tienes confirmada una cita para esta propiedad. Puedes revisar el estado en tu sección de visitas.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF666666),
-                      height: 1.5,
-                    ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Ya tienes una visita en proceso',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF00444B),
                   ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: onViewVisits,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF007376),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Ya solicitaste o tienes confirmada una cita para esta propiedad. Puedes revisar el estado en tu sección de visitas.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Public Sans',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF666666),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onViewVisits,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF007376),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Ver mis visitas',
-                        style: TextStyle(
-                          fontFamily: 'Public Sans',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Ver mis visitas',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: onDismiss,
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF007376),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text(
-                        'Volver a la propiedad',
-                        style: TextStyle(
-                          fontFamily: 'Public Sans',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: onDismiss,
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF007376),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text(
+                      'Volver a la propiedad',
+                      style: TextStyle(
+                        fontFamily: 'Public Sans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

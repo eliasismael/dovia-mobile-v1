@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -89,6 +90,7 @@ class _LegalAssociateCardWidgetState extends State<LegalAssociateCardWidget> {
                 url,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => fallback,
+                cacheWidth: networkImageCacheWidth(width: 92, height: 92),
               ),
       ),
     );

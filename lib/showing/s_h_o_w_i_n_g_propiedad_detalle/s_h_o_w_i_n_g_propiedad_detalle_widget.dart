@@ -240,10 +240,9 @@ class _SHOWINGPropiedadDetalleWidgetState
         barrierColor: Colors.black.withOpacity(0.7),
         transitionDuration: const Duration(milliseconds: 300),
         pageBuilder: (context, anim1, anim2) {
-          return BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: Recorrido360Modal(url: url),
-          );
+          // Sin desenfoque: el fondo ya oscurece al 70 % y el blur encima del
+          // visor 360 traba los celulares viejos.
+          return Recorrido360Modal(url: url);
         },
         transitionBuilder: (context, anim1, anim2, child) {
           return FadeTransition(

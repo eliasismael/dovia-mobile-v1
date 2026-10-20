@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
@@ -664,6 +665,7 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
             height: 90.0,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => _photoPlaceholder(),
+            cacheWidth: networkImageCacheWidth(width: 90.0, height: 90.0),
           ),
         ),
       ),

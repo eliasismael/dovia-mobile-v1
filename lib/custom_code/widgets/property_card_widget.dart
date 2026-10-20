@@ -1,6 +1,7 @@
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
+import '/core/network_image_size.dart';
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -148,6 +149,7 @@ class PropertyCardWidget extends StatelessWidget {
             if (loadingProgress == null) return child;
             return _buildImagePlaceholder();
           },
+          cacheWidth: networkImageCacheWidth(),
         );
       } else {
         return Image.asset(

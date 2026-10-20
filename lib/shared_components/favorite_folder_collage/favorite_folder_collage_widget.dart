@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import 'package:flutter/material.dart';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -80,6 +81,8 @@ class _FavoriteFolderCollageWidgetState
         width: double.infinity,
         height: double.infinity,
         errorBuilder: (_, __, ___) => Container(color: const Color(0xFFE9EFF2)),
+        cacheWidth: networkImageCacheWidth(
+            width: double.infinity, height: double.infinity),
       );
 
   @override

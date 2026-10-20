@@ -2,6 +2,10 @@ import '/auth/registration_progress.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'
+    show LicenseEntry, LicenseEntryWithLineBreaks, LicenseRegistry;
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -21,8 +25,22 @@ import 'notifications/push_notifications_service.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'repositories/index.dart';
 
+/// Licencias OFL de las fuentes incluidas en `assets/google_fonts`.
+Stream<LicenseEntry> _fontLicenses() async* {
+  for (final font in ['inter', 'publicsans', 'raleway']) {
+    final text =
+        await rootBundle.loadString('assets/google_fonts/OFL-$font.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], text);
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Las fuentes vienen dentro de la app (assets/google_fonts): sin esto se
+  // bajaban de internet la primera vez, lo que en celulares viejos o con mala
+  // señal demoraba el arranque y hacía saltar el texto de fuente.
+  GoogleFonts.config.allowRuntimeFetching = false;
+  LicenseRegistry.addLicense(_fontLicenses);
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 

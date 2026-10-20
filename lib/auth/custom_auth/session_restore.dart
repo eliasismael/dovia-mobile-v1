@@ -14,10 +14,22 @@ import 'token_refresher.dart';
 /// sesión, para no desloguear a quien abre la app sin conexión.
 Future<void> restoreSession() async {
   if (!loggedIn) return;
-  // Con mala señal no se frena el splash más de unos segundos: la renovación
-  // sigue en segundo plano y, si una llamada da 401 antes, la cubre igual.
-  await refreshSession()
-      .timeout(const Duration(seconds: 8), onTimeout: () => null);
+  final expiration = authManager.tokenExpiration;
+  final stillValid = expiration != null &&
+      expiration.isAfter(DateTime.now().add(const Duration(minutes: 5)));
+  if (stillValid) {
+    // Con el token todavía vigente la app abre al instante, sin esperar a la
+    // red. Se renueva igual en segundo plano: así llegan en segundos los
+    // datos nuevos del token (un rol recién aprobado) y una cuenta
+    // deshabilitada se detecta al abrir, como antes.
+    unawaited(refreshSession());
+  } else {
+    // Con mala señal no se frena el splash más de unos segundos: la
+    // renovación sigue en segundo plano y, si una llamada da 401 antes, la
+    // cubre igual.
+    await refreshSession()
+        .timeout(const Duration(seconds: 8), onTimeout: () => null);
+  }
   // No frena el arranque: el uid solo hace falta más adelante.
   unawaited(_backfillUid());
 }

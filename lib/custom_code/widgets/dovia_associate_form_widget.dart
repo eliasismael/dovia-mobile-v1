@@ -1,4 +1,5 @@
 // Automatic FlutterFlow imports
+import '/core/network_image_size.dart';
 import '/core/api_error.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 // Imports other custom widgets
@@ -983,6 +984,8 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
                       child: const Icon(Icons.insert_drive_file_outlined,
                           size: 28, color: aquaColor),
                     ),
+                    cacheWidth: networkImageCacheWidth(
+                        width: double.infinity, height: 160),
                   ),
                 ),
                 Positioned(

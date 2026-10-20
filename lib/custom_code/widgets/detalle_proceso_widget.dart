@@ -1,4 +1,5 @@
 // Automatic FlutterFlow imports
+import '/core/network_image_size.dart';
 import '/backend/schema/structs/index.dart';
 // Imports other custom widgets
 // Imports custom functions
@@ -1139,6 +1140,7 @@ class _DetalleProcesoWidgetState extends State<DetalleProcesoWidget> {
           size: 50,
           color: DetalleProcesoWidget.aqua60Color,
         ),
+        cacheWidth: networkImageCacheWidth(width: 100, height: 100),
       );
     } else {
       return Image.asset(

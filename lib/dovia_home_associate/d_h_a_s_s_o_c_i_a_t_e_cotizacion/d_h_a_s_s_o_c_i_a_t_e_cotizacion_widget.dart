@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/dovia_home_associate/associate_nav.dart';
 import 'dart:async';
@@ -521,6 +522,7 @@ class _DHASSOCIATECotizacionWidgetState
                 color: FlutterFlowTheme.of(context).secondaryText,
               ),
             ),
+            cacheWidth: networkImageCacheWidth(width: 92.0, height: 92.0),
           ),
         ),
       ),

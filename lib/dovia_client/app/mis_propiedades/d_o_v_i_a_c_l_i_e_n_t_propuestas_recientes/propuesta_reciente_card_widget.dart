@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/domain/owner_proposal_models.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -139,6 +140,7 @@ class PropuestaRecienteCardWidget extends StatelessWidget {
                 proposal.propertyImageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => _placeholderImage(),
+                cacheWidth: networkImageCacheWidth(),
               )
             : _placeholderImage(),
       ),

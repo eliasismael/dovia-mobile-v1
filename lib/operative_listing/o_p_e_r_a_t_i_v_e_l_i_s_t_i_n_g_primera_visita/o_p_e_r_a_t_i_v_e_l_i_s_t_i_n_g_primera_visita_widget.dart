@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import 'dart:async';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -524,6 +525,10 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (_, __, ___) =>
                                                       _avatarPlaceholder(),
+                                                  cacheWidth:
+                                                      networkImageCacheWidth(
+                                                          width: 70,
+                                                          height: 70),
                                                 )
                                               : _avatarPlaceholder(),
                                         ),

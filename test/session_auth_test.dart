@@ -124,6 +124,38 @@ void main() {
       expect(currentUserUid, 'user-desde-perfil');
     });
 
+    test('con el token vigente abre sin esperar a la red y renueva después',
+        () async {
+      await _storedSession(
+          expiration: DateTime.now().add(const Duration(minutes: 40)));
+      final server = Completer<http.Response>();
+      await http.runWithClient(
+        () async {
+          // El refresh queda colgado: restoreSession igual termina.
+          await restoreSession()
+              .timeout(const Duration(seconds: 1), onTimeout: () {
+            fail('restoreSession esperó a la red con el token vigente');
+          });
+          expect(authManager.authenticationToken, 'token-viejo');
+
+          server.complete(_refreshOk('token-nuevo'));
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        },
+        () => MockClient((req) => server.future),
+      );
+      expect(authManager.authenticationToken, 'token-nuevo');
+    });
+
+    test('con el token por vencer lo renueva al abrir', () async {
+      await _storedSession(
+          expiration: DateTime.now().add(const Duration(minutes: 2)));
+      await http.runWithClient(
+        () => restoreSession(),
+        () => MockClient((req) async => _refreshOk('token-nuevo')),
+      );
+      expect(authManager.authenticationToken, 'token-nuevo');
+    });
+
     test('sin conexión no cierra la sesión', () async {
       await _storedSession();
       await http.runWithClient(

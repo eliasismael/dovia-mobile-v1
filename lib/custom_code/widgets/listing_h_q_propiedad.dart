@@ -1,6 +1,7 @@
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
+import '/core/network_image_size.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1354,6 +1355,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                         const Icon(Icons.broken_image_outlined,
                             size: 24, color: Color(0xFF9E9E9E)),
                       ),
+                      cacheWidth: networkImageCacheWidth(),
                     )
                   : Image.file(File(file.path), fit: BoxFit.cover),
             ),

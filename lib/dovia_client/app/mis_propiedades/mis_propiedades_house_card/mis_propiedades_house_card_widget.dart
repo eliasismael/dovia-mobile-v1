@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -152,6 +153,8 @@ class _MisPropiedadesHouseCardWidgetState
                                         height: 108.0,
                                         fit: BoxFit.cover,
                                       ),
+                                      cacheWidth: networkImageCacheWidth(
+                                          width: 72.0, height: 108.0),
                                     )
                                   : Image.asset(
                                       'assets/images/casa_card_sobreMiVisita.png',

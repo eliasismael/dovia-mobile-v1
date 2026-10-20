@@ -1,6 +1,7 @@
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
+import '/core/network_image_size.dart';
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -263,6 +264,8 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
                                   color: inputPlaceholder,
                                 );
                               },
+                              cacheWidth:
+                                  networkImageCacheWidth(width: 76, height: 76),
                             )
                           : const Icon(
                               Icons.person,

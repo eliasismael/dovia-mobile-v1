@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/dovia_home_associate/associate_current_job.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_associate/associate_nav.dart';
@@ -422,6 +423,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                         color: FlutterFlowTheme.of(context).secondaryText,
                       ),
                     ),
+                    cacheWidth:
+                        networkImageCacheWidth(width: 92.0, height: 92.0),
                   ),
                 ),
               ),

@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/shared_components/favorite_folder_collage/favorite_folder_collage_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -78,6 +79,7 @@ class _TusFavoritosCarpetasModalWidgetState
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) => Image.asset(fallback,
           width: width, height: height, fit: BoxFit.cover),
+      cacheWidth: networkImageCacheWidth(width: width, height: height),
     );
   }
 
@@ -745,7 +747,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                         .invalidate();
                                                                     if (!removeResult
                                                                         .succeeded) {
-                                                                      if (!context.mounted) return;
+                                                                      if (!context
+                                                                          .mounted)
+                                                                        return;
                                                                       await showDialog(
                                                                         context:
                                                                             context,
@@ -833,7 +837,9 @@ class _TusFavoritosCarpetasModalWidgetState
                                                                           true;
                                                                       // Sin aviso: el ícono de la carpeta ya muestra que quedó guardada.
                                                                     } else {
-                                                                      if (!context.mounted) return;
+                                                                      if (!context
+                                                                          .mounted)
+                                                                        return;
                                                                       await showDialog(
                                                                         context:
                                                                             context,

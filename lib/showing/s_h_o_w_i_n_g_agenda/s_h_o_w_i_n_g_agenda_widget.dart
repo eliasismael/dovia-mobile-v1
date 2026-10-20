@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
@@ -634,6 +635,8 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                         height: 100.0,
                         fit: BoxFit.cover,
                       ),
+                      cacheWidth:
+                          networkImageCacheWidth(width: 100.0, height: 100.0),
                     )
                   : Image.asset(
                       'assets/images/casa_card_sobreMiVisita.png',

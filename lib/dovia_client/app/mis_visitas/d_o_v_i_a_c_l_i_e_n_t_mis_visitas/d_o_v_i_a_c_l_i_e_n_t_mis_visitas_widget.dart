@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -817,6 +818,8 @@ class _VisitCardState extends State<_VisitCard> {
                   height: 95,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  cacheWidth: networkImageCacheWidth(
+                      width: double.infinity, height: 95),
                 ),
               ),
               const SizedBox(height: 8),
@@ -1024,6 +1027,9 @@ class _VerMasScreen extends StatefulWidget {
 }
 
 class _VerMasScreenState extends State<_VerMasScreen> {
+  /// Tarjetas que animan su entrada: las que entran en la primera pantalla.
+  static const _animatedCards = 8;
+
   late final List<dynamic> items = List.of(widget.items);
 
   String get title => widget.title;
@@ -1052,25 +1058,44 @@ class _VerMasScreenState extends State<_VerMasScreen> {
                 ),
                 Expanded(
                   child: LayoutBuilder(builder: (context, constraints) {
-                    // Dos columnas; cada tarjeta mide lo que ocupa su contenido.
+                    // Dos columnas; cada tarjeta mide lo que ocupa su contenido
+                    // y cada fila, lo que su tarjeta más alta.
                     final cardWidth = (constraints.maxWidth - 32 - 10) / 2;
-                    return SingleChildScrollView(
+                    Widget card(int index) {
+                      final item = SizedBox(
+                        width: cardWidth,
+                        child: _buildItem(items[index]),
+                      );
+                      // Solo las que se ven al abrir entran desde la
+                      // izquierda, una tras otra; animarlas todas trababa los
+                      // celulares viejos con muchas visitas.
+                      if (index >= _animatedCards) return item;
+                      return _SlideInFromLeft(
+                        delay: Duration(milliseconds: 90 * index),
+                        child: item,
+                      );
+                    }
+
+                    // Por filas y con builder: solo se arman (y cargan su
+                    // foto) las tarjetas que están en pantalla.
+                    final rows = (items.length + 1) ~/ 2;
+                    return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
-                      child: Wrap(
-                        spacing: 10,
-                        runSpacing: 14,
-                        children: List.generate(items.length, (index) {
-                          final v = items[index];
-                          // Cada tarjeta entra desde la izquierda, una tras otra.
-                          return _SlideInFromLeft(
-                            delay: Duration(milliseconds: 90 * index),
-                            child: SizedBox(
-                              width: cardWidth,
-                              child: _buildItem(v),
-                            ),
-                          );
-                        }),
-                      ),
+                      itemCount: rows,
+                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      itemBuilder: (context, row) {
+                        final first = row * 2;
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            card(first),
+                            if (first + 1 < items.length) ...[
+                              const SizedBox(width: 10),
+                              card(first + 1),
+                            ],
+                          ],
+                        );
+                      },
                     );
                   }),
                 ),

@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar/d_h_a_s_s_o_c_i_a_t_e_trabajo_a_realizar_widget.dart';
 import '/dovia_home_associate/associate_current_job.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
@@ -764,13 +765,18 @@ class _DHASSOCIATETuTrabajoWidgetState
                                                     width: 92.0,
                                                     height: 92.0,
                                                     fit: BoxFit.cover,
-                                                    errorBuilder: (_, __, ___) =>
-                                                        Container(
+                                                    errorBuilder:
+                                                        (_, __, ___) =>
+                                                            Container(
                                                       width: 92.0,
                                                       height: 92.0,
                                                       color: const Color(
                                                           0xFFEFEFEF),
                                                     ),
+                                                    cacheWidth:
+                                                        networkImageCacheWidth(
+                                                            width: 92.0,
+                                                            height: 92.0),
                                                   ),
                                                 ),
                                             ].divide(

@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -328,6 +329,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                     p.image,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => _placeholder(),
+                    cacheWidth: networkImageCacheWidth(),
                   )
                 : _placeholder(),
           ),

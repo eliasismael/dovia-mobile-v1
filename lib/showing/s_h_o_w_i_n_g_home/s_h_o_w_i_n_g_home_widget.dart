@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
@@ -799,6 +800,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                 height: 100.0,
                 fit: BoxFit.cover,
               ),
+              cacheWidth: networkImageCacheWidth(width: 100.0, height: 100.0),
             )
           : Image.asset(
               'assets/images/casa_card_sobreMiVisita.png',

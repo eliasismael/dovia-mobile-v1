@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -121,6 +122,12 @@ class _DOVIACLIENTVisitaCardWidgetState
                                     child: const Icon(Icons.home_outlined,
                                         color: Colors.grey),
                                   ),
+                                  cacheWidth: networkImageCacheWidth(
+                                      width: MediaQuery.sizeOf(context).width *
+                                          1.0,
+                                      height:
+                                          MediaQuery.sizeOf(context).height *
+                                              1.0),
                                 )
                               : Image.asset(
                                   'assets/images/casa_card_sobreMiVisita.png',

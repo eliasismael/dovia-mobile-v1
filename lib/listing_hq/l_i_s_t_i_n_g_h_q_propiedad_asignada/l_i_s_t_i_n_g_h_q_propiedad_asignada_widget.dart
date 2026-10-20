@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -694,6 +695,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
       height: size,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => placeholder(),
+      cacheWidth: networkImageCacheWidth(width: size, height: size),
     );
   }
 

@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
@@ -585,6 +586,7 @@ Widget _thumbnail(String imageUrl) {
               imageUrl,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => placeholder(),
+              cacheWidth: networkImageCacheWidth(width: 72, height: 100),
             )
           : placeholder(),
     ),

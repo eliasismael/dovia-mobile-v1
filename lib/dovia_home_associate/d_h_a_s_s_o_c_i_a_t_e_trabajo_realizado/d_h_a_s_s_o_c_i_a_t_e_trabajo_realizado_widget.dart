@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import '/shared_components/status_bar_clip/status_bar_clip.dart';
 import '/dovia_home_associate/associate_nav.dart';
 import '/auth/custom_auth/auth_util.dart';
@@ -317,6 +318,7 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
               size: 28.0,
             ),
           ),
+          cacheWidth: networkImageCacheWidth(width: 136.0, height: 136.0),
         ),
       );
 

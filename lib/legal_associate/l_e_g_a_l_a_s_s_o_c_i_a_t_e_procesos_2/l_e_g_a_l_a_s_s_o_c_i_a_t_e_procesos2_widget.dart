@@ -1,3 +1,4 @@
+import '/core/network_image_size.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -1491,6 +1492,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
                     fadeInDuration: Duration.zero,
                     placeholder: (_, __) => Center(child: _spinner()),
                     errorWidget: (_, __, ___) => _fileThumb(d),
+                    memCacheWidth: networkImageCacheWidth(),
                   )
                 else
                   _fileThumb(d),
