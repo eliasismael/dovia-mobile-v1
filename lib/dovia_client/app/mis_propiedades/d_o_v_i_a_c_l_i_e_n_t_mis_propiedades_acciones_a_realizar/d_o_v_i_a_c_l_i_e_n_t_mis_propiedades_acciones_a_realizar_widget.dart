@@ -89,7 +89,7 @@ class _DOVIACLIENTMisPropiedadesAccionesARealizarWidgetState
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 20.0, 0.0, 0.0),
                               child: Text(
-                                '¿Qué quieres hacer con tu propiedad?',
+                                '¿Qué te gustaría hacer?',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -115,7 +115,7 @@ class _DOVIACLIENTMisPropiedadesAccionesARealizarWidgetState
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 8.0, 0.0, 0.0),
                               child: Text(
-                                'Selecciona cómo deseas comercializar. Puedes elegir una o ambas opciones',
+                                'Puedes seleccionar ambas',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -232,7 +232,7 @@ class _DOVIACLIENTMisPropiedadesAccionesARealizarWidgetState
                             model: _model.primaryButtonModel3,
                             updateCallback: () => safeSetState(() {}),
                             child: PrimaryButtonWidget(
-                              text: 'Aceptar',
+                              text: 'Continuar',
                               onTap: () async {
                                 context.pushNamed(
                                   DOVIACLIENTMisPropiedadesVenderRentarWidget

@@ -191,7 +191,9 @@ class PropertiesRepository extends ChangeNotifier {
     return Success(rawData);
   }
 
-  /// Gets the publishable zones.
+  /// Zonas donde se puede publicar (`GET /properties/publishable-zones`).
+  /// La respuesta trae el array en `data`; cada zona tiene `id`, `name`,
+  /// `cityOrPlace` e `isActive`.
   Future<Result<List<dynamic>>> getPublishableZones() async {
     final token = currentAuthenticationToken ?? '';
     final response =
@@ -203,7 +205,9 @@ class PropertiesRepository extends ChangeNotifier {
       return Failure('Error al cargar zonas de publicación',
           statusCode: response.statusCode);
     }
-    return Success(response.jsonBody as List? ?? []);
+    final body = response.jsonBody;
+    final data = body is Map ? body['data'] : body;
+    return Success(data is List ? data : const []);
   }
 
   /// Changes the status of a property.

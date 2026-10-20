@@ -12,12 +12,8 @@ class DOVIAAPIPropertyContextGroup {
       UploadPropertyOwnerIDDocumentCall();
   static UploadPropertyCertificationCall uploadPropertyCertificationCall =
       UploadPropertyCertificationCall();
-  static CreatePropertyBasicSALEAndRENTCall createPropertyBasicSALEAndRENTCall =
-      CreatePropertyBasicSALEAndRENTCall();
-  static CreatePropertyBasicRENTCall createPropertyBasicRENTCall =
-      CreatePropertyBasicRENTCall();
-  static CreatePropertyBasicSALECall createPropertyBasicSALECall =
-      CreatePropertyBasicSALECall();
+  static CreatePropertyBasicCall createPropertyBasicCall =
+      CreatePropertyBasicCall();
   static ListPropertiesCall listPropertiesCall = ListPropertiesCall();
   static GetPropertiesForMapCall getPropertiesForMapCall =
       GetPropertiesForMapCall();
@@ -40,6 +36,10 @@ class DOVIAAPIPropertyContextGroup {
       PresignPropertyImagesCall();
   static ConfirmPropertyImagesCall confirmPropertyImagesCall =
       ConfirmPropertyImagesCall();
+  static PresignPropertyDocumentsCall presignPropertyDocumentsCall =
+      PresignPropertyDocumentsCall();
+  static ConfirmPropertyDocumentsCall confirmPropertyDocumentsCall =
+      ConfirmPropertyDocumentsCall();
 }
 
 class UploadPropertyOwnerIDDocumentCall {
@@ -101,266 +101,24 @@ class UploadPropertyCertificationCall {
   }
 }
 
-class CreatePropertyBasicSALEAndRENTCall {
+/// `POST /properties/basic`: crea la propiedad en DRAFT. El body lo arma
+/// `buildCreatePropertyBody` (venta, renta o ambas y la titularidad).
+class CreatePropertyBasicCall {
   Future<ApiCallResponse> call({
     String? authToken = '',
-    String? name = '',
-    String? address = '',
-    double? longitude,
-    double? latitude,
-    String? finca = '',
-    String? follio = '',
-    String? libro = '',
-    double? salePrice,
-    double? maintenanceFee,
-    double? singlePropertyTax,
-    double? monthlyRent,
-    int? minimumTimeRent,
-    String? othersRent = '',
-    String? allowedUses = '',
-    String? prohibitedUses = '',
-    String? availableFrom = '',
-    bool? isCompanyOwned,
-    String? companyName = '',
-    String? legalRepresentative = '',
+    required Map<String, dynamic> body,
   }) async {
     final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
 
-    Map<String, dynamic> bodyRaw = {
-      "listingType": ["SALE", "RENT"],
-      "name": name,
-      "address": address,
-      "geoLocation": {"longitude": longitude, "latitude": latitude},
-      "saleInfo": {
-        if (salePrice != null) "salePrice": salePrice,
-        if (maintenanceFee != null) "maintenanceFee": maintenanceFee,
-        if (singlePropertyTax != null) "singlePropertyTax": singlePropertyTax
-      },
-      "rentInfo": {
-        if (monthlyRent != null) "monthlyRent": monthlyRent,
-        "rentalConditions": {
-          if (minimumTimeRent != null) "minimumTime": minimumTimeRent,
-          if (allowedUses?.isNotEmpty == true) "allowedUses": allowedUses,
-          if (prohibitedUses?.isNotEmpty == true)
-            "prohibitedUses": prohibitedUses,
-          if (availableFrom?.isNotEmpty == true) "availableFrom": availableFrom,
-          if (othersRent?.isNotEmpty == true) "others": othersRent
-        }
-      },
-    };
-
-    if (finca?.isNotEmpty == true ||
-        follio?.isNotEmpty == true ||
-        libro?.isNotEmpty == true) {
-      bodyRaw["legalInfo"] = {
-        if (finca?.isNotEmpty == true) "finca": finca,
-        if (follio?.isNotEmpty == true) "folio": follio,
-        if (libro?.isNotEmpty == true) "libro": libro,
-      };
-    }
-
-    final effectiveLegalRep =
-        (legalRepresentative != null && legalRepresentative.isNotEmpty)
-            ? legalRepresentative
-            : companyName;
-
-    if (isCompanyOwned == true) {
-      bodyRaw["ownership"] = {
-        "isCompanyOwned": true,
-        "companyName": companyName,
-        "legalRepresentative": effectiveLegalRep ?? ''
-      };
-    } else {
-      bodyRaw["ownership"] = {
-        "isCompanyOwned": false,
-        "legalRepresentative": effectiveLegalRep ?? ''
-      };
-    }
-
-    final ffApiRequestBody = jsonEncode(bodyRaw);
     return ApiManager.instance.makeApiCall(
-      callName: 'Create Property Basic SALE and RENT',
+      callName: 'Create Property Basic',
       apiUrl: '$baseUrl/properties/basic',
       callType: ApiCallType.POST,
       headers: {
         'Authorization': 'Bearer $authToken',
       },
       params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.JSON,
-      returnBody: true,
-      encodeBodyUtf8: false,
-      decodeUtf8: false,
-      cache: false,
-      isStreamingApi: false,
-      alwaysAllowBody: false,
-    );
-  }
-}
-
-class CreatePropertyBasicRENTCall {
-  Future<ApiCallResponse> call({
-    String? authToken = '',
-    String? name = '',
-    String? address = '',
-    double? longitude,
-    double? latitude,
-    String? finca = '',
-    String? follio = '',
-    String? libro = '',
-    double? monthlyRent,
-    int? minimumTimeRent,
-    String? othersRent = '',
-    String? allowedUses = '',
-    String? prohibitedUses = '',
-    String? availableFrom = '',
-    bool? isCompanyOwned,
-    String? companyName = '',
-    String? legalRepresentative = '',
-  }) async {
-    final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
-
-    Map<String, dynamic> bodyRaw = {
-      "listingType": ["RENT"],
-      "name": name,
-      "address": address,
-      "geoLocation": {"longitude": longitude, "latitude": latitude},
-      "rentInfo": {
-        if (monthlyRent != null) "monthlyRent": monthlyRent,
-        "rentalConditions": {
-          if (minimumTimeRent != null) "minimumTime": minimumTimeRent,
-          if (allowedUses?.isNotEmpty == true) "allowedUses": allowedUses,
-          if (prohibitedUses?.isNotEmpty == true)
-            "prohibitedUses": prohibitedUses,
-          if (availableFrom?.isNotEmpty == true) "availableFrom": availableFrom,
-          if (othersRent?.isNotEmpty == true) "others": othersRent
-        }
-      },
-    };
-
-    if (finca?.isNotEmpty == true ||
-        follio?.isNotEmpty == true ||
-        libro?.isNotEmpty == true) {
-      bodyRaw["legalInfo"] = {
-        if (finca?.isNotEmpty == true) "finca": finca,
-        if (follio?.isNotEmpty == true) "folio": follio,
-        if (libro?.isNotEmpty == true) "libro": libro,
-      };
-    }
-
-    final effectiveLegalRep =
-        (legalRepresentative != null && legalRepresentative.isNotEmpty)
-            ? legalRepresentative
-            : companyName;
-
-    if (isCompanyOwned == true) {
-      bodyRaw["ownership"] = {
-        "isCompanyOwned": true,
-        "companyName": companyName,
-        "legalRepresentative": effectiveLegalRep ?? ''
-      };
-    } else {
-      bodyRaw["ownership"] = {
-        "isCompanyOwned": false,
-        "legalRepresentative": effectiveLegalRep ?? ''
-      };
-    }
-
-    final ffApiRequestBody = jsonEncode(bodyRaw);
-    return ApiManager.instance.makeApiCall(
-      callName: 'Create Property Basic RENT',
-      apiUrl: '$baseUrl/properties/basic',
-      callType: ApiCallType.POST,
-      headers: {
-        'Authorization': 'Bearer $authToken',
-      },
-      params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.JSON,
-      returnBody: true,
-      encodeBodyUtf8: false,
-      decodeUtf8: false,
-      cache: false,
-      isStreamingApi: false,
-      alwaysAllowBody: false,
-    );
-  }
-
-  String? propertyId(dynamic response) => castToType<String>(getJsonField(
-        response,
-        r'''$.data.property.id''',
-      ));
-}
-
-class CreatePropertyBasicSALECall {
-  Future<ApiCallResponse> call({
-    String? authToken = '',
-    String? name = '',
-    String? address = '',
-    double? longitude,
-    double? latitude,
-    String? finca = '',
-    String? follio = '',
-    String? libro = '',
-    int? salePrice,
-    int? maintenanceFee,
-    int? singlePropertyTax,
-    bool? isCompanyOwned,
-    String? companyName = '',
-    String? legalRepresentative = '',
-  }) async {
-    final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
-
-    Map<String, dynamic> bodyRaw = {
-      "listingType": ["SALE"],
-      "name": name,
-      "address": address,
-      "geoLocation": {"longitude": longitude, "latitude": latitude},
-      "saleInfo": {
-        if (salePrice != null) "salePrice": salePrice,
-        if (maintenanceFee != null) "maintenanceFee": maintenanceFee,
-        if (singlePropertyTax != null) "singlePropertyTax": singlePropertyTax
-      },
-    };
-
-    if (finca?.isNotEmpty == true ||
-        follio?.isNotEmpty == true ||
-        libro?.isNotEmpty == true) {
-      bodyRaw["legalInfo"] = {
-        if (finca?.isNotEmpty == true) "finca": finca,
-        if (follio?.isNotEmpty == true) "folio": follio,
-        if (libro?.isNotEmpty == true) "libro": libro,
-      };
-    }
-
-    final effectiveLegalRep =
-        (legalRepresentative != null && legalRepresentative.isNotEmpty)
-            ? legalRepresentative
-            : companyName;
-
-    if (isCompanyOwned == true) {
-      bodyRaw["ownership"] = {
-        "isCompanyOwned": true,
-        "companyName": companyName,
-        "legalRepresentative": effectiveLegalRep ?? ''
-      };
-    } else {
-      bodyRaw["ownership"] = {
-        "isCompanyOwned": false,
-        "legalRepresentative": effectiveLegalRep ?? ''
-      };
-    }
-
-    final ffApiRequestBody = jsonEncode(bodyRaw);
-    return ApiManager.instance.makeApiCall(
-      callName: 'Create Property Basic SALE',
-      apiUrl: '$baseUrl/properties/basic',
-      callType: ApiCallType.POST,
-      headers: {
-        'Authorization': 'Bearer $authToken',
-      },
-      params: {},
-      body: ffApiRequestBody,
+      body: jsonEncode(body),
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
@@ -1032,6 +790,72 @@ class ConfirmPropertyImagesCall {
       },
       params: {},
       body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// `POST /properties/{id}/documents/presign`: URLs para subir a S3 los
+/// documentos de titularidad (identificación del propietario o del
+/// representante y acta de nombramiento). Cada elemento de [uploads] lleva
+/// `purpose`, `fileName`, `mimeType` y `size`.
+class PresignPropertyDocumentsCall {
+  Future<ApiCallResponse> call({
+    String? propertyId = '',
+    String? authToken = '',
+    required List<Map<String, dynamic>> uploads,
+  }) async {
+    final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Presign Property Documents',
+      apiUrl: '$baseUrl/properties/$propertyId/documents/presign',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: jsonEncode({'uploads': uploads}),
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// `POST /properties/{id}/documents/confirm`: asocia a la propiedad los
+/// archivos ya subidos. Solo se mandan los `uploadId`.
+class ConfirmPropertyDocumentsCall {
+  Future<ApiCallResponse> call({
+    String? propertyId = '',
+    String? authToken = '',
+    required List<String> uploadIds,
+  }) async {
+    final baseUrl = DOVIAAPIPropertyContextGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Confirm Property Documents',
+      apiUrl: '$baseUrl/properties/$propertyId/documents/confirm',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+      params: {},
+      body: jsonEncode({
+        'uploads': [
+          for (final id in uploadIds) {'uploadId': id},
+        ],
+      }),
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
