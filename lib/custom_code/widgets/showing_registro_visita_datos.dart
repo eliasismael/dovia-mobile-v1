@@ -62,10 +62,15 @@ class _ShowingRegistroVisitaDatosState
     (label: 'Segunda visita', value: 'SECOND_VISIT'),
     (label: 'Visita de seguimiento', value: 'FOLLOW_UP_VISIT'),
   ];
+
+  /// Los mismos cuatro rangos que acepta el backend. Antes "+30 min" se
+  /// enviaba como `MORE_THAN_60_MIN`: una visita de 40 minutos quedaba
+  /// registrada como de más de una hora.
   static const List<_Opt> _durationOpts = [
     (label: '< 15 min', value: 'LESS_THAN_15_MIN'),
     (label: '15–30 min', value: 'BETWEEN_15_AND_30_MIN'),
-    (label: '+30 min', value: 'MORE_THAN_30_MIN'),
+    (label: '30–60 min', value: 'BETWEEN_30_AND_60_MIN'),
+    (label: '+60 min', value: 'MORE_THAN_60_MIN'),
   ];
   static const List<_Opt> _attendeesOpts = [
     (label: 'Pareja', value: 'PARTNER'),
@@ -119,6 +124,10 @@ class _ShowingRegistroVisitaDatosState
   List<FFUploadedFile> _uploadedPhotos = [];
   bool _isUploadingPhotos = false;
 
+  /// Hay un envío en curso: el botón no vuelve a disparar otro (dos toques
+  /// subían las fotos dos veces y mandaban dos registros).
+  bool _isSending = false;
+
   @override
   void dispose() {
     _commentController.dispose();
@@ -137,7 +146,8 @@ class _ShowingRegistroVisitaDatosState
       _nextStep != null &&
       _confirmed;
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
+    if (_isSending) return;
     if (!_isValid) {
       final missing = <String>[];
       if (_kind == null) missing.add('Modalidad');
@@ -160,11 +170,6 @@ class _ShowingRegistroVisitaDatosState
       return;
     }
 
-    final Map<String, String> durationMap = {
-      'LESS_THAN_15_MIN': 'LESS_THAN_15_MIN',
-      'BETWEEN_15_AND_30_MIN': 'BETWEEN_15_AND_30_MIN',
-      'MORE_THAN_30_MIN': 'MORE_THAN_60_MIN',
-    };
     final Map<String, String> conditionMap = {
       'CLEAN': 'GOOD',
       'NEEDS_MAINTENANCE': 'FAIR',
@@ -197,7 +202,7 @@ class _ShowingRegistroVisitaDatosState
 
     final data = <String, dynamic>{
       'showingVisitKind': 'IN_PERSON',
-      'showingVisitDuration': durationMap[_duration] ?? 'BETWEEN_15_AND_30_MIN',
+      'showingVisitDuration': _duration,
       'additionalAttendees': _attendees,
       'propertyCondition': conditionMap[_propertyCondition] ?? 'GOOD',
       'clientInterestLevel': interestMap[_interest] ?? 'NEUTRAL',
@@ -210,7 +215,15 @@ class _ShowingRegistroVisitaDatosState
     };
 
     if (widget.onSave != null) {
-      widget.onSave!(data);
+      final pending = widget.onSave!(data);
+      if (pending is Future) {
+        setState(() => _isSending = true);
+        try {
+          await pending;
+        } finally {
+          if (mounted) setState(() => _isSending = false);
+        }
+      }
     } else if (widget.onFinalizarRegistro != null) {
       widget.onFinalizarRegistro!();
     }
@@ -572,7 +585,13 @@ class _ShowingRegistroVisitaDatosState
         const SizedBox(height: 16),
         _optionsInline(_kindOpts, _kind, (v) => _kind = v, height: 46),
         const SizedBox(height: 16),
-        _optionsInline(_durationOpts, _duration, (v) => _duration = v,
+        // Dos filas de dos: cuatro en una fila no entran en pantallas chicas.
+        _optionsInline(
+            _durationOpts.sublist(0, 2), _duration, (v) => _duration = v,
+            height: 46),
+        const SizedBox(height: 12),
+        _optionsInline(
+            _durationOpts.sublist(2), _duration, (v) => _duration = v,
             height: 46),
       ],
     );
@@ -951,18 +970,19 @@ class _ShowingRegistroVisitaDatosState
         ),
         const SizedBox(height: 16),
         GestureDetector(
-          onTap: _handleSubmit,
+          onTap: _isSending ? null : _handleSubmit,
           child: Container(
             width: double.infinity,
             height: 56,
             decoration: BoxDecoration(
-              color:
-                  _isValid ? primaryColor : primaryColor.withValues(alpha: 0.5),
+              color: _isValid && !_isSending
+                  ? primaryColor
+                  : primaryColor.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(25),
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'Finalizar registro de visita',
+            child: Text(
+              _isSending ? 'Enviando...' : 'Finalizar registro de visita',
               style: TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 16,
