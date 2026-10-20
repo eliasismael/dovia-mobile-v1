@@ -387,6 +387,11 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                 .getDefaultFavoritesCall
                                 .call(
                               authToken: currentAuthenticationToken,
+                              // El backend pagina de a 20 por defecto y "Ver
+                              // más" sólo despliega lo ya traído: con más de
+                              // 20 favoritos los siguientes no aparecían. 100
+                              // es el máximo que aceptan los listados.
+                              limit: '100',
                             ),
                             builder: (context, snapshot) {
                               // Customize what your widget looks like when it's loading.

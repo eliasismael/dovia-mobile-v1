@@ -5,6 +5,8 @@ import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
 import '/dovia_home_client/proposal_fields.dart';
 import '/dovia_home_client/service_request_fields.dart';
+import '/dovia_home_client/upcoming_service_requests.dart';
+import '/shared_components/error_state/error_state_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -197,15 +199,11 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     // El endpoint valida `status` contra el enum PENDING/TAKEN/IN_PROGRESS/
     // FINISHED y acepta un único valor (un string multi-valor devuelve 400
     // "status invalido"). Para "Próximas visitas" (varios estados) se traen
-    // todas sin filtro y se excluye FINISHED client-side; para las finalizadas
-    // se filtra directamente por FINISHED.
+    // sin filtro, paginando, y se excluye FINISHED (ver
+    // [loadUpcomingServiceRequests]); para las finalizadas se filtra
+    // directamente por FINISHED.
     _upcomingVisitsFuture =
-        DOVIAAPIDoviaHomeContextGroup.listServiceRequestsCall
-            .call(
-      authToken: token,
-      limit: 20,
-    )
-            .then((response) {
+        loadUpcomingServiceRequests(authToken: token).then((response) {
       // Cuando el backend ya devuelve una solicitud pintada de forma
       // optimista, manda la del backend (con estado real y detalle
       // navegable) y la optimista se descarta.
@@ -1509,7 +1507,13 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                             }
                             final response = snapshot.data!;
                             if (!response.succeeded) {
-                              return const SizedBox.shrink();
+                              // Antes se ocultaba la sección y parecía que no
+                              // había visitas.
+                              return ErrorStateWidget.fromResponse(
+                                response,
+                                onRetry: () =>
+                                    safeSetState(_loadDashboardData),
+                              );
                             }
                             final rawVisits = DOVIAAPIDoviaHomeContextGroup
                                     .listServiceRequestsCall

@@ -168,6 +168,9 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                             .call(
                           authToken: currentAuthenticationToken,
                           folderId: widget.folderId,
+                          // El backend pagina de a 20 por defecto; 100 es el
+                          // máximo de los listados.
+                          limit: '100',
                         ),
                         builder: (context, snapshot) {
                           // Customize what your widget looks like when it's loading.

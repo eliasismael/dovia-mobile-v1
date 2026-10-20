@@ -453,6 +453,9 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     final defaultFavoritesResponse =
         await DOVIAAPIFavoriteContextGroup.getDefaultFavoritesCall.call(
       authToken: token,
+      // Sin límite el backend devuelve 20 y los favoritos siguientes salían
+      // con el corazón vacío. 100 es el máximo de los listados.
+      limit: '100',
     );
     if (defaultFavoritesResponse.succeeded) {
       final defaultFavorites = getJsonField(
@@ -486,6 +489,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
             await DOVIAAPIFavoriteContextGroup.getFavoritesInFolderCall.call(
           authToken: token,
           folderId: folderId,
+          limit: '100',
         );
         if (!folderFavoritesResponse.succeeded) continue;
 
