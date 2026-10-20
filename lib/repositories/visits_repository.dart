@@ -34,11 +34,17 @@ class VisitsRepository extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIVisitContextGroup.getMyVisitsCall.call(
       authToken: token,
       filter: 'upcoming',
     );
+    // Se cerró sesión o entró otra cuenta mientras tanto: las visitas son de
+    // la sesión anterior y no se guardan.
+    if (authManager.sessionGeneration != generation) {
+      return const Failure('La sesión cambió mientras se cargaba');
+    }
 
     _isLoading = false;
 
@@ -243,6 +249,8 @@ class VisitsRepository extends ChangeNotifier {
   void clear() {
     _myVisits = [];
     _error = null;
+    // Una carga de la sesión anterior se descarta al volver: no queda "cargando".
+    _isLoading = false;
     notifyListeners();
   }
 

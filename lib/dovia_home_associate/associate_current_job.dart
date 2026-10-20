@@ -22,6 +22,14 @@ class AssociateCurrentJob {
 
   static void invalidate() => _fetchedAt = null;
 
+  /// Olvida el trabajo guardado (al cerrar sesión o cambiar de cuenta): si
+  /// no, el próximo asociado veía "En curso" con el trabajo del anterior.
+  static void clear() {
+    _job = null;
+    _fetchedAt = null;
+    _pending = null;
+  }
+
   static Future<Map<String, dynamic>?> load() {
     final fetchedAt = _fetchedAt;
     if (fetchedAt != null && DateTime.now().difference(fetchedAt) < _ttl) {
@@ -31,6 +39,7 @@ class AssociateCurrentJob {
   }
 
   static Future<Map<String, dynamic>?> _fetch() async {
+    final generation = authManager.sessionGeneration;
     try {
       final response = await DOVIAAPIDoviaHomeContextGroup
           .listAssociateServiceRequestsCall
@@ -38,6 +47,8 @@ class AssociateCurrentJob {
         status: 'IN_PROGRESS',
         authToken: currentAuthenticationToken ?? '',
       );
+      // Respuesta de una sesión anterior: no se guarda para la cuenta nueva.
+      if (authManager.sessionGeneration != generation) return null;
       if (!response.succeeded) return _job;
       final list = DOVIAAPIDoviaHomeContextGroup
               .listAssociateServiceRequestsCall

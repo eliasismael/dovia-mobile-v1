@@ -35,6 +35,11 @@ class PropertiesRepository extends ChangeNotifier {
       List.unmodifiable(_homeProperties);
   List<MapPropertyMarker> get mapMarkers => List.unmodifiable(_mapMarkers);
 
+  /// Se cerró sesión o entró otra cuenta mientras se esperaba la respuesta:
+  /// es de la sesión anterior y no se guarda en el caché.
+  bool _stale(int generation) => authManager.sessionGeneration != generation;
+  static const _sessionChangedMessage = 'La sesión cambió mientras se cargaba';
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   /// Loads the property listing shown on the client home page.
@@ -50,8 +55,10 @@ class PropertiesRepository extends ChangeNotifier {
     _homeError = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final response =
         await DOVIAAPIPropertyContextGroup.getPropertiesForHomeCall.call();
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     _isLoadingHome = false;
 
@@ -80,8 +87,10 @@ class PropertiesRepository extends ChangeNotifier {
     _mapError = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final response =
         await DOVIAAPIPropertyContextGroup.getPropertiesForMapCall.call();
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     _isLoadingMap = false;
 
@@ -106,10 +115,12 @@ class PropertiesRepository extends ChangeNotifier {
       return Success(_detailCache[propertyId] as Map<String, dynamic>);
     }
 
+    final generation = authManager.sessionGeneration;
     final response =
         await DOVIAAPIPropertyContextGroup.getPropertyByIDCall.call(
       propertyId: propertyId,
     );
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     if (!response.succeeded) {
       return Failure(
@@ -295,6 +306,9 @@ class PropertiesRepository extends ChangeNotifier {
     _detailCache.clear();
     _homeError = null;
     _mapError = null;
+    // Una carga de la sesión anterior se descarta al volver: no queda "cargando".
+    _isLoadingHome = false;
+    _isLoadingMap = false;
     notifyListeners();
   }
 }

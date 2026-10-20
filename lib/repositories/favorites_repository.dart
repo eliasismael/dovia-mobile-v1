@@ -47,6 +47,12 @@ class FavoritesRepository extends ChangeNotifier {
   /// Synchronous check — returns cached value immediately.
   bool isFavorited(String propertyId) => _favoritedIds.contains(propertyId);
 
+  /// Se cerró sesión o entró otra cuenta mientras se esperaba la respuesta:
+  /// es de la sesión anterior y no se guarda (si no, la cuenta nueva veía los
+  /// favoritos de la anterior).
+  bool _stale(int generation) => authManager.sessionGeneration != generation;
+  static const _sessionChangedMessage = 'La sesión cambió mientras se cargaba';
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   /// Adds or removes a favorite optimistically, then confirms with the server.
@@ -65,6 +71,7 @@ class FavoritesRepository extends ChangeNotifier {
     _updatePropertyFavoriteStatus(propertyId, !wasAlreadyFavorited);
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     ApiCallResponse response;
 
@@ -76,6 +83,7 @@ class FavoritesRepository extends ChangeNotifier {
       response = await DOVIAAPIFavoriteContextGroup.addPropertyToFavoritesCall
           .call(propertyId: propertyId, folderId: folderId, authToken: token);
     }
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     if (!response.succeeded) {
       // Roll back optimistic update on failure
@@ -106,10 +114,12 @@ class FavoritesRepository extends ChangeNotifier {
     _updatePropertyFavoriteStatus(propertyId, true);
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIFavoriteContextGroup
         .addPropertyToFavoritesCall
         .call(propertyId: propertyId, folderId: folderId, authToken: token);
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     if (!response.succeeded) {
       _favoritedIds.remove(propertyId);
@@ -131,10 +141,12 @@ class FavoritesRepository extends ChangeNotifier {
     _updatePropertyFavoriteStatus(propertyId, false);
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIFavoriteContextGroup
         .removePropertyFromFavoritesCall
         .call(propertyId: propertyId, authToken: token);
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     if (!response.succeeded) {
       _favoritedIds.add(propertyId);
@@ -157,6 +169,7 @@ class FavoritesRepository extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response =
         await DOVIAAPIFavoriteContextGroup.getDefaultFavoritesCall.call(
@@ -164,6 +177,7 @@ class FavoritesRepository extends ChangeNotifier {
       page: page.toString(),
       limit: limit.toString(),
     );
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     _isLoading = false;
 
@@ -194,10 +208,12 @@ class FavoritesRepository extends ChangeNotifier {
 
   /// Loads all favorite folders for the user.
   Future<Result<List<FavoriteFolder>>> loadFolders() async {
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIFavoriteContextGroup
         .getAllFavoriteFoldersCall
         .call(authToken: token);
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     if (!response.succeeded) {
       return Failure(
@@ -248,10 +264,12 @@ class FavoritesRepository extends ChangeNotifier {
 
   /// Checks whether a specific property is favorited and caches the result.
   Future<void> refreshFavoriteStatus(String propertyId) async {
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIFavoriteContextGroup
         .checkIfPropertyIsFavoritedCall
         .call(propertyId: propertyId, authToken: token);
+    if (_stale(generation)) return;
 
     if (response.succeeded) {
       final isFavorited =
@@ -332,9 +350,11 @@ class FavoritesRepository extends ChangeNotifier {
   /// Adds a property to a specific folder.
   Future<Result<void>> addFavoriteToFolder(
       String folderId, String propertyId) async {
+    final generation = authManager.sessionGeneration;
     final token = currentAuthenticationToken ?? '';
     final response = await DOVIAAPIFavoriteContextGroup.addFavoriteToFolderCall
         .call(folderId: folderId, propertyId: propertyId, authToken: token);
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     if (!response.succeeded) {
       return Failure(
@@ -354,6 +374,8 @@ class FavoritesRepository extends ChangeNotifier {
     _defaultFavorites = [];
     _defaultFavoritesMeta = null;
     _error = null;
+    // Una carga de la sesión anterior se descarta al volver: no queda "cargando".
+    _isLoading = false;
     notifyListeners();
   }
 

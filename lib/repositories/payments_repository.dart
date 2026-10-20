@@ -52,6 +52,12 @@ class PaymentsRepository extends ChangeNotifier {
 
   String get _token => currentAuthenticationToken ?? '';
 
+  /// Se cerró sesión o entró otra cuenta mientras se esperaba la respuesta:
+  /// es de la sesión anterior y no se guarda (si no, la cuenta nueva podía
+  /// heredar la suscripción Premium o los pagos de la anterior).
+  bool _stale(int generation) => authManager.sessionGeneration != generation;
+  static const _sessionChangedMessage = 'La sesión cambió mientras se cargaba';
+
   // ---------------------------------------------------------------------------
   // Planes
   // ---------------------------------------------------------------------------
@@ -101,9 +107,11 @@ class PaymentsRepository extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final response = await DOVIAAPIPaymentContextGroup
         .getCurrentSubscriptionCall
         .call(authToken: _token);
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     _isLoading = false;
 
@@ -134,9 +142,11 @@ class PaymentsRepository extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final response = await DOVIAAPIPaymentContextGroup
         .cancelCurrentSubscriptionCall
         .call(authToken: _token);
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     _isLoading = false;
 
@@ -236,6 +246,7 @@ class PaymentsRepository extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final generation = authManager.sessionGeneration;
     final response = await DOVIAAPIPaymentContextGroup.listPaymentsCall.call(
       page: page,
       limit: limit,
@@ -243,6 +254,7 @@ class PaymentsRepository extends ChangeNotifier {
       paymentType: paymentType,
       authToken: _token,
     );
+    if (_stale(generation)) return const Failure(_sessionChangedMessage);
 
     _isLoading = false;
 
@@ -511,7 +523,8 @@ class PaymentsRepository extends ChangeNotifier {
         _currentSubscription == null &&
         !_subscriptionLoaded &&
         _payments.isEmpty &&
-        _error == null;
+        _error == null &&
+        !_isLoading;
     if (isEmpty) return;
 
     _plans = [];
@@ -519,6 +532,8 @@ class PaymentsRepository extends ChangeNotifier {
     _subscriptionLoaded = false;
     _payments = [];
     _error = null;
+    // Una carga de la sesión anterior se descarta al volver: no queda "cargando".
+    _isLoading = false;
     notifyListeners();
   }
 }

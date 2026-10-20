@@ -15,7 +15,8 @@ import 'auth/custom_auth/custom_auth_user_provider.dart';
 import 'auth/custom_auth/session_restore.dart';
 import 'auth/custom_auth/token_refresher.dart';
 import 'backend/api_requests/api_manager.dart';
-import 'index.dart' show SignInWidget;
+import 'dovia_home_associate/associate_current_job.dart';
+import 'index.dart' show DHCLIENTUbicacionWidget, SignInWidget;
 import 'notifications/notification_navigation.dart';
 import 'notifications/notification_router.dart';
 import 'notifications/firebase_push_messaging.dart';
@@ -154,6 +155,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           context.read<PropertiesRepository>().clear();
           context.read<VisitsRepository>().clear();
           context.read<PaymentsRepository>().clear();
+          // Estado guardado fuera de los repositorios que también es de la
+          // cuenta: el trabajo "En curso" del asociado y la última dirección
+          // verificada del cliente de Dovia Home.
+          AssociateCurrentJob.clear();
+          DHCLIENTUbicacionWidget.lastVerifiedAddressId = null;
+          DHCLIENTUbicacionWidget.lastVerifiedAddressLabel = null;
         }
         // Solo en un logout real: al abrir la app sin sesión puede haber un
         // registro a medias que necesita esos datos.
