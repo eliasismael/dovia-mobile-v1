@@ -33,13 +33,15 @@ FirebaseOptions? _firebaseOptions() {
         storageBucket: 'dovia-notifications.firebasestorage.app',
       );
     case TargetPlatform.iOS:
+      // Una sola app iOS (com.doviaapp.dovia) para dev y staging: el entorno
+      // lo define la URL de la API al compilar.
       return const FirebaseOptions(
         apiKey: 'AIzaSyBGsuuNXcPyScRKKGon2J0vQBdswbzyv2U',
-        appId: '1:240336837682:ios:d9f8f9d2aaffb9642df02b',
+        appId: '1:240336837682:ios:4b87b12a08a1b5542df02b',
         messagingSenderId: '240336837682',
         projectId: 'dovia-notifications',
         storageBucket: 'dovia-notifications.firebasestorage.app',
-        iosBundleId: 'com.mycompany.dovia',
+        iosBundleId: 'com.doviaapp.dovia',
       );
     default:
       return null;
