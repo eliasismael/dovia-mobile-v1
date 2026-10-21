@@ -198,7 +198,9 @@ Map<String, String> validatePublication(PublicationInput input) {
       require('$prefix.sex');
     }
     positiveInt('$prefix.age', 'Ingresá una edad válida.');
-    if (named) require('$prefix.nationality');
+    // Los contratos que arma el backend la necesitan de todos: dueño,
+    // quien registra y representante legal.
+    require('$prefix.nationality');
     require('$prefix.maritalStatus');
     require('$prefix.idType');
     require('$prefix.idNumber');
@@ -305,7 +307,7 @@ Map<String, dynamic> buildCreatePropertyBody(PublicationInput input) {
       if (named) 'fullName': input.v('$prefix.fullName'),
       if (named) 'sex': input.v('$prefix.sex'),
       'age': int.parse(input.v('$prefix.age')),
-      if (named) 'nationality': input.v('$prefix.nationality'),
+      'nationality': input.v('$prefix.nationality'),
       'maritalStatus': input.v('$prefix.maritalStatus'),
       'identification': {
         'type': input.v('$prefix.idType'),

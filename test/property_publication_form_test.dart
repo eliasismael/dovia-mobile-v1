@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dovia/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_rentar/property_publication_form.dart';
 
@@ -16,6 +16,7 @@ const _base = {
 
 const _me = {
   'me.age': '45',
+  'me.nationality': 'Guatemalteca',
   'me.maritalStatus': 'MARRIED',
   'me.idType': 'DPI',
   'me.idNumber': '1234567890101',
@@ -84,6 +85,12 @@ void main() {
       expect(validatePublication(_input(OwnershipKind.self, _me)), isEmpty);
     });
 
+    test('la nacionalidad es obligatoria también en tus datos', () {
+      final errors = validatePublication(
+          _input(OwnershipKind.self, {..._me, 'me.nationality': ''}));
+      expect(errors, {'me.nationality': 'Completá este campo.'});
+    });
+
     test('sin identificación en la cuenta no se puede enviar', () {
       final errors =
           validatePublication(_input(OwnershipKind.self, _me, identity: false));
@@ -129,10 +136,9 @@ void main() {
       expect(errors.keys, ['appt.date']);
     });
 
-    test('finca, folio y libro son opcionales y sin ellos no va legalInfo',
-        () {
-      final input = _input(OwnershipKind.self,
-          {..._me, 'finca': '', 'folio': '', 'libro': ''});
+    test('finca, folio y libro son opcionales y sin ellos no va legalInfo', () {
+      final input = _input(
+          OwnershipKind.self, {..._me, 'finca': '', 'folio': '', 'libro': ''});
       expect(validatePublication(input), isEmpty);
       expect(buildCreatePropertyBody(input).containsKey('legalInfo'), isFalse);
     });
@@ -152,6 +158,7 @@ void main() {
         'type': 'SELF',
         'owner': {
           'age': 45,
+          'nationality': 'Guatemalteca',
           'maritalStatus': 'MARRIED',
           'identification': {'type': 'DPI', 'number': '1234567890101'},
           'occupation': 'Comerciante',
@@ -180,6 +187,7 @@ void main() {
       expect(ownership['type'], 'THIRD_PARTY');
       expect(ownership['relationshipToOwner'], 'CHILD');
       expect(ownership['submitter']['age'], 45);
+      expect(ownership['submitter']['nationality'], 'Guatemalteca');
       expect(ownership['owner'], {
         'fullName': 'María López',
         'sex': 'FEMALE',

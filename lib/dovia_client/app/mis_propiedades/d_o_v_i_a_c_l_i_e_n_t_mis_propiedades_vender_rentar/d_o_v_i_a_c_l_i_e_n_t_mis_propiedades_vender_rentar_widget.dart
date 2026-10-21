@@ -985,8 +985,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
         ),
       );
 
-  /// Datos personales de una persona. [named] agrega nombre, sexo y
-  /// nacionalidad (quien no es el dueño de la cuenta); [phone], el teléfono.
+  /// Datos personales de una persona. [named] agrega nombre y sexo (quien
+  /// no es el dueño de la cuenta); [phone], el teléfono.
   List<Widget> _personFields(String prefix,
           {required bool named, bool phone = false}) =>
       [
@@ -1008,9 +1008,12 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
           _grid([
             _numberField('$prefix.age', 'Edad',
                 required: true, hint: 'Ej.: 45'),
-            _dropdown(
-                '$prefix.maritalStatus', 'Estado civil', kMaritalStatusLabels),
+            _textField('$prefix.nationality', 'Nacionalidad',
+                required: true, hint: 'Ej.: Guatemalteca'),
           ]),
+        if (!named)
+          _dropdown(
+              '$prefix.maritalStatus', 'Estado civil', kMaritalStatusLabels),
         _grid([
           _dropdown(
               '$prefix.idType', 'Tipo de documento', kIdentificationLabels),
