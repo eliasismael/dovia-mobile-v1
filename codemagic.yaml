@@ -4,9 +4,13 @@
 # un tag testflight-*:
 #   git tag testflight-1 && git push origin testflight-1
 #
-# La firma (certificado y perfil de App Store) la genera Codemagic con la
-# clave de API de App Store Connect cargada en Team settings → Integrations →
-# Developer Portal con el nombre de `integrations.app_store_connect`.
+# La firma la arma el build: con la clave de API de App Store Connect (Team
+# settings → Integrations → Developer Portal, nombre en
+# `integrations.app_store_connect`) busca en Apple el certificado de
+# distribución y el perfil de App Store, y los crea si no existen. El
+# certificado usa la clave privada CERTIFICATE_PRIVATE_KEY del grupo de
+# variables `ios_signing` (secreta; si se pierde, se genera otra y Apple crea
+# un certificado nuevo).
 
 workflows:
   ios-testflight:
@@ -19,10 +23,10 @@ workflows:
       flutter: 3.44.2
       xcode: latest
       cocoapods: default
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.doviaapp.dovia
+      groups:
+        - ios_signing
       vars:
+        BUNDLE_ID: com.doviaapp.dovia
         # "ID de Apple" de la app en App Store Connect → Información de la app.
         APP_STORE_APPLE_ID: 6825416376
         # Backend al que apunta el build (iOS no tiene flavors: una sola app).
@@ -34,8 +38,12 @@ workflows:
         - pattern: 'testflight-*'
           include: true
     scripts:
-      - name: Perfiles de firma
-        script: xcode-project use-profiles
+      - name: Firma
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
       - name: Dependencias
         script: |
           flutter pub get
