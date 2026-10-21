@@ -1,0 +1,57 @@
+# Builds de iOS para TestFlight en Codemagic.
+#
+# Se dispara a mano (Start new build → master → ios-testflight) o al pushear
+# un tag testflight-*:
+#   git tag testflight-1 && git push origin testflight-1
+#
+# La firma (certificado y perfil de App Store) la genera Codemagic con la
+# clave de API de App Store Connect cargada en Team settings → Integrations →
+# Developer Portal con el nombre de `integrations.app_store_connect`.
+
+workflows:
+  ios-testflight:
+    name: iOS → TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: dovia_asc
+    environment:
+      flutter: 3.44.2
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.doviaapp.dovia
+      vars:
+        # "ID de Apple" de la app en App Store Connect → Información de la app.
+        APP_STORE_APPLE_ID: 6825416376
+        # Backend al que apunta el build (iOS no tiene flavors: una sola app).
+        API_BASE_URL: https://52aqw5tygf.execute-api.us-east-2.amazonaws.com/staging
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'testflight-*'
+          include: true
+    scripts:
+      - name: Perfiles de firma
+        script: xcode-project use-profiles
+      - name: Dependencias
+        script: |
+          flutter pub get
+          cd ios && pod install --repo-update
+      - name: Build del IPA
+        script: |
+          # Cada subida a TestFlight necesita un número de build mayor.
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          flutter build ipa --release \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --build-number=$((LATEST + 1)) \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
