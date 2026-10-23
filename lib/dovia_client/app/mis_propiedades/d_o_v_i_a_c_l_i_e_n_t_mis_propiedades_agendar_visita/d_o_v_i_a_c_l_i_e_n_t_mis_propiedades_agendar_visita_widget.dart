@@ -1,5 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
+import '/core/api_error.dart';
 import '/dovia_client/app/mis_propiedades/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_visita_1/d_o_v_i_a_c_l_i_e_n_t_mis_propiedades_visita1_widget.dart';
 import '/dovia_client/d_o_v_i_a_c_l_i_e_n_t_navbar/d_o_v_i_a_c_l_i_e_n_t_navbar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -195,7 +196,8 @@ class _DOVIACLIENTMisPropiedadesAgendarVisitaWidgetState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Error al agendar la visita. Intenta de nuevo.',
+            apiErrorMessage(_model.apiResCreateVisitRequest!,
+                'Error al agendar la visita. Intenta de nuevo.'),
             style: FlutterFlowTheme.of(context)
                 .bodyMedium
                 .override(font: GoogleFonts.inter()),

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '/app_state.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
+import '/core/api_error.dart';
 import '/core/result.dart';
 import '/domain/visit_models.dart';
 
@@ -93,9 +94,12 @@ class VisitsRepository extends ChangeNotifier {
     // El 401 por token vencido lo renueva y reintenta el ApiManager, atado a
     // la sesión que hizo el pedido. Acá había un refresh propio que podía
     // guardar el token de una cuenta con el id de otra.
+    // El motivo del backend le dice al cliente qué cambiar (Ej: ya tiene una
+    // visita activa en esta propiedad, o la propiedad no está disponible).
     if (!response.succeeded) {
       return Failure(
-        'No se pudo solicitar la visita',
+        apiErrorMessage(
+            response, 'No se pudo solicitar la visita. Inténtalo de nuevo.'),
         statusCode: response.statusCode,
       );
     }

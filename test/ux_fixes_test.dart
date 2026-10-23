@@ -16,8 +16,7 @@ import 'package:dovia/custom_code/widgets/ajustes_screen.dart';
 import 'package:dovia/custom_code/widgets/custom_recover_password1.dart';
 import 'package:dovia/custom_code/widgets/custom_recover_password2.dart';
 import 'package:dovia/custom_code/widgets/operative_listing_profile.dart';
-import 'package:dovia/index.dart'
-    show RecoverPasswordStep2Widget, SignInWidget;
+import 'package:dovia/index.dart' show RecoverPasswordStep2Widget, SignInWidget;
 import 'package:dovia/repositories/index.dart';
 import 'package:dovia/shared_components/error_state/error_state_widget.dart';
 
@@ -105,6 +104,13 @@ void main() {
       expect(apiErrorMessage(_res(400, 'texto'), 'genérico'), 'genérico');
     });
 
+    test('un 5xx no muestra el texto del servidor', () {
+      expect(
+          apiErrorMessage(
+              _res(502, {'message': 'Internal server error'}), 'genérico'),
+          'genérico');
+    });
+
     test('solo red y 5xx muestran el aviso de reintentar', () async {
       await authManager.signIn(authenticationToken: 't', authUid: 'u');
       expect(isRetryableLoadError(_res(-1)), isTrue);
@@ -128,8 +134,8 @@ void main() {
       var retries = 0;
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: ErrorStateWidget.fromResponse(_res(-1),
-              onRetry: () => retries++),
+          body:
+              ErrorStateWidget.fromResponse(_res(-1), onRetry: () => retries++),
         ),
       ));
       expect(find.textContaining('Sin conexión'), findsOneWidget);
@@ -186,8 +192,8 @@ void main() {
 
     testWidgets('si el backend falla, avisa y no cierra sesión',
         (tester) => runDelete(tester, ok: false));
-    testWidgets('si sale bien, cierra sesión',
-        (tester) => runDelete(tester, ok: true));
+    testWidgets(
+        'si sale bien, cierra sesión', (tester) => runDelete(tester, ok: true));
   });
 
   group('eliminar cuenta (asociados)', () {
@@ -218,8 +224,8 @@ void main() {
       }
       await tester.pump(const Duration(seconds: 4));
 
-      expect(find.textContaining('No pudimos eliminar tu cuenta'),
-          findsOneWidget);
+      expect(
+          find.textContaining('No pudimos eliminar tu cuenta'), findsOneWidget);
       expect(logouts, 0);
     });
   });
@@ -264,10 +270,11 @@ void main() {
         await tester.enterText(find.byType(TextFormField), ' a@dovia.com ');
         await tester.pumpAndSettle();
         await _tapText(tester, 'Restablecer contraseña');
-      }, () => MockClient((req) async {
-            sentEmail = jsonDecode(req.body)['email'];
-            return _json(200, {});
-          }));
+      },
+          () => MockClient((req) async {
+                sentEmail = jsonDecode(req.body)['email'];
+                return _json(200, {});
+              }));
 
       expect(sentEmail, 'a@dovia.com');
       expect(find.text('PASO 2'), findsOneWidget);
@@ -291,7 +298,7 @@ void main() {
       testWidgets('paso 2: ${c.name} no se muestra como código inválido',
           (tester) async {
         _tallView(tester);
-      _ignoreTextOverflow();
+        _ignoreTextOverflow();
         _ignoreTextOverflow();
         await http.runWithClient(() async {
           await tester.pumpWidget(MaterialApp.router(

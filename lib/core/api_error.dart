@@ -4,12 +4,15 @@ import '/backend/api_requests/api_manager.dart';
 ///
 /// Sin conexión (o timeout) el ApiManager devuelve `statusCode == -1`: en ese
 /// caso se dice eso, en vez de un error genérico que hace pensar que el dato
-/// cargado está mal. Si no, se usa el `message` del backend (o el primero de
+/// cargado está mal. Un 5xx es una falla del servidor: su texto ("Internal
+/// server error" de API Gateway, por ejemplo) no le sirve al usuario, así que
+/// va [fallback]. Si no, se usa el `message` del backend (o el primero de
 /// `errors`) y, sin nada de eso, [fallback].
 String apiErrorMessage(ApiCallResponse response, String fallback) {
   if (response.statusCode == -1) {
     return 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
   }
+  if (response.statusCode >= 500) return fallback;
   return apiBodyMessage(response.jsonBody) ?? fallback;
 }
 
