@@ -277,6 +277,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         progressIndicatorTheme: const ProgressIndicatorThemeData(
           color: DoviaSpinner.green,
         ),
+        // Los botones con borde (los secundarios) van sobre blanco: con el
+        // fondo transparente de Material se perdían sobre el degradé.
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(backgroundColor: Colors.white),
+        ),
       ),
       themeMode: _themeMode,
       routerConfig: _router,

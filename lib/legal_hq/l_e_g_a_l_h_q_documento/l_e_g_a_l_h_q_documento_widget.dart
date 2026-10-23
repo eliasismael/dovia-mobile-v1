@@ -403,6 +403,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
               _isRejecting = true;
             }),
             style: OutlinedButton.styleFrom(
+              backgroundColor: _red,
               side: const BorderSide(color: _red),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24.0)),
@@ -410,7 +411,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
             child: Text(
               'Me equivoqué, rechazarlo',
               style: GoogleFonts.publicSans(
-                color: _red,
+                color: Colors.white,
                 fontSize: 14.0,
                 fontWeight: FontWeight.w600,
               ),

@@ -51,6 +51,10 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
   static const Color _proposalFieldBg = Color(0xFFFAFAFA);
   static const Color _fieldText = Color(0xFF888888);
 
+  /// Borde de los campos de solo lectura: el gris claro de "Tu propuesta" no
+  /// se distinguía del fondo blanco.
+  static const Color _fieldBorder = Color(0xFFDFDFDF);
+
   ClientOfferDetail? _detail;
   bool _isLoading = true;
   bool _isWithdrawing = false;
@@ -356,6 +360,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
             decoration: BoxDecoration(
               color: background,
               borderRadius: BorderRadius.circular(10.0),
+              border: Border.all(color: _fieldBorder),
             ),
             child: Align(
               alignment: field.kind == OfferDetailFieldKind.textArea
@@ -380,31 +385,41 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
 
   /// El selector de moneda del formulario, congelado: se ve cuál eligió el
   /// cliente pero no se puede cambiar.
+  ///
+  /// Va en media columna: cada píldora toma un ancho acorde a su texto, así
+  /// "Quetzales" no queda pegado al borde.
   Widget _currencyChips(String selected) {
     return Row(
       children: [
-        Expanded(child: _currencyChip('USD', selected == 'USD')),
-        const SizedBox(width: 17.0),
-        Expanded(child: _currencyChip('Quetzales', selected == 'Quetzales')),
+        Expanded(flex: 2, child: _currencyChip('USD', selected == 'USD')),
+        const SizedBox(width: 8.0),
+        Expanded(
+          flex: 3,
+          child: _currencyChip('Quetzales', selected == 'Quetzales'),
+        ),
       ],
     );
   }
 
   Widget _currencyChip(String label, bool isSelected) {
     return Container(
-      height: 42.0,
+      height: 36.0,
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isSelected ? _aqua : Colors.white,
         border: Border.all(color: _aqua),
         borderRadius: BorderRadius.circular(25.0),
       ),
-      child: Text(
-        label,
-        style: GoogleFonts.publicSans(
-          fontSize: 14.0,
-          fontWeight: FontWeight.w600,
-          color: isSelected ? Colors.white : _aqua,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          label,
+          style: GoogleFonts.publicSans(
+            fontSize: 14.0,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : _aqua,
+          ),
         ),
       ),
     );
@@ -516,6 +531,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
       child: OutlinedButton(
         onPressed: _isWithdrawing ? null : () => context.safePop(),
         style: OutlinedButton.styleFrom(
+          backgroundColor: _aqua,
           side: const BorderSide(color: _aqua),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
@@ -526,7 +542,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
           style: GoogleFonts.publicSans(
             fontSize: 14.0,
             fontWeight: FontWeight.w600,
-            color: _aqua,
+            color: Colors.white,
           ),
         ),
       ),
@@ -544,19 +560,20 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
             child: OutlinedButton(
               onPressed: _isWithdrawing ? null : _withdraw,
               style: OutlinedButton.styleFrom(
+                backgroundColor: _destructive,
                 side: const BorderSide(color: _destructive),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25.0),
                 ),
               ),
               child: _isWithdrawing
-                  ? const DoviaSpinner(small: true, color: _destructive)
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : Text(
                       'Retirar Oferta',
                       style: GoogleFonts.publicSans(
                         fontSize: 14.0,
                         fontWeight: FontWeight.w600,
-                        color: _destructive,
+                        color: Colors.white,
                       ),
                     ),
             ),

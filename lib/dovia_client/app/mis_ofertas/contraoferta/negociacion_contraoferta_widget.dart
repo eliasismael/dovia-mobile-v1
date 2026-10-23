@@ -252,6 +252,8 @@ class _NegociacionContraofertaWidgetState
             decoration: BoxDecoration(
               color: background,
               borderRadius: BorderRadius.circular(10),
+              // Sin borde el gris claro no se distinguía del fondo blanco.
+              border: Border.all(color: const Color(0xFFDFDFDF)),
             ),
             child: Align(
               alignment: field.kind == OfferDetailFieldKind.textArea
@@ -291,9 +293,9 @@ class _NegociacionContraofertaWidgetState
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _currencyChip('USD')),
-            const SizedBox(width: 17),
-            Expanded(child: _currencyChip('Quetzales')),
+            Expanded(flex: 2, child: _currencyChip('USD')),
+            const SizedBox(width: 8),
+            Expanded(flex: 3, child: _currencyChip('Quetzales')),
           ],
         ),
         const SizedBox(height: 18),
@@ -304,19 +306,23 @@ class _NegociacionContraofertaWidgetState
   Widget _currencyChip(String label) {
     final isSelected = widget.view.currency == label;
     return Container(
-      height: 42,
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isSelected ? _aqua : Colors.white,
         border: Border.all(color: _aqua),
         borderRadius: BorderRadius.circular(25),
       ),
-      child: Text(
-        label,
-        style: GoogleFonts.publicSans(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: isSelected ? Colors.white : _aqua,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          label,
+          style: GoogleFonts.publicSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : _aqua,
+          ),
         ),
       ),
     );

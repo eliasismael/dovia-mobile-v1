@@ -898,7 +898,8 @@ class _LEGALASSOCIATEProcesos2WidgetState
                 children: [
                   Expanded(
                     child: _outlineButton('Cancelar', const Color(0xFFE0201B),
-                        _continuing ? null : _cancelMeeting),
+                        _continuing ? null : _cancelMeeting,
+                        filled: true),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1898,15 +1899,20 @@ class _LEGALASSOCIATEProcesos2WidgetState
         ),
       );
 
-  Widget _outlineButton(String label, Color color, VoidCallback? onPressed) =>
+  /// Con [filled] va relleno del color y con texto blanco (Ej: las acciones
+  /// en rojo); si no, borde del color sobre fondo blanco.
+  Widget _outlineButton(String label, Color color, VoidCallback? onPressed,
+          {bool filled = false}) =>
       OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
+          backgroundColor: filled ? color : Colors.white,
           side: BorderSide(color: color),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),
-        child: _text(label, color: color, weight: FontWeight.w600),
+        child: _text(label,
+            color: filled ? Colors.white : color, weight: FontWeight.w600),
       );
 
   Widget _spinner() => const DoviaSpinner(small: true, color: Colors.white);

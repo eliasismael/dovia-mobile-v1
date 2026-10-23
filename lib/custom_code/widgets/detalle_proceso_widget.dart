@@ -865,7 +865,8 @@ class _DetalleProcesoWidgetState extends State<DetalleProcesoWidget> {
                   child: OutlinedButton(
                     onPressed: widget.onCancelarReunion,
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
