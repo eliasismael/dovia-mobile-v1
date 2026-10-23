@@ -38,6 +38,10 @@ class _DOVIACLIENTMisFavoritosWidgetState
   late DOVIACLIENTMisFavoritosModel _model;
   bool _showAllDefaultFavorites = false;
 
+  /// Separa el spinner y el aviso de vacío del título de la sección, que
+  /// quedaban pegados a él.
+  static const _emptyStatePadding = EdgeInsets.only(top: 48.0, bottom: 24.0);
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -397,8 +401,9 @@ class _DOVIACLIENTMisFavoritosWidgetState
                             builder: (context, snapshot) {
                               // Customize what your widget looks like when it's loading.
                               if (!snapshot.hasData) {
-                                return const Center(
-                                  child: DoviaSpinner(),
+                                return const Padding(
+                                  padding: _emptyStatePadding,
+                                  child: Center(child: DoviaSpinner()),
                                 );
                               }
                               final listViewGetDefaultFavoritesResponse =
@@ -426,8 +431,7 @@ class _DOVIACLIENTMisFavoritosWidgetState
 
                                   if (favoriteHouse.isEmpty) {
                                     return const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 24.0),
+                                      padding: _emptyStatePadding,
                                       child: Center(
                                           child:
                                               Text('Aún no tienes favoritos')),
