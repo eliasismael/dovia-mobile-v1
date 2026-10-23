@@ -794,7 +794,6 @@ class _DHCLIENTAgendaWidgetState extends State<DHCLIENTAgendaWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Agenda',

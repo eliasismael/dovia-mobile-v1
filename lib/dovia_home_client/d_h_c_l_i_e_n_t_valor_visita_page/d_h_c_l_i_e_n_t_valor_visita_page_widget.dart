@@ -1019,7 +1019,6 @@ class _DHCLIENTValorVisitaPageWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       title: 'Valor de la visita',
                       hideActions: true,
                     ),

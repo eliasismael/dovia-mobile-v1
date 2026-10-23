@@ -25,8 +25,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showSettings = false,
     this.showSupport = true,
     this.onChatTap,
-    this.topPadding = 42.0,
-    this.belowStatusBar = false,
+    this.topPadding,
   }) : title = title ?? '[title]';
 
   final String title;
@@ -55,19 +54,17 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   /// asociado que está en la casa del cliente) lo redirigen con este parámetro.
   final VoidCallback? onChatTap;
 
-  /// Margen superior del header.
-  final double topPadding;
+  /// Margen superior fijo. Sin él, el header va justo debajo de la barra de
+  /// estado ([topBelowStatusBar]).
+  final double? topPadding;
 
-  /// Para las pantallas sin SafeArea arriba (Dovia Home y el inicio del
-  /// cliente): el header va justo debajo de la barra de estado, con el mismo
-  /// aire en cualquier celular, en vez de [topPadding].
-  final bool belowStatusBar;
-
-  /// Distancia del header al techo en esas pantallas. Antes era un 58 fijo:
-  /// en Android dejaba un hueco grande y en iPhone (barra de 59) quedaba al
-  /// ras.
+  /// Distancia del header al techo: el alto de la barra de estado que todavía
+  /// no se descontó, más un poco de aire. Funciona igual con SafeArea arriba
+  /// (la barra ya está descontada) y sin ella (Dovia Home, el inicio del
+  /// cliente). Antes era un 42 fijo debajo del SafeArea, o un 58 fijo sin
+  /// él: quedaba un hueco sobre el header que el inicio no tenía.
   static double topBelowStatusBar(BuildContext context) =>
-      MediaQuery.viewPaddingOf(context).top + 12.0;
+      MediaQuery.paddingOf(context).top + 12.0;
 
   @override
   State<DOVIASHAREDHeaderWidget> createState() =>
@@ -135,9 +132,8 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
           20.0,
-          widget.belowStatusBar
-              ? DOVIASHAREDHeaderWidget.topBelowStatusBar(context)
-              : widget.topPadding,
+          widget.topPadding ??
+              DOVIASHAREDHeaderWidget.topBelowStatusBar(context),
           20.0,
           0.0),
       child: Row(

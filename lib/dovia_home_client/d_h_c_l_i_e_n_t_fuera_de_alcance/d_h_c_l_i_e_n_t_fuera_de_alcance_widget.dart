@@ -433,7 +433,6 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       showMap: false,
                       showCurrency: false,
                       title: 'Fuera de alcance',

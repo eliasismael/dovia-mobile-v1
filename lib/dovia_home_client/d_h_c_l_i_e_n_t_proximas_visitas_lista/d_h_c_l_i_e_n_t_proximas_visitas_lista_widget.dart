@@ -375,7 +375,6 @@ class _DHCLIENTProximasVisitasListaWidgetState
       padding: const EdgeInsetsDirectional.only(bottom: 12.0),
       child: DOVIASHAREDHeaderWidget(
         title: 'Próximas Visitas',
-        topPadding: 34.0,
         showLogo: openedFromHome(context),
         hideActions: true,
       ),

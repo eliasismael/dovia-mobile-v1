@@ -410,7 +410,6 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Cotizaciones Recibidas',

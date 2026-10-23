@@ -512,7 +512,6 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       title: 'Materiales',
                       showMap: false,
                       showCurrency: false,

@@ -735,7 +735,6 @@ class _DHCLIENTCostoEmergenciaWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       title: 'Costo fijo mínimo\ndel trabajo',
                       hideActions: true,
                     ),

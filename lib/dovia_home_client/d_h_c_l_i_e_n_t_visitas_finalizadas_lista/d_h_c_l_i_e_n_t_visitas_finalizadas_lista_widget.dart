@@ -388,7 +388,6 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
       padding: const EdgeInsetsDirectional.only(bottom: 12.0),
       child: DOVIASHAREDHeaderWidget(
         title: 'Visitas Finalizadas',
-        topPadding: 34.0,
         showLogo: openedFromHome(context),
         hideActions: true,
       ),

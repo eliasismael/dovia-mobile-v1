@@ -519,7 +519,6 @@ class _DHCLIENTInstalacionWidgetState extends State<DHCLIENTInstalacionWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       title: DHCLIENTInstalacionWidget.serviceTitle,
                       showCurrency: false,
                       showMap: false,

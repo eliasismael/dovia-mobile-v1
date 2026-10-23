@@ -417,7 +417,6 @@ class _DHCLIENTTrabajoFinalizadoWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Trabajo finalizado',

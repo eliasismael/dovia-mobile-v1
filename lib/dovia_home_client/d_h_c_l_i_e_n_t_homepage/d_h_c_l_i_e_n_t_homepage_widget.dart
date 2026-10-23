@@ -1223,7 +1223,6 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
                       showSupport: false,
-                      belowStatusBar: true,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Dovia Home',

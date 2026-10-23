@@ -379,7 +379,6 @@ class _DHCLIENTReportarProblemaWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      belowStatusBar: true,
                       showMap: false,
                       showNotifications: true,
                       showSettings: true,
