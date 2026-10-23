@@ -1,5 +1,6 @@
 import '/domain/property_location.dart';
 import '/dovia_client/app/mis_propiedades/deal_in_progress_badge.dart';
+import '/shared_components/app_tutorial/app_tutorial.dart';
 import '/shared_components/error_state/error_state_widget.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/auth/custom_auth/auth_util.dart';
@@ -25,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_model.dart';
 
 class DOVIACLIENTMisPropiedadesWidget extends StatefulWidget {
@@ -126,38 +128,23 @@ class _DOVIACLIENTMisPropiedadesWidgetState
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadProposals());
 
-    // Empty state check: if user has no properties at all, redirect to ComoFunciona
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final pubResult = await DOVIAAPIPropertyContextGroup.getMyPropertiesCall
-          .call(status: 'PUBLISHED', authToken: currentAuthenticationToken);
-      final pendingResponse = await _fetchAllPending();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowIntro());
+  }
 
-      if (!mounted) return;
+  static const _introTutorialId = 'client_my_properties_intro';
 
-      final pubProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
-              .data(pubResult.jsonBody) ??
-          [];
-      final pendProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
-              .data(pendingResponse.jsonBody) ??
-          [];
-
-      // Also check archived: a user with only paused properties should NOT be redirected
-      final archivedCheck = await DOVIAAPIPropertyContextGroup
-          .getMyPropertiesCall
-          .call(status: 'ARCHIVED', authToken: currentAuthenticationToken);
-      if (!mounted) return;
-      final archivedProps = DOVIAAPIPropertyContextGroup.getMyPropertiesCall
-              .data(archivedCheck.jsonBody) ??
-          [];
-
-      if (pubProps.isEmpty &&
-          pendProps.isEmpty &&
-          archivedProps.isEmpty &&
-          pubResult.succeeded &&
-          pendingResponse.succeeded) {
-        context.goNamed(DOVIACLIENTComoFuncionaWidget.routeName);
-      }
-    });
+  /// La primera vez que el cliente entra a Mis propiedades se le muestra cómo
+  /// funciona publicar, una sola vez, como el tutorial de bienvenida. Antes se
+  /// decidía después de tres consultas a la API: podía saltar con el usuario
+  /// ya en otra pestaña, y volvía cada vez que no tenía propiedades.
+  Future<void> _maybeShowIntro() async {
+    final userId = currentUserUid;
+    if (userId.isEmpty) return;
+    if (await AppTutorial.isDone(_introTutorialId, userId)) return;
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+    await AppTutorial.markDone(_introTutorialId, userId);
+    if (!mounted) return;
+    context.pushNamed(DOVIACLIENTComoFuncionaWidget.routeName);
   }
 
   @override
@@ -304,17 +291,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
                                 if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 50.0,
-                                      height: 50.0,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          FlutterFlowTheme.of(context).primary,
-                                        ),
-                                      ),
-                                    ),
+                                  return const Center(
+                                    child: DoviaSpinner(),
                                   );
                                 }
                                 final listViewGetMyPropertiesResponse =
@@ -760,12 +738,8 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                               future: _fetchAllPending(),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) {
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        FlutterFlowTheme.of(context).primary,
-                                      ),
-                                    ),
+                                  return const Center(
+                                    child: DoviaSpinner(),
                                   );
                                 }
                                 final res = snapshot.data!;
@@ -1052,7 +1026,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
         if (_isLoadingProposals)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 20.0),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: DoviaSpinner()),
           )
         else if (proposals.isEmpty)
           Padding(
